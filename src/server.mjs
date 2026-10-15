@@ -5,8 +5,8 @@ import { pathToFileURL } from 'node:url';
 // MCP Apps / OpenAI File Entrypoint contracts:
 // https://github.com/openai/mcp-extensions/blob/main/docs/spec.md#file-extension-entrypoint
 // https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/2026-01-26/apps.mdx
-export const VIEWER_URI = 'ui://pwh/viewer';
-const VERSION = '0.3.1';
+export const VIEWER_URI = 'ui://pwh/client-viewer';
+const VERSION = '0.4.0';
 const MIME = 'text/html;profile=mcp-app';
 // Use the established single-result MCP protocol; 2026-07-28 MRTR is not implemented.
 const SUPPORTED_PROTOCOLS = ['2024-11-05', '2025-03-26', '2025-06-18', '2025-11-25'];
@@ -73,6 +73,18 @@ const liveOperationSchema = {
 };
 
 export const TOOLS = [
+  {
+    name:'pwh_client_asset',title:'HWPX 클라이언트 데이터 읽기',
+    description:'파일 확장 클라이언트 전용입니다. 호스트의 열린 HWPX 또는 승인된 문서 ID와 고정 WASM 자산만 청크로 읽습니다.',
+    inputSchema:objectSchema({kind:{type:'string',enum:['wasm','document']},offset:{type:'integer',minimum:0},expectedSha256:{type:'string',minLength:64},documentId:{type:'string',minLength:36}},['kind','offset']),
+    annotations:readOnly,_meta:{ui:{visibility:['app']}},
+  },
+  {
+    name:'pwh_client_save',title:'클라이언트 HWPX 새 수정본 저장',
+    description:'메모리 HWPX를 SHA·원본 변경 검사 후 새 파일로 저장합니다. 클라이언트 전용이며 원본을 덮어쓰지 않습니다.',
+    inputSchema:objectSchema({documentId:{type:'string',minLength:36},base64:{type:'string',minLength:1},expectedSourceSha256:{type:'string',minLength:64},documentSha256:{type:'string',minLength:64},revision:{type:'integer',minimum:0}},['base64','expectedSourceSha256','documentSha256','revision']),
+    annotations:writeDocument,_meta:{ui:{visibility:['app']}},
+  },
   {
     name: 'pwh_live_request', title: '선택한 문서 객체와 수정 요청 읽기',
     description: 'AI 수정 요청 주석의 requestId로 선택한 글자·문단·표 셀·서식과 해당 문서 버전을 읽습니다. 수정 전 현재 pwh_live_read 상태와 대조하세요.',
@@ -188,7 +200,7 @@ export const TOOLS = [
   },
   {
     name: 'pwh_preview', title: 'HWPX 쪽 미리보기',
-    description: 'HWP/HWPX를 조판해 쪽별 PNG와 HTML 미리보기를 만듭니다. 채팅 이미지와 문서 뷰어에 같은 조판 결과를 제공합니다.',
+    description: 'HWPX 원본을 우측 확장 클라이언트에 연결합니다. 클라이언트 WASM이 문서 모델을 로드·조판하며 선택 위치를 실제 문서 주소로 조회합니다. PNG를 다시 표시하는 뷰어가 아닙니다.',
     inputSchema: objectSchema({ input: pathSchema, ...previewProperties }, ['input']),
     annotations: readOnly, _meta: viewerMeta,
   },
@@ -197,7 +209,7 @@ export const TOOLS = [
     description: '호스트에서 선택한 HWP/HWPX를 문서 패널에서 엽니다. file.resourceUri는 호스트가 제공하는 불투명 URI입니다.',
     inputSchema: objectSchema({ file: objectSchema({ name: { type: 'string', minLength: 1 }, resourceUri: { type: 'string', minLength: 1 } }, ['name', 'resourceUri']) }, ['file']),
     annotations: readOnly,
-    _meta: { ...viewerMeta, 'openai/ui': { entrypoints: [{ type: 'file', extensions: ['.hwpx', '.hwp'] }] } },
+    _meta: { ...viewerMeta, 'openai/ui': { entrypoints: [{ type: 'file', extensions: ['.hwpx'] }] } },
   },
   {
     name: 'pwh_render_open_file', title: '열린 문서 조판',
@@ -280,6 +292,8 @@ async function previewResult(input, options, { includeImages = true } = {}) {
 }
 
 export async function callTool(name, args = {}, requestMeta = {}) {
+  if(name==='pwh_client_asset') return (await import('./client-assets.mjs')).readClientAsset(args,requestMeta);
+  if(name==='pwh_client_save') return textResult(await (await import('./client-assets.mjs')).saveClientDocument(args,requestMeta));
   // Accept old local development calls without advertising a second service name.
   if (name.startsWith('hop_')) name = `pwh_${name.slice(4)}`;
   const definition = TOOLS.find((tool) => tool.name === name);
@@ -314,9 +328,9 @@ export async function callTool(name, args = {}, requestMeta = {}) {
   if (name === 'pwh_create_document') return textResult(await engine.createDocument(args.spec, args.output === undefined ? undefined : absolutePath(args.output, 'output')));
   if (name === 'pwh_edit_template') return textResult(await engine.editTemplate(absolutePath(args.input, 'input'), args.output === undefined ? undefined : absolutePath(args.output, 'output'), args.changes));
   if (name === 'pwh_preview') {
-    const { input, ...options } = args;
-    if (options.outputDir) absolutePath(options.outputDir, 'outputDir');
-    return previewResult(absolutePath(input, 'input'), options);
+    const document=await (await import('./client-assets.mjs')).registerClientDocument(absolutePath(args.input,'input'));
+    return {content:[{type:'text',text:'HWPX를 클라이언트 조판 뷰어에 연결했습니다. 쪽수·배치는 클라이언트 로드 후 확인하세요.'}],
+      structuredContent:{...document,awaitingClientTypesetting:true},_meta:{...viewerMeta,'pwh/client-document':document}};
   }
   throw new RpcError(-32602, `지원하지 않는 도구: ${name}`);
 }
@@ -364,7 +378,7 @@ export async function handleRequest(message) {
       case 'resources/read':
         if (params.uri !== VIEWER_URI) throw new RpcError(-32602, 'Unknown resource URI');
         result = { contents: [{
-          uri: VIEWER_URI, mimeType: MIME, text: await readFile(new URL('./viewer.html', import.meta.url), 'utf8'),
+          uri: VIEWER_URI, mimeType: MIME, text: await (await import('./client-assets.mjs')).clientViewerHtml(),
           _meta: {
             ui: { prefersBorder: true, csp: { connectDomains: [], resourceDomains: [], frameDomains: [] } },
             'openai/ui': { preferredDisplayMode: 'fullscreen', availableDisplayModes: ['inline', 'fullscreen'] },

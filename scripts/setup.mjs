@@ -312,7 +312,7 @@ async function installed(target, kind, bridgeHash) {
   if (!marker || marker.version !== PINS.version || marker.kind !== kind || marker.sourceCommit !== PINS.sourceCommit
     || (kind === 'studio' && marker.bridgeSha256 !== bridgeHash)
     || (kind === 'rhwp' && marker.archiveSha256 !== PINS.cli.sha256)
-    || !marker.files || !Object.hasOwn(marker.files, { rhwp: 'rhwp.exe', studio: 'index.html', 'editor-sdk': 'index.js' }[kind])) {
+    || !marker.files || !Object.hasOwn(marker.files, { rhwp: 'rhwp.exe', studio: 'index.html', 'editor-sdk': 'index.js', core:'rhwp_bg.wasm' }[kind])) {
     throw new Error(`Existing ${target} is not this pinned pwh installation. It was preserved; use a fresh --runtime-root or move it yourself.`);
   }
   for (const [file, sha256] of Object.entries(marker.files ?? {})) {
@@ -391,7 +391,7 @@ export async function setup(options) {
       ['Windows x64', 'Node 22.12+ or 24+', 'Git', 'npm'], cliOnly: options.cliOnly, offline: options.skipDownload,
       downloads: [PINS.cli, ...options.cliOnly ? [] : [PINS.core, PINS.editor], ...options.withNanum ? [PINS.nanum] : []],
       source: options.cliOnly ? null : { url: PINS.sourceUrl, commit: PINS.sourceCommit },
-      directories: ['rhwp', 'studio', 'editor-sdk', 'fonts', 'documents'],
+      directories: ['rhwp', 'studio', 'editor-sdk', 'core', 'fonts', 'documents'],
       preserveExisting: true, startService: false }, null, 2));
     return;
   }
@@ -410,7 +410,15 @@ export async function setup(options) {
     const needsCli = !await installed(path.join(root, 'rhwp'), 'rhwp', bridgeHash);
     const needsStudio = !options.cliOnly && !await installed(path.join(root, 'studio'), 'studio', bridgeHash);
     const needsSdk = !options.cliOnly && !await installed(path.join(root, 'editor-sdk'), 'editor-sdk', bridgeHash);
+    const needsCore = !options.cliOnly && !await installed(path.join(root, 'core'), 'core', bridgeHash);
     const publish = [];
+    if (needsCore) {
+      const archive = await cachedDownload(root, PINS.core, options);
+      const prepared = path.join(stage, 'core');
+      await extractNpm(archive, prepared, '@rhwp/core');
+      await mark(prepared, 'core', await filesUnder(prepared), bridgeHash);
+      publish.push([prepared, path.join(root, 'core')]);
+    }
     if (needsCli) {
       const archive = await cachedDownload(root, PINS.cli, options);
       const extracted = path.join(stage, 'cli-archive'); await fs.mkdir(extracted);
