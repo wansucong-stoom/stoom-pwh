@@ -1,11 +1,16 @@
 {
   "name": "pwh",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "license": "MIT",
-  "engines": {"node": "^22.12.0 || >=24.0.0"},
-  "repository": {"type":"git","url":"https://github.com/wansucong-stoom/stoom-pwh.git"},
+  "engines": {
+    "node": "^22.12.0 || >=24.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wansucong-stoom/stoom-pwh.git"
+  },
   "description": "pwh: institution template-aware HWPX authoring with rhwp",
   "scripts": {
     "start": "node src/server.mjs",

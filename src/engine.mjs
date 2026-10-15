@@ -56,7 +56,7 @@ export async function engineInfo() {
   const version = (await runEngine(['--version'])).stdout.trim();
   return { engine: 'rhwp', version, executable, hopPath: config.hopPath, outputRoot,
     capabilities: ['create-hwpx', 'create-hwp', 'edit-template', 'read-fields-tables', 'png-preview', 'pdf-export', 'page-layout'],
-    integration: 'HOP uses rhwp; this integration invokes the official rhwp CLI, not the HOP GUI.' };
+    integration: 'pwh invokes the official rhwp CLI and hosts a local rhwp Studio editor.' };
 }
 
 export async function inspectDocument(input) {

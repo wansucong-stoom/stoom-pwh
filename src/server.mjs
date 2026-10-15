@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url';
 // https://github.com/openai/mcp-extensions/blob/main/docs/spec.md#file-extension-entrypoint
 // https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/2026-01-26/apps.mdx
 export const VIEWER_URI = 'ui://pwh/viewer';
-const VERSION = '0.2.0';
+const VERSION = '0.3.0';
 const MIME = 'text/html;profile=mcp-app';
 // Use the established single-result MCP protocol; 2026-07-28 MRTR is not implemented.
 const SUPPORTED_PROTOCOLS = ['2024-11-05', '2025-03-26', '2025-06-18', '2025-11-25'];
@@ -160,6 +160,17 @@ export const TOOLS = [
     },['input','expectedSourceSha256','edits']),annotations:writeDocument,
   },
   {
+    name: 'pwh_replace_image', title: '기존 그림을 새 이미지로 교체',
+    description: '저장된 HWPX의 기존 BinData 그림을 로컬 PNG·JPEG·BMP 이미지로 교체한 새 파일을 만듭니다. AI가 별도로 생성한 이미지도 image 경로로 받을 수 있습니다. 기존 그림과 같은 파일 형식만 허용하며 앵커·크기·자르기·회전·배치 XML과 나머지 ZIP 항목은 보존합니다. 같은 BinData를 참조한 모든 그림이 함께 바뀝니다. 비율이 다르면 기존 틀에서 왜곡·잘림이 생길 수 있으므로 새 파일을 재조판해 확인하세요. 원본과 기존 출력은 덮어쓰지 않습니다.',
+    inputSchema: objectSchema({
+      input: pathSchema, output: {...pathSchema, description: '반드시 새 HWPX의 절대 경로를 지정합니다. 기존 파일은 덮어쓰지 않습니다.'},
+      image: {...pathSchema, description: '교체할 로컬 이미지 절대 경로. 정적 PNG, 8-bit JPEG, 비압축/bitfield Windows BMP. 형식 변환은 하지 않습니다.'},
+      expectedSourceSha256: {type: 'string', minLength: 64, maxLength: 64},
+      binaryItemId: {type: 'string', minLength: 1, description: 'Contents/content.hpf의 기존 그림 manifest item ID. manifestHref와 둘 중 하나만 지정합니다.'},
+      manifestHref: {type: 'string', minLength: 1, description: 'Contents/content.hpf의 기존 그림 item href 원문. binaryItemId와 둘 중 하나만 지정합니다.'},
+    }, ['input', 'output', 'image', 'expectedSourceSha256']), annotations: writeDocument,
+  },
+  {
     name: 'pwh_edit_template', title: 'HWPX 서식 채우기',
     description: '디스크의 기존 HWPX에서 텍스트 치환, 필드 채우기, 표 셀 수정을 적용한 새 문서를 저장합니다. table·row·col은 0부터 시작합니다. 현재 브라우저 편집 세션을 수정하려면 pwh_live_apply를 사용하세요.',
     inputSchema: objectSchema({
@@ -296,6 +307,7 @@ export async function callTool(name, args = {}, requestMeta = {}) {
     return textResult(await (await import('./template.mjs')).inspectTemplate(absolutePath(input, 'input'), options));
   }
   if (name === 'pwh_fill_form') return textResult(await (await import('./form.mjs')).fillInstitutionForm(args));
+  if (name === 'pwh_replace_image') return textResult(await (await import('./images.mjs')).replaceDocumentImage(args));
   const engine = await loadEngine();
   if (name === 'pwh_status') return textResult(await engine.engineInfo());
   if (name === 'pwh_info') return textResult(await engine.inspectDocument(absolutePath(args.input, 'input')));

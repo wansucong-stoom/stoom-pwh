@@ -15,6 +15,8 @@ description: HWP/HWPX 기관 양식의 편집틀과 서식을 최대한 보존·
 
 분석의 sourceSha256, truncated·truncationReasons·limitations를 확인한다. XML의 xmlParagraphId와 tableOrdinal은 네이티브 편집 인덱스가 아니다. sectionIndex·topParagraphIndex·xmlPath·tablePath로 원본 위치를 찾고 실제 편집 주소와 대조한다. charPrIDRef·paraPrIDRef·styleIDRef는 원래 서식 정의를 가리키는 참조이므로 수정 전후 보존 여부를 확인한다. savedLineSegments는 저장 당시 XML 배치 힌트이며 현재 조판 위치로 취급하지 않는다. HWP에 HWPX ZIP 분석기를 직접 적용하지 않는다.
 
+본문 원고를 추출할 때에는 해당 문단의 direct run/t와 필요한 텍스트 tail을 구분한다. fieldBegin(type=MEMO) 안 subList/hp:t의 메모 문구를 본문에 섞지 않는다. fieldBegin/fieldEnd ID쌍과 memoPr는 함께 보존한다. hp:t 안의 tab 같은 inline 자식도 지우지 않는다. 도구가 그 tail만 바꾸는 경로를 제공하지 않으면 문단 전체 평문화로 우회하지 말고, 예상 문자열·정확한 원문 span·조판 fingerprint를 대조하는 제한된 추가 패치를 검토한다.
+
 양식이 요구하는 내용의 의미와 역할을 먼저 파악한다. 제목·설명·작성란·실적·계획에 해당하는 내용을 기존 항목에 배치하고, 같은 역할의 기존 서식과 표 구조를 유지하며 필요한 분량을 확장한다. 텍스트·주석을 읽었다는 사실만으로 양식을 이해했거나 완성본 작성을 보장한다고 말하지 않는다. 확장 후 재조판해 문맥·서식·쪽 나눔을 함께 검수한다. 분석 도구는 디스크 저장본을 읽으므로 미저장 공유 문서를 분석하려면 먼저 새 파일로 저장한다.
 
 제목·본문·항목별 글꼴, 글자 크기, 문단 정렬·간격, 표 열 너비와 셀 여백을 파악해 필요한 부분만 바꾼다. 알 수 없는 주소·서식은 추측해 적용하지 않는다. 원본 충실도는 실제 파일을 열어 시각적으로 확인한다.
@@ -38,6 +40,16 @@ savedLineSegments는 저장된 줄 배치 캐시다. 이 버전에는 line_segs�
 이 경로는 원본 ZIP에서 선택한 문단·셀을 패치하며 구역·단·쪽 나눔·표 앵커와 배치·셀 병합을 보존하는 것을 목표로 한다. 조판 개체를 포함한 문단·셀의 평문화는 거절하므로 대상을 임의로 확대해 우회하지 않는다. charPrIDRef로 기존 글자 서식을 지정할 수 있고 textColor는 그 서식을 복제해 색만 변경한다. 예시용 파란색을 검정으로 바꿀 때 글꼴·크기·장평·자간 등 나머지 속성을 유지한다. 기존 서식 레코드를 통째로 덮어쓰지 않는다.
 
 dropSavedLineSegments 옵션은 저장된 줄 배치 캐시를 제거한다. 이 옵션만으로 올바른 쪽 나눔을 보장하지 않는다. 반환값의 requiresVisualReview에 따라 네이티브 info·읽기·조판을 검증용으로 사용하고 저장 결과를 일반 엔진 저장기로 다시 쓰지 않는다. 실제 양식을 채웠다고 보고하기 전에 원본 SHA 불변, 내용 주소·서식·개체 보존, 넘침과 쪽 나눔을 확인한다. 검증 중인 사례를 완료한 결과로 보고하지 않는다.
+
+## 그림 생성과 교체
+
+문서 본문과 함께 기존 그림 안의 제목·라벨·성과수치도 확인한다. 원고 주제가 바뀌면 관련 본문 도식을 함께 새로 작성한다. 기관 로고·사진처럼 보존할 자산과 내용이 바뀌어야 할 그림을 구분한다. 사진·일러스트는 호스트의 지원되는 이미지 생성 도구를 쓰고, 정확한 한글·수치가 핵심인 도식·그래프는 SVG나 표준 plotting 도구 등 재현 가능한 방식도 사용한다. 호스트에 없는 생성 기능이 연결됐다고 말하지 않는다. 생성한 자산과 실제 문서에 들어간 자산을 구분한다.
+
+양식 분석의 img/binaryItemIDRef와 content.hpf manifest를 대조하여 교체 대상을 확정한다. pwh_replace_image에 input·새 output·expectedSourceSha256·image 절대 경로와 binaryItemId 또는 manifestHref 중 하나만 전달한다. PNG/JPEG/BMP 동일 형식 교체만 지원한다. 결과의 changedEntries·source/output/image SHA·referenceCount·sharedImage·aspectRatioChanged·requiresVisualReview를 읽는다. 같은 자원을 공유한 그림이 모두 바뀔 수 있다.
+
+이 도구는 BinData 자원만 바꿔 다른 XML과 manifest를 보존한다. 따라서 기존 자르기·회전·GRAY_SCALE·내부 transform도 남는다. 새 자산은 실제 배치 프레임의 비율과 가독성에 맞춰 만든다. 필요할 때에는 hp:sz·pos·여백·앵커는 보존하면서 orgSz·curSz·imgDim·imgClip·imgRect·offset·내부 matrix를 서로 일치시키는 별도 안전한 변경을 검토하고, 선택 개체 밖 XML 불변과 시각 결과를 검증한다. 앵커만 보존했다고 그림 전체가 안 잘리고 보인다고 가정하지 않는다.
+
+그림의 수치·단위·시점·제목과 본문/표가 일치하는지 확인한다. 모의 자료는 그림에도 표시한다. 원본 그림에 들어 있는 예전 실적을 새 주제의 실제 성과로 재사용하지 않는다. 생성 자산·작업 프롬프트 또는 생성 명세를 로컬에 보관하고, 사용자의 기관 문서와 이미지를 공개 소스에 포함하지 않는다.
 
 ## 실제 공유 문서
 
