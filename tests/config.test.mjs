@@ -70,3 +70,16 @@ test('runtime font records resolve beside their catalog and local records overri
   assert.equal(config.documentFonts.find(face => face.id === 'bold').path, path.join(runtime, 'fonts', 'Bold.ttf'));
   assert.equal(config.documentFonts.find(face => face.id === 'bold').weight, 600);
 });
+
+test('Windows discovers per-user fonts; renderFontFiles resolve by config with explicit JSON env precedence', async t => {
+  const w=await workspace(t);
+  const selected=path.join(w.directory,'private','fonts.json');
+  await w.write(selected,{renderFontFiles:['Regular.ttf','Bold.otf']});
+  const config=await loadConfig({...w,platform:'win32',env:{PWH_CONFIG:selected,LOCALAPPDATA:path.join(w.home,'Local')}});
+  assert.deepEqual(config.renderFontFiles,['Regular.ttf','Bold.otf'].map(p=>path.join(path.dirname(selected),p)));
+  assert.ok(config.fontPaths.includes(path.join(w.home,'Local','Microsoft','Windows','Fonts')));
+  const env={PWH_CONFIG:selected,PWH_RENDER_FONT_FILES:JSON.stringify([path.join(w.directory,'Chosen.ttc')])};
+  assert.deepEqual((await loadConfig({...w,env})).renderFontFiles,[path.join(w.directory,'Chosen.ttc')]);
+  await assert.rejects(loadConfig({...w,env:{PWH_RENDER_FONT_FILES:'bad'}}),/JSON array/);
+  await assert.rejects(loadConfig({...w,env:{PWH_RENDER_FONT_FILES:'{}'}}),/array/);
+});

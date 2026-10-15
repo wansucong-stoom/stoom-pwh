@@ -3,10 +3,10 @@ import { promises as fs, constants } from 'node:fs';
 import path from 'node:path';
 import { randomUUID, createHash } from 'node:crypto';
 import config from './config.mjs';
+import { prepareRenderFonts } from './render-fonts.mjs';
 
 const executable = config.rhwpPath;
 const outputRoot = config.outputRoot;
-const fontArgs = config.fontPaths.filter(Boolean).flatMap(p => ['--font-path', p]);
 const stamp = () => new Date().toISOString().replace(/[:.]/g, '-') + '-' + randomUUID().slice(0, 6);
 
 export function runEngine(args, { timeoutMs = 120000 } = {}) {
@@ -145,10 +145,13 @@ export async function previewDocument(input, {outputDir, pages, maxDimension = 1
   const directory = path.join(output, stamp());
   await fs.mkdir(directory, {recursive:true});
   const rendered = [], trees = [];
+  const fontWork = await workspace();
+  try {
+  const fonts = await prepareRenderFonts(config, fontWork);
   for (const pageNumber of [...new Set(selected)]) {
     const pageDir = path.join(directory, `page-${pageNumber}`);
     await fs.mkdir(pageDir);
-    await runEngine(['export-png', source, '-o', pageDir, '-p', pageNumber - 1, '--profile', 'screen', '--max-dimension', maxDimension, ...fontArgs]);
+    await runEngine(['export-png', source, '-o', pageDir, '-p', pageNumber - 1, '--profile', 'screen', '--max-dimension', maxDimension, ...fonts.args]);
     const files = (await fs.readdir(pageDir)).filter(name => name.endsWith('.png'));
     if (files.length !== 1) throw new Error('조판 결과 PNG를 찾을 수 없습니다.');
     const imagePath = path.join(pageDir, files[0]), bytes = await fs.readFile(imagePath);
@@ -164,11 +167,12 @@ export async function previewDocument(input, {outputDir, pages, maxDimension = 1
   if (await sha256(source) !== sourceSha256) throw new Error('미리보기 생성 중 문서가 변경되었습니다. 다시 렌더링하세요.');
   const layoutPath = path.join(directory, 'layout.json');
   await fs.writeFile(layoutPath, JSON.stringify({source,sourceSha256,pages:trees},null,2));
-  const result = {source, sourceSha256, title:path.basename(source), pageCount, pages:rendered, layoutPath,
+  const result = {source, sourceSha256, title:path.basename(source), pageCount, pages:rendered, layoutPath, fontSelection: fonts.diagnostics,
     omittedPages: pageCount - rendered.length, htmlPath:path.join(directory, 'index.html')};
   await fs.writeFile(result.htmlPath, standaloneHtml(result));
   await fs.writeFile(path.join(directory, 'preview.json'), JSON.stringify({...result, pages:rendered.map(({dataUrl,...page})=>page)}, null, 2));
   return result;
+  } finally { await fs.rm(fontWork, {recursive:true, force:true}); }
 }
 
 export async function exportPdf(input, output) {
@@ -178,10 +182,11 @@ export async function exportPdf(input, output) {
   await fs.mkdir(path.dirname(output), {recursive:true});
   const work = await workspace();
   try {
+    const fonts = await prepareRenderFonts(config, work);
     const temporary = path.join(work, 'export.pdf');
-    const result = (await runEngine(['export-pdf', source, '-o', temporary, '--json', ...fontArgs])).data;
+    const result = (await runEngine(['export-pdf', source, '-o', temporary, '--json', ...fonts.args])).data;
     await fs.copyFile(temporary, output, constants.COPYFILE_EXCL);
-    return {...result, output};
+    return {...result, output, fontSelection: fonts.diagnostics};
   } finally { await fs.rm(work, {recursive:true, force:true}); }
 }
 

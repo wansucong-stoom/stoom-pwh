@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url';
 // https://github.com/openai/mcp-extensions/blob/main/docs/spec.md#file-extension-entrypoint
 // https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/2026-01-26/apps.mdx
 export const VIEWER_URI = 'ui://pwh/viewer';
-const VERSION = '0.3.0';
+const VERSION = '0.3.1';
 const MIME = 'text/html;profile=mcp-app';
 // Use the established single-result MCP protocol; 2026-07-28 MRTR is not implemented.
 const SUPPORTED_PROTOCOLS = ['2024-11-05', '2025-03-26', '2025-06-18', '2025-11-25'];
@@ -80,7 +80,7 @@ export const TOOLS = [
   },
   {
     name: 'pwh_live_open', title: '한글 문서 함께 편집',
-    description: '실제 rhwp Studio 편집 화면을 로컬 브라우저 URL로 엽니다. 사용자와 에이전트가 같은 메모리 문서를 편집합니다. input을 생략하면 현재 세션을 사용하거나 빈 문서를 엽니다. 반환된 URL을 브라우저 패널에서 여세요.',
+    description: '완성된 HWPX를 직접 편집하고 선택한 위치에 AI 수정 요청을 남기는 rhwp Studio 화면을 엽니다. 같은 미저장 문서를 사용자와 에이전트가 편집합니다. 반환 URL은 Codex 우측 브라우저 패널에 열고 pwh_live_read로 확인하세요. 주석 전송은 호스트 지원에 따르며 미지원 시 요청을 복사합니다. input 생략 시 현재 세션 또는 빈 문서를 사용합니다.',
     inputSchema: objectSchema({ input: pathSchema }), annotations: writeDocument,
   },
   {

@@ -27,7 +27,8 @@ function expandPath(value, { home, runtimeRoot, root, base }) {
 }
 
 function systemFontPaths(platform, env, home) {
-  if (platform === 'win32') return [path.join(env.WINDIR || env.SystemRoot || 'C:/Windows', 'Fonts')];
+  if (platform === 'win32') return [path.join(env.WINDIR || env.SystemRoot || 'C:/Windows', 'Fonts'),
+    path.join(env.LOCALAPPDATA || path.join(home, 'AppData', 'Local'), 'Microsoft', 'Windows', 'Fonts')];
   if (platform === 'darwin') return ['/System/Library/Fonts', '/Library/Fonts', path.join(home, 'Library', 'Fonts')];
   return ['/usr/share/fonts', '/usr/local/share/fonts', path.join(home, '.local', 'share', 'fonts')];
 }
@@ -94,6 +95,14 @@ export async function loadConfig({ env = process.env, home = os.homedir(), platf
   const chosenFonts = envFonts || values.fontPaths || [config.fontRoot, ...systemFontPaths(platform, env, home)];
   if (!Array.isArray(chosenFonts)) throw new Error('fontPaths must be an array');
   config.fontPaths = [...new Set(chosenFonts.map(value => expandPath(value, context('fontPaths'))))];
+  let selectedRenderFonts = values.renderFontFiles || [];
+  if (env.PWH_RENDER_FONT_FILES !== undefined) {
+    try { selectedRenderFonts = JSON.parse(env.PWH_RENDER_FONT_FILES); }
+    catch { throw new Error('PWH_RENDER_FONT_FILES must be a JSON array of font file paths'); }
+  }
+  if (!Array.isArray(selectedRenderFonts) || selectedRenderFonts.length > 256)
+    throw new Error('renderFontFiles must be an array of at most 256 font file paths');
+  config.renderFontFiles = [...new Set(selectedRenderFonts.map(value => expandPath(value, context('renderFontFiles'))))];
 
   let runtimeFonts = [];
   try {
