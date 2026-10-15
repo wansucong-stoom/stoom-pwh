@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>pwh 문서 뷰어</title>
+  <style>
+    :root { color-scheme: light dark; font-family: var(--font-sans, "맑은 고딕", system-ui, sans-serif); color: var(--color-text-primary, #202124); background: var(--color-background-primary, #fff); }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 280px; }
+    button, input, select { font: inherit; }
+    button, select { border: 1px solid var(--color-border-primary, #d5d8dc); background: var(--color-background-primary, #fff); color: inherit; border-radius: 6px; min-height: 34px; }
+    button { padding: 5px 10px; cursor: pointer; }
+    button:hover:not(:disabled) { background: var(--color-background-secondary, #eef1f4); }
+    button:disabled { opacity: .4; cursor: default; }
+    button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #18744d; outline-offset: 2px; }
+    header { padding: 16px 18px 12px; border-bottom: 1px solid var(--color-border-primary, #e2e5e8); }
+    .brand { font-size: 11px; font-weight: 700; color: var(--color-text-secondary, #687078); margin-bottom: 5px; letter-spacing: .08em; }
+    h1 { font-size: 17px; line-height: 1.45; margin: 0; font-weight: 650; overflow-wrap: anywhere; }
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 10px 18px; border-bottom: 1px solid var(--color-border-primary, #e2e5e8); }
+    .group { display: flex; align-items: center; gap: 6px; }
+    .page-number { width: 54px; min-height: 34px; text-align: center; border: 1px solid var(--color-border-primary, #d5d8dc); border-radius: 6px; background: var(--color-background-primary, #fff); color: inherit; }
+    .page-count { font-size: 13px; color: var(--color-text-secondary, #687078); white-space: nowrap; }
+    select { padding: 4px 7px; }
+    #status { margin: 0; padding: 10px 18px; font-size: 12px; line-height: 1.6; color: var(--color-text-secondary, #687078); overflow-wrap: anywhere; }
+    #status.error { color: #b33329; background: #fff1ef; }
+    .canvas { padding: 22px; background: var(--color-background-secondary, #edf0f2); min-height: 360px; height: calc(100vh - 310px); overflow: auto; display: flex; align-items: flex-start; }
+    .sheet { margin: 0 auto; flex-shrink: 0; width: 100%; max-width: 840px; }
+    .page-surface { position: relative; }
+    #pageImage { display: block; width: 100%; height: auto; background: white; box-shadow: 0 2px 12px #0002; }
+    #selectionSurface { position: absolute; inset: 0; pointer-events: none; touch-action: none; }
+    #selectionSurface.active { pointer-events: auto; cursor: crosshair; }
+    #selectionRectangle { position: absolute; border: 2px solid #18744d; background: #18744d20; pointer-events: none; }
+    .annotation { border-bottom: 1px solid var(--color-border-primary, #e2e5e8); padding: 11px 18px; }
+    .annotation-heading { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 7px; font-size: 13px; }
+    .annotation textarea { display: block; width: 100%; resize: vertical; min-height: 58px; max-height: 180px; padding: 8px 10px; border: 1px solid var(--color-border-primary, #d5d8dc); background: var(--color-background-primary, #fff); color: inherit; border-radius: 6px; font: inherit; font-size: 13px; line-height: 1.6; }
+    .annotation-footer { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 7px; }
+    .annotation-note { color: var(--color-text-secondary, #687078); font-size: 11px; line-height: 1.5; }
+    #sendAnnotation { background: #18744d; border-color: #18744d; color: #fff; white-space: nowrap; }
+    #selectRegion[aria-pressed="true"] { border-color: #18744d; color: #18744d; }
+    #placeholder { margin: 70px auto; max-width: 340px; text-align: center; color: var(--color-text-secondary, #687078); line-height: 1.8; font-size: 14px; }
+    .spinner { width: 24px; height: 24px; border: 2px solid #cfd5da; border-top-color: #18744d; border-radius: 50%; margin: 0 auto 14px; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    [hidden] { display: none !important; }
+    @media (max-width: 480px) { header, .toolbar { padding-left: 12px; padding-right: 12px; } .canvas { padding: 12px; } .toolbar { gap: 8px; } button { padding: 5px 8px; } }
+    @media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+  </style>
+</head>
+<body>
+  <header><div class="brand">pwh · HWPX</div><h1 id="documentTitle">문서 미리보기</h1></header>
+  <nav class="toolbar" aria-label="문서 보기 도구">
+    <div class="group">
+      <button id="previous" type="button" aria-label="이전 쪽" disabled>←</button>
+      <label for="pageNumber" class="page-count">쪽</label>
+      <input id="pageNumber" class="page-number" type="number" min="1" value="1" aria-label="현재 쪽 번호" disabled>
+      <span id="pageCount" class="page-count">/ —</span>
+      <button id="next" type="button" aria-label="다음 쪽" disabled>→</button>
+    </div>
+    <div class="group">
+      <label class="page-count" for="zoom">확대</label>
+      <select id="zoom" disabled><option value="fit">너비 맞춤</option><option value="75">75%</option><option value="100">100%</option><option value="125">125%</option><option value="150">150%</option><option value="200">200%</option></select>
+      <button id="refresh" type="button" hidden>새로고침</button>
+    </div>
+  </nav>
+  <section class="annotation" aria-label="문서 수정 주석">
+    <div class="annotation-heading"><label for="comment">수정 주석</label><button id="selectRegion" type="button" aria-pressed="false" disabled>영역 선택</button><span id="regionLabel" class="page-count">현재 쪽 전체</span><button id="clearRegion" type="button" hidden>선택 해제</button></div>
+    <textarea id="comment" rows="2" maxlength="4000" placeholder="예: 선택한 제목을 더 크게 하고, 표와의 간격을 줄여 줘." disabled></textarea>
+    <div class="annotation-footer"><span class="annotation-note">영역을 드래그하고 요청을 보내면<br>Codex가 수정본을 만들 수 있습니다.</span><button id="sendAnnotation" type="button" disabled>채팅으로 수정 요청</button></div>
+  </section>
+  <p id="status" role="status" aria-live="polite">Codex 문서 뷰어에 연결하고 있습니다.</p>
+  <main class="canvas" id="canvas" tabindex="0" aria-label="조판된 문서 쪽">
+    <div id="placeholder"><div class="spinner" id="spinner"></div><span id="placeholderText">문서를 준비하고 있습니다.</span></div>
+    <figure class="sheet" id="sheet" hidden><div class="page-surface"><img id="pageImage" alt="" draggable="false"><div id="selectionSurface"></div><div id="selectionRectangle" hidden></div></div></figure>
+  </main>
+  <script>
+    (() => {
+      'use strict';
+      // MCP Apps JSON-RPC postMessage transport. No filesystem/network access in this iframe.
+      // https://github.com/modelcontextprotocol/ext-apps/blob/main/src/spec.types.ts
+      const $ = (id) => document.getElementById(id);
+      const pending = new Map();
+      const state = { pages: [], pageCount: 0, index: 0, file: null, source: null, sourceSha256: null, layoutPath: null, connected: false, busy: false, sending: false, origin: null, requestId: 0, hostCapabilities: {}, requestVersion: 0, renderingFile: null, closed: false, selecting: false, rectangle: null, dragStart: null, drafts: new Map(), contextTimer: null };
+      function send(message) { window.parent.postMessage(message, state.origin && state.origin !== 'null' ? state.origin : '*'); }
+      function notify(method, params = {}) { send({ jsonrpc: '2.0', method, params }); }
+      function request(method, params, timeout = 120000) {
+        const id = `hop-ui-${++state.requestId}`;
+        return new Promise((resolve, reject) => {
+          const timer = setTimeout(() => { pending.delete(id); reject(new Error('응답 시간이 초과되었습니다. 잠시 후 새로고침해 주세요.')); }, timeout);
+          pending.set(id, { resolve, reject, timer });
+          send({ jsonrpc: '2.0', id, method, params });
+        });
+      }
+      function setStatus(text, error = false) { $('status').textContent = text; $('status').classList.toggle('error', error); }
+      function showPlaceholder(text, loading = true) {
+        $('placeholderText').textContent = text; $('spinner').hidden = !loading;
+        $('placeholder').hidden = false; $('sheet').hidden = true;
+      }
+      function showError(error) {
+        const message = error instanceof Error ? error.message : String(error);
+        setStatus(message, true); $('spinner').hidden = true;
+        if (!state.pages.length) showPlaceholder('문서 미리보기를 표시하지 못했습니다.', false);
+      }
+      function updateControls() {
+        const available = state.pages.length > 0;
+        $('previous').disabled = !available || state.index === 0 || state.busy;
+        $('next').disabled = !available || state.index >= state.pages.length - 1 || state.busy;
+        $('pageNumber').disabled = !available || state.busy;
+        $('pageNumber').max = String(state.pageCount || 1);
+        $('pageNumber').value = String(state.pages[state.index]?.pageNumber || 1);
+        $('pageCount').textContent = `/ ${state.pageCount || '—'}`;
+        $('zoom').disabled = !available;
+        $('refresh').hidden = !state.file;
+        $('refresh').disabled = !state.connected || state.busy;
+        $('selectRegion').disabled = !available || state.busy;
+        $('comment').disabled = !available;
+        $('sendAnnotation').disabled = !available || !state.connected || state.sending || !$('comment').value.trim();
+        $('clearRegion').hidden = !state.rectangle;
+      }
+      function applyZoom() {
+        const zoom = $('zoom').value;
+        const sheet = $('sheet');
+        if (zoom === 'fit') { sheet.style.width = '100%'; sheet.style.maxWidth = '840px'; }
+        else {
+          const natural = $('pageImage').naturalWidth || 794;
+          sheet.style.width = `${Math.round(natural * Number(zoom) / 100)}px`; sheet.style.maxWidth = 'none';
+        }
+      }
+      function showPage(index) {
+        if (!state.pages.length) return;
+        const oldPage = state.pages[state.index];
+        if (oldPage) state.drafts.set(oldPage.pageNumber, { rectangle: state.rectangle, comment: $('comment').value });
+        state.index = Math.max(0, Math.min(index, state.pages.length - 1));
+        const page = state.pages[state.index];
+        const draft = state.drafts.get(page.pageNumber);
+        state.rectangle = draft?.rectangle || null; $('comment').value = draft?.comment || '';
+        $('pageImage').src = page.dataUrl;
+        $('pageImage').alt = `${$('documentTitle').textContent} ${page.pageNumber}쪽`;
+        $('placeholder').hidden = true; $('sheet').hidden = false;
+        $('canvas').scrollTop = 0; $('canvas').scrollLeft = 0;
+        updateControls(); applyZoom(); drawRectangle(); scheduleModelContext();
+      }
+      function consumeResult(result) {
+        if (!result || typeof result !== 'object') return false;
+        if (result.isError) {
+          const text = result.content?.filter((item) => item.type === 'text').map((item) => item.text).join('\n');
+          throw new Error(text || '문서 조판에 실패했습니다.');
+        }
+        // Tool-result metadata is UI-only; bitmap bytes stay out of structured model context.
+        const data = result._meta?.['pwh/preview'] || result.structuredContent;
+        if (!data || typeof data !== 'object') return false;
+        if (Array.isArray(data.pages)) {
+          const source = typeof data.source === 'string' ? data.source : null;
+          const hash = typeof data.sourceSha256 === 'string' && /^[a-f0-9]{64}$/i.test(data.sourceSha256) ? data.sourceSha256 : null;
+          if (source !== state.source || hash !== state.sourceSha256) { state.drafts.clear(); state.rectangle = null; $('comment').value = ''; }
+          state.source = source; state.sourceSha256 = hash;
+          state.layoutPath = typeof data.layoutPath === 'string' ? data.layoutPath : null;
+        }
+        if (typeof data.title === 'string') $('documentTitle').textContent = data.title;
+        if (data.file?.resourceUri) {
+          state.file = { name: String(data.file.name || '문서'), resourceUri: String(data.file.resourceUri) };
+          $('documentTitle').textContent = state.file.name;
+          updateControls();
+          if (state.renderingFile !== state.file.resourceUri) void renderOpenFile();
+        }
+        if (!Array.isArray(data.pages)) return false;
+        // Only raster PNG data URLs are accepted; document strings never become HTML.
+        const fallbackImages = result.content?.filter((item) => item.type === 'image' && item.mimeType === 'image/png') || [];
+        const pages = data.pages.map((page, index) => page && ({ ...page, dataUrl: page.dataUrl || (fallbackImages[index] ? `data:image/png;base64,${fallbackImages[index].data}` : undefined) }))
+          .filter((page) => page && Number.isInteger(page.pageNumber) && page.pageNumber > 0 && /^data:image\/png;base64,[A-Za-z0-9+/=\r\n]+$/.test(page.dataUrl || ''));
+        if (data.pages.length && !pages.length) throw new Error('쪽 이미지 형식이 올바르지 않습니다.');
+        const previousNumber = state.pages[state.index]?.pageNumber;
+        state.pages = pages;
+        state.pageCount = Number.isInteger(data.pageCount) && data.pageCount >= 0 ? data.pageCount : pages.length;
+        state.index = Math.max(0, pages.findIndex((page) => page.pageNumber === previousNumber));
+        if (pages.length) showPage(state.index);
+        else showPlaceholder('이 문서에는 표시할 쪽이 없습니다.', false);
+        setStatus(`전체 ${state.pageCount}쪽${pages.length !== state.pageCount ? ` · 선택한 ${pages.length}쪽 표시` : ''} · pwh 조판 결과`);
+        updateControls();
+        return true;
+      }
+      async function renderOpenFile(force = false) {
+        if (!state.connected || !state.file || state.closed) return;
+        if (!force && (state.busy || state.renderingFile === state.file.resourceUri)) return;
+        if (!state.hostCapabilities.serverTools) { showError(new Error('이 호스트는 문서 조판 도구 호출을 지원하지 않습니다.')); return; }
+        const resources = state.hostCapabilities.experimental?.['openai/resource'] ?? state.hostCapabilities.extensions?.['openai/resource'];
+        if (resources === undefined) { showError(new Error('이 호스트는 HWPX 파일 뷰어 연결을 지원하지 않습니다. Codex에서 pwh_preview를 호출해 주세요.')); return; }
+        const version = ++state.requestVersion;
+        state.renderingFile = state.file.resourceUri; state.busy = true;
+        setStatus('문서의 쪽 배치를 계산하고 있습니다.');
+        if (!state.pages.length) showPlaceholder('pwh가 문서를 조판하고 있습니다.');
+        updateControls();
+        try {
+          const result = await request('tools/call', { name: 'pwh_render_open_file', arguments: { maxDimension: 1800 } });
+          if (version === state.requestVersion && !state.closed) consumeResult(result);
+        } catch (error) { if (version === state.requestVersion) { state.renderingFile = null; showError(error); } }
+        finally { if (version === state.requestVersion) { state.busy = false; updateControls(); } }
+      }
+      function drawRectangle() {
+        const rectangle = state.rectangle;
+        $('selectionRectangle').hidden = !rectangle;
+        $('regionLabel').textContent = rectangle ? `영역 ${Math.round(rectangle.width * 100)}% × ${Math.round(rectangle.height * 100)}%` : '현재 쪽 전체';
+        if (rectangle) {
+          const style = $('selectionRectangle').style;
+          style.left = `${rectangle.x * 100}%`; style.top = `${rectangle.y * 100}%`;
+          style.width = `${rectangle.width * 100}%`; style.height = `${rectangle.height * 100}%`;
+        }
+        updateControls();
+      }
+      function selectionPoint(event) {
+        const bounds = $('pageImage').getBoundingClientRect();
+        return { x: Math.max(0, Math.min(1, (event.clientX - bounds.left) / bounds.width)), y: Math.max(0, Math.min(1, (event.clientY - bounds.top) / bounds.height)) };
+      }
+      function annotationMetadata() {
+        const page = state.pages[state.index];
+        return {
+          source: state.source, sourceSha256: state.sourceSha256, title: $('documentTitle').textContent, pageNumber: page?.pageNumber,
+          pageImagePath: typeof page?.path === 'string' ? page.path : undefined,
+          layoutPath: state.layoutPath || undefined,
+          rectangle: state.rectangle,
+          coordinateSystem: 'normalized-page-image: x/y/width/height in [0,1], origin top-left',
+          comment: $('comment').value.trim(),
+        };
+      }
+      function scheduleModelContext() {
+        clearTimeout(state.contextTimer);
+        if (!state.connected || !state.pages.length || !state.sourceSha256 || !state.hostCapabilities.updateModelContext?.structuredContent) return;
+        state.contextTimer = setTimeout(() => {
+          if (!state.closed) void request('ui/update-model-context', { structuredContent: { hopViewer: annotationMetadata() } }, 10000).catch(() => {});
+        }, 250);
+      }
+      async function sendAnnotation() {
+        if (!state.pages.length || !$('comment').value.trim() || state.sending) return;
+        if (!state.hostCapabilities.message?.text) { showError(new Error('이 호스트는 뷰어에서 채팅으로 요청을 보내는 기능을 지원하지 않습니다. 주석 내용을 채팅에 직접 입력해 주세요.')); return; }
+        const metadata = annotationMetadata();
+        if (!metadata.source || !metadata.sourceSha256) { showError(new Error('원본 문서 경로나 파일 지문이 없어 수정 요청을 보낼 수 없습니다. 문서를 다시 미리보기해 주세요.')); return; }
+        const page = state.pages[state.index];
+        const text = '이 HWP/HWPX 조판 미리보기에 남긴 주석을 반영해 수정해 주세요. 원본을 보존하고 수정본을 만든 뒤 다시 조판해 보여 주세요.\n\n' + JSON.stringify(metadata, null, 2) + '\n\n선택 좌표는 쪽 이미지 기준입니다. 문서 요소와의 연결은 문서 구조·레이아웃을 확인해서 판단해 주세요.';
+        const content = [{ type: 'text', text }];
+        if (state.hostCapabilities.message.image) content.push({ type: 'image', mimeType: 'image/png', data: page.dataUrl.split(',')[1].replace(/[\r\n]/g, '') });
+        const params = { role: 'user', content };
+        if (state.hostCapabilities.experimental?.['openai/message'] || state.hostCapabilities.extensions?.['openai/message']) params._meta = { 'openai/message': { target: 'active', send: true } };
+        state.sending = true; updateControls(); setStatus('쪽 이미지와 주석을 채팅에 전달하고 있습니다.');
+        try {
+          const result = await request('ui/message', params, 30000);
+          if (result?.isError) throw new Error('호스트가 수정 요청 전송을 완료하지 못했습니다.');
+          setStatus(`${metadata.pageNumber}쪽 수정 요청을 채팅으로 보냈습니다. Codex의 수정 결과를 기다려 주세요.`);
+          scheduleModelContext();
+        } catch (error) { showError(error); }
+        finally { state.sending = false; updateControls(); }
+      }
+      function applyHostContext(context = {}) {
+        if (context.theme === 'dark' || context.theme === 'light') document.documentElement.style.colorScheme = context.theme;
+        for (const [name, value] of Object.entries(context.styles?.variables || {})) {
+          if (/^--(?:color-|font-|border-radius-|shadow-)/.test(name) && typeof value === 'string' && value.length < 1000) document.documentElement.style.setProperty(name, value);
+        }
+        const insets = context.safeAreaInsets;
+        if (insets) {
+          for (const side of ['top', 'right', 'bottom', 'left']) if (Number.isFinite(insets[side]) && insets[side] >= 0) document.body.style.setProperty(`padding-${side}`, `${insets[side]}px`);
+        }
+      }
+      window.addEventListener('message', (event) => {
+        if (event.source !== window.parent || !event.data || event.data.jsonrpc !== '2.0' || state.closed) return;
+        const message = event.data;
+        // Bind to the actual parent's first protocol response, including sandbox null origins.
+        if (state.origin !== null && event.origin !== state.origin) return;
+        const waiting = Object.hasOwn(message, 'id') ? pending.get(message.id) : undefined;
+        if (waiting && !message.method) {
+          state.origin = event.origin;
+          clearTimeout(waiting.timer); pending.delete(message.id);
+          if (message.error) waiting.reject(new Error(message.error.message || '호스트 요청에 실패했습니다.'));
+          else if (Object.hasOwn(message, 'result')) waiting.resolve(message.result);
+          return;
+        }
+        if (!state.connected) return;
+        if (Object.hasOwn(message, 'id')) {
+          if (message.method === 'ping' || message.method === 'ui/resource-teardown') {
+            send({ jsonrpc: '2.0', id: message.id, result: {} });
+            if (message.method === 'ui/resource-teardown') { state.closed = true; clearTimeout(state.contextTimer); for (const item of pending.values()) { clearTimeout(item.timer); item.reject(new Error('문서 뷰어가 닫혔습니다.')); } pending.clear(); }
+          } else send({ jsonrpc: '2.0', id: message.id, error: { code: -32601, message: 'Method not found' } });
+          return;
+        }
+        try {
+          if (message.method === 'ui/notifications/tool-result') consumeResult(message.params);
+          else if (message.method === 'ui/notifications/tool-input') {
+            const file = message.params?.arguments?.file;
+            if (file && typeof file.name === 'string' && typeof file.resourceUri === 'string') {
+              state.file = { name: file.name, resourceUri: file.resourceUri }; $('documentTitle').textContent = file.name;
+              updateControls(); void renderOpenFile();
+            }
+          } else if (message.method === 'ui/notifications/host-context-changed') applyHostContext(message.params);
+          else if (message.method === 'ui/notifications/tool-cancelled') showError(new Error(message.params?.reason || '문서 작업이 취소되었습니다.'));
+        } catch (error) { showError(error); }
+      });
+      $('previous').addEventListener('click', () => showPage(state.index - 1));
+      $('next').addEventListener('click', () => showPage(state.index + 1));
+      $('pageNumber').addEventListener('change', () => {
+        const number = Number($('pageNumber').value);
+        const index = state.pages.findIndex((page) => page.pageNumber === number);
+        if (index >= 0) showPage(index);
+        else { updateControls(); setStatus('미리보기에 포함된 쪽 번호를 입력해 주세요.'); }
+      });
+      $('zoom').addEventListener('change', applyZoom);
+      $('pageImage').addEventListener('load', () => { applyZoom(); drawRectangle(); });
+      $('pageImage').addEventListener('error', () => showError(new Error('쪽 이미지를 표시하지 못했습니다.')));
+      $('refresh').addEventListener('click', () => void renderOpenFile(true));
+      $('selectRegion').addEventListener('click', () => {
+        state.selecting = !state.selecting; $('selectRegion').setAttribute('aria-pressed', String(state.selecting));
+        $('selectionSurface').classList.toggle('active', state.selecting);
+        setStatus(state.selecting ? '쪽 이미지에서 수정할 영역을 드래그해 주세요.' : '수정할 내용을 적고 채팅으로 요청을 보내 주세요.');
+      });
+      $('clearRegion').addEventListener('click', () => { state.rectangle = null; drawRectangle(); scheduleModelContext(); });
+      $('comment').addEventListener('input', () => { updateControls(); scheduleModelContext(); });
+      $('sendAnnotation').addEventListener('click', () => void sendAnnotation());
+      $('selectionSurface').addEventListener('pointerdown', (event) => {
+        if (!state.selecting || event.button !== 0) return;
+        event.preventDefault(); state.dragStart = selectionPoint(event); state.rectangle = null;
+        $('selectionSurface').setPointerCapture(event.pointerId); drawRectangle();
+      });
+      $('selectionSurface').addEventListener('pointermove', (event) => {
+        if (!state.dragStart) return;
+        const point = selectionPoint(event); const start = state.dragStart;
+        state.rectangle = { x: Math.min(start.x, point.x), y: Math.min(start.y, point.y), width: Math.abs(point.x - start.x), height: Math.abs(point.y - start.y) };
+        drawRectangle();
+      });
+      const endSelection = () => {
+        if (!state.dragStart) return;
+        state.dragStart = null;
+        if (state.rectangle && (state.rectangle.width < .005 || state.rectangle.height < .005)) state.rectangle = null;
+        drawRectangle(); scheduleModelContext(); $('comment').focus();
+      };
+      $('selectionSurface').addEventListener('pointerup', endSelection);
+      $('selectionSurface').addEventListener('pointercancel', endSelection);
+      $('canvas').addEventListener('keydown', (event) => {
+        if (event.key === 'ArrowLeft' || event.key === 'PageUp') { event.preventDefault(); showPage(state.index - 1); }
+        if (event.key === 'ArrowRight' || event.key === 'PageDown') { event.preventDefault(); showPage(state.index + 1); }
+      });
+      if (window.parent === window) {
+        setStatus('이 뷰어는 Codex 문서 패널에서 열 수 있습니다.'); showPlaceholder('HWP/HWPX 파일을 Codex에서 열거나 pwh_preview를 호출해 주세요.', false);
+      } else {
+        request('ui/initialize', { appInfo: { name: 'hop-hwpx-viewer', version: '0.1.0' }, appCapabilities: { availableDisplayModes: ['inline', 'fullscreen'] }, protocolVersion: '2026-01-26' }, 20000)
+          .then((result) => {
+            state.connected = true; state.hostCapabilities = result.hostCapabilities || {}; applyHostContext(result.hostContext);
+            notify('ui/notifications/initialized'); setStatus('문서 조판 결과를 기다리고 있습니다.');
+            updateControls();
+          }).catch(showError);
+      }
+    })();
+  </script>
+</body>
+</html>

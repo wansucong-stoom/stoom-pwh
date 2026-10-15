@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "runtimeRoot": "~/.stoom-pwh",
+  "outputRoot": "${RUNTIME_ROOT}/documents",
+  "studioDistPath": "${RUNTIME_ROOT}/studio",
+  "editorSdkPath": "${RUNTIME_ROOT}/editor-sdk",
+  "fontRoot": "${RUNTIME_ROOT}/fonts",
+  "documentFontsManifest": "${RUNTIME_ROOT}/fonts/document-fonts.json"
+}

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>pwh · 함께 편집</title>
+  <style>
+    :root { font-family: "맑은 고딕", system-ui, sans-serif; color: #202522; background: #f4f5f4; }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body { display: flex; flex-direction: column; }
+    .shared-bar { flex: 0 0 auto; min-height: 48px; display: flex; align-items: center; gap: 12px; padding: 8px 14px; border-bottom: 1px solid #d9dedb; background: #fff; }
+    .brand { color: #1b6547; font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .session { min-width: 0; flex: 1; }
+    #document-name { display: block; font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #shared-status { margin-top: 2px; font-size: 11px; line-height: 1.4; color: #66716a; overflow-wrap: anywhere; }
+    #shared-status[data-kind="error"] { color: #a72a22; }
+    #shared-status[data-kind="busy"] { color: #1b6547; }
+    #save-copy { flex: 0 0 auto; border: 1px solid #1b6547; border-radius: 6px; background: #1b6547; color: #fff; font: inherit; font-size: 12px; min-height: 32px; padding: 5px 10px; cursor: pointer; }
+    #save-copy:disabled { opacity: .5; cursor: default; }
+    #save-copy:focus-visible { outline: 2px solid #143e2c; outline-offset: 2px; }
+    #workspace { flex: 1; min-height: 0; position: relative; }
+    #editor { position: absolute; inset: 0; width: 100%; height: 100%; }
+    #working { position: absolute; inset: 0; z-index: 5; display: flex; align-items: flex-start; justify-content: center; padding-top: 56px; background: #ffffff24; cursor: wait; }
+    #working span { background: #183e2e; color: #fff; border-radius: 6px; padding: 9px 15px; font-size: 13px; box-shadow: 0 2px 10px #0002; }
+    .ai-request { flex: 0 0 auto; border-top: 1px solid #d9dedb; background: #fff; padding: 9px 14px; display: grid; grid-template-columns: minmax(150px, 1fr) minmax(180px, 1fr) auto; align-items: center; gap: 10px; }
+    #selection-card { min-width: 0; padding: 2px 0; }
+    #selection-title { font-size: 12px; font-weight: 650; }
+    #selection-text { margin: 3px 0 0; max-height: 46px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: 11px; line-height: 1.5; color: #536159; }
+    #selection-detail { margin-top: 3px; font-size: 10px; color: #737d76; }
+    .request-note { min-width: 0; }
+    .request-note label { display: block; font-size: 11px; margin-bottom: 3px; color: #536159; }
+    #request-comment { display: block; width: 100%; min-height: 42px; max-height: 100px; resize: vertical; border: 1px solid #cfd6d1; border-radius: 5px; padding: 6px 8px; color: inherit; background: #fff; font: inherit; font-size: 12px; line-height: 1.5; }
+    #request-ai { border: 1px solid #1b6547; background: #fff; color: #1b6547; border-radius: 6px; padding: 7px 10px; min-height: 34px; font: inherit; font-size: 12px; cursor: pointer; }
+    #request-ai:disabled { opacity: .45; cursor: default; }
+    #request-status { grid-column: 1 / -1; margin: -4px 0 0; color: #737d76; font-size: 10px; line-height: 1.4; }
+    #request-manual { grid-column: 1 / -1; width: 100%; max-height: 100px; overflow: auto; font-size: 11px; white-space: pre-wrap; overflow-wrap: anywhere; }
+    [hidden] { display: none !important; }
+    @media (max-width: 460px) { .shared-bar { padding: 7px 9px; gap: 8px; } .brand { display: none; } #save-copy { font-size: 11px; padding: 5px 7px; } }
+    @media (max-width: 720px) { .ai-request { grid-template-columns: 1fr auto; gap: 8px; padding: 8px 10px; } #selection-card { grid-column: 1 / -1; } }
+  </style>
+</head>
+<body>
+  <header class="shared-bar">
+    <span class="brand">pwh · 함께 편집</span>
+    <div class="session"><span id="document-name">한글 문서 편집기</span><div id="shared-status" role="status" aria-live="polite" tabindex="-1">로컬 편집기를 준비하고 있습니다.</div></div>
+    <button id="save-copy" type="button" disabled>새 수정본 저장</button>
+  </header>
+  <main id="workspace" aria-label="한글 문서 편집 화면">
+    <div id="editor"></div>
+    <div id="working" hidden aria-live="polite"><span>Codex가 문서를 편집하고 있습니다.</span></div>
+  </main>
+  <section class="ai-request" aria-label="pwh AI 수정 요청">
+    <div id="selection-card" oai-annotatable="한글 문서에서 선택한 내용">
+      <div id="selection-title">문서에서 수정할 내용을 선택해 주세요</div>
+      <pre id="selection-text">선택한 문단·표·글자의 내용을 여기에 표시합니다.</pre>
+      <div id="selection-detail">편집기 연결을 기다리고 있습니다.</div>
+    </div>
+    <div class="request-note"><label for="request-comment">수정할 내용 · 선택 입력</label><textarea id="request-comment" rows="2" maxlength="4000" placeholder="예: 이 표의 첫 행을 굵게 하고 배경색을 넣어 줘." disabled></textarea></div>
+    <button id="request-ai" type="button" disabled>수정 요청 준비 중</button>
+    <p id="request-status" role="status" aria-live="polite">선택을 준비한 뒤 요청할 수 있습니다. 요청 작성 후 Codex 채팅에서 보내 주세요.</p>
+    <pre id="request-manual" hidden></pre>
+  </section>
+  <script type="module" src="/editor-client.mjs"></script>
+</body>
+</html>

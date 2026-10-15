@@ -1,0 +1,32 @@
+{
+  "name": "pwh",
+  "version": "0.2.0",
+  "description": "주석으로 협업하고 기관 HWPX 양식을 최대한 보존하는 rhwp 기반 AI 플러그인.",
+  "author": {
+    "name": "Wansucong the STOOM"
+  },
+  "keywords": [
+    "hwp",
+    "hwpx",
+    "rhwp",
+    "공유 편집",
+    "양식"
+  ],
+  "requires_local_executor": true,
+  "skills": "./skills",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "pwh",
+    "shortDescription": "주석으로 협업하고 한글 양식 보존",
+    "longDescription": "rhwp 기반으로 기관 HWPX 양식의 구조와 서식을 분석·활용하고, 미리보기 주석을 받아 실제 문서를 수정·재조판하는 로컬 AI 플러그인입니다. 한컴 한글과의 화면 동일성을 보장하지 않습니다.",
+    "developerName": "Wansucong the STOOM",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive"
+    ],
+    "defaultPrompt": "이 기관의 한글 양식을 최대한 보존해서 내용을 작성하고 미리보기를 열어 줘. 주석으로 요청하면 실제 HWPX를 수정하고 다시 보여줘."
+  },
+  "homepage": "https://github.com/wansucong-stoom/stoom-pwh",
+  "repository": "https://github.com/wansucong-stoom/stoom-pwh",
+  "license": "MIT"
+}

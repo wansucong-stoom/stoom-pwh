@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "pwh": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "${PLUGIN_ROOT}/src/server.mjs"
+      ],
+      "cwd": "${PLUGIN_ROOT}"
+    },
+    "rhwp-core": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "${PLUGIN_ROOT}/src/native-mcp.mjs"
+      ],
+      "cwd": "${PLUGIN_ROOT}"
+    }
+  }
+}

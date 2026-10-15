@@ -1,0 +1,4 @@
+[
+  {"type":"replaceText","find":"함께 만드는 한글 문서","replace":"함께 다듬은 한글 문서"},
+  {"type":"setCell","table":0,"row":2,"col":1,"text":"서식을 유지하고 수정본 저장"}
+]
