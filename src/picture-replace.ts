@@ -2,8 +2,8 @@ export function pictureTarget(context:any){
  if(context?.kind!=='object'||context.objects?.length!==1)throw Error('교체할 그림 하나를 선택하세요.');
  const ref=context.objects[0].source;
  if(ref?.type!=='image'||ref.headerFooter||ref.noteRef||!['sec','ppi','ci'].every(k=>Number.isSafeInteger(ref[k])&&ref[k]>=0))throw Error('현재는 본문·표 셀의 그림 교체만 지원합니다.');
- const path=ref.cellPath?.length?ref.cellPath:ref.cellIdx!==undefined&&ref.outerTableControlIdx!==undefined?[{controlIndex:ref.outerTableControlIdx,cellIndex:ref.cellIdx,cellParaIndex:ref.cellParaIdx??0}]:[];
- if(ref.cellIdx!==undefined&&!path.length)throw Error('표 셀 경로가 불완전합니다.');
+ const path=ref.cellPath?.length?ref.cellPath:ref.cellIdx!=null&&ref.outerTableControlIdx!=null?[{controlIndex:ref.outerTableControlIdx,cellIndex:ref.cellIdx,cellParaIndex:ref.cellParaIdx??0}]:[];
+ if(ref.cellIdx!=null&&!path.length)throw Error('표 셀 경로가 불완전합니다.');
  return {ref,path,pathJson:JSON.stringify(path)};
 }
 export function replaceSelectedPicture(wasm:any,context:any,bytes:Uint8Array,image:any){
