@@ -35,6 +35,16 @@ export function editorCompose(args){
  tickets.set(ticketId,ticket);if(tickets.size>128)tickets.delete(tickets.keys().next().value);
  sessions.get(args.sessionId).commands.push({ticketId,type:'compose',expected:structuredClone(args.expected),paragraphs:structuredClone(paragraphs)});return ticket;
 }
+export function editorLayout(args){
+ const current=editorState({sessionId:args.sessionId});
+ if(!current.context.ready||JSON.stringify(current.context)!==JSON.stringify(args.expected))throw Error('문서 상태가 바뀌었습니다. 최신 상태를 읽으세요.');
+ const p=args.patch,keys=['paper','orientation','marginsMm'];
+ if(!p||typeof p!=='object'||!Object.keys(p).length||Object.keys(p).some(k=>!keys.includes(k))||p.paper!==undefined&&!['A4','A3','B4','B5','Letter','Legal'].includes(p.paper)||p.orientation!==undefined&&!['portrait','landscape'].includes(p.orientation))throw Error('용지 설정을 확인하세요.');
+ if(p.marginsMm!==undefined&&(!p.marginsMm||typeof p.marginsMm!=='object'||!Object.keys(p.marginsMm).length||Object.entries(p.marginsMm).some(([k,v])=>!['left','right','top','bottom','header','footer','gutter'].includes(k)||typeof v!=='number'||!Number.isFinite(v)||v<0||v>150)))throw Error('여백은 0~150mm 범위의 숫자여야 합니다.');
+ if(args.sectionIndex!==undefined&&(!Number.isSafeInteger(args.sectionIndex)||args.sectionIndex<0))throw Error('구역 번호를 확인하세요.');
+ const ticketId=randomUUID(),ticket={ticketId,sessionId:args.sessionId,status:'pending',createdAt:Date.now()};tickets.set(ticketId,ticket);if(tickets.size>128)tickets.delete(tickets.keys().next().value);
+ sessions.get(args.sessionId).commands.push({ticketId,type:'layout',expected:structuredClone(args.expected),patch:structuredClone(p),...(args.sectionIndex===undefined?{}:{sectionIndex:args.sectionIndex})});return ticket;
+}
 export function editorResult(args){const result=tickets.get(args.ticketId);if(!result)throw Error('Unknown editor ticket');return result;}
 export function editorCapture(args){
  if(typeof args.note!=='string'||!args.note.trim()||args.note.length>4000)throw Error('수정 요청 내용을 작성하세요.');
@@ -42,7 +52,7 @@ export function editorCapture(args){
  const text=!!c?.selection&&c.selectedText?.known&&!!c.selectedText.text&&!c.selectedText.truncated;
  const object=c?.ready&&c.kind==='object'&&Array.isArray(c.objects)&&c.objects.length>0&&c.objects.length<=16&&c.objects.every(o=>o?.source&&['image','shape','equation'].includes(o.source.type)&&['sec','ppi','ci'].every(k=>Number.isSafeInteger(o.source[k])&&o.source[k]>=0));
  const blank=c?.ready&&c.blankDocument===true;
- if(!text&&!object&&!blank)throw Error('텍스트를 드래그하거나 그림·도형을 선택하세요.');
+ if(!text&&!object&&!blank&&!(c?.ready&&c.requestScope==='document'&&c.documentState?.documentSha256))throw Error('텍스트를 드래그하거나 그림·도형을 선택하세요.');
  editorPoll({sessionId:args.sessionId,source:args.source,context:args.context});
  const requestId=randomUUID(),record=structuredClone({requestId,sessionId:args.sessionId,source:args.source,context:args.context,note:args.note,createdAt:Date.now(),untrustedContent:true});
  requests.set(requestId,record);if(requests.size>128)requests.delete(requests.keys().next().value);return {requestId,sessionId:args.sessionId};

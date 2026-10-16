@@ -169,3 +169,7 @@ serve 프로세스를 유지해야 브라우저가 연결된다. 실행파일 �
 ## 빈 편집기에서 문서 작성
 
 빈 편집기를 열어 달라는 요청에는 pwh_new_document를 호출하고 반환 nextAction의 절대 파일 경로를 우측 패널에 연다. 기존 파일은 필요 없다. 빈 문서에서 선택 없이 AI 수정 요청 버튼을 누르면 작성 요청을 전달한다. context.blankDocument가 true이면 pwh_editor_compose에 최신 context 전체와 paragraphs:[{role:title|heading|body,text:문단내용}]를 전달한다. 1~128문단·총 24000자 이내이며 문단 내부 줄바꿈은 분리한다. 실제 편집기가 빈 본문 여부와 최신 상태를 재검사한다. 이미 내용이 있으면 덮어쓰지 않는다. pwh_editor_result의 applied를 확인하며 실행 취소 한 번으로 복원한다. 이 경로는 제목·소제목·본문 작성 범위이며 표·그림 삽입을 지원한다고 주장하지 않는다. 새 수정본 저장은 빈 문서에서도 Windows 저장 창으로 폴더와 파일명을 선택한다.
+
+## 선택 없는 문서 전체 요청과 용지·여백
+
+문서 로드 후 AI 수정 요청은 선택 없이도 활성화된다. requestScope가 document이면 문서 전체 요청이며 선택 텍스트 치환으로 처리하지 않는다. pwh_editor_request와 최신 pwh_editor_state를 읽고 용지·방향·여백 요청에는 pwh_editor_layout을 사용한다. patch.paper는 A4/A3/B4/B5/Letter/Legal, orientation은 portrait/landscape, marginsMm는 left/right/top/bottom/header/footer/gutter의 mm 값이다. B4는 rhwp 프리셋 257×364mm이며 ISO B4와 혼동하지 않는다. sectionIndex 생략 시 전체 구역, 지정 시 해당 구역만 바꾸고 다른 값은 보존한다. 상태 변경·잘못된 여백은 거절한다. 결과 applied와 변경 전후 설정·조판 쪽수를 확인한다. 전체 문서 내용의 자동 재작성까지 이 도구가 지원한다고 말하지 않는다.

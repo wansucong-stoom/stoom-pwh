@@ -5,8 +5,8 @@ import { pathToFileURL } from 'node:url';
 // MCP Apps / OpenAI File Entrypoint contracts:
 // https://github.com/openai/mcp-extensions/blob/main/docs/spec.md#file-extension-entrypoint
 // https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/2026-01-26/apps.mdx
-export const VIEWER_URI = 'ui://pwh/inline-editor-0.5.6';
-const VERSION = '0.5.6';
+export const VIEWER_URI = 'ui://pwh/inline-editor-0.5.7';
+const VERSION = '0.5.7';
 const MIME = 'text/html;profile=mcp-app';
 // Use the established single-result MCP protocol; 2026-07-28 MRTR is not implemented.
 const SUPPORTED_PROTOCOLS = ['2024-11-05', '2025-03-26', '2025-06-18', '2025-11-25'];
@@ -73,6 +73,7 @@ const liveOperationSchema = {
 };
 
 export const TOOLS = [
+ {name:'pwh_editor_layout',title:'현재 문서의 용지·여백 설정',description:'같은 편집기에서 용지·방향·여백을 변경하고 재조판합니다. 최신 context 전체를 expected로 전달합니다. sectionIndex 생략 시 전체 구역에 적용합니다. B4는 rhwp의 257×364mm 규격입니다. 지정하지 않은 값은 보존합니다. ticket 결과를 확인하세요.',inputSchema:objectSchema({sessionId:{type:'string'},expected:{type:'object',additionalProperties:true},sectionIndex:{type:'integer',minimum:0},patch:objectSchema({paper:{type:'string',enum:['A4','A3','B4','B5','Letter','Legal']},orientation:{type:'string',enum:['portrait','landscape']},marginsMm:objectSchema(Object.fromEntries(['left','right','top','bottom','header','footer','gutter'].map(k=>[k,{type:'number',minimum:0,maximum:150}])) )})},['sessionId','expected','patch']),annotations:writeDocument},
  {name:'pwh_new_document',title:'빈 한글 편집기 열기',description:'빈 HWPX 문서를 만들고 반환 nextAction으로 우측 pwh 편집기에 여세요. 빈 문서 AI 요청은 pwh_editor_compose로 같은 편집기에 작성합니다.',inputSchema:objectSchema({output:outputSchema}),annotations:writeDocument},
  {name:'pwh_editor_compose',title:'빈 편집기에 문서 작성',description:'최신 state.context 전체를 expected로 전달해 빈 문서에 제목·소제목·본문을 작성합니다. 기존 내용이 있으면 거절하며 결과 ticketId를 pwh_editor_result로 확인합니다. 실행 취소 한 번으로 복구합니다.',inputSchema:objectSchema({sessionId:{type:'string'},expected:{type:'object',additionalProperties:true},paragraphs:{type:'array',minItems:1,maxItems:128,items:objectSchema({role:{type:'string',enum:['title','heading','body']},text:{type:'string'}},['role','text'])}},['sessionId','expected','paragraphs']),annotations:writeDocument},
   {name:'pwh_editor_capture',title:'선택 영역 AI 요청 기록',description:'클라이언트에서 우클릭으로 작성한 수정 요청과 선택 시점 문서 상태를 기록합니다.',inputSchema:objectSchema({sessionId:{type:'string'},source:{type:'string'},context:{type:'object',additionalProperties:true},note:{type:'string',maxLength:4000}},['sessionId','context','note']),annotations:writeDocument,_meta:{ui:{visibility:['app']}}},
@@ -308,8 +309,8 @@ export function documentResult(value) {
 }
 
 export async function callTool(name, args = {}, requestMeta = {}) {
-  if(['pwh_editor_compose','pwh_editor_capture','pwh_editor_request','pwh_editor_poll','pwh_editor_state','pwh_editor_rewrite','pwh_editor_result'].includes(name)){
-    const module=await import('./editor-session.mjs');const fn={pwh_editor_compose:'editorCompose',pwh_editor_capture:'editorCapture',pwh_editor_request:'editorRequest',pwh_editor_poll:'editorPoll',pwh_editor_state:'editorState',pwh_editor_rewrite:'editorRewrite',pwh_editor_result:'editorResult'}[name];return textResult(module[fn](args));
+  if(['pwh_editor_layout','pwh_editor_compose','pwh_editor_capture','pwh_editor_request','pwh_editor_poll','pwh_editor_state','pwh_editor_rewrite','pwh_editor_result'].includes(name)){
+    const module=await import('./editor-session.mjs');const fn={pwh_editor_layout:'editorLayout',pwh_editor_compose:'editorCompose',pwh_editor_capture:'editorCapture',pwh_editor_request:'editorRequest',pwh_editor_poll:'editorPoll',pwh_editor_state:'editorState',pwh_editor_rewrite:'editorRewrite',pwh_editor_result:'editorResult'}[name];return textResult(module[fn](args));
   }
   if(name==='pwh_client_asset') return (await import('./client-assets.mjs')).readClientAsset(args,requestMeta);
   if(name==='pwh_client_save_dialog') return textResult(await (await import('./client-assets.mjs')).selectClientSaveDestination(args,requestMeta));

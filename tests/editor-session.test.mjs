@@ -44,3 +44,13 @@ test('blank document requests and composition queue preserve snapshot and reject
  assert.throws(()=>editorCompose({sessionId,expected:context,paragraphs}),/빈 문서/);
  editorPoll({sessionId,context:changed,receipt:{ticketId:ticket.ticketId,ok:false,error:'changed'}});assert.equal(editorResult(ticket).status,'rejected');
 });
+import {editorLayout} from '../src/editor-session.mjs';
+test('document-wide request works without selection and layout rejects stale context',()=>{
+ const sessionId=randomUUID(),context={ready:true,requestScope:'document',blankDocument:false,selection:null,objects:[],documentState:{documentEpoch:1,changeSeq:3,documentSha256:'f'.repeat(64)}};
+ const request=editorCapture({sessionId,context,note:'B4 가로, 좌우 여백 20mm'});assert.equal(editorRequest(request).context.requestScope,'document');
+ const patch={paper:'B4',orientation:'landscape',marginsMm:{left:20,right:20}};
+ const ticket=editorLayout({sessionId,expected:context,patch});patch.marginsMm.left=1;
+ const command=editorPoll({sessionId,context}).commands[0];assert.equal(command.type,'layout');assert.equal(command.patch.marginsMm.left,20);
+ assert.throws(()=>editorLayout({sessionId,expected:context,patch:{marginsMm:{left:-1}}}),/여백/);
+ editorPoll({sessionId,context:{...context,documentState:{...context.documentState,changeSeq:4}}});assert.throws(()=>editorLayout({sessionId,expected:context,patch}),/바뀌/);assert.equal(editorResult(ticket).status,'pending');
+});
