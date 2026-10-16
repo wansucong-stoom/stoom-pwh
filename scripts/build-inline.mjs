@@ -9,7 +9,7 @@ let agentSource=await fs.readFile(agentPath,'utf8');
 if(!agentSource.includes('pwh presentation digest cache')){
  const method='  getDocumentState(): RhwpDocumentStateV1 {';
  if(!agentSource.includes(method)||!agentSource.includes('export class DocumentAgentController {'))throw Error('Unsupported document agent state bridge');
- agentSource='// pwh presentation digest cache; authoritative getDocumentState stays fresh.\nimport {createDocumentStateDigestCache} from "./pwh-document-state-cache.mjs";\n'+agentSource;
+ agentSource='// pwh presentation digest cache; authoritative getDocumentState stays fresh.\nimport {createDocumentStateDigestCache} from '+JSON.stringify('./pwh-document-state-cache.mjs')+';\n'+agentSource;
  agentSource=agentSource.replace('export class DocumentAgentController {',`export class DocumentAgentController {
   private readonly pwhStateCache=createDocumentStateDigestCache();
   private pwhStateCacheOff: (()=>void)|null=null;
@@ -30,7 +30,7 @@ if(!hostCanvas.includes('pwh exact local face first')){
  const finish='            await font.load();';
  const from=hostCanvas.indexOf(begin),to=hostCanvas.indexOf(finish,from);
  if(from<0||to<0)throw Error('Unsupported host canvas font preparation');
- hostCanvas='// pwh exact local face first; verified bytes remain the fallback.\nimport {tryLoadExactLocalFont} from "./pwh-local-font-face.mjs";\nimport {getLocalFontRecords} from "./local-fonts.ts";\n'+hostCanvas.slice(0,from)+`            const alias = \`__rhwp_host_face_\${this.id}_\${++this.serial}\`;
+ hostCanvas='// pwh exact local face first; verified bytes remain the fallback.\nimport {tryLoadExactLocalFont} from '+JSON.stringify('./pwh-local-font-face.mjs')+';\nimport {getLocalFontRecords} from "./local-fonts.ts";\n'+hostCanvas.slice(0,from)+`            const alias = \`__rhwp_host_face_\${this.id}_\${++this.serial}\`;
             const face = record.hostReference!.face;
             const localFace:any={...face};
             const catalog=getLocalFontRecords({includeRegistered:true});
