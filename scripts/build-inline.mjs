@@ -20,6 +20,14 @@ const glue=path.join(root,'pkg/rhwp.js');
 await fs.writeFile(glue,(await fs.readFile(glue,'utf8')).replace("new URL('rhwp_bg.wasm', import.meta.url)","(()=>{throw new Error('Host WASM bytes required')})()"));
 const {build}=await import(pathToFileURL(path.join(studio,'node_modules/vite/dist/node/index.js')));
 await build({configFile:false,root:studio,publicDir:false,define:{__APP_VERSION__:JSON.stringify('0.8.7'),__RHWP_DISABLE_EXTERNAL_WEBFONTS__:'true',__RHWP_HWPCTRL__:'false'},resolve:{alias:{'@':path.join(studio,'src'),'@wasm':path.join(root,'pkg')}},build:{outDir:path.join(root,'inline-dist'),target:'es2022',modulePreload:false,cssCodeSplit:false,lib:{entry:path.join(studio,'src/main.ts'),formats:['es'],fileName:()=> 'editor.js'},rollupOptions:{output:{inlineDynamicImports:true}}}});
+const cssPath=path.join(root,'inline-dist/rhwp-studio.css');
+let css=await fs.readFile(cssPath,'utf8');
+for(const name of ['icon_small_ko.svg','icon_small_ko_dark.svg']){
+ const bytes=await fs.readFile(path.join(studio,'public/images',name));
+ css=css.replaceAll(`/images/${name}`,`data:image/svg+xml;base64,${bytes.toString('base64')}`);
+}
+if(css.includes('/images/icon_small_ko'))throw new Error('Editor icon sprites must be embedded');
+await fs.writeFile(cssPath,css);
 const html=await fs.readFile(path.join(studio,'index.html'),'utf8');
 await fs.writeFile(path.join(root,'inline-dist/editor-body.html'),html.slice(html.indexOf('<body>')+6,html.lastIndexOf('</body>')).replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,''));
 console.log('Inline Studio build ready');

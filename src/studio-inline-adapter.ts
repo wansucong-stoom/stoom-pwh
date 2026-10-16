@@ -1,9 +1,11 @@
-import { replaceTextWithMutationEffects, applyCharShapeModsToRange } from './engine/command';
+import { replaceTextWithMutationEffects } from './engine/command';
 import { installSelectionBridge } from './collaboration-selection';
 
 export function installInlineEditor(d:any) {
  const bridge=installSelectionBridge(d);
  const read=()=>bridge.getSelectionContext();
+ let applying=false;
+ for(const type of ['keydown','beforeinput','pointerdown','mousedown'])window.addEventListener(type,(event)=>{if(applying){event.preventDefault();event.stopImmediatePropagation();}},{capture:true});
  (window as any).pwhEditor={
   ready:()=>d.ready,
   async load(bytes:Uint8Array,name:string){await d.ready;await d.load(bytes,name);},
@@ -34,13 +36,25 @@ export function installInlineEditor(d:any) {
     if(/[\u0000-\u0008\ufffc]/.test(text))throw Error('선택에 문서 개체가 포함되어 있습니다. 텍스트만 선택해 주세요.');
     return {p,length,format,text:lines[i]};
    });
-   await input.executeDocumentAgentOperation({kind:'snapshot',operationType:'pwh-selection-rewrite',operation:(wasm:any)=>{
+   if(applying)throw Error('이전 수정 적용이 끝날 때까지 기다려 주세요.');
+   applying=true;
+   try{await input.executeDocumentAgentOperation({kind:'snapshot',operationType:'pwh-selection-rewrite',operation:(wasm:any)=>{
     for(const part of [...parts].reverse()){
      replaceTextWithMutationEffects(wasm,part.p,part.length,part.text);
-     if(part.text)applyCharShapeModsToRange(wasm,part.p,part.p.charOffset,part.p.charOffset+Array.from(part.text).length,part.format);
+     if(part.text){
+      const end=part.p.charOffset+Array.from(part.text).length;
+      if(isCell)wasm.setCharShapeIdInCellByPath(part.p.sectionIndex,part.p.parentParaIndex,JSON.stringify(part.p.cellPath?.length?part.p.cellPath:[{controlIndex:part.p.controlIndex,cellIndex:part.p.cellIndex,cellParaIndex:part.p.cellParaIndex}]),part.p.charOffset,end,part.format.charShapeId);
+      else wasm.setCharShapeId(part.p.sectionIndex,part.p.paragraphIndex,part.p.charOffset,end,part.format.charShapeId);
+     }
+    }
+    wasm.flushDeferredPagination();
+    for(const part of parts){
+     const count=Array.from(part.text).length;
+     const actual=isCell?wasm.getTextInCellByPath(part.p.sectionIndex,part.p.parentParaIndex,JSON.stringify(part.p.cellPath?.length?part.p.cellPath:[{controlIndex:part.p.controlIndex,cellIndex:part.p.cellIndex,cellParaIndex:part.p.cellParaIndex}]),part.p.charOffset,count):wasm.getTextRange(part.p.sectionIndex,part.p.paragraphIndex,part.p.charOffset,count);
+     if(actual!==part.text)throw Error('선택 범위 수정 결과가 요청 내용과 다릅니다.');
     }
     const last=parts.at(-1)!;return {...end,charOffset:last.p.charOffset+Array.from(last.text).length};
-   }},()=>d.getCanvasView().refreshDocumentAgentMutation());
+   }},()=>d.getCanvasView().refreshDocumentAgentMutation());}finally{applying=false;}
    return {ok:true,context:read(),undoSteps:1};
   }
  };

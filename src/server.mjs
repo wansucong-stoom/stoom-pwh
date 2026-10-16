@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url';
 // https://github.com/openai/mcp-extensions/blob/main/docs/spec.md#file-extension-entrypoint
 // https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/2026-01-26/apps.mdx
 export const VIEWER_URI = 'ui://pwh/inline-editor';
-const VERSION = '0.5.0';
+const VERSION = '0.5.1';
 const MIME = 'text/html;profile=mcp-app';
 // Use the established single-result MCP protocol; 2026-07-28 MRTR is not implemented.
 const SUPPORTED_PROTOCOLS = ['2024-11-05', '2025-03-26', '2025-06-18', '2025-11-25'];

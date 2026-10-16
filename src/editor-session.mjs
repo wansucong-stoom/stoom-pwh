@@ -12,7 +12,7 @@ export function editorPoll(args){
 export function editorState(args={}){
  const active=[...sessions].filter(([,s])=>Date.now()-s.seen<ttl);
  const item=args.sessionId?active.find(([id])=>id===args.sessionId):active.length===1?active[0]:null;
- if(!item)throw Error(active.length>1?'여러 편집기가 열려 있습니다. sessionId를 지정하세요.':'현재 연결된 편집기가 없습니다. HWPX 편집기를 열어 주세요.');
+ if(!item)throw Error(active.length>1?'여러 편집기가 열려 있습니다. sessionId를 지정하세요: '+JSON.stringify(active.map(([sessionId,s])=>({sessionId,source:s.source,selectedText:s.context?.selectedText?.text||''}))):'현재 연결된 편집기가 없습니다. HWPX 편집기를 열어 주세요.');
  return {sessionId:item[0],source:item[1].source,context:item[1].context,untrustedContent:true};
 }
 export function editorRewrite(args){
