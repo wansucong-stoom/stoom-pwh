@@ -77,7 +77,7 @@ def main():
         meta,name=item.split('\t',1);mode,blob,_=meta.split()
         # Reference documents and binary fonts are not needed for pwh's Studio
         # build; their separate redistribution terms are not inferred from MIT.
-        if name.startswith(('assets/screenshots/','rhwp-studio/public/samples/')):continue
+        if name=='rhwp-studio/public/fonts' or name.startswith(('assets/screenshots/','rhwp-studio/public/samples/')):continue
         if name.startswith('assets/fonts/') and Path(name).suffix.lower() not in ('.md','.txt'):continue
         if mode!='100644' and mode!='100755': raise ValueError('Unsupported tracked input mode')
         data=regular(a.upstream_root/name)
