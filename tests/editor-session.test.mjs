@@ -32,3 +32,15 @@ test('object requests preserve exact object references without accepting a text 
  assert.throws(()=>editorRewrite({sessionId,expected:editorState({sessionId}).context,replacement:'text'}),/텍스트/);
  assert.throws(()=>editorCapture({sessionId,context:{...context,objects:[{source:{type:'image',sec:-1,ppi:0,ci:0}}]},note:'수정'}),/선택/);
 });
+import {editorCompose} from '../src/editor-session.mjs';
+test('blank document requests and composition queue preserve snapshot and reject later edits',()=>{
+ const sessionId=randomUUID(),context={ready:true,blankDocument:true,documentState:{documentEpoch:1,changeSeq:0,documentSha256:'e'.repeat(64)},selection:null,selectedText:{known:true,text:''}};
+ const request=editorCapture({sessionId,context,note:'사업계획서를 작성해 주세요'});
+ assert.equal(editorRequest(request).context.blankDocument,true);
+ const paragraphs=[{role:'title',text:'계획서'},{role:'body',text:'본문'}];
+ const ticket=editorCompose({sessionId,expected:context,paragraphs});paragraphs[0].text='later';
+ const cmd=editorPoll({sessionId,context}).commands[0];assert.equal(cmd.type,'compose');assert.equal(cmd.paragraphs[0].text,'계획서');
+ const changed={...context,blankDocument:false};editorPoll({sessionId,context:changed});
+ assert.throws(()=>editorCompose({sessionId,expected:context,paragraphs}),/빈 문서/);
+ editorPoll({sessionId,context:changed,receipt:{ticketId:ticket.ticketId,ok:false,error:'changed'}});assert.equal(editorResult(ticket).status,'rejected');
+});

@@ -26,13 +26,23 @@ export function editorRewrite(args){
  sessions.get(args.sessionId).commands.push({ticketId,expected:args.expected,replacement:args.replacement});
  return ticket;
 }
+export function editorCompose(args){
+ const current=editorState({sessionId:args.sessionId});
+ if(!current.context.blankDocument||JSON.stringify(current.context)!==JSON.stringify(args.expected))throw Error('빈 문서 상태가 바뀌었습니다. 최신 상태를 읽으세요.');
+ const paragraphs=args.paragraphs;
+ if(!Array.isArray(paragraphs)||!paragraphs.length||paragraphs.length>128||paragraphs.some(p=>!p||typeof p.text!=='string'||/[\r\n\u0000-\u0008\ufffc]/.test(p.text)||!['title','heading','body'].includes(p.role))||paragraphs.reduce((n,p)=>n+p.text.length,0)>24000||!paragraphs.some(p=>p.text.trim()))throw Error('초안 문단은 title/heading/body 역할과 텍스트를 가진 1~128개, 총 24000자 이내여야 합니다.');
+ const ticketId=randomUUID(),ticket={ticketId,sessionId:args.sessionId,status:'pending',createdAt:Date.now()};
+ tickets.set(ticketId,ticket);if(tickets.size>128)tickets.delete(tickets.keys().next().value);
+ sessions.get(args.sessionId).commands.push({ticketId,type:'compose',expected:structuredClone(args.expected),paragraphs:structuredClone(paragraphs)});return ticket;
+}
 export function editorResult(args){const result=tickets.get(args.ticketId);if(!result)throw Error('Unknown editor ticket');return result;}
 export function editorCapture(args){
  if(typeof args.note!=='string'||!args.note.trim()||args.note.length>4000)throw Error('수정 요청 내용을 작성하세요.');
  const c=args.context;
  const text=!!c?.selection&&c.selectedText?.known&&!!c.selectedText.text&&!c.selectedText.truncated;
  const object=c?.ready&&c.kind==='object'&&Array.isArray(c.objects)&&c.objects.length>0&&c.objects.length<=16&&c.objects.every(o=>o?.source&&['image','shape','equation'].includes(o.source.type)&&['sec','ppi','ci'].every(k=>Number.isSafeInteger(o.source[k])&&o.source[k]>=0));
- if(!text&&!object)throw Error('텍스트를 드래그하거나 그림·도형을 선택하세요.');
+ const blank=c?.ready&&c.blankDocument===true;
+ if(!text&&!object&&!blank)throw Error('텍스트를 드래그하거나 그림·도형을 선택하세요.');
  editorPoll({sessionId:args.sessionId,source:args.source,context:args.context});
  const requestId=randomUUID(),record=structuredClone({requestId,sessionId:args.sessionId,source:args.source,context:args.context,note:args.note,createdAt:Date.now(),untrustedContent:true});
  requests.set(requestId,record);if(requests.size>128)requests.delete(requests.keys().next().value);return {requestId,sessionId:args.sessionId};
