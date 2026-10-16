@@ -108,7 +108,7 @@ export async function registerClientDocument(filename) {
 export function normalizeHostDocumentPath(filename){
  if(typeof filename!=='string')return filename;
  // Some Windows file-link routes prepend the drive to an already absolute
- // /C:/ path, producing C:\C:\Users\... . Correct only that exact same-drive
+ // /C:/ path, producing C:\C:\folder\... . Correct only that exact same-drive
  // duplication; do not reinterpret arbitrary URI/path prefixes.
  const duplicate=filename.match(/^([a-z]):[\\/]+([a-z]):([\\/].*)$/i);
  if(duplicate&&duplicate[1].toLowerCase()===duplicate[2].toLowerCase())return duplicate[2]+':'+duplicate[3];
