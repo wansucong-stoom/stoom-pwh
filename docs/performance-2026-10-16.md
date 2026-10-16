@@ -38,3 +38,13 @@ real Codex editor before calling the UI change verified.
 
 The native CLI/WASM remain unchanged. Engine revision 2 retains the new client
 source, overlay and build dependencies separately from revision 1.
+
+## Observed in the Codex editor
+
+The real document reopened with 13 pages and active editing controls. The DOM
+reported four local font loads and one byte-transfer fallback. The user confirmed
+that opening became visibly faster. The frame used the r2 client engine with an
+existing 0.6.12 host bridge; therefore the newest host-only idle-poll/recovery-size
+guards have not been verified in that frame. Do not equate this opening result
+with a complete end-to-end drag/typing latency measurement. The current automation
+can inspect this MCP App but cannot perform a native canvas drag.
