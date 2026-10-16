@@ -50,19 +50,21 @@ async function checkCoreFile(name,bytes) {
   if(marker.kind!=='core'||marker.version!=='0.8.7'||marker.files?.[name]!==sha(bytes)) throw new Error('Client core integrity mismatch; run pwh setup');
 }
 export async function clientViewerHtml() {
-  const core=await fs.readFile(path.join(config.runtimeRoot,'core','rhwp.js'));
-  await checkCoreFile('rhwp.js',core);
-  const html=await fs.readFile(new URL('./client-viewer.html',import.meta.url),'utf8');
-  if(!html.includes('/* PWH_CORE_MODULE */')) throw new Error('Client core insertion marker is absent');
-  return html.replace('/* PWH_CORE_MODULE */',()=>core.toString('utf8').replace(/<\/script/gi,'<\\/script'));
+  const root=path.join(config.runtimeRoot,'studio-inline');
+  const [body,css,editor,host]=await Promise.all([fs.readFile(path.join(root,'editor-body.html'),'utf8'),fs.readFile(path.join(root,'rhwp-studio.css'),'utf8'),fs.readFile(path.join(root,'editor.js'),'utf8'),fs.readFile(new URL('./inline-host.js',import.meta.url),'utf8')]);
+  const marker=JSON.parse(await fs.readFile(path.join(root,'.pwh-install.json'),'utf8'));
+  if(marker.kind!=='studio-inline'||Object.entries({'editor-body.html':body,'rhwp-studio.css':css,'editor.js':editor}).some(([name,value])=>marker.files?.[name]!==sha(Buffer.from(value))))throw new Error('Inline editor integrity mismatch; rebuild it with pwh setup');
+  const escapeScript=s=>s.replace(/<\/script/gi,'<\\/script');
+  return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>pwh HWPX 편집기</title><style>${css}\n#pwh-header{font:12px system-ui;background:#fff;color:#222;padding:6px 10px;display:flex;gap:10px;align-items:center;border-bottom:1px solid #ddd}#pwh-title{max-width:30%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#pwh-status{flex:1}#studio-root{height:calc(100vh - 40px)!important}</style><script>${escapeScript(host)}</script></head><body><div id="pwh-header"><span id="pwh-title">HWPX 편집기</span><span id="pwh-status" role="status">편집기를 불러오고 있습니다.</span><button id="pwh-save">새 수정본 저장</button></div>${body}<script type="module">${escapeScript(editor)}</script></body></html>`;
 }
 export async function saveClientDocument(args,meta={}) {
   const source=documentPath(meta,args.documentId);
   if(!hashPattern.test(args.expectedSourceSha256||'')||!hashPattern.test(args.documentSha256||'')) throw new Error('Source and document SHA256 required');
   if(!Number.isSafeInteger(args.revision)||args.revision<0) throw new Error('Invalid client revision');
   if(sha(await fs.readFile(source))!==args.expectedSourceSha256) throw new Error('Source changed; client save refused');
-  if(typeof args.base64!=='string'||args.base64.length>Math.ceil(MAX_DOCUMENT*4/3)+4||!/^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(args.base64)) throw new Error('Invalid or oversized HWPX snapshot');
+  if(typeof args.base64!=='string'||args.base64.length>Math.ceil(MAX_DOCUMENT*4/3)+4||args.base64.length%4!==0||!/^[A-Za-z0-9+/]*={0,2}$/.test(args.base64)) throw new Error('Invalid or oversized HWPX snapshot');
   const bytes=Buffer.from(args.base64,'base64');
+  if(bytes.toString('base64')!==args.base64) throw new Error('Noncanonical base64 snapshot');
   if(!bytes.length||bytes.length>MAX_DOCUMENT||bytes.subarray(0,2).toString()!=='PK'||sha(bytes)!==args.documentSha256) throw new Error('Snapshot signature/digest mismatch');
   const filename=path.join(path.dirname(source),`${path.basename(source,'.hwpx')}-수정본-${randomUUID().slice(0,8)}.hwpx`);
   // A fresh same-directory file never overwrites the source. Parse before publishing.

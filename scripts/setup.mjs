@@ -391,7 +391,7 @@ export async function setup(options) {
       ['Windows x64', 'Node 22.12+ or 24+', 'Git', 'npm'], cliOnly: options.cliOnly, offline: options.skipDownload,
       downloads: [PINS.cli, ...options.cliOnly ? [] : [PINS.core, PINS.editor], ...options.withNanum ? [PINS.nanum] : []],
       source: options.cliOnly ? null : { url: PINS.sourceUrl, commit: PINS.sourceCommit },
-      directories: ['rhwp', 'studio', 'editor-sdk', 'core', 'fonts', 'documents'],
+      directories: ['rhwp', 'studio', 'studio-inline', 'editor-sdk', 'core', 'fonts', 'documents'],
       preserveExisting: true, startService: false }, null, 2));
     return;
   }
@@ -411,6 +411,7 @@ export async function setup(options) {
     const needsStudio = !options.cliOnly && !await installed(path.join(root, 'studio'), 'studio', bridgeHash);
     const needsSdk = !options.cliOnly && !await installed(path.join(root, 'editor-sdk'), 'editor-sdk', bridgeHash);
     const needsCore = !options.cliOnly && !await installed(path.join(root, 'core'), 'core', bridgeHash);
+    const needsInline = !options.cliOnly && !await exists(path.join(root,'studio-inline','editor.js'));
     const publish = [];
     if (needsCore) {
       const archive = await cachedDownload(root, PINS.core, options);
@@ -432,7 +433,7 @@ export async function setup(options) {
       await mark(prepared, 'rhwp', await filesUnder(prepared), bridgeHash);
       publish.push([prepared, path.join(root, 'rhwp')]);
     }
-    if (needsStudio || needsSdk) {
+    if (needsStudio || needsSdk || needsInline) {
       await run('git', ['--version'], { capture: true }).catch(() => { throw new Error('Git is required to verify and build the pinned Studio source.'); });
       const source = await pinnedSource(root, options);
       if (needsSdk) {
@@ -441,7 +442,7 @@ export async function setup(options) {
         await fs.copyFile(path.join(source, 'LICENSE'), path.join(sdk, 'LICENSE'));
         await mark(sdk, 'editor-sdk', await filesUnder(sdk), bridgeHash); publish.push([sdk, path.join(root, 'editor-sdk')]);
       }
-      if (needsStudio) {
+      if (needsStudio || needsInline) {
         const build = path.join(stage, 'build');
         await copyPinnedBuildInputs(source, build);
         const archive = await cachedDownload(root, PINS.core, options);
@@ -452,6 +453,7 @@ export async function setup(options) {
         const npm = await npmRunner({ ...options, studioRoot });
         await npm(['ci', '--ignore-scripts', '--include=optional', '--no-audit', '--no-fund', '--registry=https://registry.npmjs.org/',
           ...options.skipDownload ? ['--offline'] : [], ...options.npmCache ? ['--cache', options.npmCache] : []]);
+        if(needsStudio){
         await run(process.execPath, [path.join(studioRoot, 'node_modules', 'typescript', 'bin', 'tsc')], { cwd: studioRoot });
         await run(process.execPath, [path.join(studioRoot, 'node_modules', 'vite', 'bin', 'vite.js'), 'build', '--base=/studio/', '--outDir', 'dist-pwh'],
           { cwd: studioRoot, env: { RHWP_DISABLE_EXTERNAL_WEBFONTS: '1' } });
@@ -460,6 +462,14 @@ export async function setup(options) {
         await fs.copyFile(path.join(source, 'LICENSE'), path.join(prepared, 'LICENSE-RHWP.txt'));
         await fs.copyFile(path.join(build, 'pkg', 'LICENSE'), path.join(prepared, 'LICENSE-CORE.txt'));
         await mark(prepared, 'studio', await filesUnder(prepared), bridgeHash); publish.push([prepared, path.join(root, 'studio')]);
+        }
+        if(needsInline){
+          await run(process.execPath,[path.join(PROJECT_ROOT,'scripts/build-inline.mjs'),build],{cwd:PROJECT_ROOT});
+          const inline=path.join(build,'inline-dist');
+          await fs.copyFile(path.join(source,'LICENSE'),path.join(inline,'LICENSE-RHWP.txt'));
+          await mark(inline,'studio-inline',await filesUnder(inline),bridgeHash);
+          publish.push([inline,path.join(root,'studio-inline')]);
+        }
       }
     }
     if (options.withNanum) await installNanum(root, stage, options);
