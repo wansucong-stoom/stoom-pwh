@@ -4,7 +4,7 @@
 No documents, user fonts, credentials, runtime configuration or Git history are
 collected. Installation uses Node and the prebuilt ZIP, not this Python script.
 """
-import argparse, hashlib, json, os, shutil, subprocess, tempfile, zipfile, tarfile
+import argparse, hashlib, json, os, re, shutil, subprocess, tempfile, zipfile, tarfile
 from pathlib import Path
 
 PIN = '1a76570e833917d15817415a53c09ad61ab3203f'
@@ -13,6 +13,9 @@ ROOTS = ('src', 'crates', 'bindings', 'npm', 'rhwp-studio', 'rhwp-shared',
          'scripts', 'vendor', 'typescript', 'template', 'assets')
 ROOT_FILES = ('Cargo.toml', 'Cargo.lock', 'build.rs', 'LICENSE', 'THIRD_PARTY_LICENSES.md',
               'rust-toolchain.toml', 'rustfmt.toml', 'README.md', 'README_EN.md')
+CORE_WORKSPACE_ROOTS = ('tools/rhwp-subsecond', 'tools/batch-convert',
+    'tools/llm_verifier/verdict_protocol', 'tools/llm_verifier/claim_bind',
+    'tools/llm_verifier/criteria_decomp')
 
 def sha(data): return hashlib.sha256(data).hexdigest()
 def js(value): return (json.dumps(value, ensure_ascii=False, indent=2)+'\n').encode()
@@ -22,6 +25,134 @@ def git(root, *args):
 def regular(file):
     if file.is_symlink() or not file.is_file(): raise ValueError(f'Not a regular input: {file.name}')
     return file.read_bytes()
+
+def checked_path(root, name):
+    """Resolve an artifact member without following links or Windows aliases."""
+    if not isinstance(name,str) or not name or '\\' in name or name.startswith('/'):
+        raise ValueError('Unsafe core build path')
+    parts=name.split('/')
+    if any(part in ('','.','..') or ':' in part or part.endswith((' ','.')) for part in parts):
+        raise ValueError('Unsafe core build path: '+name)
+    if any(part.split('.')[0].upper() in ('CON','PRN','AUX','NUL',*[f'COM{i}' for i in range(1,10)],*[f'LPT{i}' for i in range(1,10)]) for part in parts):
+        raise ValueError('Unsafe core build path: '+name)
+    target=root.joinpath(*parts)
+    for parent in (target,*target.parents):
+        if parent==root.parent:break
+        if parent.is_symlink():raise ValueError('Symlink core build input: '+name)
+    if not target.resolve().is_relative_to(root.resolve()):raise ValueError('Core build path escapes its directory')
+    return target
+
+def pinned_extra_input(upstream_root, name, blob, core_build_dir):
+    """Read a sparse-checkout omission without fetching or trusting an overlay.
+
+    A partial clone may have the pinned tree/index metadata but not this blob.
+    In that case the candidate's preserved source is acceptable only if its Git
+    object identity matches that independent pinned metadata byte for byte.
+    """
+    try:
+        data=git(upstream_root,'cat-file','blob',blob)
+    except subprocess.CalledProcessError:
+        data=regular(checked_path(core_build_dir,'source-inputs/'+name))
+    if hashlib.sha1(f'blob {len(data)}\0'.encode()+data).hexdigest()!=blob:
+        raise ValueError('Additional workspace input differs from pinned Git blob: '+name)
+    return data
+
+def verify_core_build(core_root, pristine, original_core, runtime_root, build_root, scratch_root):
+    """Accept an explicit WASM build only with hashed artifacts and replayable source.
+
+    This verifies recorded build evidence and exact output identity. It does not
+    rerun Rust, vendor the compiler, or claim that the unchanged native CLI was
+    rebuilt. Dependencies may not change without a separately reviewed bundle.
+    """
+    manifest_bytes=regular(checked_path(core_root,'core-build-provenance.json'))
+    if len(manifest_bytes)>1024*1024:raise ValueError('Core build provenance is too large')
+    meta=json.loads(manifest_bytes)
+    if not isinstance(meta,dict) or meta.get('schemaVersion')!=1 or meta.get('upstreamCommit')!=PIN or meta.get('target')!='wasm32-unknown-unknown':
+        raise ValueError('Unexpected core build identity or target')
+    compiler=meta.get('compiler',{})
+    if any(not isinstance(compiler.get(key),str) or not compiler[key].strip() for key in ('rustc','cargo','wasmBindgen','host')):
+        raise ValueError('Core build compiler versions are required')
+    commands=meta.get('commands')
+    if not isinstance(commands,list) or not commands or any(not isinstance(command,str) or not command.strip() for command in commands):
+        raise ValueError('Core build commands are required')
+    entries={};seen=set()
+    if not isinstance(meta.get('files'),list):raise ValueError('Core build file records are required')
+    for record in meta['files']:
+        if not isinstance(record,dict):raise ValueError('Invalid core build file record')
+        name=record.get('path');file=checked_path(core_root,name)
+        if name.casefold() in seen:raise ValueError('Duplicate core build file: '+name)
+        seen.add(name.casefold())
+        if name not in ('core-source.patch','SHA256SUMS','Cargo.lock','LICENSE','THIRD_PARTY_LICENSES.md') and not name.startswith(('pkg/','source-inputs/','logs/')):
+            raise ValueError('Unexpected core build evidence file: '+name)
+        data=regular(file)
+        if type(record.get('bytes')) is not int or record['bytes']!=len(data) or record.get('sha256')!=sha(data):
+            raise ValueError('Core build file digest or size mismatch: '+name)
+        if str(Path.home()).encode() in data:raise ValueError('Machine home path in core build evidence: '+name)
+        if name in ('Cargo.lock','LICENSE','THIRD_PARTY_LICENSES.md') and pristine.get(name)!=data:
+            raise ValueError('Core build dependency/license input differs from the pinned upstream: '+name)
+        entries[name]=data
+    required_pkg=('rhwp.js','rhwp_bg.wasm','rhwp.d.ts','rhwp_bg.wasm.d.ts')
+    if {name[4:] for name in entries if name.startswith('pkg/')}!=set(required_pkg):
+        raise ValueError('Core build must record exactly the four generated pkg artifacts')
+    wasm=entries['pkg/rhwp_bg.wasm']
+    if not wasm.startswith(b'\0asm\x01\0\0\0') or wasm==original_core['rhwp_bg.wasm']:
+        raise ValueError('Core build must contain a changed WebAssembly module')
+    if not entries['pkg/rhwp.js'] or b'WebAssembly' not in entries['pkg/rhwp.js']:
+        raise ValueError('Core build JavaScript glue is missing')
+    for name in required_pkg:
+        if regular(runtime_root/'core'/name)!=entries['pkg/'+name]:
+            raise ValueError('Installed core differs from the explicit build artifact: '+name)
+    if regular(build_root/'pkg/rhwp_bg.wasm')!=wasm:
+        raise ValueError('Studio WASM differs from the explicit core build artifact')
+    patch_meta=meta.get('patch',{})
+    if patch_meta.get('path')!='core-source.patch' or patch_meta.get('sha256')!=sha(entries.get('core-source.patch',b'')) or not entries.get('core-source.patch'):
+        raise ValueError('Core source patch digest is missing or inconsistent')
+    verification=meta.get('verification',{});native=verification.get('nativeTests',{});wasm_build=verification.get('wasmBuild',{})
+    if type(native.get('passed')) is not int or native['passed']<1 or native.get('failed')!=0 or wasm_build.get('succeeded') is not True:
+        raise ValueError('A successful core build and nonempty native test run are required')
+    for evidence in (native,wasm_build):
+        log=evidence.get('log')
+        if not isinstance(log,str) or not log.startswith('logs/') or log not in entries:
+            raise ValueError('Hashed core build/test logs are required')
+    result=re.findall(rb'test result: ok\. (\d+) passed; 0 failed;',entries[native['log']])
+    if not result or sum(int(count) for count in result)!=native['passed']:
+        raise ValueError('Core test log does not support the declared passing test count')
+    sources=meta.get('changedSources');source_names=set();changes=[]
+    if not isinstance(sources,list) or not sources:raise ValueError('Changed core source records are required')
+    for record in sources:
+        if not isinstance(record,dict):raise ValueError('Invalid changed core source record')
+        name=record.get('path');checked_path(core_root,name)
+        if name in source_names:raise ValueError('Duplicate changed core source')
+        source_names.add(name)
+        if not name.startswith(('src/','crates/','bindings/','vendor/')) or not name.endswith('.rs'):
+            raise ValueError('Core source changes require Rust files and unchanged dependency manifests: '+name)
+        after=entries.get('source-inputs/'+name);before=pristine.get(name)
+        if after is None or record.get('beforeSha256')!=(sha(before) if before is not None else None) or record.get('afterSha256')!=sha(after) or type(record.get('bytes')) is not int or record.get('bytes')!=len(after):
+            raise ValueError('Core source record does not match pristine/candidate bytes: '+name)
+        if before==after:raise ValueError('Unchanged file declared as a core source change: '+name)
+        changes.append({'path':name,'beforeSha256':record['beforeSha256'],'afterSha256':sha(after),'change':'modified' if before is not None else 'added'})
+    for name,data in entries.items():
+        if name.startswith('source-inputs/'):
+            relative=name[len('source-inputs/'):]
+            if relative not in source_names and (relative not in pristine or pristine[relative]!=data):
+                raise ValueError('Unrecorded changed core source input: '+relative)
+    with tempfile.TemporaryDirectory(prefix='pwh-core-replay-',dir=scratch_root) as temp:
+        temp=Path(temp)
+        if temp.resolve().parent!=scratch_root.resolve():raise ValueError('Unsafe core patch replay workspace')
+        for name,data in pristine.items():
+            file=checked_path(temp,name);file.parent.mkdir(parents=True,exist_ok=True);file.write_bytes(data)
+        git(temp,'init','--quiet');git(temp,'config','user.name','pwh preservation');git(temp,'config','user.email','preservation@localhost')
+        git(temp,'add','-f','.');git(temp,'commit','--quiet','-m','Exact upstream core inputs')
+        patch_file=temp/'pwh-core-candidate.patch';patch_file.write_bytes(entries['core-source.patch'])
+        git(temp,'apply','--check','--index',str(patch_file));git(temp,'apply','--index',str(patch_file))
+        changed=set(filter(None,git(temp,'diff','--cached','--name-only','-z','HEAD').decode().split('\0')))
+        if changed!=source_names:raise ValueError('Core source patch paths differ from the changed source records')
+        for name in source_names:
+            if regular(checked_path(temp,name))!=entries['source-inputs/'+name]:
+                raise ValueError('Core source patch replay mismatch: '+name)
+    entries['core-build-provenance.json']=manifest_bytes
+    return {'inputs':entries,'changes':changes,'evidence':meta,'patchReplayVerified':True,
+        'originalCore':{name:sha(data) for name,data in original_core.items()}}
 def walk(root, prefix=''):
     out = {}
     for file in sorted(root.rglob('*')):
@@ -62,6 +193,7 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     for arg in ('runtime-root','build-root','upstream-root','output-dir'): p.add_argument('--'+arg,required=True,type=Path)
     p.add_argument('--license-evidence',required=True,type=Path)
+    p.add_argument('--core-build-dir',type=Path,help='Explicit WASM build artifacts, source patch and hashed build/test provenance')
     p.add_argument('--revision',type=int,default=1);p.add_argument('--write-lock',action='store_true')
     a=p.parse_args();project=Path(__file__).resolve().parents[1]
     if git(a.upstream_root,'rev-parse','HEAD').decode().strip()!=PIN: raise ValueError('Unexpected upstream commit')
@@ -71,7 +203,8 @@ def main():
     base=f'https://github.com/wansucong-stoom/stoom-pwh/releases/download/{tag}/'
     pwh_commit=git(project,'rev-parse','HEAD').decode().strip()
     # Only tracked, reviewed build inputs from the exact upstream tree.
-    tracked=git(a.upstream_root,'ls-files','-s','-z','--',*ROOTS,*ROOT_FILES).decode().split('\0')
+    source_roots=(*ROOTS,*CORE_WORKSPACE_ROOTS) if a.core_build_dir else ROOTS
+    tracked=git(a.upstream_root,'ls-files','-s','-z','--',*source_roots,*ROOT_FILES).decode().split('\0')
     pristine={};blob_records={}
     for item in filter(None,tracked):
         meta,name=item.split('\t',1);mode,blob,_=meta.split()
@@ -79,14 +212,45 @@ def main():
         # build; their separate redistribution terms are not inferred from MIT.
         if name=='rhwp-studio/public/fonts' or name.startswith(('assets/screenshots/','rhwp-studio/public/samples/')):continue
         if name.startswith('assets/fonts/') and Path(name).suffix.lower() not in ('.md','.txt'):continue
+        extra_root=next((root for root in CORE_WORKSPACE_ROOTS if name.startswith(root+'/')),None)
+        if extra_root is not None and not (name==extra_root+'/Cargo.toml' or name==extra_root+'/build.rs' or name.startswith(extra_root+'/src/')):continue
         if mode!='100644' and mode!='100755': raise ValueError('Unsupported tracked input mode')
-        data=regular(a.upstream_root/name)
+        # Sparse pristine checkouts may omit these workspace members. Read the
+        # pinned Git blob without changing or populating the pristine checkout.
+        data=pinned_extra_input(a.upstream_root,name,blob,a.core_build_dir) if extra_root is not None else regular(a.upstream_root/name)
         if hashlib.sha1(f'blob {len(data)}\0'.encode()+data).hexdigest()!=blob: raise ValueError('Upstream input differs from Git blob: '+name)
         pristine[name]=data;blob_records[name]=blob
-    pristine['PWH-SOURCE-PROVENANCE.json']=js({'commit':PIN,'includedRoots':ROOTS,'excluded':'reference documents, samples, binary fonts, screenshots, large tools/fixtures and Git history; this is a build-input snapshot, not the whole Git repository','gitBlobs':blob_records})
+    pristine['PWH-SOURCE-PROVENANCE.json']=js({'commit':PIN,'includedRoots':source_roots,'excluded':'reference documents, samples, binary fonts, screenshots, large tools/fixtures and Git history; extra Cargo workspace members include only manifests, build scripts and src; this is a build-input snapshot, not the whole Git repository','gitBlobs':blob_records})
+    original_core={}
+    with tarfile.open(a.runtime_root/'downloads/core-0.8.7.tgz','r:gz') as t:
+        for name in ('rhwp.js','rhwp_bg.wasm','rhwp.d.ts','rhwp_bg.wasm.d.ts'):
+            member=t.extractfile('package/'+name)
+            if member is None:raise ValueError('Original core package member is absent: '+name)
+            original_core[name]=member.read()
+    core_build=None
+    if a.core_build_dir:
+        core_build=verify_core_build(a.core_build_dir,pristine,original_core,a.runtime_root,a.build_root,a.output_dir)
+    else:
+        for name,data in original_core.items():
+            if data!=regular(a.runtime_root/'core'/name):raise ValueError('Installed core differs from upstream package; an explicit --core-build-dir is required')
     upstream=zip_new(a.output_dir/f'pwh-upstream-rhwp-0.8.7-{PIN[:12]}.zip',pristine)
-    # Rebuild inputs are complete for the Studio client; core/CLI are preserved
-    # unmodified binaries. Rust dependency vendoring/toolchain is not claimed.
+    core_assets=[]
+    if core_build:
+        core_asset=zip_new(a.output_dir/f'pwh-core-build-{identity}.zip',core_build['inputs'])
+        core_inputs={name:data for name,data in pristine.items() if name!='PWH-SOURCE-PROVENANCE.json'}
+        for name,data in core_build['inputs'].items():
+            if name.startswith('source-inputs/'):core_inputs[name[len('source-inputs/'):]]=data
+        core_inputs['PWH-CORE-SOURCE-PROVENANCE.json']=js({'upstreamCommit':PIN,
+            'baselineSourceArchive':upstream,'coreBuildEvidence':core_asset,
+            'changes':core_build['changes'],'patchReplayVerified':True,
+            'files':{name:sha(data) for name,data in sorted(core_inputs.items())},
+            'offlineWasmRebuildKitComplete':False,'buildUsedFullUpstreamCheckout':True,
+            'excludedProductionInputs':['saved/blank2010.hwp'],
+            'scope':'Sanitized patched library sources and Cargo workspace member manifests/build scripts/src. The recorded Rust build used the full upstream checkout; this snapshot is not a complete offline Rust build kit. Compile-time assets such as saved/blank2010.hwp, native test fixtures, sample documents, binary fonts, Rust toolchains and Skia externals are not included. Offline WASM/native CLI rebuild is not claimed.'})
+        core_inputs_asset=zip_new(a.output_dir/f'pwh-core-inputs-{identity}.zip',core_inputs)
+        core_assets.extend((core_asset,core_inputs_asset))
+    # Rebuild inputs are complete for the Studio client. Optional WASM build
+    # evidence is separate; the native CLI is always retained unchanged.
     patched={name:data for name,data in pristine.items() if name.startswith(('rhwp-studio/','npm/')) or name=='LICENSE'}
     for name in list(patched):
         source=a.build_root/name
@@ -100,9 +264,11 @@ def main():
     with tempfile.TemporaryDirectory(prefix='pwh-overlay-',dir=a.output_dir) as temp:
         temp=Path(temp);base_inputs={name:data for name,data in pristine.items() if name in patched}
         if temp.resolve().parent!=a.output_dir.resolve() or not temp.name.startswith('pwh-overlay-'):raise ValueError('Unsafe patch workspace')
-        original_core=a.runtime_root/'core'
         for name in patched:
-            if name.startswith('pkg/') and (original_core/name[4:]).is_file():base_inputs[name]=regular(original_core/name[4:])
+            if name.startswith('pkg/'):
+                core_name=name[4:]
+                if core_name in original_core:base_inputs[name]=original_core[core_name]
+                elif (a.runtime_root/'core'/core_name).is_file():base_inputs[name]=regular(a.runtime_root/'core'/core_name)
         for name,data in base_inputs.items(): f=temp/name;f.parent.mkdir(parents=True,exist_ok=True);f.write_bytes(data)
         git(temp,'init','--quiet');git(temp,'config','user.name','pwh preservation');git(temp,'config','user.email','preservation@localhost')
         git(temp,'add','-f','.');git(temp,'commit','--quiet','-m','Exact upstream inputs')
@@ -127,9 +293,6 @@ def main():
         data=regular(a.runtime_root/'downloads'/name);dest=a.output_dir/name
         if dest.exists():raise ValueError('Output exists')
         dest.write_bytes(data);original_archives[name]={'file':name,'sha256':sha(data),'size':len(data)}
-    with tarfile.open(a.runtime_root/'downloads/core-0.8.7.tgz','r:gz') as t:
-        for name in ('rhwp.js','rhwp_bg.wasm'):
-            if t.extractfile('package/'+name).read()!=regular(a.runtime_root/'core'/name):raise ValueError('Installed core differs from upstream package')
     with zipfile.ZipFile(a.runtime_root/'downloads/rhwp-v0.8.7-windows-x86_64.zip') as z:
         exes=[name for name in z.namelist() if name.endswith('rhwp.exe')]
         if len(exes)!=1 or z.read(exes[0])!=regular(a.runtime_root/'rhwp/rhwp.exe'):raise ValueError('Installed CLI differs from upstream executable')
@@ -147,13 +310,22 @@ def main():
         license_assets.append({'file':name,'size':len(data),'sha256':sha(data)})
     provenance={'upstreamVersion':'0.8.7','upstreamCommit':PIN,'pwhBaseCommit':pwh_commit,
         'pwhBuildFiles':{name:sha(regular(project/name)) for name in ('scripts/setup.mjs','scripts/build-inline.mjs','scripts/preserve-engine.py','scripts/preserved-runtime.mjs','src/studio-selection.ts','src/studio-inline-adapter.ts')},
-        'changes':changes,'nativeCoreChanges':False,'nativeCliChanges':False,
+        'changes':changes,'nativeCoreChanges':core_build is not None,'nativeCliChanges':False,
         'coreJsGluePatched':any(change['path']=='pkg/rhwp.js' for change in changes),
         'patch':{'file':patch_file.name,'sha256':sha(patch),'replayVerified':True},
         'buildDependencies':deps_asset,'patchedStudioInputs':patched_asset,'upstreamSource':upstream,
         'pwhBuildScripts':own_asset,'originalArchives':original_archives,
         'mplSource':lightning_meta,
         'rebuildScope':'Windows x64 Studio client; native CLI/WASM binaries retained unchanged. Cargo archives retained; Rust toolchain, Skia externals and a full native rebuild are not validated.'}
+    if core_build:
+        provenance['coreBuild']={'artifacts':core_asset,'patchedSourceInputs':core_inputs_asset,
+            'changes':core_build['changes'],'originalCore':core_build['originalCore'],
+            'patch':{**core_build['evidence']['patch'],'replayVerified':True},
+            'compiler':core_build['evidence']['compiler'],'commands':core_build['evidence']['commands'],
+            'verification':core_build['evidence']['verification'],'target':'wasm32-unknown-unknown',
+            'offlineWasmRebuildKitComplete':False,'buildUsedFullUpstreamCheckout':True,
+            'excludedProductionInputs':['saved/blank2010.hwp']}
+        provenance['rebuildScope']='Windows x64 Studio client and a source-patched WASM core with recorded compiler versions, hashed build/test evidence and verified patch replay. Native CLI retained unchanged. The recorded Rust build used the full upstream checkout. Retained sanitized library/workspace inputs and crate archives are not a complete offline Rust build kit: compile-time assets such as saved/blank2010.hwp, Rust toolchains, native test fixtures and Skia externals are excluded. Offline WASM/native CLI rebuild is not claimed.'
     provenance_file=a.output_dir/'PROVENANCE.json';provenance_file.write_bytes(js(provenance))
     files={}
     for component in COMPONENTS:files.update(walk(a.runtime_root/component,component+'/'))
@@ -167,7 +339,7 @@ def main():
         'files':[{'path':name,'size':len(data),'sha256':sha(data)} for name,data in sorted(files.items())]}
     files['runtime-manifest.json']=js(manifest)
     runtime=zip_new(a.output_dir/f'pwh-runtime-{identity}-windows-x64.zip',files);runtime['url']=base+runtime['file']
-    assets=[upstream,patched_asset,deps_asset,own_asset,*original_archives.values(),*license_assets,
+    assets=[upstream,patched_asset,deps_asset,own_asset,*core_assets,*original_archives.values(),*license_assets,
         {'file':patch_file.name,'sha256':sha(patch),'size':len(patch)},
         {'file':provenance_file.name,'sha256':sha(provenance_file.read_bytes()),'size':provenance_file.stat().st_size}]
     lock={'schemaVersion':1,'id':identity,'platform':'win32-x64','upstreamVersion':'0.8.7','upstreamCommit':PIN,
