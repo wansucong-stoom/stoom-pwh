@@ -4,11 +4,22 @@ import { installSelectionBridge } from './collaboration-selection';
 export function installInlineEditor(d:any) {
  const bridge=installSelectionBridge(d);
  const read=()=>bridge.getSelectionContext();
+ const requestAI=()=>{const context:any=structuredClone(read());if(!context.ready||!context.selection||!context.selectedText?.text||!context.selectedText.known||context.selectedText.truncated)return;window.dispatchEvent(new CustomEvent('pwh-ai-request',{detail:context}));};
  d.registry.register({id:'pwh:ai-rewrite-request',label:'AI 수정 요청',opensDialog:true,
   canExecute:()=>{const c:any=read();return !!c.ready&&!!c.selection&&!!c.selectedText?.text&&c.selectedText.known&&!c.selectedText.truncated;},
-  execute:()=>{const context=structuredClone(read());window.dispatchEvent(new CustomEvent('pwh-ai-request',{detail:context}));}
+  execute:requestAI
  });
  let applying=false;
+ const area=document.getElementById('editor-area');
+ if(area){
+  area.style.position='relative';
+  const style=document.createElement('style');style.textContent=`#pwh-ai-floating{position:absolute;left:26px;top:44px;z-index:35;display:flex;align-items:center;gap:7px;padding:10px 12px;border:1px solid #c4d4eb;border-radius:24px;background:var(--ui-surface,#fff);color:var(--ui-text,#222);box-shadow:0 3px 12px #0002;font:600 12px system-ui;cursor:pointer;white-space:nowrap}#pwh-ai-floating:disabled{opacity:.55;cursor:default}#pwh-ai-floating:focus-visible{outline:3px solid #4c8ee8;outline-offset:3px}#pwh-ai-floating:not(:disabled):hover{background:var(--ui-surface-muted,#edf3fc)}@media(max-width:980px){#pwh-ai-floating{left:24px;padding:10px;border-radius:50%}#pwh-ai-floating .pwh-ai-label{display:none}}`;document.head.appendChild(style);
+  const button=document.createElement('button');button.id='pwh-ai-floating';button.type='button';button.disabled=true;button.setAttribute('aria-label','AI 수정 요청');button.title='수정할 글을 드래그한 뒤 AI 수정을 요청하세요';
+  button.innerHTML='<span aria-hidden="true">✦</span><span class="pwh-ai-label">AI 수정 요청</span>';
+  button.addEventListener('pointerdown',event=>event.preventDefault());button.addEventListener('mousedown',event=>event.preventDefault());button.addEventListener('click',requestAI);area.appendChild(button);
+  const update=()=>{const input=d.getInputHandler();button.disabled=applying||!input?.hasSelection();button.title=button.disabled?'수정할 글을 먼저 드래그하세요':'선택한 글에 AI 수정을 요청합니다';};
+  document.addEventListener('pointerup',()=>setTimeout(update,0));document.addEventListener('keyup',update);const timer=setInterval(()=>{if(!button.isConnected){clearInterval(timer);return;}update();},750);
+ }
  for(const type of ['keydown','beforeinput','pointerdown','mousedown'])window.addEventListener(type,(event)=>{if(applying){event.preventDefault();event.stopImmediatePropagation();}},{capture:true});
  (window as any).pwhEditor={
   ready:()=>d.ready,

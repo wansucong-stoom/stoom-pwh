@@ -15,7 +15,7 @@
  async function consume(result){const d=result?._meta?.['pwh/client-document']||result?.structuredContent;if(d?.documentId)state.documentId=d.documentId;if(d?.source)state.source=d.source;
  if(state.loaded||state.loading)return;state.loading=true;try{const bytes=await asset('document');await installed;await window.pwhEditor.ready();await window.pwhEditor.load(bytes,state.source.split(/[\\/]/).pop());state.loaded=true;status('본문에서 직접 편집하세요. 다시 쓸 부분을 드래그하고 채팅으로 요청할 수 있습니다.');void poll();}catch(e){state.loading=false;status(e.message);}}
  window.addEventListener('message',event=>{if(event.source!==parent||event.data?.jsonrpc!=='2.0')return;if(state.origin!==null&&event.origin!==state.origin)return;const m=event.data,p=pending.get(m.id);if(p&&!m.method){state.origin=event.origin;clearTimeout(p.timer);pending.delete(m.id);m.error?p.reject(Error(m.error.message)):p.resolve(m.result);return;}if(m.method==='ui/notifications/tool-result')void consume(m.params);if(m.method==='ui/notifications/tool-input'&&m.params?.arguments?.file)void consume({});if(m.id!==undefined&&m.method==='ping')post({jsonrpc:'2.0',id:m.id,result:{}});});
- window.pwhWasmBytes=(async()=>{const init=await rpc('ui/initialize',{appInfo:{name:'pwh-inline-studio',version:'0.5.2'},appCapabilities:{availableDisplayModes:['inline','fullscreen']},protocolVersion:'2026-01-26'});state.host=init.hostCapabilities||{};post({jsonrpc:'2.0',method:'ui/notifications/initialized',params:{}});return asset('wasm');})();
+ window.pwhWasmBytes=(async()=>{const init=await rpc('ui/initialize',{appInfo:{name:'pwh-inline-studio',version:'0.5.3'},appCapabilities:{availableDisplayModes:['inline','fullscreen']},protocolVersion:'2026-01-26'});state.host=init.hostCapabilities||{};post({jsonrpc:'2.0',method:'ui/notifications/initialized',params:{}});return asset('wasm');})();
  window.pwhWasmBytes.catch(e=>status(e.message));
  window.addEventListener('pwh-ai-request',event=>{
   if(!state.loaded||document.getElementById('pwh-ai-dialog'))return;
@@ -23,8 +23,11 @@
   dialog.innerHTML='<form><h2>AI 수정 요청</h2><p class="selection" style="white-space:pre-wrap;max-height:100px;overflow:auto;background:#f4f4f4;padding:10px"></p><label>어떻게 수정할까요?<textarea aria-label="수정 요청 내용" maxlength="4000" required style="display:block;width:100%;min-height:100px;margin:10px 0"></textarea></label><p class="notice" role="status"></p><div style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="cancel">취소</button><button type="submit">요청 보내기</button></div></form>';
   dialog.querySelector('.selection').textContent=frozen.selectedText.text.slice(0,500);document.body.appendChild(dialog);
   const note=dialog.querySelector('textarea'),notice=dialog.querySelector('.notice'),submit=dialog.querySelector('[type=submit]');
+  submit.setAttribute('aria-keyshortcuts','Control+Enter');submit.title='요청 보내기 (Ctrl+Enter)';
+  const shortcut=document.createElement('small');shortcut.textContent='Ctrl+Enter로 요청 보내기';note.after(shortcut);
+  note.addEventListener('keydown',event=>{if(event.key==='Enter'&&event.ctrlKey&&!event.isComposing&&event.keyCode!==229){event.preventDefault();event.stopPropagation();if(!event.repeat&&!submit.disabled)dialog.querySelector('form').requestSubmit(submit);}});
   dialog.addEventListener('close',()=>dialog.remove(),{once:true});dialog.querySelector('.cancel').onclick=()=>dialog.close();
-  dialog.querySelector('form').onsubmit=async event=>{event.preventDefault();if(!note.value.trim())return;submit.disabled=true;try{
+  dialog.querySelector('form').onsubmit=async event=>{event.preventDefault();if(submit.disabled||!note.value.trim())return;submit.disabled=true;try{
    const current=window.pwhEditor.context();
    if(JSON.stringify(current.selection)!==JSON.stringify(frozen.selection)||JSON.stringify(current.documentState)!==JSON.stringify(frozen.documentState))throw Error('문서나 선택 영역이 바뀌었습니다. 다시 선택해 주세요.');
    if(!state.host.message?.text)throw Error('현재 호스트가 채팅 요청 전달 기능을 제공하지 않습니다.');
