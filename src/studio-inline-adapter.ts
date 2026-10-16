@@ -4,6 +4,10 @@ import { installSelectionBridge } from './collaboration-selection';
 export function installInlineEditor(d:any) {
  const bridge=installSelectionBridge(d);
  const read=()=>bridge.getSelectionContext();
+ d.registry.register({id:'pwh:ai-rewrite-request',label:'AI 수정 요청',opensDialog:true,
+  canExecute:()=>{const c:any=read();return !!c.ready&&!!c.selection&&!!c.selectedText?.text&&c.selectedText.known&&!c.selectedText.truncated;},
+  execute:()=>{const context=structuredClone(read());window.dispatchEvent(new CustomEvent('pwh-ai-request',{detail:context}));}
+ });
  let applying=false;
  for(const type of ['keydown','beforeinput','pointerdown','mousedown'])window.addEventListener(type,(event)=>{if(applying){event.preventDefault();event.stopImmediatePropagation();}},{capture:true});
  (window as any).pwhEditor={

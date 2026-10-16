@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
-import {editorPoll,editorState,editorRewrite,editorResult} from '../src/editor-session.mjs';
+import {editorPoll,editorState,editorRewrite,editorResult,editorCapture,editorRequest} from '../src/editor-session.mjs';
 test('selected rewrite crosses queue once and only becomes applied after client acknowledgement',()=>{
  const sessionId=randomUUID(),context={documentState:{documentEpoch:1,changeSeq:4,documentSha256:'a'.repeat(64)},selection:{start:1,end:3},selectedText:{text:'선택한 문장'}};
  editorPoll({sessionId,context,source:'fixture.hwpx'});
@@ -15,4 +15,12 @@ test('selected rewrite crosses queue once and only becomes applied after client 
 });
 test('client rejection is reported as rejected, never successful',()=>{
  const sessionId=randomUUID(),context={selection:{start:0,end:1},selectedText:{text:'x'}};editorPoll({sessionId,context});const ticket=editorRewrite({sessionId,expected:context,replacement:'y'});editorPoll({sessionId,context,receipt:{ticketId:ticket.ticketId,ok:false,error:'Selection changed'}});assert.equal(editorResult(ticket).status,'rejected');
+});
+test('right click request freezes exact selection and note independently of later polling',()=>{
+ const sessionId=randomUUID(),context={documentState:{documentEpoch:1,changeSeq:0},selection:{start:2,end:5},selectedText:{text:'기존 문장',known:true,truncated:false}};
+ const request=editorCapture({sessionId,source:'fixture.hwpx',context,note:'간결하게 다시 써줘'});
+ context.selectedText.text='다른 선택';editorPoll({sessionId,context});
+ const captured=editorRequest(request);assert.equal(captured.context.selectedText.text,'기존 문장');assert.equal(captured.note,'간결하게 다시 써줘');
+ captured.note='변조';assert.equal(editorRequest(request).note,'간결하게 다시 써줘');
+ assert.throws(()=>editorRewrite({sessionId,expected:editorRequest(request).context,replacement:'수정'}),/바뀌/);
 });

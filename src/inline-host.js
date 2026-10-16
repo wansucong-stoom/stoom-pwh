@@ -1,5 +1,5 @@
 (()=>{
- const state={origin:null,id:0,documentId:null,source:null,sourceSha256:null,loading:false,loaded:false,sessionId:crypto.randomUUID(),receipt:null};
+ const state={origin:null,id:0,documentId:null,source:null,sourceSha256:null,loading:false,loaded:false,sessionId:crypto.randomUUID(),receipt:null,host:{}};
  const pending=new Map(),status=text=>{const e=document.getElementById('pwh-status');if(e)e.textContent=text;};
  const installed=new Promise(resolve=>window.addEventListener('pwh-editor-installed',resolve,{once:true}));
  const post=m=>parent.postMessage(m,state.origin&&state.origin!=='null'?state.origin:'*');
@@ -15,8 +15,27 @@
  async function consume(result){const d=result?._meta?.['pwh/client-document']||result?.structuredContent;if(d?.documentId)state.documentId=d.documentId;if(d?.source)state.source=d.source;
  if(state.loaded||state.loading)return;state.loading=true;try{const bytes=await asset('document');await installed;await window.pwhEditor.ready();await window.pwhEditor.load(bytes,state.source.split(/[\\/]/).pop());state.loaded=true;status('본문에서 직접 편집하세요. 다시 쓸 부분을 드래그하고 채팅으로 요청할 수 있습니다.');void poll();}catch(e){state.loading=false;status(e.message);}}
  window.addEventListener('message',event=>{if(event.source!==parent||event.data?.jsonrpc!=='2.0')return;if(state.origin!==null&&event.origin!==state.origin)return;const m=event.data,p=pending.get(m.id);if(p&&!m.method){state.origin=event.origin;clearTimeout(p.timer);pending.delete(m.id);m.error?p.reject(Error(m.error.message)):p.resolve(m.result);return;}if(m.method==='ui/notifications/tool-result')void consume(m.params);if(m.method==='ui/notifications/tool-input'&&m.params?.arguments?.file)void consume({});if(m.id!==undefined&&m.method==='ping')post({jsonrpc:'2.0',id:m.id,result:{}});});
- window.pwhWasmBytes=(async()=>{await rpc('ui/initialize',{appInfo:{name:'pwh-inline-studio',version:'0.5.1'},appCapabilities:{availableDisplayModes:['inline','fullscreen']},protocolVersion:'2026-01-26'});post({jsonrpc:'2.0',method:'ui/notifications/initialized',params:{}});return asset('wasm');})();
+ window.pwhWasmBytes=(async()=>{const init=await rpc('ui/initialize',{appInfo:{name:'pwh-inline-studio',version:'0.5.2'},appCapabilities:{availableDisplayModes:['inline','fullscreen']},protocolVersion:'2026-01-26'});state.host=init.hostCapabilities||{};post({jsonrpc:'2.0',method:'ui/notifications/initialized',params:{}});return asset('wasm');})();
  window.pwhWasmBytes.catch(e=>status(e.message));
+ window.addEventListener('pwh-ai-request',event=>{
+  if(!state.loaded||document.getElementById('pwh-ai-dialog'))return;
+  const frozen=structuredClone(event.detail),dialog=document.createElement('dialog');dialog.id='pwh-ai-dialog';dialog.setAttribute('aria-label','AI 수정 요청');dialog.style.cssText='max-width:480px;width:90%;padding:20px;border:1px solid #bbb;border-radius:10px;background:white;color:#222';
+  dialog.innerHTML='<form><h2>AI 수정 요청</h2><p class="selection" style="white-space:pre-wrap;max-height:100px;overflow:auto;background:#f4f4f4;padding:10px"></p><label>어떻게 수정할까요?<textarea aria-label="수정 요청 내용" maxlength="4000" required style="display:block;width:100%;min-height:100px;margin:10px 0"></textarea></label><p class="notice" role="status"></p><div style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="cancel">취소</button><button type="submit">요청 보내기</button></div></form>';
+  dialog.querySelector('.selection').textContent=frozen.selectedText.text.slice(0,500);document.body.appendChild(dialog);
+  const note=dialog.querySelector('textarea'),notice=dialog.querySelector('.notice'),submit=dialog.querySelector('[type=submit]');
+  dialog.addEventListener('close',()=>dialog.remove(),{once:true});dialog.querySelector('.cancel').onclick=()=>dialog.close();
+  dialog.querySelector('form').onsubmit=async event=>{event.preventDefault();if(!note.value.trim())return;submit.disabled=true;try{
+   const current=window.pwhEditor.context();
+   if(JSON.stringify(current.selection)!==JSON.stringify(frozen.selection)||JSON.stringify(current.documentState)!==JSON.stringify(frozen.documentState))throw Error('문서나 선택 영역이 바뀌었습니다. 다시 선택해 주세요.');
+   if(!state.host.message?.text)throw Error('현재 호스트가 채팅 요청 전달 기능을 제공하지 않습니다.');
+   const capture=await tool('pwh_editor_capture',{sessionId:state.sessionId,source:state.source,context:frozen,note:note.value.trim()});
+   const requestId=capture.structuredContent.requestId;
+   const params={role:'user',content:[{type:'text',text:'편집기에서 선택한 부분을 기존 서식에 맞춰 수정해 주세요.\n\n'+note.value.trim()+'\n\n편집기 요청 ID: '+requestId}]};
+   if(state.host.experimental?.['openai/message']||state.host.extensions?.['openai/message'])params._meta={'openai/message':{target:'active',send:true}};
+   const sent=await rpc('ui/message',params);if(sent?.isError)throw Error('호스트가 수정 요청을 받지 못했습니다.');dialog.close();status('선택 영역의 AI 수정 요청을 채팅으로 전달했습니다.');
+  }catch(error){notice.textContent=error.message;}finally{submit.disabled=false;}};
+  dialog.showModal();note.focus();
+ });
  async function poll(){if(!state.loaded)return;try{const context=window.pwhEditor.context();const r=await tool('pwh_editor_poll',{sessionId:state.sessionId,source:state.source,context,...(state.receipt?{receipt:state.receipt}:{})});state.receipt=null;for(const command of r.structuredContent?.commands||[]){try{const result=await window.pwhEditor.rewrite(command);state.receipt={ticketId:command.ticketId,ok:true,undoSteps:result.undoSteps};status('선택한 영역에 GPT 수정을 반영했습니다. 실행 취소로 되돌릴 수 있습니다.');}catch(e){state.receipt={ticketId:command.ticketId,ok:false,error:e.message};status(e.message);}}}catch(e){status(e.message);}finally{setTimeout(poll,1500);}}
  document.addEventListener('DOMContentLoaded',()=>{document.getElementById('pwh-save').onclick=async()=>{try{const artifact=window.pwhEditor.export();if(artifact.contentLoss.count)throw Error('내용 손실이 보고되어 저장하지 않았습니다.');const bytes=artifact.bytes;if(bytes.length>3*1024*1024)throw Error('현재 저장 한도는 3 MiB입니다.');let encoded='';for(let i=0;i<bytes.length;i+=8192)encoded+=String.fromCharCode(...bytes.subarray(i,i+8192));const r=await tool('pwh_client_save',{documentId:state.documentId,base64:btoa(encoded),expectedSourceSha256:state.sourceSha256,documentSha256:await sha(bytes),revision:1});const d=r.structuredContent;state.documentId=d.documentId;state.source=d.path;state.sourceSha256=d.sourceSha256;await window.pwhEditor.saved(d.path.split(/[\\/]/).pop());status(`저장 완료: ${d.path}`);}catch(e){status(e.message);}};});
 })();

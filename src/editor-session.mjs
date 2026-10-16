@@ -1,5 +1,6 @@
 import {randomUUID} from 'node:crypto';
 const sessions=new Map(),tickets=new Map();
+const requests=new Map();
 const ttl=45000;
 export function editorPoll(args){
  if(typeof args.sessionId!=='string'||!/^[a-f0-9-]{36}$/i.test(args.sessionId))throw Error('Invalid editor session');
@@ -26,3 +27,11 @@ export function editorRewrite(args){
  return ticket;
 }
 export function editorResult(args){const result=tickets.get(args.ticketId);if(!result)throw Error('Unknown editor ticket');return result;}
+export function editorCapture(args){
+ if(typeof args.note!=='string'||!args.note.trim()||args.note.length>4000)throw Error('수정 요청 내용을 작성하세요.');
+ if(!args.context?.selection||!args.context.selectedText?.known||!args.context.selectedText.text||args.context.selectedText.truncated)throw Error('텍스트를 드래그해 선택하세요.');
+ editorPoll({sessionId:args.sessionId,source:args.source,context:args.context});
+ const requestId=randomUUID(),record=structuredClone({requestId,sessionId:args.sessionId,source:args.source,context:args.context,note:args.note,createdAt:Date.now(),untrustedContent:true});
+ requests.set(requestId,record);if(requests.size>128)requests.delete(requests.keys().next().value);return {requestId,sessionId:args.sessionId};
+}
+export function editorRequest(args){const record=requests.get(args.requestId);if(!record)throw Error('수정 요청이 만료됐습니다. 선택 영역에서 다시 요청하세요.');return structuredClone(record);}
