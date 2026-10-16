@@ -57,7 +57,7 @@ function sameContainer(left: any, right: any): boolean {
 export function installSelectionBridge(deps: BridgeDependencies) {
   const studioWindow = window as any;
 
-  function getSelectionContext() {
+  function getSelectionContext(options: { fresh?: boolean } = {}) {
     const input = deps.getInputHandler();
     const unknown: string[] = [];
     let remainingText = MAX_TEXT;
@@ -207,7 +207,8 @@ export function installSelectionBridge(deps: BridgeDependencies) {
       return { source: ref, properties, bbox, geometry: properties?{unit:'HWPUNIT (7200 per inch)',widthMm:properties.width*25.4/7200,heightMm:properties.height*25.4/7200,frameAspectRatio:properties.height?properties.width/properties.height:null,preserveSize:true,preserveAspectRatio:true,preservePosition:true,rotationAngle:properties.rotationAngle,crop:{left:properties.cropLeft,top:properties.cropTop,right:properties.cropRight,bottom:properties.cropBottom},replacementFit:'contain; keep existing frame/crop/rotation, pad if incoming pixel aspect differs'}:null };
     });
     const agent = deps.getDocumentAgent?.();
-    const documentState = agent ? read('document state', agent, 'getDocumentState') : null;
+    const stateMethod = options.fresh === false && typeof agent?.getPresentationDocumentState === 'function' ? 'getPresentationDocumentState' : 'getDocumentState';
+    const documentState = agent ? read('document state', agent, stateMethod) : null;
     return plain({ schemaVersion: 1, ready: true, kind, documentState, cursor, selection,
       selectedText, paragraph, formatting, table, objects, selectionRects,
       coordinateSystem: 'Source indices are zero-based; rectangles use unzoomed page CSS pixels.',

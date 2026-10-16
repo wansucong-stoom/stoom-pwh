@@ -9,14 +9,19 @@ import { installSelectionBridge } from './collaboration-selection';
 export function installInlineEditor(d:any) {
  const bridge=installSelectionBridge(d);
  const tablePlans=new Map<string,any>();
- const read=()=>{const c:any=bridge.getSelectionContext();return {...c,blankDocument:!!c.ready&&blankBody(d.wasm),requestScope:c.kind==='cell_block'&&c.table?.selectedCells?.length?'selection':c.selection&&c.selectedText?.text?'selection':c.kind==='object'?'object':'document',pageSettings:c.ready?Array.from({length:Math.min(d.wasm.getSectionCount(),32)},(_,i)=>({sectionIndex:i,...d.wasm.getPageDef(i)})):[]};};
+ const read=(fresh=true)=>{const c:any=bridge.getSelectionContext({fresh});return {...c,blankDocument:!!c.ready&&blankBody(d.wasm),requestScope:c.kind==='cell_block'&&c.table?.selectedCells?.length?'selection':c.selection&&c.selectedText?.text?'selection':c.kind==='object'?'object':'document',pageSettings:c.ready?Array.from({length:Math.min(d.wasm.getSectionCount(),32)},(_,i)=>({sectionIndex:i,...d.wasm.getPageDef(i)})):[]};};
+ const availability=()=>{const input=d.getInputHandler();return {ready:!!input&&d.wasm.pageCount>0,requestScope:input?.isInPictureObjectSelection()?'object':input?.getSelection()||input?.isInCellSelectionMode()?'selection':'document'};};
  const canRequest=(c:any)=>!!c?.ready;
  const requestAI=async()=>{const context:any=structuredClone(read());if(!canRequest(context))return;try{context.target=context.kind==='cell_block'?await captureTableTarget(d.wasm,context):await captureTarget(d.wasm,context);}catch{context.target=null;}if(read().documentState.documentEpoch!==context.documentState.documentEpoch)return;window.dispatchEvent(new CustomEvent('pwh-ai-request',{detail:context}));};
  d.registry.register({id:'pwh:ai-rewrite-request',label:'AI 수정 요청',opensDialog:true,
-  canExecute:()=>{const c:any=read();return canRequest(c);},
+  canExecute:()=>canRequest(availability()),
   execute:requestAI
  });
  let applying=false;
+ let pointerActive=false,lastInputAt=0;
+ window.addEventListener('pointerdown',()=>{pointerActive=true;},{capture:true});
+ for(const type of ['pointerup','pointercancel','blur'])window.addEventListener(type,()=>{pointerActive=false;lastInputAt=performance.now();},{capture:true});
+ for(const type of ['keydown','beforeinput','wheel'])window.addEventListener(type,()=>{lastInputAt=performance.now();},{capture:true,passive:true});
  const area=document.getElementById('editor-area');
  if(area){
   area.style.position='relative';
@@ -24,7 +29,7 @@ export function installInlineEditor(d:any) {
   const button=document.createElement('button');button.id='pwh-ai-floating';button.type='button';button.disabled=true;button.setAttribute('aria-label','AI 수정 요청');button.title='수정할 글을 드래그한 뒤 AI 수정을 요청하세요';
   button.innerHTML='<span aria-hidden="true">✦</span><span class="pwh-ai-label">AI 수정 요청</span>';
   button.addEventListener('pointerdown',event=>event.preventDefault());button.addEventListener('mousedown',event=>event.preventDefault());button.addEventListener('click',requestAI);area.appendChild(button);
-  const update=()=>{const c:any=read();button.disabled=applying||!canRequest(c);button.title=button.disabled?'글을 드래그하거나 그림·도형을 선택하세요':c.blankDocument?'빈 문서에 AI 문서 작성을 요청합니다':c.requestScope==='document'?'문서 전체의 용지·여백·구성 수정을 요청합니다':'선택한 글 또는 객체에 AI 수정을 요청합니다';};
+  const update=()=>{const c:any=availability();button.disabled=applying||!canRequest(c);button.title=button.disabled?'편집기 준비 중입니다':c.requestScope==='document'?'빈 문서 작성 또는 문서 전체 수정을 요청합니다':'선택한 글 또는 객체에 AI 수정을 요청합니다';};
   document.addEventListener('pointerup',()=>setTimeout(update,0));document.addEventListener('keyup',update);const timer=setInterval(()=>{if(!button.isConnected){clearInterval(timer);return;}update();},750);
  }
  for(const type of ['keydown','beforeinput','pointerdown','mousedown'])window.addEventListener(type,(event)=>{if(applying){event.preventDefault();event.stopImmediatePropagation();}},{capture:true});
@@ -40,7 +45,8 @@ export function installInlineEditor(d:any) {
    try{await d.load(bytes,name);tablePlans.clear();}catch(error){try{await d.load(fallback.bytes,oldName);}catch{throw Error('Document loading failed and the previous view could not be restored; reopen its saved file');}throw error;}finally{applying=false;}
    return {ok:true};
   },
-  context:read,
+  context:()=>read(false),
+  interacting:()=>pointerActive||performance.now()-lastInputAt<1200,
   capture:async()=>{const c:any=structuredClone(read());c.target=await captureTarget(d.wasm,c);return c;},
   export:()=>d.wasm.exportHwpxWithReport(),
   saved:(name:string)=>d.saved(name),

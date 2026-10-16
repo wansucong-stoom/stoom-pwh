@@ -1,5 +1,5 @@
 (()=>{
- const state={origin:null,id:0,documentId:null,source:null,sourceSha256:null,loading:false,loaded:false,sessionId:crypto.randomUUID(),receipt:null,host:{},checkpointSha:null};
+ const state={origin:null,id:0,documentId:null,source:null,sourceSha256:null,loading:false,loaded:false,sessionId:crypto.randomUUID(),receipt:null,host:{},checkpointSha:null,recoveryEligible:true};
  const pending=new Map(),status=text=>{const e=document.getElementById('pwh-status');if(e){e.textContent=text;e.title=text;}};
  window.addEventListener('error',event=>status('편집기 오류: '+event.message));
  window.addEventListener('unhandledrejection',event=>status('편집기 처리 오류: '+(event.reason?.message||String(event.reason))));
@@ -11,7 +11,7 @@
  async function asset(kind,documentId=state.documentId,updateState=true){let offset=0,hash,buffer;do{const r=await tool('pwh_client_asset',{kind,offset,...(hash?{expectedSha256:hash}:{}),...(documentId?{documentId}:{})}),m=r.structuredContent;
  if(!m||m.offset!==offset||!Number.isSafeInteger(m.totalBytes)||m.totalBytes<1||m.totalBytes>(kind==='document'?64:32)*1024*1024)throw Error('문서 자산 전송 오류');
  if(!buffer){hash=m.sha256;buffer=new Uint8Array(m.totalBytes);}if(hash!==m.sha256||buffer.length!==m.totalBytes)throw Error('문서가 전송 중 변경되었습니다.');
- if(kind==='document'&&updateState){state.source=m.source;state.sourceSha256=m.sha256;document.getElementById('pwh-title').textContent=m.name;}
+ if(kind==='document'&&updateState){state.source=m.source;state.sourceSha256=m.sha256;state.recoveryEligible=m.totalBytes<=8*1024*1024;document.getElementById('pwh-title').textContent=m.name;}
  const bytes=Uint8Array.from(atob(r._meta?.['pwh/client-bytes']||''),x=>x.charCodeAt(0));if(!bytes.length||bytes.length>512*1024||offset+bytes.length>buffer.length)throw Error('문서 청크 오류');buffer.set(bytes,offset);offset+=bytes.length;
  }while(offset<buffer.length);if(await sha(buffer)!==hash)throw Error('문서 지문 검증 실패');return buffer;}
  let fontInstall;
@@ -29,8 +29,8 @@
  }
  const recoveryKey=()=>state.source+'|'+state.sourceSha256;
  async function checkpoint(context){
-  if(!context.documentState.dirty||state.checkpointSha===context.documentState.documentSha256)return;
-  const artifact=window.pwhEditor.export();if(artifact.contentLoss.count||artifact.bytes.length>8*1024*1024)return;
+  if(!state.recoveryEligible||!context.documentState.dirty||state.checkpointSha===context.documentState.documentSha256)return;
+  const artifact=window.pwhEditor.export();if(artifact.bytes.length>8*1024*1024){state.recoveryEligible=false;return;}if(artifact.contentLoss.count)return;
   await recoveryStore('put',recoveryKey(),{bytes:artifact.bytes.buffer.slice(artifact.bytes.byteOffset,artifact.bytes.byteOffset+artifact.bytes.byteLength),sha256:await sha(artifact.bytes),savedAt:Date.now(),source:state.source});state.checkpointSha=context.documentState.documentSha256;
  }
  async function offerRecovery(){
@@ -41,9 +41,9 @@
   }catch(error){console.warn('[pwh recovery]',error.message);}
  }
  async function consume(result){const d=result?._meta?.['pwh/client-document']||result?.structuredContent;if(d?.documentId)state.documentId=d.documentId;if(d?.source)state.source=d.source;
- if(state.loaded||state.loading)return;state.loading=true;try{status('문서 파일을 읽고 있습니다.');const bytes=await asset('document');status('편집기 초기화를 기다리고 있습니다.');await installed;await window.pwhEditor.ready();try{status('시스템 글꼴 목록을 준비하고 있습니다.');fontInstall??=installSystemFonts();await fontInstall;}catch(error){console.warn('[pwh fonts]',error.message);}status('문서 조판과 첫 페이지를 준비하고 있습니다.');await window.pwhEditor.load(bytes,state.source.split(/[\\/]/).pop());status('미저장 복구본을 확인하고 있습니다.');await offerRecovery();state.loaded=true;status('본문에서 직접 편집하세요. 다시 쓸 부분을 드래그하고 채팅으로 요청할 수 있습니다.');void poll();}catch(e){state.loading=false;status(e.message);const retry=document.getElementById('pwh-retry');if(retry){retry.hidden=false;retry.onclick=()=>{retry.hidden=true;void consume({});};}}}
+ if(state.loaded||state.loading)return;state.loading=true;try{status('문서 파일을 읽고 있습니다.');const bytes=await asset('document');status('편집기 초기화를 기다리고 있습니다.');await installed;await window.pwhEditor.ready();try{status('시스템 글꼴 목록을 준비하고 있습니다.');fontInstall??=installSystemFonts();await fontInstall;}catch(error){console.warn('[pwh fonts]',error.message);}status('문서 조판과 첫 페이지를 준비하고 있습니다.');await window.pwhEditor.load(bytes,state.source.split(/[\\/]/).pop());status('미저장 복구본을 확인하고 있습니다.');await offerRecovery();state.loaded=true;state.loading=false;status('본문에서 직접 편집하세요. 다시 쓸 부분을 드래그하고 채팅으로 요청할 수 있습니다.');void poll();}catch(e){state.loading=false;status(e.message);const retry=document.getElementById('pwh-retry');if(retry){retry.hidden=false;retry.onclick=()=>{retry.hidden=true;void consume({});};}}}
  window.addEventListener('message',event=>{if(event.source!==parent||event.data?.jsonrpc!=='2.0')return;if(state.origin!==null&&event.origin!==state.origin)return;const m=event.data,p=pending.get(m.id);if(p&&!m.method){state.origin=event.origin;clearTimeout(p.timer);pending.delete(m.id);m.error?p.reject(Error(m.error.message)):p.resolve(m.result);return;}if(m.method==='ui/notifications/tool-result')void consume(m.params);if(m.method==='ui/notifications/tool-input'&&m.params?.arguments?.file)void consume({});if(m.id!==undefined&&m.method==='ping')post({jsonrpc:'2.0',id:m.id,result:{}});});
- window.pwhWasmBytes=(async()=>{const init=await rpc('ui/initialize',{appInfo:{name:'pwh-inline-studio',version:'0.6.12'},appCapabilities:{availableDisplayModes:['inline','fullscreen']},protocolVersion:'2026-01-26'});state.host=init.hostCapabilities||{};post({jsonrpc:'2.0',method:'ui/notifications/initialized',params:{}});return asset('wasm');})();
+ window.pwhWasmBytes=(async()=>{const init=await rpc('ui/initialize',{appInfo:{name:'pwh-inline-studio',version:'0.6.13'},appCapabilities:{availableDisplayModes:['inline','fullscreen']},protocolVersion:'2026-01-26'});state.host=init.hostCapabilities||{};post({jsonrpc:'2.0',method:'ui/notifications/initialized',params:{}});return asset('wasm');})();
  window.pwhWasmBytes.catch(e=>status(e.message));
  window.addEventListener('pwh-ai-request',event=>{
   if(!state.loaded||document.getElementById('pwh-ai-dialog'))return;
@@ -85,11 +85,11 @@
   const latest=window.pwhEditor.context().documentState;
   if(latest.dirty||JSON.stringify(latest)!==JSON.stringify(command.expected))throw Error('전송 중 현재 문서가 수정되어 열지 않았습니다.');
   await window.pwhEditor.openClean(bytes,doc.name,command.expected,state.source.split(/[\\/]/).pop());
-  state.documentId=doc.documentId;state.source=doc.source;state.sourceSha256=doc.sourceSha256;state.checkpointSha=null;
+  state.documentId=doc.documentId;state.source=doc.source;state.sourceSha256=doc.sourceSha256;state.checkpointSha=null;state.recoveryEligible=bytes.length<=8*1024*1024;
   document.getElementById('pwh-title').textContent=doc.name;document.getElementById('pwh-title').title=doc.source;
   return {ok:true,openedDocument:{source:doc.source,name:doc.name,pageCount:window.pwhEditor.context().documentState.pageCount}};
  }
- async function poll(){if(!state.loaded)return;try{const context=window.pwhEditor.context();try{await checkpoint(context);}catch(error){console.warn('[pwh checkpoint]',error.message);}const r=await tool('pwh_editor_poll',{sessionId:state.sessionId,source:state.source,context,capabilities:{documentOpen:true},...(state.receipt?{receipt:state.receipt}:{})});state.receipt=null;const taskLabel=document.getElementById('pwh-task');if(taskLabel){const tasks=r.structuredContent?.tasks||[];taskLabel.textContent=tasks.length?'AI 요청 '+tasks.length+'건 · '+tasks[tasks.length-1].note:'';taskLabel.title=tasks.map(t=>t.note).join('\n');}for(const command of r.structuredContent?.commands||[]){try{const result=await (command.type==='openDocument'?await openDocument(command):command.type==='tables'?window.pwhEditor.tables(command):command.type==='tableStyle'?window.pwhEditor.tableStyle(command):command.type==='replacePicture'?window.pwhEditor.replacePicture(command,await replacementBytes(command.image)):command.type==='layout'?window.pwhEditor.layout(command):command.type==='compose'?window.pwhEditor.compose(command):window.pwhEditor.rewrite(command));state.receipt={ticketId:command.ticketId,ok:true,undoSteps:result.undoSteps,...(result.openedDocument?{openedDocument:result.openedDocument}:{}),...(result.tablePlan?{tablePlan:result.tablePlan}:{}),...(result.changes?{changes:result.changes}:{}),...(result.replacement?{replacement:result.replacement}:{})};status(command.type==='openDocument'?'요청한 문서를 편집기에 열었습니다.':command.type==='tables'?'표 서식 분석을 완료했습니다.':'선택한 영역에 GPT 수정을 반영했습니다. 실행 취소로 되돌릴 수 있습니다.');}catch(e){state.receipt={ticketId:command.ticketId,ok:false,error:e.message};status(e.message);}}}catch(e){status(e.message);}finally{setTimeout(poll,1500);}}
+ async function poll(){if(!state.loaded)return;if(window.pwhEditor.interacting?.()){setTimeout(poll,1500);return;}try{const context=window.pwhEditor.context();try{await checkpoint(context);}catch(error){console.warn('[pwh checkpoint]',error.message);}const r=await tool('pwh_editor_poll',{sessionId:state.sessionId,source:state.source,context,capabilities:{documentOpen:true},...(state.receipt?{receipt:state.receipt}:{})});state.receipt=null;const taskLabel=document.getElementById('pwh-task');if(taskLabel){const tasks=r.structuredContent?.tasks||[];taskLabel.textContent=tasks.length?'AI 요청 '+tasks.length+'건 · '+tasks[tasks.length-1].note:'';taskLabel.title=tasks.map(t=>t.note).join('\n');}for(const command of r.structuredContent?.commands||[]){try{const result=await (command.type==='openDocument'?await openDocument(command):command.type==='tables'?window.pwhEditor.tables(command):command.type==='tableStyle'?window.pwhEditor.tableStyle(command):command.type==='replacePicture'?window.pwhEditor.replacePicture(command,await replacementBytes(command.image)):command.type==='layout'?window.pwhEditor.layout(command):command.type==='compose'?window.pwhEditor.compose(command):window.pwhEditor.rewrite(command));state.receipt={ticketId:command.ticketId,ok:true,undoSteps:result.undoSteps,...(result.openedDocument?{openedDocument:result.openedDocument}:{}),...(result.tablePlan?{tablePlan:result.tablePlan}:{}),...(result.changes?{changes:result.changes}:{}),...(result.replacement?{replacement:result.replacement}:{})};status(command.type==='openDocument'?'요청한 문서를 편집기에 열었습니다.':command.type==='tables'?'표 서식 분석을 완료했습니다.':'선택한 영역에 GPT 수정을 반영했습니다. 실행 취소로 되돌릴 수 있습니다.');}catch(e){state.receipt={ticketId:command.ticketId,ok:false,error:e.message};status(e.message);}}}catch(e){status(e.message);}finally{setTimeout(poll,1500);}}
  document.addEventListener('DOMContentLoaded',()=>{document.getElementById('pwh-save').onclick=async()=>{
   const button=document.getElementById('pwh-save');if(button.disabled)return;button.disabled=true;let transferId=null;
   try{
@@ -109,7 +109,7 @@
    }
    status('문서를 다시 열어 검증하고 있습니다.');
    const d=(await tool('pwh_client_save_commit',{transferId},120000)).structuredContent;transferId=null;
-   await recoveryStore('delete',recoveryKey()).catch(()=>{});state.checkpointSha=null;state.documentId=d.documentId;state.source=d.path;state.sourceSha256=d.sourceSha256;
+   await recoveryStore('delete',recoveryKey()).catch(()=>{});state.checkpointSha=null;state.documentId=d.documentId;state.source=d.path;state.sourceSha256=d.sourceSha256;state.recoveryEligible=bytes.length<=8*1024*1024;
    const same=window.pwhEditor.context().documentState.changeSeq===exportSeq;
    if(same)await window.pwhEditor.saved(d.path.split(/[\\/]/).pop());
    status(`저장 완료: ${d.path}`+(same?'':' — 저장 중 추가한 변경은 아직 미저장 상태입니다.'));

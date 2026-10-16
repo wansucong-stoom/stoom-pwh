@@ -3,6 +3,62 @@ import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 const root=path.resolve(process.argv[2]);
 const studio=path.join(root,'rhwp-studio');
+await fs.copyFile(new URL('../src/document-state-cache.mjs',import.meta.url),path.join(studio,'src/document-agent/pwh-document-state-cache.mjs'));
+const agentPath=path.join(studio,'src/document-agent/controller.ts');
+let agentSource=await fs.readFile(agentPath,'utf8');
+if(!agentSource.includes('pwh presentation digest cache')){
+ const method='  getDocumentState(): RhwpDocumentStateV1 {';
+ if(!agentSource.includes(method)||!agentSource.includes('export class DocumentAgentController {'))throw Error('Unsupported document agent state bridge');
+ agentSource='// pwh presentation digest cache; authoritative getDocumentState stays fresh.\nimport {createDocumentStateDigestCache} from "./pwh-document-state-cache.mjs";\n'+agentSource;
+ agentSource=agentSource.replace('export class DocumentAgentController {',`export class DocumentAgentController {
+  private readonly pwhStateCache=createDocumentStateDigestCache();
+  private pwhStateCacheOff: (()=>void)|null=null;
+  getPresentationDocumentState(): RhwpDocumentStateV1 {
+    this.syncGeneration();
+    if(!this.pwhStateCacheOff){const offs=['document-mutated','document-changed'].map(event=>this.deps.eventBus.on(event,()=>this.pwhStateCache.invalidate()));this.pwhStateCacheOff=()=>offs.forEach(off=>off());}
+    const revision={documentEpoch:this.documentEpoch,changeSeq:this.changeSeq,format:this.currentFormat(),pageCount:this.deps.wasm.pageCount,dirty:this.deps.isDirty()};
+    return {schemaVersion:1,...revision,documentSha256:this.pwhStateCache.read(revision,()=>exportDocumentSha256(this.deps.wasm,revision.format))};
+  }`);
+ agentSource=agentSource.replace('    this.offMutation();','    this.offMutation();\n    this.pwhStateCacheOff?.();');
+ await fs.writeFile(agentPath,agentSource);
+}
+await fs.copyFile(new URL('../src/local-font-face.mjs',import.meta.url),path.join(studio,'src/core/pwh-local-font-face.mjs'));
+const hostCanvasPath=path.join(studio,'src/core/host-canvas-fonts.ts');
+let hostCanvas=await fs.readFile(hostCanvasPath,'utf8');
+if(!hostCanvas.includes('pwh exact local face first')){
+ const begin='            const data = await loadRendererLocalFont(record);';
+ const finish='            await font.load();';
+ const from=hostCanvas.indexOf(begin),to=hostCanvas.indexOf(finish,from);
+ if(from<0||to<0)throw Error('Unsupported host canvas font preparation');
+ hostCanvas='// pwh exact local face first; verified bytes remain the fallback.\nimport {tryLoadExactLocalFont} from "./pwh-local-font-face.mjs";\nimport {getLocalFontRecords} from "./local-fonts.ts";\n'+hostCanvas.slice(0,from)+`            const alias = \`__rhwp_host_face_\${this.id}_\${++this.serial}\`;
+            const face = record.hostReference!.face;
+            const localFace:any={...face};
+            const catalog=getLocalFontRecords({includeRegistered:true});
+            for(const field of ['fullName','postscriptName']){
+              const wanted=String((face as any)[field]||'').normalize('NFC').toLowerCase();
+              const matches=new Set(catalog.filter(candidate=>[candidate.hostReference?.face.fullName,candidate.hostReference?.face.postscriptName].some(name=>name&&name.normalize('NFC').toLowerCase()===wanted)).map(candidate=>candidate.hostReference?.face.id));
+              if(!wanted||matches.size!==1||!matches.has(face.id))delete localFace[field];
+            }
+            let font=await tryLoadExactLocalFont(alias,localFace);
+            const pwhLocalFace=!!font;
+            if(stale())return;
+            if(!font){
+              const data=await loadRendererLocalFont(record);
+              if(stale())return;
+              const bytes=data?normalizeFontFaceData(data.bytes,data.faceIndex??0):null;
+              if(!bytes)throw new Error('Host font has no usable face');
+              font=new FontFace(alias,bytes,{weight:String(face.weight??400),style:face.slant??'normal'});
+              await font.load();
+            }
+            if(!stale()){const field=pwhLocalFace?'pwhLocalFontLoads':'pwhTransferredFontLoads';document.documentElement.dataset[field]=String(Number(document.documentElement.dataset[field]||0)+1);}`+hostCanvas.slice(to+finish.length);
+ await fs.writeFile(hostCanvasPath,hostCanvas);
+}
+// Repair builds made before the lightweight diagnostic count was added.
+if(hostCanvas.includes('pwh exact local face first')&&!hostCanvas.includes('const pwhLocalFace=')){
+ hostCanvas=hostCanvas.replace('let font=await tryLoadExactLocalFont(alias,localFace);','let font=await tryLoadExactLocalFont(alias,localFace);\n            const pwhLocalFace=!!font;');
+ hostCanvas=hostCanvas.replace('            this.fontSet!.add(font);',"            const pwhField=pwhLocalFace?'pwhLocalFontLoads':'pwhTransferredFontLoads';document.documentElement.dataset[pwhField]=String(Number(document.documentElement.dataset[pwhField]||0)+1);\n            this.fontSet!.add(font);");
+ await fs.writeFile(hostCanvasPath,hostCanvas);
+}
 await fs.copyFile(new URL('../src/clipboard-structure.mjs',import.meta.url),path.join(studio,'src/engine/pwh-clipboard-structure.mjs'));
 const keyboardPath=path.join(studio,'src/engine/input-handler-keyboard.ts');
 let keyboard=await fs.readFile(keyboardPath,'utf8');
@@ -32,6 +88,9 @@ await fs.copyFile(new URL('../src/studio-selection.ts',import.meta.url),path.joi
 await fs.copyFile(new URL('../src/studio-inline-adapter.ts',import.meta.url),path.join(studio,'src/pwh-inline-adapter.ts'));
 let main=await fs.readFile(path.join(studio,'src/main.ts'),'utf8');
 if(!main.includes("import './style.css'"))main="import './style.css';\n"+main;
+if(!main.includes('pwh selection layout invalidation'))main+=`\n// pwh selection layout invalidation\nfor(const event of ['document-mutated','document-changed','document-page-invalidated','document-view-changed','local-fonts-changed'])eventBus.on(event,()=>wasm.invalidatePwhSelectionLayout());\n`;
+main=main.replace("'document-changed','page-invalidated','document-view-changed'","'document-changed','document-page-invalidated','document-view-changed'");
+if(!main.includes('pwh propagate host document initialization failure'))main=main.replace("console.error('[initDoc] 오류:', error);","console.error('[initDoc] 오류:', error);\n    // pwh propagate host document initialization failure\n    if(options.suppressDialogs)throw error;");
 main=main.replace("const { CanvasKitLayerRenderer } = await import('@/view/canvaskit-renderer');","const CanvasKitLayerRenderer={create(){throw new Error('This client uses the Canvas2D editor backend')}};");
 main=main.replace('resolveChromeModeRequest(window.location.search)',"resolveChromeModeRequest('?chrome=embed')");
 main=main.replace('maybeShowSkinOnboarding();','/* host owns startup */');
@@ -53,9 +112,26 @@ if(!localFonts.includes('pwh host fonts in menu'))localFonts=localFonts.replace(
 await fs.writeFile(localFontsPath,localFonts);
 const wasmPath=path.join(studio,'src/core/wasm-bridge.ts');
 let wasm=await fs.readFile(wasmPath,'utf8');
-if(!wasm.includes('import {renderedBodySelectionRects}'))wasm='import {renderedBodySelectionRects} from '+JSON.stringify('./pwh-selection-layout.mjs')+';\n'+wasm;
+if(!/import\s*\{[^}]*\brenderedBodySelectionRects\b/.test(wasm))wasm='import {renderedBodySelectionRects} from '+JSON.stringify('./pwh-selection-layout.mjs')+';\n'+wasm;
+if(wasm.includes('import {renderedBodySelectionRects,createBodySelectionLayoutCache}'))wasm=wasm.replace(/^import\s+\{renderedBodySelectionRects\}\s+from[^\r\n]+\r?\n/gm,'');
 wasm=wasm.replace('return JSON.parse(this.doc.getSelectionRects(sec, startPara, startOffset, endPara, endOffset));','return renderedBodySelectionRects(this.doc,sec,startPara,startOffset,endPara,endOffset,JSON.parse(this.doc.getSelectionRects(sec,startPara,startOffset,endPara,endOffset)));');
 if(!wasm.includes('return renderedBodySelectionRects(this.doc,'))throw new Error('Unsupported Studio selection bridge: review upstream getSelectionRects');
+if(!wasm.includes('pwh gesture scoped selection layout cache')){
+ wasm=wasm.replace('import {renderedBodySelectionRects}', 'import {renderedBodySelectionRects,createBodySelectionLayoutCache}');
+ wasm=`// pwh gesture scoped selection layout cache\n`+wasm;
+ const moduleAnchor='export class WasmBridge {';
+ if(!wasm.includes(moduleAnchor))throw Error('Unsupported WasmBridge selection cache owner');
+ wasm=wasm.replace(moduleAnchor,`const pwhBodySelectionCache=createBodySelectionLayoutCache();
+if(typeof window!=='undefined'){
+ window.addEventListener('pointerdown',()=>pwhBodySelectionCache.begin(),{capture:true});
+ for(const event of ['pointerup','pointercancel','blur'])window.addEventListener(event,()=>pwhBodySelectionCache.end(),{capture:true});
+ for(const event of ['keydown','beforeinput'])window.addEventListener(event,()=>pwhBodySelectionCache.invalidate(),{capture:true});
+}
+export class WasmBridge {
+  invalidatePwhSelectionLayout():void {pwhBodySelectionCache.invalidate();}`);
+ wasm=wasm.replace('  invalidateCanvasMetrics(): void {','  invalidateCanvasMetrics(): void {\n    pwhBodySelectionCache.invalidate();');
+ wasm=wasm.replace('JSON.parse(this.doc.getSelectionRects(sec,startPara,startOffset,endPara,endOffset)));','JSON.parse(this.doc.getSelectionRects(sec,startPara,startOffset,endPara,endOffset)),pwhBodySelectionCache);');
+}
 
 wasm=wasm.replace('await init() as',"await init({module_or_path:await (window as any).pwhWasmBytes}) as");
 await fs.writeFile(wasmPath,wasm);

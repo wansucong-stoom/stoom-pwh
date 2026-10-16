@@ -4,6 +4,47 @@ import {createHash} from 'node:crypto';
 import config from './config.mjs';
 const hash=v=>createHash('sha256').update(v).digest('hex');
 const cached=new Map();let inventory=null,pending=null;
+const FONT_CHUNK_BYTES=512*1024,MAX_FONT_BYTES=64*1024*1024;
+const fontStamp=stat=>`${stat.size}:${stat.mtimeMs}`;
+/** Own verified file bytes; expose only immutable chunk strings to callers. */
+export function createFontChunkReader({maxBytes=MAX_FONT_BYTES,readFile=fs.readFile,statFile=fs.stat}={}){
+ if(!Number.isSafeInteger(maxBytes)||maxBytes<0)throw Error('Invalid font cache limit');
+ const entries=new Map(),reads=new Map();let cachedBytes=0;
+ const validate=(stat,expectedStamp)=>{
+  if(!stat.isFile()||!Number.isSafeInteger(stat.size)||stat.size<1||stat.size>MAX_FONT_BYTES||fontStamp(stat)!==expectedStamp)throw Error('글꼴 파일이 변경됐습니다.');
+ };
+ async function verifiedFile(file,expectedStamp){
+  const existing=entries.get(file);
+  if(existing?.stamp===expectedStamp){entries.delete(file);entries.set(file,existing);return existing;}
+  if(existing){entries.delete(file);cachedBytes-=existing.bytes.length;}
+  const key=JSON.stringify([file,expectedStamp]);let pendingRead=reads.get(key);
+  if(!pendingRead){
+   pendingRead=(async()=>{
+    const bytes=Buffer.from(await readFile(file));
+    const after=await statFile(file);validate(after,expectedStamp);
+    if(bytes.length!==after.size)throw Error('글꼴 파일이 변경됐습니다.');
+    const entry={stamp:expectedStamp,bytes,sha256:hash(bytes)};
+    // A large one-off face may be served without displacing a bounded cache.
+    if(bytes.length<=maxBytes){
+     const replaced=entries.get(file);if(replaced){entries.delete(file);cachedBytes-=replaced.bytes.length;}
+     for(const [oldFile,old] of entries){if(cachedBytes+bytes.length<=maxBytes)break;entries.delete(oldFile);cachedBytes-=old.bytes.length;}
+     entries.set(file,entry);cachedBytes+=bytes.length;
+    }
+    return entry;
+   })().finally(()=>{if(reads.get(key)===pendingRead)reads.delete(key);});
+   reads.set(key,pendingRead);
+  }
+  return pendingRead;
+ }
+ return async(file,expectedStamp,offset)=>{
+  // Check the authorized catalog's file stamp on every chunk, including hits.
+  const stat=await statFile(file);validate(stat,expectedStamp);
+  if(!Number.isSafeInteger(offset)||offset<0||offset>=stat.size)throw Error('글꼴 청크 위치 오류');
+  const {bytes,sha256}=await verifiedFile(file,expectedStamp),end=Math.min(bytes.length,offset+FONT_CHUNK_BYTES);
+  return {offset,totalBytes:bytes.length,sha256,nextOffset:end<bytes.length?end:null,base64:bytes.subarray(offset,end).toString('base64')};
+ };
+}
+const readFontChunk=createFontChunkReader();
 function utf16be(bytes){const b=Buffer.from(bytes);if(b.length%2)return '';b.swap16();return b.toString('utf16le').replace(/\0/g,'').trim();}
 export function sfntFaces(bytes){
  const faces=[];const starts=bytes.toString('ascii',0,4)==='ttcf'?Array.from({length:Math.min(bytes.readUInt32BE(8),256)},(_,i)=>bytes.readUInt32BE(12+i*4)):[0];
@@ -37,7 +78,6 @@ async function scan(){
 export async function systemFontSnapshot(){pending??=scan().finally(()=>{pending=null;});await pending;return {revision:inventory.revision,faces:[...inventory.records.values()].map(({file,stamp,faceIndex,...face})=>face)};}
 export async function systemFontChunk(args){
  if(!inventory)await systemFontSnapshot();if(args.revision!==inventory.revision)throw Error('설치 글꼴 목록이 변경됐습니다. 다시 불러오세요.');const face=inventory.records.get(args.id);if(!face)throw Error('등록되지 않은 글꼴입니다.');
- const stat=await fs.stat(face.file);if(`${stat.size}:${stat.mtimeMs}`!==face.stamp)throw Error('글꼴 파일이 변경됐습니다.');const bytes=await fs.readFile(face.file);
- if(!Number.isSafeInteger(args.offset)||args.offset<0||args.offset>=bytes.length)throw Error('글꼴 청크 위치 오류');const end=Math.min(bytes.length,args.offset+512*1024);
- return {content:[{type:'text',text:'System font chunk'}],structuredContent:{offset:args.offset,totalBytes:bytes.length,sha256:hash(bytes),faceIndex:face.faceIndex,nextOffset:end<bytes.length?end:null},_meta:{'pwh/font-bytes':bytes.subarray(args.offset,end).toString('base64')}};
+ const {base64,...metadata}=await readFontChunk(face.file,face.stamp,args.offset);
+ return {content:[{type:'text',text:'System font chunk'}],structuredContent:{...metadata,faceIndex:face.faceIndex},_meta:{'pwh/font-bytes':base64}};
 }

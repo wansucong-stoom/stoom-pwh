@@ -1,5 +1,29 @@
 const parse=value=>typeof value==='string'?JSON.parse(value):value;
 const finite=values=>values.every(Number.isFinite);
+// Page text layout rebuilds the native render tree. Reuse it only during a
+// pointer gesture, never as a persistent document cache: raw WASM mutations do
+// not expose a reliable layout revision. The host must invalidate before edits,
+// layout/font changes, and end the scope on pointerup/cancel/blur.
+export function createBodySelectionLayoutCache({maxPages=32}={}){
+ if(!Number.isSafeInteger(maxPages)||maxPages<1||maxPages>1000)throw new RangeError('Selection layout cache maxPages must be between 1 and 1000');
+ let active=false,currentDoc=null,pages=new Map();
+ const clear=()=>{currentDoc=null;pages=new Map();};
+ return {
+  begin(){clear();active=true;},
+  end(){active=false;clear();},
+  invalidate(){clear();},
+  read(doc,page,load){
+   if(!active)return load();
+   if(currentDoc!==doc){clear();currentDoc=doc;}
+   if(pages.has(page)){const layout=pages.get(page);pages.delete(page);pages.set(page,layout);return layout;}
+   const layout=load();
+   // Do not retain malformed or failed native results.
+   if(!Array.isArray(layout?.runs))return layout;
+   pages.set(page,layout);if(pages.size>maxPages)pages.delete(pages.keys().next().value);
+   return layout;
+  },
+ };
+}
 // Derive source-aware rectangles from the SAME wrapped text runs the renderer
 // uses. Never alter the source text, stored line segments, or document layout.
 export function rectanglesFromRuns(runs,pageIndex,sec,startPara,startOffset,endPara,endOffset){
@@ -23,7 +47,7 @@ export function rectanglesFromRuns(runs,pageIndex,sec,startPara,startOffset,endP
 function covers(intervals,start,end){
  let next=start;for(const [from,to]of intervals.sort((a,b)=>a[0]-b[0])){if(from>next)return false;next=Math.max(next,to);if(next>=end)return true;}return next>=end;
 }
-export function renderedBodySelectionRects(doc,sec,startPara,startOffset,endPara,endOffset,fallback){
+export function renderedBodySelectionRects(doc,sec,startPara,startOffset,endPara,endOffset,fallback,cache=null){
  try{
   if(![sec,startPara,startOffset,endPara,endOffset].every(n=>Number.isSafeInteger(n)&&n>=0)||startPara>endPara||endPara-startPara>4096||typeof doc.getPageTextLayout!=='function')return fallback;
   const count=doc.pageCount();if(!Number.isSafeInteger(count)||count<1||count>1000)return fallback;
@@ -41,7 +65,8 @@ export function renderedBodySelectionRects(doc,sec,startPara,startOffset,endPara
   const rects=[],coverage=new Map();let runsSeen=0;
   const complete=()=>[...bounds].every(([p,[from,to]])=>from===to||covers(coverage.get(p)||[],from,to));
   for(let page=first;page<count;page++){
-   const layout=parse(doc.getPageTextLayout(page));if(!Array.isArray(layout?.runs))return fallback;
+   const load=()=>parse(doc.getPageTextLayout(page));
+   const layout=cache?cache.read(doc,page,load):load();if(!Array.isArray(layout?.runs))return fallback;
    runsSeen+=layout.runs.length;if(runsSeen>200000)return fallback;
    const sourceRuns=layout.runs.filter(run=>!texts.has(run.paraIdx)||typeof run.text==='string'&&texts.get(run.paraIdx).slice(run.charStart,run.charStart+run.text.length)===run.text);
    const result=rectanglesFromRuns(sourceRuns,page,sec,startPara,startOffset,endPara,endOffset);rects.push(...result.rects);
