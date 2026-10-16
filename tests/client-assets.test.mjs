@@ -4,7 +4,16 @@ import {promises as fs} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {registerClientDocument,readClientAsset,saveClientDocument} from '../src/client-assets.mjs';
+import {registerClientDocument,readClientAsset,saveClientDocument,normalizeHostDocumentPath} from '../src/client-assets.mjs';
+test('host file-link Windows drive duplication is corrected narrowly',()=>{
+ assert.equal(normalizeHostDocumentPath('C:\\C:\\Users\\Example\\회의록.hwpx'),'C:\\Users\\Example\\회의록.hwpx');
+ assert.equal(normalizeHostDocumentPath('C:/C:/Users/Example/회의록.hwpx'),'C:/Users/Example/회의록.hwpx');
+ assert.equal(normalizeHostDocumentPath('/C:/Users/Example/회의록.hwpx'),'C:/Users/Example/회의록.hwpx');
+ for(const input of ['C:/D:/other.hwpx','https://example/a.hwpx','C:/ordinary.hwpx','//server/share/a.hwpx',null])assert.equal(normalizeHostDocumentPath(input),input);
+});
+test('host resource with a duplicated Windows drive reads the actual existing document',{skip:process.platform!=='win32'},async()=>{
+ const dir=await fs.mkdtemp(path.join(os.tmpdir(),'pwh-host-path-'));try{const filename=path.join(dir,'minutes.hwpx');await fs.writeFile(filename,'PKfixture');const duplicate=filename.slice(0,3)+filename;const r=await readClientAsset({kind:'document',offset:0},{'openai/resource':{path:duplicate}});assert.equal(Buffer.from(r._meta['pwh/client-bytes'],'base64').toString(),'PKfixture');assert.equal(r.structuredContent.source,filename);}finally{await fs.rm(dir,{recursive:true,force:true});}
+});
 
 test('client asset chunks reconstruct registered bytes and reject stale source',async()=>{
  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'pwh-client-test-'));

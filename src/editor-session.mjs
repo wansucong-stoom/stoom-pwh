@@ -5,16 +5,30 @@ const ttl=45000;
 export function editorPoll(args){
  if(typeof args.sessionId!=='string'||!/^[a-f0-9-]{36}$/i.test(args.sessionId))throw Error('Invalid editor session');
  if(!args.context||JSON.stringify(args.context).length>160000)throw Error('Invalid editor context');
- const old=sessions.get(args.sessionId),session={...old,context:args.context,source:args.source,seen:Date.now(),commands:old?.commands||[]};
+ const old=sessions.get(args.sessionId),session={...old,context:args.context,source:args.source,capabilities:args.capabilities||old?.capabilities||{},seen:Date.now(),commands:old?.commands||[]};
  sessions.set(args.sessionId,session);if(sessions.size>32)sessions.delete(sessions.keys().next().value);
  if(args.receipt){const ticket=tickets.get(args.receipt.ticketId);if(ticket?.sessionId===args.sessionId){Object.assign(ticket,{status:args.receipt.ok?'applied':'rejected',result:args.receipt,completedAt:Date.now()});const request=requests.get(ticket.requestId);if(request)request.status=ticket.status;}}
+ if(args.receipt?.ok&&args.receipt.openedDocument)for(const r of requests.values())if(r.sessionId===args.sessionId&&r.context.documentState?.documentEpoch!==args.context.documentState?.documentEpoch&&r.status==='requested')r.status='expired';
  const commands=session.commands.splice(0,1);return {sessionId:args.sessionId,commands,tasks:[...requests.values()].filter(r=>r.sessionId===args.sessionId&&['requested','queued'].includes(r.status)).slice(-8).map(r=>({requestId:r.requestId,status:r.status,note:r.note.slice(0,80),kind:r.context.target?.kind||r.context.requestScope}))};
 }
 export function editorState(args={}){
  const active=[...sessions].filter(([,s])=>Date.now()-s.seen<ttl);
  const item=args.sessionId?active.find(([id])=>id===args.sessionId):active.length===1?active[0]:null;
  if(!item)throw Error(active.length>1?'여러 편집기가 열려 있습니다. sessionId를 지정하세요: '+JSON.stringify(active.map(([sessionId,s])=>({sessionId,source:s.source,selectedText:s.context?.selectedText?.text||''}))):'현재 연결된 편집기가 없습니다. HWPX 편집기를 열어 주세요.');
- return {sessionId:item[0],source:item[1].source,context:item[1].context,untrustedContent:true};
+ return {sessionId:item[0],source:item[1].source,context:item[1].context,capabilities:item[1].capabilities||{},untrustedContent:true};
+}
+export async function editorOpen(args,register){
+ const current=editorState({sessionId:args.sessionId});
+ if(!current.capabilities.documentOpen)throw Error('The open editor predates direct document loading; reopen the editor once after updating');
+ if(!args.expected||JSON.stringify(current.context.documentState)!==JSON.stringify(args.expected.documentState))throw Error('Document changed; read current state before opening another document');
+ if(current.context.documentState?.dirty)throw Error('Save the current document before opening another document');
+ if(sessions.get(current.sessionId).commands.length)throw Error('Finish pending editor commands before opening another document');
+ const document=await register(args.input);
+ const latest=editorState({sessionId:current.sessionId});
+ if(JSON.stringify(latest.context.documentState)!==JSON.stringify(args.expected.documentState)||latest.context.documentState.dirty)throw Error('Document changed while preparing the new file');
+ const ticketId=randomUUID(),ticket={ticketId,sessionId:current.sessionId,status:'pending',createdAt:Date.now()};
+ tickets.set(ticketId,ticket);if(tickets.size>128)tickets.delete(tickets.keys().next().value);
+ sessions.get(current.sessionId).commands.push({ticketId,type:'openDocument',expected:structuredClone(args.expected.documentState),document});return {...ticket,document};
 }
 export function editorRewrite(args){
  const current=editorState({sessionId:args.sessionId});

@@ -31,6 +31,15 @@ export function installInlineEditor(d:any) {
  (window as any).pwhEditor={
   ready:()=>d.ready,
   async load(bytes:Uint8Array,name:string){await d.ready;await d.load(bytes,name);},
+  async openClean(bytes:Uint8Array,name:string,expected:any,previousName:string){
+   const before=read().documentState;
+   if(applying||before.dirty||JSON.stringify(before)!==JSON.stringify(expected))throw Error('Current document changed; opening cancelled');
+   const fallback=d.wasm.exportHwpxWithReport();if(fallback.contentLoss.count)throw Error('Cannot preserve current document safely');
+   const oldName=previousName||'이전 문서.hwpx';
+   applying=true;
+   try{await d.load(bytes,name);tablePlans.clear();}catch(error){try{await d.load(fallback.bytes,oldName);}catch{throw Error('Document loading failed and the previous view could not be restored; reopen its saved file');}throw error;}finally{applying=false;}
+   return {ok:true};
+  },
   context:read,
   capture:async()=>{const c:any=structuredClone(read());c.target=await captureTarget(d.wasm,c);return c;},
   export:()=>d.wasm.exportHwpxWithReport(),

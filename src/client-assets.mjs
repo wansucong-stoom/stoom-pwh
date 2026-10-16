@@ -105,9 +105,19 @@ export async function registerClientDocument(filename) {
   if(documents.size>64) documents.delete(documents.keys().next().value);
   return {documentId:id,source:real,sourceSha256:sha(bytes),name:path.basename(real)};
 }
+export function normalizeHostDocumentPath(filename){
+ if(typeof filename!=='string')return filename;
+ // Some Windows file-link routes prepend the drive to an already absolute
+ // /C:/ path, producing C:\C:\Users\... . Correct only that exact same-drive
+ // duplication; do not reinterpret arbitrary URI/path prefixes.
+ const duplicate=filename.match(/^([a-z]):[\\/]+([a-z]):([\\/].*)$/i);
+ if(duplicate&&duplicate[1].toLowerCase()===duplicate[2].toLowerCase())return duplicate[2]+':'+duplicate[3];
+ if(/^[\\/][a-z]:[\\/]/i.test(filename))return filename.slice(1);
+ return filename;
+}
 function documentPath(meta,id) {
   if(id) { const record=documents.get(id); if(!record) throw new Error('Document context expired; reopen the HWPX'); return record.path; }
-  const filename=meta?.['openai/resource']?.path;
+  const filename=normalizeHostDocumentPath(meta?.['openai/resource']?.path);
   if(typeof filename!=='string'||!path.isAbsolute(filename)||!/\.hwpx$/i.test(filename)) throw new Error('Host HWPX file context is required');
   return filename;
 }
