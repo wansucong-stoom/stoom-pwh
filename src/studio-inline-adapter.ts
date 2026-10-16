@@ -4,9 +4,10 @@ import { installSelectionBridge } from './collaboration-selection';
 export function installInlineEditor(d:any) {
  const bridge=installSelectionBridge(d);
  const read=()=>bridge.getSelectionContext();
- const requestAI=()=>{const context:any=structuredClone(read());if(!context.ready||!context.selection||!context.selectedText?.text||!context.selectedText.known||context.selectedText.truncated)return;window.dispatchEvent(new CustomEvent('pwh-ai-request',{detail:context}));};
+ const canRequest=(c:any)=>!!c?.ready&&((!!c.selection&&!!c.selectedText?.text&&c.selectedText.known&&!c.selectedText.truncated)||(c.kind==='object'&&Array.isArray(c.objects)&&c.objects.length>0));
+ const requestAI=()=>{const context:any=structuredClone(read());if(!canRequest(context))return;window.dispatchEvent(new CustomEvent('pwh-ai-request',{detail:context}));};
  d.registry.register({id:'pwh:ai-rewrite-request',label:'AI 수정 요청',opensDialog:true,
-  canExecute:()=>{const c:any=read();return !!c.ready&&!!c.selection&&!!c.selectedText?.text&&c.selectedText.known&&!c.selectedText.truncated;},
+  canExecute:()=>{const c:any=read();return canRequest(c);},
   execute:requestAI
  });
  let applying=false;
@@ -17,7 +18,7 @@ export function installInlineEditor(d:any) {
   const button=document.createElement('button');button.id='pwh-ai-floating';button.type='button';button.disabled=true;button.setAttribute('aria-label','AI 수정 요청');button.title='수정할 글을 드래그한 뒤 AI 수정을 요청하세요';
   button.innerHTML='<span aria-hidden="true">✦</span><span class="pwh-ai-label">AI 수정 요청</span>';
   button.addEventListener('pointerdown',event=>event.preventDefault());button.addEventListener('mousedown',event=>event.preventDefault());button.addEventListener('click',requestAI);area.appendChild(button);
-  const update=()=>{const input=d.getInputHandler();button.disabled=applying||!input?.hasSelection();button.title=button.disabled?'수정할 글을 먼저 드래그하세요':'선택한 글에 AI 수정을 요청합니다';};
+  const update=()=>{const c:any=read();button.disabled=applying||!canRequest(c);button.title=button.disabled?'글을 드래그하거나 그림·도형을 선택하세요':'선택한 글 또는 객체에 AI 수정을 요청합니다';};
   document.addEventListener('pointerup',()=>setTimeout(update,0));document.addEventListener('keyup',update);const timer=setInterval(()=>{if(!button.isConnected){clearInterval(timer);return;}update();},750);
  }
  for(const type of ['keydown','beforeinput','pointerdown','mousedown'])window.addEventListener(type,(event)=>{if(applying){event.preventDefault();event.stopImmediatePropagation();}},{capture:true});

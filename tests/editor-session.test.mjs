@@ -24,3 +24,11 @@ test('right click request freezes exact selection and note independently of late
  captured.note='변조';assert.equal(editorRequest(request).note,'간결하게 다시 써줘');
  assert.throws(()=>editorRewrite({sessionId,expected:editorRequest(request).context,replacement:'수정'}),/바뀌/);
 });
+test('object requests preserve exact object references without accepting a text rewrite',()=>{
+ const sessionId=randomUUID(),context={ready:true,kind:'object',documentState:{documentEpoch:1,changeSeq:2,documentSha256:'c'.repeat(64)},selection:null,selectedText:{known:false,text:''},objects:[{source:{type:'image',sec:0,ppi:7,ci:0},properties:{width:200}}]};
+ const request=editorCapture({sessionId,context,note:'그림을 바꿔 주세요'});
+ context.objects[0].source.ci=3;
+ assert.equal(editorRequest(request).context.objects[0].source.ci,0);
+ assert.throws(()=>editorRewrite({sessionId,expected:editorState({sessionId}).context,replacement:'text'}),/텍스트/);
+ assert.throws(()=>editorCapture({sessionId,context:{...context,objects:[{source:{type:'image',sec:-1,ppi:0,ci:0}}]},note:'수정'}),/선택/);
+});

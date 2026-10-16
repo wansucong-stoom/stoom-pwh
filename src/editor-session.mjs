@@ -29,7 +29,10 @@ export function editorRewrite(args){
 export function editorResult(args){const result=tickets.get(args.ticketId);if(!result)throw Error('Unknown editor ticket');return result;}
 export function editorCapture(args){
  if(typeof args.note!=='string'||!args.note.trim()||args.note.length>4000)throw Error('수정 요청 내용을 작성하세요.');
- if(!args.context?.selection||!args.context.selectedText?.known||!args.context.selectedText.text||args.context.selectedText.truncated)throw Error('텍스트를 드래그해 선택하세요.');
+ const c=args.context;
+ const text=!!c?.selection&&c.selectedText?.known&&!!c.selectedText.text&&!c.selectedText.truncated;
+ const object=c?.ready&&c.kind==='object'&&Array.isArray(c.objects)&&c.objects.length>0&&c.objects.length<=16&&c.objects.every(o=>o?.source&&['image','shape','equation'].includes(o.source.type)&&['sec','ppi','ci'].every(k=>Number.isSafeInteger(o.source[k])&&o.source[k]>=0));
+ if(!text&&!object)throw Error('텍스트를 드래그하거나 그림·도형을 선택하세요.');
  editorPoll({sessionId:args.sessionId,source:args.source,context:args.context});
  const requestId=randomUUID(),record=structuredClone({requestId,sessionId:args.sessionId,source:args.source,context:args.context,note:args.note,createdAt:Date.now(),untrustedContent:true});
  requests.set(requestId,record);if(requests.size>128)requests.delete(requests.keys().next().value);return {requestId,sessionId:args.sessionId};
