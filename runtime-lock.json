@@ -1,100 +1,100 @@
 {
   "schemaVersion": 1,
-  "id": "rhwp-0.8.7-pwh-r1",
+  "id": "rhwp-0.8.7-pwh-r2",
   "platform": "win32-x64",
   "upstreamVersion": "0.8.7",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
-  "releaseTag": "engine-rhwp-0.8.7-pwh-r1",
+  "releaseTag": "engine-rhwp-0.8.7-pwh-r2",
   "runtime": {
-    "file": "pwh-runtime-rhwp-0.8.7-pwh-r1-windows-x64.zip",
-    "size": 40480279,
-    "sha256": "87c2f6cfed0fd362a7ee9b9a866df60dba8cf2dcc357f7f35315429aa4f78a0a",
-    "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r1/pwh-runtime-rhwp-0.8.7-pwh-r1-windows-x64.zip"
+    "file": "pwh-runtime-rhwp-0.8.7-pwh-r2-windows-x64.zip",
+    "size": 40482355,
+    "sha256": "651eb3ff3c81f67b7e74303507d978efc8265f1ae5e7ca212ce99b213d84a283",
+    "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r2/pwh-runtime-rhwp-0.8.7-pwh-r2-windows-x64.zip"
   },
   "preservationAssets": [
     {
       "file": "pwh-upstream-rhwp-0.8.7-1a76570e8339.zip",
       "size": 14714823,
       "sha256": "067feefc25d36921ee41fea5df6fead00255ffa86441891fbaa202f96de202a2",
-      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r1/pwh-upstream-rhwp-0.8.7-1a76570e8339.zip"
+      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r2/pwh-upstream-rhwp-0.8.7-1a76570e8339.zip"
     },
     {
-      "file": "pwh-studio-inputs-rhwp-0.8.7-pwh-r1.zip",
-      "size": 7615611,
-      "sha256": "742d3c19d0ad6dea5b7929498ca25a214691334d5a8e7b9ea84ca059c47d1243",
-      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r1/pwh-studio-inputs-rhwp-0.8.7-pwh-r1.zip"
+      "file": "pwh-studio-inputs-rhwp-0.8.7-pwh-r2.zip",
+      "size": 7619224,
+      "sha256": "08582470eb8eb3ecc3c2e0ff082af37a09cccd371f4958b73e7a47e4dd0aeed7",
+      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r2/pwh-studio-inputs-rhwp-0.8.7-pwh-r2.zip"
     },
     {
-      "file": "pwh-studio-dependencies-rhwp-0.8.7-pwh-r1-windows-x64.zip",
+      "file": "pwh-studio-dependencies-rhwp-0.8.7-pwh-r2-windows-x64.zip",
       "size": 33181844,
       "sha256": "2d73c1aae0697f77a000a0783918e86581446875f4f946bcb3647e2b333aa09f",
-      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r1/pwh-studio-dependencies-rhwp-0.8.7-pwh-r1-windows-x64.zip"
+      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r2/pwh-studio-dependencies-rhwp-0.8.7-pwh-r2-windows-x64.zip"
     },
     {
-      "file": "pwh-build-scripts-rhwp-0.8.7-pwh-r1.zip",
-      "size": 640624,
-      "sha256": "ae6efa451be4b8db30b894b5ee392337958c12b958662bb98bebaa35379da959",
-      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r1/pwh-build-scripts-rhwp-0.8.7-pwh-r1.zip"
+      "file": "pwh-build-scripts-rhwp-0.8.7-pwh-r2.zip",
+      "size": 654400,
+      "sha256": "be5fd35775f6e6128dd44394d7036ecbb81a64bad049b30bed18822b3c805158",
+      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r2/pwh-build-scripts-rhwp-0.8.7-pwh-r2.zip"
     },
     {
       "file": "rhwp-v0.8.7-windows-x86_64.zip",
       "sha256": "f7ac326e98f595ae8fecd8da7a614ee9a37db77bdf938782a8e07c9da473ec6f",
       "size": 19796112,
-      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r1/rhwp-v0.8.7-windows-x86_64.zip"
+      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r2/rhwp-v0.8.7-windows-x86_64.zip"
     },
     {
       "file": "core-0.8.7.tgz",
       "sha256": "30e8a17400583570afec9169baeef3f0785e023e2a51344ed44eb8539a60e6a6",
       "size": 4514017,
-      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r1/core-0.8.7.tgz"
+      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r2/core-0.8.7.tgz"
     },
     {
       "file": "editor-0.8.7.tgz",
       "sha256": "3cb59e9de066fd976578a465da4d31272433b5e1c70c8b2584a89aa11448b61c",
       "size": 23581,
-      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r1/editor-0.8.7.tgz"
+      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r2/editor-0.8.7.tgz"
     },
     {
       "file": "lightningcss-1.33.0-source.zip",
       "size": 7709573,
       "sha256": "8f27a76a106ad68aea996451551a0952b48113b9971eff580b49d730689a5a2d",
-      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r1/lightningcss-1.33.0-source.zip"
+      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r2/lightningcss-1.33.0-source.zip"
     },
     {
       "file": "pwh-rhwp-0.8.7-cargo-crates.zip",
       "size": 49924466,
       "sha256": "e13958a398a405c46b28e438a8b351574ca5b9370ea8b7871f29fb79cca5941f",
-      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r1/pwh-rhwp-0.8.7-cargo-crates.zip"
+      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r2/pwh-rhwp-0.8.7-cargo-crates.zip"
     },
     {
       "file": "THIRD-PARTY-NOTICES.txt",
       "size": 4354888,
       "sha256": "88ec58690afec0843d4f6ab9fc2f17b0e8a2458f4658783b67e29d9fc6100e1e",
-      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r1/THIRD-PARTY-NOTICES.txt"
+      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r2/THIRD-PARTY-NOTICES.txt"
     },
     {
       "file": "npm-licenses.json",
       "size": 305365,
       "sha256": "fd2b8435d6095bcb94cc2c6c8203e823cebc57530a90a3be7630d16b408de6d8",
-      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r1/npm-licenses.json"
+      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r2/npm-licenses.json"
     },
     {
       "file": "cargo-licenses.json",
       "size": 4171746,
       "sha256": "a8dfd3bc797c017fd30bba75e9b1202b845b5ef1ff929edd2b86cd94bdff28ca",
-      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r1/cargo-licenses.json"
+      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r2/cargo-licenses.json"
     },
     {
-      "file": "pwh-studio-overlay-rhwp-0.8.7-pwh-r1.patch",
-      "sha256": "610bab5087e6a61453e12bf6fbed813fb6d5a6ba4c40581a9e72655b28d29541",
-      "size": 76867,
-      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r1/pwh-studio-overlay-rhwp-0.8.7-pwh-r1.patch"
+      "file": "pwh-studio-overlay-rhwp-0.8.7-pwh-r2.patch",
+      "sha256": "ced2b8495809a95bd71d091d69c21b167b4c483a87f15fa9c98c23c63d9e8e5b",
+      "size": 89057,
+      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r2/pwh-studio-overlay-rhwp-0.8.7-pwh-r2.patch"
     },
     {
       "file": "PROVENANCE.json",
-      "sha256": "23c29c4bdffd995d84c7779cb48e6e47545c0730ccc765075d3ae9169e1eb4fd",
-      "size": 6425,
-      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r1/PROVENANCE.json"
+      "sha256": "d8e88495e95419f5ef6dc3ed05ab47827d850a9e5f3aeff773fa52933aa3c5ed",
+      "size": 7431,
+      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r2/PROVENANCE.json"
     }
   ]
 }
