@@ -164,7 +164,7 @@ serve 프로세스를 유지해야 브라우저가 연결된다. 실행파일 �
 
 ## 객체 선택 요청
 
-그림·도형·수식을 선택해 AI 수정 요청을 보낼 수 있다. request.context.kind가 object이면 objects의 source 주소·properties와 문서 상태를 읽는다. pwh_editor_rewrite는 텍스트 전용이므로 객체 수정에 사용하지 않는다. 같은 미저장 편집기의 객체 변경·교체 적용 API는 아직 연결되지 않았으므로 요청 접수를 실제 반영 완료로 말하지 않는다. 지원 가능한 경로와 저장본 작업 여부를 구분하고 미저장 문서를 임의로 재생성하지 않는다.
+그림·도형·수식을 선택해 AI 수정 요청을 보낼 수 있다. request.context.kind가 object이면 objects의 source 주소·properties와 문서 상태를 읽는다. pwh_editor_rewrite는 텍스트 전용이므로 객체 수정에 사용하지 않는다. 그림 교체는 pwh_editor_replace_picture를 사용하고 적용 결과를 확인한다. 도형·표 자체 교체는 아직 지원하지 않는다. 지원 가능한 경로와 저장본 작업 여부를 구분하고 미저장 문서를 임의로 재생성하지 않는다.
 
 ## 빈 편집기에서 문서 작성
 
@@ -173,3 +173,11 @@ serve 프로세스를 유지해야 브라우저가 연결된다. 실행파일 �
 ## 선택 없는 문서 전체 요청과 용지·여백
 
 문서 로드 후 AI 수정 요청은 선택 없이도 활성화된다. requestScope가 document이면 문서 전체 요청이며 선택 텍스트 치환으로 처리하지 않는다. pwh_editor_request와 최신 pwh_editor_state를 읽고 용지·방향·여백 요청에는 pwh_editor_layout을 사용한다. patch.paper는 A4/A3/B4/B5/Letter/Legal, orientation은 portrait/landscape, marginsMm는 left/right/top/bottom/header/footer/gutter의 mm 값이다. B4는 rhwp 프리셋 257×364mm이며 ISO B4와 혼동하지 않는다. sectionIndex 생략 시 전체 구역, 지정 시 해당 구역만 바꾸고 다른 값은 보존한다. 상태 변경·잘못된 여백은 거절한다. 결과 applied와 변경 전후 설정·조판 쪽수를 확인한다. 전체 문서 내용의 자동 재작성까지 이 도구가 지원한다고 말하지 않는다.
+
+## 같은 객체 자리의 그림 교체
+
+사용자가 그림 교체를 요청하면 request와 최신 editor_state를 대조하고 본문·표 셀의 그림 하나가 선택됐는지 확인한다. 새 PNG/JPEG/BMP를 준비한 뒤 pwh_editor_replace_picture에 sessionId·expected 전체·image 절대 경로를 전달한다. 문단/컨트롤/셀 경로가 가리키는 기존 Picture의 이미지 내용을 교체하며 객체를 삭제·재삽입하지 않는다. 위치·크기·비율·회전·자르기·배치 속성은 그대로 유지한다. 새 이미지 비율이 다르면 기존 이미지의 픽셀 비율에 맞춰 contain 방식으로 투명 여백을 추가해 왜곡을 피한다. 기존 crop은 유지되어 내용이 잘릴 수 있으므로 실제 화면을 검수한다. 한 번의 실행 취소로 복원하며 editor_result.applied와 replacement.propertiesPreserved를 확인한다. 머리말·꼬리말·각주 그림, 도형·수식·표 자체, 다중 선택은 지원하지 않는다. 이미지 크기는 8MiB/16M픽셀 제한이다. 파일 그림 교체 도구로 미저장 현재 문서를 대체하지 않는다.
+
+## 설치 글꼴 자동 반영
+
+시스템·사용자 글꼴 폴더와 설정 글꼴 경로를 로컬에서 검색해 실제 family/fullName/굵기/스타일/TTC faceIndex를 읽는다. 편집기 목록과 렌더러에 같은 host font provider를 연결한다. 편집기를 열 때 목록을 한 번 불러오며 주기적으로 검사하지 않는다. 새 글꼴 설치·삭제 후에는 편집기를 다시 열어 반영한다. 파일 상태·SHA가 바뀌면 오래된 바이트를 적용하지 않는다. 글꼴 파일은 앱 전용 MCP 청크로 전송하며 임의의 경로를 iframe에서 받지 않는다. 발견된 face 수는 문서가 해당 글꼴로 정확히 조판됐다는 증거가 아니다. 새 설치·삭제 후 실제 목록·표시·쪽 나눔을 확인하고 결과를 안내한다.

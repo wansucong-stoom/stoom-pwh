@@ -5,8 +5,8 @@ import { pathToFileURL } from 'node:url';
 // MCP Apps / OpenAI File Entrypoint contracts:
 // https://github.com/openai/mcp-extensions/blob/main/docs/spec.md#file-extension-entrypoint
 // https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/2026-01-26/apps.mdx
-export const VIEWER_URI = 'ui://pwh/inline-editor-0.5.7';
-const VERSION = '0.5.7';
+export const VIEWER_URI = 'ui://pwh/inline-editor-0.5.8';
+const VERSION = '0.5.8';
 const MIME = 'text/html;profile=mcp-app';
 // Use the established single-result MCP protocol; 2026-07-28 MRTR is not implemented.
 const SUPPORTED_PROTOCOLS = ['2024-11-05', '2025-03-26', '2025-06-18', '2025-11-25'];
@@ -73,6 +73,10 @@ const liveOperationSchema = {
 };
 
 export const TOOLS = [
+ {name:'pwh_client_fonts',title:'설치 글꼴 목록',description:'시스템·사용자 글꼴 목록을 앱에 공급합니다.',inputSchema:objectSchema(),annotations:readOnly,_meta:{ui:{visibility:['app']}}},
+ {name:'pwh_client_font_asset',title:'설치 글꼴 자산',description:'발견된 글꼴 ID의 검증된 바이트만 앱에 공급합니다.',inputSchema:objectSchema({id:{type:'string'},revision:{type:'string'},offset:{type:'integer',minimum:0}},['id','revision','offset']),annotations:readOnly,_meta:{ui:{visibility:['app']}}},
+ {name:'pwh_editor_replace_picture',title:'현재 선택 그림을 같은 위치에서 교체',description:'본문·표 셀의 선택 그림 하나를 새 PNG/JPEG/BMP로 교체합니다. image는 준비한 이미지 절대 경로, expected는 최신 context 전체입니다. 기존 크기·자르기·배치를 보존하고 같은 편집기 snapshot으로 반영합니다. ticket 결과와 시각 검수를 확인하세요. 도형·표 자체·머리말 그림은 지원하지 않습니다.',inputSchema:objectSchema({sessionId:{type:'string'},expected:{type:'object',additionalProperties:true},image:pathSchema},['sessionId','expected','image']),annotations:writeDocument},
+ {name:'pwh_client_image_asset',title:'그림 교체 자산 읽기',description:'선택 그림 교체의 검증된 이미지 청크를 읽는 앱 전용 도구입니다.',inputSchema:objectSchema({assetId:{type:'string'},sessionId:{type:'string'},offset:{type:'integer',minimum:0}},['assetId','sessionId','offset']),annotations:readOnly,_meta:{ui:{visibility:['app']}}},
  {name:'pwh_editor_layout',title:'현재 문서의 용지·여백 설정',description:'같은 편집기에서 용지·방향·여백을 변경하고 재조판합니다. 최신 context 전체를 expected로 전달합니다. sectionIndex 생략 시 전체 구역에 적용합니다. B4는 rhwp의 257×364mm 규격입니다. 지정하지 않은 값은 보존합니다. ticket 결과를 확인하세요.',inputSchema:objectSchema({sessionId:{type:'string'},expected:{type:'object',additionalProperties:true},sectionIndex:{type:'integer',minimum:0},patch:objectSchema({paper:{type:'string',enum:['A4','A3','B4','B5','Letter','Legal']},orientation:{type:'string',enum:['portrait','landscape']},marginsMm:objectSchema(Object.fromEntries(['left','right','top','bottom','header','footer','gutter'].map(k=>[k,{type:'number',minimum:0,maximum:150}])) )})},['sessionId','expected','patch']),annotations:writeDocument},
  {name:'pwh_new_document',title:'빈 한글 편집기 열기',description:'빈 HWPX 문서를 만들고 반환 nextAction으로 우측 pwh 편집기에 여세요. 빈 문서 AI 요청은 pwh_editor_compose로 같은 편집기에 작성합니다.',inputSchema:objectSchema({output:outputSchema}),annotations:writeDocument},
  {name:'pwh_editor_compose',title:'빈 편집기에 문서 작성',description:'최신 state.context 전체를 expected로 전달해 빈 문서에 제목·소제목·본문을 작성합니다. 기존 내용이 있으면 거절하며 결과 ticketId를 pwh_editor_result로 확인합니다. 실행 취소 한 번으로 복구합니다.',inputSchema:objectSchema({sessionId:{type:'string'},expected:{type:'object',additionalProperties:true},paragraphs:{type:'array',minItems:1,maxItems:128,items:objectSchema({role:{type:'string',enum:['title','heading','body']},text:{type:'string'}},['role','text'])}},['sessionId','expected','paragraphs']),annotations:writeDocument},
@@ -309,9 +313,12 @@ export function documentResult(value) {
 }
 
 export async function callTool(name, args = {}, requestMeta = {}) {
-  if(['pwh_editor_layout','pwh_editor_compose','pwh_editor_capture','pwh_editor_request','pwh_editor_poll','pwh_editor_state','pwh_editor_rewrite','pwh_editor_result'].includes(name)){
-    const module=await import('./editor-session.mjs');const fn={pwh_editor_layout:'editorLayout',pwh_editor_compose:'editorCompose',pwh_editor_capture:'editorCapture',pwh_editor_request:'editorRequest',pwh_editor_poll:'editorPoll',pwh_editor_state:'editorState',pwh_editor_rewrite:'editorRewrite',pwh_editor_result:'editorResult'}[name];return textResult(module[fn](args));
+  if(['pwh_editor_replace_picture','pwh_editor_layout','pwh_editor_compose','pwh_editor_capture','pwh_editor_request','pwh_editor_poll','pwh_editor_state','pwh_editor_rewrite','pwh_editor_result'].includes(name)){
+    const module=await import('./editor-session.mjs');const fn={pwh_editor_replace_picture:'editorReplacePicture',pwh_editor_layout:'editorLayout',pwh_editor_compose:'editorCompose',pwh_editor_capture:'editorCapture',pwh_editor_request:'editorRequest',pwh_editor_poll:'editorPoll',pwh_editor_state:'editorState',pwh_editor_rewrite:'editorRewrite',pwh_editor_result:'editorResult'}[name];return textResult(await module[fn](args));
   }
+  if(name==='pwh_client_fonts') return textResult(await (await import('./system-fonts.mjs')).systemFontSnapshot());
+  if(name==='pwh_client_font_asset') return (await import('./system-fonts.mjs')).systemFontChunk(args);
+  if(name==='pwh_client_image_asset') return (await import('./replacement-image.mjs')).replacementImageChunk(args);
   if(name==='pwh_client_asset') return (await import('./client-assets.mjs')).readClientAsset(args,requestMeta);
   if(name==='pwh_client_save_dialog') return textResult(await (await import('./client-assets.mjs')).selectClientSaveDestination(args,requestMeta));
   if(name==='pwh_client_save') return textResult(await (await import('./client-assets.mjs')).saveClientDocument(args,requestMeta));

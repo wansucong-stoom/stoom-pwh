@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {sfntFaces} from '../src/system-fonts.mjs';
+test('system font metadata preserves family aliases weight and TTC face identity',()=>{
+ const encoded=s=>{const b=Buffer.from(s,'utf16le');b.swap16();return b;};const names=[[1,'Test Family'],[4,'Test Family Bold'],[6,'TestFamily-Bold']];const strings=names.map(([,v])=>encoded(v)),header=6+12*names.length;const name=Buffer.alloc(header+strings.reduce((n,b)=>n+b.length,0));name.writeUInt16BE(names.length,2);name.writeUInt16BE(header,4);let off=0;
+ names.forEach(([id],i)=>{const p=6+i*12;name.writeUInt16BE(3,p);name.writeUInt16BE(1,p+2);name.writeUInt16BE(0x409,p+4);name.writeUInt16BE(id,p+6);name.writeUInt16BE(strings[i].length,p+8);name.writeUInt16BE(off,p+10);strings[i].copy(name,header+off);off+=strings[i].length;});
+ const os2=Buffer.alloc(64);os2.writeUInt16BE(700,4);const data=Buffer.alloc(44+name.length+64);data.writeUInt32BE(0x10000,0);data.writeUInt16BE(2,4);data.write('name',12);data.writeUInt32BE(44,20);data.writeUInt32BE(name.length,24);data.write('OS/2',28);data.writeUInt32BE(44+name.length,36);data.writeUInt32BE(64,40);name.copy(data,44);os2.copy(data,44+name.length);
+ const faces=sfntFaces(data);assert.equal(faces.length,1);assert.equal(faces[0].family,'Test Family');assert.equal(faces[0].weight,700);assert.equal(faces[0].faceIndex,0);assert.ok(faces[0].aliases.includes('TestFamily-Bold'));assert.deepEqual(sfntFaces(Buffer.alloc(0)),[]);
+});

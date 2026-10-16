@@ -1,3 +1,4 @@
+import {pictureTarget,replaceSelectedPicture} from './pwh-picture-replace';
 import {applyLayout} from './pwh-page-layout';
 import {blankBody,composeBlankBody} from './pwh-blank-compose';
 import { replaceTextWithMutationEffects } from './engine/command';
@@ -30,6 +31,28 @@ export function installInlineEditor(d:any) {
   context:read,
   export:()=>d.wasm.exportHwpxWithReport(),
   saved:(name:string)=>d.saved(name),
+  async replacePicture(command:any,bytes:Uint8Array){
+   const before:any=read();if(JSON.stringify(before)!==JSON.stringify(command.expected))throw Error('문서·선택 상태가 바뀌었습니다. 다시 요청하세요.');
+   if(applying)throw Error('이전 수정 적용 중입니다.');applying=true;
+   const input=d.getInputHandler(),cursor=input.getCursorPosition();let replacement:any;
+   try{
+    const {ref,pathJson}=pictureTarget(before),oldBytes=d.wasm.getControlImageData(ref.sec,ref.ppi,ref.ci,pathJson);
+    const oldBitmap=await createImageBitmap(new Blob([oldBytes])),newBitmap=await createImageBitmap(new Blob([bytes],{type:command.image.mediaType}));
+    let prepared=bytes,metadata=command.image,padded=false;
+    try{
+     if(oldBitmap.width*oldBitmap.height>16*1024*1024)throw Error('기존 이미지가 비율 보존 처리 한도를 초과합니다.');
+     if(oldBitmap.width*newBitmap.height!==oldBitmap.height*newBitmap.width){
+      const canvas=document.createElement('canvas');canvas.width=oldBitmap.width;canvas.height=oldBitmap.height;const ctx=canvas.getContext('2d');if(!ctx)throw Error('이미지 비율 보존 처리를 시작할 수 없습니다.');
+      const scale=Math.min(canvas.width/newBitmap.width,canvas.height/newBitmap.height),w=newBitmap.width*scale,h=newBitmap.height*scale;ctx.drawImage(newBitmap,(canvas.width-w)/2,(canvas.height-h)/2,w,h);
+      const blob:Blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(Error('이미지 비율 보존 처리 실패')),'image/png'));
+      prepared=new Uint8Array(await blob.arrayBuffer());if(prepared.length>8*1024*1024)throw Error('비율 보존 이미지가 8 MiB를 넘습니다.');metadata={...command.image,width:canvas.width,height:canvas.height,extension:'png',mediaType:'image/png'};padded=true;
+     }
+    }finally{oldBitmap.close();newBitmap.close();}
+    if(JSON.stringify(read())!==JSON.stringify(command.expected))throw Error('이미지 준비 중 문서·선택이 바뀌었습니다.');
+    await input.executeDocumentAgentOperation({kind:'snapshot',operationType:'pwh-picture-replace',operation:(wasm:any)=>{replacement={...replaceSelectedPicture(wasm,before,prepared,metadata),fit:'contain',transparentPadding:padded};return cursor;}},()=>d.getCanvasView().refreshDocumentAgentMutation());
+   }finally{applying=false;}
+   return {ok:true,context:read(),replacement,undoSteps:1};
+  },
   async layout(command:any){
    const before:any=read();if(JSON.stringify(before)!==JSON.stringify(command.expected))throw Error('문서 상태가 바뀌었습니다. 다시 요청하세요.');
    if(applying)throw Error('이전 수정 적용 중입니다.');applying=true;

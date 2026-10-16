@@ -3,6 +3,7 @@ import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 const root=path.resolve(process.argv[2]);
 const studio=path.join(root,'rhwp-studio');
+await fs.copyFile(new URL('../src/picture-replace.ts',import.meta.url),path.join(studio,'src/pwh-picture-replace.ts'));
 await fs.copyFile(new URL('../src/page-layout.ts',import.meta.url),path.join(studio,'src/pwh-page-layout.ts'));
 await fs.copyFile(new URL('../src/blank-compose.ts',import.meta.url),path.join(studio,'src/pwh-blank-compose.ts'));
 await fs.copyFile(new URL('../src/studio-selection.ts',import.meta.url),path.join(studio,'src/collaboration-selection.ts'));
@@ -19,6 +20,12 @@ const menuPath=path.join(studio,'src/ui/context-menu.ts');
 let menu=await fs.readFile(menuPath,'utf8');
 if(!menu.includes("commandId:'pwh:ai-rewrite-request'"))menu=menu.replace('    this.hide();',"    items=[{type:'command',commandId:'pwh:ai-rewrite-request',label:'AI 수정 요청'},{type:'separator'},...items];\n    this.hide();");
 await fs.writeFile(menuPath,menu);
+const localFontsPath=path.join(studio,'src/core/local-fonts.ts');
+let localFonts=await fs.readFile(localFontsPath,'utf8');
+if(!localFonts.includes('pwh host fonts in menu'))localFonts=localFonts.replace('export function getLocalFontRecords(options: GetLocalFontsOptions = {}): LocalFontRecord[] {',`export function getLocalFontRecords(options: GetLocalFontsOptions = {}): LocalFontRecord[] {
+  // pwh host fonts in menu: system inventory and renderer share the same source.
+  if (hostFontSource.active) return currentHostRecords().filter(record => options.includeRegistered || !record.aliases.some(name => REGISTERED_FONTS.has(name)));`);
+await fs.writeFile(localFontsPath,localFonts);
 const wasmPath=path.join(studio,'src/core/wasm-bridge.ts');
 let wasm=await fs.readFile(wasmPath,'utf8');
 wasm=wasm.replace('await init() as',"await init({module_or_path:await (window as any).pwhWasmBytes}) as");

@@ -12,10 +12,23 @@
  if(kind==='document'){state.source=m.source;state.sourceSha256=m.sha256;document.getElementById('pwh-title').textContent=m.name;}
  const bytes=Uint8Array.from(atob(r._meta?.['pwh/client-bytes']||''),x=>x.charCodeAt(0));if(!bytes.length||bytes.length>512*1024||offset+bytes.length>buffer.length)throw Error('문서 청크 오류');buffer.set(bytes,offset);offset+=bytes.length;
  }while(offset<buffer.length);if(await sha(buffer)!==hash)throw Error('문서 지문 검증 실패');return buffer;}
+ let fontInstall;
+ async function installSystemFonts(){
+  await installed;const listeners=new Set();let snapshot=(await tool('pwh_client_fonts',{})).structuredContent;
+  const provider={getSnapshot:async()=>snapshot,subscribe:fn=>{listeners.add(fn);return()=>listeners.delete(fn);},readFace:async(id,revision,signal)=>{
+   let offset=0,bytes,hash,faceIndex;
+   do{if(signal.aborted)throw Error('글꼴 요청 취소');const r=await tool('pwh_client_font_asset',{id,revision,offset}),m=r.structuredContent;
+    if(m.offset!==offset||m.totalBytes>64*1024*1024)throw Error('글꼴 전송 오류');if(!bytes){bytes=new Uint8Array(m.totalBytes);hash=m.sha256;faceIndex=m.faceIndex;}
+    if(hash!==m.sha256||bytes.length!==m.totalBytes)throw Error('글꼴 변경 감지');const part=Uint8Array.from(atob(r._meta?.['pwh/font-bytes']||''),x=>x.charCodeAt(0));if(!part.length||part.length>512*1024||offset+part.length>bytes.length)throw Error('글꼴 청크 오류');bytes.set(part,offset);offset+=part.length;
+   }while(offset<bytes.length);if(await sha(bytes)!==hash)throw Error('글꼴 SHA 오류');return {bytes:bytes.buffer,faceIndex};
+  }};
+  await window.rhwpStudio.fonts.setProvider(provider);
+
+ }
  async function consume(result){const d=result?._meta?.['pwh/client-document']||result?.structuredContent;if(d?.documentId)state.documentId=d.documentId;if(d?.source)state.source=d.source;
- if(state.loaded||state.loading)return;state.loading=true;try{const bytes=await asset('document');await installed;await window.pwhEditor.ready();await window.pwhEditor.load(bytes,state.source.split(/[\\/]/).pop());state.loaded=true;status('본문에서 직접 편집하세요. 다시 쓸 부분을 드래그하고 채팅으로 요청할 수 있습니다.');void poll();}catch(e){state.loading=false;status(e.message);}}
+ if(state.loaded||state.loading)return;state.loading=true;try{const bytes=await asset('document');await installed;await window.pwhEditor.ready();try{fontInstall??=installSystemFonts();await fontInstall;}catch(error){console.warn('[pwh fonts]',error.message);}await window.pwhEditor.load(bytes,state.source.split(/[\\/]/).pop());state.loaded=true;status('본문에서 직접 편집하세요. 다시 쓸 부분을 드래그하고 채팅으로 요청할 수 있습니다.');void poll();}catch(e){state.loading=false;status(e.message);}}
  window.addEventListener('message',event=>{if(event.source!==parent||event.data?.jsonrpc!=='2.0')return;if(state.origin!==null&&event.origin!==state.origin)return;const m=event.data,p=pending.get(m.id);if(p&&!m.method){state.origin=event.origin;clearTimeout(p.timer);pending.delete(m.id);m.error?p.reject(Error(m.error.message)):p.resolve(m.result);return;}if(m.method==='ui/notifications/tool-result')void consume(m.params);if(m.method==='ui/notifications/tool-input'&&m.params?.arguments?.file)void consume({});if(m.id!==undefined&&m.method==='ping')post({jsonrpc:'2.0',id:m.id,result:{}});});
- window.pwhWasmBytes=(async()=>{const init=await rpc('ui/initialize',{appInfo:{name:'pwh-inline-studio',version:'0.5.7'},appCapabilities:{availableDisplayModes:['inline','fullscreen']},protocolVersion:'2026-01-26'});state.host=init.hostCapabilities||{};post({jsonrpc:'2.0',method:'ui/notifications/initialized',params:{}});return asset('wasm');})();
+ window.pwhWasmBytes=(async()=>{const init=await rpc('ui/initialize',{appInfo:{name:'pwh-inline-studio',version:'0.5.8'},appCapabilities:{availableDisplayModes:['inline','fullscreen']},protocolVersion:'2026-01-26'});state.host=init.hostCapabilities||{};post({jsonrpc:'2.0',method:'ui/notifications/initialized',params:{}});return asset('wasm');})();
  window.pwhWasmBytes.catch(e=>status(e.message));
  window.addEventListener('pwh-ai-request',event=>{
   if(!state.loaded||document.getElementById('pwh-ai-dialog'))return;
@@ -39,6 +52,15 @@
   }catch(error){notice.textContent=error.message;}finally{submit.disabled=false;}};
   dialog.showModal();note.focus();
  });
- async function poll(){if(!state.loaded)return;try{const context=window.pwhEditor.context();const r=await tool('pwh_editor_poll',{sessionId:state.sessionId,source:state.source,context,...(state.receipt?{receipt:state.receipt}:{})});state.receipt=null;for(const command of r.structuredContent?.commands||[]){try{const result=await (command.type==='layout'?window.pwhEditor.layout(command):command.type==='compose'?window.pwhEditor.compose(command):window.pwhEditor.rewrite(command));state.receipt={ticketId:command.ticketId,ok:true,undoSteps:result.undoSteps,...(result.changes?{changes:result.changes}:{})};status('선택한 영역에 GPT 수정을 반영했습니다. 실행 취소로 되돌릴 수 있습니다.');}catch(e){state.receipt={ticketId:command.ticketId,ok:false,error:e.message};status(e.message);}}}catch(e){status(e.message);}finally{setTimeout(poll,1500);}}
+ async function replacementBytes(image){
+  let offset=0;const bytes=new Uint8Array(image.totalBytes);if(bytes.length>8*1024*1024)throw Error('교체 이미지가 너무 큽니다.');
+  while(offset<bytes.length){const r=await tool('pwh_client_image_asset',{assetId:image.assetId,sessionId:state.sessionId,offset}),m=r.structuredContent;
+   if(m.offset!==offset||m.sha256!==image.sha256||m.totalBytes!==bytes.length)throw Error('이미지 전송 정보 오류');
+   const part=Uint8Array.from(atob(r._meta?.['pwh/image-bytes']||''),x=>x.charCodeAt(0));if(!part.length||part.length>512*1024||offset+part.length>bytes.length)throw Error('이미지 청크 오류');bytes.set(part,offset);offset+=part.length;
+  }
+  if(await sha(bytes)!==image.sha256)throw Error('이미지 SHA 검증 실패');
+  const bitmap=await createImageBitmap(new Blob([bytes],{type:image.mediaType}));try{if(bitmap.width!==image.width||bitmap.height!==image.height)throw Error('이미지 실제 크기 불일치');}finally{bitmap.close();}return bytes;
+ }
+ async function poll(){if(!state.loaded)return;try{const context=window.pwhEditor.context();const r=await tool('pwh_editor_poll',{sessionId:state.sessionId,source:state.source,context,...(state.receipt?{receipt:state.receipt}:{})});state.receipt=null;for(const command of r.structuredContent?.commands||[]){try{const result=await (command.type==='replacePicture'?window.pwhEditor.replacePicture(command,await replacementBytes(command.image)):command.type==='layout'?window.pwhEditor.layout(command):command.type==='compose'?window.pwhEditor.compose(command):window.pwhEditor.rewrite(command));state.receipt={ticketId:command.ticketId,ok:true,undoSteps:result.undoSteps,...(result.changes?{changes:result.changes}:{}),...(result.replacement?{replacement:result.replacement}:{})};status('선택한 영역에 GPT 수정을 반영했습니다. 실행 취소로 되돌릴 수 있습니다.');}catch(e){state.receipt={ticketId:command.ticketId,ok:false,error:e.message};status(e.message);}}}catch(e){status(e.message);}finally{setTimeout(poll,1500);}}
  document.addEventListener('DOMContentLoaded',()=>{document.getElementById('pwh-save').onclick=async()=>{const button=document.getElementById('pwh-save');if(button.disabled)return;button.disabled=true;try{status('저장할 폴더와 파일명을 선택하세요.');const choice=(await tool('pwh_client_save_dialog',{documentId:state.documentId,expectedSourceSha256:state.sourceSha256},310000)).structuredContent;if(choice.cancelled){status('저장을 취소했습니다.');return;}const artifact=window.pwhEditor.export();if(artifact.contentLoss.count)throw Error('내용 손실이 보고되어 저장하지 않았습니다.');const bytes=artifact.bytes;if(bytes.length>3*1024*1024)throw Error('현재 저장 한도는 3 MiB입니다.');let encoded='';for(let i=0;i<bytes.length;i+=8192)encoded+=String.fromCharCode(...bytes.subarray(i,i+8192));const r=await tool('pwh_client_save',{documentId:state.documentId,saveTicket:choice.saveTicket,base64:btoa(encoded),expectedSourceSha256:state.sourceSha256,documentSha256:await sha(bytes),revision:1});const d=r.structuredContent;state.documentId=d.documentId;state.source=d.path;state.sourceSha256=d.sourceSha256;await window.pwhEditor.saved(d.path.split(/[\\/]/).pop());status(`저장 완료: ${d.path}`);}catch(e){status(e.message);}finally{button.disabled=false;}};});
 })();

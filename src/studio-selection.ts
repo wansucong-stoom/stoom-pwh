@@ -204,7 +204,7 @@ export function installSelectionBridge(deps: BridgeDependencies) {
       } else if (ref.type === 'equation') properties = read('equation properties', deps.wasm, 'getEquationProperties', ref.sec, ref.ppi, ref.ci, ref.cellIdx, ref.cellParaIdx);
       const bbox = ref.type === 'shape' && !objectPath && ref.cellIdx === undefined && !ref.headerFooter && !ref.noteRef
         ? read('shape rectangle', deps.wasm, 'getShapeBBox', ref.sec, ref.ppi, ref.ci) : null;
-      return { source: ref, properties, bbox };
+      return { source: ref, properties, bbox, geometry: properties?{unit:'HWPUNIT (7200 per inch)',widthMm:properties.width*25.4/7200,heightMm:properties.height*25.4/7200,frameAspectRatio:properties.height?properties.width/properties.height:null,preserveSize:true,preserveAspectRatio:true,preservePosition:true,rotationAngle:properties.rotationAngle,crop:{left:properties.cropLeft,top:properties.cropTop,right:properties.cropRight,bottom:properties.cropBottom},replacementFit:'contain; keep existing frame/crop/rotation, pad if incoming pixel aspect differs'}:null };
     });
     const agent = deps.getDocumentAgent?.();
     const documentState = agent ? read('document state', agent, 'getDocumentState') : null;

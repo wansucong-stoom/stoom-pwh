@@ -45,6 +45,16 @@ export function editorLayout(args){
  const ticketId=randomUUID(),ticket={ticketId,sessionId:args.sessionId,status:'pending',createdAt:Date.now()};tickets.set(ticketId,ticket);if(tickets.size>128)tickets.delete(tickets.keys().next().value);
  sessions.get(args.sessionId).commands.push({ticketId,type:'layout',expected:structuredClone(args.expected),patch:structuredClone(p),...(args.sectionIndex===undefined?{}:{sectionIndex:args.sectionIndex})});return ticket;
 }
+export async function editorReplacePicture(args){
+ const current=editorState({sessionId:args.sessionId});
+ if(JSON.stringify(current.context)!==JSON.stringify(args.expected))throw Error('문서·선택 상태가 바뀌었습니다. 다시 읽으세요.');
+ const objects=current.context.objects,ref=objects?.[0]?.source;
+ if(current.context.kind!=='object'||objects?.length!==1||ref?.type!=='image'||ref.headerFooter||ref.noteRef||!objects[0].properties)throw Error('본문 또는 표 셀의 그림 하나를 선택하세요.');
+ const image=await (await import('./replacement-image.mjs')).registerReplacementImage(args.image,args.sessionId);
+ if(JSON.stringify(editorState({sessionId:args.sessionId}).context)!==JSON.stringify(args.expected))throw Error('이미지 검사 중 문서·선택이 바뀌었습니다.');
+ const ticketId=randomUUID(),ticket={ticketId,sessionId:args.sessionId,status:'pending',createdAt:Date.now()};tickets.set(ticketId,ticket);if(tickets.size>128)tickets.delete(tickets.keys().next().value);
+ sessions.get(args.sessionId).commands.push({ticketId,type:'replacePicture',expected:structuredClone(args.expected),image});return {...ticket,image,limitations:['기존 틀·자르기를 유지하고 비율이 다르면 contain 투명 여백을 추가합니다. 기존 crop에 의한 잘림은 시각적으로 확인하세요.']};
+}
 export function editorResult(args){const result=tickets.get(args.ticketId);if(!result)throw Error('Unknown editor ticket');return result;}
 export function editorCapture(args){
  if(typeof args.note!=='string'||!args.note.trim()||args.note.length>4000)throw Error('수정 요청 내용을 작성하세요.');
