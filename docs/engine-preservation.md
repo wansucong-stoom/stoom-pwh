@@ -55,6 +55,15 @@ The result is `inline-dist/editor.js`, `rhwp-studio.css` and
 `editor-body.html`. Compare their hashes with the runtime manifest. Applying the
 recorded patch to pristine inputs is a separate reproducibility check.
 
+Revision 1 was installed into a fresh directory from its local ZIP with downloads
+disabled. A real five-page HWPX opened, exported and reopened with five pages;
+the original file remained unchanged. Rebuilding from the preserved inputs and
+22 installed build packages produced byte-identical CSS and HTML. JavaScript
+differed only in generated `//#region` build-directory comments; removing that
+specific comment-path difference made the complete files identical. The release's
+`VERIFICATION.json` records both raw hashes and this limitation. The 15-file
+upstream-to-pwh patch also replayed with every resulting source hash matching.
+
 Cargo crate archives are preserved with their original checksums. **A full
 native CLI/WASM rebuild is not claimed:** Rust toolchains, Skia externals and
 platform build tooling are not all vendored or validated. The existing native

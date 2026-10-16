@@ -7,8 +7,8 @@
   "releaseTag": "engine-rhwp-0.8.7-pwh-r1",
   "runtime": {
     "file": "pwh-runtime-rhwp-0.8.7-pwh-r1-windows-x64.zip",
-    "size": 40470743,
-    "sha256": "441b27eb1353c866cfb7c7f4748c9e2f5f73eb3642694d52c3fc4c9c41995e75",
+    "size": 40480279,
+    "sha256": "87c2f6cfed0fd362a7ee9b9a866df60dba8cf2dcc357f7f35315429aa4f78a0a",
     "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r1/pwh-runtime-rhwp-0.8.7-pwh-r1-windows-x64.zip"
   },
   "preservationAssets": [
@@ -32,8 +32,8 @@
     },
     {
       "file": "pwh-build-scripts-rhwp-0.8.7-pwh-r1.zip",
-      "size": 639926,
-      "sha256": "5afa8663b248bceb50fd19b7a2f37e96ec03f07995a4d5ec5dacc2adc9dd0373",
+      "size": 640624,
+      "sha256": "ae6efa451be4b8db30b894b5ee392337958c12b958662bb98bebaa35379da959",
       "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r1/pwh-build-scripts-rhwp-0.8.7-pwh-r1.zip"
     },
     {
@@ -68,8 +68,8 @@
     },
     {
       "file": "THIRD-PARTY-NOTICES.txt",
-      "size": 4322066,
-      "sha256": "2ee02f270d6d76b18d1db062269458ac2d9fb4acf6bc328aec5fed79d4dcce42",
+      "size": 4354888,
+      "sha256": "88ec58690afec0843d4f6ab9fc2f17b0e8a2458f4658783b67e29d9fc6100e1e",
       "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r1/THIRD-PARTY-NOTICES.txt"
     },
     {
@@ -92,7 +92,7 @@
     },
     {
       "file": "PROVENANCE.json",
-      "sha256": "97eaac04b5cb2cf578a8ae11ff2e221af6ea70993672b45525b429d620f3973e",
+      "sha256": "23c29c4bdffd995d84c7779cb48e6e47545c0730ccc765075d3ae9169e1eb4fd",
       "size": 6425,
       "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r1/PROVENANCE.json"
     }
