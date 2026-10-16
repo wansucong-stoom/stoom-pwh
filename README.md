@@ -179,3 +179,9 @@ pwh 코드는 [MIT License](LICENSE)입니다. 이 라이선스가 외부 엔진
 - 한컴·Windows 등의 상용 글꼴, 기관 문서와 로고: 이 저장소에 포함하지 않습니다.
 
 상세 목록은 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)를 확인하세요. pwh는 Hancom, rhwp, HOP 또는 OpenAI의 공식 제품이 아니며 각 프로젝트·상표의 소유권을 주장하지 않습니다.
+
+## 기본 문서 작성·수정 흐름
+
+문서 초안을 만들거나 파일을 수정한 뒤 검증하고, 호스트의 `open_in_codex` file target / right placement로 우측 pwh 본문 편집기에 표시한다. 작성·수정 도구 결과의 `nextAction`은 호스트 에이전트가 실행할 열기 안내다. 플러그인이 직접 Codex 패널을 강제로 여는 API는 아니며 `awaitingHostOpen`은 아직 표시를 확인하지 않았다는 뜻이다. 같은 편집기에서 선택 수정하는 경우에는 현재 모델에 반영한다.
+
+새 수정본 저장은 Windows 저장 창에서 폴더·파일명을 선택하고, 취소 시 파일을 쓰지 않는다. 원본과 기존 파일은 덮어쓰지 않는다.

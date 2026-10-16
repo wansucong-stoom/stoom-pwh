@@ -2,6 +2,30 @@ import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { createHash, randomUUID } from 'node:crypto';
 import config from './config.mjs';
+import {execFile} from 'node:child_process';
+import {promisify} from 'node:util';
+import {fileURLToPath} from 'node:url';
+const execFileAsync=promisify(execFile);
+const saveTickets=new Map();
+export async function chooseSavePath({initialDirectory,suggestedName}) {
+  if(process.platform!=='win32') throw new Error('Windows save dialog is required on this platform');
+  const {stdout}=await execFileAsync('powershell.exe',['-NoProfile','-STA','-File',fileURLToPath(new URL('../scripts/save-dialog.ps1',import.meta.url)),'-InitialDirectory',initialDirectory,'-SuggestedName',suggestedName],{windowsHide:true,timeout:300000,maxBuffer:65536,encoding:'utf8'});
+  return JSON.parse(stdout.trim());
+}
+export async function selectClientSaveDestination(args,meta={},choose=chooseSavePath) {
+  const source=documentPath(meta,args.documentId);
+  if(!hashPattern.test(args.expectedSourceSha256||'')||sha(await fs.readFile(source))!==args.expectedSourceSha256) throw new Error('Source changed; reopen the document');
+  const selected=await choose({initialDirectory:path.dirname(source),suggestedName:`${path.basename(source,path.extname(source))}-수정본-${randomUUID().slice(0,8)}.hwpx`});
+  if(selected.cancelled)return {cancelled:true};
+  const filename=selected.path;
+  if(typeof filename!=='string'||!path.isAbsolute(filename)||!/\.hwpx$/i.test(filename))throw new Error('Choose an absolute HWPX filename');
+  try {await fs.lstat(filename);throw new Error('Existing file cannot be overwritten; choose a new filename');}catch(e){if(e.code!=='ENOENT')throw e;}
+  const saveTicket=randomUUID();
+  for(const [id,t] of saveTickets)if(Date.now()-t.createdAt>600000)saveTickets.delete(id);
+  if(saveTickets.size>=64)throw new Error('Too many pending save dialogs');
+  saveTickets.set(saveTicket,{source,filename,sha256:args.expectedSourceSha256,createdAt:Date.now()});
+  return {cancelled:false,saveTicket,path:filename};
+}
 import {runEngine} from './engine.mjs';
 
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -66,9 +90,11 @@ export async function saveClientDocument(args,meta={}) {
   const bytes=Buffer.from(args.base64,'base64');
   if(bytes.toString('base64')!==args.base64) throw new Error('Noncanonical base64 snapshot');
   if(!bytes.length||bytes.length>MAX_DOCUMENT||bytes.subarray(0,2).toString()!=='PK'||sha(bytes)!==args.documentSha256) throw new Error('Snapshot signature/digest mismatch');
-  const filename=path.join(path.dirname(source),`${path.basename(source,'.hwpx')}-수정본-${randomUUID().slice(0,8)}.hwpx`);
+  const ticket=saveTickets.get(args.saveTicket);
+  if(!ticket||ticket.source!==source||ticket.sha256!==args.expectedSourceSha256||Date.now()-ticket.createdAt>600000)throw new Error('Choose a save destination again');
+  const filename=ticket.filename;
   // A fresh same-directory file never overwrites the source. Parse before publishing.
-  const temporary=path.join(path.dirname(source),`.pwh-${randomUUID()}.hwpx`);
+  const temporary=path.join(path.dirname(filename),`.pwh-${randomUUID()}.hwpx`);
   let created=false;
   try {
     await fs.writeFile(temporary,bytes,{flag:'wx'});
@@ -77,6 +103,7 @@ export async function saveClientDocument(args,meta={}) {
     if(info?.format!=='hwpx') throw new Error('Client snapshot did not reopen as HWPX');
     if(sha(await fs.readFile(source))!==args.expectedSourceSha256) throw new Error('Source changed during save');
     await fs.copyFile(temporary,filename,1);
+    saveTickets.delete(args.saveTicket);
     const registered=await registerClientDocument(filename);
     return {...registered,path:filename,revision:args.revision,documentSha256:sha(bytes),info};
   } finally { if(created) await fs.unlink(temporary).catch(()=>{}); }

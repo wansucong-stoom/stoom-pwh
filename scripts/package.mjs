@@ -12,7 +12,7 @@ const FILES = Object.freeze([
   'engine.config.json', 'engine.config.example.json', 'README.md', 'LICENSE',
   'THIRD_PARTY_NOTICES.md', 'CONTRIBUTING.md', 'scripts/setup.mjs',
   'scripts/inspect_template.py', 'scripts/fill_form.py', 'scripts/replace_image.py', 'scripts/build-studio.ps1',
-  'scripts/package.mjs', 'scripts/build-inline.mjs',
+  'scripts/package.mjs', 'scripts/build-inline.mjs', 'scripts/save-dialog.ps1',
 ]);
 const DIRECTORIES = Object.freeze(['docs', 'licenses', 'skills', 'src', 'examples']);
 const SOURCE_EXTENSIONS = new Set(['.md', '.txt', '.json', '.mjs', '.js', '.ts', '.html', '.css', '.svg']);

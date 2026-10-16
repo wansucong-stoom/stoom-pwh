@@ -5,8 +5,8 @@ import { pathToFileURL } from 'node:url';
 // MCP Apps / OpenAI File Entrypoint contracts:
 // https://github.com/openai/mcp-extensions/blob/main/docs/spec.md#file-extension-entrypoint
 // https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/2026-01-26/apps.mdx
-export const VIEWER_URI = 'ui://pwh/inline-editor-0.5.3';
-const VERSION = '0.5.3';
+export const VIEWER_URI = 'ui://pwh/inline-editor-0.5.4';
+const VERSION = '0.5.4';
 const MIME = 'text/html;profile=mcp-app';
 // Use the established single-result MCP protocol; 2026-07-28 MRTR is not implemented.
 const SUPPORTED_PROTOCOLS = ['2024-11-05', '2025-03-26', '2025-06-18', '2025-11-25'];
@@ -86,9 +86,12 @@ export const TOOLS = [
     annotations:readOnly,_meta:{ui:{visibility:['app']}},
   },
   {
+    name:'pwh_client_save_dialog',title:'수정본 저장 위치 선택',description:'사용자의 저장 버튼 클릭에 따라 Windows 저장 창을 엽니다. 취소하면 파일을 쓰지 않습니다.',inputSchema:objectSchema({documentId:{type:'string'},expectedSourceSha256:{type:'string'}},['expectedSourceSha256']),annotations:writeDocument,_meta:{ui:{visibility:['app']}},
+  },
+  {
     name:'pwh_client_save',title:'클라이언트 HWPX 새 수정본 저장',
     description:'메모리 HWPX를 SHA·원본 변경 검사 후 새 파일로 저장합니다. 클라이언트 전용이며 원본을 덮어쓰지 않습니다.',
-    inputSchema:objectSchema({documentId:{type:'string',minLength:36},base64:{type:'string',minLength:1},expectedSourceSha256:{type:'string',minLength:64},documentSha256:{type:'string',minLength:64},revision:{type:'integer',minimum:0}},['base64','expectedSourceSha256','documentSha256','revision']),
+    inputSchema:objectSchema({saveTicket:{type:'string'},documentId:{type:'string',minLength:36},base64:{type:'string',minLength:1},expectedSourceSha256:{type:'string',minLength:64},documentSha256:{type:'string',minLength:64},revision:{type:'integer',minimum:0}},['saveTicket','base64','expectedSourceSha256','documentSha256','revision']),
     annotations:writeDocument,_meta:{ui:{visibility:['app']}},
   },
   {
@@ -156,7 +159,7 @@ export const TOOLS = [
   },
   {
     name: 'pwh_create_document', title: 'HWPX 문서 만들기',
-    description: '제목·문단·표 등을 담은 spec으로 새 HWPX 문서를 만듭니다. 완료 후 pwh_preview로 조판 결과를 확인하세요.',
+    description: '제목·문단·표 등을 담은 spec으로 새 HWPX 문서를 만듭니다. 초안 저장·검증 후 open_in_codex(target:{type:file,path:출력절대경로},placement:right)로 우측 본문 편집기에 여세요. 채팅에 편집기 위젯을 만들지 마세요.',
     inputSchema: objectSchema({ spec: documentSpecSchema, output: outputSchema }, ['spec']),
     annotations: writeDocument,
   },
@@ -297,11 +300,17 @@ async function previewResult(input, options, { includeImages = true } = {}) {
   };
 }
 
+export function documentResult(value) {
+  const filename=value.path||value.output;
+  return textResult({...value,...(typeof filename==='string'&&/\.hwpx$/i.test(filename)?{nextAction:{tool:'open_in_codex',arguments:{target:{type:'file',path:filename},placement:'right'},instruction:'검증 후 별도 요청을 기다리지 말고 우측 pwh 본문 편집기에 여세요. 실제 로드 여부를 확인하고 파일 링크도 전달하세요.',awaitingHostOpen:true}}:{})});
+}
+
 export async function callTool(name, args = {}, requestMeta = {}) {
   if(['pwh_editor_capture','pwh_editor_request','pwh_editor_poll','pwh_editor_state','pwh_editor_rewrite','pwh_editor_result'].includes(name)){
     const module=await import('./editor-session.mjs');const fn={pwh_editor_capture:'editorCapture',pwh_editor_request:'editorRequest',pwh_editor_poll:'editorPoll',pwh_editor_state:'editorState',pwh_editor_rewrite:'editorRewrite',pwh_editor_result:'editorResult'}[name];return textResult(module[fn](args));
   }
   if(name==='pwh_client_asset') return (await import('./client-assets.mjs')).readClientAsset(args,requestMeta);
+  if(name==='pwh_client_save_dialog') return textResult(await (await import('./client-assets.mjs')).selectClientSaveDestination(args,requestMeta));
   if(name==='pwh_client_save') return textResult(await (await import('./client-assets.mjs')).saveClientDocument(args,requestMeta));
   // Accept old local development calls without advertising a second service name.
   if (name.startsWith('hop_')) name = `pwh_${name.slice(4)}`;
@@ -329,13 +338,13 @@ export async function callTool(name, args = {}, requestMeta = {}) {
     const {input, ...options} = args;
     return textResult(await (await import('./template.mjs')).inspectTemplate(absolutePath(input, 'input'), options));
   }
-  if (name === 'pwh_fill_form') return textResult(await (await import('./form.mjs')).fillInstitutionForm(args));
-  if (name === 'pwh_replace_image') return textResult(await (await import('./images.mjs')).replaceDocumentImage(args));
+  if (name === 'pwh_fill_form') return documentResult(await (await import('./form.mjs')).fillInstitutionForm(args));
+  if (name === 'pwh_replace_image') return documentResult(await (await import('./images.mjs')).replaceDocumentImage(args));
   const engine = await loadEngine();
   if (name === 'pwh_status') return textResult(await engine.engineInfo());
   if (name === 'pwh_info') return textResult(await engine.inspectDocument(absolutePath(args.input, 'input')));
-  if (name === 'pwh_create_document') return textResult(await engine.createDocument(args.spec, args.output === undefined ? undefined : absolutePath(args.output, 'output')));
-  if (name === 'pwh_edit_template') return textResult(await engine.editTemplate(absolutePath(args.input, 'input'), args.output === undefined ? undefined : absolutePath(args.output, 'output'), args.changes));
+  if (name === 'pwh_create_document') return documentResult(await engine.createDocument(args.spec, args.output === undefined ? undefined : absolutePath(args.output, 'output')));
+  if (name === 'pwh_edit_template') return documentResult(await engine.editTemplate(absolutePath(args.input, 'input'), args.output === undefined ? undefined : absolutePath(args.output, 'output'), args.changes));
   if (name === 'pwh_preview') {
     const document=await (await import('./client-assets.mjs')).registerClientDocument(absolutePath(args.input,'input'));
     return {content:[{type:'text',text:'HWPX를 클라이언트 조판 뷰어에 연결했습니다. 쪽수·배치는 클라이언트 로드 후 확인하세요.'}],
@@ -362,7 +371,7 @@ export async function handleRequest(message) {
           protocolVersion: SUPPORTED_PROTOCOLS.includes(params.protocolVersion) ? params.protocolVersion : '2025-11-25',
           capabilities: { tools: { listChanged: false }, resources: { subscribe: false, listChanged: false } },
           serverInfo: { name: 'pwh', version: VERSION, title: 'pwh' },
-          instructions: '함께 편집하려면 pwh_live_open의 URL을 브라우저 패널에 열고 pwh_live_read로 현재 문서를 읽으세요. pwh_live_apply와 pwh_live_save에는 최신 expectedState가 필요합니다. pwh_info·pwh_edit_template·pwh_preview는 디스크 파일을 처리하며 브라우저의 미저장 편집과 구분해야 합니다.',
+          instructions: '문서 작성·수정의 기본 흐름은 초안 HWPX 저장·검증 후 open_in_codex의 file target과 placement:right로 우측 pwh 편집기에 표시하는 것입니다. 별도 열기 요청을 기다리지 말고 실제 로드 여부를 확인하세요. 선택 수정은 같은 열린 편집기에 반영하고 전체 문서를 다시 만들지 마세요. 함께 편집하려면 pwh_live_open의 URL을 브라우저 패널에 열고 pwh_live_read로 현재 문서를 읽으세요. pwh_live_apply와 pwh_live_save에는 최신 expectedState가 필요합니다. pwh_info·pwh_edit_template·pwh_preview는 디스크 파일을 처리하며 브라우저의 미저장 편집과 구분해야 합니다.',
         };
         break;
       case 'server/discover':
