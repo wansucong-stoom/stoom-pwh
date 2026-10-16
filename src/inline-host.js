@@ -1,6 +1,8 @@
 (()=>{
  const state={origin:null,id:0,documentId:null,source:null,sourceSha256:null,loading:false,loaded:false,sessionId:crypto.randomUUID(),receipt:null,host:{},checkpointSha:null};
  const pending=new Map(),status=text=>{const e=document.getElementById('pwh-status');if(e){e.textContent=text;e.title=text;}};
+ window.addEventListener('error',event=>status('편집기 오류: '+event.message));
+ window.addEventListener('unhandledrejection',event=>status('편집기 처리 오류: '+(event.reason?.message||String(event.reason))));
  const installed=new Promise(resolve=>window.addEventListener('pwh-editor-installed',resolve,{once:true}));
  const post=m=>parent.postMessage(m,state.origin&&state.origin!=='null'?state.origin:'*');
  const rpc=(method,params,timeout=45000)=>new Promise((resolve,reject)=>{const id=`pwh-inline-${++state.id}`,timer=setTimeout(()=>{pending.delete(id);reject(Error('편집기 연결 응답 시간이 초과되었습니다.'));},timeout);pending.set(id,{resolve,reject,timer});post({jsonrpc:'2.0',id,method,params});});
@@ -17,7 +19,7 @@
   await installed;const listeners=new Set();let snapshot=(await tool('pwh_client_fonts',{})).structuredContent;
   const provider={getSnapshot:async()=>snapshot,subscribe:fn=>{listeners.add(fn);return()=>listeners.delete(fn);},readFace:async(id,revision,signal)=>{
    let offset=0,bytes,hash,faceIndex;
-   do{if(signal.aborted)throw Error('글꼴 요청 취소');const r=await tool('pwh_client_font_asset',{id,revision,offset}),m=r.structuredContent;
+   do{if(signal.aborted)throw Error('글꼴 요청 취소');if(state.loading)status('문서 글꼴을 읽고 있습니다: '+(snapshot.faces.find(face=>face.id===id)?.family||id)+' · '+Math.round(offset/1024)+' KiB');const r=await tool('pwh_client_font_asset',{id,revision,offset}),m=r.structuredContent;
     if(m.offset!==offset||m.totalBytes>64*1024*1024)throw Error('글꼴 전송 오류');if(!bytes){bytes=new Uint8Array(m.totalBytes);hash=m.sha256;faceIndex=m.faceIndex;}
     if(hash!==m.sha256||bytes.length!==m.totalBytes)throw Error('글꼴 변경 감지');const part=Uint8Array.from(atob(r._meta?.['pwh/font-bytes']||''),x=>x.charCodeAt(0));if(!part.length||part.length>512*1024||offset+part.length>bytes.length)throw Error('글꼴 청크 오류');bytes.set(part,offset);offset+=part.length;
    }while(offset<bytes.length);if(await sha(bytes)!==hash)throw Error('글꼴 SHA 오류');return {bytes:bytes.buffer,faceIndex};
@@ -39,9 +41,9 @@
   }catch(error){console.warn('[pwh recovery]',error.message);}
  }
  async function consume(result){const d=result?._meta?.['pwh/client-document']||result?.structuredContent;if(d?.documentId)state.documentId=d.documentId;if(d?.source)state.source=d.source;
- if(state.loaded||state.loading)return;state.loading=true;try{const bytes=await asset('document');await installed;await window.pwhEditor.ready();try{fontInstall??=installSystemFonts();await fontInstall;}catch(error){console.warn('[pwh fonts]',error.message);}await window.pwhEditor.load(bytes,state.source.split(/[\\/]/).pop());await offerRecovery();state.loaded=true;status('본문에서 직접 편집하세요. 다시 쓸 부분을 드래그하고 채팅으로 요청할 수 있습니다.');void poll();}catch(e){state.loading=false;status(e.message);const retry=document.getElementById('pwh-retry');if(retry){retry.hidden=false;retry.onclick=()=>{retry.hidden=true;void consume({});};}}}
+ if(state.loaded||state.loading)return;state.loading=true;try{status('문서 파일을 읽고 있습니다.');const bytes=await asset('document');status('편집기 초기화를 기다리고 있습니다.');await installed;await window.pwhEditor.ready();try{status('시스템 글꼴 목록을 준비하고 있습니다.');fontInstall??=installSystemFonts();await fontInstall;}catch(error){console.warn('[pwh fonts]',error.message);}status('문서 조판과 첫 페이지를 준비하고 있습니다.');await window.pwhEditor.load(bytes,state.source.split(/[\\/]/).pop());status('미저장 복구본을 확인하고 있습니다.');await offerRecovery();state.loaded=true;status('본문에서 직접 편집하세요. 다시 쓸 부분을 드래그하고 채팅으로 요청할 수 있습니다.');void poll();}catch(e){state.loading=false;status(e.message);const retry=document.getElementById('pwh-retry');if(retry){retry.hidden=false;retry.onclick=()=>{retry.hidden=true;void consume({});};}}}
  window.addEventListener('message',event=>{if(event.source!==parent||event.data?.jsonrpc!=='2.0')return;if(state.origin!==null&&event.origin!==state.origin)return;const m=event.data,p=pending.get(m.id);if(p&&!m.method){state.origin=event.origin;clearTimeout(p.timer);pending.delete(m.id);m.error?p.reject(Error(m.error.message)):p.resolve(m.result);return;}if(m.method==='ui/notifications/tool-result')void consume(m.params);if(m.method==='ui/notifications/tool-input'&&m.params?.arguments?.file)void consume({});if(m.id!==undefined&&m.method==='ping')post({jsonrpc:'2.0',id:m.id,result:{}});});
- window.pwhWasmBytes=(async()=>{const init=await rpc('ui/initialize',{appInfo:{name:'pwh-inline-studio',version:'0.6.8'},appCapabilities:{availableDisplayModes:['inline','fullscreen']},protocolVersion:'2026-01-26'});state.host=init.hostCapabilities||{};post({jsonrpc:'2.0',method:'ui/notifications/initialized',params:{}});return asset('wasm');})();
+ window.pwhWasmBytes=(async()=>{const init=await rpc('ui/initialize',{appInfo:{name:'pwh-inline-studio',version:'0.6.9'},appCapabilities:{availableDisplayModes:['inline','fullscreen']},protocolVersion:'2026-01-26'});state.host=init.hostCapabilities||{};post({jsonrpc:'2.0',method:'ui/notifications/initialized',params:{}});return asset('wasm');})();
  window.pwhWasmBytes.catch(e=>status(e.message));
  window.addEventListener('pwh-ai-request',event=>{
   if(!state.loaded||document.getElementById('pwh-ai-dialog'))return;
