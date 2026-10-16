@@ -5,8 +5,9 @@ import { pathToFileURL } from 'node:url';
 // MCP Apps / OpenAI File Entrypoint contracts:
 // https://github.com/openai/mcp-extensions/blob/main/docs/spec.md#file-extension-entrypoint
 // https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/2026-01-26/apps.mdx
-export const VIEWER_URI = 'ui://pwh/inline-editor-0.5.9';
-const VERSION = '0.5.9';
+export const VIEWER_URI = 'ui://pwh/inline-editor-0.6.0';
+const VERSION = '0.6.0';
+export const isViewerResourceUri=uri=>typeof uri==='string'&&/^ui:\/\/pwh\/inline-editor(?:-\d+\.\d+\.\d+)?$/.test(uri);
 const MIME = 'text/html;profile=mcp-app';
 // Use the established single-result MCP protocol; 2026-07-28 MRTR is not implemented.
 const SUPPORTED_PROTOCOLS = ['2024-11-05', '2025-03-26', '2025-06-18', '2025-11-25'];
@@ -405,9 +406,9 @@ export async function handleRequest(message) {
       case 'resources/list': result = { resources: [{ uri: VIEWER_URI, name: 'pwh-viewer', title: 'pwh 문서 뷰어', mimeType: MIME }] }; break;
       case 'resources/templates/list': result = { resourceTemplates: [] }; break;
       case 'resources/read':
-        if (params.uri !== VIEWER_URI) throw new RpcError(-32602, 'Unknown resource URI');
+        if (!isViewerResourceUri(params.uri)) throw new RpcError(-32602, 'Unknown resource URI');
         result = { contents: [{
-          uri: VIEWER_URI, mimeType: MIME, text: await (await import('./client-assets.mjs')).clientViewerHtml(),
+          uri: params.uri, mimeType: MIME, text: await (await import('./client-assets.mjs')).clientViewerHtml(),
           _meta: {
             ui: { prefersBorder: true, csp: { connectDomains: [], resourceDomains: [], frameDomains: [] } },
             'openai/ui': { preferredDisplayMode: 'fullscreen', availableDisplayModes: ['inline', 'fullscreen'] },
@@ -427,9 +428,14 @@ export function runStdio(input = process.stdin, output = process.stdout) {
   let buffer = '';
   let discardLine = false;
   let queue = Promise.resolve();
+  const concurrent=new Set();
   const send = (message) => new Promise((resolve, reject) => output.write(`${JSON.stringify(message)}\n`, (error) => error ? reject(error) : resolve()));
   const enqueue = (line) => {
     if (!line.trim()) return;
+    let fast;try{fast=JSON.parse(line);}catch{}
+    const independent=fast?.method==='resources/read'||fast?.method==='tools/call'&&['pwh_client_asset','pwh_client_image_asset','pwh_client_font_asset','pwh_editor_poll'].includes(fast.params?.name);
+    if(independent&&concurrent.size<8){const pending=handleRequest(fast).then(response=>response&&send(response)).catch(error=>process.stderr.write(`pwh MCP: ${error.message}\n`)).finally(()=>concurrent.delete(pending));concurrent.add(pending);return;}
+
     queue = queue.then(async () => {
       let request;
       try { request = JSON.parse(line); }
@@ -455,7 +461,7 @@ export function runStdio(input = process.stdin, output = process.stdout) {
   });
   input.on('end', () => { if (buffer.trim() && !discardLine) enqueue(buffer); });
   input.on('error', (error) => { process.stderr.write(`pwh MCP input: ${error.message}\n`); });
-  return { done: () => queue };
+  return { done: () => Promise.all([queue,...concurrent]) };
 }
 
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) runStdio();

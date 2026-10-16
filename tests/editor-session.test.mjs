@@ -52,5 +52,11 @@ test('document-wide request works without selection and layout rejects stale con
  const ticket=editorLayout({sessionId,expected:context,patch});patch.marginsMm.left=1;
  const command=editorPoll({sessionId,context}).commands[0];assert.equal(command.type,'layout');assert.equal(command.patch.marginsMm.left,20);
  assert.throws(()=>editorLayout({sessionId,expected:context,patch:{marginsMm:{left:-1}}}),/여백/);
- editorPoll({sessionId,context:{...context,documentState:{...context.documentState,changeSeq:4}}});assert.throws(()=>editorLayout({sessionId,expected:context,patch}),/바뀌/);assert.equal(editorResult(ticket).status,'pending');
+ editorPoll({sessionId,context:{...context,documentState:{...context.documentState,changeSeq:4}}});assert.equal(editorLayout({sessionId,expected:context,patch}).status,'pending');editorPoll({sessionId,context:{...context,documentState:{...context.documentState,documentEpoch:2}}});assert.throws(()=>editorLayout({sessionId,expected:context,patch}),/바뀌/);assert.equal(editorResult(ticket).status,'pending');
+});
+test('anchored rewrite survives unrelated edits and released selection in the same document epoch',()=>{
+ const sessionId=randomUUID(),expected={ready:true,kind:'body_text',documentState:{documentEpoch:1,changeSeq:1},selection:{start:{paragraphIndex:1},end:{paragraphIndex:1}},selectedText:{text:'AI 대상'},target:{kind:'body_text',epoch:1,segments:[{id:'target'}]}};
+ editorPoll({sessionId,context:{...expected,selection:null,selectedText:{text:''},documentState:{documentEpoch:1,changeSeq:8}}});
+ const ticket=editorRewrite({sessionId,expected,replacement:'수정 결과'});const cmd=editorPoll({sessionId,context:expected}).commands[0];assert.equal(cmd.expected.target.segments[0].id,'target');assert.equal(ticket.status,'pending');
+ editorPoll({sessionId,context:{...expected,documentState:{documentEpoch:2,changeSeq:0}}});assert.throws(()=>editorRewrite({sessionId,expected,replacement:'수정'}),/바뀌/);
 });

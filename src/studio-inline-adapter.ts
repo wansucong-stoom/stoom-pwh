@@ -1,3 +1,4 @@
+import {captureTarget,resolveTarget} from './pwh-collaboration-target';
 import {pictureTarget,replaceSelectedPicture} from './pwh-picture-replace';
 import {applyLayout} from './pwh-page-layout';
 import {blankBody,composeBlankBody} from './pwh-blank-compose';
@@ -8,7 +9,7 @@ export function installInlineEditor(d:any) {
  const bridge=installSelectionBridge(d);
  const read=()=>{const c:any=bridge.getSelectionContext();return {...c,blankDocument:!!c.ready&&blankBody(d.wasm),requestScope:c.selection&&c.selectedText?.text?'selection':c.kind==='object'?'object':'document',pageSettings:c.ready?Array.from({length:Math.min(d.wasm.getSectionCount(),32)},(_,i)=>({sectionIndex:i,...d.wasm.getPageDef(i)})):[]};};
  const canRequest=(c:any)=>!!c?.ready;
- const requestAI=()=>{const context:any=structuredClone(read());if(!canRequest(context))return;window.dispatchEvent(new CustomEvent('pwh-ai-request',{detail:context}));};
+ const requestAI=async()=>{const context:any=structuredClone(read());if(!canRequest(context))return;try{context.target=await captureTarget(d.wasm,context);}catch{context.target=null;}if(read().documentState.documentEpoch!==context.documentState.documentEpoch)return;window.dispatchEvent(new CustomEvent('pwh-ai-request',{detail:context}));};
  d.registry.register({id:'pwh:ai-rewrite-request',label:'AI 수정 요청',opensDialog:true,
   canExecute:()=>{const c:any=read();return canRequest(c);},
   execute:requestAI
@@ -29,10 +30,13 @@ export function installInlineEditor(d:any) {
   ready:()=>d.ready,
   async load(bytes:Uint8Array,name:string){await d.ready;await d.load(bytes,name);},
   context:read,
+  capture:async()=>{const c:any=structuredClone(read());c.target=await captureTarget(d.wasm,c);return c;},
   export:()=>d.wasm.exportHwpxWithReport(),
   saved:(name:string)=>d.saved(name),
+  recovered:()=>d.recovered(),
+  legacyDrafts:()=>d.legacyDrafts(),
   async replacePicture(command:any,bytes:Uint8Array){
-   const before:any=read();if(JSON.stringify(before)!==JSON.stringify(command.expected))throw Error('문서·선택 상태가 바뀌었습니다. 다시 요청하세요.');
+   const latest:any=read(),before:any=command.expected.target?await resolveTarget(d.wasm,command.expected,latest):latest;if(!command.expected.target&&JSON.stringify(before)!==JSON.stringify(command.expected))throw Error('문서·선택 상태가 바뀌었습니다. 다시 요청하세요.');
    if(applying)throw Error('이전 수정 적용 중입니다.');applying=true;
    const input=d.getInputHandler(),cursor=input.getCursorPosition();let replacement:any;
    try{
@@ -48,13 +52,17 @@ export function installInlineEditor(d:any) {
       prepared=new Uint8Array(await blob.arrayBuffer());if(prepared.length>8*1024*1024)throw Error('비율 보존 이미지가 8 MiB를 넘습니다.');metadata={...command.image,width:canvas.width,height:canvas.height,extension:'png',mediaType:'image/png'};padded=true;
      }
     }finally{oldBitmap.close();newBitmap.close();}
-    if(JSON.stringify(read())!==JSON.stringify(command.expected))throw Error('이미지 준비 중 문서·선택이 바뀌었습니다.');
+    if(command.expected.target)await resolveTarget(d.wasm,command.expected,read());else if(JSON.stringify(read())!==JSON.stringify(command.expected))throw Error('이미지 준비 중 문서·선택이 바뀌었습니다.');
     await input.executeDocumentAgentOperation({kind:'snapshot',operationType:'pwh-picture-replace',operation:(wasm:any)=>{replacement={...replaceSelectedPicture(wasm,before,prepared,metadata),fit:'contain',transparentPadding:padded};return cursor;}},()=>d.getCanvasView().refreshDocumentAgentMutation());
    }finally{applying=false;}
    return {ok:true,context:read(),replacement,undoSteps:1};
   },
   async layout(command:any){
-   const before:any=read();if(JSON.stringify(before)!==JSON.stringify(command.expected))throw Error('문서 상태가 바뀌었습니다. 다시 요청하세요.');
+   const before:any=read(),saved=command.expected;
+   if(before.documentState.documentEpoch!==saved.documentState.documentEpoch)throw Error('문서를 다시 열어 요청이 만료됐습니다.');
+   const sections=command.sectionIndex===undefined?before.pageSettings:before.pageSettings.filter((p:any)=>p.sectionIndex===command.sectionIndex);
+   const keys=[...(command.patch.paper?['width','height']:[]),...(command.patch.orientation?['landscape']:[]),...Object.keys(command.patch.marginsMm||{}).map(k=>({left:'marginLeft',right:'marginRight',top:'marginTop',bottom:'marginBottom',header:'marginHeader',footer:'marginFooter',gutter:'marginGutter'}[k]))];
+   if(before.pageSettings.length!==saved.pageSettings?.length||sections.some((p:any)=>{const old=saved.pageSettings.find((x:any)=>x.sectionIndex===p.sectionIndex);return !old||keys.some(k=>p[k]!==old[k]);}))throw Error('변경할 용지·여백 설정이 이미 수정되어 충돌했습니다.');
    if(applying)throw Error('이전 수정 적용 중입니다.');applying=true;
    const input=d.getInputHandler(),cursor=input.getCursorPosition();let changes:any;
    try{await input.executeDocumentAgentOperation({kind:'snapshot',operationType:'pwh-page-layout',operation:(wasm:any)=>{changes=applyLayout(wasm,command.patch,command.sectionIndex);return cursor;}},()=>d.getCanvasView().refreshDocumentAgentMutation());}finally{applying=false;}
@@ -68,17 +76,17 @@ export function installInlineEditor(d:any) {
    return {ok:true,context:read(),undoSteps:1};
   },
   async rewrite(command:any){
-   const before:any=read(),input=d.getInputHandler();
+   const latest:any=read(),before:any=command.expected.target?await resolveTarget(d.wasm,command.expected,latest):latest,input=d.getInputHandler();
    if(!before.ready||!before.selection||!before.selectedText?.known||before.selectedText.truncated||!['body_text','cell_text','textbox_text'].includes(before.kind))throw Error('본문 또는 같은 셀 안의 텍스트를 선택하세요.');
    const expected=command.expected;
-   for(const key of ['documentEpoch','changeSeq','documentSha256'])if(before.documentState[key]!==expected.documentState[key])throw Error('문서가 변경되어 적용하지 않았습니다. 다시 선택해 주세요.');
-   if(JSON.stringify(before.selection)!==JSON.stringify(expected.selection)||before.selectedText.text!==expected.selectedText.text)throw Error('선택 영역이 변경되어 적용하지 않았습니다.');
+   for(const key of command.expected.target?['documentEpoch']:['documentEpoch','changeSeq','documentSha256'])if(before.documentState[key]!==expected.documentState[key])throw Error('문서가 변경되어 적용하지 않았습니다. 다시 선택해 주세요.');
+   if(!command.expected.target&&(JSON.stringify(before.selection)!==JSON.stringify(expected.selection)||before.selectedText.text!==expected.selectedText.text))throw Error('선택 영역이 변경되어 적용하지 않았습니다.');
    const replacement=command.replacement;
    if(typeof replacement!=='string'||replacement.length>12000||replacement.includes('\r'))throw Error('다시 쓸 내용이 올바르지 않습니다.');
    const lines=replacement.split('\n'),oldLines=before.selectedText.text.split('\n');
    if(lines.length!==oldLines.length)throw Error('기존 문단 서식을 유지하려면 선택한 문단 수와 같은 수의 문단으로 작성해야 합니다.');
    const {start,end}=before.selection;
-   const isCell=start.parentParaIndex!==undefined,first=isCell?(start.cellPath?.at(-1)?.cellParaIndex??start.cellParaIndex):start.paragraphIndex;
+   const isCell=start.parentParaIndex!=null,first=isCell?(start.cellPath?.at(-1)?.cellParaIndex??start.cellParaIndex):start.paragraphIndex;
    const parts=oldLines.map((text:string,i:number)=>{
     const p={...start,paragraphIndex:first+i,cellParaIndex:first+i,charOffset:i===0?start.charOffset:0,
      ...(start.cellPath?.length?{cellPath:start.cellPath.map((x:any,j:number)=>j===start.cellPath.length-1?{...x,cellParaIndex:first+i}:x)}:{})};
@@ -108,7 +116,7 @@ export function installInlineEditor(d:any) {
      const actual=isCell?wasm.getTextInCellByPath(part.p.sectionIndex,part.p.parentParaIndex,JSON.stringify(part.p.cellPath?.length?part.p.cellPath:[{controlIndex:part.p.controlIndex,cellIndex:part.p.cellIndex,cellParaIndex:part.p.cellParaIndex}]),part.p.charOffset,count):wasm.getTextRange(part.p.sectionIndex,part.p.paragraphIndex,part.p.charOffset,count);
      if(actual!==part.text)throw Error('선택 범위 수정 결과가 요청 내용과 다릅니다.');
     }
-    const last=parts.at(-1)!;return {...end,charOffset:last.p.charOffset+Array.from(last.text).length};
+    const userCursor=input.getCursorPosition();if(command.expected.target&&userCursor.parentParaIndex==null&&!parts.some((part:any)=>part.p.sectionIndex===userCursor.sectionIndex&&part.p.paragraphIndex===userCursor.paragraphIndex))return userCursor;const last=parts.at(-1)!;return {...end,charOffset:last.p.charOffset+Array.from(last.text).length};
    }},()=>d.getCanvasView().refreshDocumentAgentMutation());}finally{applying=false;}
    return {ok:true,context:read(),undoSteps:1};
   }
