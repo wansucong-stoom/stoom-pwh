@@ -48,6 +48,32 @@ export function editorLayout(args){
  tickets.set(ticketId,ticket);if(tickets.size>128)tickets.delete(tickets.keys().next().value);
  sessions.get(args.sessionId).commands.push({ticketId,type:'layout',expected:structuredClone(args.expected),patch:structuredClone(p),...(args.sectionIndex===undefined?{}:{sectionIndex:args.sectionIndex})});return ticket;
 }
+export function editorTables(args){
+ const current=editorState({sessionId:args.sessionId});
+ if(!args.expected||args.expected.documentState?.documentEpoch!==current.context.documentState?.documentEpoch)throw Error('Document changed; inspect the current editor');
+ return queueTableCommand(args,{type:'tables'});
+}
+export async function editorTableStyle(args){
+ const current=editorState({sessionId:args.sessionId});
+ if(!args.expected||args.expected.documentState?.documentEpoch!==current.context.documentState?.documentEpoch)throw Error('Document changed; inspect the current editor');
+ const module=await import('./table-style.mjs');
+ if(args.styles){
+  if(args.expected.target?.kind!=='table_cells')throw Error('Capture a fresh cell selection before applying cell styles');
+  module.validateTableStyles(args.styles,args.expected.target.cells);
+ }else{
+  if(typeof args.planId!=='string'||!['table','document'].includes(args.scope)||args.scope==='table'&&(!Number.isInteger(args.tableIndex)||args.tableIndex<0))throw Error('Inspect the tables and provide a plan and scope');
+  module.validateTheme(args.theme);
+  if(args.headerRowsByTable&&Object.entries(args.headerRowsByTable).some(([k,v])=>!/^\d+$/.test(k)||!Number.isInteger(v)||v<0||v>10))throw Error('Invalid header row overrides');
+ }
+ return queueTableCommand(args,{type:'tableStyle',...(args.styles?{styles:structuredClone(args.styles)}:{planId:args.planId,scope:args.scope,tableIndex:args.tableIndex,theme:structuredClone(args.theme),headerRowsByTable:structuredClone(args.headerRowsByTable||{})})});
+}
+function queueTableCommand(args,command){
+ const ticketId=randomUUID(),ticket={ticketId,sessionId:args.sessionId,status:'pending',createdAt:Date.now()};
+ const requestId=args.requestId||args.expected.target?.requestId;
+ if(requestId){const request=requests.get(requestId);if(!request||request.sessionId!==args.sessionId)throw Error('Unknown request for this editor');if(command.type==='tableStyle'){ticket.requestId=requestId;request.status='queued';}}
+ tickets.set(ticketId,ticket);if(tickets.size>128)tickets.delete(tickets.keys().next().value);
+ sessions.get(args.sessionId).commands.push({ticketId,expected:structuredClone(args.expected),...command});return ticket;
+}
 export async function editorReplacePicture(args){
  const current=editorState({sessionId:args.sessionId});
  if(!args.expected||(!args.expected.target&&JSON.stringify(current.context)!==JSON.stringify(args.expected))||(args.expected.target&&args.expected.target.epoch!==current.context.documentState?.documentEpoch))throw Error('문서·선택 상태가 바뀌었습니다. 다시 읽으세요.');
@@ -66,7 +92,8 @@ export function editorCapture(args){
  const text=!!c?.selection&&c.selectedText?.known&&!!c.selectedText.text&&!c.selectedText.truncated;
  const object=c?.ready&&c.kind==='object'&&Array.isArray(c.objects)&&c.objects.length>0&&c.objects.length<=16&&c.objects.every(o=>o?.source&&['image','shape','equation'].includes(o.source.type)&&['sec','ppi','ci'].every(k=>Number.isSafeInteger(o.source[k])&&o.source[k]>=0));
  const blank=c?.ready&&c.blankDocument===true;
- if(!text&&!object&&!blank&&!(c?.ready&&c.requestScope==='document'&&c.documentState?.documentSha256))throw Error('텍스트를 드래그하거나 그림·도형을 선택하세요.');
+ const cells=c?.ready&&c.kind==='cell_block'&&c.table?.selectedCellsComplete&&c.table?.selectedCells?.length>0;
+ if(!text&&!object&&!blank&&!cells&&!(c?.ready&&c.requestScope==='document'&&c.documentState?.documentSha256))throw Error('텍스트를 드래그하거나 그림·도형을 선택하세요.');
  editorPoll({sessionId:args.sessionId,source:args.source,context:args.context});
  const requestId=randomUUID(),record=structuredClone({requestId,sessionId:args.sessionId,source:args.source,context:args.context,note:args.note,createdAt:Date.now(),untrustedContent:true});
  record.status='requested';if(record.context.target)record.context.target.requestId=requestId;

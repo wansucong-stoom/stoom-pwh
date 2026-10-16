@@ -1,3 +1,4 @@
+import {captureTableTarget,inspectTablePlan,resolveTablePlan,resolveTableTarget,applyTableStyles,stylesForTheme,themeFromTable} from './pwh-table-style.mjs';
 import {captureTarget,resolveTarget} from './pwh-collaboration-target';
 import {pictureTarget,replaceSelectedPicture} from './pwh-picture-replace';
 import {applyLayout} from './pwh-page-layout';
@@ -7,9 +8,10 @@ import { installSelectionBridge } from './collaboration-selection';
 
 export function installInlineEditor(d:any) {
  const bridge=installSelectionBridge(d);
- const read=()=>{const c:any=bridge.getSelectionContext();return {...c,blankDocument:!!c.ready&&blankBody(d.wasm),requestScope:c.selection&&c.selectedText?.text?'selection':c.kind==='object'?'object':'document',pageSettings:c.ready?Array.from({length:Math.min(d.wasm.getSectionCount(),32)},(_,i)=>({sectionIndex:i,...d.wasm.getPageDef(i)})):[]};};
+ const tablePlans=new Map<string,any>();
+ const read=()=>{const c:any=bridge.getSelectionContext();return {...c,blankDocument:!!c.ready&&blankBody(d.wasm),requestScope:c.kind==='cell_block'&&c.table?.selectedCells?.length?'selection':c.selection&&c.selectedText?.text?'selection':c.kind==='object'?'object':'document',pageSettings:c.ready?Array.from({length:Math.min(d.wasm.getSectionCount(),32)},(_,i)=>({sectionIndex:i,...d.wasm.getPageDef(i)})):[]};};
  const canRequest=(c:any)=>!!c?.ready;
- const requestAI=async()=>{const context:any=structuredClone(read());if(!canRequest(context))return;try{context.target=await captureTarget(d.wasm,context);}catch{context.target=null;}if(read().documentState.documentEpoch!==context.documentState.documentEpoch)return;window.dispatchEvent(new CustomEvent('pwh-ai-request',{detail:context}));};
+ const requestAI=async()=>{const context:any=structuredClone(read());if(!canRequest(context))return;try{context.target=context.kind==='cell_block'?await captureTableTarget(d.wasm,context):await captureTarget(d.wasm,context);}catch{context.target=null;}if(read().documentState.documentEpoch!==context.documentState.documentEpoch)return;window.dispatchEvent(new CustomEvent('pwh-ai-request',{detail:context}));};
  d.registry.register({id:'pwh:ai-rewrite-request',label:'AI 수정 요청',opensDialog:true,
   canExecute:()=>{const c:any=read();return canRequest(c);},
   execute:requestAI
@@ -56,6 +58,20 @@ export function installInlineEditor(d:any) {
     await input.executeDocumentAgentOperation({kind:'snapshot',operationType:'pwh-picture-replace',operation:(wasm:any)=>{replacement={...replaceSelectedPicture(wasm,before,prepared,metadata),fit:'contain',transparentPadding:padded};return cursor;}},()=>d.getCanvasView().refreshDocumentAgentMutation());
    }finally{applying=false;}
    return {ok:true,context:read(),replacement,undoSteps:1};
+  },
+  async tables(command:any){
+   const current:any=read();if(current.documentState.documentEpoch!==command.expected.documentState?.documentEpoch)throw Error('Table request expired');
+   const plan=await inspectTablePlan(d.wasm,current),planId=crypto.randomUUID();
+   tablePlans.set(planId,plan);if(tablePlans.size>8)tablePlans.delete(tablePlans.keys().next().value);
+   return {ok:true,tablePlan:{planId,unsupportedTables:plan.unsupported,tables:plan.refs.map((r:any,index:number)=>({index,source:{sec:r.sec,ppi:r.ppi,ci:r.ci},dimensions:r.snapshot.dimensions,headerRows:r.snapshot.cells.filter((c:any)=>c.properties.isHeader).map((c:any)=>c.geometry.row),sample:r.snapshot.cells.slice(0,4).map((c:any)=>c.paragraphs.map((p:any)=>p.text).join(' ').slice(0,160)),theme:themeFromTable(r)}))}};
+  },
+  async tableStyle(command:any){
+   const before:any=read(),input=d.getInputHandler(),cursor=input.getCursorPosition();let refs:any[],styles:any[],changes:any[]=[];
+   if(command.styles){const ref=await resolveTableTarget(d.wasm,command.expected.target,before);refs=[ref];styles=[command.styles];}
+   else{const plan=tablePlans.get(command.planId);if(!plan)throw Error('Table plan expired; inspect tables again');refs=await resolveTablePlan(d.wasm,plan,before,command.scope,command.tableIndex);styles=refs.map((ref:any,i:number)=>stylesForTheme(ref,command.theme,command.headerRowsByTable?.[command.scope==='document'?i:command.tableIndex]??command.theme.headerRows));}
+   if(applying)throw Error('Another edit is being applied');applying=true;
+   try{await input.executeDocumentAgentOperation({kind:'snapshot',operationType:'pwh-table-style',operation:(wasm:any)=>{for(let i=0;i<refs.length;i++)changes.push({...applyTableStyles(wasm,refs[i],styles[i]),section:refs[i].sec,paragraph:refs[i].ppi});return cursor;}},()=>d.getCanvasView().refreshDocumentAgentMutation());}finally{applying=false;}
+   return {ok:true,changes,undoSteps:1,context:read()};
   },
   async layout(command:any){
    const before:any=read(),saved=command.expected;

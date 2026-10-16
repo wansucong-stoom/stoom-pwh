@@ -3,6 +3,7 @@ import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 const root=path.resolve(process.argv[2]);
 const studio=path.join(root,'rhwp-studio');
+await fs.copyFile(new URL('../src/table-style.mjs',import.meta.url),path.join(studio,'src/pwh-table-style.mjs'));
 await fs.copyFile(new URL('../src/collaboration-target.ts',import.meta.url),path.join(studio,'src/pwh-collaboration-target.ts'));
 await fs.copyFile(new URL('../src/picture-replace.ts',import.meta.url),path.join(studio,'src/pwh-picture-replace.ts'));
 await fs.copyFile(new URL('../src/page-layout.ts',import.meta.url),path.join(studio,'src/pwh-page-layout.ts'));
