@@ -5,10 +5,12 @@ import { pathToFileURL } from 'node:url';
 // MCP Apps / OpenAI File Entrypoint contracts:
 // https://github.com/openai/mcp-extensions/blob/main/docs/spec.md#file-extension-entrypoint
 // https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/2026-01-26/apps.mdx
-// File entrypoint identity must survive plugin updates. Keep the last widely
-// registered URI; package/appInfo versions carry the release version instead.
-export const VIEWER_URI = 'ui://pwh/inline-editor-0.6.0';
-const VERSION = '0.6.9';
+// Fresh entrypoints need a release-specific identity: the host can retain HTML
+// for an unchanged URI even after restarting the server. Keep legacy resources
+// advertised and readable so existing frames can still use their old identity.
+const VERSION = '0.6.10';
+export const VIEWER_URI = `ui://pwh/inline-editor-${VERSION}`;
+const LEGACY_VIEWER_URIS = ['ui://pwh/inline-editor',...Array.from({length:10},(_,i)=>`ui://pwh/inline-editor-0.6.${i}`),...Array.from({length:10},(_,i)=>`ui://pwh/inline-editor-0.5.${i}`)];
 export const isViewerResourceUri=uri=>typeof uri==='string'&&/^ui:\/\/pwh\/inline-editor(?:-\d+\.\d+\.\d+)?$/.test(uri);
 const MIME = 'text/html;profile=mcp-app';
 // Use the established single-result MCP protocol; 2026-07-28 MRTR is not implemented.
@@ -414,7 +416,7 @@ export async function handleRequest(message) {
           result = { isError: true, content: [{ type: 'text', text: error instanceof Error ? error.message : '문서 작업에 실패했습니다.' }] };
         }
         break;
-      case 'resources/list': result = { resources: [{ uri: VIEWER_URI, name: 'pwh-viewer', title: 'pwh 문서 뷰어', mimeType: MIME }] }; break;
+      case 'resources/list': result = { resources: [VIEWER_URI,...LEGACY_VIEWER_URIS].map((uri,i)=>({uri,name:i?'pwh-viewer-legacy-'+i:'pwh-viewer',title:'pwh 문서 뷰어',mimeType:MIME})) }; break;
       case 'resources/templates/list': result = { resourceTemplates: [] }; break;
       case 'resources/read':
         if (!isViewerResourceUri(params.uri)) throw new RpcError(-32602, 'Unknown resource URI');
