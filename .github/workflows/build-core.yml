@@ -1,0 +1,50 @@
+name: Build patched rhwp core candidate
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/floating-picture]
+    paths:
+      - engine-patches/rhwp-0.8.7-floating-picture.patch
+      - scripts/build-core.sh
+      - .github/workflows/build-core.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pwh-core-build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      CARGO_TERM_COLOR: never
+      CARGO_BUILD_JOBS: '2'
+    steps:
+      - name: Checkout pwh maintenance sources
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          path: pwh
+          persist-credentials: false
+      - name: Checkout exact upstream source and workspace fixtures
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: edwardkim/rhwp
+          ref: 1a76570e833917d15817415a53c09ad61ab3203f
+          path: upstream
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Test and build candidate without publishing
+        shell: bash
+        run: bash "$GITHUB_WORKSPACE/pwh/scripts/build-core.sh" "$GITHUB_WORKSPACE/upstream" "$GITHUB_WORKSPACE/core-build"
+      - name: Retain candidate and diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: rhwp-0.8.7-floating-picture-${{ github.run_id }}-${{ github.run_attempt }}
+          path: core-build/
+          retention-days: 14
+          if-no-files-found: warn

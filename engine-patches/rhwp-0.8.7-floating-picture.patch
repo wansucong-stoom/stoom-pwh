@@ -1,0 +1,324 @@
+diff --git a/src/renderer/float_placement.rs b/src/renderer/float_placement.rs
+--- a/src/renderer/float_placement.rs
++++ b/src/renderer/float_placement.rs
+@@ -1423,6 +1423,265 @@
+     pub char_start: usize,
+     pub top: f64,
+     pub height: f64,
++}
++
++/// A paragraph-relative picture is anchored to the stored line containing its
++/// control, not to the beginning of a multi-line host paragraph. The saved
++/// successor independently closes the picture/caption band; retain its spacing
++/// contract instead of adding the host's text height or caption height twice.
++///
++/// This is an original-layout contract local to these paragraphs. An edit in a
++/// different paragraph does not revoke it. Callers exclude split hosts and
++/// other-page owners. Dirty/synthetic lines, a control on the
++/// first line, or an overlapping successor retain the existing flow path.
++#[allow(clippy::too_many_arguments)]
++pub(crate) fn stored_tail_topbottom_picture_placement(
++    para: &Paragraph,
++    successor: &Paragraph,
++    control_index: usize,
++    spacing_before: f64,
++    successor_spacing_before: f64,
++    frame_vpos: i32,
++    actual_host_flow_y: f64,
++    dpi: f64,
++) -> Option<ParagraphFloatPlacement> {
++    use crate::model::paragraph::{ColumnBreakType, LineSeg};
++    use crate::model::shape::CaptionDirection;
++    let [Control::Picture(picture)] = para.controls.as_slice() else {
++        return None;
++    };
++    let valid = |p: &Paragraph| {
++        !p.stored_text_partition_is_dirty()
++            && !p.cell_format_vpos_dirty
++            && !p.line_segs.is_empty()
++            && p.line_segs.iter().all(|line| {
++                line.tag & LineSeg::TAG_IMPLEMENTATION_PROPERTY == 0
++                    && line.line_height > 0
++            })
++            && p.line_segs.windows(2).all(|pair| {
++                pair[1].vertical_pos >= pair[0].vertical_pos
++                    && pair[1].text_start >= pair[0].text_start
++            })
++    };
++    let common = &picture.common;
++    if control_index != 0
++        || !valid(para)
++        || !valid(successor)
++        || para.text.trim().is_empty()
++        || !successor.controls.is_empty()
++        || successor.column_type != ColumnBreakType::None
++        || common.treat_as_char
++        || !common.flow_with_text
++        || common.text_wrap != TextWrap::TopAndBottom
++        || common.vert_rel_to != VertRelTo::Para
++        || common.vert_align != VertAlign::Top
++        || !matches!(common.horz_rel_to, HorzRelTo::Column | HorzRelTo::Para)
++        || common.allow_overlap
++        || !dpi.is_finite()
++        || dpi <= 0.0
++        || !spacing_before.is_finite()
++        || spacing_before < 0.0
++        || !successor_spacing_before.is_finite()
++        || successor_spacing_before < 0.0
++        || !actual_host_flow_y.is_finite()
++    {
++        return None;
++    }
++    let owner = *stored_control_line_indices(para)?.get(control_index)?;
++    if owner == 0 || owner + 1 != para.line_segs.len() {
++        return None;
++    }
++    let first = para.line_segs.first()?;
++    let line = para.line_segs.get(owner)?;
++    let next = successor.line_segs.first()?;
++    let host_y = hwpunit_to_px(first.vertical_pos.checked_sub(frame_vpos)?, dpi);
++    let anchor_y = hwpunit_to_px(line.vertical_pos.checked_sub(frame_vpos)?, dpi);
++    let unit = dpi / 7200.0;
++    if (actual_host_flow_y + spacing_before - host_y).abs() > unit {
++        return None;
++    }
++    let offset = signed_hwpunit(common.vertical_offset);
++    let top_hu = i64::from(line.vertical_pos)
++        + i64::from(offset)
++        + i64::from(common.margin.top);
++    // The independent stored host lines must all end above the picture. This
++    // excludes text that flows around/below a float and avoids reinterpreting
++    // those paragraphs as a trailing picture band.
++    if para.line_segs.iter().any(|text_line| {
++        i64::from(text_line.vertical_pos) + i64::from(text_line.line_height) > top_hu
++    }) {
++        return None;
++    }
++    let caption_hu = match picture.caption.as_ref() {
++        None => 0,
++        Some(caption) => {
++            let [paragraph] = caption.paragraphs.as_slice() else {
++                return None;
++            };
++            if caption.direction != CaptionDirection::Bottom
++                || !valid(paragraph)
++                || !paragraph.controls.is_empty()
++            {
++                return None;
++            }
++            let cap_first = paragraph.line_segs.first()?;
++            let cap_last = paragraph.line_segs.last()?;
++            i64::from(cap_last.vertical_pos) + i64::from(cap_last.line_height)
++                - i64::from(cap_first.vertical_pos.min(0))
++                + i64::from(caption.spacing)
++        }
++    };
++    let (_, height) = picture_flow_frame_size_hu(picture);
++    let bottom_hu = top_hu + i64::from(height) + caption_hu + i64::from(common.margin.bottom);
++    let next_hu = i64::from(next.vertical_pos);
++    if height <= 0 || bottom_hu > next_hu {
++        return None;
++    }
++    let px = |value: i64| (value - i64::from(frame_vpos)) as f64 * dpi / 7200.0;
++    Some(ParagraphFloatPlacement {
++        flow: ParagraphFloatFlow::StoredPicture {
++            next_flow_y: px(next_hu) - successor_spacing_before,
++        },
++        anchor_y,
++        stored_host_origin: Some(host_y),
++        stored_successor_line_origin: Some(px(next_hu)),
++        table_left: None,
++        table_top: px(top_hu),
++        occupied_bottom: px(bottom_hu),
++    })
++}
++
++#[cfg(test)]
++mod pwh_floating_picture_tests {
++    use super::*;
++    use crate::model::paragraph::LineSeg;
++    use crate::model::shape::{Caption, CaptionDirection};
++
++    fn line(text_start: u32, vertical_pos: i32) -> LineSeg {
++        LineSeg {
++            text_start,
++            vertical_pos,
++            line_height: 600,
++            text_height: 600,
++            baseline_distance: 500,
++            segment_width: 10000,
++            ..Default::default()
++        }
++    }
++
++    fn original_frame() -> (Paragraph, Paragraph) {
++        let picture = Picture {
++            common: CommonObjAttr {
++                width: 10000,
++                height: 9000,
++                treat_as_char: false,
++                flow_with_text: true,
++                allow_overlap: false,
++                text_wrap: TextWrap::TopAndBottom,
++                vert_rel_to: VertRelTo::Para,
++                vert_align: VertAlign::Top,
++                horz_rel_to: HorzRelTo::Column,
++                vertical_offset: 1500,
++                ..Default::default()
++            },
++            caption: Some(Caption {
++                direction: CaptionDirection::Bottom,
++                spacing: 200,
++                paragraphs: vec![Paragraph {
++                    text: "Caption".into(),
++                    line_segs: vec![line(0, 0)],
++                    ..Default::default()
++                }],
++                ..Default::default()
++            }),
++            ..Default::default()
++        };
++        let host = Paragraph {
++            text: "abcdef".into(),
++            // The 8-unit picture control is immediately before the final 'f'.
++            char_offsets: vec![0, 1, 2, 3, 4, 13],
++            char_count: 15,
++            line_segs: vec![line(0, 100), line(2, 1600), line(4, 3100)],
++            controls: vec![Control::Picture(Box::new(picture))],
++            ..Default::default()
++        };
++        let next = Paragraph {
++            line_segs: vec![line(0, 14400)],
++            ..Default::default()
++        };
++        (host, next)
++    }
++
++    #[test]
++    fn pwh_floating_picture_uses_the_owning_line_including_the_first_line_inset() {
++        let (host, next) = original_frame();
++        assert_eq!(stored_control_line_indices(&host), Some(vec![2]));
++        let plan = stored_tail_topbottom_picture_placement(
++            &host, &next, 0, 100.0 / 75.0, 1.0, 0, 0.0, 96.0,
++        ).expect("the original tail picture frame is complete");
++        // The source line is 3100 HU from the column origin. Subtracting the
++        // first line's 100 HU would move the picture up by that leading inset.
++        assert!((plan.anchor_y - 3100.0 / 75.0).abs() < 1e-9);
++        let host_ink_bottom = (3100.0 + 600.0) / 75.0;
++        assert!(host_ink_bottom < plan.table_top);
++        assert!((plan.table_top - 4600.0 / 75.0).abs() < 1e-9);
++        assert!((plan.occupied_bottom - 14400.0 / 75.0).abs() < 1e-9);
++        assert!((plan.paragraph_end(1.0, 0.0) + 1.0 - 14400.0 / 75.0).abs() < 1e-9);
++        // Reading the plan never rewrites the object's relative offsets.
++        let Control::Picture(picture) = &host.controls[0] else { unreachable!() };
++        assert_eq!(picture.common.vertical_offset, 1500);
++        assert!(!picture.common.treat_as_char);
++    }
++
++    #[test]
++    fn pwh_floating_picture_rejects_stale_or_incomplete_source_frames() {
++        let (mut host, mut next) = original_frame();
++        let plan = |host: &Paragraph, next: &Paragraph| {
++            stored_tail_topbottom_picture_placement(
++                host, next, 0, 100.0 / 75.0, 1.0, 0, 0.0, 96.0,
++            )
++        };
++        host.stored_text_partition_dirty = true;
++        assert!(plan(&host, &next).is_none());
++        host.stored_text_partition_dirty = false;
++        assert!(stored_tail_topbottom_picture_placement(
++            &host, &next, 0, 100.0 / 75.0, 1.0, 0, 10.0, 96.0,
++        ).is_none(), "an upstream edit that shifted the host cannot reuse the old page origin");
++        next.line_segs[0].vertical_pos = 14399;
++        assert!(plan(&host, &next).is_none(), "a successor inside the caption is not a closed frame");
++        next.line_segs[0].vertical_pos = 14400;
++        host.line_segs[1].tag = LineSeg::TAG_IMPLEMENTATION_PROPERTY;
++        assert!(plan(&host, &next).is_none());
++    }
++
++    #[test]
++    fn pwh_floating_picture_keeps_other_anchor_and_flow_contracts() {
++        let (mut host, next) = original_frame();
++        let plan = |host: &Paragraph| {
++            stored_tail_topbottom_picture_placement(
++                host, &next, 0, 100.0 / 75.0, 1.0, 0, 0.0, 96.0,
++            )
++        };
++        if let Control::Picture(picture) = &mut host.controls[0] {
++            picture.common.vert_rel_to = VertRelTo::Paper;
++        }
++        assert!(plan(&host).is_none());
++        if let Control::Picture(picture) = &mut host.controls[0] {
++            picture.common.vert_rel_to = VertRelTo::Para;
++            picture.common.text_wrap = TextWrap::BehindText;
++        }
++        assert!(plan(&host).is_none());
++        if let Control::Picture(picture) = &mut host.controls[0] {
++            picture.common.text_wrap = TextWrap::TopAndBottom;
++            picture.common.treat_as_char = true;
++        }
++        assert!(plan(&host).is_none());
++        if let Control::Picture(picture) = &mut host.controls[0] {
++            picture.common.treat_as_char = false;
++        }
++        host.char_offsets = vec![8, 9, 10, 11, 12, 13];
++        assert!(plan(&host).is_none(), "a picture control on the first line keeps the existing path");
++    }
+ }
+ 
+ /// 양수 앞 간격을 가진 빈 후속 줄의 기존 저장 프레임 계약.
+diff --git a/src/renderer/typeset/section/controls.rs b/src/renderer/typeset/section/controls.rs
+--- a/src/renderer/typeset/section/controls.rs
++++ b/src/renderer/typeset/section/controls.rs
+@@ -252,6 +252,51 @@
+                                 st.register_side_wrap_picture(para_idx, ctrl_idx, para, Some(placement.anchor_y), styles);
+                             }
+                         }
++                        // A trailing paragraph-relative picture belongs to its
++                        // control's line, including that line's original top
++                        // inset. Publish one plan for both pagination and paint;
++                        // layout_shape_item already consumes StoredPicture.
++                        // Freshness belongs to the host/successor and their
++                        // actual flow origin, not a document-wide edited flag.
++                        if (self.profile.get().hwp5_stored_pagination_layout()
++                            || self.profile.get().hwpx_stored_layout())
++                            && (st.pages.len(), st.current_column)
++                                == (picture_host_origin.0, picture_host_origin.1)
++                            && st.current_items.iter().any(|item| {
++                                matches!(item, PageItem::FullParagraph { para_index } if *para_index == para_idx)
++                            })
++                        {
++                            let saved = paragraphs.get(para_idx + 1).and_then(|next| {
++                                let host_style = styles.para_styles.get(para.para_shape_id as usize)?;
++                                let next_style = styles.para_styles.get(next.para_shape_id as usize)?;
++                                let first_para = st.current_items.iter().find_map(|item| match item {
++                                    PageItem::FullParagraph { para_index } => paragraphs.get(*para_index),
++                                    _ => None,
++                                })?;
++                                let first_before = styles.para_styles.get(first_para.para_shape_id as usize)?.spacing_before;
++                                let base = st.vpos_page_base.unwrap_or(0);
++                                let retained_before = first_before.max(0.0)
++                                    .min(hwpunit_to_px(base.max(0), self.dpi));
++                                let frame_vpos = base - crate::renderer::px_to_hwpunit(retained_before, self.dpi);
++                                let actual_host_flow_y = match st.vpos_snapped_flow_start {
++                                    Some((owner, y)) if owner == para_idx => y,
++                                    _ => picture_host_origin.2,
++                                };
++                                crate::renderer::float_placement::stored_tail_topbottom_picture_placement(
++                                    para, next, ctrl_idx, host_style.spacing_before,
++                                    next_style.spacing_before, frame_vpos, actual_host_flow_y, self.dpi,
++                                )
++                            });
++                            if let Some(placement) = saved.filter(|placement| {
++                                placement.occupied_bottom <= st.available_height()
++                                    && placement.paragraph_end(st.current_height, 0.0) >= st.current_height
++                                    && placement.paragraph_end(st.current_height, 0.0) <= st.available_height()
++                            }) {
++                                st.record_paragraph_float_placement((para_idx, ctrl_idx), placement);
++                                st.align_flow_to(placement.paragraph_end(st.current_height, 0.0));
++                                continue;
++                            }
++                        }
+                         // 저장된 그림 앞 공간과 뒤 호스트 줄을 하나의 프레임으로 예약한다.
+                         // 저장 줄이 있는 원본의 현재 단에서만 확정하고 편집 흐름에는 적용하지 않는다.
+                         if (self.profile.get().hwp5_stored_pagination_layout()
