@@ -8,7 +8,7 @@ import { pathToFileURL } from 'node:url';
 // File entrypoint identity must survive plugin updates. Keep the last widely
 // registered URI; package/appInfo versions carry the release version instead.
 export const VIEWER_URI = 'ui://pwh/inline-editor-0.6.0';
-const VERSION = '0.6.6';
+const VERSION = '0.6.7';
 export const isViewerResourceUri=uri=>typeof uri==='string'&&/^ui:\/\/pwh\/inline-editor(?:-\d+\.\d+\.\d+)?$/.test(uri);
 const MIME = 'text/html;profile=mcp-app';
 // Use the established single-result MCP protocol; 2026-07-28 MRTR is not implemented.
@@ -155,7 +155,7 @@ export const TOOLS = [
   },
   {
     name: 'pwh_info', title: 'HWPX 문서 정보',
-    description: '디스크에 저장된 HWP/HWPX 문서의 문단·표 등 구조와 정보를 확인합니다. 현재 브라우저의 미저장 편집은 pwh_live_read로 확인하세요.',
+    description: '디스크에 저장된 HWP/HWPX 문서의 문단·표 등 구조와 정보를 확인합니다. 우측 파일 편집기의 미저장 문서는 pwh_editor_state로, 별도 로컬 Studio 서버 세션은 pwh_live_read로 확인하세요.',
     inputSchema: objectSchema({ input: pathSchema }, ['input']), annotations: readOnly,
   },
   {
@@ -210,7 +210,7 @@ export const TOOLS = [
   },
   {
     name: 'pwh_edit_template', title: 'HWPX 서식 채우기',
-    description: '디스크의 기존 HWPX에서 텍스트 치환, 필드 채우기, 표 셀 수정을 적용한 새 문서를 저장합니다. table·row·col은 0부터 시작합니다. 현재 브라우저 편집 세션을 수정하려면 pwh_live_apply를 사용하세요.',
+    description: '디스크의 기존 HWPX에서 텍스트 치환, 필드 채우기, 표 셀 수정을 적용한 새 문서를 저장합니다. table·row·col은 0부터 시작합니다. 현재 우측 편집기 수정은 pwh_editor_*의 지원 도구를 사용하세요. pwh_live_apply는 별도 로컬 Studio 서버 세션 전용입니다.',
     inputSchema: objectSchema({
       input: pathSchema, output: outputSchema,
       changes: {
@@ -394,7 +394,7 @@ export async function handleRequest(message) {
           protocolVersion: SUPPORTED_PROTOCOLS.includes(params.protocolVersion) ? params.protocolVersion : '2025-11-25',
           capabilities: { tools: { listChanged: false }, resources: { subscribe: false, listChanged: false } },
           serverInfo: { name: 'pwh', version: VERSION, title: 'pwh' },
-          instructions: '문서 작성·수정의 기본 흐름은 초안 HWPX 저장·검증 후 open_in_codex의 file target과 placement:right로 우측 pwh 편집기에 표시하는 것입니다. 별도 열기 요청을 기다리지 말고 실제 로드 여부를 확인하세요. 선택 수정은 같은 열린 편집기에 반영하고 전체 문서를 다시 만들지 마세요. 함께 편집하려면 pwh_live_open의 URL을 브라우저 패널에 열고 pwh_live_read로 현재 문서를 읽으세요. pwh_live_apply와 pwh_live_save에는 최신 expectedState가 필요합니다. pwh_info·pwh_edit_template·pwh_preview는 디스크 파일을 처리하며 브라우저의 미저장 편집과 구분해야 합니다.',
+          instructions: '문서 작성·수정의 기본 흐름은 초안 HWPX 저장·검증 후 open_in_codex의 file target과 placement:right로 우측 pwh 편집기에 표시하는 것입니다. 별도 열기 요청을 기다리지 말고 실제 로드 여부를 확인하세요. 선택 수정은 같은 열린 편집기에 반영하고 전체 문서를 다시 만들지 마세요. 기본 협업은 pwh_editor_state/request와 작업별 pwh_editor_* 도구를 사용하고 pwh_editor_result의 applied를 확인하세요. pwh_live_*는 사용자가 별도 로컬 Studio 서버를 명시한 경우에만 사용하는 호환 경로이며 기본 파일 편집기와 다른 세션입니다. pwh_info·pwh_edit_template·pwh_preview는 디스크 파일을 처리하며 현재 편집기의 미저장 내용과 구분해야 합니다.',
         };
         break;
       case 'server/discover':
