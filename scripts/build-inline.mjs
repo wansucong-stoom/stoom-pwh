@@ -3,6 +3,7 @@ import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 const root=path.resolve(process.argv[2]);
 const studio=path.join(root,'rhwp-studio');
+await fs.copyFile(new URL('../src/selection-layout.mjs',import.meta.url),path.join(studio,'src/core/pwh-selection-layout.mjs'));
 await fs.copyFile(new URL('../src/table-style.mjs',import.meta.url),path.join(studio,'src/pwh-table-style.mjs'));
 await fs.copyFile(new URL('../src/collaboration-target.ts',import.meta.url),path.join(studio,'src/pwh-collaboration-target.ts'));
 await fs.copyFile(new URL('../src/picture-replace.ts',import.meta.url),path.join(studio,'src/pwh-picture-replace.ts'));
@@ -33,6 +34,10 @@ if(!localFonts.includes('pwh host fonts in menu'))localFonts=localFonts.replace(
 await fs.writeFile(localFontsPath,localFonts);
 const wasmPath=path.join(studio,'src/core/wasm-bridge.ts');
 let wasm=await fs.readFile(wasmPath,'utf8');
+if(!wasm.includes('import {renderedBodySelectionRects}'))wasm='import {renderedBodySelectionRects} from '+JSON.stringify('./pwh-selection-layout.mjs')+';\n'+wasm;
+wasm=wasm.replace('return JSON.parse(this.doc.getSelectionRects(sec, startPara, startOffset, endPara, endOffset));','return renderedBodySelectionRects(this.doc,sec,startPara,startOffset,endPara,endOffset,JSON.parse(this.doc.getSelectionRects(sec,startPara,startOffset,endPara,endOffset)));');
+if(!wasm.includes('return renderedBodySelectionRects(this.doc,'))throw new Error('Unsupported Studio selection bridge: review upstream getSelectionRects');
+
 wasm=wasm.replace('await init() as',"await init({module_or_path:await (window as any).pwhWasmBytes}) as");
 await fs.writeFile(wasmPath,wasm);
 const glue=path.join(root,'pkg/rhwp.js');
