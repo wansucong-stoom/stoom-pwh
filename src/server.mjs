@@ -8,7 +8,7 @@ import { pathToFileURL } from 'node:url';
 // File entrypoint identity must survive plugin updates. Keep the last widely
 // registered URI; package/appInfo versions carry the release version instead.
 export const VIEWER_URI = 'ui://pwh/inline-editor-0.6.0';
-const VERSION = '0.6.7';
+const VERSION = '0.6.8';
 export const isViewerResourceUri=uri=>typeof uri==='string'&&/^ui:\/\/pwh\/inline-editor(?:-\d+\.\d+\.\d+)?$/.test(uri);
 const MIME = 'text/html;profile=mcp-app';
 // Use the established single-result MCP protocol; 2026-07-28 MRTR is not implemented.

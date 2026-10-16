@@ -15,10 +15,36 @@ document, institution logo or filled institution report as a test fixture.
 
 The Studio build script checks this source pin before applying pwh's additive
 selection bridge. Downloaded native executables, Studio builds and SDK files are
-local runtime assets, rather than source files committed to this repository.
+runtime assets, rather than source files committed to this repository. Versioned
+copies, source-input snapshots, modification patches and corresponding-source
+assets are retained in this repository's engine preservation Releases, referenced
+by `runtime-lock.json`. Normal setup installs that preserved prebuilt runtime.
 Preserve the upstream license and bundled dependency/font notices when copying
 or redistributing those assets. The MIT notice for upstream code is reproduced
 below; it does not relicense upstream font assets or other dependencies.
+
+Each preserved runtime component contains
+`licenses/pwh-preservation/THIRD-PARTY-NOTICES.txt`, with the collected upstream,
+npm and Rust dependency notices. Companion inventories and original Cargo
+archives are release assets. The inventory is not an exact binary link map.
+See [the dated review](docs/license-review-2026-10-16.md) for limitations and
+remaining rights/provenance questions.
+
+## Lightning CSS and Studio build dependencies
+
+The minimal Windows Studio rebuild bundle contains 22 installed packages, whose
+individual terms are retained. Lightning CSS 1.33.0 and its Windows binding are
+MPL-2.0. Its corresponding source at commit
+`1d680fa14e9a089c92dc0929f869d6757ae91c30` is provided as
+`lightningcss-1.33.0-source.zip` in the engine preservation Release, alongside
+the full MPL text and source-availability notice. This does not apply MPL to
+unrelated pwh-authored files. Packages used only by upstream browser tests/PWA
+tooling are not part of that minimal rebuild bundle.
+
+The preserved source-input snapshot excludes binary fonts, screenshots and
+sample documents. Do not infer their redistribution terms from the project's
+MIT license. No proprietary system font or institution document is added to
+the runtime mirror.
 
 ## HOP
 

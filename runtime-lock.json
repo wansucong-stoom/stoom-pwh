@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "rhwp-0.8.7-pwh-r1",
+  "platform": "win32-x64",
+  "upstreamVersion": "0.8.7",
+  "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
+  "releaseTag": "engine-rhwp-0.8.7-pwh-r1",
+  "runtime": {
+    "file": "pwh-runtime-rhwp-0.8.7-pwh-r1-windows-x64.zip",
+    "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r1/pwh-runtime-rhwp-0.8.7-pwh-r1-windows-x64.zip",
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  }
+}

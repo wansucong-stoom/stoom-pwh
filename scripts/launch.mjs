@@ -9,7 +9,7 @@ import {createHash,randomUUID} from 'node:crypto';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 const digest=b=>createHash('sha256').update(b).digest('hex');
 const folders=['src','scripts','licenses','docs','skills','examples','.codex-plugin'];
-const files=['package.json','plugin.json','engine.config.json','engine.config.local.json','engine.config.example.json','README.md','LICENSE','THIRD_PARTY_NOTICES.md','.mcp.json','mcp.json'];
+const files=['package.json','plugin.json','runtime-lock.json','engine.config.json','engine.config.local.json','engine.config.example.json','README.md','LICENSE','THIRD_PARTY_NOTICES.md','.mcp.json','mcp.json'];
 export async function materializeRelease(source,releaseRoot){
  source=path.resolve(source);releaseRoot=path.resolve(releaseRoot);
  const entries=[];let total=0;

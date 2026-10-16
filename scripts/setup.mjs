@@ -11,6 +11,7 @@ import { spawn } from 'node:child_process';
 import { pipeline } from 'node:stream/promises';
 import { Transform } from 'node:stream';
 import { gunzipSync, inflateRawSync } from 'node:zlib';
+import {installPreservedRuntime} from './preserved-runtime.mjs';
 
 export const PINS = Object.freeze({
   version: '0.8.7',
@@ -52,25 +53,29 @@ export function parseArgs(args, env = process.env) {
     else if (arg === '--skip-download') result.skipDownload = true;
     else if (arg === '--with-nanum') result.withNanum = true;
     else if (arg === '--cli-only') result.cliOnly = true;
-    else if (['--runtime-root', '--nanum-archive', '--npm-cli', '--npm-cache'].includes(arg)) {
+    else if (arg === '--from-source') result.fromSource = true;
+    else if (['--runtime-root', '--runtime-archive', '--nanum-archive', '--npm-cli', '--npm-cache'].includes(arg)) {
       const value = args[++i];
       if (!value || value.startsWith('--')) throw new Error(`${arg} requires a path.`);
-      result[{ '--runtime-root': 'runtimeRoot', '--nanum-archive': 'nanumArchive',
+      result[{ '--runtime-root': 'runtimeRoot', '--runtime-archive':'runtimeArchive', '--nanum-archive': 'nanumArchive',
         '--npm-cli': 'npmCli', '--npm-cache': 'npmCache' }[arg]] = path.resolve(value);
     } else throw new Error(`Unknown option: ${arg}. Use --help.`);
   }
   if (result.nanumArchive && !result.withNanum) throw new Error('--nanum-archive requires --with-nanum.');
+  if(result.runtimeArchive&&result.fromSource)throw Error('--runtime-archive cannot be combined with --from-source.');
   return result;
 }
 
 function usage() {
   return `Usage: node scripts/setup.mjs [options]
 
-Requires Windows x64 and Node.js 22.12+ (or 24+). Browser editor builds also require Git and npm.
+Requires Windows x64 and Node.js 22.12+ (or 24+). The default uses pwh's preserved prebuilt runtime.
   --runtime-root PATH  Install into PATH (default: PWH_RUNTIME_ROOT or ~/.stoom-pwh).
   --dry-run            Print the complete plan; do not write, run programs, or access the network.
-  --skip-download      Offline: require verified downloads/ archives and source/rhwp-0.8.7 checkout;
-                       npm ci uses --offline and needs its dependencies in the npm cache.
+  --skip-download      Offline: require the verified preserved ZIP in downloads/, or --runtime-archive.
+  --runtime-archive PATH Use a local preserved runtime ZIP; its pinned SHA256 is required.
+  --from-source        Explicit legacy source build. Requires Git/npm and pinned upstream inputs;
+                       with --skip-download it also requires the source checkout and npm cache.
   --cli-only           Install the pinned CLI only; skip Studio/core/editor and Git/npm checks.
   --with-nanum         Opt in to NAVER's ~131 MB ZIP; install four unmodified TTFs and their license.
   --nanum-archive PATH Use a local NAVER ZIP instead (the same pinned SHA256 is required).
@@ -384,6 +389,10 @@ async function installNanum(root, stage, options) {
 }
 
 export async function setup(options) {
+  if(!options.fromSource){
+    const lock=JSON.parse(await fs.readFile(path.join(PROJECT_ROOT,'runtime-lock.json'),'utf8'));
+    return installPreservedRuntime(options,lock,{download:cachedDownload,zipEntries,childPath,installNanum});
+  }
   const root = path.resolve(options.runtimeRoot);
   console.log(`pwh runtime: ${root}\nrhwp ${PINS.version}; source ${PINS.sourceCommit}`);
   if (options.dryRun) {

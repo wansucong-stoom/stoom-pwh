@@ -7,6 +7,8 @@ description: 한글 문서의 초안 작성과 기존 HWP/HWPX 수정을 요청�
 
 ## 경로와 지원 범위
 
+초기 런타임 준비는 플러그인 루트의 scripts/setup.mjs를 사용한다. 기본 경로는 runtime-lock.json으로 고정한 pwh 보존 Release의 완성 런타임이며, 원본 GitHub·npm에서 매번 빌드하지 않는다. 로컬 보존 ZIP은 --runtime-archive와 --skip-download로 설치한다. --from-source는 별도 유지보수 경로다. 보존본의 원본 커밋·pwh 변경 패치·의존성·라이선스 고지는 docs/engine-preservation.md와 docs/license-review-2026-10-16.md를 확인한다. 체크섬 일치는 이용허락이나 법률 검토 완료의 증거가 아니다.
+
 이 스킬은 양식을 이해하는 작성 원칙과 실제 구현 기능을 구분한다. 우측 파일 편집기는 pwh_editor_*의 같은 미저장 문서를, 디스크 보조 도구는 저장된 파일을 다룬다. 일반 본문 전체의 자동 스타일 통일, 중첩 표의 일괄 편집·구조 붙여넣기, 도형·표 자체 교체까지 구현됐다고 해석하지 않는다. 실제 도구 스키마·capabilities·known/truncated·지원 오류와 적용 결과를 우선한다.
 
 ## 기본 작성·수정 및 표시 흐름
