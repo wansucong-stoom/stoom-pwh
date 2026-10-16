@@ -29,16 +29,77 @@ export async function selectClientSaveDestination(args,meta={},choose=chooseSave
 import {runEngine} from './engine.mjs';
 
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
-const CHUNK=512*1024, MAX_DOCUMENT=8*1024*1024;
+export const CHUNK=512*1024, MAX_DOCUMENT=64*1024*1024;
+const assetCache=new Map();let cachedBytes=0;
+async function cachedAsset(file,kind){
+ const stat=await fs.stat(file);if(!stat.isFile()||stat.size>(kind==='wasm'?32*1024*1024:MAX_DOCUMENT))throw Error('Client asset too large');
+ const marker=kind==='wasm'?await fs.readFile(path.join(config.runtimeRoot,'core','.pwh-install.json'),'utf8'):'';
+ const key=`${stat.dev}:${stat.ino}:${stat.size}:${stat.mtimeMs}:${stat.ctimeMs}:${marker}`;
+ let record=assetCache.get(file);if(record?.key===key){assetCache.delete(file);assetCache.set(file,record);return record;}
+ if(record){cachedBytes-=record.bytes.length;assetCache.delete(file);}
+ const bytes=await fs.readFile(file);if(bytes.length!==stat.size)throw Error('Asset changed during read');
+ const hash=sha(bytes);if(kind==='wasm')await checkCoreFile('rhwp_bg.wasm',bytes);
+ record={key,bytes,hash};
+ while(assetCache.size&&(cachedBytes+bytes.length>96*1024*1024||assetCache.size>=3)){const oldest=assetCache.keys().next().value;cachedBytes-=assetCache.get(oldest).bytes.length;assetCache.delete(oldest);}
+ if(assetCache.has(file))cachedBytes-=assetCache.get(file).bytes.length;
+ assetCache.set(file,record);cachedBytes+=bytes.length;return record;
+}
 const documents=new Map();
 const hashPattern=/^[a-f0-9]{64}$/i;
+const uploads=new Map(),UPLOAD_TTL=15*60*1000;
+async function cleanUploads(){for(const [id,t]of uploads)if(!t.busy&&Date.now()-t.updatedAt>UPLOAD_TTL){uploads.delete(id);await fs.unlink(t.temporary).catch(()=>{});}}
+const uploadCleanup=setInterval(()=>{void cleanUploads().catch(()=>{});},60000);uploadCleanup.unref();
+export async function beginClientSave(args,meta={}){
+ await cleanUploads();const source=documentPath(meta,args.documentId);
+ if(!Number.isSafeInteger(args.totalBytes)||args.totalBytes<2||args.totalBytes>MAX_DOCUMENT||!hashPattern.test(args.documentSha256||'')||!hashPattern.test(args.expectedSourceSha256||''))throw Error('Invalid save size or digest; maximum is 64 MiB');
+ if(sha(await fs.readFile(source))!==args.expectedSourceSha256)throw Error('Source changed; reopen the document');
+ const ticket=saveTickets.get(args.saveTicket);
+ if(!ticket||ticket.source!==source||ticket.sha256!==args.expectedSourceSha256||Date.now()-ticket.createdAt>600000)throw Error('Choose a save destination again');
+ if(uploads.size>=4)throw Error('Too many pending saves');
+ const transferId=randomUUID(),temporary=path.join(path.dirname(ticket.filename),`.pwh-upload-${transferId}.hwpx`);
+ await fs.writeFile(temporary,Buffer.alloc(0),{flag:'wx'});
+ uploads.set(transferId,{source,filename:ticket.filename,temporary,totalBytes:args.totalBytes,documentSha256:args.documentSha256,sourceSha256:args.expectedSourceSha256,offset:0,updatedAt:Date.now(),busy:false});
+ saveTickets.delete(args.saveTicket);return {transferId,chunkBytes:CHUNK,totalBytes:args.totalBytes,nextOffset:0};
+}
+function getUpload(id){const transfer=uploads.get(id);if(!transfer||Date.now()-transfer.updatedAt>UPLOAD_TTL)throw Error('Save transfer expired; choose the destination again');if(transfer.busy)throw Error('Save transfer is busy');return transfer;}
+export async function uploadClientChunk(args){
+ const t=getUpload(args.transferId);
+ if(!Number.isSafeInteger(args.offset)||args.offset<0||typeof args.base64!=='string'||!args.base64.length||args.base64.length>Math.ceil(CHUNK*4/3)+4||args.base64.length%4||!/^[A-Za-z0-9+/]*={0,2}$/.test(args.base64))throw Error('Invalid save chunk');
+ const bytes=Buffer.from(args.base64,'base64'),hash=sha(bytes);
+ if(!bytes.length||bytes.length>CHUNK||bytes.toString('base64')!==args.base64||args.offset+bytes.length>t.totalBytes)throw Error('Invalid save chunk size/encoding');
+ if(t.last?.offset===args.offset&&t.last.hash===hash){t.updatedAt=Date.now();return {transferId:args.transferId,nextOffset:t.offset,totalBytes:t.totalBytes};}
+ if(args.offset!==t.offset)throw Error('Save chunk offset mismatch');
+ if(args.offset===0&&bytes.subarray(0,2).toString()!=='PK')throw Error('HWPX signature is missing');
+ t.busy=true;
+ try{const handle=await fs.open(t.temporary,'r+');try{let written=0;while(written<bytes.length){const result=await handle.write(bytes,written,bytes.length-written,args.offset+written);if(!result.bytesWritten)throw Error('Save chunk write failed');written+=result.bytesWritten;}}finally{await handle.close();}
+  t.offset+=bytes.length;t.last={offset:args.offset,hash};t.updatedAt=Date.now();return {transferId:args.transferId,nextOffset:t.offset,totalBytes:t.totalBytes};
+ }finally{t.busy=false;}
+}
+export async function abortClientSave(args){
+ const t=uploads.get(args.transferId);if(!t)return {aborted:false};if(t.busy)throw Error('Save transfer is busy');uploads.delete(args.transferId);await fs.unlink(t.temporary).catch(()=>{});return {aborted:true};
+}
+export async function commitClientSave(args,verify=async file=>(await runEngine(['info',file,'--json'])).data){
+ const t=getUpload(args.transferId);if(t.offset!==t.totalBytes)throw Error('Save transfer is incomplete');
+ t.busy=true;
+ try{
+  const bytes=await fs.readFile(t.temporary);
+  if(bytes.length!==t.totalBytes||sha(bytes)!==t.documentSha256)throw Error('Save transfer digest mismatch');
+  if(sha(await fs.readFile(t.source))!==t.sourceSha256)throw Error('Source changed during save');
+  const info=await verify(t.temporary);if(info?.format!=='hwpx')throw Error('Saved document did not reopen as HWPX');
+  if(sha(await fs.readFile(t.source))!==t.sourceSha256)throw Error('Source changed during verification');
+  // The verifier is read-only, but recheck staged bytes before publication too.
+  if(sha(await fs.readFile(t.temporary))!==t.documentSha256)throw Error('Staged document changed during verification');
+  await fs.copyFile(t.temporary,t.filename,1);
+  const registered=await registerClientDocument(t.filename);return {...registered,path:t.filename,revision:1,documentSha256:t.documentSha256,info};
+ }finally{uploads.delete(args.transferId);await fs.unlink(t.temporary).catch(()=>{});}
+}
 
 export async function registerClientDocument(filename) {
   if(!path.isAbsolute(filename)||!/\.hwpx$/i.test(filename)) throw new Error('Client viewer requires an absolute HWPX path');
   const real=await fs.realpath(filename), stat=await fs.stat(real);
-  if(!stat.isFile()||stat.size>MAX_DOCUMENT) throw new Error('Client HWPX must be at most 8 MiB');
+  if(!stat.isFile()||stat.size>MAX_DOCUMENT) throw new Error('Client HWPX must be at most 64 MiB');
   const bytes=await fs.readFile(real);
-  if(bytes.length>MAX_DOCUMENT) throw new Error('Client HWPX changed or exceeds 8 MiB');
+  if(bytes.length>MAX_DOCUMENT) throw new Error('Client HWPX changed or exceeds 64 MiB');
   if(bytes.subarray(0,2).toString()!=='PK') throw new Error('HWPX ZIP signature is missing');
   const id=randomUUID(); documents.set(id,{path:real,sha256:sha(bytes)});
   if(documents.size>64) documents.delete(documents.keys().next().value);
@@ -56,10 +117,7 @@ export async function readClientAsset(args,meta={}) {
   if(args.kind==='wasm') file=path.join(config.runtimeRoot,'core','rhwp_bg.wasm');
   else if(args.kind==='document') file=documentPath(meta,args.documentId);
   else throw new Error('Unknown client asset');
-  const stat=await fs.stat(file);
-  if(!stat.isFile()||stat.size>(args.kind==='wasm'?32*1024*1024:MAX_DOCUMENT)) throw new Error('Client asset too large');
-  const bytes=await fs.readFile(file),hash=sha(bytes);
-  if(args.kind==='wasm') await checkCoreFile('rhwp_bg.wasm',bytes);
+  const {bytes,hash}=await cachedAsset(file,args.kind);
   if(args.expectedSha256!==undefined&&args.expectedSha256!==hash) throw new Error('Asset changed during transfer; reopen the document');
   if(args.documentId&&args.kind==='document'&&documents.get(args.documentId)?.sha256!==hash) throw new Error('Source document changed; reopen it');
   if(args.offset>bytes.length) throw new Error('Asset offset out of range');

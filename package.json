@@ -1,6 +1,6 @@
 {
   "name": "pwh",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "private": true,
   "type": "module",
   "license": "MIT",
@@ -11,7 +11,7 @@
     "type": "git",
     "url": "https://github.com/wansucong-stoom/stoom-pwh.git"
   },
-  "description": "pwh: institution template-aware HWPX authoring with rhwp",
+  "description": "pwh: create and edit Korean HWPX documents together with AI in Codex",
   "scripts": {
     "start": "node src/server.mjs",
     "setup": "node scripts/setup.mjs",

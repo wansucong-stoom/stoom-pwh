@@ -7,7 +7,7 @@
  const tool=async(name,args,timeout)=>{let r=await rpc('tools/call',{name,arguments:args},timeout);if(r?.isError)throw Error(r.content?.map(c=>c.text||'').join('\n')||'도구 실행 실패');return r;};
  const sha=async bytes=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),x=>x.toString(16).padStart(2,'0')).join('');
  async function asset(kind){let offset=0,hash,buffer;do{const r=await tool('pwh_client_asset',{kind,offset,...(hash?{expectedSha256:hash}:{}),...(state.documentId?{documentId:state.documentId}:{})}),m=r.structuredContent;
- if(!m||m.offset!==offset||!Number.isSafeInteger(m.totalBytes)||m.totalBytes<1||m.totalBytes>32*1024*1024)throw Error('문서 자산 전송 오류');
+ if(!m||m.offset!==offset||!Number.isSafeInteger(m.totalBytes)||m.totalBytes<1||m.totalBytes>(kind==='document'?64:32)*1024*1024)throw Error('문서 자산 전송 오류');
  if(!buffer){hash=m.sha256;buffer=new Uint8Array(m.totalBytes);}if(hash!==m.sha256||buffer.length!==m.totalBytes)throw Error('문서가 전송 중 변경되었습니다.');
  if(kind==='document'){state.source=m.source;state.sourceSha256=m.sha256;document.getElementById('pwh-title').textContent=m.name;}
  const bytes=Uint8Array.from(atob(r._meta?.['pwh/client-bytes']||''),x=>x.charCodeAt(0));if(!bytes.length||bytes.length>512*1024||offset+bytes.length>buffer.length)throw Error('문서 청크 오류');buffer.set(bytes,offset);offset+=bytes.length;
@@ -41,7 +41,7 @@
  async function consume(result){const d=result?._meta?.['pwh/client-document']||result?.structuredContent;if(d?.documentId)state.documentId=d.documentId;if(d?.source)state.source=d.source;
  if(state.loaded||state.loading)return;state.loading=true;try{const bytes=await asset('document');await installed;await window.pwhEditor.ready();try{fontInstall??=installSystemFonts();await fontInstall;}catch(error){console.warn('[pwh fonts]',error.message);}await window.pwhEditor.load(bytes,state.source.split(/[\\/]/).pop());await offerRecovery();state.loaded=true;status('본문에서 직접 편집하세요. 다시 쓸 부분을 드래그하고 채팅으로 요청할 수 있습니다.');void poll();}catch(e){state.loading=false;status(e.message);const retry=document.getElementById('pwh-retry');if(retry){retry.hidden=false;retry.onclick=()=>{retry.hidden=true;void consume({});};}}}
  window.addEventListener('message',event=>{if(event.source!==parent||event.data?.jsonrpc!=='2.0')return;if(state.origin!==null&&event.origin!==state.origin)return;const m=event.data,p=pending.get(m.id);if(p&&!m.method){state.origin=event.origin;clearTimeout(p.timer);pending.delete(m.id);m.error?p.reject(Error(m.error.message)):p.resolve(m.result);return;}if(m.method==='ui/notifications/tool-result')void consume(m.params);if(m.method==='ui/notifications/tool-input'&&m.params?.arguments?.file)void consume({});if(m.id!==undefined&&m.method==='ping')post({jsonrpc:'2.0',id:m.id,result:{}});});
- window.pwhWasmBytes=(async()=>{const init=await rpc('ui/initialize',{appInfo:{name:'pwh-inline-studio',version:'0.6.1'},appCapabilities:{availableDisplayModes:['inline','fullscreen']},protocolVersion:'2026-01-26'});state.host=init.hostCapabilities||{};post({jsonrpc:'2.0',method:'ui/notifications/initialized',params:{}});return asset('wasm');})();
+ window.pwhWasmBytes=(async()=>{const init=await rpc('ui/initialize',{appInfo:{name:'pwh-inline-studio',version:'0.6.2'},appCapabilities:{availableDisplayModes:['inline','fullscreen']},protocolVersion:'2026-01-26'});state.host=init.hostCapabilities||{};post({jsonrpc:'2.0',method:'ui/notifications/initialized',params:{}});return asset('wasm');})();
  window.pwhWasmBytes.catch(e=>status(e.message));
  window.addEventListener('pwh-ai-request',event=>{
   if(!state.loaded||document.getElementById('pwh-ai-dialog'))return;
@@ -76,5 +76,29 @@
   const bitmap=await createImageBitmap(new Blob([bytes],{type:image.mediaType}));try{if(bitmap.width!==image.width||bitmap.height!==image.height)throw Error('이미지 실제 크기 불일치');}finally{bitmap.close();}return bytes;
  }
  async function poll(){if(!state.loaded)return;try{const context=window.pwhEditor.context();try{await checkpoint(context);}catch(error){console.warn('[pwh checkpoint]',error.message);}const r=await tool('pwh_editor_poll',{sessionId:state.sessionId,source:state.source,context,...(state.receipt?{receipt:state.receipt}:{})});state.receipt=null;const taskLabel=document.getElementById('pwh-task');if(taskLabel){const tasks=r.structuredContent?.tasks||[];taskLabel.textContent=tasks.length?'AI 요청 '+tasks.length+'건 · '+tasks[tasks.length-1].note:'';taskLabel.title=tasks.map(t=>t.note).join('\n');}for(const command of r.structuredContent?.commands||[]){try{const result=await (command.type==='tables'?window.pwhEditor.tables(command):command.type==='tableStyle'?window.pwhEditor.tableStyle(command):command.type==='replacePicture'?window.pwhEditor.replacePicture(command,await replacementBytes(command.image)):command.type==='layout'?window.pwhEditor.layout(command):command.type==='compose'?window.pwhEditor.compose(command):window.pwhEditor.rewrite(command));state.receipt={ticketId:command.ticketId,ok:true,undoSteps:result.undoSteps,...(result.tablePlan?{tablePlan:result.tablePlan}:{}),...(result.changes?{changes:result.changes}:{}),...(result.replacement?{replacement:result.replacement}:{})};status(command.type==='tables'?'표 서식 분석을 완료했습니다.':'선택한 영역에 GPT 수정을 반영했습니다. 실행 취소로 되돌릴 수 있습니다.');}catch(e){state.receipt={ticketId:command.ticketId,ok:false,error:e.message};status(e.message);}}}catch(e){status(e.message);}finally{setTimeout(poll,1500);}}
- document.addEventListener('DOMContentLoaded',()=>{document.getElementById('pwh-save').onclick=async()=>{const button=document.getElementById('pwh-save');if(button.disabled)return;button.disabled=true;try{status('저장할 폴더와 파일명을 선택하세요.');const choice=(await tool('pwh_client_save_dialog',{documentId:state.documentId,expectedSourceSha256:state.sourceSha256},310000)).structuredContent;if(choice.cancelled){status('저장을 취소했습니다.');return;}const artifact=window.pwhEditor.export();if(artifact.contentLoss.count)throw Error('내용 손실이 보고되어 저장하지 않았습니다.');const bytes=artifact.bytes;if(bytes.length>3*1024*1024)throw Error('현재 저장 한도는 3 MiB입니다.');let encoded='';for(let i=0;i<bytes.length;i+=8192)encoded+=String.fromCharCode(...bytes.subarray(i,i+8192));const r=await tool('pwh_client_save',{documentId:state.documentId,saveTicket:choice.saveTicket,base64:btoa(encoded),expectedSourceSha256:state.sourceSha256,documentSha256:await sha(bytes),revision:1});const d=r.structuredContent;await recoveryStore('delete',recoveryKey()).catch(()=>{});state.checkpointSha=null;state.documentId=d.documentId;state.source=d.path;state.sourceSha256=d.sourceSha256;await window.pwhEditor.saved(d.path.split(/[\\/]/).pop());status(`저장 완료: ${d.path}`);}catch(e){status(e.message);}finally{button.disabled=false;}};});
+ document.addEventListener('DOMContentLoaded',()=>{document.getElementById('pwh-save').onclick=async()=>{
+  const button=document.getElementById('pwh-save');if(button.disabled)return;button.disabled=true;let transferId=null;
+  try{
+   status('저장할 폴더와 파일명을 선택하세요.');
+   const choice=(await tool('pwh_client_save_dialog',{documentId:state.documentId,expectedSourceSha256:state.sourceSha256},310000)).structuredContent;
+   if(choice.cancelled){status('저장을 취소했습니다.');return;}
+   const artifact=window.pwhEditor.export(),exportSeq=window.pwhEditor.context().documentState.changeSeq;
+   if(artifact.contentLoss.count)throw Error('내용 손실이 보고되어 저장하지 않았습니다.');
+   const bytes=artifact.bytes;if(bytes.length>64*1024*1024)throw Error('현재 문서 저장 한도는 64 MiB입니다.');
+   const started=(await tool('pwh_client_save_begin',{documentId:state.documentId,saveTicket:choice.saveTicket,totalBytes:bytes.length,expectedSourceSha256:state.sourceSha256,documentSha256:await sha(bytes)})).structuredContent;
+   transferId=started.transferId;
+   for(let offset=0;offset<bytes.length;){
+    const part=bytes.subarray(offset,Math.min(offset+started.chunkBytes,bytes.length));let encoded='';for(let i=0;i<part.length;i+=8192)encoded+=String.fromCharCode(...part.subarray(i,i+8192));
+    const result=(await tool('pwh_client_save_chunk',{transferId,offset,base64:btoa(encoded)})).structuredContent;
+    if(result.nextOffset!==offset+part.length)throw Error('저장 전송 순서가 일치하지 않습니다.');offset=result.nextOffset;
+    status('문서 저장 중 '+Math.round(offset/bytes.length*100)+'%');
+   }
+   status('문서를 다시 열어 검증하고 있습니다.');
+   const d=(await tool('pwh_client_save_commit',{transferId},120000)).structuredContent;transferId=null;
+   await recoveryStore('delete',recoveryKey()).catch(()=>{});state.checkpointSha=null;state.documentId=d.documentId;state.source=d.path;state.sourceSha256=d.sourceSha256;
+   const same=window.pwhEditor.context().documentState.changeSeq===exportSeq;
+   if(same)await window.pwhEditor.saved(d.path.split(/[\\/]/).pop());
+   status(`저장 완료: ${d.path}`+(same?'':' — 저장 중 추가한 변경은 아직 미저장 상태입니다.'));
+  }catch(e){if(transferId)await tool('pwh_client_save_abort',{transferId}).catch(()=>{});status(e.message);}finally{button.disabled=false;}
+ };});
 })();

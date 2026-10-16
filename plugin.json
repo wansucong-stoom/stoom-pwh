@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "pwh",
-  "version": "0.6.1",
-  "description": "주석으로 협업하고 기관 HWPX 양식을 최대한 보존하는 rhwp 기반 AI 플러그인.",
+  "version": "0.6.2",
+  "description": "AI에게 한글 문서 초안 작성과 기존 문서 수정을 요청하고, Codex 편집기에서 같은 문서를 함께 보며 수정하는 HWPX 협업 플러그인.",
   "author": {
     "name": "Wansucong the STOOM"
   },
@@ -17,14 +17,14 @@
     "com.openai": {
       "interface": {
         "displayName": "pwh",
-        "shortDescription": "주석으로 협업하고 한글 양식 보존",
-        "longDescription": "rhwp 기반으로 기관 HWPX 양식의 구조와 서식을 분석·활용하고, 미리보기 주석을 받아 실제 문서를 수정·재조판하는 로컬 AI 플러그인입니다. 한컴 한글과의 화면 동일성을 보장하지 않습니다.",
+        "shortDescription": "한글 문서를 AI와 함께 작성·편집",
+        "longDescription": "AI에게 한글 문서의 초안 작성이나 기존 문서 수정을 요청하세요. Codex 데스크톱의 본문 편집기에서 직접 편집하고, 선택한 글·그림·표의 수정을 AI에게 요청해 같은 문서에 반영할 수 있습니다. 기관 양식을 활용하고 표 디자인을 통일하며, 편집 가능한 HWPX로 저장합니다. 편집·조판 엔진은 rhwp를 사용합니다.",
         "developerName": "Wansucong the STOOM",
         "category": "Productivity",
         "capabilities": [
           "Interactive"
         ],
-        "defaultPrompt": "이 기관의 한글 양식을 최대한 보존해서 내용을 작성하고 미리보기를 열어 줘. 주석으로 요청하면 실제 HWPX를 수정하고 다시 보여줘."
+        "defaultPrompt": "한글 문서의 초안을 작성하거나 기존 문서를 수정하고 우측 편집기에 열어 줘. 내가 선택한 부분에 AI 수정을 요청하면 같은 문서에 반영해 줘."
       }
     }
   },

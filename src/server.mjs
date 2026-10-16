@@ -5,8 +5,10 @@ import { pathToFileURL } from 'node:url';
 // MCP Apps / OpenAI File Entrypoint contracts:
 // https://github.com/openai/mcp-extensions/blob/main/docs/spec.md#file-extension-entrypoint
 // https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/2026-01-26/apps.mdx
-export const VIEWER_URI = 'ui://pwh/inline-editor-0.6.1';
-const VERSION = '0.6.1';
+// File entrypoint identity must survive plugin updates. Keep the last widely
+// registered URI; package/appInfo versions carry the release version instead.
+export const VIEWER_URI = 'ui://pwh/inline-editor-0.6.0';
+const VERSION = '0.6.2';
 export const isViewerResourceUri=uri=>typeof uri==='string'&&/^ui:\/\/pwh\/inline-editor(?:-\d+\.\d+\.\d+)?$/.test(uri);
 const MIME = 'text/html;profile=mcp-app';
 // Use the established single-result MCP protocol; 2026-07-28 MRTR is not implemented.
@@ -98,6 +100,10 @@ export const TOOLS = [
   {
     name:'pwh_client_save_dialog',title:'수정본 저장 위치 선택',description:'사용자의 저장 버튼 클릭에 따라 Windows 저장 창을 엽니다. 취소하면 파일을 쓰지 않습니다.',inputSchema:objectSchema({documentId:{type:'string'},expectedSourceSha256:{type:'string'}},['expectedSourceSha256']),annotations:writeDocument,_meta:{ui:{visibility:['app']}},
   },
+  {name:'pwh_client_save_begin',title:'HWPX 분할 저장 시작',description:'저장 창의 일회용 ticket으로 최대 64 MiB의 분할 저장을 시작합니다.',inputSchema:objectSchema({documentId:{type:'string'},saveTicket:{type:'string'},totalBytes:{type:'integer',minimum:2,maximum:67108864},expectedSourceSha256:{type:'string'},documentSha256:{type:'string'}},['saveTicket','totalBytes','expectedSourceSha256','documentSha256']),annotations:writeDocument,_meta:{ui:{visibility:['app']}}},
+  {name:'pwh_client_save_chunk',title:'HWPX 저장 조각 전송',description:'최대 512 KiB를 순서대로 전송합니다. 같은 마지막 조각의 재전송은 안전합니다.',inputSchema:objectSchema({transferId:{type:'string'},offset:{type:'integer',minimum:0},base64:{type:'string',minLength:1,maxLength:699056}},['transferId','offset','base64']),annotations:writeDocument,_meta:{ui:{visibility:['app']}}},
+  {name:'pwh_client_save_commit',title:'HWPX 검증 후 저장 완료',description:'전체 SHA와 원본 변경, 엔진 재열기를 검증하고 새 파일로 확정합니다.',inputSchema:objectSchema({transferId:{type:'string'}},['transferId']),annotations:writeDocument,_meta:{ui:{visibility:['app']}}},
+  {name:'pwh_client_save_abort',title:'HWPX 분할 저장 중단',description:'아직 확정하지 않은 임시 저장 조각만 정리합니다.',inputSchema:objectSchema({transferId:{type:'string'}},['transferId']),annotations:writeDocument,_meta:{ui:{visibility:['app']}}},
   {
     name:'pwh_client_save',title:'클라이언트 HWPX 새 수정본 저장',
     description:'메모리 HWPX를 SHA·원본 변경 검사 후 새 파일로 저장합니다. 클라이언트 전용이며 원본을 덮어쓰지 않습니다.',
@@ -322,6 +328,7 @@ export async function callTool(name, args = {}, requestMeta = {}) {
   if(name==='pwh_client_fonts') return textResult(await (await import('./system-fonts.mjs')).systemFontSnapshot());
   if(name==='pwh_client_font_asset') return (await import('./system-fonts.mjs')).systemFontChunk(args);
   if(name==='pwh_client_image_asset') return (await import('./replacement-image.mjs')).replacementImageChunk(args);
+  if(['pwh_client_save_begin','pwh_client_save_chunk','pwh_client_save_commit','pwh_client_save_abort'].includes(name)){const m=await import('./client-assets.mjs');return textResult(await m[{pwh_client_save_begin:'beginClientSave',pwh_client_save_chunk:'uploadClientChunk',pwh_client_save_commit:'commitClientSave',pwh_client_save_abort:'abortClientSave'}[name]](args,...(name==='pwh_client_save_begin'?[requestMeta]:[])));}
   if(name==='pwh_client_asset') return (await import('./client-assets.mjs')).readClientAsset(args,requestMeta);
   if(name==='pwh_client_save_dialog') return textResult(await (await import('./client-assets.mjs')).selectClientSaveDestination(args,requestMeta));
   if(name==='pwh_client_save') return textResult(await (await import('./client-assets.mjs')).saveClientDocument(args,requestMeta));
