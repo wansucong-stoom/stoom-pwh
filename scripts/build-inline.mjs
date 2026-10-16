@@ -3,6 +3,25 @@ import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 const root=path.resolve(process.argv[2]);
 const studio=path.join(root,'rhwp-studio');
+await fs.copyFile(new URL('../src/clipboard-structure.mjs',import.meta.url),path.join(studio,'src/engine/pwh-clipboard-structure.mjs'));
+const keyboardPath=path.join(studio,'src/engine/input-handler-keyboard.ts');
+let keyboard=await fs.readFile(keyboardPath,'utf8');
+if(!keyboard.includes('pwh structured cell clipboard guard')){
+ const internalAnchor='  // 내부 복사 marker가 있으면 내부 클립보드를 사용한다.';
+ const externalAnchor='function pasteExternalHtml(this: any, html: string, text: string, hasSelection: boolean): void {';
+ if(!keyboard.includes(internalAnchor)||!keyboard.includes(externalAnchor))throw new Error('Unsupported Studio clipboard bridge: review upstream paste handlers');
+ keyboard='// pwh structured cell clipboard guard\nimport {clipboardCellWarning} from '+JSON.stringify('./pwh-clipboard-structure.mjs')+';\nimport {showToast as pwhClipboardToast} from "@/ui/toast";\n'+keyboard;
+ keyboard=keyboard.replace(internalAnchor,`  if(useInternalClipboard){
+    const warning=clipboardCellWarning(pos,html,this.wasm.clipboardHasControl());
+    if(warning){pwhClipboardToast({message:warning,durationMs:12000});return;}
+  }
+`+internalAnchor);
+ keyboard=keyboard.replace(externalAnchor,externalAnchor+`
+  const warning=clipboardCellWarning(this.cursor.getPosition(),html);
+  if(warning){pwhClipboardToast({message:warning,durationMs:12000});return;}
+`);
+ await fs.writeFile(keyboardPath,keyboard);
+}
 await fs.copyFile(new URL('../src/selection-layout.mjs',import.meta.url),path.join(studio,'src/core/pwh-selection-layout.mjs'));
 await fs.copyFile(new URL('../src/table-style.mjs',import.meta.url),path.join(studio,'src/pwh-table-style.mjs'));
 await fs.copyFile(new URL('../src/collaboration-target.ts',import.meta.url),path.join(studio,'src/pwh-collaboration-target.ts'));
