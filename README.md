@@ -55,7 +55,7 @@ pwh의 양식 분석 도구는 글자·문단 서식 ID, 스타일, 용지·여�
 
 **권장 설치 방법은 아래의 Git clone → 런타임 준비 → 마켓플레이스 등록입니다.**
 
-별도로 **[pwh 0.3.1 플러그인 소스 ZIP](https://github.com/wansucong-stoom/stoom-pwh/raw/refs/heads/main/releases/pwh-0.3.1.zip)**도 제공합니다. 압축 안의 `pwh/`가 플러그인 루트이며 패키지 직접 등록·개발용입니다. 이 ZIP은 플러그인 단독 패키지 규칙에 따라 마켓플레이스 카탈로그와 실행 엔진을 포함하지 않습니다. 아래의 `marketplace add .` 설치를 하려면 ZIP 대신 Git clone으로 받은 저장소를 사용하세요.
+별도로 **[pwh 0.4.0 플러그인 소스 ZIP](https://github.com/wansucong-stoom/stoom-pwh/raw/refs/heads/main/releases/pwh-0.4.0.zip)**도 제공합니다. 압축 안의 `pwh/`가 플러그인 루트이며 패키지 직접 등록·개발용입니다. 이 ZIP은 플러그인 단독 패키지 규칙에 따라 마켓플레이스 카탈로그와 실행 엔진을 포함하지 않습니다. 아래의 `marketplace add .` 설치를 하려면 ZIP 대신 Git clone으로 받은 저장소를 사용하세요.
 
 ### 요구사항
 
@@ -149,7 +149,7 @@ pwh MCP는 `pwh_*` 이름으로 도구를 제공합니다. 이전 개발본의 `
 | `pwh_fill_form` | 원본 XML을 최대한 보존하는 문단·셀·텍스트 말단 수정 |
 | `pwh_replace_image` | PNG·JPEG·BMP 그림 자원을 교체하고 다른 항목·배치 XML 보존 검증 |
 | `pwh_create_document`, `pwh_edit_template` | 새 문서 생성과 네이티브 파일 편집 |
-| `pwh_preview` | 쪽별 PNG·HTML과 레이아웃 생성 |
+| `pwh_preview` | HWPX 클라이언트 문서 모델 연결 |
 | `pwh_live_open/read/commands/apply/save/status` | 실제 Studio 문서 열기·읽기·편집·저장 |
 | `pwh_live_request` | 편집기 선택 문맥으로 작성한 수정 요청 조회 |
 
