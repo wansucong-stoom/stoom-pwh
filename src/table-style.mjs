@@ -27,7 +27,7 @@ export async function captureTableTarget(w,c){
  const {sec,ppi,ci,cellPath}=c.table.source;
  if(cellPath?.length>1)return null;
  const cells=c.table.selectedCells.map(x=>x.cellIndex);
- if(cells.length>32)return null;
+ if(cells.length>256)return null;
  const snapshot=tableSnapshot(w,sec,ppi,ci);
  return {kind:'table_cells',epoch:c.documentState.documentEpoch,section:sec,controlIndex:ci,cells,sha256:await digest(snapshot)};
 }

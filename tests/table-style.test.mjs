@@ -31,3 +31,10 @@ test('table inspection does not complete a request; actual style acknowledgement
  assert.equal(editorRequest(request).status,'applied');
  await assert.rejects(editorTableStyle({sessionId,expected:{documentState:{documentEpoch:2}},planId:'plan',scope:'document',theme}),/changed/);
 });
+test('a legacy 32-cell summary of a full 64-cell table can submit all cells without inventing geometry',()=>{
+ const sessionId=randomUUID(),context={ready:true,kind:'cell_block',requestScope:'selection',documentState:{documentEpoch:1},table:{source:{sec:0,ppi:24,ci:0,cellPath:[{controlIndex:0,cellIndex:0,cellParaIndex:0}]},dimensions:{rowCount:8,colCount:8,cellCount:64},selectedRange:{startRow:0,startCol:0,endRow:7,endCol:7},selectedCellsComplete:false,selectedCells:Array.from({length:32},(_,cellIndex)=>({cellIndex,row:Math.floor(cellIndex/8),col:cellIndex%8}))}};
+ const request=editorCapture({sessionId,context,note:'Restyle the selected table'}),stored=editorRequest(request).context;
+ assert.equal(stored.table.selectedCells.length,64);assert.equal(stored.table.selectedCellsComplete,true);assert.equal(stored.table.selectedCells[63].cellIndex,63);assert.equal(stored.table.selectedCells[63].row,undefined);assert.equal(context.table.selectedCells.length,32);
+ assert.throws(()=>editorCapture({sessionId:randomUUID(),context:{...context,table:{...context.table,selectedCells:null}},note:'Do not guess exclusions'}));
+ assert.throws(()=>editorCapture({sessionId:randomUUID(),context:{...context,table:{...context.table,selectedRange:{startRow:1,startCol:0,endRow:7,endCol:7}}},note:'Do not guess partial selection'}));
+});

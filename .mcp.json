@@ -4,7 +4,8 @@
       "type": "stdio",
       "command": "node",
       "args": [
-        "${PLUGIN_ROOT}/src/server.mjs"
+        "${PLUGIN_ROOT}/scripts/launch.mjs",
+        "pwh"
       ],
       "cwd": "${PLUGIN_ROOT}"
     },
@@ -12,7 +13,8 @@
       "type": "stdio",
       "command": "node",
       "args": [
-        "${PLUGIN_ROOT}/src/native-mcp.mjs"
+        "${PLUGIN_ROOT}/scripts/launch.mjs",
+        "rhwp-core"
       ],
       "cwd": "${PLUGIN_ROOT}"
     }

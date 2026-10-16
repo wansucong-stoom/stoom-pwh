@@ -12,12 +12,12 @@ const FILES = Object.freeze([
   'engine.config.json', 'engine.config.example.json', 'README.md', 'LICENSE',
   'THIRD_PARTY_NOTICES.md', 'CONTRIBUTING.md', 'scripts/setup.mjs',
   'scripts/inspect_template.py', 'scripts/fill_form.py', 'scripts/replace_image.py', 'scripts/inspect_image.py', 'scripts/build-studio.ps1',
-  'scripts/package.mjs', 'scripts/build-inline.mjs', 'scripts/save-dialog.ps1',
+  'scripts/package.mjs', 'scripts/build-inline.mjs', 'scripts/save-dialog.ps1', 'scripts/launch.mjs',
 ]);
 const DIRECTORIES = Object.freeze(['docs', 'licenses', 'skills', 'src', 'examples']);
 const SOURCE_EXTENSIONS = new Set(['.md', '.txt', '.json', '.mjs', '.js', '.ts', '.html', '.css', '.svg']);
 const MAX_SOURCE_BYTES = 64 * 1024 * 1024;
-const REQUIRED = ['scripts/build-inline.mjs','src/inline-host.js','src/studio-inline-adapter.ts','src/editor-session.mjs','src/server.mjs', 'src/native-mcp.mjs', 'src/cli.mjs', 'src/engine.mjs',
+const REQUIRED = ['scripts/launch.mjs','scripts/build-inline.mjs','src/inline-host.js','src/studio-inline-adapter.ts','src/editor-session.mjs','src/server.mjs', 'src/native-mcp.mjs', 'src/cli.mjs', 'src/engine.mjs',
   'src/config.mjs', 'src/live.mjs', 'src/editor.html', 'src/editor-client.mjs', 'src/viewer.html',
   'src/studio-selection.ts', 'src/template.mjs', 'src/form.mjs', 'skills/pwh/SKILL.md',
   'licenses/naver-nanum-OFL-1.1.txt', 'examples/demo.json', 'examples/changes.json'];

@@ -10,7 +10,7 @@ type BridgeDependencies = {
 
 const MAX_TEXT = 6000;
 const MAX_PARAGRAPHS = 24;
-const MAX_CELLS = 32;
+const MAX_CELLS = 256;
 const MAX_SCANNED_CELLS = 256;
 const MAX_RECTS = 96;
 

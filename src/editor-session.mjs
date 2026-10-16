@@ -102,14 +102,22 @@ export async function editorReplacePicture(args){
 export function editorResult(args){const result=tickets.get(args.ticketId);if(!result)throw Error('Unknown editor ticket');return result;}
 export function editorCapture(args){
  if(typeof args.note!=='string'||!args.note.trim()||args.note.length>4000)throw Error('수정 요청 내용을 작성하세요.');
- const c=args.context;
+ const c=structuredClone(args.context);
+ // Older clients list at most 32 cells. A full-table rectangle still identifies
+ // every cell by the native cell count, without guessing merged coordinates.
+ const table=c?.table,range=table?.selectedRange,dim=table?.dimensions;
+ if(c?.kind==='cell_block'&&!table?.selectedCellsComplete&&Array.isArray(table?.selectedCells)&&table.source?.cellPath?.length<=1&&Number.isSafeInteger(dim?.cellCount)&&dim.cellCount>0&&dim.cellCount<=256&&Number.isSafeInteger(dim.rowCount)&&Number.isSafeInteger(dim.colCount)&&range?.startRow===0&&range.startCol===0&&range.endRow===dim.rowCount-1&&range.endCol===dim.colCount-1){
+  const known=new Map(table.selectedCells.map(cell=>[cell.cellIndex,cell]));
+  table.selectedCells=Array.from({length:dim.cellCount},(_,cellIndex)=>known.get(cellIndex)||{cellIndex,source:{sec:table.source.sec,ppi:table.source.ppi,ci:table.source.ci,cellPath:[{controlIndex:table.source.ci,cellIndex,cellParaIndex:0}]}});
+  table.selectedCellsComplete=true;table.selectionResolvedFrom='full_table_dimensions';
+ }
  const text=!!c?.selection&&c.selectedText?.known&&!!c.selectedText.text&&!c.selectedText.truncated;
  const object=c?.ready&&c.kind==='object'&&Array.isArray(c.objects)&&c.objects.length>0&&c.objects.length<=16&&c.objects.every(o=>o?.source&&['image','shape','equation'].includes(o.source.type)&&['sec','ppi','ci'].every(k=>Number.isSafeInteger(o.source[k])&&o.source[k]>=0));
  const blank=c?.ready&&c.blankDocument===true;
  const cells=c?.ready&&c.kind==='cell_block'&&c.table?.selectedCellsComplete&&c.table?.selectedCells?.length>0;
  if(!text&&!object&&!blank&&!cells&&!(c?.ready&&c.requestScope==='document'&&c.documentState?.documentSha256))throw Error('텍스트를 드래그하거나 그림·도형을 선택하세요.');
- editorPoll({sessionId:args.sessionId,source:args.source,context:args.context});
- const requestId=randomUUID(),record=structuredClone({requestId,sessionId:args.sessionId,source:args.source,context:args.context,note:args.note,createdAt:Date.now(),untrustedContent:true});
+ editorPoll({sessionId:args.sessionId,source:args.source,context:c});
+ const requestId=randomUUID(),record=structuredClone({requestId,sessionId:args.sessionId,source:args.source,context:c,note:args.note,createdAt:Date.now(),untrustedContent:true});
  record.status='requested';if(record.context.target)record.context.target.requestId=requestId;
  requests.set(requestId,record);if(requests.size>128)requests.delete(requests.keys().next().value);return {requestId,sessionId:args.sessionId};
 }
