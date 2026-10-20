@@ -1,0 +1,144 @@
+--- a/src/renderer/mod.rs
++++ b/src/renderer/mod.rs
+@@ -1923,7 +1923,9 @@
+ /// **줄간격**은 문단 형식 높이에만 실리므로 줄이 없으면 통째로 빠졌다. 한/글 2024 합성 문서
+ /// (`samples/issue7418/tac_host_line_synthetic`, 글자 10·17pt × 줄간격 100·160·200% × 표 높이
+ /// 1716·3014)의 저장 줄은 12조합 모두 `vertsize = 표 높이 + 바깥 여백`,
+-/// `spacing = 글자 크기 × (줄간격 − 100%)` 이다 — 그림·도형 줄(`#7079`)과 같은 leading 이다.
++/// 기존 관측은 `spacing = 글자 크기 × (줄간격 − 100%)` 이다.
++/// 별도로 확인한 `affectLSpacing=1`인 단일 표는 아래 공통 helper가 표 줄 상자를
++/// 기준으로 계산한다. 그림·도형 줄(`#7079`)의 기존 계약은 바꾸지 않는다.
+ /// 높이는 바깥 여백을 뺀 표 높이다(여백은 `tac_outer_margin_v_px` 가 예산에 더한다).
+ pub(crate) fn tac_table_host_line_metrics(
+     para: &crate::model::paragraph::Paragraph,
+@@ -1949,7 +1951,58 @@
+         })?;
+     Some((
+         height,
+-        tac_object_stack_line_leading_px(para, styles, para_style),
++        tac_table_affect_line_spacing_metrics(para, dpi, styles, para_style)
++            .map(|(_, leading)| leading)
++            .unwrap_or_else(|| tac_object_stack_line_leading_px(para, styles, para_style)),
++    ))
++}
++
++/// A fresh single inline-table host can use its object line box as the
++/// percentage-spacing base. Real stored lines already own their spacing and
++/// must never be overridden; import-generated synthetic lines are still fresh.
++/// Keep mixed controls, visible text, non-percent spacing,
++/// and objects no taller than the host font on their existing paths.
++/// The verified base is the declared table frame plus its outer margins;
++/// this helper does not infer a replacement measured frame after cell growth.
++/// The table's outer margins belong to the line box exactly once; callers add
++/// them separately to flow height. Return `(table content height, extra gap)`.
++pub(crate) fn tac_table_affect_line_spacing_metrics(
++    para: &crate::model::paragraph::Paragraph,
++    dpi: f64,
++    styles: &crate::renderer::style_resolver::ResolvedStyleSet,
++    para_style: Option<&crate::renderer::style_resolver::ResolvedParaStyle>,
++) -> Option<(f64, f64)> {
++    use crate::model::control::Control;
++    if !para_has_no_stored_line_segs(para) || !para.text.is_empty() {
++        return None;
++    }
++    let [Control::Table(table)] = para.controls.as_slice() else {
++        return None;
++    };
++    if !table.common.treat_as_char || !table.common.affect_line_spacing {
++        return None;
++    }
++    let style = para_style?;
++    if !matches!(style.line_spacing_type, LineSpacingType::Percent)
++        || !style.line_spacing.is_finite()
++        || style.line_spacing <= 100.0
++    {
++        return None;
++    }
++    let char_shape_id = para
++        .char_shape_id_at(0)
++        .or_else(|| para.char_shapes.first().map(|shape| shape.char_shape_id))?;
++    let font_size = styles.char_styles.get(char_shape_id as usize)?.font_size;
++    let frame_hu = i64::from(table.common.height)
++        + i64::from(table.outer_margin_top)
++        + i64::from(table.outer_margin_bottom);
++    let frame_height = hwpunit_to_px(i32::try_from(frame_hu).ok()?, dpi);
++    if !font_size.is_finite() || font_size <= 0.0 || frame_height <= font_size {
++        return None;
++    }
++    Some((
++        hwpunit_to_px(i32::try_from(table.common.height).ok()?, dpi),
++        frame_height * (style.line_spacing - 100.0) / 100.0,
+     ))
+ }
+ 
+--- a/src/renderer/composer/line_breaking.rs
++++ b/src/renderer/composer/line_breaking.rs
+@@ -4373,9 +4373,16 @@
+             }
+             line_specs.push((line_start, line_width, line_height));
+ 
++            // A fresh single TAC table with affectLSpacing uses its object
++            // frame as the percentage base. Publish that spacing in the
++            // synthetic segment before following paragraph positions are built.
++            let fresh_tac_metric = crate::renderer::tac_table_affect_line_spacing_metrics(
++                para, dpi, styles, para_style,
++            );
+             let orig_line_segs = para.line_segs.clone();
+             let mut new_line_segs = Vec::with_capacity(line_specs.len());
+-            // 개체만 있는 줄도 줄간격 기준은 **그 문단의 글자모양 크기**다. 한컴은 개체 높이를
++            // 위 affectLSpacing 전용 분기 외에는 개체 줄의 줄간격 기준을 호스트 글자모양으로
++            // 유지한다. 기존 관측에서 한컴은 개체 높이를
+             // line_height 에만 반영하고 spacing 은 글자 높이로 계산한다(정답지 개체 줄 18/18:
+             // 165%·14pt 문단의 표 줄 spacing 912 = 1400×0.65, 160%·10pt 문단의 그림 줄 600 = 1000×0.6).
+             // 0.0 을 넘기면 내부 기본 12px(900 HU)로 떨어져 585 가 되고, 쪽마다 327 HU 씩 덜 쌓인다.
+@@ -4411,6 +4418,9 @@
+                     };
+                 }
+                 apply_inline_control_line_height(&mut seg, height_hwp);
++                if let Some((_, leading)) = fresh_tac_metric {
++                    seg.line_spacing = crate::renderer::px_to_hwpunit(leading, dpi);
++                }
+                 new_line_segs.push(seg);
+             }
+ 
+--- a/src/renderer/layout.rs
++++ b/src/renderer/layout.rs
+@@ -14054,7 +14054,21 @@
+                 // 하며, om_top 선가산분·om_bottom 후가산(#521)을 겹치면 om 상하합
+                 // (1704HU=22.7px)만큼 후속 본문이 밀려 단 하단이 절단된다.
+                 let mut stored_lh_covers_om = false;
+-                if let Some(seg) = host_seg {
++                let ps_id_for_ls = composed
++                    .get(para_index)
++                    .map(|c| c.para_style_id as usize)
++                    .unwrap_or(para.para_shape_id as usize);
++                let fresh_tac_metric = crate::renderer::tac_table_affect_line_spacing_metrics(
++                    para,
++                    self.dpi,
++                    styles,
++                    styles.para_styles.get(ps_id_for_ls),
++                );
++                if let Some((_, leading)) = fresh_tac_metric {
++                    // Synthetic host segments are not saved layout evidence.
++                    // Match the fresh object-line metric used by flow/measure.
++                    y_offset += leading;
++                } else if let Some(seg) = host_seg {
+                     if seg.line_spacing > 0 {
+                         let native_stored_layout =
+                             self.profile.get().hwp5_stored_pagination_layout()
+@@ -14113,13 +14127,9 @@
+                     // [#5788] 저장 lineseg 가 없는(기계생성) 문서는 앵커 줄의 trailing
+                     // line_spacing 을 실을 seg 가 없어 표 아래 문단이 그만큼 붙는다
+                     // (3190263: 표 19개 × −9.2px 누적으로 8쪽 vs 한글 9쪽; 한글 계산
+-                    // 조판은 앵커 줄간격을 더한다). 문단 스타일의 퍼센트 줄간격을
+-                    // 앵커 글꼴 크기로 환산해 보충한다 — 저장 lineseg 보유 문서
++                    // 조판은 앵커 줄간격을 더한다). 위의 affectLSpacing 전용 분기 외에는
++                    // 기존 앵커 글꼴 기준을 보존한다. 저장 lineseg 보유 문서
+                     // (#1116 핀 계열)는 위 경로 그대로라 불변.
+-                    let ps_id_for_ls = composed
+-                        .get(para_index)
+-                        .map(|c| c.para_style_id as usize)
+-                        .unwrap_or(para.para_shape_id as usize);
+                     let font_size = para
+                         .char_shapes
+                         .first()

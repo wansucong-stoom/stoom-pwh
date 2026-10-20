@@ -19,3 +19,16 @@ jobs:
         with:
           python-version: '3.12'
       - run: node --test
+  wasm-table-regressions:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node scripts/setup.mjs --runtime-root "$env:RUNNER_TEMP/pwh-wasm-regression-runtime"
+      - shell: pwsh
+        run: |
+          $env:PWH_CORE_JS = Join-Path $env:RUNNER_TEMP 'pwh-wasm-regression-runtime/core/rhwp.js'
+          $env:PWH_CORE_WASM = Join-Path $env:RUNNER_TEMP 'pwh-wasm-regression-runtime/core/rhwp_bg.wasm'
+          node --test tests/rowbreak-table-height.test.mjs tests/tac-table-line-spacing.test.mjs

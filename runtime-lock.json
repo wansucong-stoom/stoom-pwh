@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "id": "rhwp-0.8.7-pwh-r2",
+  "id": "rhwp-0.8.7-pwh-r3",
   "platform": "win32-x64",
   "upstreamVersion": "0.8.7",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
-  "releaseTag": "engine-rhwp-0.8.7-pwh-r2",
+  "releaseTag": "engine-rhwp-0.8.7-pwh-r3",
   "runtime": {
-    "file": "pwh-runtime-rhwp-0.8.7-pwh-r2-windows-x64.zip",
-    "size": 40482355,
-    "sha256": "651eb3ff3c81f67b7e74303507d978efc8265f1ae5e7ca212ce99b213d84a283",
-    "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r2/pwh-runtime-rhwp-0.8.7-pwh-r2-windows-x64.zip"
+    "file": "pwh-runtime-rhwp-0.8.7-pwh-r3-windows-x64.zip",
+    "size": 40839324,
+    "sha256": "0c7fd9ba142c5eac8357f8f6815d3bc06ce8a102fc7b5ed6d595da6311311601",
+    "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r3/pwh-runtime-rhwp-0.8.7-pwh-r3-windows-x64.zip"
   },
   "preservationAssets": [
     {
@@ -95,6 +95,18 @@
       "sha256": "d8e88495e95419f5ef6dc3ed05ab47827d850a9e5f3aeff773fa52933aa3c5ed",
       "size": 7431,
       "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r2/PROVENANCE.json"
+    },
+    {
+      "file": "pwh-core-patches-rhwp-0.8.7-pwh-r3.zip",
+      "size": 124132,
+      "sha256": "5974a90b868567a318e1bf37f25ca770e41b01dda6229c439503fa107fda6ccc",
+      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r3/pwh-core-patches-rhwp-0.8.7-pwh-r3.zip"
+    },
+    {
+      "file": "VERIFICATION.json",
+      "size": 1125,
+      "sha256": "8cfc7e59cfb1f47dc2756b73738bcd717735216eebba84ef129408452a5dd8d3",
+      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r3/VERIFICATION.json"
     }
   ]
 }

@@ -1,0 +1,34 @@
+[
+  {
+    "name": "tac-page-boundary-fit.hwpx",
+    "objectHeight": 10000,
+    "outerTop": 100,
+    "outerBottom": 200,
+    "percent": 135,
+    "affect": true,
+    "storedSpacing": null,
+    "treatAsChar": true,
+    "fontHeight": 1100,
+    "bodyHeight": 16490,
+    "pageHeight": 17990,
+    "pageCount": 1,
+    "pageTop": 750,
+    "pageBottom": 750
+  },
+  {
+    "name": "tac-page-boundary-out.hwpx",
+    "objectHeight": 10000,
+    "outerTop": 100,
+    "outerBottom": 200,
+    "percent": 135,
+    "affect": true,
+    "storedSpacing": null,
+    "treatAsChar": true,
+    "fontHeight": 1100,
+    "bodyHeight": 16450,
+    "pageHeight": 17950,
+    "pageCount": 2,
+    "pageTop": 750,
+    "pageBottom": 750
+  }
+]

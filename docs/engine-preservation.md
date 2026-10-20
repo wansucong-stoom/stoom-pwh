@@ -9,7 +9,7 @@ version. Node itself is a prerequisite, not bundled.
 For an offline initial installation:
 
 ```powershell
-node scripts/setup.mjs --runtime-root C:\pwh-runtime --runtime-archive C:\backups\pwh-runtime-rhwp-0.8.7-pwh-r1-windows-x64.zip --skip-download
+node scripts/setup.mjs --runtime-root C:\pwh-runtime-r3 --runtime-archive C:\backups\pwh-runtime-rhwp-0.8.7-pwh-r3-windows-x64.zip --skip-download
 ```
 
 The ZIP hash, identity, file names, expanded sizes, component licenses and every
@@ -38,7 +38,9 @@ download from NAVER unless a verified local `--nanum-archive` is supplied.
 
 `PROVENANCE.json` records the upstream commit, pwh base commit and build-file
 hashes; each added/modified path with before/after SHA256; unchanged native
-CLI/core status; the patch digest and successful patch replay. The build-source
+CLI/core status; the patch digest and successful patch replay. Revision 3 records
+the changed WASM core separately; unchanged-core assertions from r1/r2 describe
+those historical revisions, not the r3 binary. The build-source
 snapshot excludes `runtime-lock.json` to avoid circular archive hashes; use the
 separate manifest published with the release.
 
@@ -64,12 +66,37 @@ specific comment-path difference made the complete files identical. The release'
 `VERIFICATION.json` records both raw hashes and this limitation. The 15-file
 upstream-to-pwh patch also replayed with every resulting source hash matching.
 
-Cargo crate archives are preserved with their original checksums. **A full
-native CLI/WASM rebuild is not claimed:** Rust toolchains, Skia externals and
-platform build tooling are not all vendored or validated. The existing native
-CLI and core binaries are retained byte-for-byte. The legacy
+Cargo crate archives are preserved with their original checksums. In revisions
+1 and 2, the native CLI and core binaries were retained byte-for-byte; a full
+native CLI/WASM rebuild was not claimed. Revision 3 rebuilds the **editor WASM
+core only** using the pinned source and two published patches. The native CLI
+and standalone Studio's separately bundled WASM remain unchanged. The
+[patched-core rebuild procedure](engine-patches/README.md) records the Rust and
+wasm-bindgen versions, missing workspace members, dependency lock audit and
+output hashes. Rust toolchains and platform tooling are not all vendored, so
+this is not a claim of a completely self-contained offline toolchain. The legacy
 `setup.mjs --from-source` path is explicit and can still need upstream Git/npm;
 it is not the normal install or the preserved offline rebuild procedure.
+
+## Upgrade from an earlier preserved runtime
+
+Keep the old runtime and install r3 into a new directory. The installer refuses
+to overwrite a different core. For example:
+
+```powershell
+node scripts/setup.mjs --runtime-root C:\pwh-runtime-r3
+```
+
+Select that directory with `PWH_RUNTIME_ROOT`, or merge a `runtimeRoot` field
+into the existing private `~/.stoom-pwh/config.json`. Preserve its other fields.
+If needed, keep `outputRoot` and `fontRoot` pointing to the previous documents
+and font directories. An installation into a new directory does not copy or
+delete documents, recovery data, fonts, or machine configuration.
+
+After saving unsaved edits, reinstall/reload the plugin through the host's
+supported flow and reopen the editor. A running server retains the configuration
+with which it started. Do not edit the host's plugin cache or replace a core
+binary without updating its verified manifest and install marker.
 
 ## Future engine upgrades
 

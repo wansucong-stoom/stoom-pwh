@@ -1,0 +1,70 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -4101,6 +4101,7 @@
+         table: &crate::model::table::Table,
+         row_count: usize,
+         rh: &mut [f64],
++        styles: &ResolvedStyleSet,
+     ) {
+         if row_count == 0 || rh.len() < row_count || !self.declared_trust_allowed.get() {
+             return;
+@@ -4166,6 +4167,50 @@
+         for r in 0..row_count {
+             if (decl[r] - rh[r]).abs() > (decl[r] * 0.15).max(12.0) {
+                 return;
++            }
++        }
++        // Horizontal NO_LS rows are composed from the current text and width.
++        // Matching table totals do not prove that the declared row allocation
++        // still fits: the measurer can preserve a grown row's content floor by
++        // reclaiming slack from another row. Restoring every declared height
++        // would then discard that floor and let the text cross the cell border.
++        // Keep the existing ViewText correction only when every shortened
++        // content frame can actually hold its recomposed content and padding.
++        if viewtext_content_grid {
++            let owner_widths = table.paragraph_frame_owner_widths();
++            let width_scale = self.render_table_width_scale(table);
++            for (cell_index, cell) in table.cells.iter().enumerate() {
++                let row = cell.row as usize;
++                if decl[row] + 0.5 >= rh[row]
++                    || cell.text_direction != 0
++                    || cell.paragraphs.is_empty()
++                    || !cell
++                        .paragraphs
++                        .iter()
++                        .all(crate::renderer::para_has_no_stored_line_segs)
++                {
++                    continue;
++                }
++                let (pad_left, pad_right, pad_top, pad_bottom) =
++                    self.resolve_cell_padding(cell, table);
++                let width_hu = owner_widths
++                    .get(cell_index)
++                    .copied()
++                    .unwrap_or_else(|| cell.width.min(i32::MAX as u32) as i32);
++                let inner_width = crate::renderer::composer::cell_inner_text_width(
++                    hwpunit_to_px(width_hu, self.dpi) * width_scale,
++                    pad_left,
++                    pad_right,
++                    self.dpi,
++                );
++                let (line_height, object_height) = self.calc_cell_paragraphs_content_parts(
++                    &cell.paragraphs,
++                    styles,
++                    inner_width,
++                );
++                if line_height.max(object_height) + pad_top + pad_bottom > decl[row] + 0.5 {
++                    return;
++                }
+             }
+         }
+         rh[..row_count].copy_from_slice(&decl);
+@@ -4256,7 +4301,7 @@
+             // 경계는 선언을 따른다. 한글 PDF 실측(156678235 p5 pi=46): 한글
+             // 행경계 == cellSz [22.4,41.9,69.4], rhwp 측정 재분배 [19.8,44.8,
+             // 69.1] 은 폰트 메트릭 차로 행 경계만 드리프트 — 총높이 동일.
+-            self.trust_declared_row_heights(table, row_count, &mut rh);
++            self.trust_declared_row_heights(table, row_count, &mut rh, styles);
+             // 측정된 TAC 행은 셀 내용과 저장 프레임을 이미 반영한다.
+             // 여기서 개체 선언을 최소 높이로 다시 적용하면 회수한 낡은
+             // 프레임이 paint에서 부활하여 조판과 실제 표 높이가 달라진다.

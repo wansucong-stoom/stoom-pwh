@@ -8,9 +8,9 @@ import { pathToFileURL } from 'node:url';
 // Fresh entrypoints need a release-specific identity: the host can retain HTML
 // for an unchanged URI even after restarting the server. Keep legacy resources
 // advertised and readable so existing frames can still use their old identity.
-const VERSION = '0.6.14';
+const VERSION = '0.6.15';
 export const VIEWER_URI = `ui://pwh/inline-editor-${VERSION}`;
-const LEGACY_VIEWER_URIS = ['ui://pwh/inline-editor',...Array.from({length:14},(_,i)=>`ui://pwh/inline-editor-0.6.${i}`),...Array.from({length:10},(_,i)=>`ui://pwh/inline-editor-0.5.${i}`)];
+const LEGACY_VIEWER_URIS = ['ui://pwh/inline-editor',...Array.from({length:15},(_,i)=>`ui://pwh/inline-editor-0.6.${i}`),...Array.from({length:10},(_,i)=>`ui://pwh/inline-editor-0.5.${i}`)];
 export const isViewerResourceUri=uri=>typeof uri==='string'&&/^ui:\/\/pwh\/inline-editor(?:-\d+\.\d+\.\d+)?$/.test(uri);
 const MIME = 'text/html;profile=mcp-app';
 // Use the established single-result MCP protocol; 2026-07-28 MRTR is not implemented.

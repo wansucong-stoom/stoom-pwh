@@ -9,6 +9,8 @@ dist/
 .env.*
 !.env.example
 *.hwpx
+!tests/fixtures/rowbreak-table/*.hwpx
+!tests/fixtures/tac-line-spacing/*.hwpx
 *.hwp
 *.pdf
 *.zip

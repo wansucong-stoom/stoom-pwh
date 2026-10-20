@@ -1,0 +1,156 @@
+[
+  {
+    "name": "tac-height5000-percent100-affect0.hwpx",
+    "objectHeight": 5000,
+    "outerTop": 100,
+    "outerBottom": 200,
+    "percent": 100,
+    "affect": false,
+    "storedSpacing": null,
+    "treatAsChar": true,
+    "fontHeight": 1100
+  },
+  {
+    "name": "tac-height5000-percent100-affect1.hwpx",
+    "objectHeight": 5000,
+    "outerTop": 100,
+    "outerBottom": 200,
+    "percent": 100,
+    "affect": true,
+    "storedSpacing": null,
+    "treatAsChar": true,
+    "fontHeight": 1100
+  },
+  {
+    "name": "tac-height5000-percent135-affect0.hwpx",
+    "objectHeight": 5000,
+    "outerTop": 100,
+    "outerBottom": 200,
+    "percent": 135,
+    "affect": false,
+    "storedSpacing": null,
+    "treatAsChar": true,
+    "fontHeight": 1100
+  },
+  {
+    "name": "tac-height5000-percent135-affect1.hwpx",
+    "objectHeight": 5000,
+    "outerTop": 100,
+    "outerBottom": 200,
+    "percent": 135,
+    "affect": true,
+    "storedSpacing": null,
+    "treatAsChar": true,
+    "fontHeight": 1100
+  },
+  {
+    "name": "tac-height5000-percent160-affect0.hwpx",
+    "objectHeight": 5000,
+    "outerTop": 100,
+    "outerBottom": 200,
+    "percent": 160,
+    "affect": false,
+    "storedSpacing": null,
+    "treatAsChar": true,
+    "fontHeight": 1100
+  },
+  {
+    "name": "tac-height5000-percent160-affect1.hwpx",
+    "objectHeight": 5000,
+    "outerTop": 100,
+    "outerBottom": 200,
+    "percent": 160,
+    "affect": true,
+    "storedSpacing": null,
+    "treatAsChar": true,
+    "fontHeight": 1100
+  },
+  {
+    "name": "tac-height10000-percent100-affect0.hwpx",
+    "objectHeight": 10000,
+    "outerTop": 100,
+    "outerBottom": 200,
+    "percent": 100,
+    "affect": false,
+    "storedSpacing": null,
+    "treatAsChar": true,
+    "fontHeight": 1100
+  },
+  {
+    "name": "tac-height10000-percent100-affect1.hwpx",
+    "objectHeight": 10000,
+    "outerTop": 100,
+    "outerBottom": 200,
+    "percent": 100,
+    "affect": true,
+    "storedSpacing": null,
+    "treatAsChar": true,
+    "fontHeight": 1100
+  },
+  {
+    "name": "tac-height10000-percent135-affect0.hwpx",
+    "objectHeight": 10000,
+    "outerTop": 100,
+    "outerBottom": 200,
+    "percent": 135,
+    "affect": false,
+    "storedSpacing": null,
+    "treatAsChar": true,
+    "fontHeight": 1100
+  },
+  {
+    "name": "tac-height10000-percent135-affect1.hwpx",
+    "objectHeight": 10000,
+    "outerTop": 100,
+    "outerBottom": 200,
+    "percent": 135,
+    "affect": true,
+    "storedSpacing": null,
+    "treatAsChar": true,
+    "fontHeight": 1100
+  },
+  {
+    "name": "tac-height10000-percent160-affect0.hwpx",
+    "objectHeight": 10000,
+    "outerTop": 100,
+    "outerBottom": 200,
+    "percent": 160,
+    "affect": false,
+    "storedSpacing": null,
+    "treatAsChar": true,
+    "fontHeight": 1100
+  },
+  {
+    "name": "tac-height10000-percent160-affect1.hwpx",
+    "objectHeight": 10000,
+    "outerTop": 100,
+    "outerBottom": 200,
+    "percent": 160,
+    "affect": true,
+    "storedSpacing": null,
+    "treatAsChar": true,
+    "fontHeight": 1100
+  },
+  {
+    "name": "tac-stored-spacing-affect0.hwpx",
+    "objectHeight": 5000,
+    "outerTop": 100,
+    "outerBottom": 200,
+    "percent": 135,
+    "affect": false,
+    "storedSpacing": 1777,
+    "treatAsChar": true,
+    "fontHeight": 1100
+  },
+  {
+    "name": "tac-stored-spacing-affect1.hwpx",
+    "objectHeight": 5000,
+    "outerTop": 100,
+    "outerBottom": 200,
+    "percent": 135,
+    "affect": true,
+    "storedSpacing": 1777,
+    "treatAsChar": true,
+    "fontHeight": 1100
+  }
+]
