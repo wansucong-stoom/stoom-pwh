@@ -43,29 +43,34 @@
  async function consume(result){const d=result?._meta?.['pwh/client-document']||result?.structuredContent;if(d?.documentId)state.documentId=d.documentId;if(d?.source)state.source=d.source;
  if(state.loaded||state.loading)return;state.loading=true;try{status('문서 파일을 읽고 있습니다.');const bytes=await asset('document');status('편집기 초기화를 기다리고 있습니다.');await installed;await window.pwhEditor.ready();try{status('시스템 글꼴 목록을 준비하고 있습니다.');fontInstall??=installSystemFonts();await fontInstall;}catch(error){console.warn('[pwh fonts]',error.message);}status('문서 조판과 첫 페이지를 준비하고 있습니다.');await window.pwhEditor.load(bytes,state.source.split(/[\\/]/).pop());status('미저장 복구본을 확인하고 있습니다.');await offerRecovery();state.loaded=true;state.loading=false;status('본문에서 직접 편집하세요. 다시 쓸 부분을 드래그하고 채팅으로 요청할 수 있습니다.');void poll();}catch(e){state.loading=false;status(e.message);const retry=document.getElementById('pwh-retry');if(retry){retry.hidden=false;retry.onclick=()=>{retry.hidden=true;void consume({});};}}}
  window.addEventListener('message',event=>{if(event.source!==parent||event.data?.jsonrpc!=='2.0')return;if(state.origin!==null&&event.origin!==state.origin)return;const m=event.data,p=pending.get(m.id);if(p&&!m.method){state.origin=event.origin;clearTimeout(p.timer);pending.delete(m.id);m.error?p.reject(Error(m.error.message)):p.resolve(m.result);return;}if(m.method==='ui/notifications/tool-result')void consume(m.params);if(m.method==='ui/notifications/tool-input'&&m.params?.arguments?.file)void consume({});if(m.id!==undefined&&m.method==='ping')post({jsonrpc:'2.0',id:m.id,result:{}});});
- window.pwhWasmBytes=(async()=>{const init=await rpc('ui/initialize',{appInfo:{name:'pwh-inline-studio',version:'0.6.15'},appCapabilities:{availableDisplayModes:['inline','fullscreen']},protocolVersion:'2026-01-26'});state.host=init.hostCapabilities||{};post({jsonrpc:'2.0',method:'ui/notifications/initialized',params:{}});return asset('wasm');})();
+ window.pwhWasmBytes=(async()=>{const init=await rpc('ui/initialize',{appInfo:{name:'pwh-inline-studio',version:'0.6.16'},appCapabilities:{availableDisplayModes:['inline','fullscreen']},protocolVersion:'2026-01-26'});state.host=init.hostCapabilities||{};post({jsonrpc:'2.0',method:'ui/notifications/initialized',params:{}});return asset('wasm');})();
  window.pwhWasmBytes.catch(e=>status(e.message));
  window.addEventListener('pwh-ai-request',event=>{
   if(!state.loaded||document.getElementById('pwh-ai-dialog'))return;
-  const frozen=structuredClone(event.detail),dialog=document.createElement('dialog');dialog.id='pwh-ai-dialog';dialog.setAttribute('aria-label','AI 수정 요청');dialog.style.cssText='max-width:480px;width:90%;padding:20px;border:1px solid #bbb;border-radius:10px;background:white;color:#222';
-  dialog.innerHTML='<form><h2>AI 수정 요청</h2><p class="selection" style="white-space:pre-wrap;max-height:100px;overflow:auto;background:#f4f4f4;padding:10px"></p><label>어떻게 수정할까요?<textarea aria-label="수정 요청 내용" maxlength="4000" required style="display:block;width:100%;min-height:100px;margin:10px 0"></textarea></label><p class="notice" role="status"></p><div style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="cancel">취소</button><button type="submit">요청 보내기</button></div></form>';
+  const frozen=normalizeRequestContext(structuredClone(event.detail)),dialog=document.createElement('dialog');dialog.id='pwh-ai-dialog';dialog.setAttribute('aria-label','AI 수정 요청');dialog.style.cssText='max-width:480px;width:90%;padding:20px;border:1px solid #bbb;border-radius:10px;background:white;color:#222';
+  dialog.innerHTML='<form><h2>AI 수정 요청</h2><p class="selection" style="white-space:pre-wrap;max-height:100px;overflow:auto;background:#f4f4f4;padding:10px"></p><label>어떻게 수정할까요?<textarea aria-label="수정 요청 내용" maxlength="4000" required style="display:block;width:100%;min-height:100px;margin:10px 0"></textarea></label><p class="notice" role="status"></p><div style="display:flex;justify-content:flex-end;gap:8px"><button type="button" class="cancel">취소</button><button type="button" class="send">요청 보내기</button></div></form>';
   dialog.querySelector('.selection').textContent=frozen.blankDocument?'빈 문서 — 어떤 문서를 작성할지 요청하세요.':frozen.requestScope==='document'?'문서 전체 — 용지 크기·방향·여백 등의 변경을 요청하세요.':frozen.kind==='cell_block'?'선택한 표 셀 '+(frozen.table?.selectedCells?.length||0)+'개':frozen.kind==='object'?'선택한 객체 '+frozen.objects.map(o=>({image:'그림',shape:'도형',equation:'수식'}[o.source.type]||o.source.type)).join(', '):(frozen.selectedText?.text||'').slice(0,500);document.body.appendChild(dialog);
-  const note=dialog.querySelector('textarea'),notice=dialog.querySelector('.notice'),submit=dialog.querySelector('[type=submit]');
+  const note=dialog.querySelector('textarea'),notice=dialog.querySelector('.notice'),submit=dialog.querySelector('.send');
   submit.setAttribute('aria-keyshortcuts','Control+Enter');submit.title='요청 보내기 (Ctrl+Enter)';
   const shortcut=document.createElement('small');shortcut.textContent='Ctrl+Enter로 요청 보내기';note.after(shortcut);
-  note.addEventListener('keydown',event=>{if(event.key==='Enter'&&event.ctrlKey&&!event.isComposing&&event.keyCode!==229){event.preventDefault();event.stopPropagation();if(!event.repeat&&!submit.disabled)dialog.querySelector('form').requestSubmit(submit);}});
+  note.addEventListener('keydown',event=>{if(event.key==='Enter'&&event.ctrlKey&&!event.isComposing&&event.keyCode!==229){event.preventDefault();event.stopPropagation();if(!event.repeat&&!submit.disabled)void sendRequest();}});
   dialog.addEventListener('close',()=>dialog.remove(),{once:true});dialog.querySelector('.cancel').onclick=()=>dialog.close();
-  dialog.querySelector('form').onsubmit=async event=>{event.preventDefault();if(submit.disabled||!note.value.trim())return;submit.disabled=true;try{
-   const current=window.pwhEditor.context();
-   if(!frozen.target&&(JSON.stringify(current.objects)!==JSON.stringify(frozen.objects)||current.kind!==frozen.kind||JSON.stringify(current.selection)!==JSON.stringify(frozen.selection)||JSON.stringify(current.documentState)!==JSON.stringify(frozen.documentState)))throw Error('문서나 선택 영역이 바뀌었습니다. 다시 선택해 주세요.');
+  // Native form submission can be blocked before onsubmit in a sandbox without
+  // allow-forms. Both UI paths call the RPC handler directly; no form navigation.
+  const sendRequest=async()=>{if(submit.disabled||!note.value.trim())return;submit.disabled=true;try{
+   // capture() already obtains the authoritative fresh state in preserved
+   // Studio bundles; polling context() intentionally remains inexpensive.
+   const current=await window.pwhEditor.capture();
+   assertRequestStateCurrent(frozen,current);
    if(!state.host.message?.text)throw Error('현재 호스트가 채팅 요청 전달 기능을 제공하지 않습니다.');
-   if(current.documentState.documentEpoch!==frozen.documentState.documentEpoch)throw Error('문서가 다시 열렸습니다. 다시 요청하세요.');
    const capture=await tool('pwh_editor_capture',{sessionId:state.sessionId,source:state.source,context:frozen,note:note.value.trim()});
    const requestId=capture.structuredContent.requestId;
    const params={role:'user',content:[{type:'text',text:(frozen.blankDocument?'빈 편집기에 문서를 작성해 주세요. pwh_editor_request로 요청을 읽고 최신 pwh_editor_state와 대조한 뒤 pwh_editor_compose로 제목·소제목·본문 문단을 같은 편집기에 작성하고 결과를 확인하세요.\n\n':frozen.kind==='cell_block'?'선택한 표 셀의 수정 요청입니다. pwh_editor_request의 table.selectedCells와 최신 상태를 대조하세요. 문서 전체 요청으로 확대하지 마세요.\n\n':frozen.kind==='object'?'편집기에서 선택한 객체의 수정 요청입니다. pwh_editor_request로 객체 주소와 속성을 확인하고 지원되는 객체 편집 경로를 사용하세요. 텍스트 다시 쓰기로 처리하지 마세요.\n\n':frozen.requestScope==='document'?'문서 전체 수정 요청입니다. pwh_editor_request와 최신 pwh_editor_state를 확인하세요. 용지·방향·여백은 pwh_editor_layout으로 같은 문서에 적용하고 결과를 확인하세요.\n\n':'편집기에서 선택한 부분을 기존 서식에 맞춰 수정해 주세요.\n\n')+note.value.trim()+'\n\n편집기 요청 ID: '+requestId}]};
    if(state.host.experimental?.['openai/message']||state.host.extensions?.['openai/message'])params._meta={'openai/message':{target:'active',send:true}};
    const sent=await rpc('ui/message',params);if(sent?.isError)throw Error('호스트가 수정 요청을 받지 못했습니다.');dialog.close();status('선택 영역의 AI 수정 요청을 채팅으로 전달했습니다.');
   }catch(error){notice.textContent=error.message;}finally{submit.disabled=false;}};
+  submit.onclick=sendRequest;
+  dialog.querySelector('form').onsubmit=event=>{event.preventDefault();void sendRequest();};
   dialog.showModal();note.focus();
  });
  async function replacementBytes(image){
@@ -79,11 +84,11 @@
  }
  async function openDocument(command){
   const before=window.pwhEditor.context().documentState;
-  if(before.dirty||JSON.stringify(before)!==JSON.stringify(command.expected))throw Error('현재 문서가 바뀌었거나 미저장 변경이 있어 열지 않았습니다.');
+  if(before.dirty||!sameRequestValue(before,command.expected))throw Error('현재 문서가 바뀌었거나 미저장 변경이 있어 열지 않았습니다.');
   status('요청한 문서를 불러오고 있습니다.');
   const doc=command.document,bytes=await asset('document',doc.documentId,false);
   const latest=window.pwhEditor.context().documentState;
-  if(latest.dirty||JSON.stringify(latest)!==JSON.stringify(command.expected))throw Error('전송 중 현재 문서가 수정되어 열지 않았습니다.');
+  if(latest.dirty||!sameRequestValue(latest,command.expected))throw Error('전송 중 현재 문서가 수정되어 열지 않았습니다.');
   await window.pwhEditor.openClean(bytes,doc.name,command.expected,state.source.split(/[\\/]/).pop());
   state.documentId=doc.documentId;state.source=doc.source;state.sourceSha256=doc.sourceSha256;state.checkpointSha=null;state.recoveryEligible=bytes.length<=8*1024*1024;
   document.getElementById('pwh-title').textContent=doc.name;document.getElementById('pwh-title').title=doc.source;
