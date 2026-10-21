@@ -1,4 +1,5 @@
 import {randomUUID} from 'node:crypto';
+import {sameRequestValue,sameRequestContext,normalizeRequestContext,queuedRequestContext} from './request-state.mjs';
 const sessions=new Map(),tickets=new Map();
 const requests=new Map();
 const ttl=45000;
@@ -20,19 +21,20 @@ export function editorState(args={}){
 export async function editorOpen(args,register){
  const current=editorState({sessionId:args.sessionId});
  if(!current.capabilities.documentOpen)throw Error('The open editor predates direct document loading; reopen the editor once after updating');
- if(!args.expected||JSON.stringify(current.context.documentState)!==JSON.stringify(args.expected.documentState))throw Error('Document changed; read current state before opening another document');
+ if(!args.expected||!sameRequestValue(current.context.documentState,args.expected.documentState))throw Error('Document changed; read current state before opening another document');
  if(current.context.documentState?.dirty)throw Error('Save the current document before opening another document');
  if(sessions.get(current.sessionId).commands.length)throw Error('Finish pending editor commands before opening another document');
  const document=await register(args.input);
  const latest=editorState({sessionId:current.sessionId});
- if(JSON.stringify(latest.context.documentState)!==JSON.stringify(args.expected.documentState)||latest.context.documentState.dirty)throw Error('Document changed while preparing the new file');
+ if(!sameRequestValue(latest.context.documentState,args.expected.documentState)||latest.context.documentState.dirty)throw Error('Document changed while preparing the new file');
  const ticketId=randomUUID(),ticket={ticketId,sessionId:current.sessionId,status:'pending',createdAt:Date.now()};
  tickets.set(ticketId,ticket);if(tickets.size>128)tickets.delete(tickets.keys().next().value);
- sessions.get(current.sessionId).commands.push({ticketId,type:'openDocument',expected:structuredClone(args.expected.documentState),document});return {...ticket,document};
+ sessions.get(current.sessionId).commands.push({ticketId,type:'openDocument',expected:queuedRequestContext(args.expected).documentState,document});return {...ticket,document};
 }
 export function editorRewrite(args){
+ args={...args,expected:queuedRequestContext(args.expected)};
  const current=editorState({sessionId:args.sessionId});
- if(!args.expected||(!args.expected.target&&JSON.stringify(args.expected)!==JSON.stringify(current.context))||(args.expected.target&&args.expected.target.epoch!==current.context.documentState?.documentEpoch))throw Error('편집 상태가 바뀌었습니다. 최신 선택을 다시 읽으세요.');
+ if(!args.expected||(!args.expected.target&&!sameRequestContext(args.expected,current.context))||(args.expected.target&&args.expected.target.epoch!==current.context.documentState?.documentEpoch))throw Error('편집 상태가 바뀌었습니다. 최신 선택을 다시 읽으세요.');
  if(!args.expected.selection||!args.expected.selectedText?.text)throw Error('편집기에서 다시 쓸 텍스트를 드래그하세요.');
  if(typeof args.replacement!=='string'||args.replacement.length>12000)throw Error('Replacement too large');
  const ticketId=randomUUID(),ticket={ticketId,sessionId:args.sessionId,status:'pending',createdAt:Date.now()};
@@ -42,8 +44,9 @@ export function editorRewrite(args){
  return ticket;
 }
 export function editorCompose(args){
+ args={...args,expected:queuedRequestContext(args.expected)};
  const current=editorState({sessionId:args.sessionId});
- if(!current.context.blankDocument||JSON.stringify(current.context)!==JSON.stringify(args.expected))throw Error('빈 문서 상태가 바뀌었습니다. 최신 상태를 읽으세요.');
+ if(!current.context.blankDocument||!sameRequestContext(current.context,args.expected))throw Error('빈 문서 상태가 바뀌었습니다. 최신 상태를 읽으세요.');
  const paragraphs=args.paragraphs;
  if(!Array.isArray(paragraphs)||!paragraphs.length||paragraphs.length>128||paragraphs.some(p=>!p||typeof p.text!=='string'||/[\r\n\u0000-\u0008\ufffc]/.test(p.text)||!['title','heading','body'].includes(p.role))||paragraphs.reduce((n,p)=>n+p.text.length,0)>24000||!paragraphs.some(p=>p.text.trim()))throw Error('초안 문단은 title/heading/body 역할과 텍스트를 가진 1~128개, 총 24000자 이내여야 합니다.');
  const ticketId=randomUUID(),ticket={ticketId,sessionId:args.sessionId,status:'pending',createdAt:Date.now()};
@@ -89,12 +92,13 @@ function queueTableCommand(args,command){
  sessions.get(args.sessionId).commands.push({ticketId,expected:structuredClone(args.expected),...command});return ticket;
 }
 export async function editorReplacePicture(args){
+ args={...args,expected:queuedRequestContext(args.expected)};
  const current=editorState({sessionId:args.sessionId});
- if(!args.expected||(!args.expected.target&&JSON.stringify(current.context)!==JSON.stringify(args.expected))||(args.expected.target&&args.expected.target.epoch!==current.context.documentState?.documentEpoch))throw Error('문서·선택 상태가 바뀌었습니다. 다시 읽으세요.');
+ if(!args.expected||(!args.expected.target&&!sameRequestContext(current.context,args.expected))||(args.expected.target&&args.expected.target.epoch!==current.context.documentState?.documentEpoch))throw Error('문서·선택 상태가 바뀌었습니다. 다시 읽으세요.');
  const objects=args.expected.objects,ref=objects?.[0]?.source;
  if(args.expected.kind!=='object'||objects?.length!==1||ref?.type!=='image'||ref.headerFooter||ref.noteRef||!objects[0].properties)throw Error('본문 또는 표 셀의 그림 하나를 선택하세요.');
  const image=await (await import('./replacement-image.mjs')).registerReplacementImage(args.image,args.sessionId);
- if(!args.expected.target&&JSON.stringify(editorState({sessionId:args.sessionId}).context)!==JSON.stringify(args.expected))throw Error('이미지 검사 중 문서·선택이 바뀌었습니다.');
+ if(!args.expected.target&&!sameRequestContext(editorState({sessionId:args.sessionId}).context,args.expected))throw Error('이미지 검사 중 문서·선택이 바뀌었습니다.');
  const ticketId=randomUUID(),ticket={ticketId,sessionId:args.sessionId,status:'pending',createdAt:Date.now()};if(args.expected?.target?.requestId){ticket.requestId=args.expected.target.requestId;const request=requests.get(ticket.requestId);if(request)request.status='queued';}
  tickets.set(ticketId,ticket);if(tickets.size>128)tickets.delete(tickets.keys().next().value);
  sessions.get(args.sessionId).commands.push({ticketId,type:'replacePicture',expected:structuredClone(args.expected),image});return {...ticket,image,limitations:['기존 틀·자르기를 유지하고 비율이 다르면 contain 투명 여백을 추가합니다. 기존 crop에 의한 잘림은 시각적으로 확인하세요.']};
@@ -102,7 +106,7 @@ export async function editorReplacePicture(args){
 export function editorResult(args){const result=tickets.get(args.ticketId);if(!result)throw Error('Unknown editor ticket');return result;}
 export function editorCapture(args){
  if(typeof args.note!=='string'||!args.note.trim()||args.note.length>4000)throw Error('수정 요청 내용을 작성하세요.');
- const c=structuredClone(args.context);
+ const c=normalizeRequestContext(structuredClone(args.context));
  // Older clients list at most 32 cells. A full-table rectangle still identifies
  // every cell by the native cell count, without guessing merged coordinates.
  const table=c?.table,range=table?.selectedRange,dim=table?.dimensions;
