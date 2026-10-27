@@ -3,6 +3,8 @@ import {captureTarget,resolveTarget} from './pwh-collaboration-target';
 import {pictureTarget,replaceSelectedPicture} from './pwh-picture-replace';
 import {applyLayout} from './pwh-page-layout';
 import {blankBody,composeBlankBody} from './pwh-blank-compose';
+import {applyCellEdits,prepareCellEdits,insertStructuredTable} from './pwh-table-content.mjs';
+import {sameRequestContext} from './pwh-request-state.mjs';
 import { replaceTextWithMutationEffects } from './engine/command';
 import { installSelectionBridge } from './collaboration-selection';
 
@@ -78,7 +80,27 @@ export function installInlineEditor(d:any) {
    const current:any=read();if(current.documentState.documentEpoch!==command.expected.documentState?.documentEpoch)throw Error('Table request expired');
    const plan=await inspectTablePlan(d.wasm,current),planId=crypto.randomUUID();
    tablePlans.set(planId,plan);if(tablePlans.size>8)tablePlans.delete(tablePlans.keys().next().value);
-   return {ok:true,tablePlan:{planId,unsupportedTables:plan.unsupported,tables:plan.refs.map((r:any,index:number)=>({index,source:{sec:r.sec,ppi:r.ppi,ci:r.ci},dimensions:r.snapshot.dimensions,headerRows:r.snapshot.cells.filter((c:any)=>c.properties.isHeader).map((c:any)=>c.geometry.row),sample:r.snapshot.cells.slice(0,4).map((c:any)=>c.paragraphs.map((p:any)=>p.text).join(' ').slice(0,160)),theme:themeFromTable(r)}))}};
+   return {ok:true,tablePlan:{planId,unsupportedTables:plan.unsupported,tables:plan.refs.map((r:any,index:number)=>({index,source:{sec:r.sec,ppi:r.ppi,ci:r.ci},dimensions:r.snapshot.dimensions,cells:r.snapshot.cells.map((c:any,cellIndex:number)=>({cellIndex,...c.geometry,paragraphs:c.paragraphs.map((p:any)=>p.text)})),headerRows:r.snapshot.cells.filter((c:any)=>c.properties.isHeader).map((c:any)=>c.geometry.row),sample:r.snapshot.cells.slice(0,4).map((c:any)=>c.paragraphs.map((p:any)=>p.text).join(' ').slice(0,160)),theme:themeFromTable(r)}))}};
+  },
+  async tableFill(command:any){
+   if(applying)throw Error('Another edit is being applied');applying=true;
+   const input=d.getInputHandler(),cursor=input.getCursorPosition();let changes:any;
+   try{
+    const current=read();let ref:any,allowed:any;
+    if(command.expected.target?.kind==='table_cells'){ref=await resolveTableTarget(d.wasm,command.expected.target,current);allowed=command.expected.target.cells;}
+    else{const plan=tablePlans.get(command.planId);if(!plan)throw Error('Inspect the table again');[ref]=await resolveTablePlan(d.wasm,plan,current,'table',command.tableIndex);}
+    prepareCellEdits(d.wasm,ref,command.edits,allowed);
+    await input.executeDocumentAgentOperation({kind:'snapshot',operationType:'pwh-table-fill',operation:(wasm:any)=>{changes=applyCellEdits(wasm,ref,command.edits,allowed);return cursor;}},()=>d.getCanvasView().refreshDocumentAgentMutation());
+   }finally{applying=false;}
+   return {ok:true,changes,undoSteps:1,context:read()};
+  },
+  async tableInsert(command:any){
+   if(applying)throw Error('Another edit is being applied');applying=true;let changes:any;
+   try{
+    const before=read();if(!sameRequestContext(before,command.expected)||before.kind!=='body_text'||before.selection)throw Error('Insertion cursor or document changed');
+    await d.getInputHandler().executeDocumentAgentOperation({kind:'snapshot',operationType:'pwh-table-insert',operation:(wasm:any)=>{changes=insertStructuredTable(wasm,before.cursor,command.table);return before.cursor;}},()=>d.getCanvasView().refreshDocumentAgentMutation());
+   }finally{applying=false;}
+   return {ok:true,changes,undoSteps:1,context:read()};
   },
   async tableStyle(command:any){
    const before:any=read(),input=d.getInputHandler(),cursor=input.getCursorPosition();let refs:any[],styles:any[],changes:any[]=[];

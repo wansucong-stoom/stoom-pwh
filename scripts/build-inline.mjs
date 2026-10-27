@@ -80,6 +80,13 @@ if(!keyboard.includes('pwh structured cell clipboard guard')){
 }
 await fs.copyFile(new URL('../src/selection-layout.mjs',import.meta.url),path.join(studio,'src/core/pwh-selection-layout.mjs'));
 await fs.copyFile(new URL('../src/table-style.mjs',import.meta.url),path.join(studio,'src/pwh-table-style.mjs'));
+await fs.copyFile(new URL('../src/table-content.mjs',import.meta.url),path.join(studio,'src/pwh-table-content.mjs'));
+await fs.copyFile(new URL('../src/request-state.mjs',import.meta.url),path.join(studio,'src/pwh-request-state.mjs'));
+// The source module uses package-relative imports; the Studio overlay uses prefixed names.
+for(const name of ['pwh-table-content.mjs']){
+ const file=path.join(studio,'src',name);
+ await fs.writeFile(file,(await fs.readFile(file,'utf8')).replaceAll("'./table-style.mjs'","'./pwh-table-style.mjs'").replaceAll("'./request-state.mjs'","'./pwh-request-state.mjs'"));
+}
 await fs.copyFile(new URL('../src/collaboration-target.ts',import.meta.url),path.join(studio,'src/pwh-collaboration-target.ts'));
 await fs.copyFile(new URL('../src/picture-replace.ts',import.meta.url),path.join(studio,'src/pwh-picture-replace.ts'));
 await fs.copyFile(new URL('../src/page-layout.ts',import.meta.url),path.join(studio,'src/pwh-page-layout.ts'));

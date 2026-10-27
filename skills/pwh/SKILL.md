@@ -213,6 +213,16 @@ node src/cli.mjs pdf FILE NEW_PDF
 
 ## 빈 편집기에서 문서 작성
 
+### 기존 표 채우기와 AI 표 가져오기 (0.6.17)
+
+표 내용을 채우는 요청에는 pwh_editor_compose를 사용하지 않는다. 빈 표도 기존 문서 구조다. pwh_editor_request가 있으면 원래 요청의 표·선택 범위를 확인하고 최신 pwh_editor_state와 문서 epoch를 대조한다. pwh_editor_tables의 ticket을 pwh_editor_result로 읽어 tablePlan.planId와 tables[index].cells의 실제 cellIndex, row/col, rowSpan/colSpan, paragraphs를 확인한다. 기존 표에는 pwh_editor_table_fill(sessionId, expected, planId, tableIndex, edits:[{cellIndex,paragraphs:[문단별 텍스트]}])을 사용한다. 각 셀의 기존 문단 수를 유지하고 병합 제목 셀에는 텍스트를 한 번만 넣는다. 선택 셀 target.kind가 table_cells이면 그 셀만 수정한다. 객체·혼합 글자 서식·중첩/특수 영역은 지원 범위를 확인하며 거절을 우회하지 않는다. 대상 표의 내용·서식이 바뀌었거나 동일 표가 중복되어 구분할 수 없으면 다시 분석한다.
+
+채팅·Work·Codex에서 AI가 생성한 표를 새 표로 옮길 때에는 본문 커서를 읽고 pwh_editor_table_insert(sessionId, expected, table:{rows,columns,cells:[{row,column,rowSpan?,columnSpan?,paragraphs:[문단별 텍스트]}]})을 사용한다. 좌표는 0부터 시작하며 병합된 셀은 한 번만 기술한다. 전체 격자를 빠짐없이 중복 없이 덮는다. 일반 Markdown 표는 머리행을 포함하여 각 칸을 셀로 바꾸고 굵기 표시 같은 Markdown을 불필요한 원문 기호로 넣지 않는다. 셀 내부 문단은 paragraphs 배열로 분리한다. 본문 커서 외의 위치·셀 내부·선택 영역에는 새 표를 삽입하지 않는다. 새 표의 디자인은 필요한 경우 기존 table_style 기능으로 후속 적용한다. 원본 HTML의 모든 CSS·그림·수식이 자동 복제되는 기능으로 설명하지 않는다.
+
+두 기능 모두 최대 격자 256칸·텍스트 24000자이며 같은 열린 문서에 snapshot 한 번으로 적용한다. applied와 실제 내용·병합·서식·조판을 확인하고 실행 취소 한 번으로 복원한다. capabilities.tableContent가 없는 이전 편집기는 미저장 변경을 먼저 저장한 후 새 편집기로 다시 열어야 한다. 로컬 pwh 편집기와 도구에 연결된 환경에서만 실행할 수 있으며 클라우드 채팅만으로 이 PC의 문서를 자동 편집한다고 보장하지 않는다.
+
+플러그인은 해시 검증된 client/ 편집기 번들을 포함한다. 이 번들이 있으면 보존 runtime의 studio-inline보다 우선하며 코어 WASM과 사용자 문서·공유 런타임은 바꾸지 않는다. 재빌드는 고정된 rhwp 소스·의존성으로 build-inline.mjs를 실행한 뒤 bundle-client.mjs로 패키지에 포함한다.
+
 빈 편집기를 열어 달라는 요청에는 pwh_new_document를 호출하고 반환 nextAction의 절대 파일 경로를 우측 패널에 연다. 기존 파일은 필요 없다. 빈 문서에서 선택 없이 AI 수정 요청 버튼을 누르면 작성 요청을 전달한다. context.blankDocument가 true이면 pwh_editor_compose에 최신 context 전체와 paragraphs:[{role:title|heading|body,text:문단내용}]를 전달한다. 1~128문단·총 24000자 이내이며 문단 내부 줄바꿈은 분리한다. 실제 편집기가 빈 본문 여부와 최신 상태를 재검사한다. 이미 내용이 있으면 덮어쓰지 않는다. pwh_editor_result의 applied를 확인하며 실행 취소 한 번으로 복원한다. 이 경로는 제목·소제목·본문 작성 범위이며 표·그림 삽입을 지원한다고 주장하지 않는다. 새 수정본 저장은 빈 문서에서도 Windows 저장 창으로 폴더와 파일명을 선택한다.
 
 ## 선택 없는 문서 전체 요청과 용지·여백

@@ -6,3 +6,4 @@
 *.yml text eol=lf
 *.patch text eol=lf
 *.ps1 text eol=crlf
+client/** text eol=lf

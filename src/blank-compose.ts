@@ -1,6 +1,9 @@
 export function blankBody(wasm:any):boolean {
  try {
   if(wasm.getSectionCount()!==1)return false;
+  const controls=wasm.getControls();
+  const items=typeof controls==='string'?JSON.parse(controls):controls;
+  if(!Array.isArray(items)||items.some((c:any)=>!['secd','cold'].includes(c.ctrlId)))return false;
   const count=wasm.getParagraphCount(0);
   return count>=1&&count<=128&&Array.from({length:count},(_,i)=>wasm.getParagraphLength(0,i)).every(n=>n===0);
  }catch{return false;}

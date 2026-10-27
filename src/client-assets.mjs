@@ -143,7 +143,10 @@ async function checkCoreFile(name,bytes) {
   if(marker.kind!=='core'||marker.version!=='0.8.7'||marker.files?.[name]!==sha(bytes)) throw new Error('Client core integrity mismatch; run pwh setup');
 }
 export async function clientViewerHtml() {
-  const root=path.join(config.runtimeRoot,'studio-inline');
+  // Versioned plugin client overlays the preserved core runtime without changing
+  // shared runtime directories or an already-open user's document.
+  const bundled=path.join(config.pluginRoot,'client');
+  const root=await fs.stat(bundled).then(s=>s.isDirectory()?bundled:null,e=>{if(e.code==='ENOENT')return null;throw e;})||path.join(config.runtimeRoot,'studio-inline');
   const [body,css,editor,host]=await Promise.all([fs.readFile(path.join(root,'editor-body.html'),'utf8'),fs.readFile(path.join(root,'rhwp-studio.css'),'utf8'),fs.readFile(path.join(root,'editor.js'),'utf8'),fs.readFile(new URL('./inline-host.js',import.meta.url),'utf8')]);
   const marker=JSON.parse(await fs.readFile(path.join(root,'.pwh-install.json'),'utf8'));
   if(marker.kind!=='studio-inline'||Object.entries({'editor-body.html':body,'rhwp-studio.css':css,'editor.js':editor}).some(([name,value])=>marker.files?.[name]!==sha(Buffer.from(value))))throw new Error('Inline editor integrity mismatch; rebuild it with pwh setup');
