@@ -31,4 +31,4 @@ jobs:
         run: |
           $env:PWH_CORE_JS = Join-Path $env:RUNNER_TEMP 'pwh-wasm-regression-runtime/core/rhwp.js'
           $env:PWH_CORE_WASM = Join-Path $env:RUNNER_TEMP 'pwh-wasm-regression-runtime/core/rhwp_bg.wasm'
-          node --test tests/rowbreak-table-height.test.mjs tests/tac-table-line-spacing.test.mjs
+          node --test tests/rowbreak-table-height.test.mjs tests/tac-table-line-spacing.test.mjs tests/table-content.test.mjs

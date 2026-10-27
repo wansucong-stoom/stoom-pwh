@@ -12,9 +12,9 @@ const FILES = Object.freeze([
   'engine.config.json', 'engine.config.example.json', 'runtime-lock.json', 'README.md', 'LICENSE',
   'THIRD_PARTY_NOTICES.md', 'CONTRIBUTING.md', 'scripts/setup.mjs',
   'scripts/inspect_template.py', 'scripts/fill_form.py', 'scripts/replace_image.py', 'scripts/inspect_image.py', 'scripts/build-studio.ps1',
-  'scripts/package.mjs', 'scripts/build-inline.mjs', 'scripts/save-dialog.ps1', 'scripts/launch.mjs', 'scripts/preserved-runtime.mjs', 'scripts/preserve-engine.py', 'scripts/build-patched-core.mjs',
+  'scripts/package.mjs', 'scripts/build-inline.mjs', 'scripts/bundle-client.mjs', 'scripts/save-dialog.ps1', 'scripts/launch.mjs', 'scripts/preserved-runtime.mjs', 'scripts/preserve-engine.py', 'scripts/build-patched-core.mjs',
 ]);
-const DIRECTORIES = Object.freeze(['docs', 'licenses', 'skills', 'src', 'examples']);
+const DIRECTORIES = Object.freeze(['docs', 'licenses', 'skills', 'src', 'examples', 'client']);
 const SOURCE_EXTENSIONS = new Set(['.md', '.txt', '.json', '.mjs', '.js', '.ts', '.html', '.css', '.svg', '.patch']);
 const MAX_SOURCE_BYTES = 64 * 1024 * 1024;
 const REQUIRED = ['scripts/launch.mjs','scripts/build-inline.mjs','src/inline-host.js','src/studio-inline-adapter.ts','src/editor-session.mjs','src/server.mjs', 'src/native-mcp.mjs', 'src/cli.mjs', 'src/engine.mjs',
@@ -97,6 +97,12 @@ function validate(entries) {
   if (typeof pkg.version !== 'string' || !/^\d+\.\d+\.\d+(?:-[\w.-]+)?$/.test(pkg.version)
     || plugin.version !== pkg.version || codex.version !== pkg.version) throw new Error('Plugin/package versions must agree.');
   if (codex.skills !== './skills' || codex.mcpServers !== './.mcp.json') throw new Error('Codex manifest must reference the packaged skills and .mcp.json.');
+  const client=json('client/.pwh-install.json');
+  if(client.kind!=='studio-inline'||client.version!==pkg.version)throw new Error('Build the versioned editor client before packaging');
+  for(const name of ['editor.js','rhwp-studio.css','editor-body.html']){
+    requireFile('client/'+name);
+    if(createHash('sha256').update(entries.get('client/'+name)).digest('hex')!==client.files?.[name])throw new Error('Editor client digest mismatch: '+name);
+  }
   for (const filename of ['mcp.json', '.mcp.json']) {
     const mcp = json(filename);
     if (!mcp.mcpServers?.pwh || !mcp.mcpServers?.['rhwp-core']) throw new Error(`${filename} must declare pwh and rhwp-core.`);

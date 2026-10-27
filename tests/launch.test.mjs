@@ -15,7 +15,9 @@ test('running server keeps lazy imports after its original plugin cache is delet
 test('persistent releases are reused by content and detect edited snapshot files',async()=>{
  const f=await fixture();try{
   await fs.writeFile(path.join(f.source,'src','server.mjs'),'export function runStdio(){}');
+  await fs.mkdir(path.join(f.source,'client'));await fs.writeFile(path.join(f.source,'client','editor.js'),'versioned-client');
   const first=await materializeRelease(f.source,f.releaseRoot);assert.equal(await materializeRelease(f.source,f.releaseRoot),first);
+  assert.equal(await fs.readFile(path.join(first,'client','editor.js'),'utf8'),'versioned-client');
   await fs.writeFile(path.join(first,'src','lazy.mjs'),'tampered');await assert.rejects(materializeRelease(f.source,f.releaseRoot),/integrity/);
  }finally{await fs.rm(f.dir,{recursive:true,force:true});}
 });

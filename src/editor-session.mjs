@@ -70,6 +70,22 @@ export function editorTables(args){
  if(!args.expected||args.expected.documentState?.documentEpoch!==current.context.documentState?.documentEpoch)throw Error('Document changed; inspect the current editor');
  return queueTableCommand(args,{type:'tables'});
 }
+export async function editorTableFill(args){
+ const current=editorState({sessionId:args.sessionId});
+ if(!current.capabilities.tableContent)throw Error('Reopen the updated editor to enable table content editing');
+ if(!args.expected||args.expected.documentState?.documentEpoch!==current.context.documentState?.documentEpoch)throw Error('Table request expired');
+ const {validateCellEdits}=await import('./table-content.mjs');
+ validateCellEdits(args.edits,args.expected.target?.kind==='table_cells'?args.expected.target.cells:undefined);
+ if(args.expected.target?.kind!=='table_cells'&&(typeof args.planId!=='string'||!Number.isSafeInteger(args.tableIndex)||args.tableIndex<0))throw Error('Inspect the table first and supply planId/tableIndex');
+ return queueTableCommand(args,{type:'tableFill',planId:args.planId,tableIndex:args.tableIndex,edits:structuredClone(args.edits)});
+}
+export async function editorTableInsert(args){
+ const current=editorState({sessionId:args.sessionId});
+ if(!current.capabilities.tableContent)throw Error('Reopen the updated editor to enable table insertion');
+ if(!sameRequestContext(current.context,args.expected)||!current.context.ready||current.context.selection||current.context.cursor?.parentParaIndex!=null||current.context.cursor?.cellPath?.length||current.context.kind!=='body_text')throw Error('Read the current body cursor outside a table before inserting');
+ const {validateTableSpec}=await import('./table-content.mjs');validateTableSpec(args.table);
+ return queueTableCommand(args,{type:'tableInsert',table:structuredClone(args.table)});
+}
 export async function editorTableStyle(args){
  const current=editorState({sessionId:args.sessionId});
  if(!args.expected||args.expected.documentState?.documentEpoch!==current.context.documentState?.documentEpoch)throw Error('Document changed; inspect the current editor');
@@ -87,7 +103,7 @@ export async function editorTableStyle(args){
 function queueTableCommand(args,command){
  const ticketId=randomUUID(),ticket={ticketId,sessionId:args.sessionId,status:'pending',createdAt:Date.now()};
  const requestId=args.requestId||args.expected.target?.requestId;
- if(requestId){const request=requests.get(requestId);if(!request||request.sessionId!==args.sessionId)throw Error('Unknown request for this editor');if(command.type==='tableStyle'){ticket.requestId=requestId;request.status='queued';}}
+ if(requestId){const request=requests.get(requestId);if(!request||request.sessionId!==args.sessionId)throw Error('Unknown request for this editor');if(['tableStyle','tableFill','tableInsert'].includes(command.type)){ticket.requestId=requestId;request.status='queued';}}
  tickets.set(ticketId,ticket);if(tickets.size>128)tickets.delete(tickets.keys().next().value);
  sessions.get(args.sessionId).commands.push({ticketId,expected:structuredClone(args.expected),...command});return ticket;
 }
