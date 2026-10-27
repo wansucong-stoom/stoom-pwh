@@ -213,6 +213,8 @@ node src/cli.mjs pdf FILE NEW_PDF
 
 ## 빈 편집기에서 문서 작성
 
+한글 등 외부 앱의 표 복사·붙여넣기는 AI 표 삽입 도구와 별도 경로다. 0.6.18은 HTML 표와 그림이 함께 있을 때 편집 가능한 표를 먼저 가져오고, 이미지 전용 클립보드는 blob 주소 없이 디코딩한다. ‘아무것도 안 붙는다’는 보고에 실제 클립보드 형식을 확인하지 않고 원인을 확정하지 않는다. 표가 포함된 HTML과 미리보기 PNG의 혼합 입력 및 호스트 이미지 정책 아래에서 재현한 검증과, 사용자가 실제 한글에서 복사한 원본의 검증을 구분한다. HTML 표가 없는 한글 전용 클립보드 형식을 일반 텍스트만으로 병합까지 복원한다고 보장하지 않는다.
+
 ### 기존 표 채우기와 AI 표 가져오기 (0.6.17)
 
 표 내용을 채우는 요청에는 pwh_editor_compose를 사용하지 않는다. 빈 표도 기존 문서 구조다. pwh_editor_request가 있으면 원래 요청의 표·선택 범위를 확인하고 최신 pwh_editor_state와 문서 epoch를 대조한다. pwh_editor_tables의 ticket을 pwh_editor_result로 읽어 tablePlan.planId와 tables[index].cells의 실제 cellIndex, row/col, rowSpan/colSpan, paragraphs를 확인한다. 기존 표에는 pwh_editor_table_fill(sessionId, expected, planId, tableIndex, edits:[{cellIndex,paragraphs:[문단별 텍스트]}])을 사용한다. 각 셀의 기존 문단 수를 유지하고 병합 제목 셀에는 텍스트를 한 번만 넣는다. 선택 셀 target.kind가 table_cells이면 그 셀만 수정한다. 객체·혼합 글자 서식·중첩/특수 영역은 지원 범위를 확인하며 거절을 우회하지 않는다. 대상 표의 내용·서식이 바뀌었거나 동일 표가 중복되어 구분할 수 없으면 다시 분석한다.
