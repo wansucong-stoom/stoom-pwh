@@ -10,7 +10,7 @@ const execFileAsync=promisify(execFile);
 const saveTickets=new Map();
 export async function chooseSavePath({initialDirectory,suggestedName}) {
   if(process.platform!=='win32') throw new Error('Windows save dialog is required on this platform');
-  const {stdout}=await execFileAsync('powershell.exe',['-NoProfile','-STA','-File',fileURLToPath(new URL('../scripts/save-dialog.ps1',import.meta.url)),'-InitialDirectory',initialDirectory,'-SuggestedName',suggestedName],{windowsHide:true,timeout:300000,maxBuffer:65536,encoding:'utf8'});
+  const {stdout}=await execFileAsync('powershell.exe',['-NoProfile','-STA','-ExecutionPolicy','RemoteSigned','-File',fileURLToPath(new URL('../scripts/save-dialog.ps1',import.meta.url)),'-InitialDirectory',initialDirectory,'-SuggestedName',suggestedName],{windowsHide:true,timeout:300000,maxBuffer:65536,encoding:'utf8'});
   return JSON.parse(stdout.trim());
 }
 export async function selectClientSaveDestination(args,meta={},choose=chooseSavePath) {
