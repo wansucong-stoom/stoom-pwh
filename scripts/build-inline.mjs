@@ -103,10 +103,19 @@ if(!keyboard.includes('pwh prefer editable table over bitmap preview')){
 await fs.copyFile(new URL('../src/table-style.mjs',import.meta.url),path.join(studio,'src/pwh-table-style.mjs'));
 await fs.copyFile(new URL('../src/table-content.mjs',import.meta.url),path.join(studio,'src/pwh-table-content.mjs'));
 await fs.copyFile(new URL('../src/request-state.mjs',import.meta.url),path.join(studio,'src/pwh-request-state.mjs'));
+await fs.copyFile(new URL('../src/table-clipboard.mjs',import.meta.url),path.join(studio,'src/pwh-table-clipboard.mjs'));
 // The source module uses package-relative imports; the Studio overlay uses prefixed names.
-for(const name of ['pwh-table-content.mjs']){
+for(const name of ['pwh-table-content.mjs','pwh-table-clipboard.mjs']){
  const file=path.join(studio,'src',name);
- await fs.writeFile(file,(await fs.readFile(file,'utf8')).replaceAll("'./table-style.mjs'","'./pwh-table-style.mjs'").replaceAll("'./request-state.mjs'","'./pwh-request-state.mjs'"));
+ await fs.writeFile(file,(await fs.readFile(file,'utf8')).replaceAll("'./table-style.mjs'","'./pwh-table-style.mjs'").replaceAll("'./request-state.mjs'","'./pwh-request-state.mjs'").replaceAll("'./table-content.mjs'","'./pwh-table-content.mjs'"));
+}
+const editCommandsPath=path.join(studio,'src/command/commands/edit.ts');
+let editCommands=await fs.readFile(editCommandsPath,'utf8');
+if(!editCommands.includes('pwh cell clipboard command')){
+ const predicate='ctx.hasSelection || ctx.inPictureObjectSelection || ctx.inTableObjectSelection';
+ if(!editCommands.includes(predicate))throw Error('Unsupported copy command eligibility');
+ editCommands=editCommands.replace(predicate,'ctx.hasSelection || ctx.inCellSelectionMode /* pwh cell clipboard command */ || ctx.inPictureObjectSelection || ctx.inTableObjectSelection');
+ await fs.writeFile(editCommandsPath,editCommands);
 }
 await fs.copyFile(new URL('../src/collaboration-target.ts',import.meta.url),path.join(studio,'src/pwh-collaboration-target.ts'));
 await fs.copyFile(new URL('../src/picture-replace.ts',import.meta.url),path.join(studio,'src/pwh-picture-replace.ts'));

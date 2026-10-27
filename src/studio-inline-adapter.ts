@@ -5,6 +5,7 @@ import {applyLayout} from './pwh-page-layout';
 import {blankBody,composeBlankBody} from './pwh-blank-compose';
 import {applyCellEdits,prepareCellEdits,insertStructuredTable} from './pwh-table-content.mjs';
 import {sameRequestContext} from './pwh-request-state.mjs';
+import {installTableClipboard} from './pwh-table-clipboard.mjs';
 import { replaceTextWithMutationEffects } from './engine/command';
 import { installSelectionBridge } from './collaboration-selection';
 
@@ -20,6 +21,10 @@ export function installInlineEditor(d:any) {
   execute:requestAI
  });
  let applying=false;
+ void d.ready.then(()=>installTableClipboard({wasm:d.wasm,read:()=>read(),getInput:()=>d.getInputHandler(),notice:(message:string)=>{window.dispatchEvent(new CustomEvent('pwh-status',{detail:message}));},nativeRead:async()=>{const fn=(window as any).pwhReadNativeClipboard;if(!fn)throw Error('새 버전의 편집기 연결이 필요합니다.');return fn();},mutate:async(expected:any,operation:any)=>{
+  if(applying)throw Error('Another edit is being applied');applying=true;
+  try{if(!sameRequestContext(read(),expected))throw Error('붙여넣는 동안 문서 또는 커서가 바뀌었습니다. 다시 붙여넣으세요.');const input=d.getInputHandler(),cursor=input.getCursorPosition();await input.executeDocumentAgentOperation({kind:'snapshot',operationType:'pwh-table-clipboard',operation:(w:any)=>{operation(w);return cursor;}},()=>d.getCanvasView().refreshDocumentAgentMutation());}finally{applying=false;}
+ }}));
  let pointerActive=false,lastInputAt=0;
  window.addEventListener('pointerdown',()=>{pointerActive=true;},{capture:true});
  for(const type of ['pointerup','pointercancel','blur'])window.addEventListener(type,()=>{pointerActive=false;lastInputAt=performance.now();},{capture:true});

@@ -12,7 +12,7 @@ const FILES = Object.freeze([
   'engine.config.json', 'engine.config.example.json', 'runtime-lock.json', 'README.md', 'LICENSE',
   'THIRD_PARTY_NOTICES.md', 'CONTRIBUTING.md', 'scripts/setup.mjs',
   'scripts/inspect_template.py', 'scripts/fill_form.py', 'scripts/replace_image.py', 'scripts/inspect_image.py', 'scripts/build-studio.ps1',
-  'scripts/package.mjs', 'scripts/build-inline.mjs', 'scripts/bundle-client.mjs', 'scripts/save-dialog.ps1', 'scripts/launch.mjs', 'scripts/preserved-runtime.mjs', 'scripts/preserve-engine.py', 'scripts/build-patched-core.mjs',
+  'scripts/package.mjs', 'scripts/build-inline.mjs', 'scripts/bundle-client.mjs', 'scripts/read-clipboard.ps1', 'scripts/save-dialog.ps1', 'scripts/launch.mjs', 'scripts/preserved-runtime.mjs', 'scripts/preserve-engine.py', 'scripts/build-patched-core.mjs',
 ]);
 const DIRECTORIES = Object.freeze(['docs', 'licenses', 'skills', 'src', 'examples', 'client']);
 const SOURCE_EXTENSIONS = new Set(['.md', '.txt', '.json', '.mjs', '.js', '.ts', '.html', '.css', '.svg', '.patch']);
