@@ -79,6 +79,27 @@ if(!keyboard.includes('pwh structured cell clipboard guard')){
  await fs.writeFile(keyboardPath,keyboard);
 }
 await fs.copyFile(new URL('../src/selection-layout.mjs',import.meta.url),path.join(studio,'src/core/pwh-selection-layout.mjs'));
+if(!keyboard.includes('pwh prefer editable table over bitmap preview')){
+ const imageGate='  if (items) {';
+ const bitmapStart='    const img = new Image();';
+ const bitmapEnd='    // px → HWPUNIT (1px = 75 HWPUNIT at 96 DPI)';
+ const from=keyboard.indexOf(bitmapStart,keyboard.indexOf('async function pasteImageFile'));
+ const to=keyboard.indexOf(bitmapEnd,from);
+ if(!keyboard.includes(imageGate)||from<0||to<0)throw Error('Unsupported clipboard image priority/decode path');
+ keyboard=keyboard.replace('import {clipboardCellWarning}', 'import {clipboardCellWarning,preferStructuredClipboardHtml}');
+ keyboard=keyboard.replace(imageGate,'  // pwh prefer editable table over bitmap preview\n  if (items && !preferStructuredClipboardHtml(html)) {');
+ const start=keyboard.indexOf(bitmapStart,keyboard.indexOf('async function pasteImageFile'));
+ const end=keyboard.indexOf(bitmapEnd,start);
+ keyboard=keyboard.slice(0,start)+`    // Decode local clipboard bytes without a blob URL blocked by host image CSP.
+    const img = await createImageBitmap(file);
+    const imageWidth=img.width,imageHeight=img.height;img.close();
+
+`+keyboard.slice(end);
+ const pasteStart=keyboard.indexOf('async function pasteImageFile'),pasteEnd=keyboard.indexOf('/** 기존 컨트롤 선택 상태',pasteStart);
+ if(pasteEnd<0)throw Error('Unsupported clipboard image function boundary');
+ keyboard=keyboard.slice(0,pasteStart)+keyboard.slice(pasteStart,pasteEnd).replaceAll('img.naturalWidth','imageWidth').replaceAll('img.naturalHeight','imageHeight')+keyboard.slice(pasteEnd);
+ await fs.writeFile(keyboardPath,keyboard);
+}
 await fs.copyFile(new URL('../src/table-style.mjs',import.meta.url),path.join(studio,'src/pwh-table-style.mjs'));
 await fs.copyFile(new URL('../src/table-content.mjs',import.meta.url),path.join(studio,'src/pwh-table-content.mjs'));
 await fs.copyFile(new URL('../src/request-state.mjs',import.meta.url),path.join(studio,'src/pwh-request-state.mjs'));

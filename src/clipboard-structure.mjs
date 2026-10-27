@@ -3,6 +3,13 @@
 export function cellClipboardRisk({inCell,internalControl=false,hasTables=false,hasObjects=false}) {
  return Boolean(inCell&&(internalControl||hasTables||hasObjects));
 }
+// Office applications can supply both an editable HTML table and a bitmap
+// preview. The bitmap must not hide the editable representation.
+export function preferStructuredClipboardHtml(html){
+ if(typeof html!=='string'||!html)return false;
+ try{return !!new DOMParser().parseFromString(html,'text/html').querySelector('table');}
+ catch{return false;}
+}
 export function clipboardCellWarning(position,html,internalControl=false) {
  const inCell=position.parentParaIndex!==undefined||(position.cellPath?.length??0)>0;
  if(!inCell)return null;
