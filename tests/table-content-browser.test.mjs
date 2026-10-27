@@ -18,12 +18,15 @@ test('full editor imports and fills a merged table through MCP queue, renders, a
  const temp=await fs.mkdtemp(path.join(os.tmpdir(),'pwh-table-browser-')),filename=path.join(temp,'synthetic.hwpx');
  const doc=HwpDocument.createEmpty();doc.createBlankDocument();await fs.writeFile(filename,doc.exportHwpx());doc.free();
  const registered=await registerClientDocument(filename),html=await clientViewerHtml();
- let sessionId;
+ let sessionId,nativeReads=0;
  const server=createServer(async(req,res)=>{
   try{
    if(req.url==='/editor'){res.setHeader('Content-Type','text/html');res.end(html.replace('<head>','<head><meta http-equiv="Content-Security-Policy" content="img-src data:">'));return;}
    if(req.url==='/rpc'){
     let body='';for await(const part of req)body+=part;const request=JSON.parse(body);
+    if(request.params?.name==='pwh_client_clipboard'){
+     nativeReads++;res.setHeader('Content-Type','application/json');res.end(JSON.stringify({jsonrpc:'2.0',id:request.id,result:{content:[],_meta:{'pwh/clipboard':{html:'Version:0.9\r\nStartHTML:00000099\r\n<html><body><table><tr><td><p>수국</p><p>민들레</p></td></tr></table></body></html>',text:'수국\r\n민들레',formats:['HTML Format','UnicodeText']}}}}));return;
+    }
     if(request.params?.name==='pwh_editor_poll')sessionId=request.params.arguments.sessionId;
     res.setHeader('Content-Type','application/json');res.end(JSON.stringify(await handleRequest(request)));return;
    }
@@ -80,6 +83,35 @@ test('full editor imports and fills a merged table through MCP queue, renders, a
   let receipt=await wait(await editorTableInsert({sessionId,expected:current.context,table}));assert.equal(receipt.result.undoSteps,1);assert.equal(receipt.result.changes.cellCount,31);
   current=editorState({sessionId});assert.equal(current.context.blankDocument,false);
   const plan=(await wait(editorTables({sessionId,expected:current.context}))).result.tablePlan;assert.equal(plan.tables[0].cells[0].colSpan,3);assert.equal(plan.tables[0].cells[30].paragraphs[0],'판다');
+  // Select the first body cell through the actual rendered surface, then copy
+  // with the real keyboard path. The source context locates a synthetic cell.
+  const point=await frame.evaluate(()=>{
+   for(let y=220;y<700;y+=7)for(let x=180;x<900;x+=13){const hit=window.rhwpStudio.collaboration.hitTest({clientX:x,clientY:y});if(hit.position?.cellIndex===1)return{x:x+3,y:y+3};}
+   return null;
+  });assert.ok(point,'Rendered body cell found');
+  const box=await page.locator('iframe').boundingBox();await page.mouse.click(box.x+point.x,box.y+point.y);await page.keyboard.press('F5');
+  assert.equal((await frame.evaluate(()=>window.pwhEditor.context())).kind,'cell_block');
+  await page.keyboard.press('Control+c');
+  assert.equal((await frame.evaluate(()=>window.pwhEditor.context())).table.selectedCells.length,1,'Ctrl+C must preserve the selected cell block');
+  const copied=await frame.evaluate(()=>{const data=new DataTransfer();document.querySelector('[aria-label="문서 편집 입력"]').dispatchEvent(new ClipboardEvent('copy',{clipboardData:data,bubbles:true,cancelable:true}));return{html:data.getData('text/html'),text:data.getData('text/plain')};});
+  assert.equal(copied.text,'말');assert.equal((copied.html.match(/<td /g)||[]).length,1,'Copy must exclude the other 30 cells');
+  await page.keyboard.press('Escape');
+  const destination=await frame.evaluate(()=>{for(let y=220;y<700;y+=7)for(let x=180;x<900;x+=13){const hit=window.rhwpStudio.collaboration.hitTest({clientX:x,clientY:y});if(hit.position?.cellIndex===2)return{x:x+3,y:y+3};}return null;});assert.ok(destination);await page.mouse.click(box.x+destination.x,box.y+destination.y);
+  // Paste that one-cell HTML into another existing cell, preserving its table.
+  await page.keyboard.press('F5');await page.keyboard.press('Control+v');
+  await pause(200);
+  assert.ok((await frame.evaluate(()=>document.getElementById('pwh-status').textContent)).includes('완료'));
+  const cellPaste=new HwpDocument(Uint8Array.from(await frame.evaluate(()=>Array.from(window.pwhEditor.export().bytes))));try{const ref=plan.tables[0].source;assert.equal(JSON.parse(cellPaste.getTableDimensions(ref.sec,ref.ppi,ref.ci)).cellCount,31);assert.equal(cellPaste.getTextInCell(ref.sec,ref.ppi,ref.ci,2,0,0,1),'말');}finally{cellPaste.free();}
+  // The cell paste is a single undo, so the following existing tool test still
+  // starts at the original document state and the inspected plan remains valid.
+  await page.keyboard.press('Control+z');
+  for(let i=0;i<100;i++){const fresh=await frame.evaluate(()=>window.pwhEditor.context());if(fresh.documentState.changeSeq===editorState({sessionId}).context.documentState.changeSeq)break;await pause(100);}
+  assert.equal(nativeReads,0,'Do not read the OS clipboard in the background');
+  await frame.getByRole('button',{name:'한글 표·셀 가져오기'}).click();
+  await frame.getByRole('status').filter({hasText:'한글 표·셀을 가져왔습니다.'}).waitFor();assert.equal(nativeReads,1);
+  const nativePaste=new HwpDocument(Uint8Array.from(await frame.evaluate(()=>Array.from(window.pwhEditor.export().bytes))));try{const ref=plan.tables[0].source;assert.equal(nativePaste.getCellParagraphCount(ref.sec,ref.ppi,ref.ci,2),2);assert.equal(nativePaste.getTextInCell(ref.sec,ref.ppi,ref.ci,2,1,0,3),'민들레');}finally{nativePaste.free();}
+  await frame.getByRole('textbox',{name:'문서 편집 입력'}).focus();await page.keyboard.press('Control+z');
+  for(let i=0;i<100;i++){const fresh=await frame.evaluate(()=>window.pwhEditor.context());if(fresh.documentState.changeSeq===editorState({sessionId}).context.documentState.changeSeq)break;await pause(100);}
   await wait(await editorTableFill({sessionId,expected:editorState({sessionId}).context,planId:plan.planId,tableIndex:0,edits:[{cellIndex:0,paragraphs:['동물 목록']},{cellIndex:1,paragraphs:['얼룩말']}]}));
   const inspect=async()=>{const state=editorState({sessionId});return (await wait(editorTables({sessionId,expected:state.context}))).result.tablePlan.tables[0];};
   assert.equal((await inspect()).cells[0].paragraphs[0],'동물 목록');
