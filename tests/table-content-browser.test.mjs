@@ -48,16 +48,34 @@ test('full editor imports and fills a merged table through MCP queue, renders, a
   const wait=async(ticket)=>{for(let i=0;i<400;i++){const r=editorResult(ticket);if(r.status!=='pending'){assert.equal(r.status,'applied',JSON.stringify(r));return r;}await pause(100);}throw Error('Editor receipt timed out');};
   for(let i=0;i<400&&!sessionId;i++)await pause(100);assert.ok(sessionId,'Editor loaded and polled');
   let current=editorState({sessionId});assert.equal(current.context.blankDocument,true);assert.equal(current.capabilities.tableContent,true);
+  if(process.env.PWH_HANCOM_SAMPLE){
+   const sample=await fs.readFile(process.env.PWH_HANCOM_SAMPLE,'utf8');
+   await frame.evaluate(html=>{const input=document.querySelector('[aria-label="문서 편집 입력"]');input.focus();const data=new DataTransfer();data.setData('text/html',html);input.dispatchEvent(new ClipboardEvent('paste',{clipboardData:data,bubbles:true,cancelable:true}));},sample);
+   await pause(1200);
+   const result=new HwpDocument(Uint8Array.from(await frame.evaluate(()=>Array.from(window.pwhEditor.export().bytes))));
+   try{const tables=JSON.parse(result.getControls()).filter(c=>c.ctrlId==='tbl');assert.equal(tables.length,1);const t=tables[0];assert.equal(JSON.parse(result.getTableDimensions(0,t.para,t.controlIndex)).cellCount,15);assert.equal(JSON.parse(result.getCellProperties(0,t.para,t.controlIndex,0)).fillColor.toLowerCase(),'#215a85');}finally{result.free();}
+   await page.keyboard.press('Control+z');for(let i=0;i<100;i++){if(editorState({sessionId}).context.blankDocument)break;await pause(100);}
+   current=editorState({sessionId});assert.equal(current.context.blankDocument,true);
+  }
+  if(process.env.PWH_HANCOM_MIXED){
+   const sample=JSON.parse(await fs.readFile(process.env.PWH_HANCOM_MIXED,'utf8'));
+   await frame.evaluate(({html,text})=>{const input=document.querySelector('[aria-label="문서 편집 입력"]');input.focus();const data=new DataTransfer();data.setData('text/html',html);data.setData('text/plain',text);input.dispatchEvent(new ClipboardEvent('paste',{clipboardData:data,bubbles:true,cancelable:true}));},sample);
+   await pause(1500);
+   const result=new HwpDocument(Uint8Array.from(await frame.evaluate(()=>Array.from(window.pwhEditor.export().bytes))));
+   try{const controls=JSON.parse(result.getControls());assert.equal(controls.filter(c=>c.ctrlId==='tbl').length,1);assert.equal(controls.filter(c=>c.ctrlId==='gso').length,1);assert.equal(result.getParagraphCount(0),17);}finally{result.free();}
+   await page.keyboard.press('Control+z');for(let i=0;i<100;i++){if(editorState({sessionId}).context.blankDocument)break;await pause(100);}
+   current=editorState({sessionId});assert.equal(current.context.blankDocument,true);
+  }
   {
    await frame.evaluate(()=>{
     const input=document.querySelector('[aria-label="문서 편집 입력"]');input.focus();
-    const data=new DataTransfer();data.setData('text/html','<html><body><table><tr><td colspan="2">한글 표</td></tr><tr><td>말</td><td>소</td></tr></table></body></html>');data.setData('text/plain','한글 표\n말\t소');
+    const data=new DataTransfer();data.setData('text/html','<html><body><table><tr><td colspan="2" style="background-color:#235780;text-align:center"><span style="color:#ffffff;font-weight:bold">한글 표</span></td></tr><tr><td>말</td><td>소</td></tr></table></body></html>');data.setData('text/plain','한글 표\n말\t소');
     const png=Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/l9kAAAAASUVORK5CYII='),c=>c.charCodeAt(0));data.items.add(new File([png],'table-preview.png',{type:'image/png'}));
     input.dispatchEvent(new ClipboardEvent('paste',{clipboardData:data,bubbles:true,cancelable:true}));
    });
    await pause(1200);
    const pasted=new HwpDocument(Uint8Array.from(await frame.evaluate(()=>Array.from(window.pwhEditor.export().bytes))));
-   try{const tables=JSON.parse(pasted.getControls()).filter(c=>c.ctrlId==='tbl');assert.equal(tables.length,1,'HTML table must take precedence over the bitmap preview under image CSP');const table=tables[0];assert.equal(JSON.parse(pasted.getTableDimensions(0,table.para,table.controlIndex)).cellCount,3);assert.equal(pasted.getTextInCell(0,table.para,table.controlIndex,0,0,0,4),'한글 표');}finally{pasted.free();}
+   try{const tables=JSON.parse(pasted.getControls()).filter(c=>c.ctrlId==='tbl');assert.equal(tables.length,1,'HTML table must take precedence over the bitmap preview under image CSP');const table=tables[0];assert.equal(JSON.parse(pasted.getTableDimensions(0,table.para,table.controlIndex)).cellCount,3);assert.equal(pasted.getTextInCell(0,table.para,table.controlIndex,0,0,0,4),'한글 표');assert.equal(JSON.parse(pasted.getCellProperties(0,table.para,table.controlIndex,0)).fillColor.toLowerCase(),'#235780');assert.equal(JSON.parse(pasted.getCellParaPropertiesAt(0,table.para,table.controlIndex,0,0)).alignment,'center');assert.equal(JSON.parse(pasted.getCellCharPropertiesAt(0,table.para,table.controlIndex,0,0,0)).textColor.toLowerCase(),'#ffffff');}finally{pasted.free();}
    await page.keyboard.press('Control+z');
    for(let i=0;i<100;i++){
     const fresh=await frame.evaluate(()=>window.pwhEditor.context());
