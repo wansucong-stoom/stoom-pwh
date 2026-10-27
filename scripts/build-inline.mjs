@@ -100,6 +100,13 @@ if(!keyboard.includes('pwh prefer editable table over bitmap preview')){
  keyboard=keyboard.slice(0,pasteStart)+keyboard.slice(pasteStart,pasteEnd).replaceAll('img.naturalWidth','imageWidth').replaceAll('img.naturalHeight','imageHeight')+keyboard.slice(pasteEnd);
  await fs.writeFile(keyboardPath,keyboard);
 }
+// A Hancom model includes the original image and object properties, whereas
+// the clipboard bitmap is only a preview. Prefer the model when available.
+const oldImageGate='if (items && !preferStructuredClipboardHtml(html)) {';
+if(keyboard.includes(oldImageGate)){
+ keyboard=keyboard.replace(oldImageGate,'if (items && !preferStructuredClipboardHtml(html) && !extractHwpJsonModel(html)) {');
+ await fs.writeFile(keyboardPath,keyboard);
+}
 await fs.copyFile(new URL('../src/table-style.mjs',import.meta.url),path.join(studio,'src/pwh-table-style.mjs'));
 await fs.copyFile(new URL('../src/table-content.mjs',import.meta.url),path.join(studio,'src/pwh-table-content.mjs'));
 await fs.copyFile(new URL('../src/request-state.mjs',import.meta.url),path.join(studio,'src/pwh-request-state.mjs'));

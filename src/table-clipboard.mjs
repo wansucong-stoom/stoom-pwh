@@ -1,4 +1,4 @@
-import {tableSnapshot} from './table-style.mjs';
+import {tableSnapshot,applyTableStyles} from './table-style.mjs';
 import {validateTableSpec,insertStructuredTable,applyCellEdits,prepareCellEdits} from './table-content.mjs';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const parse=v=>typeof v==='string'?JSON.parse(v):v;
@@ -21,12 +21,28 @@ export function selectedTableFragment(snapshot,indices){
     return `<span style="font-family:${esc(f.fontFamily||'맑은 고딕')};font-size:${(f.fontSize||1000)/100}pt;font-weight:${f.bold?'bold':'normal'};font-style:${f.italic?'italic':'normal'};color:${esc(f.textColor||'#000000')}">${esc(text)}</span>`;
    }).join('');return `<p style="margin:0;text-align:${esc(p.format.alignment||'left')}">${runs||'<br>'}</p>`;
   }).join('');
-  rows[c.row].push({column:c.column,html:`<td rowspan="${c.rowSpan}" colspan="${c.columnSpan}" style="border:1px solid #000;padding:2pt;width:${(props.width||0)/100}pt;background:${esc(props.fillType==='solid'?props.fillColor:'#ffffff')}">${paragraphs}</td>`});
+  const borders=['Left','Right','Top','Bottom'].map(side=>{const b=props['border'+side];return `border-${side.toLowerCase()}:${b?.type===0?'none':`${Math.max(0.3,(b?.width||1)*0.25)}pt ${b?.type===2?'dashed':b?.type===3?'dotted':'solid'} ${esc(b?.color||'#000000')}`}`;}).join(';');
+  rows[c.row].push({column:c.column,html:`<td rowspan="${c.rowSpan}" colspan="${c.columnSpan}" style="${borders};padding:2pt;width:${(props.width||0)/100}pt;height:${(props.height||0)/100}pt;background:${esc(props.fillType==='solid'?props.fillColor:'#ffffff')}">${paragraphs}</td>`});
   plain[c.row][c.column]=c.paragraphs.join('\n');
  });
  return {spec,text:plain.map(r=>r.join('\t')).join('\n'),html:`<table style="border-collapse:collapse">${rows.map(r=>'<tr>'+r.sort((a,b)=>a.column-b.column).map(c=>c.html).join('')+'</tr>').join('')}</table>`};
 }
 
+// Read a bounded subset of the clipboard's presentation; never insert its HTML.
+function clipboardCellStyle(cell){
+ const chain=[];for(let e=cell;e&&e.tagName!=='BODY';e=e.parentElement)chain.unshift(e);
+ const base={};for(const e of chain)for(const name of e.style||[])base[name]=e.style.getPropertyValue(name);
+ const child=cell.querySelector('p,div,span,font,b,strong');const text={...base};
+ if(child)for(const name of child.style||[])text[name]=child.style.getPropertyValue(name);
+ const color=v=>{if(!v)return;const h=v.trim().match(/^#([\da-f]{3}|[\da-f]{6})$/i);if(h)return '#'+(h[1].length===3?[...h[1]].map(x=>x+x).join(''):h[1]);const m=v.match(/^rgb\(\s*(\d+),\s*(\d+),\s*(\d+)\s*\)$/i);if(m&&m.slice(1).every(x=>+x<=255))return '#'+m.slice(1).map(x=>(+x).toString(16).padStart(2,'0')).join('');};
+ const s={},fill=color(base['background-color']||base.background||cell.getAttribute('bgcolor')),ink=color(text.color||child?.getAttribute('color'));
+ if(fill)s.fillColor=fill;if(ink)s.textColor=ink;
+ const align=text['text-align']||cell.getAttribute('align');if(['left','center','right','justify'].includes(align))s.alignment=align;
+ const weight=text['font-weight'];if(weight)s.bold=weight==='bold'||+weight>=600;else if(child?.matches('b,strong'))s.bold=true;
+ const size=(text['font-size']||'').match(/^(\d+(?:\.\d+)?)(pt|px)$/i);if(size){const n=Math.round(+size[1]*(size[2].toLowerCase()==='px'?75:100));if(n>=600&&n<=7200)s.fontSize=n;}
+ const family=(text['font-family']||'').split(',')[0].trim().replace(/^['"]|['"]$/g,'');if(family&&family.length<=100)s.fontFamily=family;
+ return s;
+}
 export function tableFromClipboardHtml(html,Parser=globalThis.DOMParser){
  if(typeof html!=='string'||!html.trim()||html.length>8*1024*1024)return null;
  if(typeof Parser!=='function')throw Error('HTML parser unavailable');
@@ -36,7 +52,7 @@ export function tableFromClipboardHtml(html,Parser=globalThis.DOMParser){
  const doc=new Parser().parseFromString(html,'text/html'),tables=doc.querySelectorAll('table');
  if(!tables.length)return null;
  if(tables.length!==1||tables[0].querySelector('table,img,svg,object,embed,math'))throw Error('Copy one flat text table without images or nested objects');
- const table=tables[0],cells=[],used=new Set();let columns=0;
+ const table=tables[0],cells=[],styles=[],used=new Set();let columns=0;
  const rows=Array.from(table.rows);if(rows.length>256)throw Error('Table exceeds 256 grid positions');
  rows.forEach((row,r)=>{
   let col=0;
@@ -55,12 +71,12 @@ export function tableFromClipboardHtml(html,Parser=globalThis.DOMParser){
     if(block&&(buffer||!paragraphs.length))flush();
    };
    for(const child of cell.childNodes)walk(child);if(buffer||!paragraphs.length)flush();
-   cells.push({row:r,column:col,rowSpan,columnSpan,paragraphs});
+   cells.push({row:r,column:col,rowSpan,columnSpan,paragraphs});styles.push(clipboardCellStyle(cell));
    for(let dr=0;dr<rowSpan;dr++)for(let dc=0;dc<columnSpan;dc++){const key=(r+dr)+':'+(col+dc);if(used.has(key))throw Error('Overlapping clipboard cells');used.add(key);}
    col+=columnSpan;columns=Math.max(columns,col);
   }
  });
- return validateTableSpec({rows:rows.length,columns,cells});
+ const spec=validateTableSpec({rows:rows.length,columns,cells});Object.defineProperty(spec,'clipboardStyles',{value:styles});return spec;
 }
 
 export function tableFromClipboardText(text){
@@ -68,6 +84,13 @@ export function tableFromClipboardText(text){
  const rows=text.replace(/\r\n?/g,'\n').replace(/\n$/,'').split('\n').map(r=>r.split('\t'));
  const columns=rows[0]?.length;if(!columns||rows.some(r=>r.length!==columns))return null;
  return validateTableSpec({rows:rows.length,columns,cells:rows.flatMap((row,r)=>row.map((value,column)=>({row:r,column,paragraphs:[value]})))});
+}
+
+function hasHancomModel(html){
+ if(typeof html!=='string'||html.length>8*1024*1024)return false;
+ const marker=html.indexOf('[data-hwpjson]'),start=html.indexOf('{',marker),end=html.indexOf('-->',start);
+ if(marker<0||start<0||end<0)return false;
+ try{return !!JSON.parse(html.slice(start,end));}catch{return false;}
 }
 
 export function pasteClipboardCells(w,context,spec){
@@ -127,22 +150,33 @@ export function installTableClipboard({wasm,read,getInput,mutate,notice,nativeRe
  },true);
  const input=getInput();if(input){const original=input.performCopy.bind(input);input.performCopy=()=>input.isInCellSelectionMode()||input.isInTableObjectSelection()?document.execCommand('copy'):original();}
  const apply=async(spec,expected)=>mutate(expected,w=>{
-  if(expected.cursor?.parentParaIndex!=null)return pasteClipboardCells(w,expected,spec);
-  if(expected.selection)throw Error('Place a body cursor outside a selection before pasting a table');
-  return insertStructuredTable(w,expected.cursor,spec);
+  let result,ref;
+  if(expected.cursor?.parentParaIndex!=null){result=pasteClipboardCells(w,expected,spec);const source=expected.table.source;ref={sec:source.sec,ppi:source.ppi,ci:source.ci};}
+  else{if(expected.selection)throw Error('Place a body cursor outside a selection before pasting a table');result=insertStructuredTable(w,expected.cursor,spec);ref=result.source;}
+  const styles=(spec.clipboardStyles||[]).map((s,i)=>({cellIndex:result.cellIndices[i],...s})).filter(s=>Object.keys(s).length>1);
+  if(styles.length)applyTableStyles(w,{...ref,snapshot:tableSnapshot(w,ref.sec,ref.ppi,ref.ci)},styles);
+  return result;
  });
  document.addEventListener('paste',event=>{
   if(bypass)return;if(Date.now()<plainPasteUntil){plainPasteUntil=0;return;}
   const expected=structuredClone(read()),data=event.clipboardData;
   if(!expected.ready||!data)return;
   const html=data.getData('text/html'),text=data.getData('text/plain');let spec;
+  // The engine's Hancom model importer preserves richer formatting and pictures.
+  if(expected.cursor?.parentParaIndex==null&&hasHancomModel(html))return;
   try{spec=tableFromClipboardHtml(html)||tableFromClipboardText(text);}catch(error){event.preventDefault();event.stopImmediatePropagation();notice(error.message);return;}
-  const needNative=!spec&&event.isTrusted&&nativeRead&&(!text.trim()||text.includes('\t'));
+  const hasImageFile=Array.from(data.items||[]).some(item=>item.kind==='file'&&item.type.startsWith('image/'));
+  const needNative=event.isTrusted&&nativeRead&&expected.cursor?.parentParaIndex==null;
   if(!spec&&!needNative)return;
   event.preventDefault();event.stopImmediatePropagation();
   void(async()=>{
    try{
-    if(!spec){const native=await nativeRead();spec=tableFromClipboardHtml(native.html)||tableFromClipboardText(native.text);if(!spec&&native.formats?.some(f=>/hwp|hancom|hanword/i.test(f)))throw Error('한글 전용 클립보드만 있고 표 HTML이 없습니다. 원본 HWPX 파일을 열어 가져와 주세요.');}
+    if(needNative){let native;try{native=await nativeRead();}catch(error){if(!spec&&!hasImageFile&&!html&&!text)throw error;}
+     if(native){
+     if(expected.cursor?.parentParaIndex==null&&hasHancomModel(native.html)){const current=read();if(JSON.stringify(current.documentState)!==JSON.stringify(expected.documentState)||JSON.stringify(current.cursor)!==JSON.stringify(expected.cursor))throw Error('문서나 커서가 변경되어 붙여넣기를 취소했습니다.');const transfer=new DataTransfer();transfer.setData('text/html',native.html);transfer.setData('text/plain',native.text);bypass=true;try{event.target.dispatchEvent(new ClipboardEvent('paste',{clipboardData:transfer,bubbles:true,cancelable:true}));}finally{bypass=false;}return;}
+     spec=tableFromClipboardHtml(native.html)||tableFromClipboardText(native.text)||spec;
+     if(!spec&&!hasImageFile&&native.png){const current=read();if(JSON.stringify(current.documentState)!==JSON.stringify(expected.documentState)||JSON.stringify(current.cursor)!==JSON.stringify(expected.cursor))throw Error('문서나 커서가 변경되어 그림 붙여넣기를 취소했습니다.');const bytes=Uint8Array.from(atob(native.png),c=>c.charCodeAt(0)),transfer=new DataTransfer();transfer.items.add(new File([bytes],'clipboard.png',{type:'image/png'}));bypass=true;try{event.target.dispatchEvent(new ClipboardEvent('paste',{clipboardData:transfer,bubbles:true,cancelable:true}));}finally{bypass=false;}return;}
+     if(!spec&&native.formats?.some(f=>/hwp|hancom|hanword/i.test(f)))throw Error('한글 전용 클립보드만 있고 표 HTML이 없습니다. 원본 HWPX 파일을 열어 가져와 주세요.');}}
     if(spec){await apply(spec,expected);notice('표·셀 붙여넣기를 완료했습니다. 실행 취소 한 번으로 되돌릴 수 있습니다.');}
     else{bypass=true;try{event.target.dispatchEvent(new ClipboardEvent('paste',{clipboardData:data,bubbles:true,cancelable:true}));}finally{bypass=false;}}
    }catch(error){notice('표·셀 붙여넣기: '+error.message);}
@@ -150,7 +184,7 @@ export function installTableClipboard({wasm,read,getInput,mutate,notice,nativeRe
  },true);
  window.addEventListener('pwh-import-native-table',()=>{
   const expected=structuredClone(read());
-  void(async()=>{try{const data=await nativeRead(),spec=tableFromClipboardHtml(data.html)||tableFromClipboardText(data.text);if(!spec)throw Error('클립보드에서 표 구조를 찾지 못했습니다. 한글에서 표 또는 셀을 다시 복사하거나 원본 HWPX를 열어 주세요.');await apply(spec,expected);notice('한글 표·셀을 가져왔습니다.');}catch(error){notice(error.message);}})();
+  void(async()=>{try{const data=await nativeRead();if(expected.cursor?.parentParaIndex==null&&hasHancomModel(data.html)){const current=read();if(JSON.stringify(current.documentState)!==JSON.stringify(expected.documentState)||JSON.stringify(current.cursor)!==JSON.stringify(expected.cursor))throw Error('문서나 커서가 변경되어 붙여넣기를 취소했습니다.');const transfer=new DataTransfer();transfer.setData('text/html',data.html);transfer.setData('text/plain',data.text);const target=document.querySelector('[aria-label="문서 편집 입력"]');if(!target)throw Error('문서 입력 위치를 찾지 못했습니다.');bypass=true;try{target.dispatchEvent(new ClipboardEvent('paste',{clipboardData:transfer,bubbles:true,cancelable:true}));}finally{bypass=false;}return;}const spec=tableFromClipboardHtml(data.html)||tableFromClipboardText(data.text);if(!spec)throw Error('클립보드에서 표 구조를 찾지 못했습니다. 한글에서 표 또는 셀을 다시 복사하거나 원본 HWPX를 열어 주세요.');await apply(spec,expected);notice('한글 표·셀을 가져왔습니다.');}catch(error){notice(error.message);}})();
  });
  return {copySelected:payload,paste:apply};
 }
