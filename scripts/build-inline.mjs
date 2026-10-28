@@ -62,6 +62,17 @@ if(hostCanvas.includes('pwh exact local face first')&&!hostCanvas.includes('cons
 await fs.copyFile(new URL('../src/clipboard-structure.mjs',import.meta.url),path.join(studio,'src/engine/pwh-clipboard-structure.mjs'));
 const keyboardPath=path.join(studio,'src/engine/input-handler-keyboard.ts');
 let keyboard=await fs.readFile(keyboardPath,'utf8');
+await fs.copyFile(new URL('../src/cell-delete-selection.mjs',import.meta.url),path.join(studio,'src/pwh-cell-delete-selection.mjs'));
+await fs.copyFile(new URL('../src/cell-delete-dialog.ts',import.meta.url),path.join(studio,'src/pwh-cell-delete-dialog.ts'));
+if(!keyboard.includes('pwh cell delete confirmation')){
+ const prior=`      if (!this.cursor.isProtectedCellSelectionMode()) {
+        this.clearSelectedCellBlock();
+        this.updateCellSelection();
+      }`;
+ if(!keyboard.includes(prior))throw new Error('Unsupported Studio cell deletion handler');
+ keyboard="// pwh cell delete confirmation\nimport {confirmCellBlockDelete} from '@/pwh-cell-delete-dialog';\n"+keyboard.replace(prior,`      if (!this.cursor.isProtectedCellSelectionMode()) confirmCellBlockDelete(this);`);
+ await fs.writeFile(keyboardPath,keyboard);
+}
 if(!keyboard.includes('pwh structured cell clipboard guard')){
  const internalAnchor='  // 내부 복사 marker가 있으면 내부 클립보드를 사용한다.';
  const externalAnchor='function pasteExternalHtml(this: any, html: string, text: string, hasSelection: boolean): void {';
@@ -111,10 +122,12 @@ await fs.copyFile(new URL('../src/table-style.mjs',import.meta.url),path.join(st
 await fs.copyFile(new URL('../src/table-content.mjs',import.meta.url),path.join(studio,'src/pwh-table-content.mjs'));
 await fs.copyFile(new URL('../src/request-state.mjs',import.meta.url),path.join(studio,'src/pwh-request-state.mjs'));
 await fs.copyFile(new URL('../src/table-clipboard.mjs',import.meta.url),path.join(studio,'src/pwh-table-clipboard.mjs'));
+await fs.copyFile(new URL('../src/nested-table-paste.mjs',import.meta.url),path.join(studio,'src/pwh-nested-table-paste.mjs'));
+await fs.copyFile(new URL('../src/table-paste-dialog.ts',import.meta.url),path.join(studio,'src/pwh-table-paste-dialog.ts'));
 // The source module uses package-relative imports; the Studio overlay uses prefixed names.
-for(const name of ['pwh-table-content.mjs','pwh-table-clipboard.mjs']){
+for(const name of ['pwh-table-content.mjs','pwh-table-clipboard.mjs','pwh-nested-table-paste.mjs']){
  const file=path.join(studio,'src',name);
- await fs.writeFile(file,(await fs.readFile(file,'utf8')).replaceAll("'./table-style.mjs'","'./pwh-table-style.mjs'").replaceAll("'./request-state.mjs'","'./pwh-request-state.mjs'").replaceAll("'./table-content.mjs'","'./pwh-table-content.mjs'"));
+ await fs.writeFile(file,(await fs.readFile(file,'utf8')).replaceAll("'./table-style.mjs'","'./pwh-table-style.mjs'").replaceAll("'./request-state.mjs'","'./pwh-request-state.mjs'").replaceAll("'./table-content.mjs'","'./pwh-table-content.mjs'").replaceAll("'./nested-table-paste.mjs'","'./pwh-nested-table-paste.mjs'"));
 }
 const editCommandsPath=path.join(studio,'src/command/commands/edit.ts');
 let editCommands=await fs.readFile(editCommandsPath,'utf8');
@@ -175,6 +188,13 @@ export class WasmBridge {
   invalidatePwhSelectionLayout():void {pwhBodySelectionCache.invalidate();}`);
  wasm=wasm.replace('  invalidateCanvasMetrics(): void {','  invalidateCanvasMetrics(): void {\n    pwhBodySelectionCache.invalidate();');
  wasm=wasm.replace('JSON.parse(this.doc.getSelectionRects(sec,startPara,startOffset,endPara,endOffset)));','JSON.parse(this.doc.getSelectionRects(sec,startPara,startOffset,endPara,endOffset)),pwhBodySelectionCache);');
+}
+if(!wasm.includes('pwh scratch paragraph operations')){
+ const anchor='export class WasmBridge {';if(!wasm.includes(anchor))throw Error('Unsupported Studio paragraph bridge');
+ wasm=wasm.replace(anchor,`${anchor}
+  // pwh scratch paragraph operations: append and remove without splitting existing anchors.
+  insertPwhScratchParagraph(sec:number,index:number):string {if(!this.doc)throw new Error('문서가 로드되지 않았습니다');return this.doc.insertParagraph(sec,index);}
+  deletePwhScratchParagraph(sec:number,index:number):string {if(!this.doc)throw new Error('문서가 로드되지 않았습니다');return this.doc.deleteParagraph(sec,index);}`);
 }
 
 wasm=wasm.replace('await init() as',"await init({module_or_path:await (window as any).pwhWasmBytes}) as");

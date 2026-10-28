@@ -1,5 +1,6 @@
 import {tableSnapshot,applyTableStyles} from './table-style.mjs';
 import {validateTableSpec,insertStructuredTable,applyCellEdits,prepareCellEdits} from './table-content.mjs';
+import {extractHancomTableModel,pasteHancomTableInCell,pasteInternalTableInCell,pasteHtmlTableInCell} from './nested-table-paste.mjs';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const parse=v=>typeof v==='string'?JSON.parse(v):v;
 
@@ -51,7 +52,7 @@ export function tableFromClipboardHtml(html,Parser=globalThis.DOMParser){
  if(!/<table\b/i.test(html)&&/<(?:tr|td|th)\b/i.test(html))html='<table>'+html+'</table>';
  const doc=new Parser().parseFromString(html,'text/html'),tables=doc.querySelectorAll('table');
  if(!tables.length)return null;
- if(tables.length!==1||tables[0].querySelector('table,img,svg,object,embed,math'))throw Error('Copy one flat text table without images or nested objects');
+ if(tables.length!==1||tables[0].querySelector('table,img,svg,object,embed,math'))throw Error('중첩 표나 그림이 포함된 표는 기존 셀에 덮어쓸 수 없습니다. 셀 안에 표로 넣기를 선택해 주세요.');
  const table=tables[0],cells=[],styles=[],used=new Set();let columns=0;
  const rows=Array.from(table.rows);if(rows.length>256)throw Error('Table exceeds 256 grid positions');
  rows.forEach((row,r)=>{
@@ -86,6 +87,19 @@ export function tableFromClipboardText(text){
  return validateTableSpec({rows:rows.length,columns,cells:rows.flatMap((row,r)=>row.map((value,column)=>({row:r,column,paragraphs:[value]})))});
 }
 
+function safeTableHtml(html,spec){
+ if(html&&/<table\b/i.test(html)){
+  const doc=new DOMParser().parseFromString(html,'text/html'),tables=doc.querySelectorAll('table');
+  if(tables.length!==1||tables[0].querySelector('table,img,svg,object,embed,math,iframe,video,canvas'))throw Error('이 HTML 표의 중첩 객체는 안전하게 가져올 수 없습니다.');
+  const table=tables[0].cloneNode(true);table.querySelectorAll('script,style,link,meta').forEach(node=>node.remove());
+  for(const element of [table,...table.querySelectorAll('*')])for(const attr of [...element.attributes])if(/^on/i.test(attr.name))element.removeAttribute(attr.name);
+  return table.outerHTML;
+ }
+ const rows=Array.from({length:spec.rows},()=>[]);
+ for(const c of spec.cells)rows[c.row].push({column:c.column,html:`<td rowspan="${c.rowSpan??1}" colspan="${c.columnSpan??1}">${c.paragraphs.map(p=>'<p>'+esc(p)+'</p>').join('')}</td>`});
+ return '<table>'+rows.map(row=>'<tr>'+row.sort((a,b)=>a.column-b.column).map(c=>c.html).join('')+'</tr>').join('')+'</table>';
+}
+
 function hasHancomModel(html){
  if(typeof html!=='string'||html.length>8*1024*1024)return false;
  const marker=html.indexOf('[data-hwpjson]'),start=html.indexOf('{',marker),end=html.indexOf('-->',start);
@@ -95,22 +109,28 @@ function hasHancomModel(html){
 
 export function pasteClipboardCells(w,context,spec){
  validateTableSpec(spec);const source=context.table?.source,pos=context.cursor;
- if(!source||source.cellPath?.length>1)throw Error('Use a flat body table destination');
+ if(!source||source.cellPath?.length>1)throw Error('중첩 표의 기존 셀에 덮어쓰기는 아직 지원하지 않습니다.');
  const ref={sec:source.sec,ppi:source.ppi,ci:source.ci},snapshot=tableSnapshot(w,ref.sec,ref.ppi,ref.ci);
  const selected=context.kind==='cell_block'?context.table.selectedCells:null;
  const anchor=selected?.length?snapshot.cells[selected[0].cellIndex]:snapshot.cells[pos.cellIndex];if(!anchor)throw Error('Choose a destination cell');
  const top=selected?.length?Math.min(...selected.map(c=>c.row)):anchor.geometry.row,left=selected?.length?Math.min(...selected.map(c=>c.col)):anchor.geometry.col;
- const allowed=selected?.length?new Set(selected.map(c=>c.cellIndex)):null,edits=[];
+ const allowed=selected?.length>1?new Set(selected.map(c=>c.cellIndex)):null,edits=[];
  for(const cell of spec.cells){
   const index=snapshot.cells.findIndex(c=>c.geometry.row===top+cell.row&&c.geometry.col===left+cell.column);
   const target=snapshot.cells[index];
-  if(!target||allowed&&!allowed.has(index)||target.geometry.rowSpan!==(cell.rowSpan??1)||target.geometry.colSpan!==(cell.columnSpan??1))throw Error('Destination cells must fit the copied rows, columns and merges');
+  if(!target)throw Error('복사한 표가 대상 표의 바깥으로 벗어납니다. 충분한 줄과 칸이 있는 위치를 선택해 주세요.');
+  if(allowed&&!allowed.has(index))throw Error('선택한 셀 범위가 복사한 표보다 작습니다. 같은 크기의 셀 범위를 선택해 주세요.');
+  if(target.geometry.rowSpan!==(cell.rowSpan??1)||target.geometry.colSpan!==(cell.columnSpan??1))throw Error('복사한 표와 대상 셀의 병합 모양이 다릅니다. 같은 모양의 셀을 선택해 주세요.');
   edits.push({cellIndex:index,paragraphs:cell.paragraphs});
  }
- if(allowed&&allowed.size!==edits.length)throw Error('Select a destination block matching the copied cells');
+ if(allowed&&allowed.size!==edits.length)throw Error('복사한 표와 같은 크기의 셀 범위를 선택해 주세요.');
  // Preflight all original paragraphs before reshaping text containers. Row,
  // column and merge geometry remain unchanged, even for multiline cell paste.
- prepareCellEdits(w,ref,edits.map(e=>({cellIndex:e.cellIndex,paragraphs:snapshot.cells[e.cellIndex].paragraphs.map(p=>p.text)})),allowed?[...allowed]:undefined);
+ try{prepareCellEdits(w,ref,edits.map(e=>({cellIndex:e.cellIndex,paragraphs:snapshot.cells[e.cellIndex].paragraphs.map(p=>p.text)})),allowed?[...allowed]:undefined);}catch(error){
+  if(/mixed character formatting/i.test(error.message))throw Error('대상 셀에 여러 글자 서식이 섞여 있어 덮어쓰지 않았습니다.');
+  if(/contains an object/i.test(error.message))throw Error('대상 셀에 표나 그림이 있어 덮어쓰지 않았습니다.');
+  throw error;
+ }
  const checked=value=>{if(parse(value)?.ok!==true)throw Error('Cell paragraph operation failed');};
  for(const edit of edits){
   const old=snapshot.cells[edit.cellIndex].paragraphs;if(old.length===edit.paragraphs.length)continue;
@@ -121,23 +141,32 @@ export function pasteClipboardCells(w,context,spec){
  return applyCellEdits(w,ref,edits,allowed?[...allowed]:undefined);
 }
 
-export function installTableClipboard({wasm,read,getInput,mutate,notice,nativeRead}){
- let bypass=false,plainPasteUntil=0;
+export function installTableClipboard({wasm,read,getInput,mutate,notice,nativeRead,chooseTablePaste,enableNestedClipping}){
+ let bypass=false,plainPasteUntil=0,richCopy=null;
+ const richPayload=(ref,context)=>{
+  const path=ref.cellPath||[],target=path.length>1?{ci:path.at(-1).controlIndex,owner:JSON.stringify(path.slice(0,-1))}:{ci:ref.ci,owner:'[]'};
+  if(parse(wasm.copyControl(ref.sec,ref.ppi,target.ci,target.owner))?.ok!==true)throw Error('표를 복사하지 못했습니다.');
+  const html=wasm.exportControlHtml(ref.sec,ref.ppi,target.ci,target.owner);if(typeof html!=='string'||!/<table\b/i.test(html))throw Error('표의 복사 형식을 만들지 못했습니다.');
+  const token=crypto.randomUUID();richCopy={token,epoch:context.documentState.documentEpoch};
+  return {html:html+`<!--pwh-rich-table:${token}-->`,text:wasm.getClipboardText()||'[표]',rich:true};
+ };
  const payload=()=>{
   const input=getInput(),context=read();let ref,indices;
   if(context.kind==='cell_block'){
    if(!context.table?.selectedCellsComplete||!context.table.selectedCells?.length)throw Error('Select a complete rectangular cell block');
    ref=context.table.source;indices=context.table.selectedCells.map(c=>c.cellIndex);
-  }else if(input?.isInTableObjectSelection())ref=input.getSelectedTableRef();else return null;
-  if(ref.cellPath?.length>1)throw Error('Nested table copying is not supported yet');
+  }else if(input?.isInTableObjectSelection()){ref=input.getSelectedTableRef();if(!ref)throw Error('복사할 표를 찾지 못했습니다.');return richPayload(ref,context);}else return null;
+  if(ref.cellPath?.length>1){const dims=wasm.getTableDimensionsByPath(ref.sec,ref.ppi,JSON.stringify(ref.cellPath));if(indices.length===dims.cellCount)return richPayload(ref,context);throw Error('중첩 표의 일부 셀 복사는 아직 지원하지 않습니다.');}
   const snapshot=tableSnapshot(wasm,ref.sec,ref.ppi,ref.ci);indices??=snapshot.cells.map((_,i)=>i);
+  if(indices.length===snapshot.dimensions.cellCount)return richPayload(ref,context);
   return selectedTableFragment(snapshot,indices);
  };
  document.addEventListener('copy',event=>{
-  let data;try{data=payload();}catch(error){event.preventDefault();event.stopImmediatePropagation();notice(error.message);return;}
+  richCopy=null;
+  let data;try{data=payload();}catch(error){event.preventDefault();event.stopImmediatePropagation();notice(error.message,true);return;}
   if(!data)return;event.preventDefault();event.stopImmediatePropagation();
-  event.clipboardData?.setData('text/plain',data.text);event.clipboardData?.setData('text/html',data.html);
-  notice('선택한 '+data.spec.cells.length+'개 셀을 복사했습니다.');
+  event.clipboardData?.setData('text/plain',data.text);event.clipboardData?.setData('text/html',data.html+'<!--pwh-table-copy-->');
+  notice(data.rich?'표 전체를 복사했습니다.':'선택한 '+data.spec.cells.length+'개 셀을 복사했습니다.');
  },true);
  window.addEventListener('keydown',event=>{
   const key=event.code==='KeyC'?'c':event.code==='KeyV'?'v':event.key.toLowerCase();
@@ -161,30 +190,59 @@ export function installTableClipboard({wasm,read,getInput,mutate,notice,nativeRe
   if(bypass)return;if(Date.now()<plainPasteUntil){plainPasteUntil=0;return;}
   const expected=structuredClone(read()),data=event.clipboardData;
   if(!expected.ready||!data)return;
-  const html=data.getData('text/html'),text=data.getData('text/plain');let spec;
+  let html=data.getData('text/html'),text=data.getData('text/plain');let spec,parseError;
+  const inCell=expected.cursor?.parentParaIndex!=null;
+  const token=html.match(/<!--pwh-rich-table:([0-9a-f-]+)-->/i)?.[1];
+  const internalTable=inCell&&!!token&&richCopy?.token===token&&richCopy.epoch===expected.documentState.documentEpoch&&wasm.clipboardHasControl();
   // The engine's Hancom model importer preserves richer formatting and pictures.
-  if(expected.cursor?.parentParaIndex==null&&hasHancomModel(html))return;
-  try{spec=tableFromClipboardHtml(html)||tableFromClipboardText(text);}catch(error){event.preventDefault();event.stopImmediatePropagation();notice(error.message);return;}
+  if(!inCell&&hasHancomModel(html))return;
+  let model=inCell?extractHancomTableModel(html):null;
+  try{if(!model&&!internalTable)spec=tableFromClipboardHtml(html)||tableFromClipboardText(text);}catch(error){parseError=error;}
   const hasImageFile=Array.from(data.items||[]).some(item=>item.kind==='file'&&item.type.startsWith('image/'));
-  const needNative=event.isTrusted&&nativeRead&&expected.cursor?.parentParaIndex==null;
-  if(!spec&&!needNative)return;
+  const ownCopy=html.includes('<!--pwh-table-copy-->');
+  const needNative=event.isTrusted&&nativeRead&&(!inCell||!ownCopy&&(!!model||!!spec||/<table\b/i.test(html)||(!html&&!text)));
+  if(parseError&&!needNative){event.preventDefault();event.stopImmediatePropagation();notice(parseError.message,true);return;}
+  if(!spec&&!model&&!internalTable&&!needNative)return;
   event.preventDefault();event.stopImmediatePropagation();
   void(async()=>{
    try{
     if(needNative){let native;try{native=await nativeRead();}catch(error){if(!spec&&!hasImageFile&&!html&&!text)throw error;}
      if(native){
      if(expected.cursor?.parentParaIndex==null&&hasHancomModel(native.html)){const current=read();if(JSON.stringify(current.documentState)!==JSON.stringify(expected.documentState)||JSON.stringify(current.cursor)!==JSON.stringify(expected.cursor))throw Error('문서나 커서가 변경되어 붙여넣기를 취소했습니다.');const transfer=new DataTransfer();transfer.setData('text/html',native.html);transfer.setData('text/plain',native.text);bypass=true;try{event.target.dispatchEvent(new ClipboardEvent('paste',{clipboardData:transfer,bubbles:true,cancelable:true}));}finally{bypass=false;}return;}
-     spec=tableFromClipboardHtml(native.html)||tableFromClipboardText(native.text)||spec;
-     if(!spec&&!hasImageFile&&native.png){const current=read();if(JSON.stringify(current.documentState)!==JSON.stringify(expected.documentState)||JSON.stringify(current.cursor)!==JSON.stringify(expected.cursor))throw Error('문서나 커서가 변경되어 그림 붙여넣기를 취소했습니다.');const bytes=Uint8Array.from(atob(native.png),c=>c.charCodeAt(0)),transfer=new DataTransfer();transfer.items.add(new File([bytes],'clipboard.png',{type:'image/png'}));bypass=true;try{event.target.dispatchEvent(new ClipboardEvent('paste',{clipboardData:transfer,bubbles:true,cancelable:true}));}finally{bypass=false;}return;}
-     if(!spec&&native.formats?.some(f=>/hwp|hancom|hanword/i.test(f)))throw Error('한글 전용 클립보드만 있고 표 HTML이 없습니다. 원본 HWPX 파일을 열어 가져와 주세요.');}}
+     if(inCell){html=native.html||html;text=native.text||text;model=extractHancomTableModel(html);}
+     if(!model){spec=tableFromClipboardHtml(native.html)||tableFromClipboardText(native.text)||spec;parseError=null;}
+     if(!spec&&!model&&!hasImageFile&&native.png){const current=read();if(JSON.stringify(current.documentState)!==JSON.stringify(expected.documentState)||JSON.stringify(current.cursor)!==JSON.stringify(expected.cursor))throw Error('문서나 커서가 변경되어 그림 붙여넣기를 취소했습니다.');const bytes=Uint8Array.from(atob(native.png),c=>c.charCodeAt(0)),transfer=new DataTransfer();transfer.items.add(new File([bytes],'clipboard.png',{type:'image/png'}));bypass=true;try{event.target.dispatchEvent(new ClipboardEvent('paste',{clipboardData:transfer,bubbles:true,cancelable:true}));}finally{bypass=false;}return;}
+     if(!spec&&!model&&native.formats?.some(f=>/hwp|hancom|hanword/i.test(f)))throw Error('한글 전용 클립보드만 있고 표 HTML이 없습니다. 원본 HWPX 파일을 열어 가져와 주세요.');}}
+    if((model||internalTable||spec)&&inCell){
+     const choice=await chooseTablePaste({htmlOnly:!model&&!internalTable});if(!choice)return;
+     if(choice==='nested'){const tableHtml=!model&&!internalTable?safeTableHtml(html,spec):null;await mutate(expected,w=>model?pasteHancomTableInCell(w,expected,model):internalTable?pasteInternalTableInCell(w,expected):pasteHtmlTableInCell(w,expected,tableHtml,spec));enableNestedClipping?.();notice('셀 안에 표를 넣었습니다. 실행 취소 한 번으로 되돌릴 수 있습니다.');return;}
+     if(!spec)spec=tableFromClipboardHtml(html)||tableFromClipboardText(text);if(!spec)throw Error('기존 셀에 붙일 표 내용을 확인하지 못했습니다.');
+    }
+    if(parseError&&!spec)throw parseError;
     if(spec){await apply(spec,expected);notice('표·셀 붙여넣기를 완료했습니다. 실행 취소 한 번으로 되돌릴 수 있습니다.');}
     else{bypass=true;try{event.target.dispatchEvent(new ClipboardEvent('paste',{clipboardData:data,bubbles:true,cancelable:true}));}finally{bypass=false;}}
-   }catch(error){notice('표·셀 붙여넣기: '+error.message);}
+   }catch(error){notice('표·셀 붙여넣기: '+error.message,true);}
   })();
  },true);
  window.addEventListener('pwh-import-native-table',()=>{
   const expected=structuredClone(read());
-  void(async()=>{try{const data=await nativeRead();if(expected.cursor?.parentParaIndex==null&&hasHancomModel(data.html)){const current=read();if(JSON.stringify(current.documentState)!==JSON.stringify(expected.documentState)||JSON.stringify(current.cursor)!==JSON.stringify(expected.cursor))throw Error('문서나 커서가 변경되어 붙여넣기를 취소했습니다.');const transfer=new DataTransfer();transfer.setData('text/html',data.html);transfer.setData('text/plain',data.text);const target=document.querySelector('[aria-label="문서 편집 입력"]');if(!target)throw Error('문서 입력 위치를 찾지 못했습니다.');bypass=true;try{target.dispatchEvent(new ClipboardEvent('paste',{clipboardData:transfer,bubbles:true,cancelable:true}));}finally{bypass=false;}return;}const spec=tableFromClipboardHtml(data.html)||tableFromClipboardText(data.text);if(!spec)throw Error('클립보드에서 표 구조를 찾지 못했습니다. 한글에서 표 또는 셀을 다시 복사하거나 원본 HWPX를 열어 주세요.');await apply(spec,expected);notice('한글 표·셀을 가져왔습니다.');}catch(error){notice(error.message);}})();
+  void(async()=>{try{
+   const data=await nativeRead(),inCell=expected.cursor?.parentParaIndex!=null;
+   if(!inCell&&hasHancomModel(data.html)){
+    const current=read();if(JSON.stringify(current.documentState)!==JSON.stringify(expected.documentState)||JSON.stringify(current.cursor)!==JSON.stringify(expected.cursor))throw Error('문서나 커서가 변경되어 붙여넣기를 취소했습니다.');
+    const transfer=new DataTransfer();transfer.setData('text/html',data.html);transfer.setData('text/plain',data.text);const target=document.querySelector('[aria-label="문서 편집 입력"]');if(!target)throw Error('문서 입력 위치를 찾지 못했습니다.');
+    bypass=true;try{target.dispatchEvent(new ClipboardEvent('paste',{clipboardData:transfer,bubbles:true,cancelable:true}));}finally{bypass=false;}return;
+   }
+   const model=inCell?extractHancomTableModel(data.html):null;
+   let spec=model?null:tableFromClipboardHtml(data.html)||tableFromClipboardText(data.text);
+   if(inCell&&(model||spec)){
+    const choice=await chooseTablePaste({htmlOnly:!model});if(!choice)return;
+    if(choice==='nested'){const tableHtml=!model?safeTableHtml(data.html,spec):null;await mutate(expected,w=>model?pasteHancomTableInCell(w,expected,model):pasteHtmlTableInCell(w,expected,tableHtml,spec));enableNestedClipping?.();notice('셀 안에 표를 넣었습니다. 실행 취소 한 번으로 되돌릴 수 있습니다.');return;}
+   }
+   if(!spec)spec=tableFromClipboardHtml(data.html)||tableFromClipboardText(data.text);
+   if(!spec)throw Error('클립보드에서 표 구조를 찾지 못했습니다. 한글에서 표 또는 셀을 다시 복사하거나 원본 HWPX를 열어 주세요.');
+   await apply(spec,expected);notice('한글 표·셀을 가져왔습니다.');
+  }catch(error){notice(error.message,true);}})();
  });
  return {copySelected:payload,paste:apply};
 }

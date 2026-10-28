@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {pathToFileURL} from 'node:url';
 import {randomUUID} from 'node:crypto';
-import {applyCellEdits,insertStructuredTable,validateTableSpec,validateCellEdits} from '../src/table-content.mjs';
-import {tableSnapshot,inspectTablePlan,resolveTablePlan} from '../src/table-style.mjs';
+import {applyCellEdits,insertStructuredTable,validateTableSpec,validateCellEdits,addTableTitle} from '../src/table-content.mjs';
+import {tableSnapshot,inspectTablePlan,resolveTablePlan,applyTableStyles} from '../src/table-style.mjs';
 import {editorPoll,editorTableFill,editorTableInsert,editorResult} from '../src/editor-session.mjs';
 
 const spec={rows:3,columns:3,cells:[{row:0,column:0,columnSpan:3,paragraphs:['동물']},...['말','소','돼지','양','염소','토끼'].map((text,i)=>({row:1+Math.floor(i/3),column:i%3,paragraphs:[text]}))]};
@@ -32,10 +32,17 @@ test('real WASM imports merges, fills existing cells, preserves style, reopens, 
 },async()=>{
  const {default:init,HwpDocument}=await import(pathToFileURL(process.env.PWH_CORE_JS));await init({module_or_path:await fs.readFile(process.env.PWH_CORE_WASM)});
  const doc=HwpDocument.createEmpty();doc.createBlankDocument();
+ const wrapped=new Proxy(doc,{get(target,key){if(key==='setCellProperties')return (...args)=>target.setCellProperties(...args.slice(0,-1),JSON.stringify(args.at(-1)));const value=target[key];return typeof value==='function'?value.bind(target):value;}});
  try{
   const before=doc.saveSnapshot(),result=insertStructuredTable(doc,{sectionIndex:0,paragraphIndex:0,charOffset:0},spec),ref=result.source;
   let snapshot=tableSnapshot(doc,ref.sec,ref.ppi,ref.ci);assert.equal(snapshot.cells.length,7);assert.equal(snapshot.cells[0].geometry.colSpan,3);assert.equal(snapshot.cells[1].paragraphs[0].text,'말');
   const inserted=doc.saveSnapshot();
+  const noBorder={Left:{type:0,width:0,color:'#000000'},Right:{type:0,width:0,color:'#000000'},Top:{type:0,width:0,color:'#000000'},Bottom:{type:0,width:0,color:'#000000'}};
+  const titleResult=addTableTitle(wrapped,ref,'동물 목록',noBorder);assert.equal(titleResult.mergedColumns,3);
+  let titled=tableSnapshot(doc,ref.sec,ref.ppi,ref.ci);assert.equal(titled.dimensions.rowCount,4);assert.equal(titled.cells[0].geometry.colSpan,3);assert.equal(titled.cells[0].paragraphs[0].text,'동물 목록');assert.equal(titled.cells[1].paragraphs[0].text,'동물');for(const side of Object.keys(noBorder))assert.equal(titled.cells[0].properties['border'+side].type,0);
+  assert.throws(()=>applyTableStyles(wrapped,{...ref,snapshot:titled},[{cellIndex:2,borders:{Top:{type:2,width:2,color:'#123456'}}}]),/neighbouring merged/);
+  applyTableStyles(wrapped,{...ref,snapshot:titled},[{cellIndex:2,borders:{Right:{type:2,width:2,color:'#123456'}}}]);const edged=tableSnapshot(doc,ref.sec,ref.ppi,ref.ci);assert.equal(edged.cells[2].properties.borderRight.type,2);assert.equal(edged.cells[2].properties.borderRight.color.toLowerCase(),'#123456');assert.equal(edged.cells[3].properties.borderLeft.type,2);assert.deepEqual(edged.cells[1],titled.cells[1]);
+  const titledReopen=new HwpDocument(doc.exportHwpx());try{assert.equal(tableSnapshot(titledReopen,ref.sec,ref.ppi,ref.ci).cells[1].paragraphs[0].text,'동물');}finally{titledReopen.free();}doc.restoreSnapshot(inserted);
   doc.restoreSnapshot(before);assert.equal(JSON.parse(doc.getControls()).filter(c=>c.ctrlId==='tbl').length,0);
   doc.restoreSnapshot(inserted);const baseline=tableSnapshot(doc,ref.sec,ref.ppi,ref.ci);
   const filled=applyCellEdits(doc,ref,[{cellIndex:0,paragraphs:['동물 목록']},{cellIndex:1,paragraphs:['얼룩말 🦓']}]);assert.equal(filled.structurePreserved,true);

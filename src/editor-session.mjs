@@ -86,24 +86,33 @@ export async function editorTableInsert(args){
  const {validateTableSpec}=await import('./table-content.mjs');validateTableSpec(args.table);
  return queueTableCommand(args,{type:'tableInsert',table:structuredClone(args.table)});
 }
+export async function editorTableTitle(args){
+ const current=editorState({sessionId:args.sessionId});
+ if(!current.capabilities.tableTitle)throw Error('제목 행 기능이 있는 새 편집기를 열어 주세요.');
+ if(!args.expected||args.expected.documentState?.documentEpoch!==current.context.documentState?.documentEpoch)throw Error('표 요청이 만료됐습니다.');
+ if(typeof args.title!=='string'||!args.title.trim()||args.title.length>500||/[\r\n\u0000-\u001f\ufffc]/.test(args.title))throw Error('제목은 줄바꿈 없는 1~500자여야 합니다.');
+ if(args.borders!==undefined)(await import('./table-style.mjs')).validateTableStyles([{cellIndex:0,borders:args.borders}],[0]);
+ if(args.expected.target?.kind!=='table_cells'&&(typeof args.planId!=='string'||!Number.isSafeInteger(args.tableIndex)||args.tableIndex<0))throw Error('표를 먼저 분석하세요.');
+ return queueTableCommand(args,{type:'tableTitle',planId:args.planId,tableIndex:args.tableIndex,title:args.title,...(args.borders?{borders:structuredClone(args.borders)}:{})});
+}
 export async function editorTableStyle(args){
  const current=editorState({sessionId:args.sessionId});
  if(!args.expected||args.expected.documentState?.documentEpoch!==current.context.documentState?.documentEpoch)throw Error('Document changed; inspect the current editor');
  const module=await import('./table-style.mjs');
  if(args.styles){
-  if(args.expected.target?.kind!=='table_cells')throw Error('Capture a fresh cell selection before applying cell styles');
-  module.validateTableStyles(args.styles,args.expected.target.cells);
+  if(args.expected.target?.kind!=='table_cells'&&(typeof args.planId!=='string'||!Number.isSafeInteger(args.tableIndex)||args.tableIndex<0))throw Error('Select cells or inspect the target table first');
+  module.validateTableStyles(args.styles,args.expected.target?.kind==='table_cells'?args.expected.target.cells:args.styles.map(s=>s.cellIndex));
  }else{
   if(typeof args.planId!=='string'||!['table','document'].includes(args.scope)||args.scope==='table'&&(!Number.isInteger(args.tableIndex)||args.tableIndex<0))throw Error('Inspect the tables and provide a plan and scope');
   module.validateTheme(args.theme);
   if(args.headerRowsByTable&&Object.entries(args.headerRowsByTable).some(([k,v])=>!/^\d+$/.test(k)||!Number.isInteger(v)||v<0||v>10))throw Error('Invalid header row overrides');
  }
- return queueTableCommand(args,{type:'tableStyle',...(args.styles?{styles:structuredClone(args.styles)}:{planId:args.planId,scope:args.scope,tableIndex:args.tableIndex,theme:structuredClone(args.theme),headerRowsByTable:structuredClone(args.headerRowsByTable||{})})});
+ return queueTableCommand(args,{type:'tableStyle',...(args.styles?{styles:structuredClone(args.styles),planId:args.planId,tableIndex:args.tableIndex}:{planId:args.planId,scope:args.scope,tableIndex:args.tableIndex,theme:structuredClone(args.theme),headerRowsByTable:structuredClone(args.headerRowsByTable||{})})});
 }
 function queueTableCommand(args,command){
  const ticketId=randomUUID(),ticket={ticketId,sessionId:args.sessionId,status:'pending',createdAt:Date.now()};
  const requestId=args.requestId||args.expected.target?.requestId;
- if(requestId){const request=requests.get(requestId);if(!request||request.sessionId!==args.sessionId)throw Error('Unknown request for this editor');if(['tableStyle','tableFill','tableInsert'].includes(command.type)){ticket.requestId=requestId;request.status='queued';}}
+ if(requestId){const request=requests.get(requestId);if(!request||request.sessionId!==args.sessionId)throw Error('Unknown request for this editor');if(['tableStyle','tableFill','tableInsert','tableTitle'].includes(command.type)){ticket.requestId=requestId;request.status='queued';}}
  tickets.set(ticketId,ticket);if(tickets.size>128)tickets.delete(tickets.keys().next().value);
  sessions.get(args.sessionId).commands.push({ticketId,expected:structuredClone(args.expected),...command});return ticket;
 }

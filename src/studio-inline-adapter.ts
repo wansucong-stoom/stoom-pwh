@@ -3,9 +3,12 @@ import {captureTarget,resolveTarget} from './pwh-collaboration-target';
 import {pictureTarget,replaceSelectedPicture} from './pwh-picture-replace';
 import {applyLayout} from './pwh-page-layout';
 import {blankBody,composeBlankBody} from './pwh-blank-compose';
-import {applyCellEdits,prepareCellEdits,insertStructuredTable} from './pwh-table-content.mjs';
+import {applyCellEdits,prepareCellEdits,insertStructuredTable,addTableTitle} from './pwh-table-content.mjs';
 import {sameRequestContext} from './pwh-request-state.mjs';
 import {installTableClipboard} from './pwh-table-clipboard.mjs';
+import {chooseTablePaste} from './pwh-table-paste-dialog';
+import {userSettings} from './core/user-settings';
+import {showToast} from './ui/toast';
 import { replaceTextWithMutationEffects } from './engine/command';
 import { installSelectionBridge } from './collaboration-selection';
 
@@ -21,7 +24,7 @@ export function installInlineEditor(d:any) {
   execute:requestAI
  });
  let applying=false;
- void d.ready.then(()=>installTableClipboard({wasm:d.wasm,read:()=>read(),getInput:()=>d.getInputHandler(),notice:(message:string)=>{window.dispatchEvent(new CustomEvent('pwh-status',{detail:message}));},nativeRead:async()=>{const fn=(window as any).pwhReadNativeClipboard;if(!fn)throw Error('새 버전의 편집기 연결이 필요합니다.');return fn();},mutate:async(expected:any,operation:any)=>{
+ void d.ready.then(()=>installTableClipboard({wasm:d.wasm,read:()=>read(),getInput:()=>d.getInputHandler(),chooseTablePaste,enableNestedClipping:()=>{if(userSettings.getViewSettings().clipView)(document.querySelector('[data-cmd="view:toggle-clip"]') as HTMLElement|null)?.click();},notice:(message:string,isError=false)=>{window.dispatchEvent(new CustomEvent('pwh-status',{detail:message}));if(isError||/^(셀 안에 표를 넣었습니다|표·셀 붙여넣기를 완료|한글 표·셀을 가져왔습니다)/.test(message))showToast({message,durationMs:isError?12000:3500});},nativeRead:async()=>{const fn=(window as any).pwhReadNativeClipboard;if(!fn)throw Error('새 버전의 편집기 연결이 필요합니다.');return fn();},mutate:async(expected:any,operation:any)=>{
   if(applying)throw Error('Another edit is being applied');applying=true;
   try{if(!sameRequestContext(read(),expected))throw Error('붙여넣는 동안 문서 또는 커서가 바뀌었습니다. 다시 붙여넣으세요.');const input=d.getInputHandler(),cursor=input.getCursorPosition();await input.executeDocumentAgentOperation({kind:'snapshot',operationType:'pwh-table-clipboard',operation:(w:any)=>{operation(w);return cursor;}},()=>d.getCanvasView().refreshDocumentAgentMutation());}finally{applying=false;}
  }}));
@@ -107,9 +110,19 @@ export function installInlineEditor(d:any) {
    }finally{applying=false;}
    return {ok:true,changes,undoSteps:1,context:read()};
   },
+  async tableTitle(command:any){
+   if(applying)throw Error('Another edit is being applied');applying=true;let changes:any;
+   try{const current=read();let ref:any;
+    if(command.expected.target?.kind==='table_cells')ref=await resolveTableTarget(d.wasm,command.expected.target,current);
+    else{const plan=tablePlans.get(command.planId);if(!plan)throw Error('표를 다시 분석하세요.');[ref]=await resolveTablePlan(d.wasm,plan,current,'table',command.tableIndex);}
+    const input=d.getInputHandler(),cursor=input.getCursorPosition();
+    await input.executeDocumentAgentOperation({kind:'snapshot',operationType:'pwh-table-title',operation:(wasm:any)=>{changes=addTableTitle(wasm,ref,command.title,command.borders);return cursor;}},()=>d.getCanvasView().refreshDocumentAgentMutation());
+   }finally{applying=false;}
+   return {ok:true,changes,undoSteps:1,context:read()};
+  },
   async tableStyle(command:any){
    const before:any=read(),input=d.getInputHandler(),cursor=input.getCursorPosition();let refs:any[],styles:any[],changes:any[]=[];
-   if(command.styles){const ref=await resolveTableTarget(d.wasm,command.expected.target,before);refs=[ref];styles=[command.styles];}
+   if(command.styles){let ref:any;if(command.expected.target?.kind==='table_cells')ref=await resolveTableTarget(d.wasm,command.expected.target,before);else{const plan=tablePlans.get(command.planId);if(!plan)throw Error('Inspect the table again');[ref]=await resolveTablePlan(d.wasm,plan,before,'table',command.tableIndex);}refs=[ref];styles=[command.styles];}
    else{const plan=tablePlans.get(command.planId);if(!plan)throw Error('Table plan expired; inspect tables again');refs=await resolveTablePlan(d.wasm,plan,before,command.scope,command.tableIndex);styles=refs.map((ref:any,i:number)=>stylesForTheme(ref,command.theme,command.headerRowsByTable?.[command.scope==='document'?i:command.tableIndex]??command.theme.headerRows));}
    if(applying)throw Error('Another edit is being applied');applying=true;
    try{await input.executeDocumentAgentOperation({kind:'snapshot',operationType:'pwh-table-style',operation:(wasm:any)=>{for(let i=0;i<refs.length;i++)changes.push({...applyTableStyles(wasm,refs[i],styles[i]),section:refs[i].sec,paragraph:refs[i].ppi});return cursor;}},()=>d.getCanvasView().refreshDocumentAgentMutation());}finally{applying=false;}

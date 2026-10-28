@@ -1,4 +1,4 @@
-import {tableSnapshot} from './table-style.mjs';
+import {tableSnapshot,applyTableStyles,validateTableStyles} from './table-style.mjs';
 import {sameRequestValue} from './request-state.mjs';
 const parsed=v=>typeof v==='string'?JSON.parse(v):v;
 const check=v=>{const r=parsed(v);if(r?.ok!==true)throw Error('Table operation failed');return r;};
@@ -55,6 +55,28 @@ export function applyCellEdits(w,ref,edits,allowed){
   }
  }
  return {cellCount:edits.length,cellIndices:edits.map(e=>e.cellIndex),structurePreserved:true};
+}
+
+// Insert a new title row rather than merging and destroying existing headers.
+// Call inside an editor snapshot transaction so a rejected verification rolls back.
+export function addTableTitle(w,ref,title,borders){
+ if(typeof title!=='string'||!title.trim()||title.length>500||!validText(title))throw Error('표 제목은 줄바꿈 없는 1~500자로 입력하세요.');
+ if(borders!==undefined)validateTableStyles([{cellIndex:0,borders}],[0]);
+ const {sec,ppi,ci}=ref,before=tableSnapshot(w,sec,ppi,ci),dims=before.dimensions;
+ if(!dims.rowCount||!dims.colCount||dims.rowCount>=256||(dims.rowCount+1)*dims.colCount>256)throw Error('제목 행을 추가할 수 없는 표 크기입니다.');
+ // An existing vertical merge crossing the first row could be changed by insertion.
+ if(before.cells.some(c=>c.geometry.row===0&&c.geometry.rowSpan>1))throw Error('첫 행에 세로 병합 셀이 있어 자동으로 제목을 추가할 수 없습니다.');
+ check(w.insertTableRow(sec,ppi,ci,0,false));
+ if(dims.colCount>1)check(w.mergeTableCells(sec,ppi,ci,0,0,0,dims.colCount-1));
+ let after=tableSnapshot(w,sec,ppi,ci),head=after.cells.findIndex(c=>c.geometry.row===0&&c.geometry.col===0);
+ if(head<0||after.cells[head].geometry.colSpan!==dims.colCount||after.dimensions.rowCount!==dims.rowCount+1||after.dimensions.colCount!==dims.colCount)throw Error('제목 행의 구조를 확인하지 못했습니다.');
+ for(const old of before.cells){const g=old.geometry,now=after.cells.find(c=>c.geometry.row===g.row+1&&c.geometry.col===g.col);const stable=c=>{const {height,...p}=c.properties;return p;};if(!now||now.geometry.rowSpan!==g.rowSpan||now.geometry.colSpan!==g.colSpan||!sameRequestValue(now.paragraphs,old.paragraphs)||!sameRequestValue(stable(now),stable(old)))throw Error('기존 표 내용이나 구조·서식이 변경되었습니다.');}
+ if(after.cells[head].paragraphs.length!==1||after.cells[head].paragraphs[0].text)throw Error('새 제목 셀이 비어 있지 않습니다.');
+ applyCellEdits(w,{sec,ppi,ci},[{cellIndex:head,paragraphs:[title]}]);
+ if(borders!==undefined)applyTableStyles(w,{sec,ppi,ci,snapshot:tableSnapshot(w,sec,ppi,ci)},[{cellIndex:head,borders}]);
+ after=tableSnapshot(w,sec,ppi,ci);
+ if(after.cells[head].paragraphs[0].text!==title)throw Error('표 제목을 확인하지 못했습니다.');
+ return {source:{sec,ppi,ci},title,rowsAdded:1,mergedColumns:dims.colCount,originalCellsPreserved:before.cells.length,...(borders?{bordersApplied:borders}:{})};
 }
 
 // Explicit cell coordinates represent merged tables without placeholder strings.

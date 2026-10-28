@@ -1,10 +1,10 @@
 {
   "kind": "studio-inline",
-  "version": "0.6.20",
+  "version": "0.6.26",
   "upstreamVersion": "0.8.7",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "files": {
-    "editor.js": "2f3aec844a896f0bbb67a24ac7dad1174e2bb0b836cb1b499eb5f79b3b938ea9",
+    "editor.js": "8d0879e8a7455a23eeb8eebd4bdcda6ad96b308f0ebfab1a67a9a3411a9a5066",
     "rhwp-studio.css": "8b997d135e0c71dad90fa671c428451e07512fc1aa06ddadfb93fe4a406840be",
     "editor-body.html": "afc04317043d01ef99fb91eb9bce88723fac82491bf42473e4b30436e5066ceb"
   }

@@ -51,18 +51,31 @@ export function validateTableStyles(styles,cells){
   seen.add(s.cellIndex);
   for(const k of ['fillColor','textColor','borderColor'])if(s[k]!==undefined&&!color(s[k]))throw Error('Use #RRGGBB colors');
   if(s.fontFamily!==undefined&&(typeof s.fontFamily!=='string'||!s.fontFamily.trim()||s.fontFamily.length>100)||s.fontSize!==undefined&&(!Number.isFinite(s.fontSize)||s.fontSize<600||s.fontSize>7200))throw Error('Invalid font');
-  if(s.borders!==undefined){for(const [side,b]of Object.entries(s.borders)){if(!['Left','Right','Top','Bottom'].includes(side)||!b||!color(b.color)||![0,1,2,3].includes(b.type)||!Number.isInteger(b.width)||b.width<0||b.width>6)throw Error('Invalid border');}}
+  if(s.borders!==undefined){if(!s.borders||typeof s.borders!=='object'||Array.isArray(s.borders)||!Object.keys(s.borders).length)throw Error('Specify at least one border');for(const [side,b]of Object.entries(s.borders)){if(!['Left','Right','Top','Bottom'].includes(side)||!b||Object.keys(b).some(k=>!['color','type','width'].includes(k))||!color(b.color)||![0,1,2,3].includes(b.type)||!Number.isInteger(b.width)||b.width<0||b.width>6)throw Error('Invalid border');}}
   if(s.bold!==undefined&&typeof s.bold!=='boolean'||s.alignment!==undefined&&!['left','center','right','justify'].includes(s.alignment)||s.borderWidth!==undefined&&(!Number.isInteger(s.borderWidth)||s.borderWidth<0||s.borderWidth>6||!s.borderColor))throw Error('Invalid cell style');
  }
 }
 function checked(value){if(parsed(value)?.ok===false)throw Error('Cell style operation failed');}
 export function applyTableStyles(w,ref,styles){
  validateTableStyles(styles,styles.map(s=>s.cellIndex));const {sec,ppi,ci,snapshot}=ref;
+ // A physical edge is shared with neighbouring cells. The engine synchronizes
+ // its opposite side; allow only that exact adjacent edge to change.
+ const shared=new Map(),opposite={Left:'Right',Right:'Left',Top:'Bottom',Bottom:'Top'};
+ for(const s of styles){const g=snapshot.cells[s.cellIndex]?.geometry;if(!g)throw Error('Cell index out of range');const requested={...(s.borderColor?Object.fromEntries(['Left','Right','Top','Bottom'].map(side=>[side,{type:1,width:s.borderWidth??1,color:s.borderColor}])):{}),...(s.borders||{})};
+  for(const [side,b] of Object.entries(requested))for(let i=0;i<snapshot.cells.length;i++){if(i===s.cellIndex)continue;const n=snapshot.cells[i].geometry;const rowOverlap=g.row<n.row+n.rowSpan&&n.row<g.row+g.rowSpan,colOverlap=g.col<n.col+n.colSpan&&n.col<g.col+g.colSpan;
+   const adjacent=side==='Left'?n.col+n.colSpan===g.col&&rowOverlap:side==='Right'?g.col+g.colSpan===n.col&&rowOverlap:side==='Top'?n.row+n.rowSpan===g.row&&colOverlap:g.row+g.rowSpan===n.row&&colOverlap;
+   if(adjacent){const covered=side==='Left'||side==='Right'?g.row<=n.row&&g.row+g.rowSpan>=n.row+n.rowSpan:g.col<=n.col&&g.col+g.colSpan>=n.col+n.colSpan;if(!covered)throw Error('A neighbouring merged cell extends beyond the requested edge');const key=i+':'+opposite[side],prior=shared.get(key);if(prior&&!equal(prior,b))throw Error('Conflicting borders on a shared edge');shared.set(key,b);}
+  }
+ }
+ for(const s of styles)for(const [side,b] of Object.entries(s.borders||{})){const neighbour=shared.get(s.cellIndex+':'+side);if(neighbour&&!equal(neighbour,b))throw Error('Conflicting borders on a shared edge');}
  for(const s of styles){
   const cell=snapshot.cells[s.cellIndex];if(!cell)throw Error('Cell index out of range');
   const props={};if(s.fillColor)Object.assign(props,{fillType:'solid',fillColor:s.fillColor});
   if(s.borderColor)for(const side of ['Left','Right','Top','Bottom'])props['border'+side]={type:1,width:s.borderWidth??1,color:s.borderColor};
   for(const [side,border]of Object.entries(s.borders||{}))props['border'+side]=border;
+  // The pinned core recognizes edits through borderLeft and normalizes omitted
+  // sides; send the existing values for all sides that were not requested.
+  if(s.borders||s.fillColor)for(const side of ['Left','Right','Top','Bottom'])if(!props['border'+side])props['border'+side]=cell.properties['border'+side];
   if(Object.keys(props).length)checked(w.setCellProperties(sec,ppi,ci,s.cellIndex,props));
   for(let p=0;p<cell.paragraphs.length;p++){
    const para=cell.paragraphs[p],char={};for(const key of ['textColor','bold','fontSize'])if(s[key]!==undefined)char[key]=s[key];
@@ -77,6 +90,10 @@ export function applyTableStyles(w,ref,styles){
  for(let c=0;c<snapshot.cells.length;c++){
   const before=snapshot.cells[c],actual=after.cells[c],style=styles.find(s=>s.cellIndex===c);
   if(!equal(before.paragraphs.map(p=>p.text),actual.paragraphs.map(p=>p.text))||before.properties.width!==actual.properties.width)throw Error('Cell content or width changed');
+  if(!equal(before.geometry,actual.geometry))throw Error('Cell geometry changed');
+  if(!style){const strip=cell=>{const p={...cell.properties};delete p.borderFillId;delete p.height;for(const side of ['Left','Right','Top','Bottom'])if(shared.has(c+':'+side))delete p['border'+side];return {geometry:cell.geometry,properties:p,paragraphs:cell.paragraphs};};if(!equal(strip(before),strip(actual)))throw Error('Unselected cell changed outside a shared border');}
+  for(const side of ['Left','Right','Top','Bottom']){const b=shared.get(c+':'+side),got=actual.properties['border'+side];if(b&&(got?.type!==b.type||b.type!==0&&(got.width!==b.width||got.color.toLowerCase()!==b.color.toLowerCase())))throw Error('Shared border verification failed');}
+  if(style){for(const side of ['Left','Right','Top','Bottom'])if(!style.borderColor&&!Object.hasOwn(style.borders||{},side)&&!shared.has(c+':'+side)&&!equal(before.properties['border'+side],actual.properties['border'+side]))throw Error('Unrequested border changed');}
   if(style?.fillColor&&actual.properties.fillColor.toLowerCase()!==style.fillColor.toLowerCase())throw Error('Cell fill verification failed');
   for(const [side,border]of Object.entries(style?.borders||{})){
    const got=actual.properties['border'+side];
