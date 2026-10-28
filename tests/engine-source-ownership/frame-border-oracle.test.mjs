@@ -1,0 +1,8 @@
+import test from 'node:test';import assert from 'node:assert/strict';import{physicalFrameBorders}from'./frame-border-oracle.mjs';
+const skip=process.env.PWH_PLAYWRIGHT_MODULE?false:'Set PWH_PLAYWRIGHT_MODULE to run SVG physical-border oracle tests.';
+async function withPage(run){const{chromium}=await import(process.env.PWH_PLAYWRIGHT_MODULE),browser=await chromium.launch({headless:true,executablePath:process.env.PWH_BROWSER_EXECUTABLE});try{await run(await browser.newPage());}finally{await browser.close();}}
+const svg=edges=>`<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><defs><clipPath id="body"><rect width="120" height="120"/></clipPath><clipPath id="cell"><rect width="100" height="100"/></clipPath></defs><g clip-path="url(#body)">${edges}</g></svg>`;
+const line=y=>`<line x1="0" x2="100" y1="${y}" y2="${y}" stroke="black"/>`;
+test('physical border oracle detects a lower child stroke despite an expanded parent bbox',{skip},()=>withPage(async page=>{const result=await physicalFrameBorders(page,svg(line(0)+line(80)+`<g clip-path="url(#cell)">${line(90)}</g>`),{x:0,y:0,w:100,h:100});assert.equal(result.known,true);assert.equal(result.bottom,80);assert.ok(90>result.bottom);}));
+test('physical border oracle accepts merged row strokes at the parent table scope',{skip},()=>withPage(async page=>{const result=await physicalFrameBorders(page,svg(line(0)+line(80)),{x:20,y:0,w:40,h:100},0.6,{x:0,y:0,w:100,h:100});assert.equal(result.known,true);assert.equal(result.bottom,80);assert.equal(result.top,0);}));
+test('physical border oracle reports an incomplete visible parent frame as unknown',{skip},()=>withPage(async page=>{const result=await physicalFrameBorders(page,svg(line(0)),{x:0,y:0,w:100,h:100});assert.equal(result.known,false);}));

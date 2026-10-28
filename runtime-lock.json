@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "id": "rhwp-0.8.7-pwh-r3",
+  "id": "rhwp-0.8.7-pwh-r4",
   "platform": "win32-x64",
   "upstreamVersion": "0.8.7",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
-  "releaseTag": "engine-rhwp-0.8.7-pwh-r3",
+  "releaseTag": "engine-rhwp-0.8.7-pwh-r4",
   "runtime": {
-    "file": "pwh-runtime-rhwp-0.8.7-pwh-r3-windows-x64.zip",
-    "size": 40839324,
-    "sha256": "0c7fd9ba142c5eac8357f8f6815d3bc06ce8a102fc7b5ed6d595da6311311601",
-    "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r3/pwh-runtime-rhwp-0.8.7-pwh-r3-windows-x64.zip"
+    "file": "pwh-runtime-rhwp-0.8.7-pwh-r4-windows-x64.zip",
+    "size": 40878445,
+    "sha256": "b10a483ab4b48fef098ecc70cb28cafde00b965fed88cf3cd386ca0a67ed9029",
+    "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r4/pwh-runtime-rhwp-0.8.7-pwh-r4-windows-x64.zip"
   },
   "preservationAssets": [
     {
@@ -103,10 +103,22 @@
       "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r3/pwh-core-patches-rhwp-0.8.7-pwh-r3.zip"
     },
     {
+      "file": "pwh-core-patches-rhwp-0.8.7-pwh-r4.zip",
+      "size": 77671,
+      "sha256": "8160afa6cb5fe821ca4ce09b230169d09cd7b0e3cc9ca2116f42a613ad3bc2eb",
+      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r4/pwh-core-patches-rhwp-0.8.7-pwh-r4.zip"
+    },
+    {
+      "file": "pwh-inline-build-inputs-rhwp-0.8.7-pwh-r4.zip",
+      "size": 1902172,
+      "sha256": "52c74b82874b509732a026bb167e036b7c62f0c20e239c788f37d2cafa0504b7",
+      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r4/pwh-inline-build-inputs-rhwp-0.8.7-pwh-r4.zip"
+    },
+    {
       "file": "VERIFICATION.json",
-      "size": 1125,
-      "sha256": "8cfc7e59cfb1f47dc2756b73738bcd717735216eebba84ef129408452a5dd8d3",
-      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r3/VERIFICATION.json"
+      "size": 4746,
+      "sha256": "00ecb121a3822b66537871ba5c378d65bc7e368f12ff7f54d04d8dfa2bb07937",
+      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r4/VERIFICATION.json"
     }
   ]
 }

@@ -43,6 +43,22 @@ const patches = [
       },
     ],
   },
+  {
+    "file": "rhwp-0.8.7-nested-source-ownership.patch",
+    "sha256": "346e2885cb5720574515167db94448f256e5d210d729ee63e2c0ac732e5b2a96",
+    "sources": [
+      {
+        "path": "src/renderer/layout/table_layout.rs",
+        "originalSha256": "c3df908c978e4aef7876b555c4a4c7b85749587194b4755d43e4c5ae9c67c238",
+        "patchedSha256": "7f294df11f7dc48611cdcfbf8a7fa813763778dd9c4573cd619c06bc4c26990a"
+      },
+      {
+        "path": "src/renderer/layout/table_partial.rs",
+        "originalSha256": "9e0a4d66d00906d4c949481088dba04d81d1f04ac1091b09188d65a9140ddeab",
+        "patchedSha256": "cebac7b673a9c051bf31e64bcc6d2310f669b74a97bfd6351d663a9cc5b452d6"
+      }
+    ]
+  },
 ];
 const help = `Usage: node scripts/build-patched-core.mjs
   --source-archive <fixed upstream source ZIP>
@@ -140,7 +156,9 @@ with ZipFile(archive) as z:
     z.extractall(destination)
 `;
 await run(python, ['-c', extract, archive, sourceRoot]);
-const applyArgs = ['-c', 'core.autocrlf=false', '-c', 'core.eol=lf', 'apply'];
+// A source snapshot may sit below another Git worktree. Make its working tree
+// explicit so Git cannot silently skip diff paths outside the parent's prefix.
+const applyArgs = ['--work-tree=.', '-c', 'core.autocrlf=false', '-c', 'core.eol=lf', 'apply'];
 for (const patch of patches) {
   const patchFile = path.join(repoRoot, 'docs/engine-patches', patch.file);
   for (const source of patch.sources) {

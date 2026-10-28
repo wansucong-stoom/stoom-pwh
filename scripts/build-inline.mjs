@@ -120,6 +120,7 @@ if(keyboard.includes(oldImageGate)){
 }
 await fs.copyFile(new URL('../src/table-style.mjs',import.meta.url),path.join(studio,'src/pwh-table-style.mjs'));
 await fs.copyFile(new URL('../src/table-content.mjs',import.meta.url),path.join(studio,'src/pwh-table-content.mjs'));
+await fs.copyFile(new URL('../src/text-edit.mjs',import.meta.url),path.join(studio,'src/pwh-text-edit.mjs'));
 await fs.copyFile(new URL('../src/request-state.mjs',import.meta.url),path.join(studio,'src/pwh-request-state.mjs'));
 await fs.copyFile(new URL('../src/table-clipboard.mjs',import.meta.url),path.join(studio,'src/pwh-table-clipboard.mjs'));
 await fs.copyFile(new URL('../src/nested-table-paste.mjs',import.meta.url),path.join(studio,'src/pwh-nested-table-paste.mjs'));

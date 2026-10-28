@@ -5,6 +5,7 @@ import {applyLayout} from './pwh-page-layout';
 import {blankBody,composeBlankBody} from './pwh-blank-compose';
 import {applyCellEdits,prepareCellEdits,insertStructuredTable,addTableTitle} from './pwh-table-content.mjs';
 import {sameRequestContext} from './pwh-request-state.mjs';
+import {createTextSearchPlan,prepareTextEdits,applyTextEdits,textEditCursor} from './pwh-text-edit.mjs';
 import {installTableClipboard} from './pwh-table-clipboard.mjs';
 import {chooseTablePaste} from './pwh-table-paste-dialog';
 import {userSettings} from './core/user-settings';
@@ -15,6 +16,7 @@ import { installSelectionBridge } from './collaboration-selection';
 export function installInlineEditor(d:any) {
  const bridge=installSelectionBridge(d);
  const tablePlans=new Map<string,any>();
+ const textPlans=new Map<string,any>();
  const read=(fresh=true)=>{const c:any=bridge.getSelectionContext({fresh});return {...c,blankDocument:!!c.ready&&blankBody(d.wasm),requestScope:c.kind==='cell_block'&&c.table?.selectedCells?.length?'selection':c.selection&&c.selectedText?.text?'selection':c.kind==='object'?'object':'document',pageSettings:c.ready?Array.from({length:Math.min(d.wasm.getSectionCount(),32)},(_,i)=>({sectionIndex:i,...d.wasm.getPageDef(i)})):[]};};
  const availability=()=>{const input=d.getInputHandler();return {ready:!!input&&d.wasm.pageCount>0,requestScope:input?.isInPictureObjectSelection()?'object':input?.getSelection()||input?.isInCellSelectionMode()?'selection':'document'};};
  const canRequest=(c:any)=>!!c?.ready;
@@ -89,6 +91,23 @@ export function installInlineEditor(d:any) {
    const plan=await inspectTablePlan(d.wasm,current),planId=crypto.randomUUID();
    tablePlans.set(planId,plan);if(tablePlans.size>8)tablePlans.delete(tablePlans.keys().next().value);
    return {ok:true,tablePlan:{planId,unsupportedTables:plan.unsupported,tables:plan.refs.map((r:any,index:number)=>({index,source:{sec:r.sec,ppi:r.ppi,ci:r.ci},dimensions:r.snapshot.dimensions,cells:r.snapshot.cells.map((c:any,cellIndex:number)=>({cellIndex,...c.geometry,paragraphs:c.paragraphs.map((p:any)=>p.text)})),headerRows:r.snapshot.cells.filter((c:any)=>c.properties.isHeader).map((c:any)=>c.geometry.row),sample:r.snapshot.cells.slice(0,4).map((c:any)=>c.paragraphs.map((p:any)=>p.text).join(' ').slice(0,160)),theme:themeFromTable(r)}))}};
+  },
+  async textSearch(command:any){
+   const current=read();
+   if(!current.ready||current.documentState.documentEpoch!==command.expected.documentState?.documentEpoch)throw Error('텍스트 검색 요청이 만료되었습니다.');
+   const plan=createTextSearchPlan(d.wasm,current,command.query,{cursor:command.cursor,limit:command.limit}),searchId=crypto.randomUUID();
+   textPlans.set(searchId,plan);if(textPlans.size>24)textPlans.delete(textPlans.keys().next().value);
+   return {ok:true,textSearch:{searchId,...plan.result,documentState:current.documentState}};
+  },
+  async textEdit(command:any){
+   if(applying)throw Error('이전 수정 적용 중입니다.');applying=true;
+   const input=d.getInputHandler(),cursor=input.getCursorPosition();let changes:any;
+   try{
+    const prepared=prepareTextEdits(d.wasm,textPlans,command.edits,read());
+    await input.executeDocumentAgentOperation({kind:'snapshot',operationType:'pwh-text-edit',operation:(wasm:any)=>{changes=applyTextEdits(wasm,prepared,replaceTextWithMutationEffects);return textEditCursor(prepared,cursor);}},()=>d.getCanvasView().refreshDocumentAgentMutation());
+    textPlans.clear();
+   }finally{applying=false;}
+   return {ok:true,changes,context:read(),undoSteps:1};
   },
   async tableFill(command:any){
    if(applying)throw Error('Another edit is being applied');applying=true;

@@ -70,6 +70,20 @@ export function editorTables(args){
  if(!args.expected||args.expected.documentState?.documentEpoch!==current.context.documentState?.documentEpoch)throw Error('Document changed; inspect the current editor');
  return queueTableCommand(args,{type:'tables'});
 }
+export function editorTextSearch(args){
+ const current=editorState({sessionId:args.sessionId});
+ if(!current.capabilities.textEdit)throw Error('텍스트 검색·수정을 지원하는 새 편집기를 열어 주세요.');
+ if(!args.expected||args.expected.documentState?.documentEpoch!==current.context.documentState?.documentEpoch)throw Error('문서가 다시 열렸습니다. 최신 상태를 읽으세요.');
+ if(typeof args.query!=='string'||!args.query.length||args.query.length>12000||/[\r\n\u0000-\u0008\u000b-\u001f\ufffc]/.test(args.query)||args.cursor!==undefined&&(!Number.isSafeInteger(args.cursor)||args.cursor<0)||args.limit!==undefined&&(!Number.isSafeInteger(args.limit)||args.limit<1||args.limit>100))throw Error('텍스트 검색어와 범위를 확인하세요.');
+ return queueTableCommand(args,{type:'textSearch',query:args.query,...(args.cursor===undefined?{}:{cursor:args.cursor}),...(args.limit===undefined?{}:{limit:args.limit})});
+}
+export function editorTextEdit(args){
+ const current=editorState({sessionId:args.sessionId});
+ if(!current.capabilities.textEdit)throw Error('텍스트 검색·수정을 지원하는 새 편집기를 열어 주세요.');
+ if(!args.expected||args.expected.documentState?.documentEpoch!==current.context.documentState?.documentEpoch)throw Error('문서가 다시 열렸습니다. 최신 상태를 읽으세요.');
+ if(!Array.isArray(args.edits)||!args.edits.length||args.edits.length>100||JSON.stringify(args.edits).length>160000||args.edits.some(e=>!e||typeof e.searchId!=='string'||typeof e.matchId!=='string'||typeof e.replacement!=='string'||e.replacement.length>12000||/[\r\n\u0000-\u0008\u000b-\u001f\ufffc]/.test(e.replacement)))throw Error('수정할 검색 결과와 텍스트를 확인하세요.');
+ return queueTableCommand(args,{type:'textEdit',edits:structuredClone(args.edits)});
+}
 export async function editorTableFill(args){
  const current=editorState({sessionId:args.sessionId});
  if(!current.capabilities.tableContent)throw Error('Reopen the updated editor to enable table content editing');
@@ -112,7 +126,7 @@ export async function editorTableStyle(args){
 function queueTableCommand(args,command){
  const ticketId=randomUUID(),ticket={ticketId,sessionId:args.sessionId,status:'pending',createdAt:Date.now()};
  const requestId=args.requestId||args.expected.target?.requestId;
- if(requestId){const request=requests.get(requestId);if(!request||request.sessionId!==args.sessionId)throw Error('Unknown request for this editor');if(['tableStyle','tableFill','tableInsert','tableTitle'].includes(command.type)){ticket.requestId=requestId;request.status='queued';}}
+ if(requestId){const request=requests.get(requestId);if(!request||request.sessionId!==args.sessionId)throw Error('Unknown request for this editor');if(['tableStyle','tableFill','tableInsert','tableTitle','textEdit'].includes(command.type)){ticket.requestId=requestId;request.status='queued';}}
  tickets.set(ticketId,ticket);if(tickets.size>128)tickets.delete(tickets.keys().next().value);
  sessions.get(args.sessionId).commands.push({ticketId,expected:structuredClone(args.expected),...command});return ticket;
 }

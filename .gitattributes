@@ -7,3 +7,6 @@
 *.patch text eol=lf
 *.ps1 text eol=crlf
 client/** text eol=lf
+
+# Desktop source preservation manifest hashes original bytes.
+desktop/** -text
