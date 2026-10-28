@@ -1,0 +1,534 @@
+diff --git a/src/renderer/layout/table_layout.rs b/src/renderer/layout/table_layout.rs
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -1785,6 +1785,28 @@
+                 .is_none_or(|owned| owned)
+         })
+     }
++}
++
++/// A projected nested table owns only its nested atoms, not every text line in
++/// the same source paragraph. None preserves legacy atomic-table handling.
++fn projected_table_owner_in_cut(
++    units: &[CellUnit],
++    para_idx: usize,
++    start: usize,
++    end: usize,
++) -> Option<bool> {
++    let is_table_atom = |unit: &CellUnit| {
++        unit.para_idx == para_idx
++            && (unit.nested_row.is_some()
++                || unit.nested_table_fragment.is_some()
++                || unit.mixed_nested_fragment)
++    };
++    if !units.iter().any(&is_table_atom) {
++        return None;
++    }
++    let start = start.min(units.len());
++    let end = end.min(units.len()).max(start);
++    Some(units[start..end].iter().any(is_table_atom))
+ }
+ 
+ /// mixed nested unit의 source-owner 판정에 필요한 최소 의미 정보.
+@@ -7604,6 +7626,15 @@
+                         }
+                     }
+                     Control::Table(nested_table) => {
++                        if !nested_table.common.treat_as_char
++                            && fragment_cut_units.is_some_and(|(start, end)| {
++                                self.cell_cut_owns_projected_table(
++                                    cell, table, styles, start, end, cp_idx, ctrl_idx,
++                                ) == Some(false)
++                            })
++                        {
++                            continue;
++                        }
+                         let is_tac_table = nested_table.common.treat_as_char;
+ 
+                         // 저장 HWPX의 같은 host 문단 안에 있는 `글 뒤로` 표는
+@@ -12496,7 +12527,19 @@
+             // calc_nested_table_height 와 정확히 일치(드리프트 0):
+             // Σ row_h + cs*(n-1) + om_top + om_bottom + spacing.
+             // 2단계+ 중첩/텍스트 동거 문단은 아래 atom 폴백 유지(범위 외).
+-            if has_table_in_para && p.text.trim().is_empty() {
++            // One block table at the paragraph's first source control has an
++            // unambiguous nested owner. Keep the host's text lines as separate
++            // source atoms in the existing text/table flow order, and project
++            // the nested rows with their exact child cuts.
++            let projected_mixed_block_table = para_has_visible_text
++                && p.controls.len() == 1
++                && p.control_text_positions().first() == Some(&0)
++                && matches!(&p.controls[0], Control::Table(t)
++                    if t.row_count >= 2 && !t.common.treat_as_char
++                    && matches!(t.common.text_wrap, TextWrap::TopAndBottom)
++                    && !self.nested_table_is_overlay(t)
++                    && matches!(t.page_break, TablePageBreak::RowBreak));
++            if has_table_in_para && (p.text.trim().is_empty() || projected_mixed_block_table) {
+                 let nested_tables: Vec<&crate::model::table::Table> = p
+                     .controls
+                     .iter()
+@@ -12554,6 +12597,37 @@
+                             _ => (0.0, 0.0),
+                         }
+                     };
++                    if projected_mixed_block_table {
++                        for (li, line) in comp.lines.iter().enumerate() {
++                            let include_spacing = !(is_last_para && li + 1 == line_count)
++                                || (para_count > 1 && table.common.treat_as_char);
++                            let mut height = corrected_h(line, li)
++                                + if include_spacing { hwpunit_to_px(line.line_spacing, self.dpi) } else { 0.0 };
++                            if li == 0 { height += spacing_before; }
++                            if li + 1 == line_count { height += spacing_after; }
++                            let hard_break_before = line_reset_before(li);
++                            let mut vpos_gap_before = if li == 0 { vpos_gap_before_para } else { false };
++                            if use_vpos_unit_positions {
++                                if let Some(seg) = p.line_segs.get(li).filter(|seg| !line_seg_is_synthetic(seg)) {
++                                    let top = saved_unit_start_px(seg.vertical_pos, pi == 0 && li == 0,
++                                        if li == 0 { spacing_before } else { 0.0 });
++                                    if top > unit_cum { height += top - unit_cum; vpos_gap_before = true; }
++                                }
++                            }
++                            units.push(CellUnit {
++                                height, hard_break_before, stored_frame_break_before: stored_frame_break_before(li),
++                                page_frame_reset_before: hard_break_before, vpos_gap_before, para_idx: pi,
++                                vis_start: li, vis_end: li + 1, nested_row: None,
++                                nested_table_fragment: None, mixed_nested_fragment: false,
++                                mixed_nested_trailing: false, mixed_nested_content_height: 0.0,
++                                mixed_nested_recursive: false, mixed_nested_starts_after_table: false,
++                                mixed_nested_source_para_idx: None,
++                                recursive_block_prelude_role: RecursiveBlockPreludeRole::None,
++                                top_and_bottom_flow: false, empty_spacer: false, non_inline_control_range: None,
++                            });
++                            unit_cum += height;
++                        }
++                    }
+                     for (ri, rh) in rhs.iter().enumerate() {
+                         // [#4069] CELL 분할 중첩 표는 큰 행을 단일 atom으로 바깥
+                         // 원장에 올리지 않는다. 행에서 콘텐츠가 가장 높은 셀의 unit
+@@ -12625,8 +12699,15 @@
+                                 !units.is_empty()
+                                     && units.iter().all(|unit| unit.nested_row.is_some())
+                             });
++                            let driver_has_saved_frame = driver.is_some_and(|driver_index| {
++                                row_units[driver_index].iter().any(|unit| unit.stored_frame_break_before)
++                                    || row_cells[driver_index].paragraphs.windows(2).any(|pair| {
++                                        pair[0].line_segs.last().zip(pair[1].line_segs.first())
++                                            .is_some_and(|(previous, next)| previous.vertical_pos > 0 && next.vertical_pos == 0)
++                                    })
++                            });
+                             if let Some(driver_index) = driver.filter(|driver_index| {
+-                                (row_is_auto_height || driver_is_nested_table_rows)
++                                (row_is_auto_height || driver_is_nested_table_rows || (projected_mixed_block_table && driver_has_saved_frame))
+                                     && !row_has_crossing_span
+                                     && row_units[*driver_index].len() > 1
+                             }) {
+@@ -12672,12 +12753,12 @@
+                                             uh += ncs;
+                                         }
+                                         if ri + 1 == nrow {
+-                                            uh += om_bot + spacing_after;
++                                            uh += om_bot + if projected_mixed_block_table { 0.0 } else { spacing_after };
+                                         }
+                                     }
+                                     if ri == 0 && fragment_index == 0 {
+                                         uh += om_top
+-                                            + spacing_before
++                                            + if projected_mixed_block_table { 0.0 } else { spacing_before }
+                                             + if host_is_cell_last_para
+                                                 && crate::renderer::para_has_no_stored_line_segs(p)
+                                             {
+@@ -12688,11 +12769,17 @@
+                                     }
+ 
+                                     let mut hard_break_before = driver_unit.hard_break_before
+-                                        || (reset_before && ri == 0 && fragment_index == 0);
++                                        || (reset_before && !projected_mixed_block_table && ri == 0 && fragment_index == 0);
+                                     let mut stored_frame_break_before =
+                                         driver_unit.stored_frame_break_before;
++                                    if projected_mixed_block_table
++                                        && self.nested_row_cut_plain_source_frame_boundary(nt, ri, &start_cut, styles) == Some(true)
++                                    {
++                                        hard_break_before = true;
++                                        stored_frame_break_before = true;
++                                    }
+                                     let mut vpos_gap_before =
+-                                        vpos_gap_before_para && ri == 0 && fragment_index == 0;
++                                        vpos_gap_before_para && !projected_mixed_block_table && ri == 0 && fragment_index == 0;
+                                     for ((cell_units, start), end) in
+                                         row_units.iter().zip(start_cut.iter()).zip(end_cut.iter())
+                                     {
+@@ -12717,7 +12804,7 @@
+                                             }
+                                         }
+                                     }
+-                                    if use_vpos_unit_positions
++                                    if use_vpos_unit_positions && !projected_mixed_block_table
+                                         && ri == 0
+                                         && fragment_index == 0
+                                         && !hard_break_before
+@@ -12768,8 +12855,8 @@
+                                         page_frame_reset_before: hard_break_before,
+                                         vpos_gap_before,
+                                         para_idx: pi,
+-                                        vis_start: 0,
+-                                        vis_end: line_count.max(1),
++                                        vis_start: if projected_mixed_block_table { line_count } else { 0 },
++                                        vis_end: if projected_mixed_block_table { line_count } else { line_count.max(1) },
+                                         nested_row: Some(ri),
+                                         nested_table_fragment: Some(NestedTableUnitCut {
+                                             start_cut,
+@@ -12796,9 +12883,9 @@
+                         }
+ 
+                         let mut uh = *rh;
+-                        let hard_break_before = reset_before && ri == 0;
+-                        let mut vpos_gap_before = vpos_gap_before_para && ri == 0;
+-                        if use_vpos_unit_positions && ri == 0 && !hard_break_before {
++                        let hard_break_before = reset_before && !projected_mixed_block_table && ri == 0;
++                        let mut vpos_gap_before = vpos_gap_before_para && !projected_mixed_block_table && ri == 0;
++                        if use_vpos_unit_positions && !projected_mixed_block_table && ri == 0 && !hard_break_before {
+                             if let Some(seg) = p.line_segs.first() {
+                                 let mut target_top =
+                                     saved_unit_start_px(seg.vertical_pos, pi == 0, spacing_before);
+@@ -12837,7 +12924,7 @@
+                         }
+                         if ri == 0 {
+                             uh += om_top
+-                                + spacing_before
++                                + if projected_mixed_block_table { 0.0 } else { spacing_before }
+                                 + nt_cap_top
+                                 + if host_is_cell_last_para
+                                     && crate::renderer::para_has_no_stored_line_segs(p)
+@@ -12848,7 +12935,7 @@
+                                 };
+                         }
+                         if ri + 1 == nrow {
+-                            uh += om_bot + spacing_after + nt_cap_bot;
++                            uh += om_bot + if projected_mixed_block_table { 0.0 } else { spacing_after } + nt_cap_bot;
+                             // [#5880] 직접 HWPX 의 저장 사다리는 중첩 표 host 문단
+                             // 뒤 흐름을 `lh + ls` 만큼 전진시킨다(2737927 p71:
+                             // 델타 10414 = lh 9994 + ls 420 정확). 유닛 합이 행합
+@@ -12941,12 +13028,12 @@
+                             // nested row. Project it once, just like the host's
+                             // hard break, so capacity selection keeps the header
+                             // with the following stored frame.
+-                            stored_frame_break_before: stored_frame_break_before_para && ri == 0,
++                            stored_frame_break_before: stored_frame_break_before_para && !projected_mixed_block_table && ri == 0,
+                             page_frame_reset_before: hard_break_before,
+                             vpos_gap_before,
+                             para_idx: pi,
+-                            vis_start: 0,
+-                            vis_end: line_count.max(1),
++                            vis_start: if projected_mixed_block_table { line_count } else { 0 },
++                            vis_end: if projected_mixed_block_table { line_count } else { line_count.max(1) },
+                             nested_row: Some(ri),
+                             nested_table_fragment: None,
+                             mixed_nested_fragment: false,
+@@ -16307,6 +16394,114 @@
+     /// content.  Direct HWPX RowBreak tables use the opposite empty cell as a
+     /// structural band; a stored frame rewind in the sole visible cell must
+     /// therefore not be erased by the whole-row fast path.
++    /// Inspect an authoritative child RowCut without converting its cursor
++    /// into a pixel offset. Completed label cells do not own the continuation.
++    ///
++    /// Some(true): every remaining visible owner begins at an original plain
++    /// text paragraph frame rewind. Some(false): at least one supported owner
++    /// continues an ordinary source line. None: the cut contains unsupported
++    /// source owners (nested/mixed/control units, spans or synthetic geometry),
++    /// so this helper cannot authorize a physical page boundary.
++    ///
++    /// This proves source-owner synchronization, not that capacity measurement
++    /// on the preceding page was correct. Callers must preserve this provenance
++    /// separately from the ordinary raw-reset and measured-height flags.
++    pub(super) fn nested_row_cut_plain_source_frame_boundary(
++        &self,
++        table: &crate::model::table::Table,
++        row: usize,
++        start_cut: &[usize],
++        styles: &ResolvedStyleSet,
++    ) -> Option<bool> {
++        let cells: Vec<_> = Self::row_cut_cell_order(table, row)
++            .into_iter()
++            .filter_map(|index| table.cells.get(index))
++            .collect();
++        if cells.is_empty()
++            || start_cut.len() != cells.len()
++            || cells.iter().any(|cell| cell.row_span != 1)
++            || table.cells.iter().any(|cell| {
++                let first = usize::from(cell.row);
++                first < row && row < first + usize::from(cell.row_span)
++            })
++        {
++            return None;
++        }
++        let authentic = |segment: &crate::model::paragraph::LineSeg| {
++            segment.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY == 0
++        };
++        let unsupported = |unit: &CellUnit| {
++            unit.nested_row.is_some()
++                || unit.nested_table_fragment.is_some()
++                || unit.mixed_nested_fragment
++                || unit.non_inline_control_range.is_some()
++        };
++        let mut remaining_owners = 0usize;
++        let mut all_restarted = true;
++        for (cell, &cursor) in cells.iter().zip(start_cut) {
++            if cell.paragraphs.iter().any(|paragraph| {
++                paragraph.stored_text_partition_is_dirty() || paragraph.cell_format_vpos_dirty
++            }) {
++                return None;
++            }
++            let units = self.cell_units(cell, table, styles);
++            if cursor > units.len() {
++                return None;
++            }
++            // Future nested content keeps this cell active, but does not
++            // invalidate a preceding plain-text frame owner in the same cell.
++            // A nested/control unit at the cursor itself is inconclusive.
++            let first_visible = units[cursor..].iter().position(|unit| {
++                !unit.empty_spacer
++                    && (unsupported(unit) || unit.vis_start < unit.vis_end)
++                    && Self::cell_unit_has_visible_content(cell, unit)
++            }).map(|offset| cursor + offset);
++            let Some(index) = first_visible else {
++                continue; // This sibling's source content is already consumed.
++            };
++            if units[cursor..index].iter().any(|unit| {
++                unit.hard_break_before || unit.page_frame_reset_before
++                    || unit.stored_frame_break_before
++            }) {
++                return None; // Do not step across a separate source owner.
++            }
++            remaining_owners += 1;
++            let current = &units[index];
++            if unsupported(current) {
++                return None;
++            }
++            if current.vis_start != 0 || current.para_idx == 0 {
++                all_restarted = false;
++                continue;
++            }
++            let paragraph = cell.paragraphs.get(current.para_idx)?;
++            let previous_paragraph = cell.paragraphs.get(current.para_idx - 1)?;
++            if paragraph.text.trim().is_empty() || previous_paragraph.text.trim().is_empty()
++                || !paragraph.controls.is_empty() || !previous_paragraph.controls.is_empty()
++            {
++                return None;
++            }
++            let next_segment = paragraph.line_segs.first()?;
++            let previous_segment = previous_paragraph.line_segs.last()?;
++            if !authentic(next_segment) || !authentic(previous_segment) {
++                return None;
++            }
++            let Some(previous_unit) = index.checked_sub(1).and_then(|i| units.get(i)) else {
++                all_restarted = false;
++                continue;
++            };
++            if unsupported(previous_unit)
++                || previous_unit.para_idx + 1 != current.para_idx
++                || previous_unit.vis_end != previous_paragraph.line_segs.len()
++            {
++                return None;
++            }
++            all_restarted &= previous_segment.vertical_pos > 0
++                && next_segment.vertical_pos == 0;
++        }
++        (remaining_owners > 0).then_some(all_restarted)
++    }
++
+     pub(crate) fn row_has_single_visible_source_cell(
+         &self,
+         table: &crate::model::table::Table,
+@@ -17044,12 +17239,19 @@
+                         .is_some_and(|previous| {
+                             self.stored_row_reset_closes_declared_frame(cell, table, previous)
+                         });
++                let projected_source_frame = u.stored_frame_break_before && u.nested_table_fragment.as_ref().and_then(|fragment| {
++                    let child = cell.paragraphs.get(u.para_idx)?.controls.iter().find_map(|control| match control {
++                        Control::Table(child) => Some(child.as_ref()), _ => None,
++                    })?;
++                    self.nested_row_cut_plain_source_frame_boundary(child, u.nested_row?, &fragment.start_cut, styles)
++                }) == Some(true);
+                 let strict_saved_frame_break = u.stored_frame_break_before
+                     && (declared_saved_frame_break
+                         || (j == 1
+                             && start == 0
+                             && self.native_saved_two_line_row_frame(table, row, styles))
+                         || u.mixed_nested_recursive
++                        || projected_source_frame
+                         || follows_single_cell_nested_host
+                         || (self.profile.get().hwpx_stored_layout()
+                             && self.row_has_stored_vpos_frame_rewind(table, row)
+@@ -18813,6 +19015,30 @@
+             }
+         }
+         ranges
++    }
++
++    /// Use the exact nested atoms where one table has an unambiguous owner.
++    /// Multi-control mixed paragraphs keep the legacy path until their atoms
++    /// carry control indexes; paragraph identity alone cannot distinguish them.
++    pub(super) fn cell_cut_owns_projected_table(
++        &self,
++        cell: &crate::model::table::Cell,
++        table: &crate::model::table::Table,
++        styles: &ResolvedStyleSet,
++        start: usize,
++        end: usize,
++        para_idx: usize,
++        control_idx: usize,
++    ) -> Option<bool> {
++        let para = cell.paragraphs.get(para_idx)?;
++        let mut controls = para.controls.iter().enumerate().filter_map(|(index, control)| {
++            matches!(control, Control::Table(_)).then_some(index)
++        });
++        if controls.next()? != control_idx || controls.next().is_some() {
++            return None;
++        }
++        let units = self.cell_units(cell, table, styles);
++        projected_table_owner_in_cut(&units, para_idx, start, end)
+     }
+ 
+     /// Runtime-projected lines describe content atoms, not a stored page frame.
+@@ -19690,11 +19916,13 @@
+             .unwrap_or(0.0)
+     }
+ 
+-    /// Reflow's projected units own source content and the first/last host margins.
++    /// Projected units own source content and the first/last host margins.
+     /// Every actual child RowCut also owns its cell padding. Reserve that physical
+     /// box before accepting the parent cut; paint consumes the same child cursor.
++    /// Typed stored child cuts use this contract too. A distinct mixed-host text
++    /// atom owns its paragraph spacing; an empty host retains its edge spacing.
+     #[allow(clippy::too_many_arguments)]
+-    fn reflow_recursive_run_extra(
++    fn projected_recursive_run_extra(
+         &self,
+         cell: &crate::model::table::Cell,
+         styles: &ResolvedStyleSet,
+@@ -19706,7 +19934,18 @@
+     ) -> Option<f64> {
+         let pi = units[run_start].para_idx;
+         let para = cell.paragraphs.get(pi)?;
+-        if !crate::renderer::para_has_no_stored_line_segs(para) {
++        let reflowed_host = crate::renderer::para_has_no_stored_line_segs(para);
++        let separate_host_text = !reflowed_host
++            && units[run_start..run_end].iter().all(|unit| {
++                unit.nested_row.is_some() && unit.vis_start == unit.vis_end
++            });
++        // Empty stored table hosts retain a placeholder visual-line range, but
++        // their explicit child cursor ledger has the same physical contract.
++        // Placeholder ranges alone cannot authorize a source cut.
++        let stored_child_cuts = !reflowed_host
++            && units[run_start..run_end].iter().all(|unit| unit.nested_row.is_some())
++            && units[run_start..run_end].iter().any(|unit| unit.nested_table_fragment.is_some());
++        if !reflowed_host && !separate_host_text && !stored_child_cuts {
+             return None;
+         }
+         let child = para.controls.iter().find_map(|control| match control {
+@@ -19825,7 +20064,7 @@
+             physical += hwpunit_to_px(child.outer_margin_bottom as i32, self.dpi);
+         }
+         if start == run_start {
+-            if pi > 0 {
++            if pi > 0 && !separate_host_text {
+                 physical += style.map(|style| style.spacing_before).unwrap_or(0.0);
+             }
+             if pi + 1 == cell.paragraphs.len() {
+@@ -19833,7 +20072,7 @@
+             }
+         }
+         if end == run_end {
+-            if pi + 1 < cell.paragraphs.len() {
++            if pi + 1 < cell.paragraphs.len() && !separate_host_text {
+                 physical += style.map(|style| style.spacing_after).unwrap_or(0.0);
+             }
+         }
+@@ -19904,14 +20143,21 @@
+ 
+         let mut u = 0;
+         while u < units.len() {
+-            // Reflow recursive runs use their actual child RowCut even on the
+-            // first fragment. Group once so the parent scan remains O(U).
+-            if cell
++            // Exact child RowCuts own padding per physical fragment, regardless
++            // of whether the host lines were reflowed or came from the source.
++            // A stored fragment's explicit child cursors also authorize this
++            // contract when its empty host has a placeholder visual-line range.
++            // Group once so the parent scan remains O(U).
++            let reflowed_projection = cell
+                 .paragraphs
+                 .get(units[u].para_idx)
+                 .is_some_and(crate::renderer::para_has_no_stored_line_segs)
+-                && (units[u].mixed_nested_fragment || units[u].nested_row.is_some())
+-            {
++                && (units[u].mixed_nested_fragment || units[u].nested_row.is_some());
++            // Group from the first row, including complete rows before a
++            // partial row. The helper requires explicit child-cut provenance
++            // before granting stored runs a physical padding reservation.
++            let typed_stored_projection = units[u].nested_row.is_some();
++            if reflowed_projection || typed_stored_projection {
+                 let run_start = u;
+                 let pi = units[u].para_idx;
+                 while u < units.len() && units[u].para_idx == pi {
+@@ -19919,7 +20165,7 @@
+                     u += 1;
+                 }
+                 if let Some(reserve) =
+-                    self.reflow_recursive_run_extra(cell, styles, &units, run_start, u, lo, hi)
++                    self.projected_recursive_run_extra(cell, styles, &units, run_start, u, lo, hi)
+                 {
+                     extra += reserve;
+                     continue;
+@@ -21196,6 +21442,29 @@
+         }
+     }
+ 
++    #[test]
++    fn projected_table_cut_does_not_let_text_atoms_repaint_the_table() {
++        let before = saved_reset_unit(16.0, 0, 1, false);
++        let mut row0 = saved_reset_unit(24.0, 0, 1, false);
++        row0.nested_row = Some(0);
++        let mut row1 = saved_reset_unit(24.0, 0, 1, false);
++        row1.nested_row = Some(1);
++        let after = saved_reset_unit(16.0, 0, 1, false);
++        let units = vec![before, row0, row1, after];
++        assert_eq!(projected_table_owner_in_cut(&units, 0, 0, 1), Some(false));
++        assert_eq!(projected_table_owner_in_cut(&units, 0, 1, 2), Some(true));
++        assert_eq!(projected_table_owner_in_cut(&units, 0, 2, 3), Some(true));
++        assert_eq!(projected_table_owner_in_cut(&units, 0, 3, 4), Some(false));
++        assert_eq!(projected_table_owner_in_cut(&units, 0, 4, 4), Some(false));
++        assert_eq!(projected_table_owner_in_cut(&units, 1, 0, 4), None);
++    }
++
++    #[test]
++    fn projected_table_cut_preserves_legacy_atoms_without_nested_provenance() {
++        let units = vec![saved_reset_unit(24.0, 0, 1, false)];
++        assert_eq!(projected_table_owner_in_cut(&units, 0, 0, 1), None);
++    }
++
+     fn recursive_block_unit(height: f64, role: RecursiveBlockPreludeRole) -> CellUnit {
+         CellUnit {
+             height,
+diff --git a/src/renderer/layout/table_partial.rs b/src/renderer/layout/table_partial.rs
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -3459,6 +3459,18 @@
+                                 cell_node.children.push(eq_node);
+                             }
+                             Control::Table(nested_table) => {
++                                // A split stream can contain ordinary text and projected
++                                // table atoms in one paragraph. Only the selected atoms
++                                // own the block table; do not recreate it for a text-only cut.
++                                if !nested_table.common.treat_as_char
++                                    && cut_units.is_some_and(|(start, end)| {
++                                        self.cell_cut_owns_projected_table(
++                                            cell, table, styles, start, end, cp_idx, ctrl_idx,
++                                        ) == Some(false)
++                                    })
++                                {
++                                    continue;
++                                }
+                                 // 텍스트 줄만 선택된 조각은 같은 문단의 다른 저장 줄에
+                                 // 실린 TAC 표를 소유하지 않는다. 실제 중첩 행·재귀 컷이
+                                 // 선택된 경우에는 그 컷이 원본 줄 대신 소유권을 정한다.

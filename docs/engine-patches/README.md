@@ -1,6 +1,6 @@
-# Core patches: table content floors and inline-table line spacing
+# Core patches: table layout and source ownership
 
-This directory preserves two small, reviewable changes to rhwp 0.8.7. They are
+This directory preserves reviewable changes to rhwp 0.8.7. They are
 **core rendering changes**, separate from pwh's Studio/client patches. They
 change derived layout, not the source document's text, XML cell heights, fonts,
 or margins. It does not clip overflowing text, compress its line spacing, or
@@ -61,13 +61,50 @@ the percentage base once; the helper's content height excludes those margins
 because flow already accounts for them separately. No duplicate trailing
 spacing is added to the existing table-placement advance.
 
-Upstream code and comments in both diffs retain their original attribution;
+Upstream code and comments in the diffs retain their original attribution;
 rhwp is Copyright Edward Kim
 and contributors and distributed under the MIT license. See the source ZIP's
 `LICENSE`, the repository's `THIRD_PARTY_NOTICES.md`, and the original project at
 <https://github.com/edwardkim/rhwp>.
 
 ## Pinned inputs
+
+### Nested table source ownership
+
+`rhwp-0.8.7-nested-source-ownership.patch` extends the existing child `RowCut`
+path to a mixed paragraph containing one non-inline `TopAndBottom` RowBreak
+table at its first control position. Host text keeps its own line, spacing and
+break atoms. Child row/cell cursors are carried into partial layout instead of
+being reconstructed from fixed-height scalar fragments.
+
+A child cut can authorize a stored source-frame boundary only when its remaining
+visible owners begin at original plain-text paragraph restarts. Completed label
+cells do not own the continuation. Nested control fragments, synthetic or stale
+line geometry, unsupported spans and ambiguous owners do not acquire this
+authority. A table is drawn only by a cut containing its typed table atoms;
+ordinary host text cannot redraw the same block table.
+
+Typed child runs in stored paragraphs also reserve the physical height of the
+exact selected child `RowCut`, including its per-fragment cell padding. This
+includes empty hosts with placeholder visual lines when their run has explicit
+child-cut provenance; complete rows may share the run with partial row cuts.
+Placeholder line ranges alone do not authorize a physical reservation. The same
+reserve enters pagination and partial row rendering. Previously the parent could
+budget only projected source-unit heights while the child painted its padding
+too, leaving an inner border below its parent frame. Separate mixed-host text
+atoms retain paragraph spacing; empty hosts retain their existing edge-spacing
+ownership. Untyped stored scalar projections keep their existing path. No fixed
+padding or pixel adjustment is introduced.
+
+The patch changes derived pagination and rendering, retaining original document
+text and source cursor addresses. It does not change saved cell dimensions,
+hide overflow by changing view preferences, or contain document/page identifiers.
+The r4 runtime promotes this patch after source, synthetic and real-document
+regression gates. Its editor WASM is 13,758,962 bytes with SHA256
+`22516f486ced5fbff3a957b34e0d48adf77a05f8c0e80d8b7ff834d35ef5919b`.
+The reproducible build script applies all three patches and verifies every
+before/after source hash. Regression commands and synthetic fixtures are in
+[`tests/engine-source-ownership`](../../tests/engine-source-ownership/README.md).
 
 | Input | Identity / SHA256 |
 | --- | --- |
@@ -78,6 +115,7 @@ and contributors and distributed under the MIT license. See the source ZIP's
 | Patched `table_layout.rs` SHA256 | `c3df908c978e4aef7876b555c4a4c7b85749587194b4755d43e4c5ae9c67c238` |
 | Patch SHA256 | `5a2427c162ee3928b7edecbaabad10936700c7db02f25a5436fb0a74a92bd221` |
 | Inline-table spacing patch SHA256 | `a9f6a533debe686f6e89ec06870e47ccb0357635f8303775467ceb6cfca9da7a` |
+| Nested source ownership patch SHA256 | `346e2885cb5720574515167db94448f256e5d210d729ee63e2c0ac732e5b2a96` |
 | `saved/blank2010.hwp` | 13,824 bytes; `43f472751fafefb8c66b0f831660ebed51e443a46bebe44c75bba918154ce4c9` |
 | Rust / Cargo | `1.93.1` |
 | Compilation target | `wasm32-unknown-unknown` |
@@ -90,6 +128,13 @@ The second patch's source hashes are:
 | `src/renderer/mod.rs` | `b27c1148d0496fe02dfef5ee3375511c3f2cd110925ebbfe90398a67b018f15d` | `c9191193db4a0b14a936887fac5ffd99f47d77311f60dc58b961574048c3271a` |
 | `src/renderer/composer/line_breaking.rs` | `42a685bc83d81e01356a5576fcc03d0c92117d5054d018c84f77ddbad297921e` | `6ced0b75cf4b46090801dd05adabe6e715d9ff06e22468ead3dbd5e6fbc9b940` |
 | `src/renderer/layout.rs` | `eb561f70fed2217db8e17efc8b33a5639de4dd5c8087797cd2cf876be4bc4ca5` | `81fef37b2cd464f007d721edcdaf938d6ba47439dc9418c8745bc7da927d7a61` |
+
+The third patch applies after the two existing patches:
+
+| File | Before SHA256 | After SHA256 |
+| --- | --- | --- |
+| `src/renderer/layout/table_layout.rs` | `c3df908c978e4aef7876b555c4a4c7b85749587194b4755d43e4c5ae9c67c238` | `7f294df11f7dc48611cdcfbf8a7fa813763778dd9c4573cd619c06bc4c26990a` |
+| `src/renderer/layout/table_partial.rs` | `9e0a4d66d00906d4c949481088dba04d81d1f04ac1091b09188d65a9140ddeab` | `cebac7b673a9c051bf31e64bcc6d2310f669b74a97bfd6351d663a9cc5b452d6` |
 
 Obtain the pinned source ZIP from the immutable engine-r2 release:
 <https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r2/pwh-upstream-rhwp-0.8.7-1a76570e8339.zip>.
@@ -112,7 +157,7 @@ the `wasm32-unknown-unknown` standard library must already be available.
 `scripts/build-patched-core.mjs` accepts all paths as arguments. It never uses a
 maintainer's home/workspace path, installs a runtime, edits the engine lock, or
 overwrites an existing source/output directory. It verifies the source and
-patches before applying them and rejects an unexpected source revision. Both
+patches before applying them and rejects an unexpected source revision. All
 patches are required and applied in the recorded order. Git
 line-ending conversion is disabled explicitly for patch application so a
 Windows global `core.autocrlf` setting cannot change the source hashes.
@@ -183,7 +228,7 @@ upstream glue (`70cde06a369fa7fd4fc8bc8f3d6acaee158596ba1a116a2c72159002b0b5654e
 The independently repeated **first-patch-only** build was 13,751,774 bytes with SHA256
 `2af00b34b622b33d341d0be5a78f00d56dcd50d74fddca1ec71dd5d5474af907`.
 It is historical evidence for the row-floor fix, not the identity of the
-two-patch candidate. The current script builds both patches and records their
+historical two-patch build. The current script builds all three patches and records their
 individual input/output source hashes in `BUILD-RECORD.json`.
 The verified **two-patch production** rebuild was 13,752,323 bytes with SHA256
 `a9c082330122e79120f8e0976f94837cc62625261fbb77c2fa2f51d6cb3e09d8`.
@@ -225,3 +270,33 @@ runtime manifest. Keep engine-r2 and the original npm core bytes. The existing
 not be bypassed or made to accept changed bytes under the old identity. Prepare
 and verify the patched revision through an explicit release path; the rebuild
 script does not publish it or modify `runtime-lock.json`.
+
+
+## Preserve a later patched runtime
+
+`scripts/preserve-engine.py` preserves the original upstream binaries and remains
+the tool for initial source/license preservation. Its original-core checks must
+not be weakened to package a patched core.
+
+`scripts/preserve-patched-runtime.py` instead verifies a prior immutable runtime
+archive and its complete manifest, the new optimized core's `BUILD-RECORD.json`,
+all current patch hashes, and the versioned inline client's file hashes. It also
+normalizes the inline build's host-supplied-WASM resolver to prove its remaining
+JavaScript glue exactly matches the rebuilt core. Passing regression evidence
+must identify the exact WASM and build-record digests. It creates a new runtime ZIP,
+source/build-input archives, verification record and proposed lock in a new
+output directory. It never writes the project's lock or an installed runtime.
+
+Example after completing the core and inline-client regression gates:
+
+```text
+python scripts/preserve-patched-runtime.py --base-lock <preserved-r3-runtime-lock.json> --base-archive <verified-r3.zip> --candidate-core <optimized-core> --client-root client --client-build-root <studio-build-root> --regression-evidence <passing-core-regression.json> --revision 4 --output-dir <new-r4-output>
+```
+
+The current Pwh and Desktop inline clients use the new shared core. The separate
+historical full-Studio component retains its prior bytes by default; its bundled
+WASM must not be replaced merely on an assumed ABI match. A complete replacement
+requires explicit tree-hash and smoke-test evidence through the optional
+`--studio-replacement` and `--studio-verification` inputs. This scope is recorded
+in the manifest and verification file. Existing upstream source, dependency and
+license assets retain their immutable prior URLs.

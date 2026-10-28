@@ -9,7 +9,7 @@ version. Node itself is a prerequisite, not bundled.
 For an offline initial installation:
 
 ```powershell
-node scripts/setup.mjs --runtime-root C:\pwh-runtime-r3 --runtime-archive C:\backups\pwh-runtime-rhwp-0.8.7-pwh-r3-windows-x64.zip --skip-download
+node scripts/setup.mjs --runtime-root C:\pwh-runtime-r4 --runtime-archive C:\backups\pwh-runtime-rhwp-0.8.7-pwh-r4-windows-x64.zip --skip-download
 ```
 
 The ZIP hash, identity, file names, expanded sizes, component licenses and every
@@ -78,13 +78,21 @@ this is not a claim of a completely self-contained offline toolchain. The legacy
 `setup.mjs --from-source` path is explicit and can still need upstream Git/npm;
 it is not the normal install or the preserved offline rebuild procedure.
 
+Revision 4 adds the nested-table source ownership and exact child-fragment
+physical-height reservation patch. Pwh and Pwh Desktop use the same rebuilt
+editor WASM and Pwh inline sources. The runtime records the exact optimized
+core and passing regression evidence, and preserves the current client build
+inputs separately. Native CLI, editor SDK and the historical full Studio retain
+their verified prior bytes. `scripts/preserve-patched-runtime.py` verifies and
+repackages this reviewed delta without weakening the original preservation tool.
+
 ## Upgrade from an earlier preserved runtime
 
-Keep the old runtime and install r3 into a new directory. The installer refuses
+Keep the old runtime and install r4 into a new directory. The installer refuses
 to overwrite a different core. For example:
 
 ```powershell
-node scripts/setup.mjs --runtime-root C:\pwh-runtime-r3
+node scripts/setup.mjs --runtime-root C:\pwh-runtime-r4
 ```
 
 Select that directory with `PWH_RUNTIME_ROOT`, or merge a `runtimeRoot` field
