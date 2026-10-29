@@ -10,7 +10,7 @@ import {buildNativeLauncher} from './build-native-launcher.mjs';
 import {stagePreviewCore} from './preview-core.mjs';
 
 const root=path.dirname(fileURLToPath(import.meta.url)),workspace=path.dirname(root);
-const version=process.env.PWH_ZIP_VERSION||'0.1.5';
+const version=process.env.PWH_ZIP_VERSION||'0.1.6';
 if(!/^\d{1,3}\.\d{1,3}\.\d{1,5}$/.test(version)||version.split('.').some((n,i)=>Number(n)>(i===2?65535:255)))throw Error('ZIP 버전이 올바르지 않습니다.');
 const output=path.resolve(process.argv[2]||path.join(workspace,'dist',`PwhDesktop-${version}-offline.zip`));
 const runtimeArchive=process.env.PWH_OFFLINE_RUNTIME_ARCHIVE||path.join(os.homedir(),'.stoom-pwh','downloads',JSON.parse(await fs.readFile(new URL('../release-source/runtime-lock.json',import.meta.url),'utf8')).runtime.file);
@@ -30,7 +30,7 @@ const run=(program,args)=>new Promise((resolve,reject)=>{const p=spawn(program,a
 const unpack=path.join(stage,'unpack');await fs.mkdir(unpack);
 for(const entry of zipEntries(await fs.readFile(pwhZip))){const rel=entry.name.replace(/\/$/,'');if(!rel||path.isAbsolute(rel)||rel.split('/').includes('..'))throw Error('패키지 경로가 올바르지 않습니다.');const target=path.join(unpack,...rel.split('/'));if(entry.name.endsWith('/'))await fs.mkdir(target,{recursive:true});else{await fs.mkdir(path.dirname(target),{recursive:true});await fs.writeFile(target,entry.read(),{flag:'wx'});}}
 await fs.rename(path.join(unpack,'pwh'),path.join(pkg,'release-source'));
-for(const name of ['ai-providers.mjs','codex-agent.mjs','codex-session.mjs','codex-native-host.mjs','rewrite.mjs','settings.mjs','convert-hwp.mjs','desktop-files.mjs','document-scan.mjs','editor-result-wait.mjs','version-info.mjs','file-dialog.ps1','host.mjs','launch.mjs','app.html','app.css','app.js','stoom-mark.svg','stoom.ico'])await copy(path.join(root,name),path.join('standalone-pwh',name));
+for(const name of ['ai-providers.mjs','codex-agent.mjs','codex-session.mjs','codex-native-host.mjs','rewrite.mjs','settings.mjs','convert-hwp.mjs','desktop-files.mjs','document-scan.mjs','editor-result-wait.mjs','steer-turn.mjs','version-info.mjs','workspace-child.mjs','workspace-shell.mjs','workspace.html','workspace.css','workspace.js','file-dialog.ps1','host.mjs','launch.mjs','app.html','app.css','app.js','stoom-mark.svg','stoom.ico'])await copy(path.join(root,name),path.join('standalone-pwh',name));
 await fs.writeFile(path.join(pkg,'standalone-pwh','version.json'),JSON.stringify({version})+'\n',{flag:'wx'});
 for(const name of ['editor.js','manifest.json'])await copy(path.join(root,'client',name),path.join('standalone-pwh','client',name));
 await copy(path.join(workspace,'bridge','hwp-codex-host.mjs'),path.join('bridge','hwp-codex-host.mjs'));

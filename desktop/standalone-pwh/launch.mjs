@@ -15,11 +15,11 @@ process.env.PWH_FONT_ROOT=path.join(dataRoot,'fonts');
 const arg=process.argv[2];
 if(arg&&!/\.hwpx?$/i.test(arg))throw Error('HWP 또는 HWPX 문서를 선택하세요.');
 if(arg&&(await fs.stat(path.resolve(arg))).size>64*1024*1024)throw Error('문서 크기 한도는 64 MiB입니다.');
-const {createAppServer}=await import('./host.mjs');
+const {createWorkspaceServer}=await import('./workspace-shell.mjs');
 const nativeLauncher=path.join(programRoot,'PwhDesktop.exe');
 const nativeBranding=process.platform==='win32'&&process.env.PWH_NATIVE_LAUNCHER===nativeLauncher?{token:randomBytes(16).toString('hex'),complete:false,failed:false}:undefined;
 const startOptions={initialPath:arg?path.resolve(arg):undefined,nativeBranding};let instance;
-try{instance=await createAppServer({...startOptions,port:48673});}catch(error){if(error.code!=='EADDRINUSE')throw error;instance=await createAppServer(startOptions);}
+try{instance=await createWorkspaceServer({...startOptions,port:48673});}catch(error){if(error.code!=='EADDRINUSE')throw error;instance=await createWorkspaceServer(startOptions);}
 const {server,url}=instance;
 const candidates=[path.join(process.env['ProgramFiles(x86)']||'C:/Program Files (x86)','Microsoft/Edge/Application/msedge.exe'),path.join(process.env.ProgramFiles||'C:/Program Files','Microsoft/Edge/Application/msedge.exe')];
 let edge='';for(const candidate of candidates){try{await fs.access(candidate);edge=candidate;break;}catch{}}

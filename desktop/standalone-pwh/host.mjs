@@ -74,7 +74,7 @@ export async function createAppServer({initialBytes,initialPath,chooseFile,edito
  const desktopCommands=[],desktopTickets=new Map();
  const files=createDesktopFileManager({...(chooseFile?{choose:chooseFile}:{}),verify:async file=>(await runEngine(['info',file,'--json'])).data,register:registerClientDocument});
  if(initialPath&&path.extname(initialPath).toLowerCase()==='.hwpx')files.setTarget(current.source,current.sourceSha256);
- let codexSession=null,codexSessionKey='',agentBusy=false,agentProgress=[],cancelRequested=false;
+ let codexSession=null,codexSessionKey='',agentBusy=false,activeAgentSessionId=null,agentProgress=[],cancelRequested=false;
  function closeCodexSession(){codexSession?.close();codexSession=null;codexSessionKey='';}
  let lastActivity=Date.now();
  const assets={'/':'app.html','/app.js':'app.js','/app.css':'app.css','/stoom-mark.svg':'stoom-mark.svg','/stoom.ico':'stoom.ico'};
@@ -179,6 +179,11 @@ export async function createAppServer({initialBytes,initialPath,chooseFile,edito
    if(route==='/ai/status'){const settings=await readSettings(settingsPath),provider=await providerFor(settings);return json(res,await provider.status());}
    if(route==='/ai/check'){const settings=validateSettings(JSON.parse((await parse(req,8192)).toString())),provider=await providerFor(settings);return json(res,await provider.status());}
    if(route==='/ai/progress')return json(res,{events:agentProgress.splice(0,100)});
+   if(route==='/ai/steer'){
+    const input=JSON.parse((await parse(req,8192)).toString());
+    if(!agentBusy||!codexSession||cancelRequested||input.sessionId!==activeAgentSessionId)throw Error('현재 문서에 진행 중인 Codex 작업이 없습니다.');
+    return json(res,await codexSession.steer(input.note));
+   }
    if(route==='/ai/interrupt'){if(agentBusy){cancelRequested=true;if(codexSession)await codexSession.interrupt();}return json(res,{ok:agentBusy});}
    if(route==='/rpc'){
     const message=JSON.parse((await parse(req,2*1024*1024)).toString());
@@ -193,19 +198,21 @@ export async function createAppServer({initialBytes,initialPath,chooseFile,edito
    if(route==='/ai/send'){
     const input=JSON.parse((await parse(req,200000)).toString()),settings=await readSettings(settingsPath);
     if(typeof input.note!=='string'||!input.note.trim()||input.note.length>4000)throw Error('요청 내용을 입력하세요.');
+    if(input.history!==undefined&&(!Array.isArray(input.history)||input.history.length>24||input.history.some(x=>!x||!['user','assistant'].includes(x.role)||typeof x.text!=='string'||x.text.length>6000)||input.history.reduce((n,x)=>n+x.text.length,0)>32000))throw Error('이전 대화를 확인할 수 없습니다.');
     if(settings.provider==='codex'){
-     if(agentBusy)throw Error('이전 AI 작업이 진행 중입니다.');agentBusy=true;cancelRequested=false;agentProgress=[];
+     if(agentBusy)throw Error('이전 AI 작업이 진행 중입니다.');agentBusy=true;activeAgentSessionId=input.sessionId;cancelRequested=false;agentProgress=[];
      try{
      const state=editorState({sessionId:input.sessionId});
      const request=input.requestId?editorRequest({requestId:input.requestId}):editorCapture({sessionId:input.sessionId,source:state.source,context:input.context,note:input.note});
      if(input.requestId&&(request.sessionId!==input.sessionId||request.note!==input.note||request.source!==state.source))throw Error('편집기 요청이 현재 문서와 일치하지 않습니다. 다시 요청해 주세요.');
      const key=JSON.stringify([input.sessionId,settings.codexModel,settings.codexReasoningEffort]);
-     if(key!==codexSessionKey){closeCodexSession();codexSession=await createCodexSession({stoomModule:process.env.PWH_STOOM_MODULE||path.join(appRoot,'codex-native-host.mjs'),mcpUrl:`${origin}/${launchToken}/mcp`,bearerToken:agentToken,model:settings.codexModel||undefined,reasoningEffort:settings.codexReasoningEffort||undefined,notify:event=>{if(event.type==='text'&&typeof event.text==='string'){const last=agentProgress.at(-1);if(last?.type==='text'&&last.text.length+event.text.length<=160000)last.text+=event.text;else agentProgress.push({type:'text',text:event.text.slice(0,160000)});}else if(event.type==='tool')agentProgress.push(event);if(agentProgress.length>100)agentProgress.shift();}});codexSessionKey=key;}
+     const restoring=key!==codexSessionKey;
+     if(restoring){closeCodexSession();codexSession=await createCodexSession({stoomModule:process.env.PWH_STOOM_MODULE||path.join(appRoot,'codex-native-host.mjs'),mcpUrl:`${origin}/${launchToken}/mcp`,bearerToken:agentToken,model:settings.codexModel||undefined,reasoningEffort:settings.codexReasoningEffort||undefined,notify:event=>{if(event.type==='text'&&typeof event.text==='string'){const last=agentProgress.at(-1);if(last?.type==='text'&&last.text.length+event.text.length<=160000)last.text+=event.text;else agentProgress.push({type:'text',text:event.text.slice(0,160000)});}else if(event.type==='tool')agentProgress.push(event);if(agentProgress.length>100)agentProgress.shift();}});codexSessionKey=key;}
      if(cancelRequested)throw Error('Codex 작업을 중지했습니다.');
      const asset=input.imageAssetId?imageAssets.get(input.imageAssetId):null;if(input.imageAssetId&&(!asset||asset.sessionId!==input.sessionId||Date.now()-asset.createdAt>600000))throw Error('첨부 그림이 만료되었습니다. 다시 첨부하세요.');
-     const result=await codexSession.send({requestId:request.requestId,sessionId:input.sessionId,note:input.note,imageAssetId:input.imageAssetId||undefined});
+     const result=await codexSession.send({requestId:request.requestId,sessionId:input.sessionId,note:input.note,history:restoring?input.history:undefined,imageAssetId:input.imageAssetId||undefined});
      return json(res,{text:result.text,applied:null});
-     }catch(error){closeCodexSession();throw error;}finally{agentBusy=false;}
+     }catch(error){closeCodexSession();throw error;}finally{agentBusy=false;activeAgentSessionId=null;}
     }
     const provider=await providerFor(settings);
     const status=await provider.status();if(!status.ready)throw Error(status.message||'AI 연결 상태를 확인하세요.');
