@@ -10,13 +10,22 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
  const token=randomBytes(24).toString('hex'),tabs=new Map();let closing=false,generation=0;
  const makeTab=async file=>{
   if(closing||tabs.size>=12)throw Error('문서는 최대 12개까지 열 수 있습니다.');
-  const id=randomUUID(),child=spawnImpl(process.execPath,[path.join(root,'workspace-child.mjs'),...(file?[file]:[])],{windowsHide:true,stdio:['pipe','pipe','pipe'],env:process.env});
-  let output='',diagnostic='';child.stdin.on('error',()=>{});child.stderr.on('data',x=>diagnostic=(diagnostic+String(x)).slice(-1500));
-  const url=await new Promise((resolve,reject)=>{const timer=setTimeout(()=>{child.kill();reject(Error('문서 탭을 준비하지 못했습니다.'));},90000);timer.unref?.();
-   child.once('error',e=>{clearTimeout(timer);reject(e);});child.once('exit',()=>{clearTimeout(timer);reject(Error('문서 탭이 종료되었습니다. '+diagnostic.slice(0,200)));});
-   child.stdout.on('data',part=>{output+=String(part);const end=output.indexOf('\n');if(end<0)return;clearTimeout(timer);try{const candidate=new URL(JSON.parse(output.slice(0,end)).url);if(candidate.hostname!=='127.0.0.1'||candidate.protocol!=='http:')throw Error('Invalid document host');resolve(candidate.href);}catch{child.kill();reject(Error('문서 탭 연결을 확인하지 못했습니다.'));}});
-  });
-  tabs.set(id,{id,url,child});child.once('exit',()=>tabs.delete(id));return {id,url};
+  const id=randomUUID();
+  // A stable origin per tab slot keeps the editor's local recovery store reachable
+  // after reopening. A second window skips ports already owned by another app.
+  for(let childPort=48674;childPort<48738;childPort++){
+   if([...tabs.values()].some(tab=>tab.port===childPort))continue;
+   const child=spawnImpl(process.execPath,[path.join(root,'workspace-child.mjs'),String(childPort),...(file?[file]:[])],{windowsHide:true,stdio:['pipe','pipe','pipe'],env:process.env});
+   let output='',diagnostic='';child.stdin.on('error',()=>{});child.stderr.on('data',x=>diagnostic=(diagnostic+String(x)).slice(-1500));
+   const result=await new Promise((resolve,reject)=>{const timer=setTimeout(()=>{child.kill();reject(Error('문서 탭을 준비하지 못했습니다.'));},90000);timer.unref?.();
+    child.once('error',e=>{clearTimeout(timer);reject(e);});child.once('exit',()=>{clearTimeout(timer);reject(Error('문서 탭이 종료되었습니다. '+diagnostic.slice(0,200)));});
+    child.stdout.on('data',part=>{output+=String(part);const end=output.indexOf('\n');if(end<0)return;clearTimeout(timer);try{const value=JSON.parse(output.slice(0,end));if(value.errorCode)return resolve(value);const candidate=new URL(value.url);if(candidate.hostname!=='127.0.0.1'||candidate.protocol!=='http:'||Number(candidate.port)!==childPort)throw Error('Invalid document host');resolve({url:candidate.href});}catch{child.kill();reject(Error('문서 탭 연결을 확인하지 못했습니다.'));}});
+   });
+   if(result.errorCode==='EADDRINUSE')continue;
+   if(result.errorCode)throw Error('문서 탭을 열지 못했습니다.');
+   tabs.set(id,{id,url:result.url,child,port:childPort});child.once('exit',()=>tabs.delete(id));return {id,url:result.url};
+  }
+  throw Error('사용 가능한 문서 탭 연결을 찾지 못했습니다.');
  };
  let first=null;
  const stopTab=tab=>{const timer=setTimeout(()=>tab.child.kill(),3000);timer.unref?.();tab.child.once('exit',()=>clearTimeout(timer));try{tab.child.stdin.end();}catch{tab.child.kill();}};

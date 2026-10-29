@@ -348,14 +348,20 @@
     {
       "path": "standalone-pwh/workspace-child.mjs",
       "source": "standalone-pwh/workspace-child.mjs",
-      "size": 328,
-      "sha256": "940e2b3ebb8b883fa5dd32f6435f56803b01e6abfb5997ee20315655d4007226"
+      "size": 488,
+      "sha256": "8aae0bca0317c41965e6fb64f83c16d22ba40294103e536a27cd29f1239d8c70"
+    },
+    {
+      "path": "standalone-pwh/workspace-shell.check.mjs",
+      "source": "standalone-pwh/workspace-shell.test.mjs",
+      "size": 1619,
+      "sha256": "d409929abb958d5a3dd67b2cf4a312738ced5066d696e55cbf0ddd880c8a5229"
     },
     {
       "path": "standalone-pwh/workspace-shell.mjs",
       "source": "standalone-pwh/workspace-shell.mjs",
-      "size": 5647,
-      "sha256": "3bc186c03a8d9c2d4460432444617233ff757310aafa4b13476af292c815d9cb"
+      "size": 6318,
+      "sha256": "1add1be82414de5a9fb96dcf9109e7555aeb89b9072ffb253333564c41f46abd"
     },
     {
       "path": "standalone-pwh/workspace.css",
