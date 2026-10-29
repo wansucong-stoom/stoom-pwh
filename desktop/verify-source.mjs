@@ -11,6 +11,8 @@ if(args.length&&!(args.length===2&&args[0]==='--source-root'))throw Error('Usage
 const sourceRoot=args.length?path.resolve(args[1]):null;
 const manifest=JSON.parse(await fs.readFile(path.join(root,'source-manifest.json'),'utf8'));
 assert.equal(manifest.schemaVersion,1);assert.ok(Array.isArray(manifest.files)&&manifest.files.length>0);
+const sharedPackage=JSON.parse(await fs.readFile(path.join(root,'..','package.json'),'utf8'));
+assert.equal(manifest.pluginVersion,sharedPackage.version,'Desktop source manifest must match the shared Pwh version');
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const safeRelative=value=>typeof value==='string'&&value.length>0&&!path.isAbsolute(value)&&!value.includes('\\')&&!value.split('/').some(part=>!part||part==='.'||part==='..');
 const allowed=new Set(['.mjs','.js','.css','.html','.svg','.ico','.cs','.ps1','.cmd','.vbs','.txt']);

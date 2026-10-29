@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
-  <title>pwh 문서 뷰어</title>
+  <title>Pwh 문서 뷰어</title>
   <style>
     :root { color-scheme: light dark; font-family: var(--font-sans, "맑은 고딕", system-ui, sans-serif); color: var(--color-text-primary, #202124); background: var(--color-background-primary, #fff); }
     * { box-sizing: border-box; }
@@ -48,7 +48,7 @@
   </style>
 </head>
 <body>
-  <header><div class="brand">pwh · HWPX</div><h1 id="documentTitle">문서 미리보기</h1></header>
+  <header><div class="brand">Pwh · HWPX</div><h1 id="documentTitle">문서 미리보기</h1></header>
   <nav class="toolbar" aria-label="문서 보기 도구">
     <div class="group">
       <button id="previous" type="button" aria-label="이전 쪽" disabled>←</button>
@@ -175,7 +175,7 @@
         state.index = Math.max(0, pages.findIndex((page) => page.pageNumber === previousNumber));
         if (pages.length) showPage(state.index);
         else showPlaceholder('이 문서에는 표시할 쪽이 없습니다.', false);
-        setStatus(`전체 ${state.pageCount}쪽${pages.length !== state.pageCount ? ` · 선택한 ${pages.length}쪽 표시` : ''} · pwh 조판 결과`);
+        setStatus(`전체 ${state.pageCount}쪽${pages.length !== state.pageCount ? ` · 선택한 ${pages.length}쪽 표시` : ''} · Pwh 조판 결과`);
         updateControls();
         return true;
       }
@@ -188,7 +188,7 @@
         const version = ++state.requestVersion;
         state.renderingFile = state.file.resourceUri; state.busy = true;
         setStatus('문서의 쪽 배치를 계산하고 있습니다.');
-        if (!state.pages.length) showPlaceholder('pwh가 문서를 조판하고 있습니다.');
+        if (!state.pages.length) showPlaceholder('Pwh가 문서를 조판하고 있습니다.');
         updateControls();
         try {
           const result = await request('tools/call', { name: 'pwh_render_open_file', arguments: { maxDimension: 1800 } });

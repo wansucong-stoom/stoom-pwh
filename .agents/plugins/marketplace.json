@@ -1,6 +1,6 @@
 {
   "name": "pwh",
-  "interface": {"displayName": "pwh"},
+  "interface": {"displayName": "Pwh"},
   "plugins": [
     {
       "name": "pwh",

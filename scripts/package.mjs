@@ -8,7 +8,7 @@ import {deflateRawSync} from 'node:zlib';
 
 const PROJECT_ROOT = fileURLToPath(new URL('../', import.meta.url));
 const FILES = Object.freeze([
-  'plugin.json', 'mcp.json', '.mcp.json', '.codex-plugin/plugin.json', 'package.json',
+  'plugin.json', 'mcp.json', '.mcp.json', '.codex-plugin/plugin.json', 'package.json', 'assets/stoom.png',
   'engine.config.json', 'engine.config.example.json', 'runtime-lock.json', 'README.md', 'LICENSE',
   'THIRD_PARTY_NOTICES.md', 'CONTRIBUTING.md', 'scripts/setup.mjs',
   'scripts/inspect_template.py', 'scripts/fill_form.py', 'scripts/replace_image.py', 'scripts/inspect_image.py', 'scripts/build-studio.ps1',
@@ -94,6 +94,10 @@ function validate(entries) {
   for (const filename of REQUIRED) requireFile(filename);
   const plugin = json('plugin.json'), codex = json('.codex-plugin/plugin.json'), pkg = json('package.json');
   if ([plugin, codex, pkg].some(item => item.name !== 'pwh')) throw new Error('Plugin and package names must be pwh.');
+  for (const ui of [plugin.extensions?.['com.openai']?.interface, codex.interface]) {
+    if (ui?.displayName !== 'Pwh' || ui.logo !== './assets/stoom.png' || ui.composerIcon !== './assets/stoom.png') throw new Error('Pwh listing and STOOM icons must agree.');
+    requireFile(ui.logo.slice(2));
+  }
   if (typeof pkg.version !== 'string' || !/^\d+\.\d+\.\d+(?:-[\w.-]+)?$/.test(pkg.version)
     || plugin.version !== pkg.version || codex.version !== pkg.version) throw new Error('Plugin/package versions must agree.');
   if (codex.skills !== './skills' || codex.mcpServers !== './.mcp.json') throw new Error('Codex manifest must reference the packaged skills and .mcp.json.');
@@ -105,6 +109,7 @@ function validate(entries) {
   }
   for (const filename of ['mcp.json', '.mcp.json']) {
     const mcp = json(filename);
+    if(filename==='mcp.json'&&mcp.$schema!=='https://agent-plugins.org/schemas/1.0.0/mcp.schema.json')throw new Error('Portable MCP schema is missing.');
     if (!mcp.mcpServers?.pwh || !mcp.mcpServers?.['rhwp-core']) throw new Error(`${filename} must declare pwh and rhwp-core.`);
     for (const [name, server] of Object.entries(mcp.mcpServers)) {
       if (server.command !== 'node' || server.cwd !== '${PLUGIN_ROOT}' || !Array.isArray(server.args))

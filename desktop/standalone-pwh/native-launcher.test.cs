@@ -69,10 +69,14 @@ internal static class NativeBrandingTest
                 DateTime finalClearDeadline=DateTime.UtcNow.AddSeconds(3);
                 while(ApplicationId(target.Handle)!=null&&DateTime.UtcNow<finalClearDeadline) { Application.DoEvents();Thread.Sleep(20); }
                 cleared=cleared&&ApplicationId(target.Handle)==null;
-                target.Close();unrelated.Close();Application.DoEvents();
+                helper.StandardInput.WriteLine("update-close");helper.StandardInput.Flush();
+                DateTime closeDeadline=DateTime.UtcNow.AddSeconds(5);
+                while(!target.IsDisposed&&DateTime.UtcNow<closeDeadline) { Application.DoEvents();Thread.Sleep(20); }
+                bool updateClosedOnlyTarget=target.IsDisposed&&!unrelated.IsDisposed;
+                unrelated.Close();Application.DoEvents();
                 if(!helper.WaitForExit(5000))throw new Exception("Helper did not release the closed test window.");
-                bool passed=ready!=null&&ready.StartsWith("PWH_WINDOW_BRANDED ")&&small&&big&&pixelsMatch&&unchanged&&appId=="STOOM.PwhDesktop"&&cleared&&restored&&helper.ExitCode==0;
-                Console.WriteLine("{\"passed\":"+passed.ToString().ToLowerInvariant()+",\"canonicalPixelsMatch\":"+pixelsMatch.ToString().ToLowerInvariant()+",\"smallIcon\":"+small.ToString().ToLowerInvariant()+",\"largeIcon\":"+big.ToString().ToLowerInvariant()+",\"otherWindowUnchanged\":"+unchanged.ToString().ToLowerInvariant()+",\"appId\":\""+appId+"\",\"restoredAfterReload\":"+restored.ToString().ToLowerInvariant()+",\"propertiesClearedBeforeClose\":"+cleared.ToString().ToLowerInvariant()+"}");
+                bool passed=ready!=null&&ready.StartsWith("PWH_WINDOW_BRANDED ")&&small&&big&&pixelsMatch&&unchanged&&appId=="STOOM.PwhDesktop"&&cleared&&restored&&updateClosedOnlyTarget&&helper.ExitCode==0;
+                Console.WriteLine("{\"passed\":"+passed.ToString().ToLowerInvariant()+",\"canonicalPixelsMatch\":"+pixelsMatch.ToString().ToLowerInvariant()+",\"smallIcon\":"+small.ToString().ToLowerInvariant()+",\"largeIcon\":"+big.ToString().ToLowerInvariant()+",\"otherWindowUnchanged\":"+unchanged.ToString().ToLowerInvariant()+",\"appId\":\""+appId+"\",\"restoredAfterReload\":"+restored.ToString().ToLowerInvariant()+",\"propertiesClearedBeforeClose\":"+cleared.ToString().ToLowerInvariant()+",\"updateClosedOnlyTarget\":"+updateClosedOnlyTarget.ToString().ToLowerInvariant()+"}");
                 return passed?0:1;
             }
         }

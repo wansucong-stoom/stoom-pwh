@@ -4,10 +4,18 @@ import {randomBytes,randomUUID} from 'node:crypto';
 import {promises as fs} from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {desktopVersion} from './version-info.mjs';
+import {checkForDesktopUpdate,downloadInstaller,scheduleDesktopUpdate} from './update-check.mjs';
+import {recordCodexPluginSetup} from './codex-plugin-setup.mjs';
 
 const root=path.dirname(fileURLToPath(import.meta.url));
-export async function createWorkspaceServer({initialPath,nativeBranding,port=0,spawnImpl=spawn}={}){
+export async function createWorkspaceServer({initialPath,nativeBranding,port=0,spawnImpl=spawn,updateServices}={}){
  const token=randomBytes(24).toString('hex'),tabs=new Map();let closing=false,generation=0;
+ const dataRoot=process.env.PWH_STANDALONE_DATA||path.join(process.env.LOCALAPPDATA||process.env.HOME||root,'PwhDesktop');
+ const services=updateServices||{check:checkForDesktopUpdate,download:downloadInstaller,schedule:scheduleDesktopUpdate};
+ // One nonblocking GitHub lookup per app start; offline operation is normal.
+ const updateCheck=nativeBranding?desktopVersion(root).then(v=>v?services.check(v):null).catch(()=>null):Promise.resolve(null);
+ let preparedUpdate=null,preparingUpdate=null,installingUpdate=false,codexSetup=null;
  const makeTab=async file=>{
   if(closing||tabs.size>=12)throw Error('문서는 최대 12개까지 열 수 있습니다.');
   const id=randomUUID();
@@ -46,6 +54,30 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
   if(req.method==='POST'&&route==='tabs/closing'&&req.headers.origin===origin){closeAll();server.close();return send(res,{ok:true});}
   if(req.method!=='POST'||req.headers.origin!==origin||req.headers['x-pwh-request']!=='1')return send(res,{error:'허용되지 않은 요청입니다.'},403);
   if(route==='tabs/initial'){if(!first)throw Error('처음 문서 탭이 이미 열렸습니다.');const value=first;first=null;return send(res,value);}
+  if(route==='update/status'){const available=await updateCheck;return send(res,{version:available?.version||null});}
+  if(route==='codex-plugin/status'){
+   try{return send(res,JSON.parse(await fs.readFile(path.join(dataRoot,'codex-setup-result.json'),'utf8')));}catch(error){if(error.code==='ENOENT')return send(res,nativeBranding?{status:'not-configured',message:'Codex Pwh 연결을 확인해 주세요.'}:{});throw error;}
+  }
+  if(route==='codex-plugin/retry'){
+   if(!nativeBranding)throw Error('설치된 Pwh Desktop에서 연결해 주세요.');
+   codexSetup??=recordCodexPluginSetup({dataRoot}).finally(()=>{codexSetup=null;});return send(res,await codexSetup);
+  }
+  if(route==='update/result'){
+   const file=path.join(dataRoot,'updates','last-result.json');try{const value=JSON.parse(await fs.readFile(file,'utf8'));await fs.rm(file,{force:true});return send(res,{status:value.status,message:value.message});}catch(error){if(error.code==='ENOENT')return send(res,{});throw error;}
+  }
+  if(route==='update/download'){
+   if(installingUpdate)throw Error('이미 업데이트를 시작했습니다.');const asset=await updateCheck;if(!asset)throw Error('설치할 업데이트가 없습니다.');
+   if(!preparedUpdate){const controller=new AbortController();res.once('close',()=>controller.abort());preparingUpdate??=services.download(asset,path.join(dataRoot,'updates'),{signal:controller.signal}).then(installer=>{preparedUpdate={asset,installer};}).finally(()=>{preparingUpdate=null;});await preparingUpdate;}return send(res,{version:asset.version});
+  }
+  if(route==='update/install'){
+   if(!preparedUpdate||installingUpdate)throw Error('업데이트 파일을 먼저 준비해 주세요.');
+   if(!nativeBranding?.complete||typeof nativeBranding.requestClose!=='function')throw Error('앱 창을 확인하지 못했습니다. 설치 파일을 직접 실행해 주세요.');
+   installingUpdate=true;
+   try{const pids=[process.pid,process.ppid,nativeBranding.helperPid,...[...tabs.values()].map(t=>t.child.pid)].filter(pid=>Number.isSafeInteger(pid)&&pid>0);
+    await services.schedule({installer:preparedUpdate.installer,asset:preparedUpdate.asset,dataRoot,appExe:path.join(path.dirname(root),'PwhDesktop.exe'),pids});
+   }catch(error){installingUpdate=false;throw error;}
+   setTimeout(()=>nativeBranding.requestClose(),250);return send(res,{started:true});
+  }
   if(route==='tabs/new')return send(res,await makeTab());
   if(route==='tabs/close'){let body='';for await(const chunk of req){body+=chunk;if(body.length>1024)throw Error('탭 요청이 너무 큽니다.');}const tab=tabs.get(JSON.parse(body).id);if(!tab)throw Error('문서 탭을 찾을 수 없습니다.');stopTab(tab);tabs.delete(tab.id);return send(res,{ok:true});}
   return send(res,{error:'찾을 수 없는 요청입니다.'},404);
