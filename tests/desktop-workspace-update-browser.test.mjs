@@ -27,3 +27,22 @@ test('update button protects dirty and busy tabs and checks again after download
   await frame.locator('body').evaluate(()=>{window.documentState.dirty=false;});await button.click();await page.locator('#workspace-status').filter({hasText:'업데이트를 설치합니다'}).waitFor();assert.equal(downloads,2);assert.equal(installs,1);assert.equal(checks,1);assert.equal(await page.locator('#documents').evaluate(el=>el.inert),true);
  }finally{await browser.close();server.close();}
 });
+
+test('an update can start from the home screen without opening a document',{
+ skip:process.env.PWH_BROWSER_TESTS!=='1'?'Set PWH_BROWSER_TESTS and explicit Playwright paths':false,timeout:45000,
+},async()=>{
+ const {chromium}=await import(process.env.PWH_PLAYWRIGHT_MODULE||'playwright');
+ const root=new URL('../desktop/standalone-pwh/',import.meta.url),files=Object.fromEntries(await Promise.all(['workspace.html','workspace.js','workspace.css'].map(async name=>[name,await fs.readFile(new URL(name,root))])));
+ let downloads=0,installs=0;
+ const server=createServer((req,res)=>{const pathname=new URL(req.url,'http://localhost').pathname,send=value=>{res.setHeader('content-type','application/json');res.end(JSON.stringify(value));};
+  if(pathname==='/'){res.setHeader('content-type','text/html');return res.end(files['workspace.html']);}
+  if(pathname==='/workspace.js'||pathname==='/workspace.css'){res.setHeader('content-type',pathname.endsWith('.js')?'text/javascript':'text/css');return res.end(files[pathname.slice(1)]);}
+  if(pathname==='/tabs/initial')return send({home:true});if(pathname==='/recent/list')return send({documents:[]});
+  if(pathname==='/update/status')return send({version:'0.1.12'});if(pathname==='/update/result'||pathname==='/codex-plugin/status')return send({});
+  if(pathname==='/update/download'){downloads++;return send({version:'0.1.12'});}if(pathname==='/update/install'){installs++;return send({started:true});}
+  res.statusCode=404;res.end();
+ });await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ const browser=await chromium.launch({headless:true,...(process.env.PWH_BROWSER_EXECUTABLE?{executablePath:process.env.PWH_BROWSER_EXECUTABLE}:{})});
+ try{const page=await browser.newPage();await page.goto(`http://127.0.0.1:${server.address().port}/`);await page.getByRole('heading',{name:'어떤 문서를 작업할까요?'}).waitFor();await page.locator('#workspace-update').click();await page.locator('#workspace-status').filter({hasText:'업데이트를 설치합니다'}).waitFor();assert.equal(downloads,1);assert.equal(installs,1);assert.equal(await page.locator('#documents iframe').count(),0);}
+ finally{await browser.close();server.close();}
+});

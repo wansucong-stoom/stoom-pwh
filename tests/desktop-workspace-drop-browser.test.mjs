@@ -15,10 +15,10 @@ test('a file drop without native path access opens a visible work-copy warning',
  const app=await createWorkspaceServer({nativeBranding:{token:'1234567890abcdef1234567890abcdef',complete:true,resolveDroppedFiles:async()=>{throw Error('native path unavailable');}},updateServices:{check:async()=>null}});
  const browser=await chromium.launch({headless:true,executablePath:process.env.PWH_BROWSER_EXECUTABLE});
  try{
-  const page=await browser.newPage({viewport:{width:1280,height:900}});await page.goto(app.url);const original=page.frameLocator('#documents iframe').first().frameLocator('#editor');await original.locator('#pwh-desktop-tabbar').waitFor({timeout:60000});
-  const target=await original.locator('#editor-area').boundingBox(),cdp=await page.context().newCDPSession(page),data={items:[],files:[fixture],dragOperationsMask:1},x=target.x+target.width/2,y=target.y+target.height/2;
-  for(const type of ['dragEnter','dragOver','drop'])await cdp.send('Input.dispatchDragEvent',{type,x,y,data});await page.waitForFunction(()=>document.querySelectorAll('#documents iframe').length===2,null,{timeout:60000});
-  const child=page.frameLocator('#documents iframe').nth(1),editor=child.frameLocator('#editor');await editor.getByRole('button',{name:'끌어온 문서.hwpx',exact:true}).waitFor({timeout:60000});await child.locator('#document-notice').filter({hasText:'저장 위치 선택 필요'}).waitFor();
+  const page=await browser.newPage({viewport:{width:1280,height:900}});await page.goto(app.url);await page.getByRole('heading',{name:'어떤 문서를 작업할까요?'}).waitFor();
+  const target=await page.locator('#home-view').boundingBox(),cdp=await page.context().newCDPSession(page),data={items:[],files:[fixture],dragOperationsMask:1},x=target.x+target.width/2,y=target.y+target.height/2;
+  for(const type of ['dragEnter','dragOver','drop'])await cdp.send('Input.dispatchDragEvent',{type,x,y,data});await page.waitForFunction(()=>document.querySelectorAll('#documents iframe').length===1,null,{timeout:60000});
+  const child=page.frameLocator('#documents iframe').first(),editor=child.frameLocator('#editor');await editor.getByRole('button',{name:'끌어온 문서.hwpx',exact:true}).waitFor({timeout:60000});await child.locator('#document-notice').filter({hasText:'저장 위치 선택 필요'}).waitFor();
   const info=await child.locator('body').evaluate(async()=>{const r=await fetch('initialize',{method:'POST',headers:{'x-pwh-request':'1','content-type':'application/json'},body:'{}'});return (await r.json()).document;});assert.equal(info.imported,true);assert.notEqual(info.source,fixture,'the fallback must not treat an internal copy as the source file');
  }finally{await browser.close();await new Promise(resolve=>app.server.close(resolve));}
 });
