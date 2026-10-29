@@ -1,0 +1,83 @@
+diff --git a/src/renderer/height_measurer.rs b/src/renderer/height_measurer.rs
+index 741096c..7454711 100644
+--- a/src/renderer/height_measurer.rs
++++ b/src/renderer/height_measurer.rs
+@@ -1260,8 +1260,12 @@ pub fn measured_table_has_grown_text_row(
+     table: &Table,
+     dpi: f64,
+ ) -> bool {
++    table_has_grown_text_row(&measured.row_heights, table, dpi)
++}
++
++pub fn table_has_grown_text_row(row_heights: &[f64], table: &Table, dpi: f64) -> bool {
+     let declared_rows = table.get_row_heights();
+-    if declared_rows.len() != measured.row_heights.len() {
++    if declared_rows.len() != row_heights.len() {
+         return false;
+     }
+     let row_has_nested_table = |row: usize| {
+@@ -1274,8 +1278,7 @@ pub fn measured_table_has_grown_text_row(
+                 })
+         })
+     };
+-    measured
+-        .row_heights
++    row_heights
+         .iter()
+         .enumerate()
+         .zip(declared_rows.iter())
+diff --git a/src/renderer/typeset.rs b/src/renderer/typeset.rs
+index cd56863..4aa3bd7 100644
+--- a/src/renderer/typeset.rs
++++ b/src/renderer/typeset.rs
+@@ -4329,8 +4329,15 @@ impl TypesetEngine {
+             .tac_flow_query()
+             .single_tac_line_has_unstored_cell_text(para, table, fmt, tac_count)
+             && ft.total_height > table_height + 0.5;
+-        let owns_tac_band =
+-            ladder_omits_band || hwpx_rowbreak_tac_missing_owned_line || unstored_cell_band;
++        let stored_grown_text_band = st.profile.hwpx_stored_layout()
++            && tac_count == 1
++            && fmt.line_heights.len() == 1
++            && ft.total_height > table_height + 0.5
++            && crate::renderer::height_measurer::table_has_grown_text_row(&ft.row_heights, table, self.dpi);
++        let owns_tac_band = ladder_omits_band
++            || hwpx_rowbreak_tac_missing_owned_line
++            || unstored_cell_band
++            || stored_grown_text_band;
+         let table_height = if owns_tac_band {
+             if std::env::var("RHWP_5699_DBG").is_ok() {
+                 eprintln!(
+diff --git a/src/renderer/typeset/controls/tac_fit.rs b/src/renderer/typeset/controls/tac_fit.rs
+index 0a2ad8b..e3c95ff 100644
+--- a/src/renderer/typeset/controls/tac_fit.rs
++++ b/src/renderer/typeset/controls/tac_fit.rs
+@@ -71,10 +71,7 @@ pub(super) fn prepare(
+         .then(|| {
+             para.controls.iter().enumerate().find_map(|(ci, ctrl)| {
+                 let Control::Table(t) = ctrl else { return None };
+-                if !flow.is_effective_tac_table(para, t, fmt)
+-                    || !(flow.session_edited()
+-                        || flow.single_tac_line_has_unstored_cell_text(para, t, fmt, tac_count))
+-                {
++                if !flow.is_effective_tac_table(para, t, fmt) {
+                     return None;
+                 }
+                 let declared = hwpunit_to_px(t.common.height as i32, dpi);
+@@ -82,6 +79,16 @@ pub(super) fn prepare(
+                     .iter()
+                     .find(|m| m.para_index == para_idx && m.control_index == ci)
+                     .filter(|m| {
++                        let stored_text_growth = page.profile.hwpx_stored_layout()
++                            && tac_count == 1
++                            && fmt.line_heights.len() == 1
++                            && crate::renderer::height_measurer::measured_table_has_grown_text_row(m, t, dpi);
++                        if !(flow.session_edited()
++                            || flow.single_tac_line_has_unstored_cell_text(para, t, fmt, tac_count)
++                            || stored_text_growth)
++                        {
++                            return false;
++                        }
+                         let tolerance = if flow.session_edited() { 8.0 } else { 0.5 };
+                         m.total_height > declared + tolerance
+                     })

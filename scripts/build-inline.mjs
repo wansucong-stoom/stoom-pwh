@@ -143,7 +143,6 @@ await fs.copyFile(new URL('../src/picture-replace.ts',import.meta.url),path.join
 await fs.copyFile(new URL('../src/page-layout.ts',import.meta.url),path.join(studio,'src/pwh-page-layout.ts'));
 await fs.copyFile(new URL('../src/blank-compose.ts',import.meta.url),path.join(studio,'src/pwh-blank-compose.ts'));
 await fs.copyFile(new URL('../src/studio-selection.ts',import.meta.url),path.join(studio,'src/collaboration-selection.ts'));
-await fs.copyFile(new URL('../src/agent-reveal.mjs',import.meta.url),path.join(studio,'src/pwh-agent-reveal.mjs'));
 await fs.copyFile(new URL('../src/studio-inline-adapter.ts',import.meta.url),path.join(studio,'src/pwh-inline-adapter.ts'));
 let main=await fs.readFile(path.join(studio,'src/main.ts'),'utf8');
 if(!main.includes("import './style.css'"))main="import './style.css';\n"+main;

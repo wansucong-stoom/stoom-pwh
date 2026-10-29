@@ -59,6 +59,15 @@ const patches = [
       }
     ]
   },
+  {
+    file: 'rhwp-0.8.7-stored-grown-table-pagination.patch',
+    sha256: '596bf711aaf4494438c76e0b77aa29741c93f2cdb9b75c5b49e3e4c3364eade3',
+    sources: [
+      {path: 'src/renderer/height_measurer.rs', originalSha256: 'c71e4166c3d701bf702d6ebd2efbb9a7e53fa6046f45beb9ec2469c1c18e1ddd', patchedSha256: '15b9761d3a5273238c533af3f6a1ddc95bffa365a03eb0e456c989914c41e3a6'},
+      {path: 'src/renderer/typeset.rs', originalSha256: '62b9c40af3cc06a63d0ab63b25d02f7740942d016dba198619883d091687cf14', patchedSha256: '1a46e4655e19c95083dd7e5501224e5ca73d9d3dd54d0ecc1341b4fa51bfdac7'},
+      {path: 'src/renderer/typeset/controls/tac_fit.rs', originalSha256: '31a9dfe9482ca8798b25b2c42ad2bf2ef02ce73b309959234a851276855be6d3', patchedSha256: '0168df5eacacf3b7c31fb6b13e1d18a6c7011e5415cce86dfefeecdc3f8d3b6f'},
+    ],
+  },
 ];
 const help = `Usage: node scripts/build-patched-core.mjs
   --source-archive <fixed upstream source ZIP>

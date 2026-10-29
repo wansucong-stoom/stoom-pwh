@@ -4,14 +4,14 @@
 <body>
 <header class="app-header">
   <div class="app-brand" aria-label="STOOM Pwh Desktop"><img src="stoom-mark.svg" alt="" width="36" height="28"><strong>Pwh Desktop</strong></div>
+  <button id="open-ai" class="header-settings" type="button" aria-controls="ai-pane" aria-expanded="false" title="AI 대화 열기" hidden>AI 대화 열기</button>
   <button id="new" hidden>새 문서</button><input id="file" type="file" accept=".hwp,.hwpx" hidden>
   <span id="status" role="status">준비 중</span>
-  <button id="toggle-ai" class="header-settings" type="button" aria-expanded="true" title="AI 대화 닫기">AI 대화 닫기</button>
   <button id="settings" class="header-settings" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.4 3-.6 2.1-1.8 1-2.1-.5-1.7 2.8 1.5 1.6v2L3.2 14l1.7 2.8 2.1-.5 1.8 1 .6 2.1h3.2l.6-2.1 1.8-1 2.1.5 1.7-2.8-1.5-1.6v-2l1.5-1.6-1.7-2.8-2.1.5-1.8-1-.6-2.1Z" transform="translate(1 1)"/><circle cx="12" cy="12" r="3"/></svg><span>AI 설정</span></button>
 </header>
 <main>
-  <aside>
-    <div class="side-title"><strong>AI 대화</strong><span id="provider-label"></span></div>
+  <aside id="ai-pane">
+    <div class="side-title"><strong>AI 대화</strong><span id="provider-label"></span><button id="close-ai" class="icon-button" type="button" aria-controls="ai-pane" aria-label="AI 대화 닫기" title="AI 대화 닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 8 12l7 7"/></svg></button></div>
     <div id="conversation" aria-live="polite"><div id="conversation-empty" class="conversation-empty"><img src="stoom-mark.svg" alt="" width="44" height="35"><h1>문서와 함께 작업하세요</h1><p>내용을 선택해 다듬거나,<br>문서에 관해 이야기해 보세요.</p></div></div>
     <a id="download-codex" href="https://chatgpt.com/download/" target="_blank" rel="noopener noreferrer" hidden>ChatGPT 데스크톱 설치 안내 열기</a>
     <div class="composer">

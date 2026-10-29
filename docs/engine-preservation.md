@@ -9,7 +9,7 @@ version. Node itself is a prerequisite, not bundled.
 For an offline initial installation:
 
 ```powershell
-node scripts/setup.mjs --runtime-root C:\pwh-runtime-r4 --runtime-archive C:\backups\pwh-runtime-rhwp-0.8.7-pwh-r4-windows-x64.zip --skip-download
+node scripts/setup.mjs --runtime-root C:\pwh-runtime-r5 --runtime-archive C:\backups\pwh-runtime-rhwp-0.8.7-pwh-r5-windows-x64.zip --skip-download
 ```
 
 The ZIP hash, identity, file names, expanded sizes, component licenses and every
@@ -86,13 +86,18 @@ inputs separately. Native CLI, editor SDK and the historical full Studio retain
 their verified prior bytes. `scripts/preserve-patched-runtime.py` verifies and
 repackages this reviewed delta without weakening the original preservation tool.
 
+Revision 5 additionally accounts for the actual height of saved inline tables
+whose plain-text rows grew beyond their stored sizes. This prevents later text
+from being laid out past the page boundary while preserving the document's
+saved table properties. Both Pwh and Pwh Desktop use the same rebuilt core.
+
 ## Upgrade from an earlier preserved runtime
 
-Keep the old runtime and install r4 into a new directory. The installer refuses
+Keep the old runtime and install r5 into a new directory. The installer refuses
 to overwrite a different core. For example:
 
 ```powershell
-node scripts/setup.mjs --runtime-root C:\pwh-runtime-r4
+node scripts/setup.mjs --runtime-root C:\pwh-runtime-r5
 ```
 
 Select that directory with `PWH_RUNTIME_ROOT`, or merge a `runtimeRoot` field
