@@ -43,7 +43,7 @@ test('update helper waits for app exit, rechecks the installer and never runs a 
   calls.length=0;let clock=0;assert.equal(await runUpdate(input,{...opts,isAlive:()=>true,now:()=>clock,sleep:async ms=>{clock+=ms;},timeoutMs:1000}),'blocked');assert.equal(calls.length,0,'An open app cannot be forcibly closed or upgraded');
  }finally{await fs.rm(dir,{recursive:true,force:true});}
 });
-test('a separate copied helper is scheduled with the exact verified installer and owned process IDs',async()=>{
+test('a separate copied helper is scheduled with the exact verified installer and owned process IDs',{skip:process.platform!=='win32'?'Windows updater requires Windows':false},async()=>{
  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'pwh-schedule-')),nodeExe=path.join(dir,'node.exe'),installer=path.join(dir,'update.msi'),appExe=path.join(dir,'PwhDesktop.exe');await fs.writeFile(nodeExe,'synthetic-node');await fs.writeFile(installer,bytes);
  let call;const spawnImpl=(exe,args,options)=>{call={exe,args,options};const child=new EventEmitter();child.unref=()=>{};setImmediate(()=>child.emit('spawn'));return child;};
  try{await scheduleDesktopUpdate({installer,asset:{sha256:digest,size:bytes.length},dataRoot:dir,appExe,pids:[111,222],nodeExe,spawnImpl});assert.equal(await fs.readFile(call.exe,'utf8'),'synthetic-node');assert.match(await fs.readFile(call.args[0],'utf8'),/verifyInstaller/);assert.deepEqual(call.args.slice(-2),['111','222']);assert.equal(call.args[1],installer);assert.equal(call.options.detached,true);}finally{await fs.rm(dir,{recursive:true,force:true});}
