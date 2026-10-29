@@ -54,8 +54,8 @@
     {
       "path": "standalone-pwh/build-msi.mjs",
       "source": "standalone-pwh/build-msi.mjs",
-      "size": 13677,
-      "sha256": "77773b52483205553910d13897e6c2a649bc4bc6a7ea031ecd4ab31ccef790fd"
+      "size": 13812,
+      "sha256": "fdf5e0700678dc204c8d931a8bbaf862f6a7abfc82efb21cb77530d7b5d61a2d"
     },
     {
       "path": "standalone-pwh/build-native-launcher.mjs",
@@ -66,8 +66,8 @@
     {
       "path": "standalone-pwh/build-offline.mjs",
       "source": "standalone-pwh/build-offline.mjs",
-      "size": 6276,
-      "sha256": "c422b2f6b51f18674a89d6c2e18c12bbe7c57897b918ec0266ded8ba884e2e72"
+      "size": 6407,
+      "sha256": "2db4a62dea439856cad1065583702c111a0438f3547df6395b6d9bf4ad18ff4b"
     },
     {
       "path": "standalone-pwh/build-stoom-icon.mjs",
@@ -180,8 +180,8 @@
     {
       "path": "standalone-pwh/host.mjs",
       "source": "standalone-pwh/host.mjs",
-      "size": 35839,
-      "sha256": "3e6052c96f7962d0251e639699af8aeb726fbbc78133ae3fd5feb48883c4af23"
+      "size": 35958,
+      "sha256": "e6590c4d771719c6a22cbcfe815bdb22b847834b46bb7b2c87a226489c9e4bb0"
     },
     {
       "path": "standalone-pwh/install.cmd",
@@ -314,6 +314,24 @@
       "source": "standalone-pwh/verify-stoom-icon.ps1",
       "size": 2509,
       "sha256": "bf2977e281cd1974041251f798c968c0bdbe2a59f4f80cc2c96f502a4316e3a8"
+    },
+    {
+      "path": "standalone-pwh/version-info.check.mjs",
+      "source": "standalone-pwh/version-info.test.mjs",
+      "size": 1076,
+      "sha256": "2e7eb596fcb9729c5d627e4a39faa3776d81529663c27295c1ce37770dba86b3"
+    },
+    {
+      "path": "standalone-pwh/version-info.mjs",
+      "source": "standalone-pwh/version-info.mjs",
+      "size": 706,
+      "sha256": "733d5b1bc33bfdf1650c114375394acad99df7ba23af20bb7b8d73bab3651bee"
+    },
+    {
+      "path": "standalone-pwh/version.json",
+      "source": "standalone-pwh/version.json",
+      "size": 20,
+      "sha256": "7c1878e7a1631f1ddf643849612c793a01cb479fee353a6a0f5f151d8ab32e3e"
     }
   ]
 }
