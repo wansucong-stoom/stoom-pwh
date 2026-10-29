@@ -11,8 +11,10 @@ Pwh Desktop은 AI 대화와 한글 문서 편집기를 한 창에서 사용하�
 MSI는 설치된 Codex가 있으면 Pwh 플러그인과 포함된 스킬도 연결합니다. 기존 GitHub Pwh는 원래 연결을 유지해 같은 버전으로 갱신하므로 인터넷이 필요합니다. 처음 설치하는 경우 내장된 Pwh와 엔진을 사용하며, Desktop을 제거해도 Codex에서 쓰는 런타임은 사용자 데이터에 남습니다. Codex가 없거나 연결에 실패해도 Desktop 설치는 계속됩니다. 이후 상단의 **Codex 연결 다시 시도**로 재시도하고 새 Codex 대화를 열면 됩니다.
 
 - 문서 편집과 HWPX 저장은 로컬에서 처리합니다. 파일 메뉴에 새 문서·열기·저장·다른 이름으로 저장이 있습니다.
-- Codex 연결은 PC에 설치되고 로그인된 Codex의 공식 app-server를 사용합니다. OpenAI 앱 소스나 로그인 화면을 복제하지 않습니다.
-- AI 설정에서 Codex 또는 로컬 AI를 선택합니다. 로컬 AI는 Ollama 등 OpenAI 호환 서버 주소와 모델을 지정합니다. Codex 모델과 추론 강도는 대화 입력창에서도 선택합니다.
+- 새 설치의 기본 AI 연결은 OpenAI의 공식 **ChatGPT로 계속**입니다. 로그인과 요금제 사용 승인은 시스템 브라우저의 OpenAI 화면에서 진행하며, 별도 Codex 설치는 필요하지 않습니다. 기존에 저장한 AI 연결 선택은 유지합니다.
+- 공식 오픈소스 Codex app-server를 설치기에 포함해 문서 도구와 연결합니다. 선택적으로 기존에 설치된 Codex나 로컬 AI도 사용할 수 있습니다. 로컬 AI는 Ollama 등 OpenAI 호환 서버 주소와 모델을 지정합니다. 지원되는 모델과 추론 강도는 대화 입력창에서도 선택합니다.
+- ChatGPT 연결은 OpenAI의 미리보기 기능이며, 계정·모델별로 사용 가능 범위가 다를 수 있습니다. 이미지 생성과 일부 ChatGPT 내장 도구는 이 연결에서 지원되지 않습니다. 사용량은 [ChatGPT 설정](https://chatgpt.com/settings/usage)에서 확인합니다.
+- 로그인 토큰은 Windows 사용자 계정에 묶어 암호화합니다. 실행 중 인증을 갱신할 때 대화를 이어가기 위한 기록은 이 PC에 저장됩니다. 앱을 다시 열었을 때 이전 대화가 화면에 자동 복원되지는 않습니다. 다른 프로그램의 ChatGPT 또는 Codex 로그인 정보를 복사하지 않습니다.
 - AI 대화와 문서 사이의 경계를 드래그해 너비를 조절합니다. STOOM 원본 마크와 색상을 앱·설치·바로가기·파일 연결 아이콘에 사용합니다.
 
 AI에 보낸 내용은 선택한 제공자가 처리합니다. Codex 연결에는 네트워크가 필요하며, 로컬 AI도 사용 전에 별도로 모델과 서버를 준비해야 합니다.
@@ -29,10 +31,10 @@ AI에 보낸 내용은 선택한 제공자가 처리합니다. Codex 연결에�
 
 저장소의 `desktop/standalone-pwh`는 Desktop 호스트·화면·Windows 실행 파일·설치기 소스입니다. `desktop/bridge`에는 STOOM이 작성한 공식 Codex app-server 연결 코드가 있습니다. 공통 편집기 코드는 저장소의 `src`, `client`, `runtime-lock.json`을 사용합니다. Desktop이 별도의 기본 rhwp 복사본에서 빌드되지 않도록 설치기 빌드가 Pwh 버전과 편집기 SHA256 일치를 검사합니다.
 
-Windows x64의 Node.js와 WiX 3.14 도구, 고정된 보존 런타임 ZIP을 준비한 뒤 실행합니다.
+Windows x64의 Node.js와 WiX 3.14 도구, 고정된 Pwh 보존 런타임 ZIP과 [공식 Codex app-server Windows x64 패키지](https://github.com/openai/codex/releases/tag/rust-v0.165.0)를 준비한 뒤 실행합니다. `--codex-runtime`에는 공식 `codex-app-server-package-x86_64-pc-windows-msvc.tar.gz`를 안전하게 푼 디렉터리를 지정합니다. 빌드는 `official-codex-runtime.mjs`에 고정된 각 파일의 크기와 SHA256을 확인한 뒤 설치기에 복사합니다.
 
 ```powershell
-node scripts/build-desktop.mjs --output C:\build\PwhDesktop.msi --runtime-archive C:\build\pwh-runtime.zip --wix-dir C:\build\wix314
+node scripts/build-desktop.mjs --output C:\build\PwhDesktop.msi --runtime-archive C:\build\pwh-runtime.zip --wix-dir C:\build\wix314 --codex-runtime C:\build\codex-app-server
 ```
 
 이 명령은 검증된 공통 플러그인 패키지와 Desktop 소스를 새 임시 빌드 폴더에 모아 MSI를 생성합니다. 재빌드용 임시 폴더는 결과 확인을 위해 보존하며, 사용자의 설치판이나 문서를 바꾸지 않습니다. 설치기에 들어가는 Node.js와 각 런타임 구성요소의 라이선스 고지도 함께 포함됩니다.

@@ -1,6 +1,6 @@
 # Pwh Desktop 공개 소스
 
-이 폴더는 Desktop 호스트, AI 연결, Windows 실행기·설치기와 편집기 번들의 공개 소스를 보존합니다. 문서 조판 코어와 공통 편집 기능은 저장소 상위의 `src`, `client`, `runtime-lock.json`을 함께 사용합니다. Node.js 라이선스는 `standalone-pwh/NODE-LICENSE.txt`에 포함되어 있습니다.
+이 폴더는 Desktop 호스트, AI 연결, Windows 실행기·설치기와 편집기 번들의 공개 소스를 보존합니다. 문서 조판 코어와 공통 편집 기능은 저장소 상위의 `src`, `client`, `runtime-lock.json`을 함께 사용합니다. Node.js와 공식 Codex app-server의 라이선스 고지는 `standalone-pwh`의 `NODE-LICENSE.txt`와 `CODEX-*.txt`에 포함되어 있습니다. 공식 app-server 실행 파일은 공개 소스에 넣지 않으며, 설치기를 빌드할 때 고정된 파일 해시를 검증해 포함합니다.
 
 Desktop 소스는 GitHub 저장소와 GitHub 소스 아카이브에 포함됩니다. 기본 MCP 플러그인 ZIP에는 Desktop 폴더를 넣지 않습니다. Desktop을 다시 빌드할 때는 전체 저장소를 내려받아 사용하며, Desktop 설치판과 별도 소스 배포물은 플러그인 패키지와 구분합니다.
 

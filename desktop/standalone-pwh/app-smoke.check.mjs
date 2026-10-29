@@ -98,7 +98,7 @@ test('independent window loads real pwh and retains manual text editing', {skip:
   const state=await page.locator('#editor').evaluate(el=>el.contentWindow.pwhEditor.context());
   assert.equal(state.documentState.dirty,true);
   await page.getByRole('button',{name:'AI 설정'}).click();
-  await page.locator('#provider').selectOption('local');
+  await page.getByRole('radio',{name:'로컬 AI'}).check();
   assert.equal(await page.locator('#local-url').inputValue(),'http://127.0.0.1:11434/v1');
  }finally{await browser.close();}
 });
@@ -186,7 +186,7 @@ test('local OpenAI-compatible server answers from the desktop chat', {skip:!proc
   page=await browser.newPage({viewport:{width:1400,height:900}});const errors=[];page.on('pageerror',error=>errors.push(error.message));await page.goto(process.env.PWH_STANDALONE_URL);
   const frame=page.frameLocator('#editor');await frame.locator('#pwh-status').filter({hasText:'본문에서 직접 편집하세요'}).waitFor({timeout:60000});
   const prior=await page.locator('#editor').getAttribute('src');await page.locator('#new').evaluate(el=>el.click());await page.waitForFunction(value=>document.querySelector('#editor').getAttribute('src')!==value,prior);const next=await page.locator('#editor').getAttribute('src');await page.waitForFunction(value=>document.querySelector('#editor').contentWindow.location.search===new URL(value,location.href).search,next);await frame.locator('#pwh-status').filter({hasText:'본문에서 직접 편집하세요'}).waitFor({timeout:60000});
-  await page.getByRole('button',{name:'AI 설정'}).click();await page.locator('#provider').selectOption('local');await page.locator('#local-url').fill(`http://127.0.0.1:${server.address().port}/v1`);await page.locator('#local-model').fill('fake-model');await page.locator('#save-settings').click();await page.locator('#settings-dialog').waitFor({state:'hidden'});
+  await page.getByRole('button',{name:'AI 설정'}).click();await page.getByRole('radio',{name:'로컬 AI'}).check();await page.getByRole('tab',{name:'로컬 AI'}).click();await page.locator('#local-url').fill(`http://127.0.0.1:${server.address().port}/v1`);await page.locator('#local-model').fill('fake-model');await page.locator('#save-settings').click();await page.locator('#settings-dialog').waitFor({state:'hidden'});
   await page.locator('#prompt').fill('인사해 줘');await page.locator('#send').click();try{await page.locator('#conversation').getByText('수정된 문장').waitFor({timeout:15000});}catch(error){throw Error(`status=${await page.locator('#status').innerText()} chat=${await page.locator('#conversation').innerText()} errors=${errors.join(';')}`);}
   assert.equal(await page.locator('#status').innerText(),'AI 답변만 받았습니다. 문서는 변경되지 않았습니다.',await page.locator('#conversation').innerText());assert.match(await page.locator('#conversation').innerText(),/수정된 문장/);
   await frame.getByRole('textbox',{name:'문서 편집 입력'}).focus();await page.keyboard.type('Hello');for(let i=0;i<5;i++)await page.keyboard.press('Shift+ArrowLeft');
