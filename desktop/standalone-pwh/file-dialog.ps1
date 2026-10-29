@@ -1,4 +1,4 @@
-param([ValidateSet('Open','Save')][string]$Mode,[string]$SuggestedName = '문서.hwpx')
+﻿param([ValidateSet('Open','Save')][string]$Mode,[string]$SuggestedName = '문서.hwpx')
 Add-Type -AssemblyName System.Windows.Forms
 [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 if ($Mode -eq 'Open') {
@@ -15,6 +15,8 @@ if ($Mode -eq 'Open') {
 }
 $owner = [System.Windows.Forms.Form]::new()
 $owner.Text = 'Pwh Desktop'
+$icon = [System.Drawing.Icon]::new((Join-Path $PSScriptRoot 'stoom.ico'))
+$owner.Icon = $icon
 $owner.ShowInTaskbar = $false
 $owner.StartPosition = 'CenterScreen'
 $owner.Size = [System.Drawing.Size]::new(1, 1)
@@ -27,4 +29,4 @@ try {
   if ($dialog.ShowDialog($owner) -eq [System.Windows.Forms.DialogResult]::OK) {
     @{ cancelled = $false; path = $dialog.FileName } | ConvertTo-Json -Compress
   } else { @{ cancelled = $true } | ConvertTo-Json -Compress }
-} finally { $dialog.Dispose(); $owner.Close(); $owner.Dispose() }
+} finally { $dialog.Dispose(); $owner.Close(); $owner.Dispose(); $icon.Dispose() }
