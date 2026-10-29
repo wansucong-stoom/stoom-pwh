@@ -44,5 +44,9 @@ test('closing recovery leaves the draft intact even after a new edit',{
   assert.equal(await frame.evaluate(()=>window.__recoveryChoice),'dismiss');
   await frame.evaluate(()=>{window.__recoveryChoice=promptRecovery(false);});await dialog.getByRole('button',{name:'저장본 열기'}).click();assert.equal(await frame.evaluate(()=>window.__recoveryChoice),'source');
   await frame.evaluate(()=>{window.__recoveryChoice=promptRecovery(false);});await dialog.getByRole('button',{name:'복구하기'}).click();assert.equal(await frame.evaluate(()=>window.__recoveryChoice),'recover');
+  await frame.evaluate(()=>window.pwhEditor.saved());await frame.goto(`http://127.0.0.1:${server.address().port}/editor`);
+  await frame.locator('#pwh-status').filter({hasText:'본문에서 직접 편집하세요'}).waitFor({timeout:30000});assert.equal(await dialog.count(),0,'a dismissed unchanged recovery does not reappear after reopening');
+  await frame.evaluate(()=>{window.__manualRecovery=window.pwhShowRecovery();});await dialog.getByRole('button',{name:'복구하기'}).click({timeout:5000});await frame.evaluate(()=>window.__manualRecovery);
+  const recovered=new HwpDocument(Uint8Array.from(await frame.evaluate(()=>Array.from(window.pwhEditor.export().bytes))));try{assert.equal(recovered.getTextRange(0,0,0,8),'임시 복구 내용');}finally{recovered.free();}
  }finally{await browser.close();await new Promise(resolve=>server.close(resolve));await fs.rm(dir,{recursive:true,force:true});}
 });

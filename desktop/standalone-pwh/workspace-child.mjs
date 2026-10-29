@@ -1,8 +1,8 @@
 import {createAppServer} from './host.mjs';
 
-const port=Number(process.argv[2]),initialPath=process.argv[3]||undefined;
+const port=Number(process.argv[2]),initialPath=process.argv[3]||undefined,imported=process.argv[4]==='imported';
 try{
- const {server,url}=await createAppServer({initialPath,port,idleTimeoutMs:24*60*60*1000});
+ const {server,url}=await createAppServer({initialPath,imported,port,idleTimeoutMs:24*60*60*1000});
  process.stdout.write(JSON.stringify({url})+'\n');
  process.stdin.on('end',()=>{server.close();server.closeAllConnections?.();});
  process.stdin.resume();

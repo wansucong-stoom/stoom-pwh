@@ -3,6 +3,16 @@ import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 const root=path.resolve(process.argv[2]);
 const studio=path.join(root,'rhwp-studio');
+// Apply the same text selection behavior in both Pwh hosts.
+await fs.copyFile(new URL('../src/multiclick-selection.mjs',import.meta.url),path.join(studio,'src/engine/pwh-multiclick-selection.mjs'));
+const mousePath=path.join(studio,'src/engine/input-handler-mouse.ts');let mouse=await fs.readFile(mousePath,'utf8');
+if(!mouse.includes('pwh word and paragraph multiclick')){
+ const anchor='    this.cursor.moveToHit(hit);\n    this.cursor.resetPreferredX();\n    this.prepareClickHerePointerEntry?.(pageX);';
+ if(!mouse.includes(anchor))throw Error('Unsupported mouse text selection');
+ const generatedImport="import {selectMulticlick} from "+JSON.stringify('./pwh-multiclick-selection.mjs')+";\n";
+ mouse="// pwh word and paragraph multiclick\n"+generatedImport+mouse.replace(anchor,"    this.cursor.moveToHit(hit);\n    this.cursor.resetPreferredX();\n    if (e.button === 0 && !e.ctrlKey && !e.altKey && !e.metaKey && selectMulticlick(this.cursor,this.wasm,e.detail)) {\n      this.active = true; this.cellSelectionDragCandidate = null; this.updateCaret(true); this.textarea.focus(); e.preventDefault(); return;\n    }\n    this.prepareClickHerePointerEntry?.(pageX);");
+ await fs.writeFile(mousePath,mouse);
+}
 // Keep Hancom-style commands in the shared editor rather than in either host.
 await fs.copyFile(new URL('../src/table-create-shortcut.mjs',import.meta.url),path.join(studio,'src/engine/pwh-table-create-shortcut.mjs'));
 await fs.copyFile(new URL('../src/cell-border-grid.mjs',import.meta.url),path.join(studio,'src/ui/pwh-cell-border-grid.mjs'));

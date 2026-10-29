@@ -1,0 +1,21 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs/promises';import os from 'node:os';import path from 'node:path';import {pathToFileURL} from 'node:url';
+
+test('Desktop integrates tabs in the document row, preserves the HWP filename, and reopens AI',{
+ skip:process.env.PWH_BROWSER_TESTS!=='1'||!process.env.PWH_DESKTOP_SOURCE_ROOT||!process.env.PWH_TEST_HWP?'Set Desktop build, browser and explicit HWP fixture paths':false,timeout:120000,
+},async()=>{
+ const {chromium}=await import(process.env.PWH_PLAYWRIGHT_MODULE||'playwright'),dir=await fs.mkdtemp(path.join(os.tmpdir(),'pwh-desktop-ui-')),sample=path.join(dir,'문서 이름 시험.hwp');await fs.copyFile(process.env.PWH_TEST_HWP,sample);process.env.PWH_STANDALONE_DATA=path.join(dir,'data');
+ const {createWorkspaceServer}=await import(pathToFileURL(path.join(process.env.PWH_DESKTOP_SOURCE_ROOT,'workspace-shell.mjs')));
+ let dropCalls=0;const app=await createWorkspaceServer({initialPath:sample,nativeBranding:{token:'1234567890abcdef1234567890abcdef',complete:true,resolveDroppedFiles:async(_id,count)=>{dropCalls++;assert.equal(count,1);return [sample];}},updateServices:{check:async()=>null}});
+ const browser=await chromium.launch({headless:true,executablePath:process.env.PWH_BROWSER_EXECUTABLE});
+ try{
+  const page=await browser.newPage({viewport:{width:1280,height:900}});await page.goto(app.url);const child=page.frameLocator('#documents iframe').first(),editor=child.frameLocator('#editor');
+  await editor.locator('#pwh-desktop-tabbar').waitFor({timeout:60000});await editor.getByRole('button',{name:'문서 이름 시험.hwp',exact:true}).waitFor({timeout:60000});
+  assert.equal(await page.locator('body').evaluate(e=>e.classList.contains('integrated-tabs')),true);assert.ok((await page.locator('.workspace-header').boundingBox()).height<=1,'top tab strip does not consume vertical space');
+  assert.equal(await editor.locator('#pwh-version').textContent(),'Pwh Desktop 0.1.10 (0.6.31)');await child.locator('#status').filter({hasText:'조판기 준비 완료'}).waitFor({timeout:30000});assert.doesNotMatch(await editor.locator('#pwh-status').textContent(),/본문에서 직접 편집/);
+  await child.getByRole('button',{name:'AI 대화 닫기'}).click();const open=editor.getByRole('button',{name:'AI 대화 열기'});await open.waitFor({state:'visible'});assert.equal(await child.locator('#editor').isVisible(),true);const ai=await editor.locator('#pwh-ai-floating').boundingBox(),openBox=await open.boundingBox();assert.ok(openBox.y>ai.y,'open arrow is below AI edit request');await open.click();assert.equal(await child.locator('#ai-pane').isVisible(),true);
+  await editor.getByRole('button',{name:'새 문서 탭'}).click();await page.waitForFunction(()=>document.querySelectorAll('#documents iframe').length===2,null,{timeout:60000});const second=page.frameLocator('#documents iframe').nth(1),secondEditor=second.frameLocator('#editor');await secondEditor.locator('#pwh-desktop-tabbar').waitFor({timeout:60000});await secondEditor.getByRole('button',{name:'문서 이름 시험.hwp',exact:true}).click();assert.equal(await page.locator('#documents iframe').first().isVisible(),true);
+  const target=await editor.locator('#editor-area').boundingBox(),cdp=await page.context().newCDPSession(page),data={items:[],files:[sample],dragOperationsMask:1},x=target.x+target.width/2,y=target.y+target.height/2;
+  for(const type of ['dragEnter','dragOver','drop'])await cdp.send('Input.dispatchDragEvent',{type,x,y,data});await page.waitForFunction(()=>document.querySelectorAll('#documents iframe').length===3,null,{timeout:60000});assert.equal(dropCalls,1,'a trusted file drop is routed to the native path resolver');
+  const dropped=page.frameLocator('#documents iframe').nth(2).frameLocator('#editor');await dropped.getByRole('button',{name:'문서 이름 시험.hwp',exact:true}).waitFor({timeout:60000});
+ }finally{await browser.close();await new Promise(resolve=>app.server.close(resolve));}
+});

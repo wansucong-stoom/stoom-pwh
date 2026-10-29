@@ -4,6 +4,7 @@ import {promises as fs} from 'node:fs';
 import {spawn} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {randomBytes} from 'node:crypto';
+import {startWindowCloseController} from './window-close-controller.mjs';
 
 const dataRoot=process.env.PWH_DESKTOP_DATA_ROOT||path.join(process.env.LOCALAPPDATA||os.homedir(),'PwhDesktop');
 const programRoot=path.dirname(path.dirname(fileURLToPath(import.meta.url)));
@@ -25,7 +26,8 @@ const candidates=[path.join(process.env['ProgramFiles(x86)']||'C:/Program Files 
 let edge='';for(const candidate of candidates){try{await fs.access(candidate);edge=candidate;break;}catch{}}
 if(!edge){server.close();throw Error('Microsoft Edge가 필요합니다.');}
 await fs.mkdir(dataRoot,{recursive:true});
-const child=spawn(edge,[`--app=${url}`,`--user-data-dir=${path.join(dataRoot,'browser-profile')}`,'--no-first-run'],{windowsHide:false,stdio:'ignore'});
+const child=spawn(edge,[`--app=${url}`,`--user-data-dir=${path.join(dataRoot,'browser-profile')}`,'--no-first-run',...(nativeBranding?['--edge-skip-compat-layer-relaunch','--remote-debugging-pipe','--disable-background-mode']:[])],{windowsHide:false,stdio:nativeBranding?['ignore','ignore','ignore','pipe','pipe']:'ignore'});
+if(nativeBranding){const controller=startWindowCloseController(child);nativeBranding.resolveDroppedFiles=(id,count)=>controller?.resolveDroppedFiles(url,id,count);}
 child.once('error',()=>server.close());child.once('exit',code=>{if(code)server.close();});
 server.once('close',()=>child.unref());
 if(nativeBranding){

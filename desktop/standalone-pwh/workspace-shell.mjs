@@ -16,14 +16,14 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
  // One nonblocking GitHub lookup per app start; offline operation is normal.
  const updateCheck=nativeBranding?desktopVersion(root).then(v=>v?services.check(v):null).catch(()=>null):Promise.resolve(null);
  let preparedUpdate=null,preparingUpdate=null,installingUpdate=false,codexSetup=null;
- const makeTab=async file=>{
+ const makeTab=async (file,imported=false)=>{
   if(closing||tabs.size>=12)throw Error('문서는 최대 12개까지 열 수 있습니다.');
   const id=randomUUID();
   // A stable origin per tab slot keeps the editor's local recovery store reachable
   // after reopening. A second window skips ports already owned by another app.
   for(let childPort=48674;childPort<48738;childPort++){
    if([...tabs.values()].some(tab=>tab.port===childPort))continue;
-   const child=spawnImpl(process.execPath,[path.join(root,'workspace-child.mjs'),String(childPort),...(file?[file]:[])],{windowsHide:true,stdio:['pipe','pipe','pipe'],env:process.env});
+   const child=spawnImpl(process.execPath,[path.join(root,'workspace-child.mjs'),String(childPort),...(file?[file,...imported?['imported']:[]]:[])],{windowsHide:true,stdio:['pipe','pipe','pipe'],env:process.env});
    let output='',diagnostic='';child.stdin.on('error',()=>{});child.stderr.on('data',x=>diagnostic=(diagnostic+String(x)).slice(-1500));
    const result=await new Promise((resolve,reject)=>{const timer=setTimeout(()=>{child.kill();reject(Error('문서 탭을 준비하지 못했습니다.'));},90000);timer.unref?.();
     child.once('error',e=>{clearTimeout(timer);reject(e);});child.once('exit',()=>{clearTimeout(timer);reject(Error('문서 탭이 종료되었습니다. '+diagnostic.slice(0,200)));});
@@ -54,6 +54,25 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
   if(req.method==='POST'&&route==='tabs/closing'&&req.headers.origin===origin){closeAll();server.close();return send(res,{ok:true});}
   if(req.method!=='POST'||req.headers.origin!==origin||req.headers['x-pwh-request']!=='1')return send(res,{error:'허용되지 않은 요청입니다.'},403);
   if(route==='tabs/initial'){if(!first)throw Error('처음 문서 탭이 이미 열렸습니다.');const value=first;first=null;return send(res,value);}
+  if(route==='native/request-close'){
+   if(!nativeBranding?.complete||typeof nativeBranding.requestClose!=='function')throw Error('앱 창을 확인하지 못했습니다. 문서를 저장한 뒤 다시 닫아 주세요.');
+   setTimeout(()=>nativeBranding.requestClose(),100);return send(res,{requested:true});
+  }
+  if(route==='native/drop-open'){
+   let body='';for await(const chunk of req){body+=chunk;if(body.length>1024)throw Error('파일 요청이 너무 큽니다.');}const {id,count}=JSON.parse(body);
+   const paths=await nativeBranding?.resolveDroppedFiles?.(id,count);if(!Array.isArray(paths)||paths.length!==count)throw Error('원본 파일 경로를 확인하지 못했습니다.');
+   for(const file of paths){if(typeof file!=='string'||!path.isAbsolute(file)||!/\.hwpx?$/i.test(file))throw Error('HWP 또는 HWPX 파일만 열 수 있습니다.');const stat=await fs.lstat(file);if(!stat.isFile()||stat.isSymbolicLink()||stat.size>64*1024*1024)throw Error('64 MiB 이하의 일반 문서 파일을 선택하세요.');}
+   if(tabs.size+paths.length>12)throw Error('문서는 최대 12개까지 열 수 있습니다.');
+   const opened=[],errors=[];for(const file of paths){try{opened.push(await makeTab(file));}catch(error){errors.push(path.basename(file)+': '+error.message);}}
+   return send(res,{opened,errors});
+  }
+  if(route==='tabs/import'){
+   let name;try{name=decodeURIComponent(String(req.headers['x-pwh-filename']||''));}catch{throw Error('파일 이름을 확인하지 못했습니다.');}
+   if(!name||name!==path.basename(name)||!/\.hwpx?$/i.test(name)||name.length>200)throw Error('HWP 또는 HWPX 파일만 열 수 있습니다.');
+   let size=0;const chunks=[];for await(const chunk of req){size+=chunk.length;if(size>64*1024*1024)throw Error('64 MiB 이하의 문서를 선택하세요.');chunks.push(chunk);}const bytes=Buffer.concat(chunks);
+   if(bytes.length<8||(bytes.subarray(0,2).toString()!=='PK'&&bytes.subarray(0,8).toString('hex')!=='d0cf11e0a1b11ae1'))throw Error('HWP 또는 HWPX 문서가 아닙니다.');
+   const dir=path.join(dataRoot,'documents','import-'+randomUUID());await fs.mkdir(dir,{recursive:true});const file=path.join(dir,name);await fs.writeFile(file,bytes,{flag:'wx'});return send(res,await makeTab(file,true));
+  }
   if(route==='update/status'){const available=await updateCheck;return send(res,{version:available?.version||null});}
   if(route==='codex-plugin/status'){
    try{return send(res,JSON.parse(await fs.readFile(path.join(dataRoot,'codex-setup-result.json'),'utf8')));}catch(error){if(error.code==='ENOENT')return send(res,nativeBranding?{status:'not-configured',message:'Codex Pwh 연결을 확인해 주세요.'}:{});throw error;}

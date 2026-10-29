@@ -254,7 +254,7 @@ function v() {
 	}, !0);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/host-font-provider.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/host-font-provider.ts
 var y = 25e3, b = 67108864;
 function x(e, t = !1) {
 	return typeof e == "string" && e.length <= 1024 && (t || e.trim().length > 0);
@@ -13773,7 +13773,7 @@ function Te(e) {
 	return fe.filter((e) => be(e.name) === t).map((e) => e.ruleId);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/font-loader.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/font-loader.ts
 var Ee = fe, De = new Set(Ee.map((e) => e.name)), Oe = /* @__PURE__ */ new Set(["함초롬바탕", "함초롬돋움"]), ke = [], Ae = /* @__PURE__ */ new Set(), je = /* @__PURE__ */ new Set(), Me = /* @__PURE__ */ new Set();
 function Ne(e) {
 	return /^https?:\/\//i.test(e);
@@ -13922,7 +13922,7 @@ async function Ye(e, t, n) {
 	console.log(`[FontLoader] 폰트 로드 완료: ${d}개 성공, ${f}개 실패 (총 ${je.size}개 파일 요청)`);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/canvas-font-raw.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/canvas-font-raw.ts
 var Xe = null;
 function Ze(e) {
 	let t = Object.getPrototypeOf(e);
@@ -13948,7 +13948,7 @@ function $e(e, t) {
 	e.font = t;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/local-fonts.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/local-fonts.ts
 var et = "rhwp-local-fonts", tt = 72, nt = .1, rt = [
 	"monospace",
 	"serif",
@@ -14568,7 +14568,7 @@ async function Fn(e) {
 	} : null;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/host-font-requests.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/host-font-requests.ts
 function In(e) {
 	return {
 		weight: e?.bold ? 700 : 400,
@@ -14595,7 +14595,7 @@ function Rn(e) {
 	return [...t.values()];
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/pwh-selection-layout.mjs
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/pwh-selection-layout.mjs
 var zn = (e) => typeof e == "string" ? JSON.parse(e) : e, Bn = (e) => e.every(Number.isFinite);
 function Vn({ maxPages: e = 32 } = {}) {
 	if (!Number.isSafeInteger(e) || e < 1 || e > 1e3) throw RangeError("Selection layout cache maxPages must be between 1 and 1000");
@@ -19722,7 +19722,7 @@ async function Tr(e) {
 	return Sr(n, r);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/supplemental-text-metrics.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/supplemental-text-metrics.ts
 var Er = 4096, Dr = 4194304, Or = new TextEncoder();
 function kr(e) {
 	if (![e.document, e.fonts].every((e) => Number.isSafeInteger(e) && e >= 0)) throw Error("Invalid supplemental metric generation");
@@ -19848,7 +19848,7 @@ function Fr(e, t) {
 	}
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/pwh-local-font-face.mjs
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/pwh-local-font-face.mjs
 var Ir = 1e3;
 function Lr(e) {
 	let t = "";
@@ -19884,7 +19884,7 @@ async function Rr(e, t, n = globalThis.FontFace) {
 	}
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/font-substitution.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/font-substitution.ts
 var zr = ae.map((e) => {
 	let t = /* @__PURE__ */ new Map();
 	for (let [n, r, i, a, o] of e) {
@@ -20141,7 +20141,7 @@ function di(e, t = 0, n = 0, r = {}) {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/sfnt-face.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/sfnt-face.ts
 var fi = 1953784678, pi = 65536, mi = 131072, hi = 4096, gi = 4096, _i = 67108864, vi = 1751474532, yi = 2981146554;
 function bi(e, t) {
 	if (!Number.isInteger(t) || t < 0 || t > 4294967295) return null;
@@ -20189,7 +20189,7 @@ function bi(e, t) {
 	return p.buffer;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/host-canvas-fonts.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/host-canvas-fonts.ts
 var xi = 0, Si = null;
 function Ci(e, t) {
 	let n = Si;
@@ -20311,7 +20311,7 @@ function Oi(e) {
 	return e instanceof Ei || e instanceof Di;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/char-shape-runs.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/char-shape-runs.ts
 function ki(e) {
 	if (e == null) throw new Ei("문서가 로드되지 않았습니다. 문서를 먼저 열어 주세요.");
 	if (!e || [
@@ -20792,7 +20792,7 @@ function Ea(e, t) {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/hml-save-capability.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/hml-save-capability.ts
 function Da(e) {
 	if (!e || typeof e != "object") return !1;
 	let t = e;
@@ -20853,7 +20853,7 @@ function Ma(e, t) {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/selection-page-hints.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/selection-page-hints.ts
 function Na(e) {
 	return Number.isInteger(e) && Number(e) >= 0;
 }
@@ -20874,7 +20874,7 @@ function Fa(e, t, n) {
 	return JSON.parse(r);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/local-text-replace-result.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/local-text-replace-result.ts
 function Ia(e) {
 	if (!e || typeof e != "object") return;
 	let t = e, n = [
@@ -20982,7 +20982,7 @@ function Xa(e, t, n, r) {
 	t(), n(), Ja(e, r);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/wasm-bridge.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/wasm-bridge.ts
 function Za(e) {
 	return e && JSON.stringify(e);
 }
@@ -22977,7 +22977,7 @@ var io = class {
 	}
 };
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/document-title.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/document-title.ts
 function ao(e) {
 	let t = window.matchMedia("(display-mode: standalone), (display-mode: minimal-ui), (display-mode: window-controls-overlay)"), n = () => {
 		document.title = e.hasLoadedDocument() ? t.matches ? e.fileName : `${e.fileName} - rhwp-studio` : "rhwp-studio";
@@ -22985,7 +22985,7 @@ function ao(e) {
 	e.onFileNameChanged = n, t.addEventListener("change", n), n();
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/event-bus.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/event-bus.ts
 var oo = class {
 	handlers = /* @__PURE__ */ new Map();
 	on(e, t) {
@@ -23107,7 +23107,7 @@ function _o(e, t) {
 	if (n !== "hwp" && n !== "zip" && n !== "hml") throw Error(n === "html" ? "실제 HWP/HWPX/HML 파일이 아닙니다. 파일 미리보기/오류 페이지가 반환되었습니다." : n === "xml" ? "HML 문서가 아닌 일반 XML 파일입니다." : "실제 HWP/HWPX/HML 파일이 아닙니다. 파일 시그니처를 확인할 수 없습니다.");
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/canvas-metric-recovery.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/canvas-metric-recovery.ts
 var vo = "Canvas metric descriptor changed; prepare font metrics again";
 function yo(e) {
 	let t = e instanceof Error ? e.message : e;
@@ -23152,7 +23152,7 @@ function Eo(e, t = 10) {
 	return Math.max(6, (Number.isFinite(t) ? Math.max(0, t) : 10) * n);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/virtual-scroll.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/virtual-scroll.ts
 var Do = 8, Oo = .25, ko = 80, Ao = 240;
 function jo({ pageCount: e, viewportWidth: t, displayedPageWidth: n, pageGap: r, committedColumns: i, hysteresisPx: a = Do }) {
 	let o = Number.isFinite(e) ? Math.max(1, Math.floor(e)) : 1, s = Number.isFinite(t) && t > 0 ? t : 0, c = Number.isFinite(n) && n > 0 ? n : 0, l = Number.isFinite(r) && r >= 0 ? r : 0;
@@ -23506,7 +23506,7 @@ var Mo = class {
 	}
 };
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/canvaskit/replay-plane.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/canvaskit/replay-plane.ts
 function Po(e, t) {
 	return e !== "background" && t?.masterPage === !0 ? "behindText" : e;
 }
@@ -23521,12 +23521,12 @@ function Io(e, t) {
 	return e.type === "image" && (e.wrap === "behindText" ? n = "behindText" : e.wrap === "inFrontOfText" && (n = "inFrontOfText")), Po(n, t);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/render-document-identity.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/render-document-identity.ts
 function Lo(e, t) {
 	return e === null || t === null || e.digest === null || t.digest === null ? !1 : e.digest === t.digest && e.generation === t.generation;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/image-prefetch-signature.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/image-prefetch-signature.ts
 function Ro(e, t) {
 	if (!e || typeof e != "object") return;
 	if (Array.isArray(e)) {
@@ -23565,7 +23565,7 @@ async function Vo(e, t, n) {
 	return !r.every(Boolean) || !t() ? !1 : (n(), !0);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/raw-svg-prefetch.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/raw-svg-prefetch.ts
 function Ho(e) {
 	let t = new TextEncoder().encode(e), n = "", r = 32768;
 	for (let e = 0; e < t.length; e += r) n += String.fromCharCode(...t.subarray(e, e + r));
@@ -23586,7 +23586,7 @@ function Wo(e, t) {
 	else e && typeof e == "object" && Wo(e, t);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/flow-image-clip.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/flow-image-clip.ts
 function Go(e) {
 	if (e.bakedWatermark === !0) return null;
 	let t = [], n = typeof e.effect == "string" ? e.effect : "realPic";
@@ -23684,7 +23684,7 @@ function ts(e, t) {
 	return i;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/flow-image-url-cache.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/flow-image-url-cache.ts
 var ns = class {
 	urls = /* @__PURE__ */ new Map();
 	identity = null;
@@ -23770,7 +23770,7 @@ function cs(e, t, n, r) {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/page-margin-guides.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/page-margin-guides.ts
 var ls = "#C0C0C0", us = .8, ds = 1.5;
 function fs(e) {
 	let t = Number.isFinite(e) && e > 0 ? e : 1;
@@ -23793,7 +23793,7 @@ function ms(e, t, n, r, i = "both", a = 1) {
 	}, t, n, i, r, a);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/page-renderer.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/page-renderer.ts
 var hs = 1500, gs = [
 	0,
 	32,
@@ -24358,7 +24358,7 @@ function ws(e, t, n, r = t.bbox.width, i = t.bbox.height) {
 	e.style.left = `${-a.x * o}px`, e.style.top = `${-a.y * s}px`, e.style.width = `${e.naturalWidth * o}px`, e.style.height = `${e.naturalHeight * s}px`;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/zoom-anchor.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/zoom-anchor.ts
 var Ts = Object.freeze({
 	x: .5,
 	y: .5
@@ -24380,7 +24380,7 @@ function Os(e, t, n, r, i = n) {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/page-movement.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/page-movement.ts
 var ks = {
 	direction: "vertical",
 	wheelHorizontal: !0
@@ -24711,7 +24711,7 @@ function Ys(e, t, n) {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/render-backend.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/render-backend.ts
 var Xs = "rhwp.canvaskitMode", Zs = "rhwp.renderProfile";
 function Qs(e) {
 	try {
@@ -24798,7 +24798,7 @@ function ic(e, t) {
 	return e.width * n * e.height * n <= r ? n : Math.max(1, Math.sqrt(r / (e.width * e.height)));
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/grid-overlay.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/grid-overlay.ts
 var ac = 96 / 25.4, oc = 10;
 function sc(e, t, n, r) {
 	let i = document.createElement("div");
@@ -24864,7 +24864,7 @@ function gc(e, t, n, r, i, a) {
 	o.style.position = "absolute", o.style.left = `${c ? t : t - r}px`, o.style.top = `${n}px`, o.style.width = `${r}px`, o.style.height = "1px", o.style.background = a, s.style.position = "absolute", s.style.left = `${t}px`, s.style.top = `${l ? n : n - r}px`, s.style.width = "1px", s.style.height = `${r}px`, s.style.background = a, e.append(o, s);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/grid-settings.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/grid-settings.ts
 var _c = {
 	visible: !1,
 	pattern: "dots",
@@ -24921,7 +24921,7 @@ function Ec(e) {
 	return Math.round(e * 100) / 100;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/zoom-fit.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/zoom-fit.ts
 var Dc = 40, Oc = 20, kc = 10;
 function Ac(e) {
 	return Math.max(So, Math.min(5, e));
@@ -24977,7 +24977,7 @@ function Lc(e, t) {
 	}
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/user-settings.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/user-settings.ts
 var Rc = [
 	"default",
 	"flat",
@@ -25252,7 +25252,7 @@ var R = new class {
 	}
 }();
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/page-view-settings-change.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/page-view-settings-change.ts
 function Yc(e) {
 	let t = e && typeof e == "object" ? e : {}, n = js(t.arrangement, t.pageMovement), r = t.zoom, i = r && typeof r == "object" && typeof r.value == "number" && Number.isFinite(r.value) ? {
 		value: r.value,
@@ -25266,7 +25266,7 @@ function Yc(e) {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/active-page.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/active-page.ts
 function Xc(e, t) {
 	return e !== null && Number.isInteger(e) && e >= 0 && e < t;
 }
@@ -25294,7 +25294,7 @@ function $c(e, t) {
 	return Number.isInteger(e) && e >= 0 && e === t;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/i18n/locales/ko.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/i18n/locales/ko.ts
 var el = {
 	"command.edit.compareDocuments.label": "문서 비교",
 	"command.edit.compareDocuments.splitLabel": "문서 비교 ",
@@ -29232,7 +29232,7 @@ function fl() {
 	return e && Object.keys(e).length > 0 ? il : "ko";
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/i18n/dom.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/i18n/dom.ts
 var pl = "data-i18n", ml = "data-i18n-lines", hl = [
 	"title",
 	"placeholder",
@@ -29293,7 +29293,7 @@ function wl() {
 	typeof document < "u" && (document.documentElement.lang = fl());
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/i18n/resolve.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/i18n/resolve.ts
 var Tl = "rhwp-locale", El = "lang";
 function Dl(e) {
 	let t = sl(Ol(e.search));
@@ -29333,7 +29333,7 @@ function jl() {
 	return _l(), cl();
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/header-footer-mode.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/header-footer-mode.ts
 function Ml(e) {
 	return z(e === 1 ? "ui.hfApplyTo.even" : e === 2 ? "ui.hfApplyTo.odd" : "ui.hfApplyTo.both");
 }
@@ -29361,7 +29361,7 @@ function Fl(e) {
 	return t.mode !== "header" && t.mode !== "footer" || !Number.isSafeInteger(t.sectionIdx) || !Number.isSafeInteger(t.applyTo) || !Number.isSafeInteger(t.previewPage) ? "none" : t;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/header-footer-edit-overlay.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/header-footer-edit-overlay.ts
 var Il = 10, Ll = 4, Rl = 2;
 function zl(e) {
 	let t = Math.min(Rl, Math.max(1, Math.sqrt(Number.isFinite(e) && e > 0 ? e : 1)));
@@ -29390,7 +29390,7 @@ function Vl(e, t, n) {
 	return `inset(${Math.max(0, t.y * n)}px ${Math.max(0, (e.width - t.x - t.width) * n)}px ${Math.max(0, (e.height - t.y - t.height) * n)}px ${Math.max(0, t.x * n)}px)`;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/render-surface-budget.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/render-surface-budget.ts
 var Hl = 32e6, Ul = 4e7, Wl = .88, Gl = .001, Kl = [
 	2,
 	1.5,
@@ -29485,7 +29485,7 @@ function ru(e) {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/page-surface-lru.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/page-surface-lru.ts
 function iu(e) {
 	return !Number.isFinite(e) || e <= 0 ? 0 : Math.ceil(e);
 }
@@ -29775,7 +29775,7 @@ function mu(e) {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/canvas-view.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/canvas-view.ts
 var hu = {
 	width: 794,
 	height: 1123
@@ -30778,7 +30778,7 @@ var hu = {
 	}
 };
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/picture-hit-policy.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/picture-hit-policy.ts
 function yu(e) {
 	return e.plane === 1 && !e.headerFooter;
 }
@@ -30902,7 +30902,7 @@ function Eu(e, t, n) {
 	return !1;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/hyperlink.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/hyperlink.ts
 function Du(e) {
 	let t = e.cellPath?.map((e) => [
 		e.controlIndex,
@@ -30973,7 +30973,7 @@ function ju(e) {
 	}
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/input-edit-invalidation.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/input-edit-invalidation.ts
 var Mu = /* @__PURE__ */ new Set(["insertText", "deleteText"]);
 function Nu(e, t) {
 	let n = e ?? [], r = t ?? [];
@@ -30993,7 +30993,7 @@ function Pu(e, t, n, r = {}) {
 	return i !== (n.parentParaIndex !== void 0) || t.sectionIndex !== n.sectionIndex ? !1 : i ? t.parentParaIndex !== n.parentParaIndex || t.controlIndex !== n.controlIndex || t.cellIndex !== n.cellIndex || t.cellParaIndex !== n.cellParaIndex ? !1 : Nu(t.cellPath, n.cellPath) : t.paragraphIndex === n.paragraphIndex;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/object-props.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/object-props.ts
 function Fu(e, t) {
 	return t.type === "shape" ? t.cellPath && t.cellPath.length > 0 ? e.getCellShapePropertiesByPath(t.sec, t.ppi, t.cellPath, t.ci) : e.getShapeProperties(t.sec, t.ppi, t.ci) : t.headerFooter ? e.getHeaderFooterPictureProperties(t.sec, t.headerFooter.outerParaIdx, t.headerFooter.outerControlIdx, t.ppi, t.ci) : t.cellPath && t.cellPath.length > 0 ? e.getCellPicturePropertiesByPath(t.sec, t.ppi, t.cellPath, t.ci) : e.getPictureProperties(t.sec, t.ppi, t.ci);
 }
@@ -31001,7 +31001,7 @@ function Iu(e, t, n) {
 	return t.type === "shape" ? t.cellPath && t.cellPath.length > 0 ? e.setCellShapePropertiesByPath(t.sec, t.ppi, t.cellPath, t.ci, n) : e.setShapeProperties(t.sec, t.ppi, t.ci, n) : t.headerFooter ? e.setHeaderFooterPictureProperties(t.sec, t.headerFooter.outerParaIdx, t.headerFooter.outerControlIdx, t.ppi, t.ci, n) : t.cellPath && t.cellPath.length > 0 ? e.setCellPicturePropertiesByPath(t.sec, t.ppi, t.cellPath, t.ci, n) : e.setPictureProperties(t.sec, t.ppi, t.ci, n);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/command.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/command.ts
 var B = Object.freeze({
 	documentPaginationPending: !1,
 	flowChanged: !1,
@@ -32521,7 +32521,7 @@ var Wd = class e {
 	}
 };
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/cell-block-format.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/cell-block-format.ts
 function nf(e, t, n = 0) {
 	let r = e[e.length - 1];
 	return [...e.slice(0, -1), {
@@ -32557,7 +32557,7 @@ function of(e, t) {
 	return n;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/cursor.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/cursor.ts
 var sf = class e {
 	wasm;
 	position = {
@@ -34035,7 +34035,7 @@ function hf(e, t) {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/caret-renderer.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/caret-renderer.ts
 var gf = class {
 	container;
 	virtualScroll;
@@ -34125,7 +34125,7 @@ var gf = class {
 	}
 };
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/line-start-affinity.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/line-start-affinity.ts
 function _f(e, t, n) {
 	let r = n.lineInfoAt(e);
 	if (!r || r.lineIndex <= 0 || e !== r.charStart) return t;
@@ -34146,7 +34146,7 @@ function vf(e, t) {
 	return e.pageIndex === t.pageIndex && e.x <= t.x;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/field-marker-renderer.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/field-marker-renderer.ts
 var yf = class {
 	container;
 	virtualScroll;
@@ -34243,7 +34243,7 @@ var yf = class {
 	}
 };
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/history.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/history.ts
 function xf(e, t) {
 	for (let n of e) n.discard?.(t);
 }
@@ -34355,7 +34355,7 @@ var Tf = class {
 	}
 };
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/chart-data-target.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/chart-data-target.ts
 function Ef(e) {
 	if (e.type !== "ole" || e.noteRef) return null;
 	let t = e.cellPath ?? (e.cellIdx !== void 0 && e.cellParaIdx !== void 0 && e.outerTableControlIdx !== void 0 ? [{
@@ -34455,7 +34455,7 @@ function If(e, t) {
 	return n.length === 0 && e.paragraph === t.ppi && e.control === t.ci;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/dialog-drag.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/dialog-drag.ts
 function Lf(e, t, n = {}) {
 	let r = n.ignoreSelector ?? ".dialog-close", i = 0, a = 0, o = !1, s = () => {
 		o = !1, document.removeEventListener("mousemove", c), document.removeEventListener("mouseup", s);
@@ -34471,7 +34471,7 @@ function Lf(e, t, n = {}) {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/dialog.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/dialog.ts
 var Rf = "rhwp-modal-dialog-closed", V = class {
 	afterClose;
 	overlay;
@@ -34552,15 +34552,71 @@ function Bf(e, t) {
 	return new zf(e, t).showAsync();
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/toast.ts
-var Vf = "rhwp-toast-container", Hf = 8e3, Uf = 200, Wf = 350;
-function Gf() {
-	let e = document.getElementById(Vf);
-	return e || (e = document.createElement("div"), e.id = Vf, e.style.position = "fixed", e.style.top = "16px", e.style.right = "16px", e.style.zIndex = "21000", e.style.display = "flex", e.style.flexDirection = "column", e.style.gap = "8px", e.style.pointerEvents = "none", document.body.appendChild(e), e);
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/pwh-multiclick-selection.mjs
+function Vf(e, t) {
+	let n = Array.from(e);
+	if (!n.length) return null;
+	let r = Math.max(0, Math.min(n.length - 1, Math.trunc(t)));
+	if (typeof Intl.Segmenter == "function") {
+		let t = n.slice(0, r).join("").length;
+		for (let n of new Intl.Segmenter("ko", { granularity: "word" }).segment(e)) if (t >= n.index && t < n.index + n.segment.length) {
+			let t = Array.from(e.slice(0, n.index)).length;
+			return {
+				start: t,
+				end: t + Array.from(n.segment).length
+			};
+		}
+	}
+	let i = (e) => /^[\p{L}\p{N}\p{M}_]$/u.test(e) ? "word" : /^\s$/u.test(e) ? "space" : "punctuation", a = i(n[r]), o = r, s = r + 1;
+	for (; o > 0 && i(n[o - 1]) === a;) o--;
+	for (; s < n.length && i(n[s]) === a;) s++;
+	return {
+		start: o,
+		end: s
+	};
+}
+function Hf(e, t, n) {
+	if (n !== 2 && n !== 3 || e.isInHeaderFooter() || e.isInFootnote() || e.isInTextBox() || e.isInCellSelectionMode()) return !1;
+	let r = e.getPosition(), i = r.sectionIndex, a, o;
+	try {
+		if (r.parentParaIndex !== void 0) {
+			if (r.cellPath?.length) {
+				let e = JSON.stringify(r.cellPath);
+				a = t.getCellParagraphLengthByPath(i, r.parentParaIndex, e), o = t.getTextInCellByPath(i, r.parentParaIndex, e, 0, a);
+			} else {
+				let { parentParaIndex: e, controlIndex: n, cellIndex: s, cellParaIndex: c } = r;
+				if (n === void 0 || s === void 0 || c === void 0) return !1;
+				a = t.getCellParagraphLength(i, e, n, s, c), o = t.getTextInCell(i, e, n, s, c, 0, a);
+			}
+		} else a = t.getParagraphLength(i, r.paragraphIndex), o = t.getTextRange(i, r.paragraphIndex, 0, a);
+		if (!Number.isInteger(a) || a < 1 || Array.from(o).length !== a) return !1;
+		let s = n === 3 ? {
+			start: 0,
+			end: a
+		} : Vf(o, r.charOffset);
+		if (!s || s.end <= s.start) return !1;
+		let { cursorRect: c, ...l } = r;
+		return e.clearSelection(), e.moveTo({
+			...l,
+			charOffset: s.start
+		}), e.setAnchor(), e.moveTo({
+			...l,
+			charOffset: s.end
+		}), !0;
+	} catch (e) {
+		return console.warn("[Pwh] 클릭 선택 실패:", e), !1;
+	}
+}
+//#endregion
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/toast.ts
+var Uf = "rhwp-toast-container", Wf = 8e3, Gf = 200, Kf = 350;
+function qf() {
+	let e = document.getElementById(Uf);
+	return e || (e = document.createElement("div"), e.id = Uf, e.style.position = "fixed", e.style.top = "16px", e.style.right = "16px", e.style.zIndex = "21000", e.style.display = "flex", e.style.flexDirection = "column", e.style.gap = "8px", e.style.pointerEvents = "none", document.body.appendChild(e), e);
 }
 function H(e) {
-	let t = Gf(), n = e.durationMs ?? Hf, r = document.createElement("div");
-	r.style.background = "#1e293b", r.style.color = "#f1f5f9", r.style.padding = "12px 14px", r.style.borderRadius = "6px", r.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.2)", r.style.font = "13px/1.5 sans-serif", r.style.maxWidth = "400px", r.style.minWidth = "280px", r.style.display = "flex", r.style.alignItems = "flex-start", r.style.gap = "12px", r.style.transform = "translateX(120%)", r.style.transition = `transform ${Uf}ms ease-out, opacity ${Wf}ms ease-out`, r.style.opacity = "1", r.style.pointerEvents = "auto", r.setAttribute("role", "status"), r.setAttribute("aria-live", "polite");
+	let t = qf(), n = e.durationMs ?? Wf, r = document.createElement("div");
+	r.style.background = "#1e293b", r.style.color = "#f1f5f9", r.style.padding = "12px 14px", r.style.borderRadius = "6px", r.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.2)", r.style.font = "13px/1.5 sans-serif", r.style.maxWidth = "400px", r.style.minWidth = "280px", r.style.display = "flex", r.style.alignItems = "flex-start", r.style.gap = "12px", r.style.transform = "translateX(120%)", r.style.transition = `transform ${Gf}ms ease-out, opacity ${Kf}ms ease-out`, r.style.opacity = "1", r.style.pointerEvents = "auto", r.setAttribute("role", "status"), r.setAttribute("aria-live", "polite");
 	let i = document.createElement("div");
 	if (i.style.flex = "1", i.style.whiteSpace = "pre-line", i.textContent = e.message, r.appendChild(i), e.action) {
 		let t = document.createElement("button");
@@ -34582,13 +34638,13 @@ function H(e) {
 	function s() {
 		a || (a = !0, o && clearTimeout(o), r.style.opacity = "0", r.style.transform = "translateX(120%)", setTimeout(() => {
 			r.remove();
-		}, Wf));
+		}, Kf));
 	}
 	n > 0 && (o = setTimeout(s, n));
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/input-handler-hyperlink.ts
-function Kf(e, t) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/input-handler-hyperlink.ts
+function Jf(e, t) {
 	if (!e.wasm?.getHyperlinkContext || !e.canEditHyperlink?.() || e.connectorDrawingMode || e.polygonDrawingMode || e.imagePlacementMode || e.textboxPlacementMode) return null;
 	let n = e.container.querySelector("#scroll-content");
 	if (!n) return null;
@@ -34615,14 +34671,14 @@ function Kf(e, t) {
 	} catch {}
 	return null;
 }
-function qf(e, t) {
+function Yf(e, t) {
 	e.hyperlinkHover &&= (e.container.removeAttribute("title"), e.container.style.cursor === "pointer" && (e.container.style.cursor = ""), !1);
-	let n = Kf(e, t);
+	let n = Jf(e, t);
 	return n ? (e.container.title = n.link.uri, e.container.style.cursor = "pointer", e.hyperlinkHover = !0, !0) : !1;
 }
-function Jf(e, t) {
+function Xf(e, t) {
 	if (e.hyperlinkClick = null, t.button !== 0 || t.shiftKey || t.altKey) return;
-	let n = Kf(e, t);
+	let n = Jf(e, t);
 	n && (e.hyperlinkClick = {
 		hit: n,
 		x: t.clientX,
@@ -34630,10 +34686,10 @@ function Jf(e, t) {
 		generation: e.wasm.documentGeneration
 	});
 }
-function Yf(e, t) {
+function Zf(e, t) {
 	let n = e.hyperlinkClick;
 	if (e.hyperlinkClick = null, !n || t.button !== 0 || Math.hypot(t.clientX - n.x, t.clientY - n.y) > 3 || n.generation !== e.wasm.documentGeneration || e.cursor.hasSelection()) return;
-	let r = Kf(e, t);
+	let r = Jf(e, t);
 	if (r && r.link.fieldId === n.hit.link.fieldId && r.link.uri === n.hit.link.uri && JSON.stringify(r.target) === JSON.stringify(n.hit.target)) try {
 		let t = new URL(r.link.uri);
 		if (!["http:", "https:"].includes(t.protocol) || t.username || t.password) return;
@@ -34660,8 +34716,8 @@ function Yf(e, t) {
 	}
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/input-handler-connector.ts
-function Xf(e, t, n, r = 10, i) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/input-handler-connector.ts
+function Qf(e, t, n, r = 10, i) {
 	try {
 		let a = { controls: this.wasm.getPageControlLayout(e).controls.filter(bu) }, o = null, s = r;
 		for (let e of a.controls) {
@@ -34706,8 +34762,8 @@ function Xf(e, t, n, r = 10, i) {
 		return null;
 	}
 }
-function Zf(e, t, n) {
-	Qf.call(this);
+function $f(e, t, n) {
+	ep.call(this);
 	let r = { controls: this.wasm.getPageControlLayout(e).controls.filter(bu) }, i = this.container.querySelector("#scroll-content");
 	if (!i) return;
 	let a = this.viewportManager.getZoom(), o = this.virtualScroll.getPageOffset(e);
@@ -34746,11 +34802,11 @@ function Zf(e, t, n) {
 		break;
 	}
 }
-function Qf() {
+function ep() {
 	this.connectorOverlay &&= (this.connectorOverlay.remove(), null);
 }
-function $f(e, t, n, r, i) {
-	ep.call(this);
+function tp(e, t, n, r, i) {
+	np.call(this);
 	let a = this.container.querySelector("#scroll-content");
 	if (!a) return;
 	let o = this.viewportManager.getZoom(), s = this.virtualScroll.getPageOffset(i);
@@ -34760,11 +34816,11 @@ function $f(e, t, n, r, i) {
 	let u = c + e * o, d = s + t * o, f = c + n * o, p = s + r * o, m = document.createElementNS("http://www.w3.org/2000/svg", "line");
 	m.setAttribute("x1", String(u)), m.setAttribute("y1", String(d)), m.setAttribute("x2", String(f)), m.setAttribute("y2", String(p)), m.setAttribute("stroke", "#4a90d9"), m.setAttribute("stroke-width", "1.5"), m.setAttribute("stroke-dasharray", "4,4"), l.appendChild(m), a.appendChild(l), this._connectorPreviewSvg = l;
 }
-function ep() {
+function np() {
 	this._connectorPreviewSvg &&= (this._connectorPreviewSvg.remove(), null);
 }
-function tp(e, t, n) {
-	ep.call(this), Qf.call(this);
+function rp(e, t, n) {
+	np.call(this), ep.call(this);
 	try {
 		let t = this.wasm.getShapeProperties(e.sec, e.ppi, e.ci);
 		e.instanceId = t.scInstId ?? t.instanceId ?? 0;
@@ -34796,42 +34852,42 @@ function tp(e, t, n) {
 		console.warn("[Connector] 연결선 생성 실패:", e);
 	}
 }
-function np() {
-	this.connectorDrawingMode = !1, this.connectorStartRef = null, ep.call(this), Qf.call(this), this.container.style.cursor = "";
+function ip() {
+	this.connectorDrawingMode = !1, this.connectorStartRef = null, np.call(this), ep.call(this), this.container.style.cursor = "";
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/object-drag-record.ts
-function rp(e, t) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/object-drag-record.ts
+function ap(e, t) {
 	return !Number.isFinite(e) || !Number.isFinite(t) || e === t ? null : {
 		before: { rotationAngle: e },
 		after: { rotationAngle: t }
 	};
 }
-function ip(e, t) {
+function op(e, t) {
 	return e.sx === t.sx && e.sy === t.sy && e.ex === t.ex && e.ey === t.ey;
 }
-function ap(e) {
+function sp(e) {
 	return Number.isFinite(e.sx) && Number.isFinite(e.sy) && Number.isFinite(e.ex) && Number.isFinite(e.ey);
 }
-function op(e, t) {
-	return !ap(e) || !ap(t) || ip(e, t) ? null : {
+function cp(e, t) {
+	return !sp(e) || !sp(t) || op(e, t) ? null : {
 		before: { ...e },
 		after: { ...t }
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/table-bbox-cache.ts
-function sp(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/table-bbox-cache.ts
+function lp(e) {
 	let t = `${e.sec}:${e.ppi}:${e.ci}`, n = e.path;
 	return !n || n.length <= 1 ? t : `${t}|${n.map((e, t) => t === n.length - 1 ? `${e.controlIndex}` : `${e.controlIndex}.${e.cellIndex}.${e.cellParaIndex}`).join("/")}`;
 }
-function cp(e, t) {
-	return sp(e) === sp(t);
-}
-function lp(e, t) {
-	return `${sp(e)}:${t}`;
-}
 function up(e, t) {
+	return lp(e) === lp(t);
+}
+function dp(e, t) {
+	return `${lp(e)}:${t}`;
+}
+function fp(e, t) {
 	if (!e || e.length < 2 || !t || e.length !== t.length) return !1;
 	for (let n = 0; n < e.length - 1; n++) {
 		let r = e[n], i = t[n];
@@ -34839,7 +34895,7 @@ function up(e, t) {
 	}
 	return e[e.length - 1].controlIndex === t[t.length - 1].controlIndex;
 }
-function dp(e, t, n, r) {
+function pp(e, t, n, r) {
 	if (r.length === 0) return r;
 	let i = new Set(r.map((e) => e.pageIndex));
 	i.add(n), e.cachedTableRef = {
@@ -34847,50 +34903,50 @@ function dp(e, t, n, r) {
 		pageHint: n,
 		pageIndexes: i
 	}, e.cachedCellBboxes = r;
-	for (let n of i) e.tableBboxFetchFailures.delete(lp(t, n));
+	for (let n of i) e.tableBboxFetchFailures.delete(dp(t, n));
 	return r;
 }
-function fp(e, t, n) {
+function mp(e, t, n) {
 	let r = e.cachedTableRef;
-	if (r && e.cachedCellBboxes && e.cachedCellBboxes.length > 0 && cp(r, t) && (r.pageHint === n || r.pageIndexes?.has(n) === !0)) return e.cachedCellBboxes;
-	let i = lp(t, n);
+	if (r && e.cachedCellBboxes && e.cachedCellBboxes.length > 0 && up(r, t) && (r.pageHint === n || r.pageIndexes?.has(n) === !0)) return e.cachedCellBboxes;
+	let i = dp(t, n);
 	if (e.tableBboxFetchFailures.has(i)) return null;
 	try {
 		let r = t.path, i = r && r.length > 1 ? e.wasm.getTableCellBboxesByPath(t.sec, t.ppi, JSON.stringify(r)) : e.wasm.getTableCellBboxes(t.sec, t.ppi, t.ci, n);
-		if (i && i.length > 0) return dp(e, t, n, i);
+		if (i && i.length > 0) return pp(e, t, n, i);
 	} catch {}
 	return e.tableBboxFetchFailures.add(i), null;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/table-resize-updates.ts
-function pp(e, t) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/table-resize-updates.ts
+function hp(e, t) {
 	return e === 0 && !t;
 }
-var mp = 300;
-function hp(e) {
+var gp = 300;
+function _p(e) {
 	return {
 		isHoriz: e === "ArrowLeft" || e === "ArrowRight",
-		delta: e === "ArrowRight" || e === "ArrowDown" ? mp : -300
+		delta: e === "ArrowRight" || e === "ArrowDown" ? gp : -300
 	};
 }
-function gp(e) {
+function vp(e) {
 	let t = /* @__PURE__ */ new Set(), n = [];
 	for (let r of e) t.has(r.cellIdx) || (t.add(r.cellIdx), n.push(r));
 	return n;
 }
-function _p(e, t) {
+function yp(e, t) {
 	return t ? e.col : e.row;
 }
-function vp(e, t) {
-	return _p(e, t) + (t ? e.colSpan : e.rowSpan) - 1;
-}
-function yp(e, t, n, r) {
-	return Math.max(0, Math.min(vp(e, t), r) - Math.max(_p(e, t), n) + 1);
-}
 function bp(e, t) {
-	return yp(e, !0, t.startCol, t.endCol) > 0 && yp(e, !1, t.startRow, t.endRow) > 0;
+	return yp(e, t) + (t ? e.colSpan : e.rowSpan) - 1;
 }
-function xp(e, t, n) {
+function xp(e, t, n, r) {
+	return Math.max(0, Math.min(bp(e, t), r) - Math.max(yp(e, t), n) + 1);
+}
+function Sp(e, t) {
+	return xp(e, !0, t.startCol, t.endCol) > 0 && xp(e, !1, t.startRow, t.endRow) > 0;
+}
+function Cp(e, t, n) {
 	let r = [], i = /* @__PURE__ */ new Set();
 	for (let a of e) {
 		r.push({
@@ -34905,13 +34961,13 @@ function xp(e, t, n) {
 	}
 	return r;
 }
-function Sp(e, t, n) {
+function wp(e, t, n) {
 	return e.type === "col" ? n.filter((e) => e.col === t.col + t.colSpan && e.row < t.row + t.rowSpan && e.row + e.rowSpan > t.row) : n.filter((e) => e.row === t.row + t.rowSpan && e.col < t.col + t.colSpan && e.col + e.colSpan > t.col);
 }
-function Cp(e, t, n) {
-	let { isHoriz: r, delta: i } = hp(n), a = [];
-	for (let n of gp(e)) {
-		let [e, o] = r ? [t.startCol, t.endCol] : [t.startRow, t.endRow], s = yp(n, r, e, o);
+function Tp(e, t, n) {
+	let { isHoriz: r, delta: i } = _p(n), a = [];
+	for (let n of vp(e)) {
+		let [e, o] = r ? [t.startCol, t.endCol] : [t.startRow, t.endRow], s = xp(n, r, e, o);
 		if (s <= 0) continue;
 		let c = i * s;
 		a.push(r ? {
@@ -34925,12 +34981,12 @@ function Cp(e, t, n) {
 	return a;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/input-handler-mouse.ts
-function wp(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/input-handler-mouse.ts
+function Ep(e) {
 	return !e || e.isTextBox || e.parentParaIndex === void 0 || e.controlIndex === void 0 || e.cellIndex === void 0 || (e.cellPath?.length ?? 0) > 1 ? null : `${e.sectionIndex}:${e.parentParaIndex}:${e.controlIndex}:${e.cellIndex}`;
 }
-function Tp(e, t) {
-	let n = wp(t);
+function Dp(e, t) {
+	let n = Ep(t);
 	if (!n) return !1;
 	if (e.protectedCellHitCache?.key === n) return e.protectedCellHitCache.protected === !0;
 	let r = !1;
@@ -34942,27 +34998,27 @@ function Tp(e, t) {
 		protected: r
 	}, r;
 }
-function Ep(e, t) {
+function Op(e, t) {
 	if (!e.protectedCellHoverEl) {
 		let t = document.createElement("div");
 		t.className = "protected-cell-hover-guard", t.setAttribute("aria-hidden", "true"), t.textContent = "×", document.body.appendChild(t), e.protectedCellHoverEl = t;
 	}
 	e.protectedCellHoverEl.style.left = `${t.clientX + 12}px`, e.protectedCellHoverEl.style.top = `${t.clientY + 12}px`, e.protectedCellHoverEl.style.display = "flex", e.container.style.cursor = "not-allowed";
 }
-function Dp(e) {
+function kp(e) {
 	e.protectedCellHoverEl && (e.protectedCellHoverEl.style.display = "none"), e.container.style.cursor === "not-allowed" && (e.container.style.cursor = "");
 }
-function Op(e) {
-	Dp(this), this.cursor.clearSelection(), this.cursor.exitCellSelectionMode(), this.cellSelectionRenderer?.clear(), this.exitPictureObjectSelectionIfNeeded(), this.cursor.enterPictureObjectSelectionDirect(e.sec, e.ppi, e.ci, "ole", e.cellIdx, e.cellParaIdx, e.headerFooter, e.outerTableControlIdx, e.cellPath, e.noteRef), this.active = !0, this.caret.hide(), this.fieldMarker.hide(), this.selectionRenderer.clear(), this.renderPictureObjectSelection(), this.eventBus.emit("picture-object-selection-changed", !0), this.eventBus.emit("command-state-changed"), this.textarea.focus();
+function Ap(e) {
+	kp(this), this.cursor.clearSelection(), this.cursor.exitCellSelectionMode(), this.cellSelectionRenderer?.clear(), this.exitPictureObjectSelectionIfNeeded(), this.cursor.enterPictureObjectSelectionDirect(e.sec, e.ppi, e.ci, "ole", e.cellIdx, e.cellParaIdx, e.headerFooter, e.outerTableControlIdx, e.cellPath, e.noteRef), this.active = !0, this.caret.hide(), this.fieldMarker.hide(), this.selectionRenderer.clear(), this.renderPictureObjectSelection(), this.eventBus.emit("picture-object-selection-changed", !0), this.eventBus.emit("command-state-changed"), this.textarea.focus();
 }
-function kp(e) {
+function jp(e) {
 	this.cursor.clearSelection(), this.exitPictureObjectSelectionIfNeeded(), this.cursor.enterPictureObjectSelectionDirect(e.sec, e.ppi, e.ci, "line", e.cellIdx, e.cellParaIdx, e.headerFooter, e.outerTableControlIdx, e.cellPath, e.noteRef, e.missing, e.pageIndex), this.active = !0, this.caret.hide(), this.selectionRenderer.clear(), this.renderPictureObjectSelection(), this.eventBus.emit("picture-object-selection-changed", !0), this.textarea.focus();
 }
-function Ap(e) {
-	Dp(this), this.cursor.clearSelection(), this.exitPictureObjectSelectionIfNeeded(), this.cursor.isInTableObjectSelection() && (this.cursor.exitTableObjectSelection(), this.tableObjectRenderer?.clear(), this.eventBus.emit("table-object-selection-changed", !1)), this.cursor.moveToHit(e), this.cursor.resetPreferredX(), this.cursor.enterCellSelectionMode("protected") && (this.active = !0, this.caret.hide(), this.fieldMarker.hide(), this.selectionRenderer.clear(), this.updateCellSelection(), this.eventBus.emit("command-state-changed"), this.textarea.focus());
+function Mp(e) {
+	kp(this), this.cursor.clearSelection(), this.exitPictureObjectSelectionIfNeeded(), this.cursor.isInTableObjectSelection() && (this.cursor.exitTableObjectSelection(), this.tableObjectRenderer?.clear(), this.eventBus.emit("table-object-selection-changed", !1)), this.cursor.moveToHit(e), this.cursor.resetPreferredX(), this.cursor.enterCellSelectionMode("protected") && (this.active = !0, this.caret.hide(), this.fieldMarker.hide(), this.selectionRenderer.clear(), this.updateCellSelection(), this.eventBus.emit("command-state-changed"), this.textarea.focus());
 }
-function jp(e, t) {
-	Dp(this), this.active = !0, this.cursor.setCellSelectionAnchor?.(t.row, t.col), this.updateCellSelection(), this.cellSelectionDragState = {
+function Np(e, t) {
+	kp(this), this.active = !0, this.cursor.setCellSelectionAnchor?.(t.row, t.col), this.updateCellSelection(), this.cellSelectionDragState = {
 		startClientX: e.clientX,
 		startClientY: e.clientY,
 		lastClientX: e.clientX,
@@ -34974,7 +35030,7 @@ function jp(e, t) {
 		isDragging: !1
 	}, document.addEventListener("mousemove", this.onMouseMoveBound), document.addEventListener("mouseup", this.onMouseUpBound, { once: !0 }), this.textarea.focus();
 }
-function Mp(e, t) {
+function Pp(e, t) {
 	this.cellSelectionDragCandidate = {
 		startClientX: e.clientX,
 		startClientY: e.clientY,
@@ -34982,7 +35038,7 @@ function Mp(e, t) {
 		startCol: t.col
 	};
 }
-function Np(e, t, n, r) {
+function Fp(e, t, n, r) {
 	if (e.cachedTableRef && e.cachedCellBboxes?.length) {
 		let n = e.cachedCellBboxes.filter((e) => e.pageIndex === t);
 		if (n.length > 0) return {
@@ -34993,7 +35049,7 @@ function Np(e, t, n, r) {
 	}
 	return null;
 }
-function Pp(e) {
+function Ip(e) {
 	let t = this.cellSelectionDragState;
 	if (!t) return;
 	t.lastClientX = e.clientX, t.lastClientY = e.clientY;
@@ -35003,13 +35059,13 @@ function Pp(e) {
 	let i = this.hitTestCellRowCol(e);
 	i && (i.row !== t.lastRow || i.col !== t.lastCol) && (t.lastRow = i.row, t.lastCol = i.col, this.cursor.setCellSelectionFocus?.(i.row, i.col), this.updateCellSelection());
 }
-function Fp(e) {
+function Lp(e) {
 	let t = this.cellSelectionDragState;
 	if (t) {
 		if (this.cellSelectionDragState = null, document.removeEventListener("mousemove", this.onMouseMoveBound), !t.isDragging) {
 			let t = this.hitTestFromClientPoint?.(e.clientX, e.clientY);
 			if (t) {
-				if (this.cursor.isProtectedCellSelectionMode?.() && Tp(this, t)) {
+				if (this.cursor.isProtectedCellSelectionMode?.() && Dp(this, t)) {
 					this.updateCellSelection(), this.textarea.focus();
 					return;
 				}
@@ -35020,22 +35076,22 @@ function Fp(e) {
 		this.updateCellSelection(), this.textarea.focus();
 	}
 }
-function Ip(e) {
+function Rp(e) {
 	let t = this.cellSelectionDragCandidate;
 	if (!t) return !1;
 	let n = e.clientX - t.startClientX, r = e.clientY - t.startClientY;
 	if (Math.hypot(n, r) < 3) return !1;
 	let i = this.hitTestCellRowCol(e);
-	return !i || i.row === t.startRow && i.col === t.startCol || (this.stopTextSelectionDrag?.(), this.cellSelectionDragCandidate = null, document.removeEventListener("mouseup", this.onMouseUpBound), this.cursor.clearSelection(), !this.cursor.enterCellSelectionMode()) ? !1 : (this.caret.hide(), this.fieldMarker.hide(), this.selectionRenderer.clear(), this.eventBus.emit("command-state-changed"), jp.call(this, {
+	return !i || i.row === t.startRow && i.col === t.startCol || (this.stopTextSelectionDrag?.(), this.cellSelectionDragCandidate = null, document.removeEventListener("mouseup", this.onMouseUpBound), this.cursor.clearSelection(), !this.cursor.enterCellSelectionMode()) ? !1 : (this.caret.hide(), this.fieldMarker.hide(), this.selectionRenderer.clear(), this.eventBus.emit("command-state-changed"), Np.call(this, {
 		clientX: t.startClientX,
 		clientY: t.startClientY
 	}, {
 		row: t.startRow,
 		col: t.startCol
-	}), Pp.call(this, e), !0);
+	}), Ip.call(this, e), !0);
 }
-function Lp(e) {
-	if (Jf(this, e), (this.wasm?.pageCount ?? 0) <= 0) return;
+function zp(e) {
+	if (Xf(this, e), (this.wasm?.pageCount ?? 0) <= 0) return;
 	if (this.connectorDrawingMode && e.button === 0) {
 		let t = e.target;
 		if (t.closest("#menu-bar") || t.closest("#icon-toolbar") || t.closest("#style-bar")) return;
@@ -35044,18 +35100,18 @@ function Lp(e) {
 		if (!n) return;
 		let r = this.viewportManager.getZoom(), i = n.getBoundingClientRect(), a = e.clientX - i.left, o = e.clientY - i.top, s = this.virtualScroll.getPageAtPoint(a, o), c = this.virtualScroll.getPageOffset(s);
 		this.virtualScroll.getPageWidth(s);
-		let l = (a - this.virtualScroll.getPageLeftResolved(s, n.clientWidth)) / r, u = (o - c) / r, d = Xf.call(this, s, l, u, 15, this.connectorStartRef ? {
+		let l = (a - this.virtualScroll.getPageLeftResolved(s, n.clientWidth)) / r, u = (o - c) / r, d = Qf.call(this, s, l, u, 15, this.connectorStartRef ? {
 			sec: this.connectorStartRef.sec,
 			ppi: this.connectorStartRef.ppi,
 			ci: this.connectorStartRef.ci
 		} : void 0);
-		this.textarea.focus(), this.connectorStartRef ? (d && tp.call(this, {
+		this.textarea.focus(), this.connectorStartRef ? (d && rp.call(this, {
 			...this.connectorStartRef,
 			instanceId: 0
 		}, {
 			...d,
 			instanceId: 0
-		}, this.connectorType), np.call(this)) : d && (this.connectorStartRef = {
+		}, this.connectorType), ip.call(this)) : d && (this.connectorStartRef = {
 			sec: d.sec,
 			ppi: d.ppi,
 			ci: d.ci,
@@ -35371,7 +35427,7 @@ function Lp(e) {
 	}
 	if (this.cursor.isInCellSelectionMode()) {
 		if (e.button === 2) return;
-		if (pp(e.button, e.shiftKey) && this.tableResizeRenderer) {
+		if (hp(e.button, e.shiftKey) && this.tableResizeRenderer) {
 			let t = this.cursor.getCellTableContext();
 			if (t) try {
 				let n = this.viewportManager.getZoom(), r = this.container.querySelector("#scroll-content");
@@ -35386,7 +35442,7 @@ function Lp(e) {
 						ppi: t.ppi,
 						ci: t.ci
 					};
-					dp(this, u, s, l);
+					pp(this, u, s, l);
 					let d = this.virtualScroll.getPageOffset(s);
 					this.virtualScroll.getPageWidth(s);
 					let f = (a - this.virtualScroll.getPageLeftResolved(s, r.clientWidth)) / n, p = (o - d) / n, m = l.filter((e) => e.pageIndex === s), h = this.tableResizeRenderer.hitTestBorder(f, p, m);
@@ -35407,7 +35463,7 @@ function Lp(e) {
 		if (e.button === 0) {
 			let t = this.hitTestCellRowCol(e);
 			if (t) {
-				e.preventDefault(), jp.call(this, e, t);
+				e.preventDefault(), Np.call(this, e, t);
 				return;
 			}
 		}
@@ -35421,8 +35477,8 @@ function Lp(e) {
 	let a = this.viewportManager.getZoom(), o = this.container.querySelector("#scroll-content"), s = o.getBoundingClientRect(), c = e.clientX - s.left, l = e.clientY - s.top, u = this.virtualScroll.getPageAtPoint(c, l), d = this.virtualScroll.getPageOffset(u);
 	this.virtualScroll.getPageWidth(u);
 	let f = (c - this.virtualScroll.getPageLeftResolved(u, o.clientWidth)) / a, p = (l - d) / a;
-	if (pp(e.button, e.shiftKey) && this.tableResizeRenderer) {
-		let t = Np(this, u, f, p), n = t ? this.tableResizeRenderer.hitTestBorder(f, p, t.pageBboxes) : null;
+	if (hp(e.button, e.shiftKey) && this.tableResizeRenderer) {
+		let t = Fp(this, u, f, p), n = t ? this.tableResizeRenderer.hitTestBorder(f, p, t.pageBboxes) : null;
 		if (n) {
 			e.preventDefault(), this.startResizeDrag(n, f, p, t.pageBboxes), this.textarea.focus();
 			return;
@@ -35479,11 +35535,11 @@ function Lp(e) {
 	} catch {}
 	let m = this.findPictureAtClick(u, f, p);
 	if (m?.type === "ole") {
-		Op.call(this, m);
+		Ap.call(this, m);
 		return;
 	}
 	if (m?.type === "line") {
-		kp.call(this, m);
+		jp.call(this, m);
 		return;
 	}
 	try {
@@ -35506,10 +35562,10 @@ function Lp(e) {
 				return;
 			}
 		}
-		if (Tp(this, t)) {
-			if (Ap.call(this, t), e.button === 0) {
+		if (Dp(this, t)) {
+			if (Mp.call(this, t), e.button === 0) {
 				let t = this.hitTestCellRowCol(e);
-				t && jp.call(this, e, t);
+				t && Np.call(this, e, t);
 			}
 			return;
 		}
@@ -35546,7 +35602,7 @@ function Lp(e) {
 			let n = this.findPictureAtClick(u, f, p);
 			if (n) {
 				if (e.shiftKey && this.cursor.isInPictureObjectSelection()) {
-					Wp.call(this, n);
+					Kp.call(this, n);
 					let e = n.type === "shape" ? "shape" : n.type;
 					this.cursor.togglePictureObjectSelection({
 						...n,
@@ -35555,7 +35611,7 @@ function Lp(e) {
 					return;
 				}
 				if (n.type === "line") {
-					kp.call(this, n);
+					jp.call(this, n);
 					return;
 				}
 				if (n.type === "shape") {
@@ -35567,7 +35623,7 @@ function Lp(e) {
 						}
 					}
 					if (this.isShapeBorderClickByRef(f, p, n.sec, n.ppi, n.ci)) {
-						Wp.call(this, n), this.cursor.clearSelection(), this.exitPictureObjectSelectionIfNeeded(), this.cursor.enterPictureObjectSelectionDirect(n.sec, n.ppi, n.ci, "shape", void 0, void 0, n.headerFooter, void 0, void 0, void 0, void 0, n.pageIndex), this.active = !0, this.caret.hide(), this.selectionRenderer.clear(), this.renderPictureObjectSelection(), this.eventBus.emit("picture-object-selection-changed", !0), this.textarea.focus();
+						Kp.call(this, n), this.cursor.clearSelection(), this.exitPictureObjectSelectionIfNeeded(), this.cursor.enterPictureObjectSelectionDirect(n.sec, n.ppi, n.ci, "shape", void 0, void 0, n.headerFooter, void 0, void 0, void 0, void 0, n.pageIndex), this.active = !0, this.caret.hide(), this.selectionRenderer.clear(), this.renderPictureObjectSelection(), this.eventBus.emit("picture-object-selection-changed", !0), this.textarea.focus();
 						return;
 					}
 				}
@@ -35586,9 +35642,13 @@ function Lp(e) {
 			this.cursor.setAnchor(), this.cursor.moveToHit(t), this.active = !0, this.updateCaret(), this.textarea.focus();
 			return;
 		}
-		if (this.cursor.clearSelection(), this.cursor.moveToHit(t), this.cursor.resetPreferredX(), this.prepareClickHerePointerEntry?.(f), this.cursor.setAnchor(), this.active = !0, e.button === 0 && t.parentParaIndex !== void 0 && t.controlIndex !== void 0 && !t.isTextBox) {
+		if (this.cursor.clearSelection(), this.cursor.moveToHit(t), this.cursor.resetPreferredX(), e.button === 0 && !e.ctrlKey && !e.altKey && !e.metaKey && Hf(this.cursor, this.wasm, e.detail)) {
+			this.active = !0, this.cellSelectionDragCandidate = null, this.updateCaret(!0), this.textarea.focus(), e.preventDefault();
+			return;
+		}
+		if (this.prepareClickHerePointerEntry?.(f), this.cursor.setAnchor(), this.active = !0, e.button === 0 && t.parentParaIndex !== void 0 && t.controlIndex !== void 0 && !t.isTextBox) {
 			let t = this.hitTestCellRowCol(e);
-			t && Mp.call(this, e, t);
+			t && Pp.call(this, e, t);
 		} else this.cellSelectionDragCandidate = null;
 		this.startTextSelectionDrag(e);
 		let n = this.cursor.getRect();
@@ -35597,7 +35657,7 @@ function Lp(e) {
 		console.warn("[InputHandler] hitTest 실패:", e);
 	}
 }
-function Rp(e) {
+function Bp(e) {
 	if (!this.active || this.imagePlacementMode || this.textboxPlacementMode) return;
 	if (this.polygonDrawingMode) {
 		e.preventDefault(), this.finishPolygonDrawing();
@@ -35666,7 +35726,7 @@ function Rp(e) {
 		}
 	}
 }
-function zp(e) {
+function Vp(e) {
 	if (e.preventDefault(), !this.active || !this.contextMenu) return;
 	if (this.cursor.isInPictureObjectSelection()) {
 		this.contextMenu.show(e.clientX, e.clientY, this.getPictureObjectContextMenuItems());
@@ -35687,7 +35747,7 @@ function zp(e) {
 		let e = this.wasm.hitTest(o, c, l);
 		u = e.parentParaIndex !== void 0 && !e.isTextBox;
 	} catch {}
-	let d = u ? this.getTableContextMenuItems() : this.getDefaultContextMenuItems(), f = Kf(this, e);
+	let d = u ? this.getTableContextMenuItems() : this.getDefaultContextMenuItems(), f = Jf(this, e);
 	if (f) {
 		this.cursor.clearSelection(), this.cursor.moveTo(f.position), this.cursor.resetPreferredX(), this.updateCaret(), this.selectionRenderer.clear(), d = [
 			...d,
@@ -35723,14 +35783,14 @@ function zp(e) {
 	} catch {}
 	this.contextMenu.show(e.clientX, e.clientY, d);
 }
-function Bp(e) {
+function Hp(e) {
 	if (this.connectorDrawingMode) {
 		let t = this.container.querySelector("#scroll-content");
 		if (t) {
 			let n = this.viewportManager.getZoom(), r = t.getBoundingClientRect(), i = e.clientX - r.left, a = e.clientY - r.top, o = this.virtualScroll.getPageAtPoint(i, a), s = this.virtualScroll.getPageOffset(o);
 			this.virtualScroll.getPageWidth(o);
 			let c = (i - this.virtualScroll.getPageLeftResolved(o, t.clientWidth)) / n, l = (a - s) / n;
-			Zf.call(this, o, c, l), this.connectorStartRef && $f.call(this, this.connectorStartRef.x, this.connectorStartRef.y, c, l, this.connectorStartRef.pageIdx ?? o);
+			$f.call(this, o, c, l), this.connectorStartRef && tp.call(this, this.connectorStartRef.x, this.connectorStartRef.y, c, l, this.connectorStartRef.pageIdx ?? o);
 		}
 		return;
 	}
@@ -35810,7 +35870,7 @@ function Bp(e) {
 			if (this.dragRafId = 0, !this.isPictureResizeDragging || !this.pictureResizeState) return;
 			this.updatePictureResizeDrag(e);
 			let t = this.pictureResizeState, n = t.rotationAngle ?? 0;
-			this.container.style.cursor = Kp(t.dir, n);
+			this.container.style.cursor = Jp(t.dir, n);
 		});
 		return;
 	}
@@ -35822,11 +35882,11 @@ function Bp(e) {
 		return;
 	}
 	if (this.cellSelectionDragState) {
-		Pp.call(this, e);
+		Ip.call(this, e);
 		return;
 	}
 	if (this.isDragging) {
-		if (Ip.call(this, e) || (this.updateTextSelectionDragPointer(e), this.dragRafId)) return;
+		if (Rp.call(this, e) || (this.updateTextSelectionDragPointer(e), this.dragRafId)) return;
 		this.dragRafId = requestAnimationFrame(() => {
 			this.dragRafId = 0, this.isDragging && this.updateTextSelectionDragFromPointer();
 		});
@@ -35850,7 +35910,7 @@ function Bp(e) {
 				if (e && (e.type === "shape" || e.type === "ole")) try {
 					t = this.getObjectProperties(e).rotationAngle ?? 0;
 				} catch {}
-				this.container.style.cursor = Kp(a, t);
+				this.container.style.cursor = Jp(a, t);
 			}
 		} else {
 			let e = this.cursor.getSelectedPictureRef();
@@ -35904,7 +35964,7 @@ function Bp(e) {
 		}
 		return;
 	}
-	if (!qf(this, e)) {
+	if (!Yf(this, e)) {
 		if (this.tableResizeRenderer) {
 			if (this.resizeHoverRafId) return;
 			this.resizeHoverRafId = requestAnimationFrame(() => {
@@ -35913,9 +35973,9 @@ function Bp(e) {
 		} else this.container.style.cursor && (this.container.style.cursor = "");
 	}
 }
-function Vp(e) {
+function Up(e) {
 	if (!this.tableResizeRenderer) return;
-	Dp(this);
+	kp(this);
 	let t = this.viewportManager.getZoom(), n = this.container.querySelector("#scroll-content");
 	if (!n) return;
 	let r = n.getBoundingClientRect(), i = e.clientX - r.left, a = e.clientY - r.top, o = this.virtualScroll.getPageAtPoint(i, a), s = this.virtualScroll.getPageOffset(o);
@@ -35938,32 +35998,32 @@ function Vp(e) {
 				return;
 			}
 		}
-		this.tableResizeRenderer.clear(), this.cachedTableRef = null, this.cachedCellBboxes = null, Dp(this);
+		this.tableResizeRenderer.clear(), this.cachedTableRef = null, this.cachedCellBboxes = null, kp(this);
 		let e = this.findPictureAtClick(o, c, l);
 		this.container.style.cursor = e ? "pointer" : "";
 		return;
 	}
-	let f = fp(this, u, o);
+	let f = mp(this, u, o);
 	if (!f || f.length === 0) {
-		this.tableResizeRenderer.clear(), Dp(this), this.container.style.cursor && (this.container.style.cursor = "");
+		this.tableResizeRenderer.clear(), kp(this), this.container.style.cursor && (this.container.style.cursor = "");
 		return;
 	}
 	let p = f.filter((e) => e.pageIndex === o);
 	if (p.length === 0) {
-		this.tableResizeRenderer.clear(), Dp(this), this.container.style.cursor && (this.container.style.cursor = "");
+		this.tableResizeRenderer.clear(), kp(this), this.container.style.cursor && (this.container.style.cursor = "");
 		return;
 	}
 	let m = this.tableResizeRenderer.hitTestBorder(c, l, p);
-	m ? (Dp(this), this.container.style.cursor = m.type === "row" ? "row-resize" : "col-resize", this.tableResizeRenderer.showMarker(m, p, t)) : d && Tp(this, d) ? (this.tableResizeRenderer.clear(), Ep(this, e)) : (this.tableResizeRenderer.clear(), Dp(this), this.container.style.cursor && (this.container.style.cursor = ""));
+	m ? (kp(this), this.container.style.cursor = m.type === "row" ? "row-resize" : "col-resize", this.tableResizeRenderer.showMarker(m, p, t)) : d && Dp(this, d) ? (this.tableResizeRenderer.clear(), Op(this, e)) : (this.tableResizeRenderer.clear(), kp(this), this.container.style.cursor && (this.container.style.cursor = ""));
 }
-function Hp(e) {
+function Wp(e) {
 	try {
-		Up.call(this, e);
+		Gp.call(this, e);
 	} finally {
-		Yf(this, e);
+		Zf(this, e);
 	}
 }
-function Up(e) {
+function Gp(e) {
 	if (this.imagePlacementMode && this.imagePlacementDrag && this.imagePlacementData) {
 		this.finishImagePlacement(e);
 		return;
@@ -35997,7 +36057,7 @@ function Up(e) {
 		return;
 	}
 	if (this.cellSelectionDragState) {
-		Fp.call(this, e);
+		Lp.call(this, e);
 		return;
 	}
 	if (!this.isDragging) return;
@@ -36010,7 +36070,7 @@ function Up(e) {
 	let n = this.cursor.getHeaderFooterSelectionOrdered();
 	n && n.start.paraIdx === n.end.paraIdx && n.start.charOffset === n.end.charOffset && this.cursor.clearSelection(), this.updateCaret(!0);
 }
-function Wp(e) {
+function Kp(e) {
 	if (e.type === "shape" || e.type === "line" || e.type === "group" || e.type === "ole") try {
 		let t = this.cursor.positionOutsideObject(e.sec, e.ppi) ?? this.getCursorPosition();
 		this.executeOperation({
@@ -36020,7 +36080,7 @@ function Wp(e) {
 		}), this.eventBus.emit("document-changed");
 	} catch {}
 }
-function Gp() {
+function qp() {
 	let e = this.lineEndpointState;
 	if (e && e.orig) try {
 		let t = this.findPictureBbox(e.ref);
@@ -36030,7 +36090,7 @@ function Gp() {
 				sy: Math.round((t.y1 ?? 0) * 75),
 				ex: Math.round((t.x2 ?? 0) * 75),
 				ey: Math.round((t.y2 ?? 0) * 75)
-			}, r = op(e.orig, n);
+			}, r = cp(e.orig, n);
 			r && this.executeOperation({
 				kind: "record",
 				command: new qd(e.ref.sec, e.ref.ppi, e.ref.ci, r.before, r.after)
@@ -36041,7 +36101,7 @@ function Gp() {
 	}
 	this.isLineEndpointDragging = !1, this.lineEndpointState = null, this.container.style.cursor = "", this.dragRafId &&= (cancelAnimationFrame(this.dragRafId), 0);
 }
-function Kp(e, t) {
+function Jp(e, t) {
 	let n = [
 		"n",
 		"ne",
@@ -36066,8 +36126,8 @@ function Kp(e, t) {
 	}[n[(r + Math.round(i / 45)) % 8]] ?? "";
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/picture-resize-journal.ts
-var qp = class extends Kd {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/picture-resize-journal.ts
+var Yp = class extends Kd {
 	allTargets;
 	ids;
 	constructor(e, t) {
@@ -36099,7 +36159,7 @@ var qp = class extends Kd {
 		for (let t of this.ids) e.discardPictureTransform(t);
 		this.ids = [];
 	}
-}, Jp = class e {
+}, Xp = class e {
 	ids;
 	constructor(e) {
 		this.ids = e;
@@ -36115,7 +36175,7 @@ var qp = class extends Kd {
 		}
 	}
 	command(e) {
-		return this.ids.length === 0 ? new Kd(e) : new qp(e, this.ids);
+		return this.ids.length === 0 ? new Kd(e) : new Yp(e, this.ids);
 	}
 	cancel(e) {
 		let t = [];
@@ -36129,7 +36189,7 @@ var qp = class extends Kd {
 		if (this.ids = [], t.length) throw AggregateError(t, "그림 리사이즈 취소 복원 실패");
 	}
 };
-function Yp(e, t) {
+function Zp(e, t) {
 	switch (e) {
 		case "ArrowRight": return {
 			deltaW: t,
@@ -36153,9 +36213,9 @@ function Yp(e, t) {
 		};
 	}
 }
-function Xp(e, t, n, r) {
+function Qp(e, t, n, r) {
 	if (!Number.isFinite(t) || !Number.isFinite(n) || r <= 0) return null;
-	let { deltaW: i, deltaH: a } = Yp(e, r), o = i === 0 ? t : Math.max(Math.round(t + i), 283), s = a === 0 ? n : Math.max(Math.round(n + a), 283);
+	let { deltaW: i, deltaH: a } = Zp(e, r), o = i === 0 ? t : Math.max(Math.round(t + i), 283), s = a === 0 ? n : Math.max(Math.round(n + a), 283);
 	return o === t && s === n ? null : {
 		before: {
 			width: t,
@@ -36168,8 +36228,8 @@ function Xp(e, t, n, r) {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/object-selection-page.ts
-function Zp(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/object-selection-page.ts
+function $p(e) {
 	if (e.length === 0) return null;
 	let t = Infinity, n = Infinity, r = -Infinity, i = -Infinity;
 	for (let a of e) t = Math.min(t, a.x), n = Math.min(n, a.y), r = Math.max(r, a.x + a.w), i = Math.max(i, a.y + a.h);
@@ -36182,10 +36242,10 @@ function Zp(e) {
 		height: i - n
 	};
 }
-function Qp(e) {
+function em(e) {
 	e.emit("editing-page-changed", null);
 }
-function $p(e, t, n, r) {
+function tm(e, t, n, r) {
 	return {
 		left: n + e.x * t,
 		top: r + e.y * t,
@@ -36194,28 +36254,28 @@ function $p(e, t, n, r) {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/input-handler-picture.ts
-function em(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/input-handler-picture.ts
+function nm(e) {
 	return Array.isArray(e?.cellPath) && e.cellPath.length > 0;
 }
-function tm(e) {
+function rm(e) {
 	return `${e?.controlIndex ?? e?.controlIdx ?? 0}:${e?.cellIndex ?? e?.cellIdx ?? 0}:${e?.cellParaIndex ?? e?.cellParaIdx ?? 0}`;
 }
-function nm(e, t) {
-	return !Array.isArray(e) || !Array.isArray(t) || e.length !== t.length ? !1 : e.every((e, n) => tm(e) === tm(t[n]));
-}
-function rm(e, t, n) {
-	return e.type !== n || e.secIdx !== t.sec || e.paraIdx !== t.ppi || e.controlIdx !== t.ci ? !1 : em(t) ? nm(e.cellPath, t.cellPath) : !(Array.isArray(e.cellPath) && e.cellPath.length > 0 && t.cellIdx === void 0 && t.cellParaIdx === void 0);
-}
 function im(e, t) {
+	return !Array.isArray(e) || !Array.isArray(t) || e.length !== t.length ? !1 : e.every((e, n) => rm(e) === rm(t[n]));
+}
+function am(e, t, n) {
+	return e.type !== n || e.secIdx !== t.sec || e.paraIdx !== t.ppi || e.controlIdx !== t.ci ? !1 : nm(t) ? im(e.cellPath, t.cellPath) : !(Array.isArray(e.cellPath) && e.cellPath.length > 0 && t.cellIdx === void 0 && t.cellParaIdx === void 0);
+}
+function om(e, t) {
 	if (!(e.type !== "ole" || e.cellPath || e.noteRef || e.headerFooter)) try {
 		let n = this.wasm.getCursorRect(e.sec, e.ppi, 0);
-		n && this.caret.show(n, t), am.call(this, e);
+		n && this.caret.show(n, t), sm.call(this, e);
 	} catch (e) {
 		console.warn("[InputHandler] OLE 캐럿 표시 실패:", e);
 	}
 }
-function am(e) {
+function sm(e) {
 	let t = `${e.sec}:${e.ppi}:${e.ci}`;
 	if (this._oleSelectionLayerStabilizeKey === t) return;
 	this._oleSelectionLayerStabilizeKey = t;
@@ -36229,23 +36289,23 @@ function am(e) {
 	};
 	window.setTimeout(() => n(!1), 80), window.setTimeout(() => n(!1), 240), window.setTimeout(() => n(!0), 500);
 }
-function om(e) {
+function cm(e) {
 	return [
 		e.plane ?? 2,
 		e.zOrder ?? 0,
 		e.stableIndex ?? []
 	];
 }
-function sm(e, t) {
+function lm(e, t) {
 	let n = Math.min(e.length, t.length);
 	for (let r = 0; r < n; r++) if (e[r] !== t[r]) return e[r] - t[r];
 	return e.length - t.length;
 }
-function cm(e, t) {
-	let n = om(e), r = om(t);
-	return n[0] === r[0] ? n[1] === r[1] ? sm(n[2], r[2]) > 0 : n[1] > r[1] : n[0] > r[0];
+function um(e, t) {
+	let n = cm(e), r = cm(t);
+	return n[0] === r[0] ? n[1] === r[1] ? lm(n[2], r[2]) > 0 : n[1] > r[1] : n[0] > r[0];
 }
-function lm(e, t) {
+function dm(e, t) {
 	return e.type === "line" ? wu(e, t) : {
 		sec: e.secIdx,
 		ppi: e.paraIdx,
@@ -36261,7 +36321,7 @@ function lm(e, t) {
 		pageIndex: t
 	};
 }
-function um(e) {
+function fm(e) {
 	let t = document.createElement("input");
 	t.type = "file", t.accept = "image/png,image/jpeg,image/gif,image/bmp,image/webp", t.onchange = async () => {
 		let n = t.files?.[0];
@@ -36278,7 +36338,7 @@ function um(e) {
 					e();
 				}, a.onerror = () => t(/* @__PURE__ */ Error("브라우저가 이 이미지 파일을 읽지 못했습니다.")), a.src = r;
 			});
-			let o = em(e) ? JSON.stringify(e.cellPath) : "";
+			let o = nm(e) ? JSON.stringify(e.cellPath) : "";
 			this.cursor.exitPictureObjectSelection(), this.pictureObjectRenderer?.clear(), this.eventBus.emit("picture-object-selection-changed", !1), this.executeOperation({
 				kind: "snapshot",
 				operationType: "assignPictureImage",
@@ -36295,16 +36355,16 @@ function um(e) {
 		}
 	}, t.click();
 }
-function dm(e, t, n) {
+function pm(e, t, n) {
 	try {
-		let r = { controls: this.wasm.getPageControlLayout(e).controls.filter(xu) }, i = r.controls.filter((e) => e.type === "line" && e.secIdx !== void 0 && e.paraIdx !== void 0 && e.controlIdx !== void 0 && e.wrap !== "behindText" && !yu(e) && Eu(e, t, n)).reduce((e, t) => e === null || cm(t, e) ? t : e, null);
-		if (i) return lm(i, e);
+		let r = { controls: this.wasm.getPageControlLayout(e).controls.filter(xu) }, i = r.controls.filter((e) => e.type === "line" && e.secIdx !== void 0 && e.paraIdx !== void 0 && e.controlIdx !== void 0 && e.wrap !== "behindText" && !yu(e) && Eu(e, t, n)).reduce((e, t) => e === null || um(t, e) ? t : e, null);
+		if (i) return dm(i, e);
 		{
 			let i = [], a = [];
 			for (let e of r.controls) e.secIdx === void 0 || e.wrap === "behindText" || yu(e) || t >= e.x && t <= e.x + e.w && n >= e.y && n <= e.y + e.h && (e.type === "shape" ? i.push(e) : (e.type === "image" || e.type === "equation") && e.cellPath && a.push(e));
-			let o = i.filter((e) => !a.some((t) => Su(e, t))).reduce((e, t) => e === null || cm(t, e) ? t : e, null);
-			if (o) return lm(o, e);
-			let s = a.reduce((e, t) => e === null || cm(t, e) ? t : e, null);
+			let o = i.filter((e) => !a.some((t) => Su(e, t))).reduce((e, t) => e === null || um(t, e) ? t : e, null);
+			if (o) return dm(o, e);
+			let s = a.reduce((e, t) => e === null || um(t, e) ? t : e, null);
 			if (i.length > 0 && s) return {
 				sec: s.secIdx,
 				ppi: s.paraIdx,
@@ -36328,9 +36388,9 @@ function dm(e, t, n) {
 				continue;
 			}
 			let r = !1;
-			r = e.type === "line" ? Eu(e, t, n) : t >= e.x && t <= e.x + e.w && n >= e.y && n <= e.y + e.h, r && (o === null || cm(e, o)) && (o = e);
+			r = e.type === "line" ? Eu(e, t, n) : t >= e.x && t <= e.x + e.w && n >= e.y && n <= e.y + e.h, r && (o === null || um(e, o)) && (o = e);
 		}
-		if (o) return lm(o, e);
+		if (o) return dm(o, e);
 		if (a.length > 0) {
 			let r = !1;
 			try {
@@ -36357,13 +36417,13 @@ function dm(e, t, n) {
 	} catch {}
 	return null;
 }
-function fm(e) {
+function mm(e) {
 	let t = e.type ?? "image", n = t === "line" ? "line" : t;
 	try {
 		let r = this.wasm.pageCount;
 		for (let i of Cu(r, e.pageIndex)) {
 			let r = { controls: this.wasm.getPageControlLayout(i).controls.filter(xu) };
-			for (let a of r.controls) if (rm(a, {
+			for (let a of r.controls) if (am(a, {
 				...e,
 				type: t
 			}, n)) {
@@ -36388,10 +36448,10 @@ function fm(e) {
 	} catch {}
 	return null;
 }
-function pm() {
-	this.pictureObjectRenderer?.clear(), Qp(this.eventBus);
+function hm() {
+	this.pictureObjectRenderer?.clear(), em(this.eventBus);
 }
-function mm() {
+function gm() {
 	if (!this.pictureObjectRenderer) return;
 	if (this.cursor.isMultiPictureSelection()) {
 		let e = this.cursor.getSelectedPictureRefs();
@@ -36401,9 +36461,9 @@ function mm() {
 				let e = this.findPictureBbox(t);
 				e && n.push(e);
 			}
-			let r = Zp(n);
+			let r = $p(n);
 			if (r) {
-				let n = e.some((e) => ym.call(this, e));
+				let n = e.some((e) => xm.call(this, e));
 				this.pictureObjectRenderer.render({
 					pageIndex: r.renderPageIndex,
 					x: r.x,
@@ -36411,15 +36471,15 @@ function mm() {
 					width: r.width,
 					height: r.height
 				}, t, 0, n), this.eventBus.emit("editing-page-changed", r.editingPageIndex);
-			} else pm.call(this);
+			} else hm.call(this);
 		} catch {
-			pm.call(this);
+			hm.call(this);
 		}
 		return;
 	}
 	let e = this.cursor.getSelectedPictureRef();
 	if (!e) {
-		pm.call(this);
+		hm.call(this);
 		return;
 	}
 	let t = e.type ?? "image", n = t === "line" ? "line" : t;
@@ -36427,7 +36487,7 @@ function mm() {
 		let r = this.viewportManager.getZoom(), i = this.wasm.pageCount;
 		for (let a of Cu(i, e.pageIndex)) {
 			let i = { controls: this.wasm.getPageControlLayout(a).controls.filter(xu) };
-			for (let o of i.controls) if (rm(o, e, n)) {
+			for (let o of i.controls) if (am(o, e, n)) {
 				if (t === "equation" && e.cellIdx !== void 0 && (o.cellIdx !== e.cellIdx || o.cellParaIdx !== e.cellParaIdx)) continue;
 				if (t === "equation" && e.noteRef) {
 					let t = o.noteRef;
@@ -36465,7 +36525,7 @@ function mm() {
 				}
 				let n = o.x, i = o.y, s = o.w, c = o.h, l = 0, u = !1;
 				if (e.type !== "equation") try {
-					let t = _m.call(this, e);
+					let t = ym.call(this, e);
 					l = t.rotationAngle ?? 0, u = !!t.sizeProtect;
 				} catch {}
 				this.pictureObjectRenderer.render({
@@ -36474,20 +36534,20 @@ function mm() {
 					y: i,
 					width: s,
 					height: c
-				}, r, l, u), this.eventBus.emit("editing-page-changed", a), im.call(this, e, r);
+				}, r, l, u), this.eventBus.emit("editing-page-changed", a), om.call(this, e, r);
 				return;
 			}
 		}
-		pm.call(this);
+		hm.call(this);
 	} catch (e) {
-		console.warn("[InputHandler] renderPictureObjectSelection 실패:", e), pm.call(this);
+		console.warn("[InputHandler] renderPictureObjectSelection 실패:", e), hm.call(this);
 	}
 }
-function hm() {
+function _m() {
 	this.cursor.isInPictureObjectSelection() && (this.cursor.exitPictureObjectSelection(), this.pictureObjectRenderer?.clear(), this.eventBus.emit("picture-object-selection-changed", !1));
 }
-function gm(e, t, n) {
-	let r = fm.call(this, {
+function vm(e, t, n) {
+	let r = mm.call(this, {
 		...n,
 		type: "shape"
 	});
@@ -36495,12 +36555,12 @@ function gm(e, t, n) {
 	let i = Math.min(e - r.x, r.x + r.w - e), a = Math.min(t - r.y, r.y + r.h - t);
 	return i <= 3 || a <= 3;
 }
-function _m(e) {
-	return e.type === "shape" || e.type === "line" || e.type === "group" || e.type === "ole" ? em(e) ? this.wasm.getCellShapePropertiesByPath(e.sec, e.ppi, e.cellPath, e.ci) : this.wasm.getShapeProperties(e.sec, e.ppi, e.ci) : e.type === "image" && e.headerFooter ? this.wasm.getHeaderFooterPictureProperties(e.sec, e.headerFooter.outerParaIdx, e.headerFooter.outerControlIdx, e.ppi, e.ci) : e.type === "image" && em(e) ? this.wasm.getCellPicturePropertiesByPath(e.sec, e.ppi, e.cellPath, e.ci) : this.wasm.getPictureProperties(e.sec, e.ppi, e.ci);
+function ym(e) {
+	return e.type === "shape" || e.type === "line" || e.type === "group" || e.type === "ole" ? nm(e) ? this.wasm.getCellShapePropertiesByPath(e.sec, e.ppi, e.cellPath, e.ci) : this.wasm.getShapeProperties(e.sec, e.ppi, e.ci) : e.type === "image" && e.headerFooter ? this.wasm.getHeaderFooterPictureProperties(e.sec, e.headerFooter.outerParaIdx, e.headerFooter.outerControlIdx, e.ppi, e.ci) : e.type === "image" && nm(e) ? this.wasm.getCellPicturePropertiesByPath(e.sec, e.ppi, e.cellPath, e.ci) : this.wasm.getPictureProperties(e.sec, e.ppi, e.ci);
 }
-function vm(e, t) {
+function bm(e, t) {
 	if (e.type === "shape" || e.type === "line" || e.type === "group" || e.type === "ole") {
-		if (em(e)) {
+		if (nm(e)) {
 			this.wasm.setCellShapePropertiesByPath(e.sec, e.ppi, e.cellPath, e.ci, t);
 			return;
 		}
@@ -36510,42 +36570,42 @@ function vm(e, t) {
 			this.wasm.setHeaderFooterPictureProperties(e.sec, e.headerFooter.outerParaIdx, e.headerFooter.outerControlIdx, e.ppi, e.ci, t);
 			return;
 		}
-		if (e.type === "image" && em(e)) {
+		if (e.type === "image" && nm(e)) {
 			this.wasm.setCellPicturePropertiesByPath(e.sec, e.ppi, e.cellPath, e.ci, t);
 			return;
 		}
 		this.wasm.setPictureProperties(e.sec, e.ppi, e.ci, t);
 	}
 }
-function ym(e) {
+function xm(e) {
 	if (!e) return !1;
 	try {
-		return !!_m.call(this, e)?.sizeProtect;
+		return !!ym.call(this, e)?.sizeProtect;
 	} catch {
 		return !1;
 	}
 }
-function bm(e) {
+function Sm(e) {
 	if (e.type === "shape" || e.type === "group" || e.type === "line" || e.type === "ole") this.wasm.deleteShapeControl(e.sec, e.ppi, e.ci);
 	else if (e.type === "equation") this.wasm.deleteEquationControl(e.sec, e.ppi, e.ci);
 	else {
-		if (em(e)) {
+		if (nm(e)) {
 			this.wasm.deleteCellPictureControlByPath(e.sec, e.ppi, e.cellPath, e.ci);
 			return;
 		}
 		this.wasm.deletePictureControl(e.sec, e.ppi, e.ci);
 	}
 }
-function xm(e) {
+function Cm(e) {
 	let t = this.cursor.getSelectedPictureRefs(), n = this.cursor.getSelectedPictureRef();
 	if (!n) return;
 	let r = Math.round(this.gridStepMm * 7200 / 25.4), i = t.length > 1 ? t : [n];
 	try {
 		let t = [];
 		for (let n of i) {
-			let i = _m.call(this, n);
+			let i = ym.call(this, n);
 			if (i.sizeProtect) continue;
-			let a = Xp(e, i.width, i.height, r);
+			let a = Qp(e, i.width, i.height, r);
 			a && t.push({
 				r: n,
 				target: {
@@ -36560,9 +36620,9 @@ function xm(e) {
 			});
 		}
 		if (t.length === 0) return;
-		let n = Jp.capture(this.wasm, t.map((e) => e.r));
+		let n = Xp.capture(this.wasm, t.map((e) => e.r));
 		try {
-			for (let { r: e, target: n } of t) vm.call(this, e, n.after);
+			for (let { r: e, target: n } of t) bm.call(this, e, n.after);
 			this.executeOperation({
 				kind: "record",
 				command: n.command(t.map((e) => e.target))
@@ -36575,45 +36635,45 @@ function xm(e) {
 		console.warn("[InputHandler] 개체 크기 조절 실패:", e);
 	}
 }
-var Sm = 75;
-function Cm(e) {
+var wm = 75;
+function Tm(e) {
 	return e === "nw" || e === "ne" || e === "sw" || e === "se";
 }
-function wm(e, t) {
+function Em(e, t) {
 	let n = (t % 360 + 360) % 360;
-	return e.ref?.type === "image" && Cm(e.dir) && n !== 0;
+	return e.ref?.type === "image" && Tm(e.dir) && n !== 0;
 }
-function Tm(e, t) {
+function Dm(e, t) {
 	let n = (t % 360 + 360) % 360;
 	return e.ref?.type === "image" && n !== 0;
 }
-function Em(e, t, n) {
+function Om(e, t, n) {
 	let r = Math.max(e.width, 1), i = Math.max(e.height, 1), a = r, o = i;
 	if (n) {
 		let e = t * Math.PI / 180, n = Math.abs(Math.cos(e)), s = Math.abs(Math.sin(e));
 		a = r * n + i * s, o = r * s + i * n;
 	}
 	return {
-		width: Math.max(Math.round(a * Sm), 283),
-		height: Math.max(Math.round(o * Sm), 283),
+		width: Math.max(Math.round(a * wm), 283),
+		height: Math.max(Math.round(o * wm), 283),
 		frameX: e.x - Math.max(0, a - r) / 2,
 		frameY: e.y - Math.max(0, o - i) / 2
 	};
 }
-function Dm(e, t) {
+function km(e, t) {
 	if (!t) return {
 		frameX: e.bbox.x,
 		frameY: e.bbox.y
 	};
-	let n = Math.max((e.origWidth ?? 0) / Sm, e.bbox.w), r = Math.max((e.origHeight ?? 0) / Sm, e.bbox.h);
+	let n = Math.max((e.origWidth ?? 0) / wm, e.bbox.w), r = Math.max((e.origHeight ?? 0) / wm, e.bbox.h);
 	return {
 		frameX: e.bbox.x - Math.max(0, n - e.bbox.w) / 2,
 		frameY: e.bbox.y - Math.max(0, r - e.bbox.h) / 2
 	};
 }
-function Om(e, t, n) {
+function Am(e, t, n) {
 	let r = e.rotationAngle ?? 0, i = r * Math.PI / 180, a = Math.cos(i), o = Math.sin(i), s = (t.clientX - e.startClientX) / n, c = (t.clientY - e.startClientY) / n, l = s * a + c * o, u = -s * o + c * a, d = e.bbox.w, f = e.bbox.h, p = e.bbox.x + d / 2, m = e.bbox.y + f / 2, h = e.dir, g = d, _ = f;
-	if (h.includes("e") && (g = d + l), h.includes("w") && (g = d - l), h.includes("s") && (_ = f + u), h.includes("n") && (_ = f - u), wm(e, r)) {
+	if (h.includes("e") && (g = d + l), h.includes("w") && (g = d - l), h.includes("s") && (_ = f + u), h.includes("n") && (_ = f - u), Em(e, r)) {
 		let e = h.includes("e") ? 1 : -1, t = h.includes("s") ? 1 : -1, n = Math.hypot(d, f) || 1, r = (e * l * d + t * u * f) / n, i = 1 / Math.max(d, f, 1), a = Math.max((n + r) / n, i);
 		g = d * a, _ = f * a;
 	}
@@ -36625,29 +36685,29 @@ function Om(e, t, n) {
 		height: y
 	};
 }
-function km(e) {
+function jm(e) {
 	if (!this.pictureResizeState || !this.pictureObjectRenderer) return;
 	let t = this.viewportManager.getZoom(), n = this.pictureResizeState;
-	if (ym.call(this, n.ref)) {
+	if (xm.call(this, n.ref)) {
 		this.cleanupPictureResizeDrag(), this.renderPictureObjectSelection();
 		return;
 	}
 	try {
-		n.resizeTransformJournal ??= Jp.capture(this.wasm, n.multiRefs ?? [n.ref]);
+		n.resizeTransformJournal ??= Xp.capture(this.wasm, n.multiRefs ?? [n.ref]);
 	} catch (e) {
 		console.warn("[InputHandler] 그림 리사이즈 원본 보관 실패:", e), this.cleanupPictureResizeDrag();
 		return;
 	}
-	let r = n.rotationAngle ?? 0, i = n.multiRefs ? this.calcResizedBbox(e, t) : Om(n, e, t);
+	let r = n.rotationAngle ?? 0, i = n.multiRefs ? this.calcResizedBbox(e, t) : Am(n, e, t);
 	if (this.pictureObjectRenderer.renderDragPreview({
 		pageIndex: n.pageIndex,
 		...i
 	}, t, r), n.multiRefs && n.multiRefs.length > 0) {
-		if (n.multiRefs.some((e) => ym.call(this, e))) {
+		if (n.multiRefs.some((e) => xm.call(this, e))) {
 			this.cleanupPictureResizeDrag(), this.renderPictureObjectSelection();
 			return;
 		}
-		let e = i.width / n.bbox.w, t = i.height / n.bbox.h, r = n.bbox.x, a = n.bbox.y, o = i.x, s = i.y, c = Sm, l = [
+		let e = i.width / n.bbox.w, t = i.height / n.bbox.h, r = n.bbox.x, a = n.bbox.y, o = i.x, s = i.y, c = wm, l = [
 			"nw",
 			"ne",
 			"sw",
@@ -36659,15 +36719,15 @@ function km(e) {
 					width: Math.max(Math.round(i.origWidth * f), 283),
 					height: Math.max(Math.round(i.origHeight * p), 283)
 				};
-				g !== 0 && (v.horzOffset = i.origHorzOffset + g), _ !== 0 && (v.vertOffset = i.origVertOffset + _), vm.call(this, i, v);
+				g !== 0 && (v.horzOffset = i.origHorzOffset + g), _ !== 0 && (v.vertOffset = i.origVertOffset + _), bm.call(this, i, v);
 			}
 			this.eventBus.emit("document-changed");
 		} catch {}
 	}
 	if (!n.multiRefs && n.ref.type !== "line") {
-		let e = Tm(n, r), t = Em(i, r, e), a = Dm(n, e), o = t.width, s = t.height, c = Math.round(t.frameX * Sm), l = Math.round(t.frameY * Sm), u = Math.round(a.frameX * Sm), d = Math.round(a.frameY * Sm), f = n.origHorzOffset ?? u, p = n.origVertOffset ?? d;
+		let e = Dm(n, r), t = Om(i, r, e), a = km(n, e), o = t.width, s = t.height, c = Math.round(t.frameX * wm), l = Math.round(t.frameY * wm), u = Math.round(a.frameX * wm), d = Math.round(a.frameY * wm), f = n.origHorzOffset ?? u, p = n.origVertOffset ?? d;
 		try {
-			vm.call(this, n.ref, {
+			bm.call(this, n.ref, {
 				width: o,
 				height: s,
 				horzOffset: f + (c - u),
@@ -36676,19 +36736,19 @@ function km(e) {
 		} catch {}
 	}
 }
-function Am(e) {
+function Mm(e) {
 	let t = this.pictureResizeState;
 	if (!t) {
 		this.cleanupPictureResizeDrag();
 		return;
 	}
-	if (ym.call(this, t.ref) || t.multiRefs?.some((e) => ym.call(this, e))) {
+	if (xm.call(this, t.ref) || t.multiRefs?.some((e) => xm.call(this, e))) {
 		this.cleanupPictureResizeDrag(), this.renderPictureObjectSelection();
 		return;
 	}
-	let n = this.viewportManager.getZoom(), r = Sm;
+	let n = this.viewportManager.getZoom(), r = wm;
 	try {
-		t.resizeTransformJournal ??= Jp.capture(this.wasm, t.multiRefs ?? [t.ref]);
+		t.resizeTransformJournal ??= Xp.capture(this.wasm, t.multiRefs ?? [t.ref]);
 	} catch (e) {
 		console.warn("[InputHandler] 그림 리사이즈 원본 보관 실패:", e), this.cleanupPictureResizeDrag();
 		return;
@@ -36710,7 +36770,7 @@ function Am(e) {
 					width: n.origWidth,
 					height: n.origHeight
 				};
-				_ !== 0 && (y.horzOffset = n.origHorzOffset + _, b.horzOffset = n.origHorzOffset), v !== 0 && (y.vertOffset = n.origVertOffset + v, b.vertOffset = n.origVertOffset), Object.keys(y).some((e) => y[e] !== b[e]) && (vm.call(this, n, y), e.push({
+				_ !== 0 && (y.horzOffset = n.origHorzOffset + _, b.horzOffset = n.origHorzOffset), v !== 0 && (y.vertOffset = n.origVertOffset + v, b.vertOffset = n.origVertOffset), Object.keys(y).some((e) => y[e] !== b[e]) && (bm.call(this, n, y), e.push({
 					sec: n.sec,
 					ppi: n.ppi,
 					ci: n.ci,
@@ -36730,12 +36790,12 @@ function Am(e) {
 		this.cleanupPictureResizeDrag(), this.renderPictureObjectSelection();
 		return;
 	}
-	let i = Om(t, e, n), a = t.rotationAngle ?? 0, o = Tm(t, a), s = Em(i, a, o), c = Dm(t, o), l = s.width, u = s.height, d = Math.round(s.frameX * r), f = Math.round(s.frameY * r), p = Math.round(c.frameX * r), m = Math.round(c.frameY * r);
+	let i = Am(t, e, n), a = t.rotationAngle ?? 0, o = Dm(t, a), s = Om(i, a, o), c = km(t, o), l = s.width, u = s.height, d = Math.round(s.frameX * r), f = Math.round(s.frameY * r), p = Math.round(c.frameX * r), m = Math.round(c.frameY * r);
 	try {
 		let e = {}, n = {};
 		l !== t.origWidth && (e.width = l, n.width = t.origWidth), u !== t.origHeight && (e.height = u, n.height = t.origHeight);
 		let r = t.origHorzOffset ?? p, i = t.origVertOffset ?? m, a = d - p, o = f - m;
-		a !== 0 && (e.horzOffset = r + a, n.horzOffset = r), o !== 0 && (e.vertOffset = i + o, n.vertOffset = i), Object.keys(e).length > 0 && (vm.call(this, t.ref, e), this.executeOperation({
+		a !== 0 && (e.horzOffset = r + a, n.horzOffset = r), o !== 0 && (e.vertOffset = i + o, n.vertOffset = i), Object.keys(e).length > 0 && (bm.call(this, t.ref, e), this.executeOperation({
 			kind: "record",
 			command: t.resizeTransformJournal.command([{
 				sec: t.ref.sec,
@@ -36752,7 +36812,7 @@ function Am(e) {
 	}
 	this.cleanupPictureResizeDrag(), this.renderPictureObjectSelection();
 }
-function jm(e, t) {
+function Nm(e, t) {
 	let n = this.pictureResizeState, r = (e.clientX - n.startClientX) / t, i = (e.clientY - n.startClientY) / t, { x: a, y: o, w: s, h: c } = n.bbox, l = n.dir;
 	if (l.includes("e")) {
 		let e = n.bbox.w + r;
@@ -36775,7 +36835,7 @@ function jm(e, t) {
 		height: c
 	};
 }
-function Mm() {
+function Pm() {
 	let e = this.pictureResizeState?.resizeTransformJournal;
 	if (e) {
 		this.pictureResizeState.resizeTransformJournal = null;
@@ -36787,7 +36847,7 @@ function Mm() {
 	}
 	this.isPictureResizeDragging = !1, this.pictureResizeState = null, this.container.style.cursor = "", this.dragRafId &&= (cancelAnimationFrame(this.dragRafId), 0), this.pictureObjectRenderer?.clearDragPreview();
 }
-function Nm(e) {
+function Fm(e) {
 	if (!this.pictureMoveState) return;
 	let t = this.viewportManager.getZoom(), n = this.container.querySelector("#scroll-content");
 	if (!n) return;
@@ -36797,8 +36857,8 @@ function Nm(e) {
 	if (f !== 0 || p !== 0) try {
 		let e = this.pictureMoveState.multiRefs || [this.pictureMoveState.ref];
 		for (let t of e) {
-			let e = _m.call(this, t);
-			vm.call(this, t, {
+			let e = ym.call(this, t);
+			bm.call(this, t, {
 				horzOffset: e.horzOffset + f,
 				vertOffset: e.vertOffset + p
 			});
@@ -36812,7 +36872,7 @@ function Nm(e) {
 		console.warn("[InputHandler] 개체 이동 드래그 실패:", e);
 	}
 }
-function Pm() {
+function Im() {
 	if (this.pictureMoveState) {
 		let { totalDeltaH: e, totalDeltaV: t, multiRefs: n } = this.pictureMoveState;
 		if (e !== 0 || t !== 0) {
@@ -36837,9 +36897,9 @@ function Pm() {
 	}
 	this.isPictureMoveDragging = !1, this.pictureMoveState = null, this.container.style.cursor = "", this.dragRafId &&= (cancelAnimationFrame(this.dragRafId), 0);
 }
-function Fm(e) {
+function Lm(e) {
 	if (!this.pictureRotateState) return;
-	if (ym.call(this, this.pictureRotateState.ref)) {
+	if (xm.call(this, this.pictureRotateState.ref)) {
 		this.isPictureRotateDragging = !1, this.pictureRotateState = null, this.container.style.cursor = "", this.renderPictureObjectSelection();
 		return;
 	}
@@ -36848,15 +36908,15 @@ function Fm(e) {
 	let n = t.getBoundingClientRect(), r = e.clientX - n.left, i = e.clientY - n.top, a = this.pictureRotateState, o = (Math.atan2(i - a.centerY, r - a.centerX) - a.startAngle) * (180 / Math.PI), s = a.origAngle + o;
 	e.ctrlKey && (s = Math.round(s / 15) * 15), s = (s % 360 + 360) % 360, s > 180 && (s -= 360);
 	try {
-		vm.call(this, a.ref, { rotationAngle: Math.round(s) }), this.eventBus.emit("document-changed");
+		bm.call(this, a.ref, { rotationAngle: Math.round(s) }), this.eventBus.emit("document-changed");
 	} catch (e) {
 		console.warn("[InputHandler] 개체 회전 드래그 실패:", e);
 	}
 }
-function Im(e) {
+function Rm(e) {
 	let t = this.pictureRotateState;
 	if (t) try {
-		let e = _m.call(this, t.ref), n = Math.round(e?.rotationAngle ?? t.origAngle), r = rp(t.origAngle, n);
+		let e = ym.call(this, t.ref), n = Math.round(e?.rotationAngle ?? t.origAngle), r = ap(t.origAngle, n);
 		r && this.executeOperation({
 			kind: "record",
 			command: new Kd([{
@@ -36875,9 +36935,9 @@ function Im(e) {
 	this.isPictureRotateDragging = !1, this.pictureRotateState = null, this.container.style.cursor = "", this.dragRafId &&= (cancelAnimationFrame(this.dragRafId), 0), this.renderPictureObjectSelection();
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/input-handler-table.ts
-var Lm = 200;
-function Rm(e, t, n) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/input-handler-table.ts
+var zm = 200;
+function Bm(e, t, n) {
 	try {
 		let { rowLines: r, colLines: i } = e.tableResizeRenderer.computeBorderLines(n);
 		return t.type === "row" ? t.index === 0 || t.index === r.length - 1 : t.index === 0 || t.index === i.length - 1;
@@ -36885,8 +36945,8 @@ function Rm(e, t, n) {
 		return !1;
 	}
 }
-function zm(e, t, n) {
-	let r = Lm / 75, { rowLines: i, colLines: a } = e.tableResizeRenderer.computeBorderLines(n), o = t.type === "row" ? i.map((e) => ({
+function Vm(e, t, n) {
+	let r = zm / 75, { rowLines: i, colLines: a } = e.tableResizeRenderer.computeBorderLines(n), o = t.type === "row" ? i.map((e) => ({
 		pos: e.y,
 		index: e.index
 	})) : a.map((e) => ({
@@ -36903,13 +36963,13 @@ function zm(e, t, n) {
 		max: l === void 0 ? Infinity : l - r
 	};
 }
-function Bm(e, t) {
+function Hm(e, t) {
 	return Math.min(Math.max(e, t.min), t.max);
 }
-function Vm(e) {
+function Um(e) {
 	this.cursor.clearSelection(), this.cursor.exitCellSelectionMode(), this.cellSelectionRenderer?.clear(), this.exitPictureObjectSelectionIfNeeded(), this.cursor.enterTableObjectSelectionDirect(e.sec, e.ppi, e.ci, e.path && e.path.length > 1 ? [...e.path] : void 0), this.active = !0, this.caret.hide(), this.fieldMarker.hide(), this.selectionRenderer.clear(), this.renderTableObjectSelection(), this.eventBus.emit("table-object-selection-changed", !0), this.eventBus.emit("command-state-changed"), this.textarea.focus();
 }
-function Hm(e, t, n, r, i) {
+function Wm(e, t, n, r, i) {
 	let a = (e) => Math.round(e * 10) / 10, o = a(i), s = [];
 	for (let i of r) if (e.type === "col") {
 		if (n < i.y - 4 || n > i.y + i.h + 4) continue;
@@ -36948,7 +37008,7 @@ function Hm(e, t, n, r, i) {
 		side: u.side
 	};
 }
-function Um(e, t, n) {
+function Gm(e, t, n) {
 	let r = n.find((e) => e.cellIdx === t.cellIdx);
 	if (!r) return [];
 	let i = (e) => Math.round(e / 1) * 1;
@@ -36959,22 +37019,22 @@ function Um(e, t, n) {
 	let a = t.side === "end" ? r.row + r.rowSpan : r.row, o = i(t.side === "end" ? r.y + r.h : r.y);
 	return [...new Set(n.filter((e) => e.row + e.rowSpan === a && Math.abs(i(e.y + e.h) - o) <= 1).map((e) => e.cellIdx))];
 }
-function Wm(e, t, n, r, i) {
+function Km(e, t, n, r, i) {
 	if (i === 0) return 0;
 	let a = [], o = (n) => t.path && t.path.length > 1 ? e.getCellPropertiesByPath(t.sec, t.ppi, JSON.stringify(t.path), n) : e.getCellProperties(t.sec, t.ppi, t.ci, n);
 	for (let e of r) try {
 		let t = o(e.targetCellIdx), r = n.type === "col" ? t.width : t.height;
-		i < 0 && Number.isFinite(r) && a.push(Math.max(0, Math.round(r - Lm)));
+		i < 0 && Number.isFinite(r) && a.push(Math.max(0, Math.round(r - zm)));
 		for (let t of e.neighborCellIdxs) {
 			let e = o(t), r = n.type === "col" ? e.width : e.height;
-			i > 0 && Number.isFinite(r) && a.push(Math.max(0, Math.round(r - Lm)));
+			i > 0 && Number.isFinite(r) && a.push(Math.max(0, Math.round(r - zm)));
 		}
 	} catch {}
 	if (a.length === 0) return i;
 	let s = Math.min(...a);
 	return i > 0 ? Math.min(i, s) : -Math.min(Math.abs(i), s);
 }
-function Gm(e, t, n, r) {
+function qm(e, t, n, r) {
 	if (!this.cachedTableRef || !this.cachedCellBboxes || !this.tableResizeRenderer) return;
 	let { rowLines: i, colLines: a } = this.tableResizeRenderer.computeBorderLines(r), o;
 	if (e.type === "row") {
@@ -36988,11 +37048,11 @@ function Gm(e, t, n, r) {
 	}
 	let s = (e) => Math.round(e * 10) / 10, c = [];
 	for (let t of this.cachedCellBboxes) e.type === "col" ? Math.abs(s(t.x + t.w) - s(o)) <= 1 && c.push(t.cellIdx) : Math.abs(s(t.y + t.h) - s(o)) <= 1 && c.push(t.cellIdx);
-	let l = Hm(e, t, n, this.cachedCellBboxes, o);
+	let l = Wm(e, t, n, this.cachedCellBboxes, o);
 	if (!l) return;
-	let u = Um(e, l, this.cachedCellBboxes), d = u.length > 0 ? u : c;
+	let u = Gm(e, l, this.cachedCellBboxes), d = u.length > 0 ? u : c;
 	if (d.length === 0) return;
-	let f = zm(this, e, r);
+	let f = Vm(this, e, r);
 	this.isResizeDragging = !0, this.resizeDragState = {
 		edge: e,
 		tableRef: { ...this.cachedTableRef },
@@ -37004,19 +37064,19 @@ function Gm(e, t, n, r) {
 		maxResizePos: f.max
 	}, document.addEventListener("mouseup", this.onMouseUpBound, { once: !0 });
 }
-function Km(e) {
+function Jm(e) {
 	if (!this.resizeDragState || !this.tableResizeRenderer) return;
 	let t = this.viewportManager.getZoom(), n = this.container.querySelector("#scroll-content");
 	if (!n) return;
 	let r = n.getBoundingClientRect(), i = e.clientX - r.left, a = e.clientY - r.top, o = this.resizeDragState.edge.pageIndex, s = this.virtualScroll.getPageOffset(o);
 	this.virtualScroll.getPageWidth(o);
-	let c = (i - this.virtualScroll.getPageLeftResolved(o, n.clientWidth)) / t, l = (a - s) / t, u = Bm(this.resizeDragState.edge.type === "row" ? l : c, {
+	let c = (i - this.virtualScroll.getPageLeftResolved(o, n.clientWidth)) / t, l = (a - s) / t, u = Hm(this.resizeDragState.edge.type === "row" ? l : c, {
 		min: this.resizeDragState.minResizePos,
 		max: this.resizeDragState.maxResizePos
 	});
 	this.tableResizeRenderer.showDragMarker(this.resizeDragState.edge.type, u, o, this.resizeDragState.pageBboxes, t);
 }
-function qm(e) {
+function Ym(e) {
 	if (!this.resizeDragState || !this.tableResizeRenderer) {
 		this.cleanupResizeDrag();
 		return;
@@ -37028,23 +37088,23 @@ function qm(e) {
 	}
 	let i = r.getBoundingClientRect(), a = e.clientX - i.left, o = e.clientY - i.top, s = t.edge.pageIndex, c = this.virtualScroll.getPageOffset(s);
 	this.virtualScroll.getPageWidth(s);
-	let l = (a - this.virtualScroll.getPageLeftResolved(s, r.clientWidth)) / n, u = (o - c) / n, d = Bm(t.edge.type === "row" ? u : l, {
+	let l = (a - this.virtualScroll.getPageLeftResolved(s, r.clientWidth)) / n, u = (o - c) / n, d = Hm(t.edge.type === "row" ? u : l, {
 		min: t.minResizePos,
 		max: t.maxResizePos
 	}) - t.borderOriginalPos, f = Math.round(d * 75);
 	if (Math.abs(f) < 75) {
-		let e = Rm(this, t.edge, t.pageBboxes), n = { ...t.tableRef };
-		this.cleanupResizeDrag(), e && Vm.call(this, n);
+		let e = Bm(this, t.edge, t.pageBboxes), n = { ...t.tableRef };
+		this.cleanupResizeDrag(), e && Um.call(this, n);
 		return;
 	}
 	let p, m = this.cursor.isInCellSelectionMode(), h = m ? this.cursor.getSelectedCellRange() : null;
 	if (t.edge.type === "col" && m && h) {
-		let e = t.affectedCellIndices.map((e) => t.bboxes.find((t) => t.cellIdx === e)).filter((e) => e !== void 0 && bp(e, h));
+		let e = t.affectedCellIndices.map((e) => t.bboxes.find((t) => t.cellIdx === e)).filter((e) => e !== void 0 && Sp(e, h));
 		if (e.length === 0) {
 			this.cleanupResizeDrag();
 			return;
 		}
-		if (p = xp(e, t.bboxes, f), p.length === 0) {
+		if (p = Cp(e, t.bboxes, f), p.length === 0) {
 			this.cleanupResizeDrag();
 			return;
 		}
@@ -37055,8 +37115,8 @@ function qm(e) {
 		}
 		let e = t.affectedCellIndices.map((e) => t.bboxes.find((t) => t.cellIdx === e)).filter((e) => e !== void 0).map((e) => ({
 			targetCellIdx: e.cellIdx,
-			neighborCellIdxs: Sp(t.edge, e, t.bboxes).map((e) => e.cellIdx)
-		})), n = Wm(this.wasm, t.tableRef, t.edge, e, f);
+			neighborCellIdxs: wp(t.edge, e, t.bboxes).map((e) => e.cellIdx)
+		})), n = Km(this.wasm, t.tableRef, t.edge, e, f);
 		if (n === 0) {
 			this.cleanupResizeDrag();
 			return;
@@ -37101,21 +37161,21 @@ function qm(e) {
 	}
 	this.cleanupResizeDrag();
 }
-function Jm() {
+function Xm() {
 	this.isResizeDragging = !1, this.resizeDragState = null, this.tableResizeRenderer?.clear(), this.container.style.cursor = "", this.cachedTableRef = null, this.cachedCellBboxes = null, this.dragRafId &&= (cancelAnimationFrame(this.dragRafId), 0);
 }
-function Ym() {
+function Zm() {
 	this.imagePlacementMode = !1, this.imagePlacementData = null, this.imagePlacementDrag = null, this.hideImagePlacementOverlay(), this.container.style.cursor = "";
 }
-function Xm(e, t, n, r) {
+function Qm(e, t, n, r) {
 	this.imagePlacementOverlay || (this.imagePlacementOverlay = document.createElement("div"), this.imagePlacementOverlay.style.cssText = "position:fixed;border:2px dashed #0078d7;background:rgba(0,120,215,0.08);pointer-events:none;z-index:9999;", document.body.appendChild(this.imagePlacementOverlay));
 	let i = Math.min(e, n), a = Math.min(t, r), o = Math.abs(n - e), s = Math.abs(r - t);
 	this.imagePlacementOverlay.style.left = `${i}px`, this.imagePlacementOverlay.style.top = `${a}px`, this.imagePlacementOverlay.style.width = `${o}px`, this.imagePlacementOverlay.style.height = `${s}px`;
 }
-function Zm() {
+function $m() {
 	this.imagePlacementOverlay &&= (this.imagePlacementOverlay.remove(), null);
 }
-function Qm(e) {
+function eh(e) {
 	let t = this.imagePlacementDrag, n = this.imagePlacementData;
 	if (!t || !n) {
 		this.cancelImagePlacement();
@@ -37180,7 +37240,7 @@ function Qm(e) {
 	}
 	this.imagePlacementMode = !1, this.imagePlacementData = null, this.imagePlacementDrag = null, this.container.style.cursor = "";
 }
-function $m(e) {
+function th(e) {
 	let t = this.cursor.getSelectedTableRef();
 	if (!t) return;
 	let n = Math.round(this.gridStepMm * 7200 / 25.4), r = 0, i = 0;
@@ -37206,7 +37266,7 @@ function $m(e) {
 		console.warn("[InputHandler] 표 이동 실패:", e);
 	}
 }
-function eh(e) {
+function nh(e) {
 	let t = this.cursor.getSelectedPictureRefs(), n = this.cursor.getSelectedPictureRef();
 	if (!n) return;
 	let r = Math.round(this.gridStepMm * 7200 / 25.4), i = 0, a = 0;
@@ -37225,10 +37285,10 @@ function eh(e) {
 	let o = t.length > 1 ? t : [n];
 	try {
 		for (let e of o) {
-			let t = _m.call(this, e);
+			let t = ym.call(this, e);
 			if (t.treatAsChar) continue;
 			let n = t.horzOffset + i, r = t.vertOffset + a;
-			vm.call(this, e, {
+			bm.call(this, e, {
 				horzOffset: n,
 				vertOffset: r
 			});
@@ -37246,7 +37306,7 @@ function eh(e) {
 		console.warn("[InputHandler] 개체 이동 실패:", e);
 	}
 }
-function th(e) {
+function rh(e) {
 	if (!this.moveDragState) return;
 	let t = this.viewportManager.getZoom(), n = this.container.querySelector("#scroll-content");
 	if (!n) return;
@@ -37270,7 +37330,7 @@ function th(e) {
 		console.warn("[InputHandler] 표 이동 드래그 실패:", e);
 	}
 }
-function nh() {
+function ih() {
 	let e = this.moveDragState;
 	if (e) {
 		let { totalDeltaH: t, totalDeltaV: n, startPpi: r, tableRef: i } = e;
@@ -37281,7 +37341,7 @@ function nh() {
 	}
 	this.isMoveDragging = !1, this.moveDragState = null, this.dragRafId &&= (cancelAnimationFrame(this.dragRafId), 0), this.container.style.cursor = "", e?.pendingEnterCellHit && !e.hasMoved && e.totalDeltaH === 0 && e.totalDeltaV === 0 && (this.cursor.exitTableObjectSelection(), this.tableObjectRenderer?.clear(), this.eventBus.emit("table-object-selection-changed", !1), this.cursor.clearSelection(), this.cursor.moveTo(e.pendingEnterCellHit), this.cursor.resetPreferredX(), this.cursor.setAnchor(), this.active = !0, this.updateCaret(), this.textarea.focus());
 }
-function rh(e, t, n) {
+function ah(e, t, n) {
 	let r = this.cursor.getCellTableContext(), i = this.cursor.getSelectedCellRange();
 	if (!r || !i) return;
 	let a = r.cellPath && r.cellPath.length > 1 ? r.cellPath : void 0, o = a ? JSON.stringify(a) : void 0, s;
@@ -37301,10 +37361,10 @@ function rh(e, t, n) {
 		console.warn(`[InputHandler] ${t} 실패:`, e);
 	}
 }
-function ih(e) {
-	rh.call(this, e, "resizeCellByKeyboard", Cp);
+function oh(e) {
+	ah.call(this, e, "resizeCellByKeyboard", Tp);
 }
-function ah(e) {
+function sh(e) {
 	let t = this.cursor.getCellTableContext();
 	if (!t) return;
 	let n = e === "ArrowLeft" || e === "ArrowRight", r = e === "ArrowRight" || e === "ArrowDown" ? 200 : -200, i = t.cellPath && t.cellPath.length > 1 ? JSON.stringify(t.cellPath) : void 0;
@@ -37327,21 +37387,21 @@ function ah(e) {
 	}
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/pwh-table-create-shortcut.mjs
-var oh = /* @__PURE__ */ new WeakMap();
-function sh(e, t, n = Date.now()) {
-	if (t.ctrlKey && !t.metaKey && !t.altKey && !t.shiftKey && (t.code === "KeyN" || t.key?.toLowerCase() === "n")) return t.preventDefault(), t.repeat || oh.set(e, n + 2500), !0;
-	let r = oh.get(e);
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/pwh-table-create-shortcut.mjs
+var ch = /* @__PURE__ */ new WeakMap();
+function lh(e, t, n = Date.now()) {
+	if (t.ctrlKey && !t.metaKey && !t.altKey && !t.shiftKey && (t.code === "KeyN" || t.key?.toLowerCase() === "n")) return t.preventDefault(), t.repeat || ch.set(e, n + 2500), !0;
+	let r = ch.get(e);
 	return !r || [
 		"Control",
 		"Shift",
 		"Alt",
 		"Meta"
-	].includes(t.key) || (oh.delete(e), n > r || t.altKey || t.metaKey || t.shiftKey || t.repeat) || t.code !== "KeyT" && t.key?.toLowerCase() !== "t" && t.key !== "ㅅ" ? !1 : (t.preventDefault(), e._cellBlockLetterImeGuard?.arm(t), e.dispatcher?.dispatch("table:create", { pwhDetailed: !0 }), !0);
+	].includes(t.key) || (ch.delete(e), n > r || t.altKey || t.metaKey || t.shiftKey || t.repeat) || t.code !== "KeyT" && t.key?.toLowerCase() !== "t" && t.key !== "ㅅ" ? !1 : (t.preventDefault(), e._cellBlockLetterImeGuard?.arm(t), e.dispatcher?.dispatch("table:create", { pwhDetailed: !0 }), !0);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/pwh-cell-delete-selection.mjs
-function ch({ rowCount: e, colCount: t, cells: n, selected: r }) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/pwh-cell-delete-selection.mjs
+function uh({ rowCount: e, colCount: t, cells: n, selected: r }) {
 	if (!Number.isInteger(e) || !Number.isInteger(t) || e < 1 || t < 1) return { kind: "partial" };
 	let i = new Set(r), a = Array.from({ length: e }, () => Array(t).fill(!1));
 	for (let r = 0; r < n.length; r++) {
@@ -37359,14 +37419,14 @@ function ch({ rowCount: e, colCount: t, cells: n, selected: r }) {
 	} : c === e * t ? { kind: "table" } : { kind: "partial" };
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/pwh-cell-delete-dialog.ts
-function lh(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/pwh-cell-delete-dialog.ts
+function dh(e) {
 	let t = e.getSelectedCellBlock();
 	if (!t || !t.cellIndices.length) return;
 	let n = e.cursor.captureCellSelection(), r = e.cursor.getPosition(), i = { kind: "partial" };
 	if (!t.cellPath) {
 		let n = e.wasm.getTableDimensions(t.sec, t.ppi, t.ci), r = Array.from({ length: n.cellCount }, (n, r) => e.wasm.getCellInfo(t.sec, t.ppi, t.ci, r));
-		i = ch({
+		i = uh({
 			...n,
 			cells: r,
 			selected: t.cellIndices
@@ -37420,11 +37480,11 @@ function lh(e) {
 	new s().show();
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/pwh-clipboard-structure.mjs
-function uh({ inCell: e, internalControl: t = !1, hasTables: n = !1, hasObjects: r = !1 }) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/pwh-clipboard-structure.mjs
+function fh({ inCell: e, internalControl: t = !1, hasTables: n = !1, hasObjects: r = !1 }) {
 	return !!(e && (t || n || r));
 }
-function dh(e) {
+function ph(e) {
 	if (typeof e != "string" || !e) return !1;
 	try {
 		return !!new DOMParser().parseFromString(e, "text/html").querySelector("table");
@@ -37432,7 +37492,7 @@ function dh(e) {
 		return !1;
 	}
 }
-function fh(e, t, n = !1) {
+function mh(e, t, n = !1) {
 	let r = e.parentParaIndex !== void 0 || (e.cellPath?.length ?? 0) > 0;
 	if (!r) return null;
 	let i = !1, a = !1;
@@ -37442,7 +37502,7 @@ function fh(e, t, n = !1) {
 	} catch {
 		return "셀 안에 붙일 서식 구조를 확인하지 못했습니다. 기존 내용은 유지했습니다.";
 	}
-	return uh({
+	return fh({
 		inCell: r,
 		internalControl: n,
 		hasTables: i,
@@ -37450,26 +37510,26 @@ function fh(e, t, n = !1) {
 	}) ? "현재 셀 붙여넣기 경로는 표·객체 구조를 보존하지 못할 수 있어 중단했습니다. 기존 내용은 유지했습니다. 텍스트만 붙이려면 일반 텍스트로 붙여넣기를 사용하세요." : null;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/navigation-keymap.ts
-function ph(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/navigation-keymap.ts
+function hh(e) {
 	return e.key !== "ArrowUp" && e.key !== "ArrowDown" && e.key !== "ArrowLeft" && e.key !== "ArrowRight" ? null : e.ctrlKey || e.metaKey ? "resize" : "navigate";
 }
-function mh() {
+function gh() {
 	let e = globalThis.__rhwpTestPlatformKind;
 	return e === "mac" || e === "other" ? e : null;
 }
-function hh(e) {
-	let t = mh();
+function _h(e) {
+	let t = gh();
 	if (t) return t;
 	let n = e ?? (typeof navigator > "u" ? void 0 : navigator), r = n?.userAgentData?.platform || n?.platform || "", i = n?.userAgent || "";
 	return /mac|iphone|ipad|ipod/i.test(r) || /mac os x|iphone|ipad|ipod/i.test(i) ? "mac" : "other";
 }
-function gh(e) {
+function vh(e) {
 	let t = e.key || "";
 	return t === "ArrowLeft" || t === "ArrowRight" || t === "ArrowUp" || t === "ArrowDown" || t === "Home" || t === "End" ? t : e.code || t;
 }
-function _h(e, t = hh()) {
-	let n = gh(e);
+function yh(e, t = _h()) {
+	let n = vh(e);
 	if (!e.ctrlKey && !e.metaKey && !e.altKey) return n === "Home" ? "lineStart" : n === "End" ? "lineEnd" : null;
 	if (t === "mac") {
 		if (e.altKey && !e.ctrlKey && !e.metaKey) {
@@ -37490,16 +37550,16 @@ function _h(e, t = hh()) {
 	}
 	return null;
 }
-function vh(e, t = hh()) {
-	let n = gh(e);
+function bh(e, t = _h()) {
+	let n = vh(e);
 	return t === "other" && e.altKey && !e.ctrlKey && !e.metaKey && (n === "ArrowLeft" || n === "ArrowRight");
 }
-function yh(e, t = hh()) {
+function xh(e, t = _h()) {
 	return t === "mac" ? e.replace(/\bCtrl\+/g, "⌘").replace(/\bAlt\+/g, "⌥").replace(/\bShift\+/g, "⇧") : e;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/command/shortcut-map.ts
-var bh = [
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/command/shortcut-map.ts
+var Sh = [
 	[{
 		key: "z",
 		ctrl: !0
@@ -37833,14 +37893,14 @@ var bh = [
 		shift: !0
 	}, "table:block-product"]
 ];
-function xh(e, t, n = hh()) {
+function Ch(e, t, n = _h()) {
 	let r = e.ctrlKey || e.metaKey, i = e.key.toLowerCase(), a = (e.code ?? "").toLowerCase();
 	for (let [o, s] of t) if (!(o.platform && o.platform !== n) && (!o.ctrl || r) && (o.ctrl || !r) && (o.shift ?? !1) === e.shiftKey && (o.alt ?? !1) === e.altKey && (i === o.key || o.code && a === o.code.toLowerCase())) return s;
 	return null;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/command/contextual-shortcut.ts
-var Sh = class {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/command/contextual-shortcut.ts
+var wh = class {
 	state = "idle";
 	ghostText = "";
 	arm(e) {
@@ -37854,7 +37914,7 @@ var Sh = class {
 		this.state = "idle", this.ghostText = "";
 	}
 };
-function Ch(e, t) {
+function Th(e, t) {
 	let n = e.ctrlKey || e.metaKey, r = e.key.toLowerCase() === "s" || e.key === "ㄴ" || e.code.toLowerCase() === "keys";
 	return !n || !e.shiftKey || e.altKey || !r || !t.inCellSelectionMode ? null : t.saveAsEnabled ? t.blockSumEnabled ? {
 		kind: "dispatch",
@@ -37864,7 +37924,7 @@ function Ch(e, t) {
 		commandId: "file:save-as"
 	} : { kind: "consume" };
 }
-function wh(e, t) {
+function Eh(e, t) {
 	if (!t.inCellSelectionMode || e.ctrlKey || e.metaKey || e.altKey) return null;
 	let n = e.key.toLowerCase(), r = e.code.toLowerCase();
 	return n === "s" || e.key === "ㄴ" || r === "keys" ? {
@@ -37882,20 +37942,20 @@ function wh(e, t) {
 	} : null;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/office-clipboard-images.ts
-var Th = 80, Eh = 81, Dh = 14;
-function Oh(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/office-clipboard-images.ts
+var Dh = 80, Oh = 81, kh = 14;
+function Ah(e) {
 	let t = e.length >> 1, n = new Uint8Array(t);
 	for (let r = 0; r < t; r++) n[r] = parseInt(e.substr(r * 2, 2), 16);
 	return n;
 }
-function kh(e, t) {
+function jh(e, t) {
 	let n = /* @__PURE__ */ new Uint8Array(14), r = new DataView(n.buffer);
 	n[0] = 66, n[1] = 77, r.setUint32(2, 14 + e.byteLength + t.byteLength, !0), r.setUint32(10, 14 + e.byteLength, !0);
 	let i = new Uint8Array(n.byteLength + e.byteLength + t.byteLength);
 	return i.set(n, 0), i.set(e, n.byteLength), i.set(t, n.byteLength + e.byteLength), i;
 }
-function Ah(e) {
+function Mh(e) {
 	let t = [];
 	if (e.byteLength < 44) return {
 		dibs: t,
@@ -37910,12 +37970,12 @@ function Ah(e) {
 	for (; c + 8 <= e.byteLength;) {
 		let r = n.getUint32(c, !0), i = n.getUint32(c + 4, !0);
 		if (i < 8 || c + i > e.byteLength) break;
-		if (r === Eh || r === Th) {
-			let i = n.getInt32(c + 24, !0), a = n.getInt32(c + 28, !0), o = n.getUint32(c + 48, !0), s = n.getUint32(c + 52, !0), l = n.getUint32(c + 56, !0), u = n.getUint32(c + 60, !0), d = r === Eh && c + 80 <= e.byteLength ? n.getInt32(c + 72, !0) : 0, f = r === Eh && c + 80 <= e.byteLength ? n.getInt32(c + 76, !0) : 0;
+		if (r === Oh || r === Dh) {
+			let i = n.getInt32(c + 24, !0), a = n.getInt32(c + 28, !0), o = n.getUint32(c + 48, !0), s = n.getUint32(c + 52, !0), l = n.getUint32(c + 56, !0), u = n.getUint32(c + 60, !0), d = r === Oh && c + 80 <= e.byteLength ? n.getInt32(c + 72, !0) : 0, f = r === Oh && c + 80 <= e.byteLength ? n.getInt32(c + 76, !0) : 0;
 			if (s >= 12 && u > 0 && c + o + s <= e.byteLength && c + l + u <= e.byteLength) {
 				let n = e.subarray(c + o, c + o + s), r = e.subarray(c + l, c + l + u), p = new DataView(n.buffer, n.byteOffset, n.byteLength), m = Math.abs(p.getInt32(4, !0)), h = Math.abs(p.getInt32(8, !0));
 				m > 0 && h > 0 && t.push({
-					bmp: kh(n, r),
+					bmp: jh(n, r),
 					x: i,
 					y: a,
 					w: d > 0 ? d : m,
@@ -37923,15 +37983,15 @@ function Ah(e) {
 				});
 			}
 		}
-		if (c += i, r === Dh) break;
+		if (c += i, r === kh) break;
 	}
 	return {
 		dibs: t,
 		bounds: s
 	};
 }
-async function jh(e) {
-	let { dibs: t, bounds: n } = Ah(e);
+async function Nh(e) {
+	let { dibs: t, bounds: n } = Mh(e);
 	if (t.length === 0) return null;
 	let r = [];
 	try {
@@ -37964,12 +38024,12 @@ async function jh(e) {
 		for (let { bmp: e } of r) e.close?.();
 	}
 }
-function Mh(e) {
+function Ph(e) {
 	let t = [], n = /\\pict([\s\S]*?)\}/g, r;
 	for (; (r = n.exec(e)) !== null;) {
 		let e = r[1], n = /\\pngblip\b/.test(e), i = /\\jpegblip\b/.test(e), a = /\\(?:wmetafile\d*|emfblip)\b/.test(e), o = e.replace(/\\[a-zA-Z]+-?\d*\s?/g, "").replace(/[^0-9a-fA-F]/g, "");
 		if (o.length < 32) continue;
-		let s = Oh(o.slice(0, o.length - o.length % 2));
+		let s = Ah(o.slice(0, o.length - o.length % 2));
 		n ? t.push({
 			bytes: s,
 			mime: "image/png"
@@ -37986,17 +38046,17 @@ function Mh(e) {
 	}
 	return t;
 }
-async function Nh(e, t) {
+async function Fh(e, t) {
 	if (!e.byteLength || !t) return null;
 	let n = new Uint8Array(e.byteLength);
 	n.set(e);
-	let r = new Blob([n.buffer], { type: t }), i = t === "image/emf" ? await jh(e) : t === "image/bmp" ? await Ph(r) : r;
+	let r = new Blob([n.buffer], { type: t }), i = t === "image/emf" ? await Nh(e) : t === "image/bmp" ? await Ih(r) : r;
 	return i ? await new Promise((e) => {
 		let t = new FileReader();
 		t.onload = () => e(typeof t.result == "string" ? t.result : null), t.onerror = () => e(null), t.readAsDataURL(i);
 	}) : null;
 }
-async function Ph(e) {
+async function Ih(e) {
 	try {
 		let t = await createImageBitmap(e), n = document.createElement("canvas");
 		n.width = t.width, n.height = t.height;
@@ -38006,9 +38066,9 @@ async function Ph(e) {
 		return console.warn("[paste] BMP → PNG 변환 실패:", e), null;
 	}
 }
-async function Fh(e, t) {
+async function Lh(e, t) {
 	if (!t || !/\\pict/.test(t)) return e;
-	let n = Mh(t);
+	let n = Ph(t);
 	if (n.length === 0) return e;
 	let r = e.match(/<img\b[^>]*>/gi) ?? [];
 	if (r.length === 0) return e;
@@ -38024,16 +38084,16 @@ async function Fh(e, t) {
 			i.push(null);
 			continue;
 		}
-		let r = await Nh(t.bytes, t.mime);
+		let r = await Fh(t.bytes, t.mime);
 		i.push(r), r && o++;
 	}
 	let s = 0, c = e.replace(/<img\b[^>]*>/gi, (e) => {
 		let t = i[s++];
 		return t ? (o++, /src\s*=\s*["'][^"']*["']/i.test(e) ? e.replace(/src\s*=\s*["'][^"']*["']/i, `src="${t}"`) : e.replace(/<img\b/i, `<img src="${t}"`)) : e;
 	});
-	return console.log(`[paste] 클립보드 그림 ${o}/${r.length}개 삽입(pict ${n.length})`), Ih(c);
+	return console.log(`[paste] 클립보드 그림 ${o}/${r.length}개 삽입(pict ${n.length})`), Rh(c);
 }
-function Ih(e) {
+function Rh(e) {
 	if (!/<img\b/i.test(e) || typeof DOMParser > "u") return e;
 	try {
 		let t = new DOMParser().parseFromString(e, "text/html").body;
@@ -38059,20 +38119,20 @@ function Ih(e) {
 		return console.warn("[paste] 그림 위치 정리 실패 — 원본 HTML 사용:", t), e;
 	}
 }
-function Lh(e, t) {
+function zh(e, t) {
 	return !e || !t || !/\\pict/.test(t) ? !1 : /<img\b[^>]*src\s*=\s*["'](?!data:)/i.test(e);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/office-html-sanitize.ts
-var Rh = [
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/office-html-sanitize.ts
+var Bh = [
 	"script",
 	"style",
 	"xml"
-], zh = "<![endif]>";
-function Bh(e) {
+], Vh = "<![endif]>";
+function Hh(e) {
 	return Number.isNaN(e) || e === 62 || e === 47 || e <= 32;
 }
-function Vh(e, t, n, r) {
+function Uh(e, t, n, r) {
 	let i = e.indexOf(">", n);
 	if (i < 0) return e.length;
 	if (e.charCodeAt(i - 1) === 47) return i + 1;
@@ -38087,7 +38147,7 @@ function Vh(e, t, n, r) {
 		a = n + 2 + r.length;
 	}
 }
-function Hh(e) {
+function Wh(e) {
 	let t = e.toLowerCase(), n = "", r = 0;
 	for (; r < e.length;) {
 		let i = e.indexOf("<", r);
@@ -38101,13 +38161,13 @@ function Hh(e) {
 			continue;
 		}
 		if (t.startsWith("<![if", i)) {
-			let n = t.indexOf(zh, i);
+			let n = t.indexOf(Vh, i);
 			r = n < 0 ? e.length : n + 10;
 			continue;
 		}
-		let a = Rh.find((e) => t.startsWith(`<${e}`, i) && Bh(t.charCodeAt(i + 1 + e.length)));
+		let a = Bh.find((e) => t.startsWith(`<${e}`, i) && Hh(t.charCodeAt(i + 1 + e.length)));
 		if (a) {
-			r = Vh(e, t, i, a);
+			r = Uh(e, t, i, a);
 			continue;
 		}
 		n += "<", r = i + 1;
@@ -38115,8 +38175,8 @@ function Hh(e) {
 	return n;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/input-handler-keyboard.ts
-var Uh = /<!--\s*rhwp-studio-clipboard:([A-Za-z0-9._:-]+)\s*-->/, Wh = /* @__PURE__ */ new Set([
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/input-handler-keyboard.ts
+var Gh = /<!--\s*rhwp-studio-clipboard:([A-Za-z0-9._:-]+)\s*-->/, Kh = /* @__PURE__ */ new Set([
 	"ArrowLeft",
 	"ArrowRight",
 	"ArrowUp",
@@ -38128,72 +38188,72 @@ var Uh = /<!--\s*rhwp-studio-clipboard:([A-Za-z0-9._:-]+)\s*-->/, Wh = /* @__PUR
 	"Enter",
 	"Tab",
 	"Escape"
-]), Gh = /* @__PURE__ */ new Set(["edit:undo", "edit:redo"]);
-function Kh(e) {
+]), qh = /* @__PURE__ */ new Set(["edit:undo", "edit:redo"]);
+function Jh(e) {
 	if (!this.dispatcher) return !1;
-	let t = xh(e, bh);
-	return !t || !Gh.has(t) ? !1 : (e.preventDefault(), this.dispatcher.dispatch(t), !0);
+	let t = Ch(e, Sh);
+	return !t || !qh.has(t) ? !1 : (e.preventDefault(), this.dispatcher.dispatch(t), !0);
 }
-var qh = /* @__PURE__ */ new Set([
+var Yh = /* @__PURE__ */ new Set([
 	"edit:undo",
 	"edit:redo",
 	"edit:goto",
 	"edit:select-all"
 ]);
-function Jh(e) {
+function Xh(e) {
 	return e.key === "Enter" && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey && !this.isComposing && !this.isFormMode?.() && !this.cursor.isInHeaderFooter() && !this.cursor.isInFootnote() && !this.cursor.isInPictureObjectSelection() && !this.cursor.isInTableObjectSelection() && !this.cursor.isInBlockSelectionMode() && !this.cursor.isInCellSelectionMode() && !this.cursor.hasSelection() && this.cursor.isInCell();
 }
-function Yh(e) {
+function Zh(e) {
 	if (!this.dispatcher) return !1;
-	let t = xh(e, bh);
-	return !t || !qh.has(t) ? !1 : (e.preventDefault(), this.dispatcher.dispatch(t), !0);
+	let t = Ch(e, Sh);
+	return !t || !Yh.has(t) ? !1 : (e.preventDefault(), this.dispatcher.dispatch(t), !0);
 }
-function Xh(e) {
+function Qh(e) {
 	if (!this.dispatcher) return !1;
-	let t = Ch(e, {
+	let t = Th(e, {
 		inCellSelectionMode: this.cursor.isInCellSelectionMode(),
 		blockSumEnabled: this.dispatcher.isEnabled("table:block-sum"),
 		saveAsEnabled: this.dispatcher.isEnabled("file:save-as")
 	});
 	return t ? (e.preventDefault(), t.kind === "dispatch" && this.dispatcher.dispatch(t.commandId), !0) : !1;
 }
-function Zh(e) {
+function $h(e) {
 	if (!this.dispatcher) return !1;
-	let t = wh(e, { inCellSelectionMode: this.cursor.isInCellSelectionMode() });
+	let t = Eh(e, { inCellSelectionMode: this.cursor.isInCellSelectionMode() });
 	return t ? (this._cellBlockLetterImeGuard?.arm(e), e.preventDefault(), this.dispatcher.dispatch(t.commandId), !0) : !1;
 }
-function Qh() {
+function eg() {
 	try {
 		if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
 	} catch {}
 	return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 }
-function $h(e) {
+function tg(e) {
 	return e.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
-function eg(e) {
-	return `<html><body>\n<!--StartFragment-->\n${(e || "").split(/\r?\n/).map((e) => `<p>${$h(e)}</p>`).join("\n")}\n<!--EndFragment-->\n</body></html>`;
-}
-function tg(e, t) {
-	let n = `<!--rhwp-studio-clipboard:${t}-->`, r = e || eg("");
-	return Uh.test(r) ? r.replace(Uh, n) : r.includes("<!--StartFragment-->") ? r.replace("<!--StartFragment-->", `${n}\n<!--StartFragment-->`) : `${n}\n${r}`;
-}
 function ng(e) {
-	return Uh.exec(e)?.[1] ?? null;
+	return `<html><body>\n<!--StartFragment-->\n${(e || "").split(/\r?\n/).map((e) => `<p>${tg(e)}</p>`).join("\n")}\n<!--EndFragment-->\n</body></html>`;
 }
 function rg(e, t) {
-	let n = ng(t);
-	return !!n && n === e.rhwpClipboardToken;
+	let n = `<!--rhwp-studio-clipboard:${t}-->`, r = e || ng("");
+	return Gh.test(r) ? r.replace(Gh, n) : r.includes("<!--StartFragment-->") ? r.replace("<!--StartFragment-->", `${n}\n<!--StartFragment-->`) : `${n}\n${r}`;
 }
 function ig(e) {
+	return Gh.exec(e)?.[1] ?? null;
+}
+function ag(e, t) {
+	let n = ig(t);
+	return !!n && n === e.rhwpClipboardToken;
+}
+function og(e) {
 	return e.parentParaIndex !== void 0 && (e.cellPath?.length ?? 0) > 1;
 }
-function ag(e) {
+function sg(e) {
 	let t = /* @__PURE__ */ new Set(), n = [];
 	for (let r of e) t.has(r.cellIdx) || (t.add(r.cellIdx), n.push(r));
 	return n.sort((e, t) => e.row === t.row ? e.col - t.col : e.row - t.row), n;
 }
-function og(e, t) {
+function cg(e, t) {
 	return {
 		sectionIndex: e.sectionIndex,
 		paragraphIndex: 0,
@@ -38204,11 +38264,11 @@ function og(e, t) {
 		cellParaIndex: 0
 	};
 }
-function sg() {
+function lg() {
 	let e = this.cursor.getPosition(), t = e.sectionIndex, n = e.parentParaIndex, r = e.controlIndex, i = e.cellIndex;
-	if (n === void 0 || r === void 0 || i === void 0 || ig(e)) return !1;
+	if (n === void 0 || r === void 0 || i === void 0 || og(e)) return !1;
 	try {
-		let a = ag(this.wasm.getTableCellBboxes(t, n, r));
+		let a = sg(this.wasm.getTableCellBboxes(t, n, r));
 		if (a.length === 0 || a[a.length - 1].cellIdx !== i) return !1;
 		let o = this.wasm.getCellInfo(t, n, r, i), s = o.row + Math.max(1, o.rowSpan || 1) - 1;
 		return this.executeOperation({
@@ -38216,18 +38276,18 @@ function sg() {
 			operationType: "insertTableRow",
 			operation: (a) => {
 				a.insertTableRow(t, n, r, s, !0);
-				let o = ag(a.getTableCellBboxes(t, n, r)), c = s + 1, l = o.find((e) => e.row === c) ?? o.find((e) => e.row > s) ?? o[o.length - 1];
-				return og(e, l?.cellIdx ?? i);
+				let o = sg(a.getTableCellBboxes(t, n, r)), c = s + 1, l = o.find((e) => e.row === c) ?? o.find((e) => e.row > s) ?? o[o.length - 1];
+				return cg(e, l?.cellIdx ?? i);
 			}
 		}), !0;
 	} catch (e) {
 		return console.warn("[InputHandler] 마지막 셀 Tab 행 추가 실패:", e), !1;
 	}
 }
-function cg(e, t) {
+function ug(e, t) {
 	t.type === "image" ? t.cellPath && t.cellPath.length > 0 ? e.deleteCellPictureControlByPath(t.sec, t.ppi, t.cellPath, t.ci) : e.deletePictureControl(t.sec, t.ppi, t.ci) : t.type === "equation" ? e.deleteEquationControl(t.sec, t.ppi, t.ci) : e.deleteShapeControl(t.sec, t.ppi, t.ci);
 }
-function lg(e) {
+function dg(e) {
 	return {
 		key: e.key,
 		code: e.code,
@@ -38237,7 +38297,7 @@ function lg(e) {
 		altKey: e.altKey
 	};
 }
-function ug(e, t) {
+function fg(e, t) {
 	switch (t ? this.cursor.setAnchor() : this.cursor.clearSelection(), e) {
 		case "wordBackward":
 			this.cursor.moveToWordBoundary(-1);
@@ -38258,11 +38318,11 @@ function ug(e, t) {
 	}
 	this.updateCaret(), t && this.updateSelection();
 }
-function dg(e) {
-	let t = lg(e), n = hh(), r = _h(t, n);
-	return r ? (e.preventDefault(), ug.call(this, r, e.shiftKey), !0) : vh(t, n) ? (e.preventDefault(), !0) : !1;
+function pg(e) {
+	let t = dg(e), n = _h(), r = yh(t, n);
+	return r ? (e.preventDefault(), fg.call(this, r, e.shiftKey), !0) : bh(t, n) ? (e.preventDefault(), !0) : !1;
 }
-function fg(e, t) {
+function mg(e, t) {
 	switch (t ? this.cursor.setHfAnchor() : this.cursor.clearSelection(), e) {
 		case "wordBackward":
 			this.cursor.moveToWordBoundaryInHf(-1);
@@ -38283,17 +38343,17 @@ function fg(e, t) {
 	}
 	this.updateCaret();
 }
-function pg(e) {
-	let t = lg(e), n = hh(), r = _h(t, n);
-	if (r) return e.preventDefault(), fg.call(this, r, e.shiftKey), !0;
+function hg(e) {
+	let t = dg(e), n = _h(), r = yh(t, n);
+	if (r) return e.preventDefault(), mg.call(this, r, e.shiftKey), !0;
 	if (e.metaKey && !e.ctrlKey && !e.altKey && (e.key === "ArrowUp" || e.key === "ArrowDown") || (e.ctrlKey || e.metaKey) && !e.altKey && (e.key === "Home" || e.key === "End")) {
 		e.preventDefault(), e.shiftKey ? this.cursor.setHfAnchor() : this.cursor.clearSelection();
 		let t = e.key === "ArrowUp" || e.key === "Home";
 		return this.cursor.moveToHeaderFooterBoundary(t ? -1 : 1), this.updateCaret(), !0;
 	}
-	return vh(t, n) ? (e.preventDefault(), !0) : !1;
+	return bh(t, n) ? (e.preventDefault(), !0) : !1;
 }
-function mg(e, t) {
+function gg(e, t) {
 	let n = {
 		sectionIndex: e.sectionIndex,
 		paragraphIndex: t.paraIdx ?? e.paragraphIndex,
@@ -38308,7 +38368,7 @@ function mg(e, t) {
 	}
 	return n;
 }
-function hg(e, t) {
+function _g(e, t) {
 	if (t && this.deleteSelection({ deferRecord: !0 }), !e) return;
 	let n = e.split(/\r?\n/);
 	for (let e = 0; e < n.length; e++) if (n[e] && this.executeOperation({
@@ -38322,11 +38382,11 @@ function hg(e, t) {
 		});
 	}
 }
-function gg(e, t, n = "") {
-	let r = Qh();
-	return e.rhwpClipboardToken = r, tg(t || eg(n), r);
+function vg(e, t, n = "") {
+	let r = eg();
+	return e.rhwpClipboardToken = r, rg(t || ng(n), r);
 }
-async function _g(e, t) {
+async function yg(e, t) {
 	if (typeof ClipboardItem > "u" || !navigator.clipboard?.write) {
 		await navigator.clipboard.writeText(e);
 		return;
@@ -38337,7 +38397,7 @@ async function _g(e, t) {
 	});
 	await navigator.clipboard.write([n]);
 }
-async function vg(e, t) {
+async function bg(e, t) {
 	let n = new Uint8Array(e);
 	if (t === "image/png") return new Blob([n], { type: "image/png" });
 	let r = new Image(), i = URL.createObjectURL(new Blob([n], { type: t }));
@@ -38349,25 +38409,25 @@ async function vg(e, t) {
 		URL.revokeObjectURL(i);
 	}
 }
-function yg(e) {
+function xg(e) {
 	return e && e.cellPath && e.cellPath.length > 0 ? JSON.stringify(e.cellPath) : "";
 }
-async function bg(e, t, n, r, i, a, o = "") {
-	let s = await vg(e.getControlImageData(t, n, r, o), e.getControlImageMime(t, n, r, o)), c = new ClipboardItem({
+async function Sg(e, t, n, r, i, a, o = "") {
+	let s = await bg(e.getControlImageData(t, n, r, o), e.getControlImageMime(t, n, r, o)), c = new ClipboardItem({
 		"text/plain": new Blob([i], { type: "text/plain" }),
 		"text/html": new Blob([a], { type: "text/html" }),
 		"image/png": s
 	});
 	await navigator.clipboard.write([c]);
 }
-var xg = {
+var Cg = {
 	h: "insert:hyperlink",
 	ㅗ: "insert:hyperlink",
 	b: "insert:bookmark",
 	ㅠ: "insert:bookmark",
 	n: "format:para-num-shape",
 	ㅜ: "format:para-num-shape"
-}, Sg = {
+}, wg = {
 	a: "table:split",
 	ㅁ: "table:split",
 	z: "table:attach",
@@ -38378,10 +38438,10 @@ var xg = {
 	ㄴ: "page:hide",
 	m: "insert:equation",
 	ㅡ: "insert:equation"
-}, Cg = {
+}, Tg = {
 	t: "view:border-transparent",
 	ㅅ: "view:border-transparent"
-}, wg = {
+}, Eg = {
 	c: "view:ctrl-mark",
 	ㅊ: "view:ctrl-mark",
 	t: "view:para-mark",
@@ -38393,35 +38453,35 @@ var xg = {
 	q: "view:zoom-100",
 	ㅂ: "view:zoom-100"
 };
-function Tg(e, t) {
-	let n = Dg.call(this), r = Ys(this.virtualScroll, this.viewportManager, e);
-	return r.moved ? (n && Og.call(this, n, r.deltaX, r.deltaY, t), !0) : !1;
+function Dg(e, t) {
+	let n = kg.call(this), r = Ys(this.virtualScroll, this.viewportManager, e);
+	return r.moved ? (n && Ag.call(this, n, r.deltaX, r.deltaY, t), !0) : !1;
 }
-function Eg(e) {
+function Og(e) {
 	let t = this.cursor.getRect?.() ?? null;
 	if (!t) return;
 	let n = this.viewportManager.getZoom(), r = this.viewportManager.getViewportSize().height, i = Math.max(0, this.virtualScroll.getTotalHeight() - r), a = this.virtualScroll.getPageOffset(t.pageIndex) + t.y * n;
 	e < 0 ? a + t.height * n <= r && this.viewportManager.setScrollTop(0) : a >= i && this.viewportManager.setScrollTop(i);
 }
-function Dg() {
+function kg() {
 	let e = this.cursor;
 	return this.isFormMode?.() || e.isInHeaderFooter?.() || e.isInFootnote?.() || e.isInPictureObjectSelection?.() || e.isInTableObjectSelection?.() || e.isInBlockSelectionMode?.() || e.isInCellSelectionMode?.() ? null : e.getRect?.() ?? null;
 }
-function Og(e, t, n, r) {
-	let i = kg.call(this, e, t, n);
+function Ag(e, t, n, r) {
+	let i = jg.call(this, e, t, n);
 	i && (r ? this.cursor.setAnchor() : this.cursor.clearSelection(), this.cursor.moveToHit(i), this.cursor.resetPreferredX(), this.updateCaretNoScroll(), r && this.updateSelection());
 }
-function kg(e, t, n) {
+function jg(e, t, n) {
 	let r = this.container.querySelector("#scroll-content");
 	if (!r) return null;
 	let i = this.viewportManager.getZoom(), a = this.virtualScroll.getPageLeftResolved(e.pageIndex, r.clientWidth) + e.x * i, o = this.virtualScroll.getPageOffset(e.pageIndex) + (e.y + e.height / 2) * i, s = r.getBoundingClientRect();
 	return this.hitTestFromClientPoint(s.left + a + t, s.top + o + n);
 }
-function Ag(e) {
-	if (!this.active || sh(this, e)) return;
+function Mg(e) {
+	if (!this.active || lh(this, e)) return;
 	if (this._cellBlockLetterImeGuard?.reset(), this._pendingChordK) {
 		this._pendingChordK = !1;
-		let t = xg[e.key.toLowerCase()];
+		let t = Cg[e.key.toLowerCase()];
 		if (t && this.dispatcher) {
 			e.preventDefault(), this.dispatcher.dispatch(t);
 			return;
@@ -38429,7 +38489,7 @@ function Ag(e) {
 	}
 	if (this._pendingChordM && !(e.isComposing || e.keyCode === 229)) {
 		this._pendingChordM = !1;
-		let t = Sg[e.key.toLowerCase()];
+		let t = wg[e.key.toLowerCase()];
 		if (t && this.dispatcher) {
 			e.preventDefault(), this.dispatcher.dispatch(t);
 			return;
@@ -38437,7 +38497,7 @@ function Ag(e) {
 	}
 	if (this._pendingChordV) {
 		this._pendingChordV = !1;
-		let t = Cg[e.key.toLowerCase()];
+		let t = Tg[e.key.toLowerCase()];
 		if (t && this.dispatcher) {
 			e.preventDefault(), this.dispatcher.dispatch(t);
 			return;
@@ -38445,7 +38505,7 @@ function Ag(e) {
 	}
 	if (this._pendingChordG) {
 		this._pendingChordG = !1;
-		let t = wg[e.key.toLowerCase()];
+		let t = Eg[e.key.toLowerCase()];
 		if (t && this.dispatcher) {
 			e.preventDefault(), this.dispatcher.dispatch(t);
 			return;
@@ -38453,7 +38513,7 @@ function Ag(e) {
 	}
 	if (this.connectorDrawingMode) {
 		if (e.key === "Escape") {
-			e.preventDefault(), np.call(this);
+			e.preventDefault(), ip.call(this);
 			return;
 		}
 		return;
@@ -38481,7 +38541,7 @@ function Ag(e) {
 		e.preventDefault(), this.cancelTextboxPlacement();
 		return;
 	}
-	if (Xh.call(this, e) || Zh.call(this, e)) return;
+	if (Qh.call(this, e) || $h.call(this, e)) return;
 	if (e.isComposing || e.keyCode === 229) {
 		if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey && e.code === "KeyM") {
 			e.preventDefault(), this._pendingChordM = !0;
@@ -38499,7 +38559,7 @@ function Ag(e) {
 				KeyZ: "z"
 			}[e.code];
 			if (t && this.dispatcher) {
-				let n = Sg[t];
+				let n = wg[t];
 				if (n) {
 					e.preventDefault(), this.dispatcher.dispatch(n);
 					return;
@@ -38507,7 +38567,7 @@ function Ag(e) {
 			}
 		}
 		if ((e.ctrlKey || e.metaKey) && this.dispatcher) {
-			let t = xh(e, bh);
+			let t = Ch(e, Sh);
 			if (t) {
 				e.preventDefault(), this.dispatcher.dispatch(t);
 				return;
@@ -38535,13 +38595,13 @@ function Ag(e) {
 		});
 		return;
 	}
-	let t = Wh.has(e.key) && Jh.call(this, e);
-	if (Wh.has(e.key) && (t ? this.cancelDeferredPaginationForOwnedMutation() : this.flushDeferredPaginationIfNeeded("before-navigation", !1)), (e.key === "PageUp" || e.key === "PageDown") && !e.ctrlKey && !e.metaKey && !e.altKey) {
-		e.preventDefault(), Tg.call(this, e.key === "PageUp" ? -1 : 1, e.shiftKey);
+	let t = Kh.has(e.key) && Xh.call(this, e);
+	if (Kh.has(e.key) && (t ? this.cancelDeferredPaginationForOwnedMutation() : this.flushDeferredPaginationIfNeeded("before-navigation", !1)), (e.key === "PageUp" || e.key === "PageDown") && !e.ctrlKey && !e.metaKey && !e.altKey) {
+		e.preventDefault(), Dg.call(this, e.key === "PageUp" ? -1 : 1, e.shiftKey);
 		return;
 	}
 	if (this.cursor.isInHeaderFooter()) {
-		if (Yh.call(this, e)) return;
+		if (Zh.call(this, e)) return;
 		if (e.key === "Escape") {
 			if (e.preventDefault(), !e.shiftKey && this.cursor.hasHeaderFooterSelection()) {
 				this.cursor.clearSelection(), this.updateCaret();
@@ -38556,7 +38616,7 @@ function Ag(e) {
 			this.afterEdit(), this.textarea?.focus();
 			return;
 		}
-		if (pg.call(this, e)) return;
+		if (hg.call(this, e)) return;
 		if (e.key === "ArrowLeft" || e.key === "ArrowRight" || e.key === "ArrowUp" || e.key === "ArrowDown") {
 			e.preventDefault(), e.shiftKey ? this.cursor.setHfAnchor() : this.cursor.clearSelection(), e.key === "ArrowLeft" || e.key === "ArrowRight" ? this.cursor.moveHorizontalInHf(e.key === "ArrowLeft" ? -1 : 1) : this.cursor.moveVerticalInHf(e.key === "ArrowUp" ? -1 : 1), this.updateCaret();
 			return;
@@ -38607,7 +38667,7 @@ function Ag(e) {
 		return;
 	}
 	if (this.cursor.isInFootnote()) {
-		if (Yh.call(this, e)) return;
+		if (Zh.call(this, e)) return;
 		if (e.key === "Escape") {
 			e.preventDefault(), this.cursor.exitFootnoteMode(), this.eventBus.emit("footnoteModeChanged", !1), this.afterEdit(), this.textarea?.focus();
 			return;
@@ -38723,7 +38783,7 @@ function Ag(e) {
 			"Meta"
 		].includes(e.key)) return;
 		{
-			let t = xh(e, bh);
+			let t = Ch(e, Sh);
 			if (t && this.dispatcher?.isEnabled?.(t)) {
 				e.preventDefault(), this.dispatcher.dispatch(t);
 				return;
@@ -38772,12 +38832,12 @@ function Ag(e) {
 			e.preventDefault(), this.cursor.exitCellSelectionMode(), this.cellSelectionRenderer?.clear(), this.updateCaret();
 			return;
 		}
-		if (Kh.call(this, e)) return;
+		if (Jh.call(this, e)) return;
 		if (e.key === "Delete" && !e.ctrlKey && !e.metaKey && !e.altKey) {
-			e.preventDefault(), this.cursor.isProtectedCellSelectionMode() || lh(this);
+			e.preventDefault(), this.cursor.isProtectedCellSelectionMode() || dh(this);
 			return;
 		}
-		let t = ph(e);
+		let t = hh(e);
 		if (t === "resize") {
 			e.preventDefault(), this.cursor.getCellSelectionPhase() === 3 ? this.resizeTableProportional(e.key) : this.resizeCellByKeyboard(e.key);
 			return;
@@ -38789,7 +38849,7 @@ function Ag(e) {
 			return;
 		}
 		if (e.altKey && !e.ctrlKey && !e.metaKey) {
-			let t = xh(e, bh);
+			let t = Ch(e, Sh);
 			if (t === "edit:format-copy") {
 				e.preventDefault(), this.dispatcher?.dispatch(t);
 				return;
@@ -38802,7 +38862,7 @@ function Ag(e) {
 		if (e.key === "Shift" || e.key === "Control" || e.key === "Alt" || e.key === "Meta") return;
 		this.cursor.exitCellSelectionMode(), this.cellSelectionRenderer?.clear(), this.updateCaret();
 	}
-	if (dg.call(this, e)) return;
+	if (pg.call(this, e)) return;
 	if (e.ctrlKey || e.metaKey) {
 		this.handleCtrlKey(e);
 		return;
@@ -38813,7 +38873,7 @@ function Ag(e) {
 			e.preventDefault(), this._pendingChordV = !0;
 			return;
 		}
-		let t = xh(e, bh);
+		let t = Ch(e, Sh);
 		if (t) {
 			e.preventDefault(), this.dispatcher.dispatch(t);
 			return;
@@ -38895,7 +38955,7 @@ function Ag(e) {
 				return;
 			}
 			if (this.cursor.isInCell() && !this.cursor.isInTextBox()) {
-				e.shiftKey ? this.cursor.moveToCellPrev() : sg.call(this) || this.cursor.moveToCellNext(), this.updateCaret();
+				e.shiftKey ? this.cursor.moveToCellPrev() : lg.call(this) || this.cursor.moveToCellNext(), this.updateCaret();
 				break;
 			}
 			if (e.shiftKey) {
@@ -38911,7 +38971,7 @@ function Ag(e) {
 			e.preventDefault(), this.insertMode = !this.insertMode, this.eventBus.emit("insert-mode-changed", this.insertMode);
 			break;
 		default: if (this.dispatcher) {
-			let t = xh(e, bh);
+			let t = Ch(e, Sh);
 			if (t) {
 				let n = this.dispatcher.dispatchWithResult(t);
 				(n.ok || n.reason === "threw") && e.preventDefault();
@@ -38919,13 +38979,13 @@ function Ag(e) {
 		}
 	}
 }
-function jg(e) {
+function Ng(e) {
 	if (e.key === "/" && !e.shiftKey && !e.altKey) {
 		e.preventDefault(), this.commandPalette?.open();
 		return;
 	}
 	if (this.dispatcher) {
-		let t = xh(e, bh);
+		let t = Ch(e, Sh);
 		if (t) {
 			e.preventDefault(), this.dispatcher.dispatch(t);
 			return;
@@ -38954,10 +39014,10 @@ function jg(e) {
 			this.cursor.hasSelection() ? this.deleteSelection() : (this.cursor.setAnchor(), this.cursor.moveToWordBoundary(1), this.cursor.hasSelection() && this.deleteSelection());
 			break;
 		case "home":
-			e.preventDefault(), e.shiftKey ? (this.cursor.setAnchor(), this.cursor.moveToDocumentStart()) : (this.cursor.clearSelection(), this.cursor.moveToDocumentStart()), this.updateCaret(), Eg.call(this, -1);
+			e.preventDefault(), e.shiftKey ? (this.cursor.setAnchor(), this.cursor.moveToDocumentStart()) : (this.cursor.clearSelection(), this.cursor.moveToDocumentStart()), this.updateCaret(), Og.call(this, -1);
 			break;
 		case "end":
-			e.preventDefault(), e.shiftKey ? (this.cursor.setAnchor(), this.cursor.moveToDocumentEnd()) : (this.cursor.clearSelection(), this.cursor.moveToDocumentEnd()), this.updateCaret(), Eg.call(this, 1);
+			e.preventDefault(), e.shiftKey ? (this.cursor.setAnchor(), this.cursor.moveToDocumentEnd()) : (this.cursor.clearSelection(), this.cursor.moveToDocumentEnd()), this.updateCaret(), Og.call(this, 1);
 			break;
 		case "arrowleft":
 			e.preventDefault(), e.shiftKey ? this.cursor.setAnchor() : this.cursor.clearSelection(), this.cursor.moveToLineStart(), this.updateCaret();
@@ -38971,7 +39031,7 @@ function jg(e) {
 		case "arrowdown": e.preventDefault(), e.shiftKey ? this.cursor.setAnchor() : this.cursor.clearSelection(), e.metaKey && !e.ctrlKey ? this.cursor.moveToDocumentEnd() : this.cursor.moveToParagraphBoundary(1), this.updateCaret();
 	}
 }
-function Mg() {
+function Pg() {
 	if (this.cursor.isInHeaderFooter()) {
 		this.cursor.selectAllInHeaderFooter(), this.updateCaret(!0);
 		return;
@@ -38986,21 +39046,21 @@ function Mg() {
 		charOffset: 0
 	}), this.cursor.setAnchor(), this.cursor.moveToDocumentEnd(), this.updateCaret(!0);
 }
-function Ng(e) {
+function Fg(e) {
 	let t = this.getNonEmptyHeaderFooterSelection();
 	if (!t) return !1;
 	e.preventDefault();
 	try {
 		let n = this.wasm.copySelectionInHeaderFooter(t.start.sectionIdx, t.start.isHeader, t.start.applyTo, t.start.paraIdx, t.start.charOffset, t.end.paraIdx, t.end.charOffset);
-		return n.ok ? (e.clipboardData && (e.clipboardData.setData("text/plain", n.text), e.clipboardData.setData("text/html", gg(this, "", n.text))), !0) : !1;
+		return n.ok ? (e.clipboardData && (e.clipboardData.setData("text/plain", n.text), e.clipboardData.setData("text/html", vg(this, "", n.text))), !0) : !1;
 	} catch (e) {
 		return console.warn("[InputHandler] HF 선택 복사 실패:", e), !1;
 	}
 }
-function Pg(e) {
+function Ig(e) {
 	if (!this.active) return;
 	if (this.cursor.isInHeaderFooter() && this.getNonEmptyHeaderFooterSelection()) {
-		Ng.call(this, e);
+		Fg.call(this, e);
 		return;
 	}
 	if (this.cursor.isInPictureObjectSelection()) {
@@ -39008,14 +39068,14 @@ function Pg(e) {
 		if (t) {
 			e.preventDefault();
 			try {
-				let n = yg(t);
+				let n = xg(t);
 				this.wasm.copyControl(t.sec, t.ppi, t.ci, n);
 				let r = this.wasm.getClipboardText() || "[그림]", i = "";
 				try {
 					i = this.wasm.exportControlHtml(t.sec, t.ppi, t.ci, n) || "";
 				} catch {}
-				let a = gg(this, i, r);
-				e.clipboardData && (r && e.clipboardData.setData("text/plain", r), e.clipboardData.setData("text/html", a)), t.type === "image" && bg(this.wasm, t.sec, t.ppi, t.ci, r, a, n).catch(() => {});
+				let a = vg(this, i, r);
+				e.clipboardData && (r && e.clipboardData.setData("text/plain", r), e.clipboardData.setData("text/html", a)), t.type === "image" && Sg(this.wasm, t.sec, t.ppi, t.ci, r, a, n).catch(() => {});
 			} catch (e) {
 				console.warn("[InputHandler] 개체 복사 실패:", e);
 			}
@@ -39028,29 +39088,29 @@ function Pg(e) {
 	if (!t) return;
 	let { start: n, end: r } = t;
 	try {
-		ig(n) ? this.wasm.copySelectionInCellByPath(n.sectionIndex, n.parentParaIndex, JSON.stringify(n.cellPath), Ju(n), n.charOffset, Ju(r), r.charOffset) : n.parentParaIndex === void 0 ? this.wasm.copySelection(n.sectionIndex, n.paragraphIndex, n.charOffset, r.paragraphIndex, r.charOffset) : this.wasm.copySelectionInCell(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex, n.cellParaIndex, n.charOffset, r.cellParaIndex, r.charOffset);
+		og(n) ? this.wasm.copySelectionInCellByPath(n.sectionIndex, n.parentParaIndex, JSON.stringify(n.cellPath), Ju(n), n.charOffset, Ju(r), r.charOffset) : n.parentParaIndex === void 0 ? this.wasm.copySelection(n.sectionIndex, n.paragraphIndex, n.charOffset, r.paragraphIndex, r.charOffset) : this.wasm.copySelectionInCell(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex, n.cellParaIndex, n.charOffset, r.cellParaIndex, r.charOffset);
 		let t = this.wasm.getClipboardText();
 		if (e.clipboardData) {
 			t && e.clipboardData.setData("text/plain", t);
 			let i = "";
 			try {
-				i = ig(n) ? this.wasm.exportSelectionInCellHtmlByPath(n.sectionIndex, n.parentParaIndex, JSON.stringify(n.cellPath), Ju(n), n.charOffset, Ju(r), r.charOffset) : n.parentParaIndex === void 0 ? this.wasm.exportSelectionHtml(n.sectionIndex, n.paragraphIndex, n.charOffset, r.paragraphIndex, r.charOffset) : this.wasm.exportSelectionInCellHtml(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex, n.cellParaIndex, n.charOffset, r.cellParaIndex, r.charOffset);
+				i = og(n) ? this.wasm.exportSelectionInCellHtmlByPath(n.sectionIndex, n.parentParaIndex, JSON.stringify(n.cellPath), Ju(n), n.charOffset, Ju(r), r.charOffset) : n.parentParaIndex === void 0 ? this.wasm.exportSelectionHtml(n.sectionIndex, n.paragraphIndex, n.charOffset, r.paragraphIndex, r.charOffset) : this.wasm.exportSelectionInCellHtml(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex, n.cellParaIndex, n.charOffset, r.cellParaIndex, r.charOffset);
 			} catch {}
-			let a = gg(this, i, t);
+			let a = vg(this, i, t);
 			e.clipboardData.setData("text/html", a);
 		}
 	} catch (e) {
 		console.warn("[InputHandler] 복사 실패:", e);
 	}
 }
-function Fg(e) {
+function Lg(e) {
 	if (this.active) {
 		if (this.isFormMode?.()) {
 			e.preventDefault();
 			return;
 		}
 		if (this.cursor.isInHeaderFooter() && this.getNonEmptyHeaderFooterSelection()) {
-			Ng.call(this, e) && this.deleteSelection();
+			Fg.call(this, e) && this.deleteSelection();
 			return;
 		}
 		if (this.cursor.isInPictureObjectSelection()) {
@@ -39058,14 +39118,14 @@ function Fg(e) {
 			t && (this.onCopy(e), this.cursor.moveOutOfSelectedPicture(), this.pictureObjectRenderer?.clear(), this.eventBus.emit("picture-object-selection-changed", !1), this.executeOperation({
 				kind: "snapshot",
 				operationType: "cutObject",
-				operation: (e) => (cg(e, t), this.cursor.getPosition())
+				operation: (e) => (ug(e, t), this.cursor.getPosition())
 			}));
 			return;
 		}
 		this.cursor.hasSelection() && (this.onCopy(e), this.deleteSelection());
 	}
 }
-function Ig(e) {
+function Rg(e) {
 	if (!this.active || (e.preventDefault(), this.isFormMode?.())) return;
 	this.cursor.isInPictureObjectSelection() && (this.cursor.moveOutOfSelectedPicture(), this.pictureObjectRenderer?.clear(), this.eventBus.emit("picture-object-selection-changed", !1)), this.cursor.isInTableObjectSelection() && (this.cursor.moveOutOfSelectedTable(), this.eventBus.emit("table-object-selection-changed", !1));
 	let t = this.cursor.hasSelection(), n = this.cursor.getPosition(), r = e.clipboardData, i = r?.getData("text/html") || "", a = r?.getData("text/plain") || "", o = r?.getData("text/rtf") || "";
@@ -39076,9 +39136,9 @@ function Ig(e) {
 		});
 		return;
 	}
-	let s = rg(this, i), c = this.wasm.getClipboardText?.() || "", l = this.wasm.clipboardHasControl?.() === !0 && !!c && a === c, u = this.wasm.hasInternalClipboard() && (!r || s || l);
+	let s = ag(this, i), c = this.wasm.getClipboardText?.() || "", l = this.wasm.clipboardHasControl?.() === !0 && !!c && a === c, u = this.wasm.hasInternalClipboard() && (!r || s || l);
 	if (u) {
-		let e = fh(n, i, this.wasm.clipboardHasControl());
+		let e = mh(n, i, this.wasm.clipboardHasControl());
 		if (e) {
 			H({
 				message: e,
@@ -39114,45 +39174,45 @@ function Ig(e) {
 			operation: (e) => {
 				this.pastedFieldEndOutsidePending = !1, t && this.deleteSelection({ deferRecord: !0 });
 				let n = this.cursor.getPosition(), r;
-				r = ig(n) ? e.pasteInternalInCellByPath(n.sectionIndex, n.parentParaIndex, JSON.stringify(n.cellPath), n.charOffset) : n.parentParaIndex === void 0 ? e.pasteInternal(n.sectionIndex, n.paragraphIndex, n.charOffset) : e.pasteInternalInCell(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex, n.cellParaIndex, n.charOffset);
+				r = og(n) ? e.pasteInternalInCellByPath(n.sectionIndex, n.parentParaIndex, JSON.stringify(n.cellPath), n.charOffset) : n.parentParaIndex === void 0 ? e.pasteInternal(n.sectionIndex, n.paragraphIndex, n.charOffset) : e.pasteInternalInCell(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex, n.cellParaIndex, n.charOffset);
 				let i = JSON.parse(r);
-				return i.ok ? (i.containsField === !0 && (this.pastedFieldEndOutsidePending = !0), mg(n, i)) : n;
+				return i.ok ? (i.containsField === !0 && (this.pastedFieldEndOutsidePending = !0), gg(n, i)) : n;
 			}
 		});
 		return;
 	}
 	let d = r?.items;
-	if (d && !dh(i) && !Lg(i)) for (let e = 0; e < d.length; e++) {
+	if (d && !ph(i) && !zg(i)) for (let e = 0; e < d.length; e++) {
 		let n = d[e];
 		if (n.kind === "file" && n.type.startsWith("image/")) {
 			let e = n.getAsFile();
 			if (e) {
-				Bg.call(this, e, t);
+				Hg.call(this, e, t);
 				return;
 			}
 		}
 	}
 	if (i) {
-		let e = Lg(i);
-		if (e && Rg.call(this, e, t)) return;
-		if (Lh(i, o)) {
+		let e = zg(i);
+		if (e && Bg.call(this, e, t)) return;
+		if (zh(i, o)) {
 			(async () => {
 				let e = i;
 				try {
-					e = await Fh(i, o);
+					e = await Lh(i, o);
 				} catch (e) {
 					console.warn("[paste] RTF 그림 삽입 실패 — 그림 없이 붙여넣기:", e);
 				}
-				zg.call(this, e, a, t);
+				Vg.call(this, e, a, t);
 			})();
 			return;
 		}
-		zg.call(this, Ih(i), a, t);
+		Vg.call(this, Rh(i), a, t);
 		return;
 	}
-	hg.call(this, a, t);
+	_g.call(this, a, t);
 }
-function Lg(e) {
+function zg(e) {
 	let t = e.indexOf("[data-hwpjson]");
 	if (t < 0) return null;
 	let n = e.indexOf("{", t);
@@ -39160,7 +39220,7 @@ function Lg(e) {
 	let r = e.indexOf("-->", n), i = (r < 0 ? e.slice(n) : e.slice(n, r)).trim();
 	return i.length < 2 || i[0] !== "{" ? null : i;
 }
-function Rg(e, t) {
+function Bg(e, t) {
 	let n = !1;
 	try {
 		this.executeOperation({
@@ -39173,7 +39233,7 @@ function Rg(e, t) {
 				let a = r.pasteHwpJson(i.sectionIndex, i.paragraphIndex, i.charOffset, e);
 				console.debug("[paste] pasteHwpJson 결과:", String(a).slice(0, 200));
 				let o = JSON.parse(a);
-				if (o.ok) return n = !0, mg(i, o);
+				if (o.ok) return n = !0, gg(i, o);
 			}
 		});
 	} catch (e) {
@@ -39181,8 +39241,8 @@ function Rg(e, t) {
 	}
 	return n || console.debug("[paste] 문서모델 경로 미적용 — HTML 경로로 되돌아감"), n;
 }
-function zg(e, t, n) {
-	let r = fh(this.cursor.getPosition(), e);
+function Vg(e, t, n) {
+	let r = mh(this.cursor.getPosition(), e);
 	if (r) {
 		H({
 			message: r,
@@ -39190,7 +39250,7 @@ function zg(e, t, n) {
 		});
 		return;
 	}
-	let i = Hh(e);
+	let i = Wh(e);
 	console.debug(`[paste] HTML 붙여넣기 시작: 원본 ${e.length}자 → 정리 ${i.length}자, img ${(i.match(/<img\b/gi) ?? []).length}개`);
 	let a = !1, o = !1;
 	try {
@@ -39200,17 +39260,17 @@ function zg(e, t, n) {
 			operation: (e) => {
 				n && (this.deleteSelection({ deferRecord: !0 }), o = !0);
 				let t = this.cursor.getPosition(), r;
-				r = ig(t) ? e.pasteHtmlInCellByPath(t.sectionIndex, t.parentParaIndex, JSON.stringify(t.cellPath), t.charOffset, i) : t.parentParaIndex === void 0 ? e.pasteHtml(t.sectionIndex, t.paragraphIndex, t.charOffset, i) : e.pasteHtmlInCell(t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, t.cellParaIndex, t.charOffset, i);
+				r = og(t) ? e.pasteHtmlInCellByPath(t.sectionIndex, t.parentParaIndex, JSON.stringify(t.cellPath), t.charOffset, i) : t.parentParaIndex === void 0 ? e.pasteHtml(t.sectionIndex, t.paragraphIndex, t.charOffset, i) : e.pasteHtmlInCell(t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, t.cellParaIndex, t.charOffset, i);
 				let s = JSON.parse(r);
-				return console.debug("[paste] pasteHtml 결과:", String(r).slice(0, 200)), s.ok ? (a = !0, mg(t, s)) : (console.warn("[paste] HTML 가져오기 거절(ok=false) — 텍스트로 폴백:", s.error ?? s), t);
+				return console.debug("[paste] pasteHtml 결과:", String(r).slice(0, 200)), s.ok ? (a = !0, gg(t, s)) : (console.warn("[paste] HTML 가져오기 거절(ok=false) — 텍스트로 폴백:", s.error ?? s), t);
 			}
 		});
 	} catch (e) {
 		console.warn("[paste] HTML 붙여넣기 실패 — 텍스트로 폴백:", e);
 	}
-	!a && t && hg.call(this, t, n && !o);
+	!a && t && _g.call(this, t, n && !o);
 }
-async function Bg(e, t) {
+async function Hg(e, t) {
 	try {
 		let n = new Uint8Array(await e.arrayBuffer()), r = (e.type.split("/")[1] || "png").replace("jpeg", "jpg"), i = await createImageBitmap(e), a = i.width, o = i.height;
 		i.close();
@@ -39240,10 +39300,10 @@ async function Bg(e, t) {
 		console.warn("[InputHandler] 클립보드 이미지 삽입 실패:", e);
 	}
 }
-function Vg(e) {
+function Ug(e) {
 	e.cursor.isInTableObjectSelection() && (e.cursor.exitTableObjectSelection(), e.tableObjectRenderer?.clear()), e.cursor.isInPictureObjectSelection() && (e.cursor.exitPictureObjectSelection(), e.pictureObjectRenderer?.clear()), e.cursor.hasSelection() && e.cursor.clearSelection();
 }
-function Hg() {
+function Wg() {
 	try {
 		let e, t, n;
 		if (this.cursor.isInTableObjectSelection()) {
@@ -39262,7 +39322,7 @@ function Hg() {
 		let r = this.wasm.findNearestControlBackward(e, t, n);
 		if (r.type === "none") {
 			let n = this.cursor.isInTableObjectSelection() || this.cursor.isInPictureObjectSelection() || this.cursor.hasSelection();
-			if (Vg(this), n) {
+			if (Ug(this), n) {
 				let n = this.wasm.getParagraphCount(e), r = Math.min(t + 1, n - 1);
 				try {
 					this.cursor.moveTo({
@@ -39275,7 +39335,7 @@ function Hg() {
 			this.updateCaret();
 			return;
 		}
-		if (Vg(this), r.type === "table") {
+		if (Ug(this), r.type === "table") {
 			let e = this.wasm.getParagraphCount(r.sec), t = Math.min(r.para + 1, e - 1);
 			try {
 				this.cursor.moveTo({
@@ -39343,7 +39403,7 @@ function Hg() {
 		console.warn("[F11] error:", e);
 	}
 }
-function Ug() {
+function Gg() {
 	try {
 		let e, t, n;
 		if (this.cursor.isInTableObjectSelection()) {
@@ -39359,7 +39419,7 @@ function Ug() {
 		let r = this.wasm.findNearestControlForward(e, t, n);
 		if (r.type === "none") {
 			let n = this.cursor.isInTableObjectSelection() || this.cursor.isInPictureObjectSelection();
-			if (Vg(this), n) {
+			if (Ug(this), n) {
 				let n = this.wasm.getParagraphCount(e), r = Math.min(t + 1, n - 1);
 				try {
 					this.cursor.moveTo({
@@ -39372,7 +39432,7 @@ function Ug() {
 			this.updateCaret();
 			return;
 		}
-		if (Vg(this), r.type === "table") {
+		if (Ug(this), r.type === "table") {
 			let e = this.wasm.getParagraphCount(r.sec), t = Math.min(r.para + 1, e - 1);
 			try {
 				this.cursor.moveTo({
@@ -39409,8 +39469,8 @@ function Ug() {
 	}
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/hyperlink-delete-dialog.ts
-var Wg = class extends V {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/hyperlink-delete-dialog.ts
+var Kg = class extends V {
 	remove;
 	cancel;
 	accepted = !1;
@@ -39431,14 +39491,14 @@ var Wg = class extends V {
 		super.hide(), this.accepted ? this.remove() : this.cancel();
 	}
 };
-function Gg(e, t) {
-	new Wg(e, t).show();
+function qg(e, t) {
+	new Kg(e, t).show();
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/input-handler-hyperlink-delete.ts
-var Kg = /* @__PURE__ */ new WeakSet();
-function qg(e, t, n = "forward") {
-	if (Kg.has(e)) return !0;
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/input-handler-hyperlink-delete.ts
+var Jg = /* @__PURE__ */ new WeakSet();
+function Yg(e, t, n = "forward") {
+	if (Jg.has(e)) return !0;
 	let r = () => !!e.canEditHyperlink?.() && !e.isFormMode?.() && e.isActive?.() !== !1;
 	if (!r()) return !1;
 	let i = structuredClone(t), a = i.charOffset - +(n === "backward");
@@ -39452,9 +39512,9 @@ function qg(e, t, n = "forward") {
 	let c = s.links.find((e) => e.start <= a && a < e.end);
 	if (!c) return !1;
 	let l = e.wasm.documentGeneration, u = JSON.stringify(s), d = () => {
-		Kg.delete(e), e.focusTextarea();
+		Jg.delete(e), e.focusTextarea();
 	};
-	return Kg.add(e), Gg(() => {
+	return Jg.add(e), qg(() => {
 		try {
 			if (!r() || e.wasm.documentGeneration !== l || JSON.stringify(e.wasm.getHyperlinkContext(o)) !== u) throw Error("편집 상태가 바뀌었습니다. 하이퍼링크를 다시 선택해 주세요.");
 			e.executeOperation({
@@ -39484,18 +39544,18 @@ function qg(e, t, n = "forward") {
 	}, d), !0;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/input-handler-text.ts
-function Jg(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/input-handler-text.ts
+function Xg(e) {
 	return [...e].length;
 }
-var Yg = typeof Intl.Segmenter == "function" ? new Intl.Segmenter(void 0, { granularity: "grapheme" }) : null;
-function Xg(e) {
-	return Yg ? Array.from(Yg.segment(e), (e) => e.segment) : [...e];
+var Zg = typeof Intl.Segmenter == "function" ? new Intl.Segmenter(void 0, { granularity: "grapheme" }) : null;
+function Qg(e) {
+	return Zg ? Array.from(Zg.segment(e), (e) => e.segment) : [...e];
 }
-function Zg(e, t) {
+function $g(e, t) {
 	if (this.insertMode !== !1 || !t || this.cursor.isInHeaderFooter() || this.cursor.isInFootnote()) return "";
 	try {
-		let n = Xg(t).length, r = this.wasm.getFieldInfoAt(e), i = Infinity;
+		let n = Qg(t).length, r = this.wasm.getFieldInfoAt(e), i = Infinity;
 		if (r.inField && r.fieldType === "clickhere") {
 			if (this.isAtExitedFieldStart?.(e, r)) return "";
 			this.isAtExitedFieldEnd?.(e, r) || (i = r.endCharIdx ?? 0);
@@ -39503,12 +39563,12 @@ function Zg(e, t) {
 		let a;
 		for (let t = n + 1;; t *= 2) {
 			let r = this.getTextAt(e, t);
-			if (a = Xg(r), a.length > n || Jg(r) < t) break;
+			if (a = Qg(r), a.length > n || Xg(r) < t) break;
 		}
 		let o = e.parentParaIndex === void 0, s = (t) => this.wasm.textToLogicalOffset(e.sectionIndex, e.paragraphIndex, t), c = e.charOffset, l = o ? s(c) : 0, u = r, d = "";
 		for (let t of a.slice(0, n)) {
 			if (t < " ") break;
-			let n = c + Jg(t);
+			let n = c + Xg(t);
 			if (n > i) break;
 			if (i === Infinity) {
 				let t = this.wasm.getFieldInfoAt({
@@ -39530,8 +39590,8 @@ function Zg(e, t) {
 		return "";
 	}
 }
-var Qg = "각주 삭제", $g = "각주를 삭제하시겠습니까?";
-function e_(e, t) {
+var e_ = "각주 삭제", t_ = "각주를 삭제하시겠습니까?";
+function n_(e, t) {
 	if (this.isFormMode?.()) return !1;
 	try {
 		let n = this.wasm.getFieldInfoAt(e);
@@ -39542,7 +39602,7 @@ function e_(e, t) {
 		return !1;
 	}
 }
-function t_(e, t) {
+function r_(e, t) {
 	switch (t ? this.cursor.setAnchor() : this.cursor.clearSelection(), e) {
 		case "wordBackward":
 			this.cursor.moveToWordBoundary(-1);
@@ -39563,14 +39623,14 @@ function t_(e, t) {
 	}
 	this.updateCaret(), t && this.updateSelection();
 }
-function n_(e) {
+function i_(e) {
 	this.flushDeferredPaginationIfNeeded("before-navigation", !1);
-	let { code: t, shiftKey: n } = e, r = hh(), i = _h(e, r);
+	let { code: t, shiftKey: n } = e, r = _h(), i = yh(e, r);
 	if (i) {
-		t_.call(this, i, n);
+		r_.call(this, i, n);
 		return;
 	}
-	if (!vh(e, r)) {
+	if (!bh(e, r)) {
 		if (t === "ArrowLeft" || t === "ArrowRight" || t === "ArrowUp" || t === "ArrowDown") {
 			let e = this.cursor.isInVerticalCell?.() ?? !1;
 			n ? this.cursor.setAnchor() : this.cursor.clearSelection();
@@ -39595,13 +39655,13 @@ function n_(e) {
 		} else t === "Home" ? (n ? this.cursor.setAnchor() : this.cursor.clearSelection(), this.cursor.moveToLineStart(), this.markCurrentFieldStartOutside?.(), this.updateCaret()) : t === "End" && (n ? this.cursor.setAnchor() : this.cursor.clearSelection(), this.cursor.moveToLineEnd(), this.markCurrentFieldEndOutside?.(), this.updateCaret());
 	}
 }
-function r_(e, t) {
+function a_(e, t) {
 	if (e.parentParaIndex !== void 0 || e.cellPath || e.isTextBox) return !1;
 	try {
 		let n = this.wasm.getFootnoteAtCursor(e.sectionIndex, e.paragraphIndex, e.charOffset, t);
 		if (!n.hit || n.controlIndex === void 0) return !1;
 		let r = n.sectionIndex ?? e.sectionIndex, i = n.paragraphIndex ?? e.paragraphIndex, a = n.controlIndex;
-		return Bf(Qg, $g).then((e) => {
+		return Bf(e_, t_).then((e) => {
 			if (!e) {
 				this.textarea?.focus();
 				return;
@@ -39625,7 +39685,7 @@ function r_(e, t) {
 		return !1;
 	}
 }
-function i_(e, t) {
+function o_(e, t) {
 	if (this.isFormMode?.() && !this.canEditCurrentFormField?.()) return;
 	if (this.cursor.isInHeaderFooter()) {
 		let e = this.cursor.headerFooterMode === "header", t = this.cursor.hfCharOffset, n = {
@@ -39650,14 +39710,14 @@ function i_(e, t) {
 		return;
 	}
 	let { charOffset: n } = e;
-	if (!qg(this, e, "backward")) {
+	if (!Yg(this, e, "backward")) {
 		try {
 			let t = this.wasm.getFieldInfoAt(e);
 			if (!(t.inField && this.isAtExitedFieldStart?.(e, t)) && t.inField && n <= t.startCharIdx) {
-				e_.call(this, e, "backward");
+				n_.call(this, e, "backward");
 				return;
 			}
-			if (t.inField && this.isAtExitedFieldEnd?.(e, t) && e_.call(this, e, "backward")) return;
+			if (t.inField && this.isAtExitedFieldEnd?.(e, t) && n_.call(this, e, "backward")) return;
 		} catch {}
 		if (t) {
 			if (n > 0) {
@@ -39675,7 +39735,7 @@ function i_(e, t) {
 			});
 		} else {
 			let { sectionIndex: t, paragraphIndex: r } = e;
-			if (r_.call(this, e, "backward")) return;
+			if (a_.call(this, e, "backward")) return;
 			if (n > 0) {
 				let t = {
 					...e,
@@ -39696,7 +39756,7 @@ function i_(e, t) {
 		}
 	}
 }
-function a_(e, t) {
+function s_(e, t) {
 	if (this.isFormMode?.() && !this.canEditCurrentFormField?.()) return;
 	if (this.cursor.isInHeaderFooter()) {
 		let e = this.cursor.headerFooterMode === "header", t = {
@@ -39723,12 +39783,12 @@ function a_(e, t) {
 		} catch {}
 		return;
 	}
-	if (qg(this, e)) return;
+	if (Yg(this, e)) return;
 	let { charOffset: n } = e;
 	try {
 		let t = this.wasm.getFieldInfoAt(e);
 		if (t.inField && n >= t.endCharIdx) {
-			e_.call(this, e, "forward");
+			n_.call(this, e, "forward");
 			return;
 		}
 	} catch {}
@@ -39747,7 +39807,7 @@ function a_(e, t) {
 		}
 	} else {
 		let { sectionIndex: t, paragraphIndex: r } = e;
-		if (r_.call(this, e, "forward")) return;
+		if (a_.call(this, e, "forward")) return;
 		if (n < this.wasm.getParagraphLength(t, r)) this.executeOperation({
 			kind: "command",
 			command: new dd(e, 1, "forward")
@@ -39761,12 +39821,12 @@ function a_(e, t) {
 		}
 	}
 }
-function o_() {
+function c_() {
 	this.textarea.value = "", this.isComposing = !1, this.compositionAnchor = null, this.compositionLength = 0, this._lastCompositionText = "", this._lastComposedText = "", this.caret.hideComposition(), this.resetRawTextMutationEffects();
 }
-function s_() {
+function l_() {
 	if (this._cellBlockLetterImeGuard?.consume("compositionstart")) {
-		o_.call(this);
+		c_.call(this);
 		return;
 	}
 	if (this.resetRawTextMutationEffects(), this.headerFooterSelectionComposition = !1, this._compositionCovered = this.cursor.hasSelection() ? "" : null, this.cursor.isInHeaderFooter() && this.getNonEmptyHeaderFooterSelection()) {
@@ -39794,9 +39854,9 @@ function s_() {
 	}
 	this.isComposing = !0, this.compositionAnchor = (this.cursor.isInHeaderFooter() || this.cursor.isInFootnote(), e), this.compositionLength = 0;
 }
-function c_() {
+function u_() {
 	if (this._cellBlockLetterImeGuard?.consume("compositionend", this.textarea.value)) {
-		o_.call(this);
+		c_.call(this);
 		return;
 	}
 	let e = this.compositionAnchor, t = this.compositionLength, n = this.headerFooterSelectionComposition === !0, r = this._compositionCovered || "", i = this._compositionFragment;
@@ -39840,20 +39900,20 @@ function c_() {
 	}
 	if (n && this.finishHeaderFooterSelectionComposition(), this._pendingNavAfterIME) {
 		let e = this._pendingNavAfterIME;
-		this._pendingNavAfterIME = null, n_.call(this, e);
+		this._pendingNavAfterIME = null, i_.call(this, e);
 	}
 }
-function l_(e, t) {
+function d_(e, t) {
 	try {
 		return (e.cellPath?.length ?? 0) > 0 && e.parentParaIndex !== void 0 ? this.wasm.getTextInCellByPath(e.sectionIndex, e.parentParaIndex, JSON.stringify(e.cellPath), e.charOffset, t) : e.parentParaIndex === void 0 ? this.wasm.getTextRange(e.sectionIndex, e.paragraphIndex, e.charOffset, t) : this.wasm.getTextInCell(e.sectionIndex, e.parentParaIndex, e.controlIndex, e.cellIndex, e.cellParaIndex, e.charOffset, t);
 	} catch {
 		return "";
 	}
 }
-function u_(e) {
+function f_(e) {
 	if (!this.active) return;
 	if (this._cellBlockLetterImeGuard?.consume("input", this.textarea.value)) {
-		e?.preventDefault(), o_.call(this);
+		e?.preventDefault(), c_.call(this);
 		return;
 	}
 	let t = this.textarea.value;
@@ -39866,12 +39926,12 @@ function u_(e) {
 		this.resetRawTextMutationEffects();
 		let r = this._compositionCovered === null && t;
 		if (r) {
-			if (this._compositionCovered = Zg.call(this, e, t), this._compositionCovered) {
+			if (this._compositionCovered = $g.call(this, e, t), this._compositionCovered) {
 				this._compositionFragment = rd(this.wasm, e);
 				let t = this.wasm.getFieldInfoAt(e);
 				this._compositionOutsideField = !t.inField || this.isAtExitedFieldEnd?.(e, t);
 			}
-			this.compositionLength += Jg(this._compositionCovered);
+			this.compositionLength += Xg(this._compositionCovered);
 		}
 		this._compositionCovered && this._compositionOutsideField && this.wasm.clearActiveField();
 		try {
@@ -39891,8 +39951,8 @@ function u_(e) {
 				return;
 			}
 		}
-		this.compositionLength = Jg(t), t && (this._lastCompositionText = t), this.applyPendingCharShapeToRange?.(e, Jg(t));
-		let i = this.consumeRawTextMutationBeforeCursor(), a = e.charOffset + Jg(t);
+		this.compositionLength = Xg(t), t && (this._lastCompositionText = t), this.applyPendingCharShapeToRange?.(e, Xg(t));
+		let i = this.consumeRawTextMutationBeforeCursor(), a = e.charOffset + Xg(t);
 		this.cursor.isInHeaderFooter() ? this.cursor.setHfCursorPosition(this.cursor.hfParaIdx, a) : this.cursor.isInFootnote() ? this.cursor.setFnCursorPosition(this.cursor.fnInnerParaIdx, a) : this.cursor.moveTo({
 			...e,
 			charOffset: a
@@ -39916,7 +39976,7 @@ function u_(e) {
 			this.textarea.value = "";
 			return;
 		}
-		this.resetRawTextMutationEffects(), this.replaceTextAtRaw(this._iosAnchor, this._iosLength, t), this._iosLength = Jg(t);
+		this.resetRawTextMutationEffects(), this.replaceTextAtRaw(this._iosAnchor, this._iosLength, t), this._iosLength = Xg(t);
 		let e = this.consumeRawTextMutationBeforeCursor();
 		this._iosRequiresFullRefresh = this._iosRequiresFullRefresh || e;
 		let n = this._iosAnchor.charOffset + (t?.length || 0);
@@ -39989,13 +40049,13 @@ function u_(e) {
 		this.textarea.value = "";
 		return;
 	}
-	let a = i ? "" : Zg.call(this, n, t);
+	let a = i ? "" : $g.call(this, n, t);
 	this.executeOperation({
 		kind: "command",
 		command: new ud(n, t, void 0, this.getPendingCharShape?.(), a)
 	}), r && this.refreshClickHereAfterFirstInput?.();
 }
-function d_(e, t) {
+function p_(e, t) {
 	if (!this.canInsertTextInFormMode?.(e)) return B;
 	if (this.cursor.isInHeaderFooter()) {
 		let n = this.cursor.headerFooterMode === "header";
@@ -40003,13 +40063,13 @@ function d_(e, t) {
 	}
 	return this.cursor.isInFootnote() ? (this.wasm.insertTextInFootnote(this.cursor.fnSectionIdx, this.cursor.fnParaIdx, this.cursor.fnControlIdx, this.cursor.fnInnerParaIdx, e.charOffset, t), Lu) : $u(this.wasm, e, t);
 }
-function f_(e, t, n) {
+function m_(e, t, n) {
 	if (!this.canInsertTextInFormMode?.(e) || t > 0 && !this.canDeleteTextInFormMode?.(e, t)) return B;
 	if (!this.cursor.isInHeaderFooter() && !this.cursor.isInFootnote()) return nd(this.wasm, e, t, n);
 	let r = new Ru();
-	return t > 0 && r.add(p_.call(this, e, t)), n.length > 0 && r.add(d_.call(this, e, n)), r.consume();
+	return t > 0 && r.add(h_.call(this, e, t)), n.length > 0 && r.add(p_.call(this, e, n)), r.consume();
 }
-function p_(e, t) {
+function h_(e, t) {
 	if (!this.canDeleteTextInFormMode?.(e, t)) return B;
 	if (this.cursor.isInHeaderFooter()) {
 		let n = this.cursor.headerFooterMode === "header";
@@ -40018,19 +40078,19 @@ function p_(e, t) {
 	return this.cursor.isInFootnote() ? (this.wasm.deleteTextInFootnote(this.cursor.fnSectionIdx, this.cursor.fnParaIdx, this.cursor.fnControlIdx, this.cursor.fnInnerParaIdx, e.charOffset, t), B) : ad(this.wasm, e, t);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/hanging-indent.ts
-function m_(e, t) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/hanging-indent.ts
+function g_(e, t) {
 	return !Number.isFinite(e) || !Number.isFinite(t) ? 0 : Math.max(0, e - t);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/table-border-hit.ts
-function h_(e, t, n, r = 5) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/table-border-hit.ts
+function __(e, t, n, r = 5) {
 	let i = Math.abs(e - n.x) <= r, a = Math.abs(e - (n.x + n.width)) <= r, o = Math.abs(t - n.y) <= r, s = Math.abs(t - (n.y + n.height)) <= r, c = t >= n.y - r && t <= n.y + n.height + r, l = e >= n.x - r && e <= n.x + n.width + r;
 	return i && c || a && c || o && l || s && l;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/deferred-pagination-runner.ts
-var g_ = class {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/deferred-pagination-runner.ts
+var v_ = class {
 	client;
 	onComplete;
 	onFallback;
@@ -40113,8 +40173,8 @@ var g_ = class {
 	}
 };
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/table-object-clipboard-target.ts
-function __(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/table-object-clipboard-target.ts
+function y_(e) {
 	let t = e.cellPath ?? [];
 	return t.length > 1 ? {
 		controlIndex: t[t.length - 1].controlIndex,
@@ -40125,8 +40185,8 @@ function __(e) {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/initial-caret-focus.ts
-function v_(e, t, n, r) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/initial-caret-focus.ts
+function b_(e, t, n, r) {
 	return e ? (n.show(e, t), r.emit("cursor-rect-updated", {
 		pageIndex: e.pageIndex,
 		x: e.x,
@@ -40134,19 +40194,19 @@ function v_(e, t, n, r) {
 	}), !0) : !1;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/caret-layout-reveal.ts
-var y_ = /* @__PURE__ */ new Set([
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/caret-layout-reveal.ts
+var x_ = /* @__PURE__ */ new Set([
 	"pageBreak",
 	"columnBreak",
 	"splitParagraph"
 ]);
-function b_(e) {
+function S_(e) {
 	return e.startsWith("snapshot:") ? e.slice(9) : e;
 }
-var x_ = class {
+var C_ = class {
 	pending = !1;
 	requestFor(e) {
-		y_.has(b_(e)) && (this.pending = !0);
+		x_.has(S_(e)) && (this.pending = !0);
 	}
 	clear() {
 		this.pending = !1;
@@ -40155,15 +40215,15 @@ var x_ = class {
 		let e = this.pending;
 		return this.pending = !1, e;
 	}
-}, S_ = "http://www.w3.org/2000/svg", C_ = 48, w_ = 2, T_ = 150, E_ = 75, D_ = 120, O_ = 100, k_ = 200, A_ = 25, j_ = class extends Error {
+}, w_ = "http://www.w3.org/2000/svg", T_ = 48, E_ = 2, D_ = 150, O_ = 75, k_ = 120, A_ = 100, j_ = 200, M_ = 25, N_ = class extends Error {
 	code = "RENDER_FAILED";
 	recovered;
 	cause;
 	constructor(e, t) {
 		super(t ? "document-agent render 실패 후 snapshot을 복구했습니다." : "document-agent render 실패 후 snapshot 복구도 실패했습니다."), this.name = "DocumentAgentRenderCommitError", this.recovered = t, this.cause = e;
 	}
-}, M_ = 30;
-function N_(e, t) {
+}, P_ = 30;
+function F_(e, t) {
 	if (e.sectionIndex !== t.sectionIndex || e.parentParaIndex !== t.parentParaIndex) return !1;
 	let n = Yu(e), r = Yu(t);
 	return n.length !== r.length || n.length === 0 ? !1 : n.every((e, t) => {
@@ -40171,7 +40231,7 @@ function N_(e, t) {
 		return e.controlIndex === i.controlIndex && e.cellIndex === i.cellIndex && (t + 1 === n.length || e.cellParaIndex === i.cellParaIndex);
 	});
 }
-var P_ = /* @__PURE__ */ "fontSize.bold.italic.underline.strikethrough.textColor.shadeColor.emboss.engrave.fontId.fontIds.underlineType.underlineColor.outlineType.shadowType.shadowColor.shadowOffsetX.shadowOffsetY.strikeColor.subscript.superscript.ratios.spacings.relativeSizes.charOffsets.emphasisDot.underlineShape.strikeShape.kerning".split("."), F_ = [
+var I_ = /* @__PURE__ */ "fontSize.bold.italic.underline.strikethrough.textColor.shadeColor.emboss.engrave.fontId.fontIds.underlineType.underlineColor.outlineType.shadowType.shadowColor.shadowOffsetX.shadowOffsetY.strikeColor.subscript.superscript.ratios.spacings.relativeSizes.charOffsets.emphasisDot.underlineShape.strikeShape.kerning".split("."), L_ = [
 	"alignment",
 	"lineSpacing",
 	"lineSpacingType",
@@ -40196,7 +40256,7 @@ var P_ = /* @__PURE__ */ "fontSize.bold.italic.underline.strikethrough.textColor
 	"koreanBreakUnit",
 	"borderConnect",
 	"borderIgnoreMargin"
-], I_ = [
+], R_ = [
 	"paddingLeft",
 	"paddingRight",
 	"paddingTop",
@@ -40210,18 +40270,18 @@ var P_ = /* @__PURE__ */ "fontSize.bold.italic.underline.strikethrough.textColor
 	"editableInForm",
 	"borderFillId"
 ];
-function L_(e, t) {
+function z_(e, t) {
 	let n = {};
 	for (let r of t) e[r] !== void 0 && (n[r] = e[r]);
 	return n;
 }
-function R_(e) {
-	return Math.round(e * T_);
+function B_(e) {
+	return Math.round(e * D_);
 }
-function z_(e) {
-	return Math.round(e * E_);
+function V_(e) {
+	return Math.round(e * O_);
 }
-function B_(e, t) {
+function H_(e, t) {
 	let n = Math.max(1, e.bodyRight - e.bodyLeft), r = e.columns?.filter((e) => e.width > 0) ?? [];
 	if (r.length === 0) return n;
 	let i = r.find((e) => t >= e.x && t <= e.x + e.width);
@@ -40232,13 +40292,13 @@ function B_(e, t) {
 	}, r[0]);
 	return Math.min(a.width, n);
 }
-function V_(e, t, n, r) {
-	let i = Math.round(e * E_), a = Math.round(t * E_);
+function U_(e, t, n, r) {
+	let i = Math.round(e * O_), a = Math.round(t * O_);
 	if (!n || i <= 0 || a <= 0) return {
 		width: i,
 		height: a
 	};
-	let o = Math.floor(B_(n, r) * E_), s = Math.floor(Math.max(1, n.height - n.marginTop - n.marginBottom) * E_), c = Math.min(1, o / i, s / a);
+	let o = Math.floor(H_(n, r) * O_), s = Math.floor(Math.max(1, n.height - n.marginTop - n.marginBottom) * O_), c = Math.min(1, o / i, s / a);
 	return !Number.isFinite(c) || c <= 0 ? {
 		width: i,
 		height: a
@@ -40247,20 +40307,20 @@ function V_(e, t, n, r) {
 		height: Math.max(1, Math.round(a * c))
 	};
 }
-function H_(e) {
+function W_(e) {
 	let t = { ...e };
-	return e.marginLeft !== void 0 && (t.marginLeft = R_(e.marginLeft)), e.marginRight !== void 0 && (t.marginRight = R_(e.marginRight)), e.indent !== void 0 && (t.indent = R_(e.indent)), e.spacingBefore !== void 0 && (t.spacingBefore = z_(e.spacingBefore)), e.spacingAfter !== void 0 && (t.spacingAfter = z_(e.spacingAfter)), t;
+	return e.marginLeft !== void 0 && (t.marginLeft = B_(e.marginLeft)), e.marginRight !== void 0 && (t.marginRight = B_(e.marginRight)), e.indent !== void 0 && (t.indent = B_(e.indent)), e.spacingBefore !== void 0 && (t.spacingBefore = V_(e.spacingBefore)), e.spacingAfter !== void 0 && (t.spacingAfter = V_(e.spacingAfter)), t;
 }
-function U_() {
-	let e = document.createElementNS(S_, "svg");
+function G_() {
+	let e = document.createElementNS(w_, "svg");
 	return e.style.width = "100%", e.style.height = "100%", e.style.overflow = "visible", e;
 }
-function W_(e, t) {
+function K_(e, t) {
 	for (let [n, r] of Object.entries(t)) e.setAttribute(n, String(r));
 }
-function G_(e, t, n, r, i, a = !1) {
-	let o = document.createElementNS(S_, "line");
-	W_(o, {
+function q_(e, t, n, r, i, a = !1) {
+	let o = document.createElementNS(w_, "line");
+	K_(o, {
 		x1: t,
 		y1: n,
 		x2: r,
@@ -40269,11 +40329,11 @@ function G_(e, t, n, r, i, a = !1) {
 		"stroke-width": 2
 	}), a && o.setAttribute("stroke-dasharray", "6,3"), e.appendChild(o);
 }
-function K_(e, t, n) {
+function J_(e, t, n) {
 	let r = document.createElement("div");
 	return r.style.cssText = `position:fixed;left:${e}px;top:${t}px;background:rgba(0,0,0,0.75);color:#fff;font-size:11px;padding:2px 6px;border-radius:3px;white-space:nowrap;pointer-events:none`, r.textContent = n, r;
 }
-var q_ = class {
+var Y_ = class {
 	container;
 	wasm;
 	eventBus;
@@ -40321,7 +40381,7 @@ var q_ = class {
 	deferredPaginationRunner;
 	rawTextMutationEffects = new Ru();
 	pendingFocusedPagePatch = null;
-	caretLayoutReveal = new x_();
+	caretLayoutReveal = new C_();
 	isResizeDragging = !1;
 	resizeDragState = null;
 	isMoveDragging = !1;
@@ -40361,7 +40421,7 @@ var q_ = class {
 	_lastComposedText = "";
 	headerFooterSelectionComposition = !1;
 	_pendingNavAfterIME = null;
-	_cellBlockLetterImeGuard = new Sh();
+	_cellBlockLetterImeGuard = new wh();
 	_iosComposing = !1;
 	_iosAnchor = null;
 	_iosBeforePageIndex = void 0;
@@ -40385,7 +40445,7 @@ var q_ = class {
 	onMouseUpBound;
 	onF11InterceptBound;
 	constructor(e, t, n, r, i) {
-		this.container = e, this.wasm = t, this.eventBus = n, this.virtualScroll = r, this.viewportManager = i, this.cursor = new sf(t), this.caret = new gf(e, r), this.fieldMarker = new yf(e, r), this.selectionRenderer = new bf(e, r), this.history = new Tf(), this.deferredPaginationRunner = new g_(t, (e) => this.completeResumablePagination(e.pageCount), () => this.fallbackFromResumablePagination());
+		this.container = e, this.wasm = t, this.eventBus = n, this.virtualScroll = r, this.viewportManager = i, this.cursor = new sf(t), this.caret = new gf(e, r), this.fieldMarker = new yf(e, r), this.selectionRenderer = new bf(e, r), this.history = new Tf(), this.deferredPaginationRunner = new v_(t, (e) => this.completeResumablePagination(e.pageCount), () => this.fallbackFromResumablePagination());
 		let a = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1, o = this.container.closest("main") ?? document.body;
 		if (a) {
 			let e = document.createElement("div");
@@ -40401,7 +40461,7 @@ var q_ = class {
 		this.onClickBound = this.onClick.bind(this), this.onDblClickBound = this.onDblClick.bind(this), this.onKeyDownBound = this.onKeyDown.bind(this), this.onInputBound = this.onInput.bind(this), this.onCompositionStartBound = this.onCompositionStart.bind(this), this.onCompositionEndBound = this.onCompositionEnd.bind(this), this.onInputBlurBound = () => {
 			this.flushDeferredPaginationIfNeeded("input-blur", !1);
 		}, this.onCopyBound = this.onCopy.bind(this), this.onCutBound = this.onCut.bind(this), this.onPasteBound = this.onPaste.bind(this), this.onContextMenuBound = this.onContextMenu.bind(this), this.onMouseMoveBound = this.onMouseMove.bind(this), this.onMouseUpBound = this.onMouseUp.bind(this), this.onF11InterceptBound = (e) => {
-			e.key === "F11" && (e.preventDefault(), e.stopPropagation(), e.shiftKey ? Ug.call(this) : Hg.call(this));
+			e.key === "F11" && (e.preventDefault(), e.stopPropagation(), e.shiftKey ? Gg.call(this) : Wg.call(this));
 		}, document.addEventListener("keydown", this.onF11InterceptBound, !0), e.addEventListener("mousedown", this.onClickBound), e.addEventListener("dblclick", this.onDblClickBound), e.addEventListener("contextmenu", this.onContextMenuBound), e.addEventListener("mousemove", this.onMouseMoveBound), this.textarea.addEventListener("keydown", this.onKeyDownBound), this.textarea.addEventListener("input", this.onInputBound), this.textarea.addEventListener("compositionstart", this.onCompositionStartBound), this.textarea.addEventListener("compositionend", this.onCompositionEndBound), this.textarea.addEventListener("blur", this.onInputBlurBound), this.textarea.addEventListener("copy", this.onCopyBound), this.textarea.addEventListener("cut", this.onCutBound), this.textarea.addEventListener("paste", this.onPasteBound), n.on("zoom-changed", () => this.updateViewportOverlayPositions()), n.on("document-view-changed", () => {
 			this.active && requestAnimationFrame(() => this.updateCaret(!0));
 		}), n.on("document-layout-refreshed", () => {
@@ -40428,31 +40488,31 @@ var q_ = class {
 		this.caret.updatePosition(this.viewportManager.getZoom()), this.active && this.fieldMarker.isVisible && this.updateFieldMarkers(), this.cursor.hasSelection() && this.updateSelection(), this.cursor.isInCellSelectionMode() && this.updateCellSelection(), this.cursor.isInPictureObjectSelection() && this.renderPictureObjectSelection(), this.cursor.isInTableObjectSelection() && this.renderTableObjectSelection();
 	}
 	onClick(e) {
-		Lp.call(this, e);
-	}
-	onContextMenu(e) {
 		zp.call(this, e);
 	}
-	onDblClick(e) {
-		Rp.call(this, e);
-	}
-	onMouseMove(e) {
-		Bp.call(this, e);
-	}
-	handleResizeHover(e) {
+	onContextMenu(e) {
 		Vp.call(this, e);
 	}
+	onDblClick(e) {
+		Bp.call(this, e);
+	}
+	onMouseMove(e) {
+		Hp.call(this, e);
+	}
+	handleResizeHover(e) {
+		Up.call(this, e);
+	}
 	startResizeDrag(e, t, n, r) {
-		Gm.call(this, e, t, n, r);
+		qm.call(this, e, t, n, r);
 	}
 	updateResizeDrag(e) {
-		Km.call(this, e);
+		Jm.call(this, e);
 	}
 	finishResizeDrag(e) {
-		qm.call(this, e);
+		Ym.call(this, e);
 	}
 	cleanupResizeDrag() {
-		Jm.call(this);
+		Xm.call(this);
 	}
 	gridStepMm = 3;
 	setGridStep(e) {
@@ -40493,7 +40553,7 @@ var q_ = class {
 			ok: !1,
 			error: "그림을 넣을 문단을 찾지 못했습니다."
 		};
-		let l = c.sectionIndex, u = c.isTextBox === !0, d = (c.cellPath?.length ?? 0) > 0 && c.parentParaIndex !== void 0, f = d && !u, p = d && u, m = (f || p) && c.parentParaIndex !== void 0 ? c.parentParaIndex : c.paragraphIndex, h = f || p ? c.cellPath ?? [] : [], g = h.length > 0 ? JSON.stringify(h) : "", { width: _, height: v } = V_(n, r, this.getPageInfoForDrop(s.pageIdx), s.pageX), y = `그림입니다.\r\n원본 그림의 이름: ${i}\r\n원본 그림의 크기: 가로 ${n}pixel, 세로 ${r}pixel`;
+		let l = c.sectionIndex, u = c.isTextBox === !0, d = (c.cellPath?.length ?? 0) > 0 && c.parentParaIndex !== void 0, f = d && !u, p = d && u, m = (f || p) && c.parentParaIndex !== void 0 ? c.parentParaIndex : c.paragraphIndex, h = f || p ? c.cellPath ?? [] : [], g = h.length > 0 ? JSON.stringify(h) : "", { width: _, height: v } = U_(n, r, this.getPageInfoForDrop(s.pageIdx), s.pageX), y = `그림입니다.\r\n원본 그림의 이름: ${i}\r\n원본 그림의 크기: 가로 ${n}pixel, 세로 ${r}pixel`;
 		try {
 			let i = null;
 			return this.executeOperation({
@@ -40524,16 +40584,16 @@ var q_ = class {
 		}
 	}
 	cancelImagePlacement() {
-		Ym.call(this);
-	}
-	showImagePlacementOverlay(e, t, n, r) {
-		Xm.call(this, e, t, n, r);
-	}
-	hideImagePlacementOverlay() {
 		Zm.call(this);
 	}
+	showImagePlacementOverlay(e, t, n, r) {
+		Qm.call(this, e, t, n, r);
+	}
+	hideImagePlacementOverlay() {
+		$m.call(this);
+	}
 	finishImagePlacement(e) {
-		Qm.call(this, e);
+		eh.call(this, e);
 	}
 	enterTextboxPlacementMode() {
 		this.shapePlacementType = "textbox", this.textboxPlacementMode = !0, this.textboxPlacementDrag = null, this.container.style.cursor = "crosshair";
@@ -40557,13 +40617,13 @@ var q_ = class {
 			this.polygonOverlay.replaceChildren();
 			return;
 		}
-		let r = U_();
-		for (let e = 0; e < n.length - 1; e++) G_(r, n[e].x, n[e].y, n[e + 1].x, n[e + 1].y);
+		let r = G_();
+		for (let e = 0; e < n.length - 1; e++) q_(r, n[e].x, n[e].y, n[e + 1].x, n[e + 1].y);
 		let i = n[n.length - 1];
-		G_(r, i.x, i.y, e, t, !0);
+		q_(r, i.x, i.y, e, t, !0);
 		for (let e of n) {
-			let t = document.createElementNS(S_, "circle");
-			W_(t, {
+			let t = document.createElementNS(w_, "circle");
+			K_(t, {
 				cx: e.x,
 				cy: e.y,
 				r: 3,
@@ -40572,7 +40632,7 @@ var q_ = class {
 				"stroke-width": 1
 			}), r.appendChild(t);
 		}
-		let a = [...n.map((e) => e.x), e], o = [...n.map((e) => e.y), t], s = Math.min(...a), c = Math.max(...a), l = Math.min(...o), u = Math.max(...o), d = this.viewportManager.getZoom(), f = ((c - s) / d * 25.4 / 96).toFixed(1), p = ((u - l) / d * 25.4 / 96).toFixed(1), m = K_(c + 4, u + 4, `${f} × ${p} mm`);
+		let a = [...n.map((e) => e.x), e], o = [...n.map((e) => e.y), t], s = Math.min(...a), c = Math.max(...a), l = Math.min(...o), u = Math.max(...o), d = this.viewportManager.getZoom(), f = ((c - s) / d * 25.4 / 96).toFixed(1), p = ((u - l) / d * 25.4 / 96).toFixed(1), m = J_(c + 4, u + 4, `${f} × ${p} mm`);
 		this.polygonOverlay.replaceChildren(r, m);
 	}
 	finishPolygonDrawing() {
@@ -40618,19 +40678,19 @@ var q_ = class {
 	}
 	showTextboxPlacementOverlay(e, t, n, r, i = !1) {
 		this.textboxPlacementOverlay || (this.textboxPlacementOverlay = document.createElement("div"), this.textboxPlacementOverlay.style.cssText = "position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;", document.body.appendChild(this.textboxPlacementOverlay));
-		let a = this.shapePlacementType, o = this.viewportManager.getZoom(), s = Math.min(e, n), c = Math.min(t, r), l = Math.abs(n - e), u = Math.abs(r - t), d = (l / o * 25.4 / 96).toFixed(1), f = (u / o * 25.4 / 96).toFixed(1), p = K_(s + l + 4, c + u + 4, `${d} × ${f} mm`), m = U_(), h = null;
+		let a = this.shapePlacementType, o = this.viewportManager.getZoom(), s = Math.min(e, n), c = Math.min(t, r), l = Math.abs(n - e), u = Math.abs(r - t), d = (l / o * 25.4 / 96).toFixed(1), f = (u / o * 25.4 / 96).toFixed(1), p = J_(s + l + 4, c + u + 4, `${d} × ${f} mm`), m = G_(), h = null;
 		if (a === "line") {
 			let a = n, s = r;
 			if (i) {
 				let i = n - e, o = r - t, c = Math.round(Math.atan2(o, i) / (Math.PI / 4)) * (Math.PI / 4), l = Math.sqrt(i * i + o * o);
 				a = e + l * Math.cos(c), s = t + l * Math.sin(c);
 			}
-			this.textboxPlacementDrag && i && (this.textboxPlacementDrag.currentClientX = a, this.textboxPlacementDrag.currentClientY = s), G_(m, e, t, a, s, !0);
+			this.textboxPlacementDrag && i && (this.textboxPlacementDrag.currentClientX = a, this.textboxPlacementDrag.currentClientY = s), q_(m, e, t, a, s, !0);
 			let c = (Math.hypot(a - e, s - t) / o * 25.4 / 96).toFixed(1), l = (e + a) / 2, u = (t + s) / 2;
-			h = K_(l + 8, u + 8, `${c} mm`);
+			h = J_(l + 8, u + 8, `${c} mm`);
 		} else if (a === "ellipse") {
-			let e = s + l / 2, t = c + u / 2, n = document.createElementNS(S_, "ellipse");
-			W_(n, {
+			let e = s + l / 2, t = c + u / 2, n = document.createElementNS(w_, "ellipse");
+			K_(n, {
 				cx: e,
 				cy: t,
 				rx: l / 2,
@@ -40643,16 +40703,16 @@ var q_ = class {
 		} else if (a === "arc") {
 			let e = l / 2, t = u / 2;
 			if (e > 1 && t > 1) {
-				let n = s + l / 2, r = c + u / 2, i = document.createElementNS(S_, "path");
-				W_(i, {
+				let n = s + l / 2, r = c + u / 2, i = document.createElementNS(w_, "path");
+				K_(i, {
 					d: `M ${n} ${c} A ${e} ${t} 0 0 1 ${s + l} ${r}`,
 					fill: "none",
 					stroke: "#333",
 					"stroke-width": 2,
 					"stroke-dasharray": "6,3"
 				}), m.appendChild(i);
-				let a = document.createElementNS(S_, "rect");
-				W_(a, {
+				let a = document.createElementNS(w_, "rect");
+				K_(a, {
 					x: s,
 					y: c,
 					width: l,
@@ -40664,8 +40724,8 @@ var q_ = class {
 				}), m.appendChild(a);
 			}
 		} else if (a === "polygon") {
-			let e = s + l / 2, t = c, n = document.createElementNS(S_, "polygon");
-			W_(n, {
+			let e = s + l / 2, t = c, n = document.createElementNS(w_, "polygon");
+			K_(n, {
 				points: `${e},${t} ${s + l},${c + u} ${s},${c + u}`,
 				fill: "rgba(0,0,0,0.05)",
 				stroke: "#333",
@@ -40673,8 +40733,8 @@ var q_ = class {
 				"stroke-dasharray": "6,3"
 			}), m.appendChild(n);
 		} else {
-			let e = document.createElementNS(S_, "rect");
-			W_(e, {
+			let e = document.createElementNS(w_, "rect");
+			K_(e, {
 				x: s,
 				y: c,
 				width: l,
@@ -40759,31 +40819,31 @@ var q_ = class {
 		this.textboxPlacementMode = !1, this.textboxPlacementDrag = null, this.container.style.cursor = "";
 	}
 	moveSelectedTable(e) {
-		$m.call(this, e);
-	}
-	moveSelectedPicture(e) {
-		eh.call(this, e);
-	}
-	resizeSelectedPicture(e) {
-		xm.call(this, e);
-	}
-	updateMoveDrag(e) {
 		th.call(this, e);
 	}
+	moveSelectedPicture(e) {
+		nh.call(this, e);
+	}
+	resizeSelectedPicture(e) {
+		Cm.call(this, e);
+	}
+	updateMoveDrag(e) {
+		rh.call(this, e);
+	}
 	finishMoveDrag() {
-		nh.call(this);
+		ih.call(this);
 	}
 	resizeCellByKeyboard(e) {
-		ih.call(this, e);
+		oh.call(this, e);
 	}
 	resizeTableProportional(e) {
-		ah.call(this, e);
+		sh.call(this, e);
 	}
 	onMouseUp(e) {
-		Hp.call(this, e);
+		Wp.call(this, e);
 	}
 	finishLineEndpointDrag() {
-		Gp.call(this);
+		qp.call(this);
 	}
 	hitTestFromEvent(e) {
 		return this.hitTestFromClientPoint(e.clientX, e.clientY);
@@ -40872,12 +40932,12 @@ var q_ = class {
 		this.isDragging = !1, this.cellSelectionDragCandidate = null, document.removeEventListener("mousemove", this.onMouseMoveBound), this.stopTextSelectionDragAutoScroll();
 	}
 	getTextSelectionDragScrollDeltaY() {
-		let e = this.container.getBoundingClientRect(), t = e.top + C_, n = e.top + this.container.clientHeight - C_, r = this.dragLastClientY;
+		let e = this.container.getBoundingClientRect(), t = e.top + T_, n = e.top + this.container.clientHeight - T_, r = this.dragLastClientY;
 		return r < t ? -this.scaleTextSelectionDragScrollStep(t - r) : r > n ? this.scaleTextSelectionDragScrollStep(r - n) : 0;
 	}
 	scaleTextSelectionDragScrollStep(e) {
-		let t = Math.min(1, Math.max(0, e / C_));
-		return Math.round(w_ + 18 * t);
+		let t = Math.min(1, Math.max(0, e / T_));
+		return Math.round(E_ + 18 * t);
 	}
 	updateTextSelectionDragAutoScroll() {
 		if (!this.isDragging) {
@@ -40902,7 +40962,7 @@ var q_ = class {
 	}
 	isTableBorderClick(e, t, n, r, i, a) {
 		try {
-			return h_(t, n, this.wasm.getTableBBoxAtPage(r, i, a, e));
+			return __(t, n, this.wasm.getTableBBoxAtPage(r, i, a, e));
 		} catch {
 			return !1;
 		}
@@ -40913,7 +40973,7 @@ var q_ = class {
 			if (o.length === 0) return !1;
 			let s = Infinity, c = Infinity, l = -Infinity, u = -Infinity;
 			for (let e of o) s = Math.min(s, e.x), c = Math.min(c, e.y), l = Math.max(l, e.x + e.w), u = Math.max(u, e.y + e.h);
-			return h_(t, n, {
+			return __(t, n, {
 				x: s,
 				y: c,
 				width: l - s,
@@ -40946,7 +41006,7 @@ var q_ = class {
 	}
 	findTableByOuterClick(e, t, n, r, i) {
 		try {
-			let a = { controls: this.wasm.getPageControlLayout(e).controls.filter(bu) }, o = (e, r, i, a) => h_(t, n, {
+			let a = { controls: this.wasm.getPageControlLayout(e).controls.filter(bu) }, o = (e, r, i, a) => __(t, n, {
 				x: e,
 				y: r,
 				width: i,
@@ -41239,25 +41299,25 @@ var q_ = class {
 		];
 	}
 	onKeyDown(e) {
-		Ag.call(this, e);
+		Mg.call(this, e);
 	}
 	handleDocumentNavigationKey(e) {
-		this.active && Ag.call(this, e);
+		this.active && Mg.call(this, e);
 	}
 	handleCtrlKey(e) {
-		jg.call(this, e);
+		Ng.call(this, e);
 	}
 	handleSelectAll() {
-		Mg.call(this);
+		Pg.call(this);
 	}
 	onCopy(e) {
-		Pg.call(this, e);
+		Ig.call(this, e);
 	}
 	onCut(e) {
-		Fg.call(this, e);
+		Lg.call(this, e);
 	}
 	onPaste(e) {
-		Ig.call(this, e);
+		Rg.call(this, e);
 	}
 	applyCharFormat(e) {
 		if (this.cursor.isInHeaderFooter()) {
@@ -41566,7 +41626,7 @@ var q_ = class {
 					let r = JSON.stringify(e.cellPath);
 					n = this.wasm.getCursorRectByPath(e.sectionIndex, e.parentParaIndex, r, s.charStart), t ??= this.wasm.getCursorRectByPath(e.sectionIndex, e.parentParaIndex, r, e.charOffset);
 				} else n = this.wasm.getCursorRectInCell(e.sectionIndex, e.parentParaIndex, i, a, o, s.charStart), t ??= this.wasm.getCursorRectInCell(e.sectionIndex, e.parentParaIndex, i, a, o, e.charOffset);
-				let c = m_(t.x, n.x);
+				let c = g_(t.x, n.x);
 				return this.executeParaFormatCommand([{
 					kind: "cell",
 					sec: e.sectionIndex,
@@ -41574,16 +41634,16 @@ var q_ = class {
 					controlIdx: i,
 					cellIdx: a,
 					cellParaIdx: o
-				}], { indent: -R_(c) }), !0;
+				}], { indent: -B_(c) }), !0;
 			}
 			let r = this.wasm.getLineInfo(e.sectionIndex, e.paragraphIndex, 0);
 			n = this.wasm.getCursorRect(e.sectionIndex, e.paragraphIndex, r.charStart), t ??= this.wasm.getCursorRect(e.sectionIndex, e.paragraphIndex, e.charOffset);
-			let i = m_(t.x, n.x);
+			let i = g_(t.x, n.x);
 			return this.executeParaFormatCommand([{
 				kind: "body",
 				sec: e.sectionIndex,
 				para: e.paragraphIndex
-			}], { indent: -R_(i) }), !0;
+			}], { indent: -B_(i) }), !0;
 		} catch (e) {
 			return console.warn("[InputHandler] Shift+Tab hanging indent 실패:", e), !1;
 		}
@@ -41820,9 +41880,9 @@ var q_ = class {
 				if (!e) throw Error("복구할 최신 snapshot을 찾을 수 없습니다.");
 				this.cursor.moveTo(e), this.cursor.resetPreferredX(), await t(), this.updateCaret();
 			} catch (t) {
-				throw new j_(AggregateError([e, t]), !1);
+				throw new N_(AggregateError([e, t]), !1);
 			}
-			throw new j_(e, !0);
+			throw new N_(e, !0);
 		}
 		try {
 			this.eventBus.emit("document-mutated", "document-agent");
@@ -41836,31 +41896,31 @@ var q_ = class {
 		}
 	}
 	handleBackspace(e, t) {
-		i_.call(this, e, t);
+		o_.call(this, e, t);
 	}
 	handleDelete(e, t) {
-		a_.call(this, e, t);
+		s_.call(this, e, t);
 	}
 	onCompositionStart() {
-		s_.call(this);
+		l_.call(this);
 	}
 	onCompositionEnd() {
-		c_.call(this);
+		u_.call(this);
 	}
 	getTextAt(e, t) {
-		return l_.call(this, e, t);
+		return d_.call(this, e, t);
 	}
 	onInput(e) {
-		u_.call(this, e);
+		f_.call(this, e);
 	}
 	insertTextAtRaw(e, t) {
-		this.rawTextMutationEffects.add(d_.call(this, e, t));
+		this.rawTextMutationEffects.add(p_.call(this, e, t));
 	}
 	replaceTextAtRaw(e, t, n) {
-		this.rawTextMutationEffects.add(f_.call(this, e, t, n));
+		this.rawTextMutationEffects.add(m_.call(this, e, t, n));
 	}
 	deleteTextAt(e, t) {
-		this.rawTextMutationEffects.add(p_.call(this, e, t));
+		this.rawTextMutationEffects.add(h_.call(this, e, t));
 	}
 	focusTextarea() {
 		this.textarea.focus();
@@ -41891,10 +41951,10 @@ var q_ = class {
 	scheduleDeferredPaginationFlush() {
 		this.cancelDeferredPaginationFlush(), this.deferredPaginationPending = !0, this.shouldAutoFlushDeferredPagination() && (this.deferredPaginationFlushTimer = setTimeout(() => {
 			this.flushDeferredPaginationIfNeeded("idle-auto");
-		}, D_));
+		}, k_));
 	}
 	shouldAutoFlushDeferredPagination() {
-		return !this.deferredPaginationRunner.hasPendingWork() && this.wasm.pageCount <= M_;
+		return !this.deferredPaginationRunner.hasPendingWork() && this.wasm.pageCount <= P_;
 	}
 	cancelDeferredPaginationFlush() {
 		this.deferredPaginationFlushTimer &&= (clearTimeout(this.deferredPaginationFlushTimer), null);
@@ -41905,7 +41965,7 @@ var q_ = class {
 		if (e.focusedCursorGeometry ? this.cursor.prepareFocusedCellCursorGeometry(e.focusedCursorGeometry) : t && this.cursor.invalidateFocusedCellCursorGeometry(), e.paginationCompleted && (this.cancelDeferredPaginationFlush(), this.deferredPaginationRunner.cancel(), this.deferredPaginationPending = !1), e.flowChanged && e.paginationCompleted) return !0;
 		if (!e.documentPaginationPending) return !1;
 		let n = this.deferredPaginationRunner.hasPendingWork();
-		return this.cancelDeferredPaginationFlush(), this.deferredPaginationPending = !0, !e.flowChanged && !n ? !1 : (this.deferredPaginationRunner.requestStart(k_, O_, A_), !0);
+		return this.cancelDeferredPaginationFlush(), this.deferredPaginationPending = !0, !e.flowChanged && !n ? !1 : (this.deferredPaginationRunner.requestStart(j_, A_, M_), !0);
 	}
 	completeResumablePagination(e) {
 		this.cancelDeferredPaginationFlush(), this.deferredPaginationPending = !1, this.lastCellKey = null, this.protectedCellHitCache = null, this.eventBus.emit("document-mutated", "input-handler-resumable-pagination"), this.eventBus.emit("document-changed", "deferred-pagination-complete");
@@ -42122,7 +42182,7 @@ var q_ = class {
 			let e = this.wasm.hitTest(s, l, u);
 			if (e.sectionIndex !== t.sec || e.parentParaIndex !== t.ppi || e.controlIndex !== t.ci || e.cellIndex === void 0) return null;
 			if (t.cellPath && t.cellPath.length > 1) {
-				if (!up(t.cellPath, e.cellPath)) return null;
+				if (!fp(t.cellPath, e.cellPath)) return null;
 				let n = JSON.stringify(e.cellPath), r = this.wasm.getCellInfoByPath(t.sec, t.ppi, n);
 				return {
 					row: r.row,
@@ -42188,7 +42248,7 @@ var q_ = class {
 		let { start: r, end: i } = n, a = this.viewportManager.getZoom();
 		try {
 			let e, t = r.parentParaIndex !== void 0, n = i.parentParaIndex !== void 0;
-			if (t && n && N_(r, i)) {
+			if (t && n && F_(r, i)) {
 				let t = r.cursorRect && i.cursorRect ? {
 					startPageHint: r.cursorRect.pageIndex,
 					endPageHint: i.cursorRect.pageIndex
@@ -42260,7 +42320,7 @@ var q_ = class {
 		}
 	}
 	clearTableObjectSelectionRender() {
-		this.tableObjectRenderer?.clear(), Qp(this.eventBus);
+		this.tableObjectRenderer?.clear(), em(this.eventBus);
 	}
 	renderTableObjectSelection() {
 		if (!this.tableObjectRenderer) return;
@@ -42304,55 +42364,55 @@ var q_ = class {
 		}
 	}
 	findPictureAtClick(e, t, n) {
-		return dm.call(this, e, t, n);
+		return pm.call(this, e, t, n);
 	}
 	findPictureBbox(e) {
-		return fm.call(this, e);
+		return mm.call(this, e);
 	}
 	getObjectProperties(e) {
-		return _m.call(this, e);
+		return ym.call(this, e);
 	}
 	setObjectProperties(e, t) {
-		vm.call(this, e, t);
+		bm.call(this, e, t);
 	}
 	deleteObjectControl(e) {
-		bm.call(this, e);
+		Sm.call(this, e);
 	}
 	promptAssignPictureImage(e) {
-		um.call(this, e);
+		fm.call(this, e);
 	}
 	renderPictureObjectSelection() {
-		mm.call(this);
+		gm.call(this);
 	}
 	exitPictureObjectSelectionIfNeeded() {
-		hm.call(this);
+		_m.call(this);
 	}
 	isShapeBorderClick(e, t, n) {
-		return gm.call(this, e, t, n);
+		return vm.call(this, e, t, n);
 	}
 	updatePictureResizeDrag(e) {
-		km.call(this, e);
+		jm.call(this, e);
 	}
 	finishPictureResizeDrag(e) {
-		Am.call(this, e);
+		Mm.call(this, e);
 	}
 	calcResizedBbox(e, t) {
-		return jm.call(this, e, t);
+		return Nm.call(this, e, t);
 	}
 	cleanupPictureResizeDrag() {
-		Mm.call(this);
-	}
-	updatePictureMoveDrag(e) {
-		Nm.call(this, e);
-	}
-	finishPictureMoveDrag() {
 		Pm.call(this);
 	}
-	updatePictureRotateDrag(e) {
+	updatePictureMoveDrag(e) {
 		Fm.call(this, e);
 	}
+	finishPictureMoveDrag() {
+		Im.call(this);
+	}
+	updatePictureRotateDrag(e) {
+		Lm.call(this, e);
+	}
 	finishPictureRotateDrag(e) {
-		Im.call(this, e);
+		Rm.call(this, e);
 	}
 	scrollCaretIntoView(e) {
 		let t = this.viewportManager.getZoom(), n = this.virtualScroll.getPageOffset(e.pageIndex), r = this.virtualScroll.getPageLeftResolved(e.pageIndex, this.container.scrollWidth), i = n + e.y * t, a = r + e.x * t, o = e.height * t, s = this.container.scrollTop, c = this.container.clientHeight, l = this.container.scrollLeft, u = this.container.clientWidth;
@@ -42365,13 +42425,13 @@ var q_ = class {
 				sectionIndex: 0,
 				paragraphIndex: 0,
 				charOffset: 0
-			}), this.cursor.resetPreferredX(), this.active = !0, v_(this.cursor.getRect(), this.viewportManager.getZoom(), this.caret, this.eventBus), this.emitCursorFormatState(), this.focusTextarea();
+			}), this.cursor.resetPreferredX(), this.active = !0, b_(this.cursor.getRect(), this.viewportManager.getZoom(), this.caret, this.eventBus), this.emitCursorFormatState(), this.focusTextarea();
 		} catch (e) {
 			console.warn("[InputHandler] 캐럿 자동 배치 실패:", e), this.cursor.moveTo({
 				sectionIndex: 0,
 				paragraphIndex: 0,
 				charOffset: 0
-			}), this.active = !0, v_(this.cursor.getRect(), this.viewportManager.getZoom(), this.caret, this.eventBus), this.focusTextarea();
+			}), this.active = !0, b_(this.cursor.getRect(), this.viewportManager.getZoom(), this.caret, this.eventBus), this.focusTextarea();
 		}
 	}
 	focus() {
@@ -42935,14 +42995,14 @@ var q_ = class {
 		if (this.cursor.isInPictureObjectSelection()) {
 			let e = this.cursor.getSelectedPictureRef();
 			if (e) try {
-				let t = yg(e);
+				let t = xg(e);
 				this.wasm.copyControl(e.sec, e.ppi, e.ci, t);
 				let n = this.wasm.getClipboardText() || "[그림]", r = "";
 				try {
 					r = this.wasm.exportControlHtml(e.sec, e.ppi, e.ci, t) || "";
 				} catch {}
-				let i = gg(this, r, n);
-				e.type === "image" ? bg(this.wasm, e.sec, e.ppi, e.ci, n, i, t).catch(() => navigator.clipboard.writeText(n).catch(() => {})) : _g(n, i).catch(() => navigator.clipboard.writeText(n).catch(() => {}));
+				let i = vg(this, r, n);
+				e.type === "image" ? Sg(this.wasm, e.sec, e.ppi, e.ci, n, i, t).catch(() => navigator.clipboard.writeText(n).catch(() => {})) : yg(n, i).catch(() => navigator.clipboard.writeText(n).catch(() => {}));
 			} catch (e) {
 				console.warn("[InputHandler] 개체 복사 실패:", e);
 			}
@@ -42951,13 +43011,13 @@ var q_ = class {
 		if (this.cursor.isInTableObjectSelection()) {
 			let e = this.cursor.getSelectedTableRef();
 			if (e) try {
-				let t = __(e);
+				let t = y_(e);
 				this.wasm.copyControl(e.sec, e.ppi, t.controlIndex, t.ownerCellPathJson);
 				let n = this.wasm.getClipboardText() || "[표]", r = "";
 				try {
 					r = this.wasm.exportControlHtml(e.sec, e.ppi, t.controlIndex, t.ownerCellPathJson) || "";
 				} catch {}
-				_g(n, gg(this, r, n)).catch(() => navigator.clipboard.writeText(n).catch(() => {}));
+				yg(n, vg(this, r, n)).catch(() => navigator.clipboard.writeText(n).catch(() => {}));
 			} catch (e) {
 				console.warn("[InputHandler] 표 복사 실패:", e);
 			}
@@ -43046,7 +43106,7 @@ var q_ = class {
 		return Object.keys(t).length > 0 && this.applyCharPropsToRange(e.start, e.end, t), Object.keys(n).length > 0 && this.applyParaPropsToRange(e.start, e.end, n), this.formatCopyState = null, this.focusTextarea(), !0;
 	}
 	copyFormatAtCursor() {
-		let e = this.getCharProperties(), t = L_(e, P_);
+		let e = this.getCharProperties(), t = z_(e, I_);
 		if (t.fontIds === void 0 && t.fontId === void 0) {
 			let n = e.fontFamily;
 			if (n) {
@@ -43054,7 +43114,7 @@ var q_ = class {
 				e >= 0 && (t.fontId = e);
 			}
 		}
-		let n = H_(L_(this.getParaProperties(), F_)), r = this.cursor.getPosition(), i = r.parentParaIndex === void 0 ? void 0 : L_(this.wasm.getCellOwnProperties(r.sectionIndex, r.parentParaIndex, r.controlIndex, r.cellIndex), I_);
+		let n = W_(z_(this.getParaProperties(), L_)), r = this.cursor.getPosition(), i = r.parentParaIndex === void 0 ? void 0 : z_(this.wasm.getCellOwnProperties(r.sectionIndex, r.parentParaIndex, r.controlIndex, r.cellIndex), R_);
 		this.formatCopyState = {
 			charProps: JSON.parse(JSON.stringify(t)),
 			paraProps: JSON.parse(JSON.stringify(n)),
@@ -43376,7 +43436,7 @@ var q_ = class {
 			o.focus(), o.select();
 		});
 	}
-}, J_ = [
+}, X_ = [
 	"함초롬바탕",
 	"함초롬돋움",
 	"맑은 고딕",
@@ -43384,7 +43444,7 @@ var q_ = class {
 	"바탕",
 	"돋움",
 	"궁서"
-], Y_ = [
+], Z_ = [
 	{
 		id: "all",
 		label: z("dialog.toolbar.label")
@@ -43405,7 +43465,7 @@ var q_ = class {
 		id: "system",
 		label: z("dialog.toolbar.label.x8a1767")
 	}
-], X_ = class {
+], Q_ = class {
 	container;
 	wasm;
 	eventBus;
@@ -43778,7 +43838,7 @@ var q_ = class {
 	}
 	initFontDropdown(e) {
 		this.lastFontFamilies = e ? [...e] : void 0, this.fontMenuDocumentFonts = this.normalizeFontNames(e ?? []), this.fontMenuCategory = this.fontMenuDocumentFonts.length > 0 ? "document" : "current", this.closeFontMenu(), this.fontName.replaceChildren();
-		for (let e of J_) this.ensureFontOption(e);
+		for (let e of X_) this.ensureFontOption(e);
 		if (e?.length) for (let t of e) this.ensureFontOption(t);
 		this.populateFontSetOptions();
 	}
@@ -43891,7 +43951,7 @@ var q_ = class {
 		e.className = "font-picker-menu", e.setAttribute("role", "dialog"), e.setAttribute("aria-label", z("dialog.toolbar.openFontMenu.label"));
 		let t = document.createElement("div");
 		t.className = "font-picker-categories", t.setAttribute("role", "tablist");
-		for (let n of Y_) {
+		for (let n of Z_) {
 			let r = document.createElement("button");
 			r.type = "button", r.className = "font-picker-category", r.dataset.category = n.id, r.textContent = n.label, r.setAttribute("role", "tab"), r.addEventListener("click", () => {
 				this.fontMenuCategory = n.id, this.renderFontMenu(e);
@@ -43921,7 +43981,7 @@ var q_ = class {
 	renderFontMenu(e) {
 		let t = e.querySelector("[data-role=\"heading\"]"), n = e.querySelector("[data-role=\"list\"]");
 		if (!t || !n) return;
-		let r = Y_.find((e) => e.id === this.fontMenuCategory), i = this.getFontMenuEntries(this.fontMenuCategory);
+		let r = Z_.find((e) => e.id === this.fontMenuCategory), i = this.getFontMenuEntries(this.fontMenuCategory);
 		t.textContent = `${r.label} (${i.length})`;
 		for (let t of e.querySelectorAll(".font-picker-category")) {
 			let e = t.dataset.category === this.fontMenuCategory;
@@ -43944,7 +44004,7 @@ var q_ = class {
 		}] : [], n = this.fontMenuDocumentFonts.map((e) => ({
 			value: e,
 			label: e
-		})), r = J_.map((e) => ({
+		})), r = X_.map((e) => ({
 			value: e,
 			label: e
 		})), i = R.getAllFontSets().map((e) => ({
@@ -43999,11 +44059,11 @@ var q_ = class {
 		}
 		this.eventBus.emit("format-char", { fontIds: n });
 	}
-}, Z_ = ".tb-split-item:not([disabled])";
-function Q_(e) {
-	return Array.from(e.querySelectorAll(Z_));
+}, $_ = ".tb-split-item:not([disabled])";
+function ev(e) {
+	return Array.from(e.querySelectorAll($_));
 }
-function $_(e, t, n = {}) {
+function tv(e, t, n = {}) {
 	let r = e.querySelector(".tb-split-arrow"), i = e.querySelector(".tb-split-menu");
 	if (e.classList.toggle("open", t), r?.setAttribute("aria-expanded", String(t)), !t) {
 		n.returnFocus && r?.focus({ preventScroll: !0 });
@@ -44012,44 +44072,44 @@ function $_(e, t, n = {}) {
 	if (!i) return;
 	let a = e.getBoundingClientRect(), o = i.getBoundingClientRect(), s = Math.min(Math.max(4, a.left), Math.max(4, window.innerWidth - o.width - 4)), c = a.bottom + 2, l = c + o.height <= window.innerHeight - 4 ? c : Math.max(4, a.top - o.height - 2);
 	if (i.style.left = `${s}px`, i.style.top = `${l}px`, n.focus) {
-		let t = Q_(e), r = n.focus === "first" ? t[0] : t.at(-1);
+		let t = ev(e), r = n.focus === "first" ? t[0] : t.at(-1);
 		requestAnimationFrame(() => r?.focus({ preventScroll: !0 }));
 	}
 }
-function ev(e, t) {
+function nv(e, t) {
 	e.querySelectorAll(".tb-split.open").forEach((e) => {
-		e !== t && $_(e, !1);
+		e !== t && tv(e, !1);
 	});
 }
-function tv(e, t, n) {
-	let r = Q_(e), i = r.indexOf(t);
+function rv(e, t, n) {
+	let r = ev(e), i = r.indexOf(t);
 	i < 0 || r.length === 0 || r[(i + n + r.length) % r.length]?.focus({ preventScroll: !0 });
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/icon-toolbar-scroller.ts
-var nv = 1, rv = 240, iv = "tb-scroll-nav-transitioning-out", av = ":scope > .tb-sep";
-function ov(e, t) {
-	return e - t > nv;
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/icon-toolbar-scroller.ts
+var iv = 1, av = 240, ov = "tb-scroll-nav-transitioning-out", sv = ":scope > .tb-sep";
+function cv(e, t) {
+	return e - t > iv;
 }
-function sv(e, t, n) {
+function lv(e, t, n) {
 	return n ? Math.max(0, Math.min(e, t)) : 0;
 }
-function cv(e, t, n) {
+function uv(e, t, n) {
 	return {
-		atStart: n || e <= nv,
-		atEnd: n || e >= t - nv
+		atStart: n || e <= iv,
+		atEnd: n || e >= t - iv
 	};
 }
-function lv(e, t, n, r) {
+function dv(e, t, n, r) {
 	let i = n > 0 ? r : 0;
-	if (n > 0) i = e.find((e) => e > t + nv) ?? i;
-	else for (let n = e.length - 1; n >= 0; n--) if (e[n] < t - nv) {
+	if (n > 0) i = e.find((e) => e > t + iv) ?? i;
+	else for (let n = e.length - 1; n >= 0; n--) if (e[n] < t - iv) {
 		i = e[n];
 		break;
 	}
 	return Math.max(0, Math.min(i, r));
 }
-var uv = class {
+var fv = class {
 	root;
 	viewport;
 	track;
@@ -44072,10 +44132,10 @@ var uv = class {
 	};
 	onScroll = () => {
 		if (!this.overflowing) {
-			Math.abs(this.viewport.scrollLeft) > nv && (this.viewport.scrollLeft = 0);
+			Math.abs(this.viewport.scrollLeft) > iv && (this.viewport.scrollLeft = 0);
 			return;
 		}
-		ev(this.track), this.updateNavigationState();
+		nv(this.track), this.updateNavigationState();
 	};
 	onPreviousClick = () => {
 		this.previousButton.getAttribute("aria-disabled") !== "true" && this.scrollToAdjacentDivider(-1);
@@ -44109,14 +44169,14 @@ var uv = class {
 		}));
 	}
 	refresh() {
-		let e = ov(this.track.scrollWidth, this.viewport.clientWidth);
+		let e = cv(this.track.scrollWidth, this.viewport.clientWidth);
 		this.overflowing = e, this.viewport.classList.toggle("tb-scroll-viewport-enabled", e), this.previousButton.hidden = !e, this.nextButton.hidden = !e;
 		let t = this.maxScrollLeft();
-		this.viewport.scrollLeft = sv(this.viewport.scrollLeft, t, e), this.updateNavigationState(t);
+		this.viewport.scrollLeft = lv(this.viewport.scrollLeft, t, e), this.updateNavigationState(t);
 	}
 	visibleDividerBoundaries(e) {
 		let t = this.track.getBoundingClientRect().left, n = this.viewport.getBoundingClientRect().left, r = e > 0 ? this.nextButton.getBoundingClientRect() : this.previousButton.getBoundingClientRect(), i = this.navigationEdgeGap(), a = e > 0 ? r.left - i - n : r.right + i - n;
-		return Array.from(this.track.querySelectorAll(av)).filter((e) => !e.hidden && getComputedStyle(e).display !== "none" && e.offsetWidth > 0).map((n) => {
+		return Array.from(this.track.querySelectorAll(sv)).filter((e) => !e.hidden && getComputedStyle(e).display !== "none" && e.offsetWidth > 0).map((n) => {
 			let r = n.getBoundingClientRect();
 			return e > 0 ? r.right - t - a : r.left - t - a;
 		}).sort((e, t) => e - t);
@@ -44126,7 +44186,7 @@ var uv = class {
 	}
 	scrollToAdjacentDivider(e) {
 		if (!this.overflowing) return;
-		let t = this.viewport.scrollLeft, n = lv(this.visibleDividerBoundaries(e), t, e, this.maxScrollLeft());
+		let t = this.viewport.scrollLeft, n = dv(this.visibleDividerBoundaries(e), t, e, this.maxScrollLeft());
 		this.scrollTo(n);
 	}
 	scrollTo(e) {
@@ -44135,15 +44195,15 @@ var uv = class {
 			return;
 		}
 		let t = Math.max(0, Math.min(e, this.maxScrollLeft())), n = this.viewport.scrollLeft, r = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-		if (this.cancelScrollAnimation(), r || Math.abs(t - n) <= nv) {
+		if (this.cancelScrollAnimation(), r || Math.abs(t - n) <= iv) {
 			this.viewport.scrollLeft = t, this.updateNavigationState(this.maxScrollLeft());
 			return;
 		}
-		let i = this.maxScrollLeft(), a = t <= nv ? this.previousButton : t >= i - nv ? this.nextButton : null;
-		a && (this.exitingButton = a, a.style.setProperty("--tb-scroll-exit-duration", `${rv}ms`), a.classList.add(iv));
+		let i = this.maxScrollLeft(), a = t <= iv ? this.previousButton : t >= i - iv ? this.nextButton : null;
+		a && (this.exitingButton = a, a.style.setProperty("--tb-scroll-exit-duration", `${av}ms`), a.classList.add(ov));
 		let o = null, s = t - n, c = (e) => {
 			o ??= e;
-			let r = Math.min(1, (e - o) / rv), a = 1 - (1 - r) ** 3;
+			let r = Math.min(1, (e - o) / av), a = 1 - (1 - r) ** 3;
 			if (this.viewport.scrollLeft = n + s * a, this.updateNavigationState(i), r < 1) {
 				this.scrollAnimationFrame = requestAnimationFrame(c);
 				return;
@@ -44153,7 +44213,7 @@ var uv = class {
 		this.scrollAnimationFrame = requestAnimationFrame(c);
 	}
 	finishScrollExit() {
-		this.exitingButton &&= (this.exitingButton.classList.remove(iv), this.exitingButton.style.removeProperty("--tb-scroll-exit-duration"), null);
+		this.exitingButton &&= (this.exitingButton.classList.remove(ov), this.exitingButton.style.removeProperty("--tb-scroll-exit-duration"), null);
 	}
 	cancelScrollAnimation() {
 		this.scrollAnimationFrame !== null && (cancelAnimationFrame(this.scrollAnimationFrame), this.scrollAnimationFrame = null), this.finishScrollExit();
@@ -44167,7 +44227,7 @@ var uv = class {
 		e.getAttribute("aria-disabled") !== n && e.setAttribute("aria-disabled", n), e.getAttribute("aria-hidden") !== n && e.setAttribute("aria-hidden", n);
 	}
 	updateNavigationState(e = this.maxScrollLeft()) {
-		let t = this.previousButton.hasAttribute("hidden") || this.nextButton.hasAttribute("hidden"), n = this.viewport.scrollLeft, { atStart: r, atEnd: i } = cv(n, e, t);
+		let t = this.previousButton.hasAttribute("hidden") || this.nextButton.hasAttribute("hidden"), n = this.viewport.scrollLeft, { atStart: r, atEnd: i } = uv(n, e, t);
 		this.syncNavigationButton(this.previousButton, r), this.syncNavigationButton(this.nextButton, i);
 	}
 	resetToStart() {
@@ -44177,12 +44237,12 @@ var uv = class {
 		this.animationFrame !== null && cancelAnimationFrame(this.animationFrame), this.cancelScrollAnimation(), this.resizeObserver.disconnect(), this.modeObserver.disconnect(), this.previousButton.removeEventListener("click", this.onPreviousClick), this.nextButton.removeEventListener("click", this.onNextClick), this.viewport.removeEventListener("scroll", this.onScroll), this.viewport.removeEventListener("keydown", this.onViewportKeyDown), this.viewport.removeEventListener("focusin", this.onViewportFocusIn);
 	}
 };
-function dv(e) {
+function pv(e) {
 	if (!e) return null;
 	let t = e.querySelector("#icon-toolbar-viewport"), n = e.querySelector(".tb-scroll-track"), r = e.querySelector("#icon-toolbar-prev"), i = e.querySelector("#icon-toolbar-next");
-	return !t || !n || !r || !i ? null : new uv(e, t, n, r, i);
+	return !t || !n || !r || !i ? null : new fv(e, t, n, r, i);
 }
-var fv = "(max-width: 459px), (min-width: 808px) and (max-width: 961px)", pv = "(max-width: 459px), (min-width: 828px) and (max-width: 981px)", mv = ".sb-paragraph-ribbon-group .sb-btn", hv = "sb-al-left", gv = [
+var mv = "(max-width: 459px), (min-width: 808px) and (max-width: 961px)", hv = "(max-width: 459px), (min-width: 828px) and (max-width: 981px)", gv = ".sb-paragraph-ribbon-group .sb-btn", _v = "sb-al-left", vv = [
 	"sb-al-left",
 	"sb-al-center",
 	"sb-al-right",
@@ -44190,10 +44250,10 @@ var fv = "(max-width: 459px), (min-width: 808px) and (max-width: 961px)", pv = "
 	"sb-al-distribute",
 	"sb-al-split"
 ];
-function _v(e, t) {
+function yv(e, t) {
 	return e && !t;
 }
-var vv = class {
+var bv = class {
 	container;
 	host;
 	trigger;
@@ -44221,8 +44281,8 @@ var vv = class {
 	};
 	onPanelClick = (e) => {
 		let t = e.target;
-		if (!(t instanceof Element) || !t.closest(mv)) return;
-		let n = _v(this.openedFromKeyboard, this.panelPointerActivation);
+		if (!(t instanceof Element) || !t.closest(gv)) return;
+		let n = yv(this.openedFromKeyboard, this.panelPointerActivation);
 		this.panelPointerActivation = !1, this.openedFromKeyboard = !1, this.setOpen(!1, !1, n);
 	};
 	onDocumentPointerDown = (e) => {
@@ -44236,7 +44296,7 @@ var vv = class {
 		this.syncLayoutMode();
 	};
 	constructor(e, t, n, r, i, a = window.matchMedia.bind(window)) {
-		this.container = e, this.host = t, this.trigger = n, this.triggerIcon = r, this.panel = i, this.mediaQuery = a(cl() === "en" ? pv : fv), this.paragraphButtons = Array.from(i.querySelectorAll(mv)), this.stateObserver = new MutationObserver(() => this.syncIndicator()), n.addEventListener("pointerdown", this.onTriggerPointerDown), n.addEventListener("click", this.onTriggerClick), n.addEventListener("keydown", this.onTriggerKeyDown), i.addEventListener("pointerdown", this.onPanelPointerDown), i.addEventListener("click", this.onPanelClick), document.addEventListener("pointerdown", this.onDocumentPointerDown, !0), window.addEventListener("keydown", this.onWindowKeyDown, !0), this.mediaQuery.addEventListener("change", this.onMediaChange), this.stateObserver.observe(i, {
+		this.container = e, this.host = t, this.trigger = n, this.triggerIcon = r, this.panel = i, this.mediaQuery = a(cl() === "en" ? hv : mv), this.paragraphButtons = Array.from(i.querySelectorAll(gv)), this.stateObserver = new MutationObserver(() => this.syncIndicator()), n.addEventListener("pointerdown", this.onTriggerPointerDown), n.addEventListener("click", this.onTriggerClick), n.addEventListener("keydown", this.onTriggerKeyDown), i.addEventListener("pointerdown", this.onPanelPointerDown), i.addEventListener("click", this.onPanelClick), document.addEventListener("pointerdown", this.onDocumentPointerDown, !0), window.addEventListener("keydown", this.onWindowKeyDown, !0), this.mediaQuery.addEventListener("change", this.onMediaChange), this.stateObserver.observe(i, {
 			attributes: !0,
 			subtree: !0,
 			attributeFilter: [
@@ -44257,8 +44317,8 @@ var vv = class {
 		this.open = r, this.host.classList.toggle("open", r), this.trigger.setAttribute("aria-expanded", String(r)), this.panel.hidden = this.mediaQuery.matches ? !r : !1, r && t ? requestAnimationFrame(() => this.paragraphButtons.find((e) => !e.disabled)?.focus()) : !r && n && this.trigger.focus({ preventScroll: !0 });
 	}
 	syncIndicator() {
-		let e = this.paragraphButtons.find((e) => e.classList.contains("active") || e.getAttribute("aria-pressed") === "true"), t = e?.querySelector(".sb-align"), n = gv.find((e) => t?.classList.contains(e)) ?? hv, r = this.container.getAttribute("aria-disabled") === "true";
-		this.triggerIcon.classList.remove(...gv), this.triggerIcon.classList.add(n), this.trigger.disabled = r;
+		let e = this.paragraphButtons.find((e) => e.classList.contains("active") || e.getAttribute("aria-pressed") === "true"), t = e?.querySelector(".sb-align"), n = vv.find((e) => t?.classList.contains(e)) ?? _v, r = this.container.getAttribute("aria-disabled") === "true";
+		this.triggerIcon.classList.remove(...vv), this.triggerIcon.classList.add(n), this.trigger.disabled = r;
 		let i = e?.title, a = i ? z("ui.styleToolbarOverflow.alignMoreCurrent", { p1: i }) : z("ui.styleToolbarOverflow.alignMore");
 		this.trigger.setAttribute("aria-label", a), this.trigger.title = i ? z("dialog.styleToolbarOverflow.trigger.tooltip", { p1: i }) : z("dialog.styleToolbarOverflow.syncIndicator.tooltip");
 	}
@@ -44266,14 +44326,14 @@ var vv = class {
 		this.setOpen(!1), this.trigger.removeEventListener("pointerdown", this.onTriggerPointerDown), this.trigger.removeEventListener("click", this.onTriggerClick), this.trigger.removeEventListener("keydown", this.onTriggerKeyDown), this.panel.removeEventListener("pointerdown", this.onPanelPointerDown), this.panel.removeEventListener("click", this.onPanelClick), document.removeEventListener("pointerdown", this.onDocumentPointerDown, !0), window.removeEventListener("keydown", this.onWindowKeyDown, !0), this.mediaQuery.removeEventListener("change", this.onMediaChange), this.stateObserver.disconnect();
 	}
 };
-function yv(e) {
+function xv(e) {
 	if (!e) return null;
 	let t = e.querySelector(".sb-overflow-host"), n = e.querySelector("#btn-style-overflow"), r = e.querySelector("#style-overflow-current-icon"), i = e.querySelector("#style-overflow-panel");
-	return !t || !n || !r || !i ? null : new vv(e, t, n, r, i);
+	return !t || !n || !r || !i ? null : new bv(e, t, n, r, i);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/menu-shortcut-labels.ts
-function bv(e, t) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/menu-shortcut-labels.ts
+function Sv(e, t) {
 	let n = e.querySelectorAll(".md-item[data-cmd]");
 	for (let e of n) {
 		let n = e, r = n.dataset.cmd;
@@ -44281,12 +44341,12 @@ function bv(e, t) {
 		let i = t.get(r)?.shortcutLabel;
 		if (!i) continue;
 		let a = n.querySelector(".md-shortcut");
-		a || (a = document.createElement("span"), a.className = "md-shortcut", n.appendChild(a)), a.textContent = yh(i);
+		a || (a = document.createElement("span"), a.className = "md-shortcut", n.appendChild(a)), a.textContent = xh(i);
 	}
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/menu-bar.ts
-var xv = class {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/menu-bar.ts
+var Cv = class {
 	container;
 	eventBus;
 	dispatcher;
@@ -44294,7 +44354,7 @@ var xv = class {
 	openMenu = null;
 	onMenuOpen;
 	constructor(e, t, n, r, i = {}) {
-		this.container = e, this.eventBus = t, this.dispatcher = n, this.onMenuOpen = i.onMenuOpen, this.menuItems = Array.from(e.querySelectorAll(".menu-item")), bv(e, r), this.setupTitleClicks(), this.setupTitleHover(), this.setupItemClicks(), this.setupOutsideClose(), this.setupKeyboardClose();
+		this.container = e, this.eventBus = t, this.dispatcher = n, this.onMenuOpen = i.onMenuOpen, this.menuItems = Array.from(e.querySelectorAll(".menu-item")), Sv(e, r), this.setupTitleClicks(), this.setupTitleHover(), this.setupItemClicks(), this.setupOutsideClose(), this.setupKeyboardClose();
 	}
 	setupTitleClicks() {
 		for (let e of this.menuItems) {
@@ -44376,66 +44436,66 @@ var xv = class {
 	}
 };
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/extension-settings.ts
-function Sv() {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/extension-settings.ts
+function wv() {
 	return !0;
 }
-function Cv() {
-	return { disableExternalWebFonts: Sv() };
-}
-function wv() {
-	return { disableExternalWebFonts: Cv().disableExternalWebFonts };
-}
 function Tv() {
-	return globalThis.chrome ?? null;
+	return { disableExternalWebFonts: wv() };
 }
 function Ev() {
-	return globalThis.browser ?? null;
+	return { disableExternalWebFonts: Tv().disableExternalWebFonts };
 }
 function Dv() {
-	return Tv()?.runtime?.lastError?.message ?? null;
+	return globalThis.chrome ?? null;
 }
-function Ov(e) {
+function Ov() {
+	return globalThis.browser ?? null;
+}
+function kv() {
+	return Dv()?.runtime?.lastError?.message ?? null;
+}
+function Av(e) {
 	return !!e && typeof e.then == "function";
 }
-function kv(e, t) {
+function jv(e, t) {
 	return new Promise((n, r) => {
 		let i = !1, a = (e) => {
 			i || (i = !0, e());
 		};
 		try {
 			let i = e.get(t, (e) => {
-				let t = Dv();
+				let t = kv();
 				a(t ? () => r(Error(t)) : () => n(e ?? {}));
 			});
-			Ov(i) && i.then((e) => a(() => n(e ?? {})), (e) => a(() => r(e)));
+			Av(i) && i.then((e) => a(() => n(e ?? {})), (e) => a(() => r(e)));
 		} catch (e) {
 			a(() => r(e));
 		}
 	});
 }
-async function Av(e, t) {
+async function Mv(e, t) {
 	let n = e.get(t);
-	return Ov(n) ? n ?? {} : {};
+	return Av(n) ? n ?? {} : {};
 }
-function jv(e) {
+function Nv(e) {
 	return { disableExternalWebFonts: e.disableExternalWebFonts === !0 };
 }
-async function Mv(e, t) {
+async function Pv(e, t) {
 	if (!e) return null;
 	try {
-		return jv(t === "chrome-callback" ? await kv(e, wv()) : await Av(e, wv()));
+		return Nv(t === "chrome-callback" ? await jv(e, Ev()) : await Mv(e, Ev()));
 	} catch (e) {
 		return console.warn("[extension-settings] 확장 설정 로드 실패:", e), null;
 	}
 }
-async function Nv() {
-	let e = Tv()?.storage, t = Ev()?.storage;
-	return await Mv(e?.sync, "chrome-callback") ?? await Mv(t?.sync, "promise") ?? await Mv(t?.local, "promise") ?? await Mv(e?.local, "chrome-callback") ?? Cv();
+async function Fv() {
+	let e = Dv()?.storage, t = Ov()?.storage;
+	return await Pv(e?.sync, "chrome-callback") ?? await Pv(t?.sync, "promise") ?? await Pv(t?.local, "promise") ?? await Pv(e?.local, "chrome-callback") ?? Tv();
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/command/registry.ts
-var Pv = class {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/command/registry.ts
+var Iv = class {
 	commands = /* @__PURE__ */ new Map();
 	register(e) {
 		this.commands.set(e.id, e);
@@ -44460,48 +44520,48 @@ var Pv = class {
 	getAllIds() {
 		return Array.from(this.commands.keys());
 	}
-}, Fv = ".menu-item", Iv = ".menu-title", Lv = ".menu-dropdown", Rv = ".md-item", zv = ".md-sub", Bv = ".md-sub-panel", Vv = ".md-label";
-function Hv(e) {
-	return (e.querySelector(Vv)?.textContent ?? e.textContent ?? "").trim();
+}, Lv = ".menu-item", Rv = ".menu-title", zv = ".menu-dropdown", Bv = ".md-item", Vv = ".md-sub", Hv = ".md-sub-panel", Uv = ".md-label";
+function Wv(e) {
+	return (e.querySelector(Uv)?.textContent ?? e.textContent ?? "").trim();
 }
-function Uv(e, t) {
+function Gv(e, t) {
 	let n = [];
 	for (let r of Array.from(e.children)) {
-		if (r.classList.contains(zv.slice(1))) {
-			let e = r.querySelector(Bv);
+		if (r.classList.contains(Vv.slice(1))) {
+			let e = r.querySelector(Hv);
 			n.push({
-				label: Hv(r),
+				label: Wv(r),
 				enabled: !r.classList.contains("disabled"),
-				submenu: e ? Uv(e, t) : []
+				submenu: e ? Gv(e, t) : []
 			});
 			continue;
 		}
-		if (!r.classList.contains(Rv.slice(1))) continue;
+		if (!r.classList.contains(Bv.slice(1))) continue;
 		let e = r.dataset.cmd;
 		n.push({
 			commandId: e,
-			label: Hv(r),
+			label: Wv(r),
 			enabled: e ? t(e) : !r.classList.contains("disabled")
 		});
 	}
 	return n;
 }
-function Wv(e, t) {
+function Kv(e, t) {
 	let n = [];
-	for (let r of Array.from(e.querySelectorAll(Fv))) {
-		let e = r.dataset.menu ?? "", i = r.querySelector(Lv);
+	for (let r of Array.from(e.querySelectorAll(Lv))) {
+		let e = r.dataset.menu ?? "", i = r.querySelector(zv);
 		n.push({
 			menuId: e,
-			label: (r.querySelector(Iv)?.textContent ?? e).trim(),
-			items: i ? Uv(i, t) : []
+			label: (r.querySelector(Rv)?.textContent ?? e).trim(),
+			items: i ? Gv(i, t) : []
 		});
 	}
 	return n;
 }
-function Gv(e, t) {
-	return e.querySelector(`${Fv}[data-menu="${t}"] ${Lv}`);
+function qv(e, t) {
+	return e.querySelector(`${Lv}[data-menu="${t}"] ${zv}`);
 }
-function Kv(e, t, n, r, i = "bottom") {
+function Jv(e, t, n, r, i = "bottom") {
 	let a = document.createElement("div");
 	a.className = "md-item", a.dataset.cmd = t;
 	let o = document.createElement("span");
@@ -44511,25 +44571,25 @@ function Kv(e, t, n, r, i = "bottom") {
 	}
 	return i === "top" ? e.prepend(a) : e.appendChild(a), a;
 }
-function qv(e, t) {
-	e.querySelectorAll(`${Rv}[data-cmd="${t}"]`).forEach((e) => e.remove());
+function Yv(e, t) {
+	e.querySelectorAll(`${Bv}[data-cmd="${t}"]`).forEach((e) => e.remove());
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/automation/types.ts
-var Jv = "ext:", Yv = {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/automation/types.ts
+var Xv = "ext:", Zv = {
 	menu: "rhwp-chrome-no-menu",
 	toolbar: "rhwp-chrome-no-toolbar",
 	statusbar: "rhwp-chrome-no-status"
 };
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/automation/host.ts
-function Xv(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/automation/host.ts
+function Qv(e) {
 	if (!e.startsWith("ext:")) {
-		let t = /* @__PURE__ */ Error(`확장 커맨드 ID 는 "${Jv}" 접두사가 필요합니다: ${e}`);
+		let t = /* @__PURE__ */ Error(`확장 커맨드 ID 는 "${Xv}" 접두사가 필요합니다: ${e}`);
 		throw t.code = "EXT_PREFIX_REQUIRED", t;
 	}
 }
-var Zv = class {
+var $v = class {
 	options;
 	ownedMenuItems = /* @__PURE__ */ new Set();
 	ownedCommands = /* @__PURE__ */ new Set();
@@ -44552,7 +44612,7 @@ var Zv = class {
 	}
 	getMenuModel() {
 		let e = this.options.getMenuContainer();
-		return e ? Wv(e, (e) => this.options.dispatcher.isEnabled(e)) : [];
+		return e ? Kv(e, (e) => this.options.dispatcher.isEnabled(e)) : [];
 	}
 	isEnabled(e) {
 		return this.options.dispatcher.isEnabled(e);
@@ -44568,14 +44628,14 @@ var Zv = class {
 		return this.options.getContext();
 	}
 	registerCommand(e) {
-		Xv(e.id), this.options.registry.register(e), this.ownedCommands.add(e.id);
+		Qv(e.id), this.options.registry.register(e), this.ownedCommands.add(e.id);
 	}
 	unregisterCommand(e) {
 		e.startsWith("ext:") && (this.removeMenuItem(e), this.options.registry.unregister(e), this.ownedCommands.delete(e));
 	}
 	addMenuItem(e) {
-		Xv(e.commandId);
-		let t = this.options.getMenuContainer(), n = t ? Gv(t, e.menuId) : null;
+		Qv(e.commandId);
+		let t = this.options.getMenuContainer(), n = t ? qv(t, e.menuId) : null;
 		if (!n) {
 			let t = /* @__PURE__ */ Error(`메뉴를 찾을 수 없습니다: ${e.menuId}`);
 			throw t.code = "UNKNOWN_MENU", t;
@@ -44585,44 +44645,44 @@ var Zv = class {
 			let t = /* @__PURE__ */ Error(`미등록 커맨드: ${e.commandId}`);
 			throw t.code = "UNKNOWN_COMMAND", t;
 		}
-		qv(n, e.commandId), Kv(n, e.commandId, r.label, r.shortcutLabel ? yh(r.shortcutLabel) : void 0, e.position), this.ownedMenuItems.add(e.commandId);
+		Yv(n, e.commandId), Jv(n, e.commandId, r.label, r.shortcutLabel ? xh(r.shortcutLabel) : void 0, e.position), this.ownedMenuItems.add(e.commandId);
 	}
 	removeMenuItem(e) {
 		let t = this.options.getMenuContainer();
-		t && qv(t, e), this.ownedMenuItems.delete(e);
+		t && Yv(t, e), this.ownedMenuItems.delete(e);
 	}
 	disposeOwned() {
 		for (let e of Array.from(this.ownedMenuItems)) this.removeMenuItem(e);
 		for (let e of Array.from(this.ownedCommands)) this.unregisterCommand(e);
 	}
-}, Qv = "studio-root";
-function $v() {
-	return document.getElementById(Qv);
+}, ey = "studio-root";
+function ty() {
+	return document.getElementById(ey);
 }
-function ey() {
-	let e = $v(), t = (t) => !e || !e.classList.contains(Yv[t]);
+function ny() {
+	let e = ty(), t = (t) => !e || !e.classList.contains(Zv[t]);
 	return {
 		menu: t("menu"),
 		toolbar: t("toolbar"),
 		statusbar: t("statusbar")
 	};
 }
-function ty(e) {
-	let t = $v();
-	if (t) for (let n of Object.keys(Yv)) {
+function ry(e) {
+	let t = ty();
+	if (t) for (let n of Object.keys(Zv)) {
 		let r = e[n];
-		typeof r == "boolean" && t.classList.toggle(Yv[n], !r);
+		typeof r == "boolean" && t.classList.toggle(Zv[n], !r);
 	}
-	return ey();
+	return ny();
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/plugin/host.ts
-function ny(e, t) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/plugin/host.ts
+function iy(e, t) {
 	let n = Error(t);
 	return n.code = e, n;
 }
-var ry = 2e3, iy = 20;
-function ay() {
+var ay = 2e3, oy = 20;
+function sy() {
 	return {
 		commands: /* @__PURE__ */ new Set(),
 		menuItems: /* @__PURE__ */ new Set(),
@@ -44631,7 +44691,7 @@ function ay() {
 		activeTx: 0
 	};
 }
-var oy = class {
+var cy = class {
 	pluginId;
 	deps;
 	ledger;
@@ -44650,9 +44710,9 @@ var oy = class {
 		return this.deps.wasm.documentGeneration;
 	}
 	transaction(e, t) {
-		if (this.ledger.activeTx > 0) throw ny("NESTED_TX", `트랜잭션 중첩은 허용하지 않습니다: ${e}`);
+		if (this.ledger.activeTx > 0) throw iy("NESTED_TX", `트랜잭션 중첩은 허용하지 않습니다: ${e}`);
 		let n = this.deps.getInputHandler();
-		if (!n) throw ny("DOCUMENT_RELEASED", "문서가 로드되지 않았습니다");
+		if (!n) throw iy("DOCUMENT_RELEASED", "문서가 로드되지 않았습니다");
 		let r = !1, i = !1, a, o = {
 			doc: () => this.requireDocument(),
 			deferPagination: () => {
@@ -44671,7 +44731,7 @@ var oy = class {
 				this.deps.wasm.cancelDeferredPagination();
 			} catch {}
 		}
-		if (!i) throw ny("DOCUMENT_RELEASED", `현재 편집 모드에서 거절된 작업입니다: ${e}`);
+		if (!i) throw iy("DOCUMENT_RELEASED", `현재 편집 모드에서 거절된 작업입니다: ${e}`);
 		return a;
 	}
 	read(e) {
@@ -44726,10 +44786,10 @@ var oy = class {
 	}
 	requireDocument() {
 		let e = this.deps.wasm.borrowDocumentHandle();
-		if (!e || e.__wbg_ptr === 0) throw ny("DOCUMENT_RELEASED", "문서가 이미 해제되었습니다");
+		if (!e || e.__wbg_ptr === 0) throw iy("DOCUMENT_RELEASED", "문서가 이미 해제되었습니다");
 		return e;
 	}
-}, sy = class {
+}, ly = class {
 	deps;
 	loaded = /* @__PURE__ */ new Map();
 	constructor(e) {
@@ -44755,14 +44815,14 @@ var oy = class {
 		try {
 			n = await this.deps.resolve(e);
 		} catch {
-			throw ny("PLUGIN_NOT_ALLOWED", `허용되지 않은 플러그인입니다: ${e}`);
+			throw iy("PLUGIN_NOT_ALLOWED", `허용되지 않은 플러그인입니다: ${e}`);
 		}
-		if (n.apiVersion !== 1) throw ny("PLUGIN_ACTIVATE_FAILED", `지원하지 않는 플러그인 API 세대: ${n.apiVersion} (지원 1)`);
-		let r = ay(), i = new oy(n.id, this.deps, r), a;
+		if (n.apiVersion !== 1) throw iy("PLUGIN_ACTIVATE_FAILED", `지원하지 않는 플러그인 API 세대: ${n.apiVersion} (지원 1)`);
+		let r = sy(), i = new cy(n.id, this.deps, r), a;
 		try {
 			a = await n.activate(i);
 		} catch (e) {
-			throw this.reclaim(r), ny("PLUGIN_ACTIVATE_FAILED", e instanceof Error ? e.message : String(e));
+			throw this.reclaim(r), iy("PLUGIN_ACTIVATE_FAILED", e instanceof Error ? e.message : String(e));
 		}
 		return this.loaded.set(n.id, {
 			plugin: n,
@@ -44776,11 +44836,11 @@ var oy = class {
 	}
 	async unload(e) {
 		let t = this.loaded.get(e);
-		if (!t) throw ny("PLUGIN_NOT_LOADED", `올라와 있지 않은 플러그인입니다: ${e}`);
-		let n = Date.now() + ry;
+		if (!t) throw iy("PLUGIN_NOT_LOADED", `올라와 있지 않은 플러그인입니다: ${e}`);
+		let n = Date.now() + ay;
 		for (; t.ledger.activeTx > 0;) {
-			if (Date.now() > n) throw ny("TX_TIMEOUT", `진행 중인 트랜잭션이 끝나지 않았습니다: ${e}`);
-			await new Promise((e) => setTimeout(e, iy));
+			if (Date.now() > n) throw iy("TX_TIMEOUT", `진행 중인 트랜잭션이 끝나지 않았습니다: ${e}`);
+			await new Promise((e) => setTimeout(e, oy));
 		}
 		try {
 			t.plugin.deactivate?.();
@@ -44791,7 +44851,7 @@ var oy = class {
 	}
 	invoke(e, t, n) {
 		let r = this.loaded.get(e);
-		if (!r) throw ny("PLUGIN_NOT_LOADED", `올라와 있지 않은 플러그인입니다: ${e}`);
+		if (!r) throw iy("PLUGIN_NOT_LOADED", `올라와 있지 않은 플러그인입니다: ${e}`);
 		let i = r.surface[t];
 		if (typeof i != "function") throw Error(`${e} 플러그인에 없는 메서드입니다: ${t}`);
 		return i(...n);
@@ -44817,23 +44877,23 @@ var oy = class {
 		for (let t of Array.from(e.commands)) this.deps.automation.unregisterCommand(t);
 		e.swapUnsubs.length = 0, e.eventUnsubs.length = 0, e.menuItems.clear(), e.commands.clear();
 	}
-}, cy = /* @__PURE__ */ new Set([
+}, uy = /* @__PURE__ */ new Set([
 	"edit:cut",
 	"edit:paste",
 	"edit:delete",
 	"field:edit",
 	"field:remove",
 	"file:page-setup"
-]), ly = [
+]), dy = [
 	"format:",
 	"insert:",
 	"table:",
 	"page:"
 ];
-function uy(e, t) {
-	return t.isFormMode ? cy.has(e) ? !0 : ly.some((t) => e.startsWith(t)) : !1;
+function fy(e, t) {
+	return t.isFormMode ? uy.has(e) ? !0 : dy.some((t) => e.startsWith(t)) : !1;
 }
-var dy = class {
+var py = class {
 	registry;
 	services;
 	eventBus;
@@ -44850,7 +44910,7 @@ var dy = class {
 			reason: "unregistered"
 		};
 		let r = this.services.getContext();
-		if (uy(e, r)) return {
+		if (fy(e, r)) return {
 			ok: !1,
 			reason: "blocked-in-form-mode"
 		};
@@ -44872,12 +44932,12 @@ var dy = class {
 		let t = this.registry.get(e);
 		if (!t) return !1;
 		let n = this.services.getContext();
-		return uy(e, n) ? !1 : !t.canExecute || t.canExecute(n);
+		return fy(e, n) ? !1 : !t.canExecute || t.canExecute(n);
 	}
 };
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/command/document-shortcut-guard.ts
-function fy(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/command/document-shortcut-guard.ts
+function my(e) {
 	let t = e;
 	for (; t;) {
 		if (["INPUT", "TEXTAREA"].includes(t.tagName) || t.isContentEditable || t.getAttribute?.("role") === "textbox") return !0;
@@ -44885,8 +44945,8 @@ function fy(e) {
 	}
 	return !1;
 }
-function py(e) {
-	if (fy(e)) return !0;
+function hy(e) {
+	if (my(e)) return !0;
 	let t = e;
 	for (; t;) {
 		if (t.tagName === "SELECT") return !0;
@@ -44894,12 +44954,12 @@ function py(e) {
 	}
 	return !1;
 }
-function my(e, t, n, r) {
-	return t?.isConnected || py(e.target) ? !1 : (e.preventDefault(), n(), r(), !0);
+function gy(e, t, n, r) {
+	return t?.isConnected || hy(e.target) ? !1 : (e.preventDefault(), n(), r(), !0);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/command/export-html.ts
-var hy = {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/command/export-html.ts
+var _y = {
 	html: {
 		extension: "html",
 		mimeType: "text/html;charset=utf-8",
@@ -44911,18 +44971,18 @@ var hy = {
 		label: "Word 문서(.doc)"
 	}
 };
-function gy(e) {
+function vy(e) {
 	let t = e.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
 	return (t ? t[1] : e).replace(/<!--StartFragment-->/gi, "").replace(/<!--EndFragment-->/gi, "").trim();
 }
-function _y(e) {
+function yy(e) {
 	let t = Math.max(0, e.getSectionCount()), n = [];
 	for (let r = 0; r < t; r += 1) {
 		let t = e.getParagraphCount(r);
 		if (t <= 0) continue;
 		let i = t - 1;
 		try {
-			let t = e.getParagraphLength(r, i), a = gy(e.exportSelectionHtml(r, 0, 0, i, t) ?? "");
+			let t = e.getParagraphLength(r, i), a = vy(e.exportSelectionHtml(r, 0, 0, i, t) ?? "");
 			a && n.push(a);
 		} catch (e) {
 			let t = e instanceof Error ? e.message : String(e);
@@ -44931,37 +44991,37 @@ function _y(e) {
 	}
 	return n.join("\n");
 }
-function vy(e) {
+function by(e) {
 	return e.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
-function yy(e, t) {
+function xy(e, t) {
 	return `<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="utf-8" />
-<title>${vy(t)}</title>
+<title>${by(t)}</title>
 </head>
 <body>
 ${e}
 </body>
 </html>`;
 }
-function by(e, t) {
+function Sy(e, t) {
 	return `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
 <head>
 <meta charset="utf-8" />
-<title>${vy(t)}</title>
+<title>${by(t)}</title>
 </head>
 <body>
 ${e}
 </body>
 </html>`;
 }
-function xy(e) {
+function Cy(e) {
 	return ((e ?? "").trim() || "문서").replace(/\.(hwpx?|hml|html?|doc)$/i, "");
 }
-function Sy(e, t, n) {
-	let r = hy[t], i = xy(n), a = _y(e), o = t === "doc" ? by(a, i) : yy(a, i);
+function wy(e, t, n) {
+	let r = _y[t], i = Cy(n), a = yy(e), o = t === "doc" ? Sy(a, i) : xy(a, i);
 	return {
 		fileName: `${i}.${r.extension}`,
 		content: o,
@@ -44969,21 +45029,21 @@ function Sy(e, t, n) {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/dom-utils.ts
-var Cy = "svg";
-function wy(e, t) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/dom-utils.ts
+var Ty = "svg";
+function Ey(e, t) {
 	let n = new DOMParser().parseFromString(t, "image/svg+xml");
 	if (n.querySelector("parsererror")) return;
 	let r = n.documentElement;
-	r.nodeName.toLowerCase() === Cy && e.appendChild(document.importNode(r, !0));
+	r.nodeName.toLowerCase() === Ty && e.appendChild(document.importNode(r, !0));
 }
-function Ty(e, t) {
+function Dy(e, t) {
 	let n = document.createElement("option");
 	return n.value = e, n.textContent = t, n;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/dialog-apply.ts
-function Ey(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/dialog-apply.ts
+function Oy(e) {
 	let { services: t, label: n, command: r, fallback: i } = e;
 	try {
 		let e = t?.getInputHandler();
@@ -44992,7 +45052,7 @@ function Ey(e) {
 		return console.warn(`[${n}] 적용 실패:`, e), !1;
 	}
 }
-function Dy(e) {
+function ky(e) {
 	let { services: t, label: n, operationType: r, operation: i, fallback: a } = e;
 	try {
 		let e = t?.getInputHandler();
@@ -45005,8 +45065,8 @@ function Dy(e) {
 		return console.warn(`[${n}] 적용 실패:`, e), !1;
 	}
 }
-var Oy = 7200 / 25.4;
-function ky(e) {
+var Ay = 7200 / 25.4;
+function jy(e) {
 	return e.landscape ? {
 		width: e.height,
 		height: e.width
@@ -45015,33 +45075,33 @@ function ky(e) {
 		height: e.height
 	};
 }
-function Ay(e) {
-	let t = ky(e);
+function My(e) {
+	let t = jy(e);
 	return {
 		width: t.width - e.marginLeft - e.marginRight - e.marginGutter,
 		height: t.height - e.marginTop - e.marginBottom - e.marginHeader - e.marginFooter
 	};
 }
-function jy(e) {
-	let t = 10 * Oy, n = Ay(e), r = (e) => (e / Oy).toFixed(1);
+function Ny(e) {
+	let t = 10 * Ay, n = My(e), r = (e) => (e / Ay).toFixed(1);
 	return n.width < t ? `좌우 여백이 너무 커서 본문이 남지 않습니다 (본문 너비 ${r(n.width)}mm, 최소 10mm). 왼쪽·오른쪽·제본 여백을 줄여주세요.` : n.height < t ? `위아래 여백이 너무 커서 본문이 남지 않습니다 (본문 높이 ${r(n.height)}mm, 최소 10mm). 위쪽·아래쪽·머리말·꼬리말 여백을 줄여주세요.` : null;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/page-setup-dialog.ts
-var My = 7200 / 25.4, Ny = 3;
-function Py(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/page-setup-dialog.ts
+var Py = 7200 / 25.4, Fy = 3;
+function Iy(e) {
 	return Math.round(e * 25.4 / 7200 * 10) / 10;
 }
-function Fy(e) {
-	return Math.round(e * My);
+function Ly(e) {
+	return Math.round(e * Py);
 }
-function Iy(e, t) {
-	return Math.abs(e - t) <= Ny;
+function Ry(e, t) {
+	return Math.abs(e - t) <= Fy;
 }
-function Ly(e, t, n, r) {
-	return Iy(e, n) && Iy(t, r) || Iy(e, r) && Iy(t, n);
+function zy(e, t, n, r) {
+	return Ry(e, n) && Ry(t, r) || Ry(e, r) && Ry(t, n);
 }
-var Ry = [
+var By = [
 	[
 		"A4",
 		59528,
@@ -45072,14 +45132,14 @@ var Ry = [
 		62208,
 		102816
 	]
-], zy = {
+], Vy = {
 	portrait: "<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"orient-icon orient-icon-portrait\" width=\"28\" height=\"36\" viewBox=\"0 0 28 36\" aria-hidden=\"true\" focusable=\"false\"><rect x=\"1\" y=\"1\" width=\"26\" height=\"34\" rx=\"2\" fill=\"#fff\" stroke=\"#748bc9\" stroke-width=\"1.5\"/><line x1=\"6\" y1=\"8\" x2=\"22\" y2=\"8\" stroke=\"#aab\" stroke-width=\"1.2\"/><line x1=\"6\" y1=\"12\" x2=\"22\" y2=\"12\" stroke=\"#aab\" stroke-width=\"1.2\"/><line x1=\"6\" y1=\"16\" x2=\"18\" y2=\"16\" stroke=\"#aab\" stroke-width=\"1.2\"/></svg>",
 	landscape: "<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"orient-icon orient-icon-landscape\" width=\"40\" height=\"28\" viewBox=\"0 0 40 28\" aria-hidden=\"true\" focusable=\"false\"><rect x=\"1\" y=\"1\" width=\"38\" height=\"26\" rx=\"2\" fill=\"#fff\" stroke=\"#748bc9\" stroke-width=\"1.5\"/><line x1=\"7\" y1=\"7\" x2=\"33\" y2=\"7\" stroke=\"#aab\" stroke-width=\"1.2\"/><line x1=\"7\" y1=\"11\" x2=\"33\" y2=\"11\" stroke=\"#aab\" stroke-width=\"1.2\"/><line x1=\"7\" y1=\"15\" x2=\"29\" y2=\"15\" stroke=\"#aab\" stroke-width=\"1.2\"/><line x1=\"7\" y1=\"19\" x2=\"23\" y2=\"19\" stroke=\"#c5cce0\" stroke-width=\"1.1\"/></svg>"
-}, By = {
+}, Hy = {
 	single: "<svg width=\"24\" height=\"32\" viewBox=\"0 0 24 32\"><rect x=\"1\" y=\"1\" width=\"22\" height=\"30\" rx=\"1.5\" fill=\"#fff\" stroke=\"#748bc9\" stroke-width=\"1.2\"/><line x1=\"5\" y1=\"7\" x2=\"19\" y2=\"7\" stroke=\"#bbc\" stroke-width=\"1\"/><line x1=\"5\" y1=\"10\" x2=\"19\" y2=\"10\" stroke=\"#bbc\" stroke-width=\"1\"/><line x1=\"5\" y1=\"13\" x2=\"15\" y2=\"13\" stroke=\"#bbc\" stroke-width=\"1\"/></svg>",
 	duplex: "<svg width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><rect x=\"1\" y=\"1\" width=\"13\" height=\"30\" rx=\"1.5\" fill=\"#fff\" stroke=\"#748bc9\" stroke-width=\"1.2\"/><rect x=\"18\" y=\"1\" width=\"13\" height=\"30\" rx=\"1.5\" fill=\"#fff\" stroke=\"#748bc9\" stroke-width=\"1.2\"/><line x1=\"14\" y1=\"4\" x2=\"14\" y2=\"28\" stroke=\"#335095\" stroke-width=\"1.5\" stroke-dasharray=\"2,2\"/></svg>",
 	top: "<svg width=\"24\" height=\"32\" viewBox=\"0 0 24 32\"><rect x=\"1\" y=\"1\" width=\"22\" height=\"13\" rx=\"1.5\" fill=\"#fff\" stroke=\"#748bc9\" stroke-width=\"1.2\"/><rect x=\"1\" y=\"18\" width=\"22\" height=\"13\" rx=\"1.5\" fill=\"#fff\" stroke=\"#748bc9\" stroke-width=\"1.2\"/><line x1=\"4\" y1=\"15\" x2=\"20\" y2=\"15\" stroke=\"#335095\" stroke-width=\"1.5\" stroke-dasharray=\"2,2\"/></svg>"
-}, Vy = class extends V {
+}, Uy = class extends V {
 	services;
 	wasm;
 	eventBus;
@@ -45101,7 +45161,7 @@ var Ry = [
 	createBody() {
 		let e = document.createElement("div"), t = this.createSection(z("dialog.pageSetup.createSection.label")), n = this.row();
 		this.paperSelect = document.createElement("select"), this.paperSelect.className = "dialog-select", this.paperSelect.style.width = "100px";
-		for (let [e] of Ry) {
+		for (let [e] of By) {
 			let t = document.createElement("option");
 			t.value = e, t.textContent = e, this.paperSelect.appendChild(t);
 		}
@@ -45112,14 +45172,14 @@ var Ry = [
 		let a = document.createElement("div");
 		a.className = "page-setup-sections";
 		let o = this.createSection(z("dialog.pageSetup.createSection.label.x78ea53")), s = document.createElement("div");
-		s.className = "dialog-icon-radio-group", this.landscapeRadios = [this.iconRadio("orient", "세로", "false", zy.portrait, s), this.iconRadio("orient", "가로", "true", zy.landscape, s)];
+		s.className = "dialog-icon-radio-group", this.landscapeRadios = [this.iconRadio("orient", "세로", "false", Vy.portrait, s), this.iconRadio("orient", "가로", "true", Vy.landscape, s)];
 		for (let e of this.landscapeRadios) e.addEventListener("change", () => this.onOrientChange());
 		o.appendChild(s);
 		let c = this.createSection(z("dialog.pageSetup.createSection.label.x0a5a7c")), l = document.createElement("div");
 		l.className = "dialog-icon-radio-group", this.bindingRadios = [
-			this.iconRadio("binding", "한쪽", "0", By.single, l),
-			this.iconRadio("binding", "맞쪽", "1", By.duplex, l),
-			this.iconRadio("binding", "위로", "2", By.top, l)
+			this.iconRadio("binding", "한쪽", "0", Hy.single, l),
+			this.iconRadio("binding", "맞쪽", "1", Hy.duplex, l),
+			this.iconRadio("binding", "위로", "2", Hy.top, l)
 		], c.appendChild(l), a.appendChild(o), a.appendChild(c), e.appendChild(a);
 		let u = this.createSection(z("dialog.pageSetup.createSection.label.xebb638")), d = document.createElement("div");
 		d.className = "margin-grid", this.marginInputs = {};
@@ -45148,24 +45208,24 @@ var Ry = [
 		return p.appendChild(this.scopeSelect), p.style.marginTop = "4px", e.appendChild(p), e;
 	}
 	onConfirm() {
-		let e = this.landscapeRadios[1].checked, t = Fy(parseFloat(this.widthInput.value) || 0), n = Fy(parseFloat(this.heightInput.value) || 0);
+		let e = this.landscapeRadios[1].checked, t = Ly(parseFloat(this.widthInput.value) || 0), n = Ly(parseFloat(this.heightInput.value) || 0);
 		e && ([t, n] = [n, t]);
 		let r = {
 			width: t,
 			height: n,
-			marginLeft: Fy(parseFloat(this.marginInputs.marginLeft.value) || 0),
-			marginRight: Fy(parseFloat(this.marginInputs.marginRight.value) || 0),
-			marginTop: Fy(parseFloat(this.marginInputs.marginTop.value) || 0),
-			marginBottom: Fy(parseFloat(this.marginInputs.marginBottom.value) || 0),
-			marginHeader: Fy(parseFloat(this.marginInputs.marginHeader.value) || 0),
-			marginFooter: Fy(parseFloat(this.marginInputs.marginFooter.value) || 0),
-			marginGutter: Fy(parseFloat(this.marginInputs.marginGutter.value) || 0),
+			marginLeft: Ly(parseFloat(this.marginInputs.marginLeft.value) || 0),
+			marginRight: Ly(parseFloat(this.marginInputs.marginRight.value) || 0),
+			marginTop: Ly(parseFloat(this.marginInputs.marginTop.value) || 0),
+			marginBottom: Ly(parseFloat(this.marginInputs.marginBottom.value) || 0),
+			marginHeader: Ly(parseFloat(this.marginInputs.marginHeader.value) || 0),
+			marginFooter: Ly(parseFloat(this.marginInputs.marginFooter.value) || 0),
+			marginGutter: Ly(parseFloat(this.marginInputs.marginGutter.value) || 0),
 			landscape: e,
 			binding: parseInt(this.bindingRadios.find((e) => e.checked)?.value ?? "0")
-		}, i = jy(r);
+		}, i = Ny(r);
 		if (i) return alert(i), !1;
 		let a = () => this.wasm.setPageDef(this.sectionIdx, r);
-		return Dy({
+		return ky({
 			services: this.services,
 			label: "PageSetupDialog",
 			operationType: "pageSetup",
@@ -45178,16 +45238,16 @@ var Ry = [
 	populateFields() {
 		let e = this.pageDef, t = e.width, n = e.height;
 		e.landscape && ([t, n] = [n, t]);
-		let r = Ry.find(([, t, n]) => Ly(e.width, e.height, t, n));
-		this.paperSelect.value = r ? r[0] : "custom", this.widthInput.value = Py(t).toFixed(1), this.heightInput.value = Py(n).toFixed(1), this.widthInput.disabled = !!r, this.heightInput.disabled = !!r, this.landscapeRadios[+!!e.landscape].checked = !0, this.updateIconRadioState("orient");
+		let r = By.find(([, t, n]) => zy(e.width, e.height, t, n));
+		this.paperSelect.value = r ? r[0] : "custom", this.widthInput.value = Iy(t).toFixed(1), this.heightInput.value = Iy(n).toFixed(1), this.widthInput.disabled = !!r, this.heightInput.disabled = !!r, this.landscapeRadios[+!!e.landscape].checked = !0, this.updateIconRadioState("orient");
 		let i = Math.min(e.binding, 2);
-		this.bindingRadios[i].checked = !0, this.updateIconRadioState("binding"), this.marginInputs.marginTop.value = Py(e.marginTop).toFixed(1), this.marginInputs.marginBottom.value = Py(e.marginBottom).toFixed(1), this.marginInputs.marginLeft.value = Py(e.marginLeft).toFixed(1), this.marginInputs.marginRight.value = Py(e.marginRight).toFixed(1), this.marginInputs.marginHeader.value = Py(e.marginHeader).toFixed(1), this.marginInputs.marginFooter.value = Py(e.marginFooter).toFixed(1), this.marginInputs.marginGutter.value = Py(e.marginGutter).toFixed(1);
+		this.bindingRadios[i].checked = !0, this.updateIconRadioState("binding"), this.marginInputs.marginTop.value = Iy(e.marginTop).toFixed(1), this.marginInputs.marginBottom.value = Iy(e.marginBottom).toFixed(1), this.marginInputs.marginLeft.value = Iy(e.marginLeft).toFixed(1), this.marginInputs.marginRight.value = Iy(e.marginRight).toFixed(1), this.marginInputs.marginHeader.value = Iy(e.marginHeader).toFixed(1), this.marginInputs.marginFooter.value = Iy(e.marginFooter).toFixed(1), this.marginInputs.marginGutter.value = Iy(e.marginGutter).toFixed(1);
 	}
 	onPaperChange() {
-		let e = this.paperSelect.value, t = Ry.find(([t]) => t === e);
+		let e = this.paperSelect.value, t = By.find(([t]) => t === e);
 		if (t) {
 			let [e, n] = this.landscapeRadios[1].checked ? [t[2], t[1]] : [t[1], t[2]];
-			this.widthInput.value = Py(e).toFixed(1), this.heightInput.value = Py(n).toFixed(1), this.widthInput.disabled = !0, this.heightInput.disabled = !0;
+			this.widthInput.value = Iy(e).toFixed(1), this.heightInput.value = Iy(n).toFixed(1), this.widthInput.disabled = !0, this.heightInput.disabled = !0;
 		} else this.widthInput.disabled = !1, this.heightInput.disabled = !1;
 	}
 	onOrientChange() {
@@ -45235,11 +45295,11 @@ var Ry = [
 		let o = document.createElement("input");
 		o.type = "radio", o.name = e, o.value = n, o.className = "icon-radio-input", o.addEventListener("change", () => this.updateIconRadioState(e));
 		let s = document.createElement("span");
-		s.className = "icon-radio-icon", wy(s, r);
+		s.className = "icon-radio-icon", Ey(s, r);
 		let c = document.createElement("span");
 		return c.className = "icon-radio-text", c.textContent = t, a.appendChild(o), a.appendChild(s), a.appendChild(c), i.appendChild(a), o;
 	}
-}, Hy = [
+}, Wy = [
 	{
 		name: "wasm-bindgen",
 		license: "MIT / Apache-2.0"
@@ -45304,7 +45364,7 @@ var Ry = [
 		name: "console_error_panic_hook",
 		license: "MIT / Apache-2.0"
 	}
-], Uy = class extends V {
+], Gy = class extends V {
 	constructor() {
 		super(z("dialog.about.title"), 460);
 	}
@@ -45325,7 +45385,7 @@ var Ry = [
 		o.className = "about-license-title", o.textContent = z("dialog.about.licenseTitle.text"), e.appendChild(o);
 		let s = document.createElement("table");
 		s.className = "about-license-table";
-		for (let e of Hy) {
+		for (let e of Wy) {
 			let t = document.createElement("tr"), n = document.createElement("td");
 			n.textContent = e.name;
 			let r = document.createElement("td");
@@ -45347,7 +45407,7 @@ var Ry = [
 			t.className = "dialog-btn dialog-btn-primary", t.textContent = z("dialog.about.closeBtn.text"), t.addEventListener("click", () => this.hide()), e.appendChild(t);
 		}
 	}
-}, Wy = {
+}, Ky = {
 	hml: {
 		extension: ".hml",
 		mimeType: "application/xml",
@@ -45372,41 +45432,41 @@ var Ry = [
 			accept: { "application/hwp+zip": [".hwpx"] }
 		}
 	}
-}, Gy = /* @__PURE__ */ new WeakSet();
-function Ky(e) {
-	e && Gy.add(e);
-}
-function qy(e) {
-	e && Gy.delete(e);
-}
+}, qy = /* @__PURE__ */ new WeakSet();
 function Jy(e) {
+	e && qy.add(e);
+}
+function Yy(e) {
+	e && qy.delete(e);
+}
+function Xy(e) {
 	let t = e.trim().toLowerCase();
 	return t.endsWith(".hml") ? "hml" : t.endsWith(".hwpx") ? "hwpx" : t.endsWith(".hwp") ? "hwp" : null;
 }
-function Yy(e, t) {
-	let n = Wy[t].extension, r = e.trim() || `document${n}`;
+function Zy(e, t) {
+	let n = Ky[t].extension, r = e.trim() || `document${n}`;
 	return /\.(hwp|hwpx|hml)$/i.test(r) ? r.replace(/\.(hwp|hwpx|hml)$/i, n) : `${r}${n}`;
 }
-function Xy(e, t) {
+function Qy(e, t) {
 	return e.forceSaveAs || e.format === "hml" && !t;
 }
-function Zy(e, t, n) {
-	let r = e === "hml" && n != null && Gy.has(n);
+function $y(e, t, n) {
+	let r = e === "hml" && n != null && qy.has(n);
 	if (e === "hml" && !r) return {
 		format: "hml",
 		forceSaveAs: !0,
-		suggestedName: Yy(t, "hml")
+		suggestedName: Zy(t, "hml")
 	};
-	let i = n?.name ?? t, a = (r ? Jy(i) : null) ?? (e === "hwpx" ? "hwpx" : "hwp");
+	let i = n?.name ?? t, a = (r ? Xy(i) : null) ?? (e === "hwpx" ? "hwpx" : "hwp");
 	return {
 		format: a,
 		forceSaveAs: !1,
-		suggestedName: Yy(t, a)
+		suggestedName: Zy(t, a)
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/save-as-dialog.ts
-var Qy = class extends V {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/save-as-dialog.ts
+var eb = class extends V {
 	format;
 	allowPassword;
 	inheritPassword;
@@ -45449,7 +45509,7 @@ var Qy = class extends V {
 	}
 	confirmValue() {
 		let e = this.input.value.trim();
-		return e ? Yy(e, this.format) : (this.input.focus(), null);
+		return e ? Zy(e, this.format) : (this.input.focus(), null);
 	}
 	onConfirm() {
 		let e = this.confirmValue();
@@ -45472,12 +45532,12 @@ var Qy = class extends V {
 		});
 	}
 };
-function $y(e, t = "hwp", n = {}) {
-	return new Qy(e, t, n.allowPassword === !0, n.inheritPassword === !0).showAsync();
+function tb(e, t = "hwp", n = {}) {
+	return new eb(e, t, n.allowPassword === !0, n.inheritPassword === !0).showAsync();
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/hwp-password-dialog.ts
-var eb = class extends V {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/hwp-password-dialog.ts
+var nb = class extends V {
 	fileName;
 	errorMessage;
 	input;
@@ -45517,10 +45577,10 @@ var eb = class extends V {
 		});
 	}
 };
-function tb(e, t) {
-	return new eb(e, t).showAsync();
+function rb(e, t) {
+	return new nb(e, t).showAsync();
 }
-var nb = class extends V {
+var ib = class extends V {
 	fileName;
 	passwordInput;
 	confirmationInput;
@@ -45565,12 +45625,12 @@ var nb = class extends V {
 		});
 	}
 };
-function rb(e) {
-	return new nb(e).showAsync();
+function ab(e) {
+	return new ib(e).showAsync();
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/unsaved-changes-dialog.ts
-var ib = class extends V {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/unsaved-changes-dialog.ts
+var ob = class extends V {
 	options;
 	resolve;
 	constructor(e) {
@@ -45606,29 +45666,29 @@ var ib = class extends V {
 		});
 	}
 };
-function ab(e) {
-	return new ib(e).showAsync();
+function sb(e) {
+	return new ob(e).showAsync();
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/hml-save-format-message.ts
-var ob = 3;
-function sb(e, t) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/hml-save-format-message.ts
+var cb = 3;
+function lb(e, t) {
 	let n = Ma(e, t);
 	if (n.hmlEnabled) return "HML로 의미를 보존해 저장할 수 있지만 원본 바이트와 동일하지는 않습니다.\n저장할 형식을 선택하세요.";
 	let r = [`${n.diagnostic ?? "HML 저장을 사용할 수 없습니다."}\nHWP 또는 HWPX로 저장할 수 있습니다.`], i = Aa(e)?.saveBlockers ?? [];
-	for (let e of i.slice(0, ob)) r.push(`${e.xmlPath}: ${e.message}`);
-	return i.length > ob && r.push(`그 외 ${i.length - ob}건`), r.join("\n");
+	for (let e of i.slice(0, cb)) r.push(`${e.xmlPath}: ${e.message}`);
+	return i.length > cb && r.push(`그 외 ${i.length - cb}건`), r.join("\n");
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/hml-save-format-dialog.ts
-var cb = class extends V {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/hml-save-format-dialog.ts
+var ub = class extends V {
 	resolve;
 	hmlEnabled;
 	message;
 	constructor(e, t) {
 		super(z("dialog.hmlSaveFormat.title"), 440);
 		let n = Ma(e, t);
-		this.hmlEnabled = n.hmlEnabled, this.message = sb(e, t);
+		this.hmlEnabled = n.hmlEnabled, this.message = lb(e, t);
 	}
 	createBody() {
 		let e = document.createElement("div");
@@ -45658,33 +45718,33 @@ var cb = class extends V {
 		});
 	}
 };
-function lb(e = null, t = !1) {
-	return new cb(e, t).showAsync();
+function db(e = null, t = !1) {
+	return new ub(e, t).showAsync();
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/command/save-document-format.ts
-function ub(e, t) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/command/save-document-format.ts
+function fb(e, t) {
 	return t === "hml" ? {
 		bytes: e.exportHml(),
 		contentLoss: null
 	} : t === "hwpx" ? e.exportHwpxWithReport() : e.exportHwpWithReport();
 }
-function db(e, t, n) {
+function pb(e, t, n) {
 	return t === "hwpx" ? e.exportHwpxWithPasswordAndReport(n) : e.exportHwpWithPasswordAndReport(n);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/command/print-pages.ts
-var fb = "브라우저 인쇄 창에서 ‘대상 → PDF로 저장’을 선택합니다.";
-function pb(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/command/print-pages.ts
+var mb = "브라우저 인쇄 창에서 ‘대상 → PDF로 저장’을 선택합니다.";
+function hb(e) {
 	return e.trim().replace(/\.(hwp|hwpx|hml)$/i, "").trim() || "문서";
 }
-function mb(e, t, n) {
+function gb(e, t, n) {
 	return `${e === "pdf" ? "PDF 준비 중…" : "인쇄 준비 중…"} (${t}/${n})`;
 }
-function hb(e) {
-	return e === "pdf" ? `PDF 준비 완료 — ${fb}` : "인쇄 미리보기 준비 완료";
+function _b(e) {
+	return e === "pdf" ? `PDF 준비 완료 — ${mb}` : "인쇄 미리보기 준비 완료";
 }
-var gb = [
+var vb = [
 	148,
 	182,
 	210,
@@ -45696,38 +45756,38 @@ var gb = [
 	364,
 	420,
 	431.8
-], _b = .05;
-function vb(e) {
-	for (let t of gb) if (Math.abs(e - t) <= _b) return t;
+], yb = .05;
+function bb(e) {
+	for (let t of vb) if (Math.abs(e - t) <= yb) return t;
 	return e;
 }
-function yb(e) {
-	return vb(Math.round(e * 25.4 / 96 * 1e3) / 1e3);
+function xb(e) {
+	return bb(Math.round(e * 25.4 / 96 * 1e3) / 1e3);
 }
-function bb(e) {
+function Sb(e) {
 	return Number.isInteger(e) ? String(e) : e.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
 }
-function xb(e, t, n) {
+function Cb(e, t, n) {
 	return {
 		svg: e,
-		widthMm: yb(t.width),
-		heightMm: yb(t.height),
+		widthMm: xb(t.width),
+		heightMm: xb(t.height),
 		pageName: `rhwp-print-page-${n + 1}`,
 		className: `rhwp-print-page-${n + 1}`
 	};
 }
-function Sb(e) {
+function wb(e) {
 	return e.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
-function Cb(e, t) {
+function Tb(e, t) {
 	let n = e;
 	for (let [e, r] of t) {
-		let t = Sb(e);
+		let t = wb(e);
 		n = n.replace(RegExp(`url\\((['"]?)#${t}\\1\\)`, "g"), () => `url(#${r})`), n === `#${e}` && (n = `#${r}`);
 	}
 	return n;
 }
-function wb(e, t) {
+function Eb(e, t) {
 	let n = [...e.hasAttribute("id") ? [e] : [], ...Array.from(e.querySelectorAll("[id]"))], r = /* @__PURE__ */ new Map();
 	for (let e of n) {
 		let n = e.getAttribute("id");
@@ -45741,17 +45801,17 @@ function wb(e, t) {
 			n && e.setAttribute(t.name, n);
 			continue;
 		}
-		let n = Cb(t.value, r);
+		let n = Tb(t.value, r);
 		n !== t.value && e.setAttribute(t.name, n);
 	}
 }
-function Tb(e) {
+function Db(e) {
 	return `
-${e.map((e) => `@page ${e.pageName} { size: ${bb(e.widthMm)}mm ${bb(e.heightMm)}mm; margin: 0; }`).join("\n")}
+${e.map((e) => `@page ${e.pageName} { size: ${Sb(e.widthMm)}mm ${Sb(e.heightMm)}mm; margin: 0; }`).join("\n")}
 * { margin: 0; padding: 0; }
 body { background: #fff; }
 .page { break-after: page; page-break-after: always; overflow: hidden; }
-${e.map((e) => `.${e.className} { page: ${e.pageName}; width: ${bb(e.widthMm)}mm; height: ${bb(e.heightMm)}mm; }`).join("\n")}
+${e.map((e) => `.${e.className} { page: ${e.pageName}; width: ${Sb(e.widthMm)}mm; height: ${Sb(e.heightMm)}mm; }`).join("\n")}
 .page:last-child { break-after: auto; page-break-after: auto; }
 .page svg { width: 100%; height: 100%; }
 @media screen {
@@ -45798,34 +45858,34 @@ ${e.map((e) => `.${e.className} { page: ${e.pageName}; width: ${bb(e.widthMm)}mm
 @media print { .print-preview-bar { display: none !important; } }
 `;
 }
-function Eb(e, t) {
+function Ob(e, t) {
 	let n = e.createElement("style");
-	n.textContent = Tb(t), e.head.appendChild(n);
+	n.textContent = Db(t), e.head.appendChild(n);
 }
-function Db(e, t, n) {
+function kb(e, t, n) {
 	let r = e.createElement("div");
 	r.className = `page ${n.className}`;
 	let i = new DOMParser().parseFromString(n.svg, "image/svg+xml"), a = i.querySelector("parsererror");
 	if (a) throw Error(`인쇄용 SVG 파싱 실패: ${a.textContent || "parsererror"}`);
-	wb(i.documentElement, n.pageName), r.appendChild(e.importNode(i.documentElement, !0)), t.appendChild(r);
+	Eb(i.documentElement, n.pageName), r.appendChild(e.importNode(i.documentElement, !0)), t.appendChild(r);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/command/print-surface.ts
-var Ob = "print.html", kb = 1e4, Ab = "rhwp-print-surface", jb = class extends Error {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/command/print-surface.ts
+var Ab = "print.html", jb = 1e4, Mb = "rhwp-print-surface", Nb = class extends Error {
 	constructor() {
 		super("인쇄 미리보기 팝업이 차단되었습니다."), this.name = "PrintPreviewBlockedError";
 	}
 };
-function Mb(e, t = Ob) {
+function Pb(e, t = Ab) {
 	return new URL(t, e).href;
 }
-async function Nb(e = {}) {
+async function Fb(e = {}) {
 	let t = e.hostDocument ?? document, n = t.defaultView;
 	if (!n || !t.body) throw Error("인쇄 surface를 만들 수 없습니다.");
-	t.getElementById(Ab)?.remove();
+	t.getElementById(Mb)?.remove();
 	let r = t.createElement("iframe");
-	r.id = Ab, r.title = "인쇄 문서", r.setAttribute("aria-hidden", "true"), r.style.position = "fixed", r.style.inset = "0", r.style.width = "100vw", r.style.height = "100vh", r.style.border = "0", r.style.opacity = "0", r.style.pointerEvents = "none", r.style.zIndex = "-1";
-	let i = Mb(t.baseURI, e.surfacePath ?? Ob), a = e.timeoutMs ?? kb;
+	r.id = Mb, r.title = "인쇄 문서", r.setAttribute("aria-hidden", "true"), r.style.position = "fixed", r.style.inset = "0", r.style.width = "100vw", r.style.height = "100vh", r.style.border = "0", r.style.opacity = "0", r.style.pointerEvents = "none", r.style.zIndex = "-1";
+	let i = Pb(t.baseURI, e.surfacePath ?? Ab), a = e.timeoutMs ?? jb;
 	await new Promise((e, o) => {
 		let s = !1, c = (t) => {
 			s || (s = !0, n.clearTimeout(d), r.removeEventListener("load", l), r.removeEventListener("error", u), t ? o(t) : e());
@@ -45847,8 +45907,8 @@ async function Nb(e = {}) {
 		}
 	};
 }
-function Pb(e = {}) {
-	let t = e.hostWindow ?? window, n = Mb(t.document.baseURI, e.surfacePath ?? Ob), r = e.timeoutMs ?? kb, i = t.open(n, "_blank");
+function Ib(e = {}) {
+	let t = e.hostWindow ?? window, n = Pb(t.document.baseURI, e.surfacePath ?? Ab), r = e.timeoutMs ?? jb, i = t.open(n, "_blank");
 	return i ? new Promise((e, a) => {
 		let o = !1, s = (n) => {
 			if (!o) {
@@ -45872,18 +45932,18 @@ function Pb(e = {}) {
 			}
 		}, c = () => s(), l = t.setTimeout(() => s(/* @__PURE__ */ Error("인쇄 미리보기 준비 시간이 초과되었습니다.")), r);
 		i.addEventListener("load", c), i.location.href === n && i.document.readyState === "complete" && t.queueMicrotask(c);
-	}) : Promise.reject(new jb());
+	}) : Promise.reject(new Nb());
 }
-function Fb(e) {
+function Lb(e) {
 	return new Promise((t) => {
 		e.requestAnimationFrame(() => t());
 	});
 }
-async function Ib(e) {
+async function Rb(e) {
 	let t = e.document.fonts;
-	t && await t.ready, await Fb(e.window), await Fb(e.window), e.document.documentElement.getBoundingClientRect();
+	t && await t.ready, await Lb(e.window), await Lb(e.window), e.document.documentElement.getBoundingClientRect();
 }
-var Lb = [{
+var zb = [{
 	description: "HWP/HWPX/HML 문서",
 	accept: {
 		"application/x-hwp": [".hwp"],
@@ -45892,52 +45952,52 @@ var Lb = [{
 		"text/xml": [".hml"]
 	}
 }];
-function Rb(e) {
-	return [Wy[e].pickerType];
-}
-function zb(e) {
-	return e instanceof DOMException && e.name === "AbortError";
-}
 function Bb(e) {
-	return /\.(hwp|hwpx|hml)$/i.test(e.trim());
+	return [Ky[e].pickerType];
 }
 function Vb(e) {
+	return e instanceof DOMException && e.name === "AbortError";
+}
+function Hb(e) {
+	return /\.(hwp|hwpx|hml)$/i.test(e.trim());
+}
+function Ub(e) {
 	return typeof e.showOpenFilePicker == "function";
 }
-async function Hb(e, t) {
+async function Wb(e, t) {
 	let n = await e.createWritable();
 	await n.write(t), await n.close();
 }
-function Ub(e) {
-	return Wy[e].extension;
+function Gb(e) {
+	return Ky[e].extension;
 }
-async function Wb(e, t, n) {
+async function Kb(e, t, n) {
 	if (n && (e === n || await e.isSameEntry?.(n) === !0)) throw Error("HML 원본 파일은 저장 대상으로 선택할 수 없습니다.");
 	if (!e.name.toLowerCase().endsWith(t)) throw Error(`${t} 확장자를 가진 파일을 선택해야 합니다.`);
 }
-async function Gb(e) {
-	if (!Vb(e)) return null;
+async function qb(e) {
+	if (!Ub(e)) return null;
 	try {
 		return (await e.showOpenFilePicker({
 			excludeAcceptAllOption: !0,
 			multiple: !1,
-			types: Lb
+			types: zb
 		}))[0] ?? null;
 	} catch (e) {
-		if (zb(e)) return null;
+		if (Vb(e)) return null;
 		throw e;
 	}
 }
-async function Kb(e) {
+async function Jb(e) {
 	let t = await e.getFile();
 	return {
 		name: t.name,
 		bytes: new Uint8Array(await t.arrayBuffer())
 	};
 }
-async function qb(e) {
-	let { blob: t, suggestedName: n, currentHandle: r, windowLike: i, forceSaveAs: a, saveFormat: o } = e, s = Rb(o);
-	if (r && !a) return await Wb(r, Ub(o), null), await Hb(r, t), {
+async function Yb(e) {
+	let { blob: t, suggestedName: n, currentHandle: r, windowLike: i, forceSaveAs: a, saveFormat: o } = e, s = Bb(o);
+	if (r && !a) return await Kb(r, Gb(o), null), await Wb(r, t), {
 		method: "current-handle",
 		handle: r,
 		fileName: r.name
@@ -45948,7 +46008,7 @@ async function qb(e) {
 			suggestedName: n,
 			types: s
 		});
-		return await Wb(e, Ub(o), a ? r : null), await Hb(e, t), {
+		return await Kb(e, Gb(o), a ? r : null), await Wb(e, t), {
 			method: "save-picker",
 			handle: e,
 			fileName: e.name
@@ -45961,12 +46021,12 @@ async function qb(e) {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/command/file-open-picker.ts
-async function Jb(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/command/file-open-picker.ts
+async function Xb(e) {
 	if (!await e.canReplace()) return;
-	let t = Vb(e.windowLike), n = null;
+	let t = Ub(e.windowLike), n = null;
 	if (t) try {
-		n = await Gb(e.windowLike);
+		n = await qb(e.windowLike);
 	} catch (n) {
 		e.warn("[file:open] File System Access API 실패, 폴백:", n), t = !1;
 	}
@@ -45977,7 +46037,7 @@ async function Jb(e) {
 		return;
 	}
 	try {
-		let { bytes: t, name: r } = await Kb(n);
+		let { bytes: t, name: r } = await Jb(n);
 		e.emitOpenDocument({
 			bytes: t,
 			fileName: r,
@@ -45990,8 +46050,8 @@ async function Jb(e) {
 	}
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/pdf-print-dialog.ts
-var Yb = class extends V {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/pdf-print-dialog.ts
+var Zb = class extends V {
 	pageCount;
 	showGuidance;
 	state = "confirm";
@@ -46017,7 +46077,7 @@ var Yb = class extends V {
 		let r = document.createElement("strong");
 		r.textContent = z("dialog.pdfPrint.guidanceTitle.text");
 		let i = document.createElement("span");
-		i.textContent = z("dialog.pdfPrint.guidanceText.text", { p1: fb }), n.append(r, i);
+		i.textContent = z("dialog.pdfPrint.guidanceText.text", { p1: mb }), n.append(r, i);
 		let a = document.createElement("p");
 		a.className = "dialog-pdf-note", a.textContent = z("dialog.pdfPrint.stateNote.text");
 		let o = document.createElement("div");
@@ -46053,7 +46113,7 @@ var Yb = class extends V {
 		});
 	}
 	updateProgress(e) {
-		let t = Math.max(0, Math.min(e, this.pageCount)), n = mb("pdf", t, this.pageCount);
+		let t = Math.max(0, Math.min(e, this.pageCount)), n = gb("pdf", t, this.pageCount);
 		this.progressMessage.textContent = n, this.progressTrack.setAttribute("aria-valuenow", String(t));
 		let r = this.pageCount > 0 ? t / this.pageCount * 100 : 0;
 		this.progressBar.style.width = `${r}%`;
@@ -46066,24 +46126,24 @@ var Yb = class extends V {
 		let t = this.dialog.querySelector(".dialog-pdf-progress");
 		t && (t.hidden = !0), this.errorMessage.hidden = !1, this.errorMessage.textContent = z("dialog.pdfPrint.errorMessage.text", { p1: e }), this.confirmButton && (this.confirmButton.hidden = !0), this.cancelButton && (this.cancelButton.textContent = z("dialog.pdfPrint.cancelButton.text"), this.cancelButton.disabled = !1, this.cancelButton.focus()), this.closeButton && (this.closeButton.hidden = !1);
 	}
-}, Xb = "rhwpStudioRecent", Zb = 1, Qb = "recent", $b = 20, ex = /* @__PURE__ */ new Map();
-function tx() {
+}, Qb = "rhwpStudioRecent", $b = 1, ex = "recent", tx = 20, nx = /* @__PURE__ */ new Map();
+function rx() {
 	return typeof indexedDB < "u";
 }
-function nx() {
+function ix() {
 	return globalThis.crypto?.randomUUID?.() ?? `recent_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 }
-function rx() {
-	return tx() ? new Promise((e) => {
-		let t = indexedDB.open(Xb, Zb);
+function ax() {
+	return rx() ? new Promise((e) => {
+		let t = indexedDB.open(Qb, $b);
 		t.onerror = () => e(null), t.onsuccess = () => e(t.result), t.onupgradeneeded = () => {
 			let e = t.result;
-			e.objectStoreNames.contains(Qb) || e.createObjectStore(Qb, { keyPath: "id" });
+			e.objectStoreNames.contains(ex) || e.createObjectStore(ex, { keyPath: "id" });
 		};
 	}) : Promise.resolve(null);
 }
-async function ix(e, t) {
-	let n = await rx();
+async function ox(e, t) {
+	let n = await ax();
 	if (!n) return t();
 	try {
 		return await e(n);
@@ -46091,79 +46151,79 @@ async function ix(e, t) {
 		n.close();
 	}
 }
-function ax(e) {
+function sx(e) {
 	return new Promise((t, n) => {
-		let r = e.transaction(Qb, "readonly").objectStore(Qb).getAll();
+		let r = e.transaction(ex, "readonly").objectStore(ex).getAll();
 		r.onsuccess = () => t(r.result ?? []), r.onerror = () => n(r.error);
 	});
 }
-function ox(e, t) {
+function cx(e, t) {
 	return new Promise((n, r) => {
-		let i = e.transaction(Qb, "readwrite");
-		i.objectStore(Qb).put(t), i.oncomplete = () => n(), i.onerror = () => r(i.error);
+		let i = e.transaction(ex, "readwrite");
+		i.objectStore(ex).put(t), i.oncomplete = () => n(), i.onerror = () => r(i.error);
 	});
 }
-function sx(e, t) {
+function lx(e, t) {
 	return new Promise((n, r) => {
-		let i = e.transaction(Qb, "readwrite");
-		i.objectStore(Qb).delete(t), i.oncomplete = () => n(), i.onerror = () => r(i.error);
+		let i = e.transaction(ex, "readwrite");
+		i.objectStore(ex).delete(t), i.oncomplete = () => n(), i.onerror = () => r(i.error);
 	});
 }
-async function cx(e, t) {
+async function ux(e, t) {
 	let n = e.handle, r = t.handle;
 	if (n && r && typeof n.isSameEntry == "function") try {
 		return await n.isSameEntry(r);
 	} catch {}
 	return e.fileName === t.fileName;
 }
-function lx(e) {
-	return e.sort((e, t) => t.openedAt - e.openedAt).slice(0, $b);
+function dx(e) {
+	return e.sort((e, t) => t.openedAt - e.openedAt).slice(0, tx);
 }
-async function ux(e) {
+async function fx(e) {
 	let t = {
-		id: nx(),
+		id: ix(),
 		fileName: e.fileName,
 		sourceFormat: e.sourceFormat,
 		openedAt: Date.now(),
 		...e.handle ? { handle: e.handle } : {}
 	};
-	await ix(async (n) => {
-		let r = await ax(n);
-		for (let t of r) await cx(e, t) && await sx(n, t.id);
+	await ox(async (n) => {
+		let r = await sx(n);
+		for (let t of r) await ux(e, t) && await lx(n, t.id);
 		try {
-			await ox(n, t);
+			await cx(n, t);
 		} catch {
 			try {
 				let { handle: e, ...r } = t;
-				await ox(n, r);
+				await cx(n, r);
 			} catch {
 				return;
 			}
 		}
-		let i = lx(await ax(n)), a = new Set(i.map((e) => e.id));
-		for (let e of await ax(n)) a.has(e.id) || await sx(n, e.id);
+		let i = dx(await sx(n)), a = new Set(i.map((e) => e.id));
+		for (let e of await sx(n)) a.has(e.id) || await lx(n, e.id);
 	}, async () => {
-		for (let [t, n] of ex) await cx(e, n) && ex.delete(t);
-		ex.set(t.id, t);
-		let n = new Set(lx([...ex.values()]).map((e) => e.id));
-		for (let e of [...ex.keys()]) n.has(e) || ex.delete(e);
+		for (let [t, n] of nx) await ux(e, n) && nx.delete(t);
+		nx.set(t.id, t);
+		let n = new Set(dx([...nx.values()]).map((e) => e.id));
+		for (let e of [...nx.keys()]) n.has(e) || nx.delete(e);
 	});
 }
-async function dx() {
-	return ix(async (e) => lx(await ax(e)), async () => lx([...ex.values()]));
-}
-async function fx(e) {
-	ex.delete(e), await ix(async (t) => sx(t, e), async () => {});
-}
 async function px() {
-	ex.clear(), await ix(async (e) => new Promise((t, n) => {
-		let r = e.transaction(Qb, "readwrite");
-		r.objectStore(Qb).clear(), r.oncomplete = () => t(), r.onerror = () => n(r.error);
+	return ox(async (e) => dx(await sx(e)), async () => dx([...nx.values()]));
+}
+async function mx(e) {
+	nx.delete(e), await ox(async (t) => lx(t, e), async () => {});
+}
+async function hx() {
+	nx.clear(), await ox(async (e) => new Promise((t, n) => {
+		let r = e.transaction(ex, "readwrite");
+		r.objectStore(ex).clear(), r.oncomplete = () => t(), r.onerror = () => n(r.error);
 	}), async () => {});
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/recent/recent-open.ts
-async function mx(e, t) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/recent/recent-open.ts
+async function gx(e, t) {
 	if (!e.handle) return t.toast(`"${e.fileName}"은(는) 핸들 없이 열려 자동 재열기가 불가합니다. 파일을 다시 선택하세요.`, 4e3), t.requestReopen?.(), "needs-pick";
 	let n = e.handle, r = !1;
 	try {
@@ -46184,10 +46244,10 @@ async function mx(e, t) {
 	}
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/command/commands/file.ts
-async function hx(e) {
-	await Jb({
-		canReplace: () => Ix(e),
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/command/commands/file.ts
+async function _x(e) {
+	await Xb({
+		canReplace: () => Rx(e),
 		windowLike: window,
 		findFileInput: () => document.getElementById("file-input"),
 		emitOpenDocument: (t) => e.eventBus.emit("open-document-bytes", t),
@@ -46195,37 +46255,37 @@ async function hx(e) {
 		alert: (e) => alert(e)
 	});
 }
-async function gx(e) {
+async function vx(e) {
 	try {
 		return typeof e.queryPermission == "function" && await e.queryPermission({ mode: "read" }) === "granted" || typeof e.requestPermission != "function" || await e.requestPermission({ mode: "read" }) === "granted";
 	} catch {
 		return !1;
 	}
 }
-function _x(e) {
+function yx(e) {
 	return e instanceof DOMException && (e.name === "AbortError" || e.name === "NotAllowedError");
 }
-function vx(e, t) {
-	return Yy(e, t).replace(/\.(hwp|hwpx|hml)$/i, "");
+function bx(e, t) {
+	return Zy(e, t).replace(/\.(hwp|hwpx|hml)$/i, "");
 }
-function yx(e, t) {
+function xx(e, t) {
 	let n = e.getInputHandler();
 	if (n && (n.flushDeferredPaginationIfNeeded(t), n.hasDeferredPaginationPending())) throw Error(`출력 전 페이지네이션을 완료하지 못했습니다 (${t})`);
 }
-async function bx(e) {
+async function Sx(e) {
 	let t = e.wasm.getSourceFormat();
 	if (t !== "hml") return t === "hwpx" ? "hwpx" : "hwp";
-	let n = Tx(e);
-	return lb(n.metadata, n.exporterAvailable);
+	let n = Dx(e);
+	return db(n.metadata, n.exporterAvailable);
 }
-function xx(e, t, n) {
-	let r = n === void 0 ? ub(e.wasm, t) : db(e.wasm, Cx(t), n);
+function Cx(e, t, n) {
+	let r = n === void 0 ? fb(e.wasm, t) : pb(e.wasm, Tx(t), n);
 	return {
-		blob: new Blob([r.bytes], { type: Wy[t].mimeType }),
+		blob: new Blob([r.bytes], { type: Ky[t].mimeType }),
 		contentLoss: r.contentLoss
 	};
 }
-function Sx(e) {
+function wx(e) {
 	let t = qa(e);
 	t && H({
 		message: t,
@@ -46233,20 +46293,20 @@ function Sx(e) {
 		confirmLabel: z("command.file.showExportContentLoss.message")
 	});
 }
-function Cx(e) {
+function Tx(e) {
 	if (e === "hml") throw Error("암호 설정 저장은 HWP 또는 HWPX 형식에서만 지원합니다.");
 	return e;
 }
-function wx(e) {
-	let t = Tx(e);
+function Ex(e) {
+	let t = Dx(e);
 	return Ma(t.metadata, t.exporterAvailable).hmlEnabled;
 }
-function Tx(e) {
+function Dx(e) {
 	return ja(() => e.wasm.getHmlOpenMetadata(), () => e.wasm.hasHmlExportCapability());
 }
-async function Ex(e, t, n, r, i, a) {
+async function Ox(e, t, n, r, i, a) {
 	try {
-		return await qb({
+		return await Yb({
 			blob: n,
 			suggestedName: r,
 			currentHandle: a,
@@ -46255,25 +46315,25 @@ async function Ex(e, t, n, r, i, a) {
 			saveFormat: t
 		});
 	} catch (e) {
-		return _x(e) ? "cancelled" : (console.warn("[file:save] File System Access API 실패, 폴백:", e), {
+		return yx(e) ? "cancelled" : (console.warn("[file:save] File System Access API 실패, 폴백:", e), {
 			method: "fallback",
 			handle: null,
 			fileName: r
 		});
 	}
 }
-function Dx(e, t, n, r, i, a = !1) {
-	t === "hml" && Ky(r.handle), e.wasm.currentFileHandle = r.handle, e.wasm.fileName = r.fileName, ux({
+function kx(e, t, n, r, i, a = !1) {
+	t === "hml" && Jy(r.handle), e.wasm.currentFileHandle = r.handle, e.wasm.fileName = r.fileName, fx({
 		fileName: r.fileName,
 		sourceFormat: n,
 		handle: r.handle
 	}).catch(() => void 0), e.refreshDocumentStatus(), e.wasm.requiresPasswordForSave = a, e.documentState.markClean(i);
 }
-function Ox(e, t) {
-	let n = hy[t].label;
+function Ax(e, t) {
+	let n = _y[t].label;
 	try {
-		let n = Sy(e.wasm, t, e.wasm.fileName);
-		kx(new Blob([n.content], { type: n.mimeType }), n.fileName);
+		let n = wy(e.wasm, t, e.wasm.fileName);
+		jx(new Blob([n.content], { type: n.mimeType }), n.fileName);
 	} catch (e) {
 		let t = e instanceof Error ? e.message : String(e);
 		alert(z("command.file.exportHtmlBasedFile.message", {
@@ -46282,7 +46342,7 @@ function Ox(e, t) {
 		}));
 	}
 }
-function kx(e, t) {
+function jx(e, t) {
 	let n = URL.createObjectURL(e), r = document.createElement("a");
 	r.href = n, r.download = t;
 	try {
@@ -46291,11 +46351,11 @@ function kx(e, t) {
 		setTimeout(() => URL.revokeObjectURL(n), 1e3);
 	}
 }
-async function Ax(e, t) {
-	return (await $y(vx(e, t), t, { allowPassword: !1 }))?.fileName ?? null;
+async function Mx(e, t) {
+	return (await tb(bx(e, t), t, { allowPassword: !1 }))?.fileName ?? null;
 }
-async function jx(e, t) {
-	let n = e.wasm.requiresPasswordForSave, r = t !== "hml", i = await $y(vx(e.wasm.fileName, t), t, {
+async function Nx(e, t) {
+	let n = e.wasm.requiresPasswordForSave, r = t !== "hml", i = await tb(bx(e.wasm.fileName, t), t, {
 		allowPassword: r,
 		inheritPassword: n && r
 	});
@@ -46308,95 +46368,95 @@ async function jx(e, t) {
 		fileName: i.fileName,
 		password: null
 	};
-	let a = await rb(i.fileName);
+	let a = await ab(i.fileName);
 	return a === null ? null : {
 		fileName: i.fileName,
 		password: a
 	};
 }
-async function Mx(e, t) {
+async function Px(e, t) {
 	let n = null;
 	try {
-		let r = e.wasm.getSourceFormat(), i = await jx(e, t);
+		let r = e.wasm.getSourceFormat(), i = await Nx(e, t);
 		if (i === null) return;
-		n = i.password, yx(e, "save-as");
-		let a = i.fileName, o = xx(e, t, n ?? void 0), s = r === "hml" ? e.wasm.currentFileHandle : null, c = await Ya(o.contentLoss, () => Ex(e, t, o.blob, a, !0, s), (e) => e !== "cancelled" && e.method !== "fallback", (i) => Dx(e, r, t, i, "save-as", n !== null), Sx);
+		n = i.password, xx(e, "save-as");
+		let a = i.fileName, o = Cx(e, t, n ?? void 0), s = r === "hml" ? e.wasm.currentFileHandle : null, c = await Ya(o.contentLoss, () => Ox(e, t, o.blob, a, !0, s), (e) => e !== "cancelled" && e.method !== "fallback", (i) => kx(e, r, t, i, "save-as", n !== null), wx);
 		if (c === "cancelled" || c.method !== "fallback") return;
-		let l = await Ax(a, t);
+		let l = await Mx(a, t);
 		if (!l) return;
-		Xa(o.contentLoss, () => kx(o.blob, l), () => {
-			e.wasm.fileName = l, ux({
+		Xa(o.contentLoss, () => jx(o.blob, l), () => {
+			e.wasm.fileName = l, fx({
 				fileName: l,
 				sourceFormat: t,
 				handle: null
 			}).catch(() => void 0), e.refreshDocumentStatus(), e.wasm.requiresPasswordForSave = n !== null, e.documentState.markClean("save-as");
-		}, Sx);
+		}, wx);
 	} catch (e) {
-		Nx("file:save-as", e);
+		Fx("file:save-as", e);
 	} finally {
 		n = "";
 	}
 }
-function Nx(e, t) {
+function Fx(e, t) {
 	let n = t instanceof Error ? t.message : String(t);
 	console.error(`[${e}] 저장 실패:`, n), alert(z("command.file.reportSaveError.message", { p1: n }));
 }
-async function Px(e) {
+async function Ix(e) {
 	let t = null;
 	try {
-		yx(e, "save");
-		let n = e.wasm.getSourceFormat(), r = Zy(n, e.wasm.fileName, e.wasm.currentFileHandle), i = r.format !== "hml" || wx(e);
-		if (Xy(r, i)) {
-			let t = await bx(e);
+		xx(e, "save");
+		let n = e.wasm.getSourceFormat(), r = $y(n, e.wasm.fileName, e.wasm.currentFileHandle), i = r.format !== "hml" || Ex(e);
+		if (Qy(r, i)) {
+			let t = await Sx(e);
 			if (t === null) return "cancelled";
 			r = {
 				...r,
 				format: t,
 				forceSaveAs: r.forceSaveAs || t !== r.format,
-				suggestedName: Yy(e.wasm.fileName, t)
+				suggestedName: Zy(e.wasm.fileName, t)
 			};
 		}
 		if (e.wasm.requiresPasswordForSave) {
-			let n = Cx(r.format);
-			if (t = await rb(Yy(e.wasm.fileName, n)), t === null) return "cancelled";
+			let n = Tx(r.format);
+			if (t = await ab(Zy(e.wasm.fileName, n)), t === null) return "cancelled";
 		}
-		let a = xx(e, r.format, t ?? void 0), o = await Ya(a.contentLoss, () => Ex(e, r.format, a.blob, r.suggestedName, r.forceSaveAs, e.wasm.currentFileHandle), (e) => e !== "cancelled" && e.method !== "fallback", (i) => Dx(e, n, r.format, i, "save", t !== null), Sx);
+		let a = Cx(e, r.format, t ?? void 0), o = await Ya(a.contentLoss, () => Ox(e, r.format, a.blob, r.suggestedName, r.forceSaveAs, e.wasm.currentFileHandle), (e) => e !== "cancelled" && e.method !== "fallback", (i) => kx(e, n, r.format, i, "save", t !== null), wx);
 		if (o === "cancelled") return "cancelled";
 		if (o.method !== "fallback") return "saved";
-		let s = await Fx(e, r);
-		return s ? (Xa(a.contentLoss, () => kx(a.blob, s), () => {
+		let s = await Lx(e, r);
+		return s ? (Xa(a.contentLoss, () => jx(a.blob, s), () => {
 			e.wasm.requiresPasswordForSave = t !== null, e.documentState.markClean("save");
-		}, Sx), "saved") : "cancelled";
+		}, wx), "saved") : "cancelled";
 	} catch (e) {
-		return Nx("file:save", e), "failed";
+		return Fx("file:save", e), "failed";
 	} finally {
 		t = "";
 	}
 }
-async function Fx(e, t) {
+async function Lx(e, t) {
 	if (!e.wasm.isNewDocument && !t.forceSaveAs) return t.suggestedName;
-	let n = await Ax(t.suggestedName, t.format);
+	let n = await Mx(t.suggestedName, t.format);
 	return n ? (e.wasm.fileName = n, t.forceSaveAs && (e.wasm.currentFileHandle = null), n) : null;
 }
-async function Ix(e, t = {}) {
+async function Rx(e, t = {}) {
 	let n = e.getContext();
 	if (!n.hasDocument || !n.isDirty) return !0;
-	let r = t.allowLocalSave !== !1, i = await ab({
+	let r = t.allowLocalSave !== !1, i = await sb({
 		fileName: e.wasm.fileName,
 		canSave: r,
 		...r ? {} : { saveUnavailableReason: "저장은 호스트 애플리케이션이 담당합니다." }
 	});
-	return i === "cancel" ? !1 : i === "discard" ? !0 : r ? await Px(e) === "saved" : !1;
+	return i === "cancel" ? !1 : i === "discard" ? !0 : r ? await Ix(e) === "saved" : !1;
 }
-function Lx(e, t, n, r = null) {
+function zx(e, t, n, r = null) {
 	e.documentElement.lang = "ko", e.head.replaceChildren();
 	let i = e.createElement("meta");
 	i.setAttribute("charset", "UTF-8");
 	let a = e.createElement("meta");
-	a.name = "viewport", a.content = "width=device-width, initial-scale=1.0", e.head.append(i, a), e.title = r ? z("command.file.doc.tooltip", { p1: t }) : pb(t), Eb(e, n), e.body.replaceChildren(), e.body.className = r ? "rhwp-print-preview" : "", r && Rx(e, r, t, n.length);
-	for (let t of n) Db(e, e.body, t);
+	a.name = "viewport", a.content = "width=device-width, initial-scale=1.0", e.head.append(i, a), e.title = r ? z("command.file.doc.tooltip", { p1: t }) : hb(t), Ob(e, n), e.body.replaceChildren(), e.body.className = r ? "rhwp-print-preview" : "", r && Bx(e, r, t, n.length);
+	for (let t of n) kb(e, e.body, t);
 }
-function Rx(e, t, n, r) {
+function Bx(e, t, n, r) {
 	let i = e.createElement("div");
 	i.className = "print-preview-bar", i.setAttribute("role", "toolbar"), i.setAttribute("aria-label", z("command.file.appendPrintPreviewBar.label"));
 	let a = e.createElement("button");
@@ -46409,19 +46469,19 @@ function Rx(e, t, n, r) {
 		p2: r
 	}), i.append(a, o, s), e.body.appendChild(i);
 }
-function zx() {
+function Vx() {
 	return new Promise((e) => {
 		window.requestAnimationFrame(() => e());
 	});
 }
-async function Bx() {
-	await zx(), await zx();
+async function Hx() {
+	await Vx(), await Vx();
 }
-function Vx(e, t) {
+function Ux(e, t) {
 	let n = e.document.getElementById("print-loading-message");
 	n && (n.textContent = t);
 }
-async function Hx(e, t, n) {
+async function Wx(e, t, n) {
 	let r = e.wasm, i = r.withPortableMetrics(() => Array.from({ length: r.pageCount }, (e, t) => ({
 		svg: r.renderPageSvgWithProfile(t, "print"),
 		info: r.getPageInfo(t)
@@ -46429,25 +46489,25 @@ async function Hx(e, t, n) {
 	for (let e = 0; e < a; e++) {
 		n(e + 1, a);
 		let { svg: t, info: r } = i[e];
-		o.push(xb(t, r, e)), e % 5 == 0 && await new Promise((e) => setTimeout(e, 0));
+		o.push(Cb(t, r, e)), e % 5 == 0 && await new Promise((e) => setTimeout(e, 0));
 	}
 	return o;
 }
-var Ux = !1;
-function Wx() {
-	return Ux ? (H({
+var Gx = !1;
+function Kx() {
+	return Gx ? (H({
 		message: z("command.file.beginPrintJob.message"),
 		durationMs: 2500
-	}), !1) : (Ux = !0, !0);
+	}), !1) : (Gx = !0, !0);
 }
-async function Gx(e) {
-	if (!Wx()) return;
+async function qx(e) {
+	if (!Kx()) return;
 	let t = e.wasm, n = document.getElementById("sb-message"), r = n?.textContent || "", i = null, a = null, o = !0, s = !1, c = null;
 	try {
-		yx(e, "print-pdf");
+		xx(e, "print-pdf");
 		let r = t.pageCount;
 		if (r === 0) return;
-		i = new Yb(r, R.getShowPdfPrintGuidance()), s = !0;
+		i = new Zb(r, R.getShowPdfPrintGuidance()), s = !0;
 		let o = await i.showAsync();
 		if (!o.confirmed) return;
 		if (o.hideFutureGuidance) try {
@@ -46455,12 +46515,12 @@ async function Gx(e) {
 		} catch (e) {
 			console.warn("[file:print-to-pdf] 안내 표시 설정을 저장하지 못했습니다:", e);
 		}
-		let l = mb("pdf", 0, r);
-		n && (n.textContent = l), i.updateProgress(0), await Bx(), a = await Nb();
-		let u = await Hx(e, "pdf", (e, t) => {
-			n && (n.textContent = mb("pdf", e, t)), i?.updateProgress(e);
+		let l = gb("pdf", 0, r);
+		n && (n.textContent = l), i.updateProgress(0), await Hx(), a = await Fb();
+		let u = await Wx(e, "pdf", (e, t) => {
+			n && (n.textContent = gb("pdf", e, t)), i?.updateProgress(e);
 		});
-		Lx(a.document, t.fileName, u), await Ib(a), n && (n.textContent = hb("pdf")), i.closeBeforePrint(), s = !1, await Bx(), console.info(`[file:print-to-pdf] 브라우저 인쇄 호출 (surface=iframe, pages=${r}, profile=print)`), c = document.title, document.title = pb(t.fileName), a.window.print();
+		zx(a.document, t.fileName, u), await Rb(a), n && (n.textContent = _b("pdf")), i.closeBeforePrint(), s = !1, await Hx(), console.info(`[file:print-to-pdf] 브라우저 인쇄 호출 (surface=iframe, pages=${r}, profile=print)`), c = document.title, document.title = hb(t.fileName), a.window.print();
 	} catch (e) {
 		o = !1;
 		let t = e instanceof Error ? e.message : String(e);
@@ -46469,36 +46529,36 @@ async function Gx(e) {
 			durationMs: 5e3
 		});
 	} finally {
-		c !== null && (document.title = c), a?.dispose(), Ux = !1, o && n && (n.textContent = r);
+		c !== null && (document.title = c), a?.dispose(), Gx = !1, o && n && (n.textContent = r);
 	}
 }
-async function Kx(e) {
-	if (!Wx()) return;
+async function Jx(e) {
+	if (!Kx()) return;
 	let t = e.wasm, n = document.getElementById("sb-message"), r = n?.textContent || "", i = null, a = !1, o = !0;
 	try {
-		yx(e, "print");
+		xx(e, "print");
 		let r = t.pageCount;
 		if (r === 0) return;
-		let o = Pb(), s = mb("print", 0, r);
+		let o = Ib(), s = gb("print", 0, r);
 		if (n && (n.textContent = s), i = await o, !i) return;
-		Vx(i, s);
-		let c = await Hx(e, "print", (e, t) => {
-			let r = mb("print", e, t);
-			n && (n.textContent = r), i && Vx(i, r);
+		Ux(i, s);
+		let c = await Wx(e, "print", (e, t) => {
+			let r = gb("print", e, t);
+			n && (n.textContent = r), i && Ux(i, r);
 		});
-		Lx(i.document, t.fileName, c, i.window), await Ib(i), n && (n.textContent = hb("print")), a = !0, console.info(`[file:print] 인쇄 미리보기 준비 완료 (surface=window, pages=${r}, profile=print)`);
+		zx(i.document, t.fileName, c, i.window), await Rb(i), n && (n.textContent = _b("print")), a = !0, console.info(`[file:print] 인쇄 미리보기 준비 완료 (surface=window, pages=${r}, profile=print)`);
 	} catch (e) {
 		o = !1;
 		let t = e instanceof Error ? e.message : String(e);
-		console.error("[file:print]", t), n && (n.textContent = z("command.file.statusEl.text.x2f5125", { p1: t })), e instanceof jb ? alert(z("command.file.runPrintPreview.message")) : H({
+		console.error("[file:print]", t), n && (n.textContent = z("command.file.statusEl.text.x2f5125", { p1: t })), e instanceof Nb ? alert(z("command.file.runPrintPreview.message")) : H({
 			message: z("command.file.runPrintPreview.message.xc4753b", { p1: t }),
 			durationMs: 5e3
 		});
 	} finally {
-		a || i?.close(), Ux = !1, o && n && (n.textContent = r);
+		a || i?.close(), Gx = !1, o && n && (n.textContent = r);
 	}
 }
-var qx = [
+var Yx = [
 	{
 		id: "file:new-doc",
 		label: z("command.file.newDoc.label"),
@@ -46512,7 +46572,7 @@ var qx = [
 	{
 		id: "file:open",
 		label: z("command.file.open.label"),
-		execute: hx
+		execute: _x
 	},
 	{
 		id: "file:open-recent",
@@ -46520,7 +46580,7 @@ var qx = [
 		async execute(e, t) {
 			let n = typeof t?.id == "string" ? t.id : void 0;
 			if (!n) return;
-			let r = (await dx()).find((e) => e.id === n);
+			let r = (await px()).find((e) => e.id === n);
 			if (!r) {
 				H({
 					message: z("command.file.execute.message"),
@@ -46528,17 +46588,17 @@ var qx = [
 				});
 				return;
 			}
-			await mx(r, {
-				ensurePermission: gx,
-				readFile: Kb,
-				remove: fx,
+			await gx(r, {
+				ensurePermission: vx,
+				readFile: Jb,
+				remove: mx,
 				toast: (e, t) => H({
 					message: e,
 					durationMs: t
 				}),
 				emitOpen: (t) => e.eventBus.emit("open-document-bytes", t),
 				requestReopen: () => {
-					hx(e);
+					_x(e);
 				}
 			});
 		}
@@ -46547,7 +46607,7 @@ var qx = [
 		id: "file:clear-recent",
 		label: z("command.file.clearRecent.registryLabel"),
 		async execute() {
-			confirm(z("command.file.execute.message.xb74439")) && (await px(), H({
+			confirm(z("command.file.execute.message.xb74439")) && (await hx(), H({
 				message: z("command.file.execute.message.x93673a"),
 				durationMs: 2200
 			}));
@@ -46560,7 +46620,7 @@ var qx = [
 		shortcutLabel: "Ctrl+S",
 		canExecute: (e) => e.hasDocument,
 		async execute(e) {
-			await Px(e);
+			await Ix(e);
 		}
 	},
 	{
@@ -46569,8 +46629,8 @@ var qx = [
 		shortcutLabel: "Ctrl+Shift+S",
 		canExecute: (e) => e.hasDocument,
 		async execute(e) {
-			let t = await bx(e);
-			t !== null && await Mx(e, t);
+			let t = await Sx(e);
+			t !== null && await Px(e, t);
 		}
 	},
 	{
@@ -46578,7 +46638,7 @@ var qx = [
 		label: z("command.file.saveAsHwp.registryLabel"),
 		canExecute: (e) => e.hasDocument,
 		async execute(e) {
-			await Mx(e, "hwp");
+			await Px(e, "hwp");
 		}
 	},
 	{
@@ -46586,7 +46646,7 @@ var qx = [
 		label: z("command.file.saveAsHwpx.registryLabel"),
 		canExecute: (e) => e.hasDocument,
 		async execute(e) {
-			await Mx(e, "hwpx");
+			await Px(e, "hwpx");
 		}
 	},
 	{
@@ -46597,7 +46657,7 @@ var qx = [
 		shortcutLabel: "F7",
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			new Vy(e.wasm, e.eventBus, 0, e).show();
+			new Uy(e.wasm, e.eventBus, 0, e).show();
 		}
 	},
 	{
@@ -46605,7 +46665,7 @@ var qx = [
 		label: z("command.file.printToPdf.label"),
 		canExecute: (e) => e.hasDocument,
 		async execute(e) {
-			await Gx(e);
+			await qx(e);
 		}
 	},
 	{
@@ -46613,7 +46673,7 @@ var qx = [
 		label: z("command.file.exportHtml.label"),
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			Ox(e, "html");
+			Ax(e, "html");
 		}
 	},
 	{
@@ -46621,7 +46681,7 @@ var qx = [
 		label: z("command.file.exportDoc.label"),
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			Ox(e, "doc");
+			Ax(e, "doc");
 		}
 	},
 	{
@@ -46631,7 +46691,7 @@ var qx = [
 		shortcutLabel: "Ctrl+P",
 		canExecute: (e) => e.hasDocument,
 		async execute(e) {
-			await Kx(e);
+			await Jx(e);
 		}
 	},
 	{
@@ -46640,10 +46700,10 @@ var qx = [
 		label: z("command.file.about.label"),
 		icon: "icon-help",
 		execute() {
-			new Uy().show();
+			new Gy().show();
 		}
 	}
-], Jx = 1e3, Yx = class extends V {
+], Xx = 1e3, Zx = class extends V {
 	guideInput;
 	memoInput;
 	nameInput;
@@ -46677,7 +46737,7 @@ var qx = [
 		let i = document.createElement("label");
 		i.className = "field-edit-label", i.textContent = z("dialog.fieldEdit.guideLabel.text"), r.appendChild(i), this.guideInput = document.createElement("input"), this.guideInput.type = "text", this.guideInput.className = "field-edit-input", this.guideInput.maxLength = 250, r.appendChild(this.guideInput), this.guideErrorLabel = document.createElement("div"), this.guideErrorLabel.className = "field-edit-error", this.guideErrorLabel.style.color = "#c00", this.guideErrorLabel.style.fontSize = "11px", this.guideErrorLabel.style.display = "none", this.guideErrorLabel.textContent = z("dialog.fieldEdit.guideErrorLabel.text", { p1: 250 }), r.appendChild(this.guideErrorLabel);
 		let a = document.createElement("label");
-		a.className = "field-edit-label", a.textContent = z("dialog.fieldEdit.memoLabel.text"), r.appendChild(a), this.memoInput = document.createElement("textarea"), this.memoInput.className = "field-edit-textarea", this.memoInput.rows = 4, this.memoInput.maxLength = Jx, r.appendChild(this.memoInput), this.memoErrorLabel = document.createElement("div"), this.memoErrorLabel.className = "field-edit-error", this.memoErrorLabel.style.color = "#c00", this.memoErrorLabel.style.fontSize = "11px", this.memoErrorLabel.style.display = "none", this.memoErrorLabel.textContent = z("dialog.fieldEdit.memoErrorLabel.text", { p1: Jx }), r.appendChild(this.memoErrorLabel);
+		a.className = "field-edit-label", a.textContent = z("dialog.fieldEdit.memoLabel.text"), r.appendChild(a), this.memoInput = document.createElement("textarea"), this.memoInput.className = "field-edit-textarea", this.memoInput.rows = 4, this.memoInput.maxLength = Xx, r.appendChild(this.memoInput), this.memoErrorLabel = document.createElement("div"), this.memoErrorLabel.className = "field-edit-error", this.memoErrorLabel.style.color = "#c00", this.memoErrorLabel.style.fontSize = "11px", this.memoErrorLabel.style.display = "none", this.memoErrorLabel.textContent = z("dialog.fieldEdit.memoErrorLabel.text", { p1: Xx }), r.appendChild(this.memoErrorLabel);
 		let o = document.createElement("label");
 		o.className = "field-edit-label", o.textContent = z("dialog.fieldEdit.nameLabel.text"), r.appendChild(o), this.nameInput = document.createElement("input"), this.nameInput.type = "text", this.nameInput.className = "field-edit-input", this.nameInput.maxLength = 250, r.appendChild(this.nameInput), this.nameErrorLabel = document.createElement("div"), this.nameErrorLabel.className = "field-edit-error", this.nameErrorLabel.style.color = "#c00", this.nameErrorLabel.style.fontSize = "11px", this.nameErrorLabel.style.display = "none", this.nameErrorLabel.textContent = z("dialog.fieldEdit.nameErrorLabel.text", { p1: 250 }), r.appendChild(this.nameErrorLabel);
 		let s = document.createElement("label");
@@ -46710,8 +46770,8 @@ var qx = [
 	}
 };
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/find-dialog.ts
-function Xx(e, t) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/find-dialog.ts
+function Qx(e, t) {
 	if (!e || !t.found) return;
 	let n = t.cellContext, r = n ? {
 		sectionIndex: t.sec,
@@ -46731,7 +46791,7 @@ function Xx(e, t) {
 	}, a = e.cursor;
 	n ? (a?.clearSelection(), a?.moveTo(r)) : e.moveCursorTo(r), a && (a.setAnchor(), a.moveTo(i)), e.updateCaret?.();
 }
-var Zx = class e {
+var $x = class e {
 	static lastQuery = "";
 	static lastCaseSensitive = !1;
 	_open = !1;
@@ -46908,7 +46968,7 @@ var Zx = class e {
 		this.matchCountLabel && (this.matchCountLabel.textContent = "", this.matchCountLabel.hidden = !0);
 	}
 	navigateToHit(e) {
-		Xx(this.services.getInputHandler(), e);
+		Qx(this.services.getInputHandler(), e);
 	}
 	doReplace() {
 		if (!this.currentHit || !this.currentHit.found) {
@@ -46946,7 +47006,7 @@ var Zx = class e {
 			document.addEventListener("mousemove", o), document.addEventListener("mouseup", s);
 		});
 	}
-}, Qx = class extends V {
+}, eS = class extends V {
 	services;
 	pageInput;
 	statusLabel;
@@ -47051,12 +47111,12 @@ var Zx = class e {
 	}
 };
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/compare/diff-location-label.ts
-function $x(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/compare/diff-location-label.ts
+function tS(e) {
 	let t = (e ?? "").trim();
 	return t === "" || t === "(없음)";
 }
-function eS(e, t) {
+function nS(e, t) {
 	let n;
 	if (t === "left" && e.severity === "added") {
 		if (!e.contextOnLeft) return null;
@@ -47071,48 +47131,48 @@ function eS(e, t) {
 	let i = t === "left" ? e.leftAnchor : e.rightAnchor;
 	return i ? `제 ${n + 1}구역, ${i.pageIndex + 1}쪽` : `제 ${n + 1}구역`;
 }
-function tS(e) {
-	let t = eS(e, "left"), n = eS(e, "right");
+function rS(e) {
+	let t = nS(e, "left"), n = nS(e, "right");
 	return !t && !n ? null : t && n ? `좌 ${t}, 우 ${n}` : t ?? n;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/compare/compare-debug.ts
-function nS() {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/compare/compare-debug.ts
+function iS() {
 	try {
 		if (typeof globalThis < "u" && globalThis.__RHWP_COMPARE_DEBUG__ || typeof window < "u" && (new URLSearchParams(window.location.search).get("compareDebug") === "1" || window.localStorage?.getItem("rhwp:compareDebug") === "1")) return !0;
 	} catch {}
 	return !1;
 }
-function rS(...e) {
-	nS() && console.log("[rhwp:compare]", ...e);
+function aS(...e) {
+	iS() && console.log("[rhwp:compare]", ...e);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/compare/diff-engine.ts
-var iS = 32, aS = 20, oS = 5, sS = 10, cS = 4, lS = 3, uS = .86, dS = .7, fS = 4, pS = .4, mS = .12, hS = .4, gS = 1.5, _S = .35, vS = .28, yS = 12, bS = 24, xS = 28e4, SS = 96e3, CS = 14e6, wS = .62, TS = 6, ES = 1.9, DS = 18e4, OS = 2600, kS = 96, AS = 45e4, jS = 48, MS = 2.35, NS = 4.38, PS = 4.25, FS = .74, IS = .36, LS = null, RS = null;
-function zS(e, t) {
-	let n = RS;
-	RS = e;
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/compare/diff-engine.ts
+var oS = 32, sS = 20, cS = 5, lS = 10, uS = 4, dS = 3, fS = .86, pS = .7, mS = 4, hS = .4, gS = .12, _S = .4, vS = 1.5, yS = .35, bS = .28, xS = 12, SS = 24, CS = 28e4, wS = 96e3, TS = 14e6, ES = .62, DS = 6, OS = 1.9, kS = 18e4, AS = 2600, jS = 96, MS = 45e4, NS = 48, PS = 2.35, FS = 4.38, IS = 4.25, LS = .74, RS = .36, zS = null, BS = null;
+function VS(e, t) {
+	let n = BS;
+	BS = e;
 	try {
 		return t();
 	} finally {
-		RS = n;
+		BS = n;
 	}
 }
-function BS(e) {
-	return {
-		minTextLen: e.anchorTuning?.minTextLen ?? aS,
-		minUniqueChars: e.anchorTuning?.minUniqueChars ?? TS,
-		maxWhitespaceRatio: e.anchorTuning?.maxWhitespaceRatio ?? wS,
-		minEntropy: e.anchorTuning?.minEntropy ?? ES
-	};
-}
-function VS(e) {
-	return {
-		maxComputeMs: e.performanceTuning?.maxComputeMs ?? OS,
-		hardSegmentCells: e.performanceTuning?.hardSegmentCells ?? DS
-	};
-}
 function HS(e) {
+	return {
+		minTextLen: e.anchorTuning?.minTextLen ?? sS,
+		minUniqueChars: e.anchorTuning?.minUniqueChars ?? DS,
+		maxWhitespaceRatio: e.anchorTuning?.maxWhitespaceRatio ?? ES,
+		minEntropy: e.anchorTuning?.minEntropy ?? OS
+	};
+}
+function US(e) {
+	return {
+		maxComputeMs: e.performanceTuning?.maxComputeMs ?? AS,
+		hardSegmentCells: e.performanceTuning?.hardSegmentCells ?? kS
+	};
+}
+function WS(e) {
 	if (!e) return 0;
 	let t = /* @__PURE__ */ new Map();
 	for (let n of e) t.set(n, (t.get(n) ?? 0) + 1);
@@ -47123,17 +47183,17 @@ function HS(e) {
 	}
 	return n;
 }
-function US(e, t) {
+function GS(e, t) {
 	let n = e.trim();
-	return n.length >= oS && n.length < t.minTextLen && WS(n) ? !0 : e.length < t.minTextLen || (e.match(/\s/g) ?? []).length / Math.max(1, e.length) > t.maxWhitespaceRatio || new Set(e).size < t.minUniqueChars ? !1 : HS(e) >= t.minEntropy;
+	return n.length >= cS && n.length < t.minTextLen && KS(n) ? !0 : e.length < t.minTextLen || (e.match(/\s/g) ?? []).length / Math.max(1, e.length) > t.maxWhitespaceRatio || new Set(e).size < t.minUniqueChars ? !1 : WS(e) >= t.minEntropy;
 }
-function WS(e) {
+function KS(e) {
 	return e ? !!(/^\[[^\]]+\]$/.test(e) || /^\[[^\]]+:[^\]]+\]$/.test(e) || /^\d+\.\s+/.test(e)) : !1;
 }
-function GS() {
-	return LS ? LS.bailedOut ? !0 : Date.now() <= LS.deadline ? !1 : (LS.bailedOut = !0, !0) : !1;
+function qS() {
+	return zS ? zS.bailedOut ? !0 : Date.now() <= zS.deadline ? !1 : (zS.bailedOut = !0, !0) : !1;
 }
-function KS(e, t) {
+function JS(e, t) {
 	let n = 0, r = Math.min(e.length, t.length);
 	for (; n < r && e.charCodeAt(n) === t.charCodeAt(n);) n += 1;
 	let i = 0;
@@ -47143,7 +47203,7 @@ function KS(e, t) {
 		b: t.slice(n, t.length - i)
 	};
 }
-function qS(e, t) {
+function YS(e, t) {
 	let n = e.length, r = t.length;
 	if (n === 0) return r;
 	if (r === 0) return n;
@@ -47161,7 +47221,7 @@ function qS(e, t) {
 	}
 	return i[r];
 }
-function JS(e, t, n) {
+function XS(e, t, n) {
 	let r = n.length;
 	if (t <= 0) {
 		let e = Array(r + 1);
@@ -47182,7 +47242,7 @@ function JS(e, t, n) {
 	}
 	return i;
 }
-function YS(e, t, n) {
+function ZS(e, t, n) {
 	let r = e.length, i = n.length, a = Array(i + 1);
 	for (let e = 0; e <= i; e += 1) a[e] = i - e;
 	for (let o = r - 1; o >= t; --o) {
@@ -47197,7 +47257,7 @@ function YS(e, t, n) {
 	}
 	return a;
 }
-function XS(e, t) {
+function QS(e, t) {
 	let n = e.length, r = t.length, i = Array.from({ length: n + 1 }, () => Array(r + 1).fill(0));
 	for (let e = 0; e <= n; e += 1) i[e][0] = e;
 	for (let e = 0; e <= r; e += 1) i[0][e] = e;
@@ -47209,61 +47269,61 @@ function XS(e, t) {
 	for (; a > 0 || o > 0;) a > 0 && o > 0 && e.charCodeAt(a - 1) === t.charCodeAt(o - 1) ? (s.push("="), --a, --o) : a > 0 && i[a][o] === i[a - 1][o] + 1 ? (s.push("-"), --a) : o > 0 && i[a][o] === i[a][o - 1] + 1 ? (s.push("+"), --o) : a > 0 && o > 0 ? (s.push("×"), --a, --o) : a > 0 ? (s.push("-"), --a) : (s.push("+"), --o);
 	return s.reverse(), s.join("");
 }
-function ZS(e, t) {
+function $S(e, t) {
 	let n = e.length, r = t.length;
 	if (n === 0) return "+".repeat(r);
 	if (r === 0) return "-".repeat(n);
-	if (n * r <= xS) return XS(e, t);
-	let i = Math.max(1, Math.floor(n / 2)), a = JS(e, i, t), o = YS(e, i, t), s = 0, c = Infinity;
+	if (n * r <= CS) return QS(e, t);
+	let i = Math.max(1, Math.floor(n / 2)), a = XS(e, i, t), o = ZS(e, i, t), s = 0, c = Infinity;
 	for (let e = 0; e <= r; e += 1) {
 		let t = a[e] + o[e];
 		(t < c || t === c && e < s) && (c = t, s = e);
 	}
-	return ZS(e.slice(0, i), t.slice(0, s)) + ZS(e.slice(i), t.slice(s));
+	return $S(e.slice(0, i), t.slice(0, s)) + $S(e.slice(i), t.slice(s));
 }
-function QS(e, t) {
+function eC(e, t) {
 	if (e.length === 0 && t.length === 0) return "";
-	if (e.length + t.length > SS) return `문자 diff 요약 생략(길이: ${e.length}+${t.length})`;
-	let { a: n, b: r } = KS(e, t), i = n.length, a = r.length;
-	return i === 0 && a === 0 ? "" : i * a > CS ? `문자 diff 요약 생략(과대: ${i}×${a})` : `편집거리 ${qS(n, r)} · ${ZS(n, r).replace(/=+/g, "·").slice(0, 100)}`;
+	if (e.length + t.length > wS) return `문자 diff 요약 생략(길이: ${e.length}+${t.length})`;
+	let { a: n, b: r } = JS(e, t), i = n.length, a = r.length;
+	return i === 0 && a === 0 ? "" : i * a > TS ? `문자 diff 요약 생략(과대: ${i}×${a})` : `편집거리 ${YS(n, r)} · ${$S(n, r).replace(/=+/g, "·").slice(0, 100)}`;
 }
-function $S(e, t) {
+function tC(e, t) {
 	let n = t.ignoreWhitespace ? e.replace(/\s+/g, " ").trim() : e;
 	return t.caseSensitive ? n : n.toLowerCase();
 }
-function eC(e) {
+function nC(e) {
 	let t = 2166136261;
 	for (let n = 0; n < e.length; n += 1) t ^= e.charCodeAt(n), t = Math.imul(t, 16777619);
 	return (t >>> 0).toString(16);
 }
-function tC(e) {
+function rC(e) {
 	let t = 2166136261;
 	for (let n = 0; n < e.length; n += 1) t ^= e[n], t = Math.imul(t, 16777619);
 	return (t >>> 0).toString(16);
 }
-function nC(e, t) {
+function iC(e, t) {
 	return `${e}:${t}`;
 }
-function rC(e, t) {
+function aC(e, t) {
 	return e === "table" ? "table" : e === "image" ? "image" : e === "shape" || e === "group" ? t.toLowerCase().includes("chart") ? "chart" : "shape" : t.toLowerCase().includes("chart") ? "chart" : "paragraphMeta";
 }
-function iC(e) {
+function oC(e) {
 	let t = e.key.match(/^(sid:[^:]+:\d+|loc:-?\d+:-?\d+:\d+):[^:]+$/);
 	if (!t) return `${e.kind}::${e.key}`;
 	let n = t[1];
 	return e.kind === "shape" || e.kind === "chart" ? `${e.kind}::${n}:shape` : e.kind === "table" ? `${e.kind}::${n}:table` : `${e.kind}::${n}:image`;
 }
-function aC(e) {
+function sC(e) {
 	let t = 0;
 	return e.summary.includes("text=\"") && !e.summary.includes("text=\"(없음)\"") && (t += 4), e.summary.includes("pix=nopix") || (t += 2), e.summary.includes("nobox") || (t += 1), e.type === "shape" && (t += 1), t;
 }
-function oC(e) {
+function cC(e) {
 	return e === "table" ? "표" : e === "shape" ? "도형" : e === "image" ? "이미지" : e === "chart" ? "그래프" : e === "text" ? "텍스트" : "메타";
 }
-function sC(e, t, n, r, i) {
+function lC(e, t, n, r, i) {
 	let a = "nosig";
 	try {
-		a = eC(e.getTableSignature(n, r, i));
+		a = nC(e.getTableSignature(n, r, i));
 	} catch {}
 	let o = e.getTableDimensions(n, r, i), s = Math.max(0, o.rowCount * o.colCount), c = [], l = [], u = [];
 	for (let a = 0; a < s; a += 1) {
@@ -47276,18 +47336,18 @@ function sC(e, t, n, r, i) {
 		let d = [];
 		for (let o = 0; o < s; o += 1) try {
 			let s = e.getCellParagraphLength(n, r, i, a, o), c = s > 0 ? e.getTextInCell(n, r, i, a, o, 0, s) : "";
-			c && d.push($S(c, t));
+			c && d.push(tC(c, t));
 		} catch {}
 		let f = d.join("|");
 		if (c.push(f), f && l.length < 240) {
 			let e = f.replaceAll("\"", "'").replaceAll("\r\n", "\n").replaceAll("\n", " ↵ ").replace(/\s{2,}/g, " ").trim().slice(0, 180), t = `r${o.colCount > 0 ? Math.floor(a / o.colCount) + 1 : 1}c${o.colCount > 0 ? a % o.colCount + 1 : a + 1}`;
-			l.push(`${t}=${encodeURIComponent(e)}`), u.push(`${t}=${eC(f)}`);
+			l.push(`${t}=${encodeURIComponent(e)}`), u.push(`${t}=${nC(f)}`);
 		}
 	}
-	let d = eC(c.join("||")), f = c.filter(Boolean).slice(0, 2).map((e) => e.replaceAll("\"", "'").replace(/\s+/g, " ").trim()).join(" | ").slice(0, 80), p = "";
+	let d = nC(c.join("||")), f = c.filter(Boolean).slice(0, 2).map((e) => e.replaceAll("\"", "'").replace(/\s+/g, " ").trim()).join(" | ").slice(0, 80), p = "";
 	try {
 		let t = e.getTableProperties(n, r, i);
-		p = eC(JSON.stringify(t));
+		p = nC(JSON.stringify(t));
 	} catch {
 		p = "noprops";
 	}
@@ -47301,19 +47361,19 @@ function sC(e, t, n, r, i) {
 	let h = l.join("&"), g = u.join("&");
 	return `table r=${o.rowCount} c=${o.colCount} tprev="${f || "(없음)"}" cprev="${h || "(없음)"}" csha="${g || "(없음)"}" txt=${d} props=${p} box=${m} sig=${a}`;
 }
-function cC(e) {
+function uC(e) {
 	let t = e.match(/:(\d+):[^:]+$/);
 	return t && Number.isFinite(Number(t[1])) ? Number(t[1]) : null;
 }
-function lC(e) {
+function dC(e) {
 	return `${e.section}:${e.paragraph}`;
 }
-function uC(e) {
+function fC(e) {
 	let t = /* @__PURE__ */ new Map();
-	for (let { left: n, right: r } of e) n && r && t.set(lC(r), n);
+	for (let { left: n, right: r } of e) n && r && t.set(dC(r), n);
 	return t;
 }
-function dC(e) {
+function pC(e) {
 	let t = {};
 	for (let n of e.matchAll(/([a-z]+)=("([^"]*)"|[^\s]+)/g)) {
 		let e = n[2] ?? "";
@@ -47321,7 +47381,7 @@ function dC(e) {
 	}
 	return t;
 }
-function fC(e, t) {
+function mC(e, t) {
 	let n = (e) => {
 		let t = /* @__PURE__ */ new Map();
 		if (!e || e === "(없음)") return t;
@@ -47336,10 +47396,10 @@ function fC(e, t) {
 	for (let e of a) (r.get(e) ?? "") !== (i.get(e) ?? "") && (o += 1);
 	return o;
 }
-function pC(e, t, n) {
-	let r = dC(e.summary), i = dC(t.summary), a = [], o = oC(e.kind), s = (r, i, o, s, c = !1) => {
+function hC(e, t, n) {
+	let r = pC(e.summary), i = pC(t.summary), a = [], o = cC(e.kind), s = (r, i, o, s, c = !1) => {
 		(c || o !== s) && a.push({
-			id: nC(e.kind, `${n}:${r}`),
+			id: iC(e.kind, `${n}:${r}`),
 			kind: e.kind,
 			severity: "modified",
 			path: {
@@ -47357,7 +47417,7 @@ function pC(e, t, n) {
 	if (e.type === "table" && t.type === "table") {
 		let e = r.cprev && r.cprev !== "(없음)" || i.cprev && i.cprev !== "(없음)" || r.tprev && r.tprev !== "(없음)" || i.tprev && i.tprev !== "(없음)" ? "표" : "테이블", t = (r.r ?? "") !== (i.r ?? "") || (r.c ?? "") !== (i.c ?? "");
 		s("rows-cols", `${e} 행/열 변경`, `r=${r.r ?? "(없음)"} c=${r.c ?? "(없음)"}`, `r=${i.r ?? "(없음)"} c=${i.c ?? "(없음)"}`), s("size", `${e} 크기 변경`, `box=${r.box ?? "(없음)"}`, `box=${i.box ?? "(없음)"}`);
-		let n = `cprev="${r.cprev ?? r.tprev ?? "(없음)"}"`, o = `cprev="${i.cprev ?? i.tprev ?? "(없음)"}"`, c = (r.txt ?? "") !== (i.txt ?? "") || n !== o, l = fC(r.csha ?? "", i.csha ?? "");
+		let n = `cprev="${r.cprev ?? r.tprev ?? "(없음)"}"`, o = `cprev="${i.cprev ?? i.tprev ?? "(없음)"}"`, c = (r.txt ?? "") !== (i.txt ?? "") || n !== o, l = mC(r.csha ?? "", i.csha ?? "");
 		return s("text", t ? `${e} 텍스트 변경(구조변경 동반${l > 0 ? `, ${l}셀` : ""})` : `${e} 텍스트 변경${l > 0 ? `(${l}셀)` : ""}`, n, o, c), a;
 	}
 	if (e.type === "image" && t.type === "image") {
@@ -47372,7 +47432,7 @@ function pC(e, t, n) {
 	}
 	return s("generic", `${o} 속성 변경`, e.summary, t.summary), a;
 }
-function mC(e) {
+function gC(e) {
 	let t = (e) => e == null || Number.isNaN(e) ? 0 : Math.round(e / 2) * 2;
 	return JSON.stringify({
 		a: e.alignment ?? "",
@@ -47383,7 +47443,7 @@ function mC(e) {
 		ml: t(e.marginLeft)
 	});
 }
-function hC(e, t, n, r) {
+function _C(e, t, n, r) {
 	let i = /* @__PURE__ */ new Set([0]);
 	r > 0 && (i.add(1), i.add(Math.max(0, r - 1)), r > 2 && i.add(Math.floor(r / 2)));
 	for (let r of i) try {
@@ -47397,7 +47457,7 @@ function hC(e, t, n, r) {
 		};
 	} catch {}
 }
-function gC(e, t, n, r) {
+function vC(e, t, n, r) {
 	let i = /* @__PURE__ */ new Map();
 	for (let n = 0; n < t.pageCount; n += 1) {
 		let t;
@@ -47425,7 +47485,7 @@ function gC(e, t, n, r) {
 		t && (e.anchor = t, e.sectionPage = r.get(t.pageIndex) ?? t.pageIndex + 1);
 	}
 }
-function _C(e, t) {
+function yC(e, t) {
 	for (let n of e) {
 		if (n.anchor) continue;
 		let r, i = !1;
@@ -47464,7 +47524,7 @@ function _C(e, t) {
 		}
 	}
 }
-function vC(e, t, n, r) {
+function bC(e, t, n, r) {
 	e.refreshLayout();
 	let i = /* @__PURE__ */ new Map();
 	for (let n = 0; n < t.pageCount; n += 1) try {
@@ -47475,16 +47535,16 @@ function vC(e, t, n, r) {
 	for (let n = 0; n < t.sectionCount; n += 1) {
 		let t = e.getParagraphCount(n);
 		for (let c = 0; c < t; c += 1) {
-			let t = e.getParagraphLength(n, c), l = t > 0 ? e.getTextRange(n, c, 0, t) : "", u = e.getControlTextPositions(n, c), d = $S(l, r), f = "";
+			let t = e.getParagraphLength(n, c), l = t > 0 ? e.getTextRange(n, c, 0, t) : "", u = e.getControlTextPositions(n, c), d = tC(l, r), f = "";
 			try {
 				let t = e.getParaPropertiesAt(n, c);
-				f = eC(mC(t));
+				f = nC(gC(t));
 				let r = t.headType ?? "None";
 				o.set(`${n}:${c}`, r === "Outline" || r === "Number");
 			} catch {
 				f = "", o.set(`${n}:${c}`, !1);
 			}
-			let p = eC(`${d}|cc:${u.length}${f ? `|ps:${f}` : ""}`), m = e.getParagraphStableId(n, c), h = hC(e, n, c, t), g = h ? i.get(h.pageIndex) ?? h.pageIndex + 1 : 1;
+			let p = nC(`${d}|cc:${u.length}${f ? `|ps:${f}` : ""}`), m = e.getParagraphStableId(n, c), h = _C(e, n, c, t), g = h ? i.get(h.pageIndex) ?? h.pageIndex + 1 : 1;
 			a.push({
 				section: n,
 				paragraph: c,
@@ -47500,16 +47560,16 @@ function vC(e, t, n, r) {
 			}), s += 1;
 		}
 	}
-	gC(e, t, a, i), _C(a, i);
-	let c = BS(r), l = /* @__PURE__ */ new Map();
+	vC(e, t, a, i), yC(a, i);
+	let c = HS(r), l = /* @__PURE__ */ new Map();
 	for (let e of a) l.set(e.signature, (l.get(e.signature) ?? 0) + 1);
 	for (let e of a) {
 		if ((l.get(e.signature) ?? 0) > 1) {
 			e.isAnchorCandidate = !1;
 			continue;
 		}
-		let t = e.normalizedText.trim(), n = o.get(`${e.section}:${e.paragraph}`) ?? !1, r = t.length >= oS && t.length < c.minTextLen && WS(t), i = n && t.length >= 3 && t.length < c.minTextLen;
-		e.isAnchorCandidate = US(e.normalizedText, c) || r || i;
+		let t = e.normalizedText.trim(), n = o.get(`${e.section}:${e.paragraph}`) ?? !1, r = t.length >= cS && t.length < c.minTextLen && KS(t), i = n && t.length >= 3 && t.length < c.minTextLen;
+		e.isAnchorCandidate = GS(e.normalizedText, c) || r || i;
 	}
 	let u = /* @__PURE__ */ new Map(), d = /* @__PURE__ */ new Map();
 	for (let e of a) u.set(`${e.section}:${e.paragraph}`, e.stableId), d.set(`${e.section}:${e.paragraph}`, e.normalizedText.slice(0, 48));
@@ -47519,7 +47579,7 @@ function vC(e, t, n, r) {
 		for (let i of t.controls) {
 			let t = i.secIdx ?? -1, a = i.paraIdx ?? -1, o = i.controlIdx ?? -1, s = t >= 0 && a >= 0 ? u.get(`${t}:${a}`) : void 0, c = s ? `sid:${s}:${o}:${i.type}` : `loc:${t}:${a}:${o}:${i.type}`, l = `${i.type} ${Math.round(i.w)}x${Math.round(i.h)}`;
 			try {
-				if (i.type === "table" && t >= 0 && a >= 0 && o >= 0) l = sC(e, r, t, a, o);
+				if (i.type === "table" && t >= 0 && a >= 0 && o >= 0) l = lC(e, r, t, a, o);
 				else if (i.type === "image" && t >= 0 && a >= 0 && o >= 0) {
 					let n = e.getPictureProperties(t, a, o), r = Math.round(n.width), i = Math.round(n.height), s = [
 						n.cropLeft,
@@ -47528,7 +47588,7 @@ function vC(e, t, n, r) {
 						n.cropBottom
 					].map((e) => Math.round(e)).join(","), c = `${n.effect}:${n.rotationAngle ?? 0}`, u = `${n.brightness ?? 0}/${n.contrast ?? 0}`, f = d.get(`${t}:${a}`) ?? "", p = ((n.description ?? "").trim() || f).replaceAll("\"", "'").slice(0, 48), m = "nopix";
 					try {
-						m = tC(e.getControlImageData(t, a, o));
+						m = rC(e.getControlImageData(t, a, o));
 					} catch {
 						m = "nopix";
 					}
@@ -47543,7 +47603,7 @@ function vC(e, t, n, r) {
 					}
 					let g = (h.trim() || (n.description ?? "").trim() || m).replaceAll("\"", "'").slice(0, 120), _ = !h.trim() && !!(n.description ?? "").trim(), v = !h.trim() && !(n.description ?? "").trim() && !!m.trim(), y = "nopix";
 					try {
-						y = tC(e.getControlImageData(t, a, o));
+						y = rC(e.getControlImageData(t, a, o));
 					} catch {
 						y = "nopix";
 					}
@@ -47566,7 +47626,7 @@ function vC(e, t, n, r) {
 				section: t,
 				paragraph: a,
 				summary: l,
-				kind: rC(i.type, l),
+				kind: aC(i.type, l),
 				anchor: {
 					pageIndex: n,
 					x: i.x,
@@ -47580,7 +47640,7 @@ function vC(e, t, n, r) {
 	for (let t of a) {
 		let n = e.getControlTextPositions(t.section, t.paragraph).length;
 		for (let i = 0; i < n; i += 1) try {
-			let n = sC(e, r, t.section, t.paragraph, i), a = t.stableId ? `sid:${t.stableId}:${i}:table` : `loc:${t.section}:${t.paragraph}:${i}:table`, o = t.anchor ?? {
+			let n = lC(e, r, t.section, t.paragraph, i), a = t.stableId ? `sid:${t.stableId}:${i}:table` : `loc:${t.section}:${t.paragraph}:${i}:table`, o = t.anchor ?? {
 				pageIndex: 0,
 				x: 0,
 				y: 0,
@@ -47610,26 +47670,26 @@ function vC(e, t, n, r) {
 	}
 	let m = /* @__PURE__ */ new Map();
 	for (let e of f) {
-		let t = iC(e), n = m.get(t);
+		let t = oC(e), n = m.get(t);
 		if (!n) {
 			m.set(t, e);
 			continue;
 		}
-		aC(e) > aC(n) && m.set(t, e);
+		sC(e) > sC(n) && m.set(t, e);
 	}
-	if (nS()) {
+	if (iS()) {
 		let e = p, t = {
 			layout: e.filter((e) => e.source === "layout").length,
 			direct: e.filter((e) => e.source === "direct").length
 		}, n = e.filter((e) => e.shapeTextLen > 0).length, r = e.filter((e) => e.usedDescription).length, i = e.filter((e) => e.usedParaFallback).length, a = e.filter((e) => e.hasPix).length;
-		rS("[shape-text-debug] 수집 요약", {
+		aS("[shape-text-debug] 수집 요약", {
 			total: e.length,
 			bySource: t,
 			withShapeText: n,
 			withDescription: r,
 			withParaFallback: i,
 			withPix: a
-		}), rS("[shape-text-debug] 샘플(최대 20)", e.slice(0, 20).map((e) => ({
+		}), aS("[shape-text-debug] 샘플(최대 20)", e.slice(0, 20).map((e) => ({
 			src: e.source,
 			sec: e.sec,
 			para: e.para,
@@ -47639,7 +47699,7 @@ function vC(e, t, n, r) {
 			desc: e.usedDescription,
 			paraFallback: e.usedParaFallback,
 			pix: e.hasPix
-		}))), rS("[shape-text-debug] 미추출 대상(shapeTextLen=0)", e.filter((e) => e.shapeTextLen === 0).map((e) => ({
+		}))), aS("[shape-text-debug] 미추출 대상(shapeTextLen=0)", e.filter((e) => e.shapeTextLen === 0).map((e) => ({
 			src: e.source,
 			sec: e.sec,
 			para: e.para,
@@ -47661,14 +47721,14 @@ function vC(e, t, n, r) {
 		controls: [...m.values()]
 	};
 }
-async function yC(e, t, n) {
+async function xC(e, t, n) {
 	let r = new io();
-	return await r.initialize(), vC(r, r.loadDocument(e, t), t, n);
+	return await r.initialize(), bC(r, r.loadDocument(e, t), t, n);
 }
-function bC(e, t, n) {
-	return vC(e, e.getDocumentInfo(), t, n);
+function SC(e, t, n) {
+	return bC(e, e.getDocumentInfo(), t, n);
 }
-function xC(e) {
+function CC(e) {
 	let t = /* @__PURE__ */ new Map(), n = /* @__PURE__ */ new Map();
 	for (let r of e.paragraphs) {
 		if (!r.stableId) return null;
@@ -47679,20 +47739,20 @@ function xC(e) {
 	}
 	return t;
 }
-function SC(e) {
+function wC(e) {
 	return e.replace(/[\u200b-\u200d\ufeff]/g, "").replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim().length === 0;
 }
-function CC(e) {
-	return e.controlCount === 0 && SC(e.normalizedText);
-}
-function wC(e) {
-	return e.filter((e) => e.kind === "r" ? !CC(e.r) : e.kind !== "l" || !CC(e.l));
-}
 function TC(e) {
+	return e.controlCount === 0 && wC(e.normalizedText);
+}
+function EC(e) {
+	return e.filter((e) => e.kind === "r" ? !TC(e.r) : e.kind !== "l" || !TC(e.l));
+}
+function DC(e) {
 	return `구역 ${e.section}, 문단 ${e.paragraph}`;
 }
-function EC(e, t, n) {
-	let r = xC(e), i = xC(t);
+function OC(e, t, n) {
+	let r = CC(e), i = CC(t);
 	if (!r || !i) return [];
 	let a = [.../* @__PURE__ */ new Set([...r.keys(), ...i.keys()])];
 	a.sort((e, t) => {
@@ -47703,8 +47763,8 @@ function EC(e, t, n) {
 	for (let e of a) {
 		let t = r.get(e), a = i.get(e);
 		if (t && !a) {
-			CC(t) || o.push({
-				id: nC("text", `id-removed:${e}`),
+			TC(t) || o.push({
+				id: iC("text", `id-removed:${e}`),
 				kind: "text",
 				severity: "removed",
 				path: {
@@ -47719,8 +47779,8 @@ function EC(e, t, n) {
 			continue;
 		}
 		if (!t && a) {
-			CC(a) || o.push({
-				id: nC("text", `id-added:${e}`),
+			TC(a) || o.push({
+				id: iC("text", `id-added:${e}`),
 				kind: "text",
 				severity: "added",
 				path: {
@@ -47735,31 +47795,31 @@ function EC(e, t, n) {
 			continue;
 		}
 		t && a && (t.normalizedText !== a.normalizedText && o.push({
-			id: nC("text", `id-modified:${e}`),
+			id: iC("text", `id-modified:${e}`),
 			kind: "text",
 			severity: "modified",
-			path: AC(t, a),
+			path: MC(t, a),
 			title: "텍스트 변경",
 			leftPreview: t.text,
 			rightPreview: a.text,
 			leftAnchor: t.anchor,
 			rightAnchor: a.anchor,
-			inlineTextDiff: QS(t.text, a.text)
-		}), n.includes("paragraphMeta") && t.signature === a.signature && Math.abs(t.globalIndex - a.globalIndex) > lS && o.push({
-			id: nC("paragraphMeta", `id-moved:${e}`),
+			inlineTextDiff: eC(t.text, a.text)
+		}), n.includes("paragraphMeta") && t.signature === a.signature && Math.abs(t.globalIndex - a.globalIndex) > dS && o.push({
+			id: iC("paragraphMeta", `id-moved:${e}`),
 			kind: "paragraphMeta",
 			severity: "modified",
-			path: AC(t, a),
+			path: MC(t, a),
 			title: "문단 순서 이동",
 			leftPreview: `A idx=${t.globalIndex}`,
 			rightPreview: `B idx=${a.globalIndex}`,
 			leftAnchor: t.anchor,
 			rightAnchor: a.anchor
 		}), n.includes("paragraphMeta") && t.controlCount !== a.controlCount && o.push({
-			id: nC("paragraphMeta", `id-ctrlcount:${e}`),
+			id: iC("paragraphMeta", `id-ctrlcount:${e}`),
 			kind: "paragraphMeta",
 			severity: "modified",
-			path: AC(t, a),
+			path: MC(t, a),
 			title: "문단 개체 수 변경",
 			leftPreview: `controls=${t.controlCount}`,
 			rightPreview: `controls=${a.controlCount}`,
@@ -47769,15 +47829,15 @@ function EC(e, t, n) {
 	}
 	return o;
 }
-function DC(e, t, n) {
-	let r = !!(xC(t) && xC(n));
+function kC(e, t, n) {
+	let r = !!(CC(t) && CC(n));
 	return e === "identity" && r ? "identity" : "alignment";
 }
-function OC(e) {
+function AC(e) {
 	return e.kind === "paragraphMeta" && (e.id.includes("moved:") || e.id.includes("id-moved:"));
 }
-function kC(e, t, n) {
-	let r = xC(t), i = xC(n);
+function jC(e, t, n) {
+	let r = CC(t), i = CC(n);
 	if (!r || !i) return e;
 	let a = t.paragraphs.map((e) => e.stableId).filter((e) => e && i.has(e)), o = n.paragraphs.map((e) => e.stableId).filter((e) => e && r.has(e)), s = /* @__PURE__ */ new Map(), c = /* @__PURE__ */ new Map();
 	a.forEach((e, t) => s.set(e, t)), o.forEach((e, t) => c.set(e, t));
@@ -47786,7 +47846,7 @@ function kC(e, t, n) {
 	let u = Array(t.paragraphs.length + 1).fill(0);
 	for (let e = 0; e < t.paragraphs.length; e += 1) u[e + 1] = u[e] + +!i.has(t.paragraphs[e].stableId);
 	return e.filter((e) => {
-		if (!OC(e)) return !0;
+		if (!AC(e)) return !0;
 		let n, a, o = e.id.includes("id-moved:") ? e.id.split("id-moved:")[1] : "";
 		if (o ? (n = r.get(o), a = i.get(o)) : (n = t.paragraphs.find((t) => t.section === e.path.section && t.paragraph === e.path.paragraph), a = n ? i.get(n.stableId) : void 0), !n || !a) return !0;
 		let d = a.globalIndex - n.globalIndex;
@@ -47801,7 +47861,7 @@ function kC(e, t, n) {
 		return !0;
 	});
 }
-function AC(e, t) {
+function MC(e, t) {
 	return t ? {
 		section: t.section,
 		paragraph: t.paragraph
@@ -47813,7 +47873,7 @@ function AC(e, t) {
 		paragraph: 0
 	};
 }
-function jC(e, t, n) {
+function NC(e, t, n) {
 	let r = /* @__PURE__ */ new Map(), i = /* @__PURE__ */ new Map();
 	for (let t of e) r.set(t.signature, (r.get(t.signature) ?? 0) + 1);
 	for (let e of t) i.set(e.signature, (i.get(e.signature) ?? 0) + 1);
@@ -47836,7 +47896,7 @@ function jC(e, t, n) {
 	}
 	return o;
 }
-function MC(e) {
+function PC(e) {
 	let t = /* @__PURE__ */ new Map();
 	for (let n of e) {
 		let e = n.normalizedText.trim();
@@ -47844,13 +47904,13 @@ function MC(e) {
 	}
 	return t;
 }
-function NC(e, t) {
-	let n = MC(e), r = MC(t), i = /* @__PURE__ */ new Set();
+function FC(e, t) {
+	let n = PC(e), r = PC(t), i = /* @__PURE__ */ new Set();
 	for (let [e, t] of n) t === 1 && r.get(e) === 1 && i.add(e);
 	return i;
 }
-function PC(e, t, n) {
-	let r = NC(e, t), i = /* @__PURE__ */ new Map();
+function IC(e, t, n) {
+	let r = FC(e, t), i = /* @__PURE__ */ new Map();
 	for (let e = 0; e < t.length; e += 1) {
 		let n = t[e];
 		n.isAnchorCandidate && (i.has(n.signature) || i.set(n.signature, []), i.get(n.signature).push(e));
@@ -47871,7 +47931,7 @@ function PC(e, t, n) {
 	}
 	return a;
 }
-function FC(e, t) {
+function LC(e, t) {
 	let n = Array.from(e), r = Array.from(t);
 	if (n.length < 2 || r.length < 2) return 0;
 	let i = /* @__PURE__ */ new Set(), a = /* @__PURE__ */ new Set();
@@ -47882,7 +47942,7 @@ function FC(e, t) {
 	for (let e of i) a.has(e) && (o += 1);
 	return 2 * o / (i.size + a.size);
 }
-function IC(e, t) {
+function RC(e, t) {
 	if (!e && !t) return 1;
 	if (!e || !t) return 0;
 	if (e === t) return 1;
@@ -47890,48 +47950,48 @@ function IC(e, t) {
 		let e = 0;
 		for (let t of n) r.has(t) && (e += 1);
 		return 2 * e / (n.size + r.size);
-	})(), a = FC(e.replace(/\s+/g, ""), t.replace(/\s+/g, "")), o = e.length <= t.length ? e : t, s = e.length <= t.length ? t : e, c = o.length >= 4 && s.includes(o) ? .96 : 0, l = i * .2 + a * .8;
+	})(), a = LC(e.replace(/\s+/g, ""), t.replace(/\s+/g, "")), o = e.length <= t.length ? e : t, s = e.length <= t.length ? t : e, c = o.length >= 4 && s.includes(o) ? .96 : 0, l = i * .2 + a * .8;
 	return Math.max(l, c);
 }
-function LC(e, t) {
+function zC(e, t) {
 	if (e.section !== t.section || Math.abs(e.paragraph - t.paragraph) > 1 || e.controlCount !== t.controlCount) return !1;
-	if (RS) {
-		let n = e.globalIndex - RS.leftBaseGi, r = t.globalIndex - RS.rightBaseGi;
+	if (BS) {
+		let n = e.globalIndex - BS.leftBaseGi, r = t.globalIndex - BS.rightBaseGi;
 		return Math.abs(n - r) <= 2;
 	}
 	return Math.abs(e.globalIndex - t.globalIndex) <= 2;
 }
-function RC(e, t) {
+function BC(e, t) {
 	let n = e.normalizedText.replace(/\s+/g, "").length, r = t.normalizedText.replace(/\s+/g, "").length;
 	return n > 15 && r > 15;
 }
-function zC(e, t) {
-	return LC(e, t) ? RC(e, t) ? .25 : .45 : dS;
-}
-function BC(e, t) {
-	let n = IC(e.normalizedText, t.normalizedText);
-	return !LC(e, t) || !RC(e, t) ? n : n > mS ? Math.max(n, pS) : n;
-}
 function VC(e, t) {
-	if (e.signature === t.signature) return 0;
-	let n = BC(e, t);
-	if (n < zC(e, t)) return fS;
-	let r = 1 - n;
-	return e.controlCount !== t.controlCount && (r += .35), LC(e, t) && (r = Math.max(0, r - hS)), r;
+	return zC(e, t) ? BC(e, t) ? .25 : .45 : pS;
 }
-function HC(e) {
-	let t = e.normalizedText.trim(), n = t ? eC(t) : "empty";
+function HC(e, t) {
+	let n = RC(e.normalizedText, t.normalizedText);
+	return !zC(e, t) || !BC(e, t) ? n : n > gS ? Math.max(n, hS) : n;
+}
+function UC(e, t) {
+	if (e.signature === t.signature) return 0;
+	let n = HC(e, t);
+	if (n < VC(e, t)) return mS;
+	let r = 1 - n;
+	return e.controlCount !== t.controlCount && (r += .35), zC(e, t) && (r = Math.max(0, r - _S)), r;
+}
+function WC(e) {
+	let t = e.normalizedText.trim(), n = t ? nC(t) : "empty";
 	return {
 		...e,
 		signature: `nh:${n}`
 	};
 }
-function UC(e, t, n, r) {
-	if (e.length + t.length < jS) return null;
-	let i = jC(e.map(HC), t.map(HC), 0);
-	return i.length === 0 ? null : WC(e, t, i, n, r);
+function GC(e, t, n, r) {
+	if (e.length + t.length < NS) return null;
+	let i = NC(e.map(WC), t.map(WC), 0);
+	return i.length === 0 ? null : KC(e, t, i, n, r);
 }
-function WC(e, t, n, r, i) {
+function KC(e, t, n, r, i) {
 	let a = [
 		{
 			li: -1,
@@ -47950,17 +48010,17 @@ function WC(e, t, n, r, i) {
 			right: t[s.ri]
 		});
 		let l = e.slice(s.li + 1, c.li), u = t.slice(s.ri + 1, c.ri);
-		(l.length !== 0 || u.length !== 0) && o.push(...qC(l, u, r + 1, i));
+		(l.length !== 0 || u.length !== 0) && o.push(...YC(l, u, r + 1, i));
 	}
 	return o;
 }
-function GC(e, t, n, r) {
-	let i = jC(e, t, n >= 1 ? cS : sS);
-	return i.length === 0 ? [] : WC(e, t, i, n, r);
+function qC(e, t, n, r) {
+	let i = NC(e, t, n >= 1 ? uS : lS);
+	return i.length === 0 ? [] : KC(e, t, i, n, r);
 }
-function KC(e, t) {
+function JC(e, t) {
 	let n = e.length, r = t.length;
-	if (n === 0 || r === 0 || n * r > AS) return null;
+	if (n === 0 || r === 0 || n * r > MS) return null;
 	let i = 0, a = 0, o = 0;
 	for (let s = 0; s < n; s += 1) for (let c = 0; c < r; c += 1) {
 		if (e[s].signature !== t[c].signature) continue;
@@ -47974,63 +48034,63 @@ function KC(e, t) {
 		len: i
 	};
 }
-function qC(e, t, n = 0, r = null) {
-	let i = e.length, a = t.length, o = VS(cw ?? sw);
+function YC(e, t, n = 0, r = null) {
+	let i = e.length, a = t.length, o = US(uw ?? lw);
 	return i === 0 && a === 0 ? [] : i === 0 ? t.map((e) => ({
 		left: null,
 		right: e
 	})) : a === 0 ? e.map((e) => ({
 		left: e,
 		right: null
-	})) : zS(r ? {
+	})) : VS(r ? {
 		leftBaseGi: r.leftAnchorGi,
 		rightBaseGi: r.rightAnchorGi
 	} : {
 		leftBaseGi: e[0].globalIndex,
 		rightBaseGi: t[0].globalIndex
 	}, () => {
-		if (GS()) return XC(e, t);
-		if (n >= kS) return i * a <= 22500 && i * a <= o.hardSegmentCells ? JC(e, t) : XC(e, t);
-		if (jC(e, t, n >= 1 ? cS : sS).length > 0) return GC(e, t, n, r);
-		let s = UC(e, t, n, r);
+		if (qS()) return QC(e, t);
+		if (n >= jS) return i * a <= 22500 && i * a <= o.hardSegmentCells ? XC(e, t) : QC(e, t);
+		if (NC(e, t, n >= 1 ? uS : lS).length > 0) return qC(e, t, n, r);
+		let s = GC(e, t, n, r);
 		if (s) return s;
-		if (i * a <= 22500 && i * a <= o.hardSegmentCells) return JC(e, t);
-		let c = KC(e, t);
-		if (c && n + 1 < kS) {
+		if (i * a <= 22500 && i * a <= o.hardSegmentCells) return XC(e, t);
+		let c = JC(e, t);
+		if (c && n + 1 < jS) {
 			let { li0: i, ri0: a, len: o } = c, s = [];
-			s.push(...qC(e.slice(0, i), t.slice(0, a), n + 1, r));
+			s.push(...YC(e.slice(0, i), t.slice(0, a), n + 1, r));
 			for (let n = 0; n < o; n += 1) s.push({
 				left: e[i + n],
 				right: t[a + n]
 			});
-			return s.push(...qC(e.slice(i + o), t.slice(a + o), n + 1, r)), s;
+			return s.push(...YC(e.slice(i + o), t.slice(a + o), n + 1, r)), s;
 		}
-		return XC(e, t);
+		return QC(e, t);
 	});
 }
-function JC(e, t) {
-	if (GS()) return XC(e, t);
+function XC(e, t) {
+	if (qS()) return QC(e, t);
 	let n = e.length, r = t.length, i = 1e9, a = 1.05, o = 1.05, s = Array.from({ length: n + 1 }, () => Array(r + 1).fill(i));
 	s[0][0] = 0;
 	for (let e = 1; e <= n; e += 1) s[e][0] = s[e - 1][0] + a;
 	for (let e = 1; e <= r; e += 1) s[0][e] = s[0][e - 1] + o;
 	for (let i = 1; i <= n; i += 1) {
-		if (i % 12 == 0 && GS()) return XC(e, t);
+		if (i % 12 == 0 && qS()) return QC(e, t);
 		for (let n = 1; n <= r; n += 1) {
-			let r = VC(e[i - 1], t[n - 1]);
+			let r = UC(e[i - 1], t[n - 1]);
 			s[i][n] = Math.min(s[i - 1][n - 1] + r, s[i - 1][n] + a, s[i][n - 1] + o);
 		}
 	}
 	let c = 1e-5, l = [], u = n, d = r;
 	for (; u > 0 || d > 0;) {
-		let n = u > 0 && d > 0 ? s[u - 1][d - 1] + VC(e[u - 1], t[d - 1]) : i, r = u > 0 ? s[u - 1][d] + a : i, f = d > 0 ? s[u][d - 1] + o : i, p = s[u][d];
+		let n = u > 0 && d > 0 ? s[u - 1][d - 1] + UC(e[u - 1], t[d - 1]) : i, r = u > 0 ? s[u - 1][d] + a : i, f = d > 0 ? s[u][d - 1] + o : i, p = s[u][d];
 		if (u > 0 && d > 0 && Math.abs(n - p) < c) {
 			for (l.push({
 				left: e[u - 1],
 				right: t[d - 1]
 			}), --u, --d; u > 0 && d > 0;) {
 				let n = e[u - 1], r = t[d - 1];
-				if (VC(n, r) !== 0 || Math.abs(s[u][d] - s[u - 1][d - 1]) >= c) break;
+				if (UC(n, r) !== 0 || Math.abs(s[u][d] - s[u - 1][d - 1]) >= c) break;
 				let i = s[u - 1][d] + a, f = s[u][d - 1] + o;
 				if (i < s[u][d] - c || f < s[u][d] - c) break;
 				l.push({
@@ -48059,18 +48119,18 @@ function JC(e, t) {
 	}
 	return l.reverse(), l;
 }
-function YC(e, t) {
-	let n = BC(e, t);
-	if (e.signature !== t.signature && n < zC(e, t)) return -1;
+function ZC(e, t) {
+	let n = HC(e, t);
+	if (e.signature !== t.signature && n < VC(e, t)) return -1;
 	let r = 0;
-	return e.signature === t.signature && (r += 5), e.controlCount === t.controlCount && (r += 1), LC(e, t) && (r += gS), r + n * 3;
+	return e.signature === t.signature && (r += 5), e.controlCount === t.controlCount && (r += 1), zC(e, t) && (r += vS), r + n * 3;
 }
-function XC(e, t) {
+function QC(e, t) {
 	let n = [], r = /* @__PURE__ */ new Set(), i = 0, a = 3.45, o = (t, n, i) => {
 		let a = -1, o = -1, s = -1, c = Math.max(0, n), l = Math.min(e.length - 1, i);
 		for (let n = c; n <= l; n += 1) {
 			if (r.has(n)) continue;
-			let i = YC(e[n], t);
+			let i = ZC(e[n], t);
 			i < 0 || (i > o ? (s = o, o = i, a = n) : i > s && (s = i));
 		}
 		return {
@@ -48080,7 +48140,7 @@ function XC(e, t) {
 		};
 	};
 	for (let s = 0; s < t.length; s += 1) {
-		if (s % 32 == 0 && GS()) {
+		if (s % 32 == 0 && qS()) {
 			for (let e = s; e < t.length; e += 1) n.push({
 				left: null,
 				right: t[e]
@@ -48091,12 +48151,12 @@ function XC(e, t) {
 			});
 			return n;
 		}
-		let c = t[s], { bestLi: l, bestScore: u, secondScore: d } = o(c, Math.max(i, 0), Math.min(e.length - 1, i + iS + iS));
+		let c = t[s], { bestLi: l, bestScore: u, secondScore: d } = o(c, Math.max(i, 0), Math.min(e.length - 1, i + oS + oS));
 		if (l < 0 || u < a) {
 			let t = o(c, 0, e.length - 1);
 			t.bestScore > u && (l = t.bestLi, u = t.bestScore, d = t.secondScore);
 		}
-		let f = !(l >= 0 && LC(e[l], c)) && l >= 0 && d >= 0 && u - d < _S;
+		let f = !(l >= 0 && zC(e[l], c)) && l >= 0 && d >= 0 && u - d < yS;
 		l >= 0 && u >= a && !f ? (r.add(l), n.push({
 			left: e[l],
 			right: c
@@ -48111,39 +48171,39 @@ function XC(e, t) {
 	});
 	return n;
 }
-function ZC(e, t, n) {
+function $C(e, t, n) {
 	let r = `${t.normalizedText} ${n.normalizedText}`.trim();
 	if (!r) return !1;
 	let i = e.normalizedText.replace(/\s+/g, " ").trim(), a = r.replace(/\s+/g, " ").trim();
 	if (!i) return !1;
 	let o = Math.max(2, Math.ceil(i.length * .06));
-	return a.length > i.length + o ? !1 : IC(e.normalizedText, r) >= uS;
+	return a.length > i.length + o ? !1 : RC(e.normalizedText, r) >= fS;
 }
-function QC(e, t, n, r) {
+function ew(e, t, n, r) {
 	if (e.section !== t.section || Math.abs(e.paragraph - t.paragraph) > 2 || Math.abs(e.globalIndex - t.globalIndex) > 4 || e.controlCount !== t.controlCount || e.normalizedText.length === 0 == (t.normalizedText.length === 0)) return !1;
 	let i = new Map(n.map((e) => [e.globalIndex, e])), a = new Map(r.map((e) => [e.globalIndex, e])), o = i.get(e.globalIndex - 1) ?? null, s = i.get(e.globalIndex + 1) ?? null, c = a.get(t.globalIndex - 1) ?? null, l = a.get(t.globalIndex + 1) ?? null, u = (e) => !!e && e.normalizedText.length === 0;
 	if ((u(o) || u(s) || u(c) || u(l)) && !(Math.abs(e.paragraph - t.paragraph) <= 2 && Math.abs(e.globalIndex - t.globalIndex) <= 4)) return !1;
 	let d = !!o && !!c && o.section === c.section && o.signature === c.signature, f = !!s && !!l && s.section === l.section && s.signature === l.signature;
 	return !(!d && !f && !(Math.abs(e.paragraph - t.paragraph) <= 2 && Math.abs(e.globalIndex - t.globalIndex) <= 4));
 }
-function $C(e, t) {
-	return e.section !== t.section || e.controlCount !== t.controlCount || Math.abs(e.paragraph - t.paragraph) > yS || Math.abs(e.globalIndex - t.globalIndex) > bS ? !1 : IC(e.normalizedText, t.normalizedText) >= vS;
+function tw(e, t) {
+	return e.section !== t.section || e.controlCount !== t.controlCount || Math.abs(e.paragraph - t.paragraph) > xS || Math.abs(e.globalIndex - t.globalIndex) > SS ? !1 : RC(e.normalizedText, t.normalizedText) >= bS;
 }
-function ew(e, t) {
+function nw(e, t) {
 	for (let n = t - 1; n >= 0; n--) {
 		let t = e[n];
 		if (t.kind === "lr" || t.kind === "l") return t.l;
 	}
 	return null;
 }
-function tw(e, t) {
+function rw(e, t) {
 	for (let n = t - 1; n >= 0; n--) {
 		let t = e[n];
 		if (t.kind === "lr" || t.kind === "r") return t.r;
 	}
 	return null;
 }
-function nw(e) {
+function iw(e) {
 	let t = [];
 	for (let n of e) {
 		let { left: e, right: r } = n;
@@ -48161,17 +48221,17 @@ function nw(e) {
 	}
 	return t;
 }
-function rw(e, t, n) {
+function aw(e, t, n) {
 	let r = [], i = 0;
 	for (; i < e.length;) {
 		let a = e[i], o = i + 1 < e.length ? e[i + 1] : null;
-		if (a.kind === "l" && o?.kind === "r" && QC(a.l, o.r, t, n)) {
+		if (a.kind === "l" && o?.kind === "r" && ew(a.l, o.r, t, n)) {
 			r.push({
-				id: nC("text", `modified-empty-edit:${a.l.section}:${a.l.paragraph}`),
+				id: iC("text", `modified-empty-edit:${a.l.section}:${a.l.paragraph}`),
 				kind: "text",
 				severity: "modified",
-				path: AC(a.l, o.r),
-				title: `텍스트 변경 (${TC(a.l)})`,
+				path: MC(a.l, o.r),
+				title: `텍스트 변경 (${DC(a.l)})`,
 				leftPreview: a.l.text,
 				rightPreview: o.r.text,
 				leftAnchor: a.l.anchor,
@@ -48179,13 +48239,13 @@ function rw(e, t, n) {
 			}), i += 2;
 			continue;
 		}
-		if (a.kind === "r" && o?.kind === "l" && QC(o.l, a.r, t, n)) {
+		if (a.kind === "r" && o?.kind === "l" && ew(o.l, a.r, t, n)) {
 			r.push({
-				id: nC("text", `modified-empty-edit:${o.l.section}:${o.l.paragraph}`),
+				id: iC("text", `modified-empty-edit:${o.l.section}:${o.l.paragraph}`),
 				kind: "text",
 				severity: "modified",
-				path: AC(o.l, a.r),
-				title: `텍스트 변경 (${TC(o.l)})`,
+				path: MC(o.l, a.r),
+				title: `텍스트 변경 (${DC(o.l)})`,
 				leftPreview: o.l.text,
 				rightPreview: a.r.text,
 				leftAnchor: o.l.anchor,
@@ -48193,14 +48253,14 @@ function rw(e, t, n) {
 			}), i += 2;
 			continue;
 		}
-		if (a.kind === "l" && o?.kind === "r" && $C(a.l, o.r)) {
+		if (a.kind === "l" && o?.kind === "r" && tw(a.l, o.r)) {
 			let e = o.r;
 			r.push({
-				id: nC("text", `modified-merged:${a.l.section}:${a.l.paragraph}`),
+				id: iC("text", `modified-merged:${a.l.section}:${a.l.paragraph}`),
 				kind: "text",
 				severity: "modified",
-				path: AC(a.l, e),
-				title: `텍스트 변경 (${TC(e)})`,
+				path: MC(a.l, e),
+				title: `텍스트 변경 (${DC(e)})`,
 				leftPreview: a.l.text,
 				rightPreview: e.text,
 				leftAnchor: a.l.anchor,
@@ -48210,14 +48270,14 @@ function rw(e, t, n) {
 			}), i += 2;
 			continue;
 		}
-		if (a.kind === "r" && o?.kind === "l" && $C(o.l, a.r)) {
+		if (a.kind === "r" && o?.kind === "l" && tw(o.l, a.r)) {
 			let e = o.l;
 			r.push({
-				id: nC("text", `modified-merged:${e.section}:${e.paragraph}`),
+				id: iC("text", `modified-merged:${e.section}:${e.paragraph}`),
 				kind: "text",
 				severity: "modified",
-				path: AC(e, a.r),
-				title: `텍스트 변경 (${TC(a.r)})`,
+				path: MC(e, a.r),
+				title: `텍스트 변경 (${DC(a.r)})`,
 				leftPreview: e.text,
 				rightPreview: a.r.text,
 				leftAnchor: e.anchor,
@@ -48227,29 +48287,29 @@ function rw(e, t, n) {
 			}), i += 2;
 			continue;
 		}
-		if (a.kind === "r" && o?.kind === "lr" && ZC(o.l, a.r, o.r)) {
+		if (a.kind === "r" && o?.kind === "lr" && $C(o.l, a.r, o.r)) {
 			let e = o.l, t = a.r, n = o.r;
 			r.push({
-				id: nC("text", `modified:${e.section}:${e.paragraph}`),
+				id: iC("text", `modified:${e.section}:${e.paragraph}`),
 				kind: "text",
 				severity: "modified",
-				path: AC(e, t),
-				title: `텍스트 변경 (${TC(t)})`,
+				path: MC(e, t),
+				title: `텍스트 변경 (${DC(t)})`,
 				leftPreview: e.text,
 				rightPreview: t.text,
 				leftAnchor: e.anchor,
 				rightAnchor: t.anchor,
 				leftSectionPage: e.sectionPage,
 				rightSectionPage: t.sectionPage
-			}, ...CC(n) ? [] : [{
-				id: nC("text", `added:${n.section}:${n.paragraph}`),
+			}, ...TC(n) ? [] : [{
+				id: iC("text", `added:${n.section}:${n.paragraph}`),
 				kind: "text",
 				severity: "added",
 				path: {
 					section: n.section,
 					paragraph: n.paragraph
 				},
-				title: `문단 추가 (${TC(n)})`,
+				title: `문단 추가 (${DC(n)})`,
 				leftPreview: "",
 				rightPreview: n.text,
 				rightAnchor: n.anchor,
@@ -48263,17 +48323,17 @@ function rw(e, t, n) {
 		}
 		if (a.kind === "r") {
 			let t = a.r;
-			if (!CC(t)) {
-				let n = ew(e, i);
+			if (!TC(t)) {
+				let n = nw(e, i);
 				r.push({
-					id: nC("text", `added:${t.section}:${t.paragraph}`),
+					id: iC("text", `added:${t.section}:${t.paragraph}`),
 					kind: "text",
 					severity: "added",
 					path: {
 						section: t.section,
 						paragraph: t.paragraph
 					},
-					title: `문단 추가 (${TC(t)})`,
+					title: `문단 추가 (${DC(t)})`,
 					leftPreview: "",
 					rightPreview: t.text,
 					rightAnchor: t.anchor,
@@ -48289,14 +48349,14 @@ function rw(e, t, n) {
 		}
 		if (a.kind === "l") {
 			let t = a.l;
-			if (!CC(t)) {
-				let n = tw(e, i);
+			if (!TC(t)) {
+				let n = rw(e, i);
 				r.push({
-					id: nC("text", `removed:${t.section}:${t.paragraph}`),
+					id: iC("text", `removed:${t.section}:${t.paragraph}`),
 					kind: "text",
 					severity: "removed",
-					path: AC(t, null),
-					title: `문단 삭제 (${TC(t)})`,
+					path: MC(t, null),
+					title: `문단 삭제 (${DC(t)})`,
 					leftPreview: t.text,
 					rightPreview: "",
 					leftAnchor: t.anchor,
@@ -48312,37 +48372,37 @@ function rw(e, t, n) {
 		}
 		let s = a.l, c = a.r;
 		s.normalizedText !== c.normalizedText && r.push({
-			id: nC("text", `modified:${s.section}:${s.paragraph}`),
+			id: iC("text", `modified:${s.section}:${s.paragraph}`),
 			kind: "text",
 			severity: "modified",
-			path: AC(s, c),
-			title: `텍스트 변경 (${TC(s)})`,
+			path: MC(s, c),
+			title: `텍스트 변경 (${DC(s)})`,
 			leftPreview: s.text,
 			rightPreview: c.text,
 			leftAnchor: s.anchor,
 			rightAnchor: c.anchor
-		}), s.signature === c.signature && Math.abs(s.globalIndex - c.globalIndex) > lS && r.push({
-			id: nC("paragraphMeta", `moved:${s.section}:${s.paragraph}`),
+		}), s.signature === c.signature && Math.abs(s.globalIndex - c.globalIndex) > dS && r.push({
+			id: iC("paragraphMeta", `moved:${s.section}:${s.paragraph}`),
 			kind: "paragraphMeta",
 			severity: "modified",
 			path: {
 				section: s.section,
 				paragraph: s.paragraph
 			},
-			title: `문단 이동 감지 (${TC(s)})`,
+			title: `문단 이동 감지 (${DC(s)})`,
 			leftPreview: `A idx=${s.globalIndex}`,
 			rightPreview: `B idx=${c.globalIndex}`,
 			leftAnchor: s.anchor,
 			rightAnchor: c.anchor
 		}), s.controlCount !== c.controlCount && r.push({
-			id: nC("paragraphMeta", `ctrlcount:${s.section}:${s.paragraph}`),
+			id: iC("paragraphMeta", `ctrlcount:${s.section}:${s.paragraph}`),
 			kind: "paragraphMeta",
 			severity: "modified",
 			path: {
 				section: s.section,
 				paragraph: s.paragraph
 			},
-			title: `문단 개체 수 변경 (${TC(s)})`,
+			title: `문단 개체 수 변경 (${DC(s)})`,
 			leftPreview: `controls=${s.controlCount}`,
 			rightPreview: `controls=${c.controlCount}`,
 			leftAnchor: s.anchor,
@@ -48351,9 +48411,9 @@ function rw(e, t, n) {
 	}
 	return r;
 }
-function iw(e, t) {
-	let n = e.paragraphs, r = t.paragraphs, i = BS(cw ?? sw), a = PC(n, r, i);
-	nS() && rS("[③ 앵커] 시그니처 유일 + 품질필터(길이/공백비율/엔트로피). 빈 줄·패턴 문장이 많으면 구간이 어긋날 수 있음.", `앵커 ${a.length}쌍 (앞 20개)`, a.slice(0, 20).map(({ li: e, ri: t }) => ({
+function ow(e, t) {
+	let n = e.paragraphs, r = t.paragraphs, i = HS(uw ?? lw), a = IC(n, r, i);
+	iS() && aS("[③ 앵커] 시그니처 유일 + 품질필터(길이/공백비율/엔트로피). 빈 줄·패턴 문장이 많으면 구간이 어긋날 수 있음.", `앵커 ${a.length}쌍 (앞 20개)`, a.slice(0, 20).map(({ li: e, ri: t }) => ({
 		li: e,
 		ri: t,
 		left: n[e].text.slice(0, 44),
@@ -48385,15 +48445,15 @@ function iw(e, t) {
 			leftAnchorGi: n[t.li].globalIndex,
 			rightAnchorGi: r[t.ri].globalIndex
 		} : null;
-		s.push(...qC(a, c, 0, l));
+		s.push(...YC(a, c, 0, l));
 	}
-	let c = uC(s);
+	let c = fC(s);
 	return {
-		diffs: rw(wC(nw(s)), n, r),
+		diffs: aw(EC(iw(s)), n, r),
 		rightToLeftPara: c
 	};
 }
-function aw(e, t) {
+function sw(e, t) {
 	let n = [], r = e.filter((e) => e.type === "table"), i = t.filter((e) => e.type === "table");
 	if (r.length === 0 || i.length === 0) return {
 		pins: [],
@@ -48401,10 +48461,10 @@ function aw(e, t) {
 		restRight: t
 	};
 	let a = (e) => {
-		let t = dC(e.summary), n = (t.txt ?? "").trim();
+		let t = pC(e.summary), n = (t.txt ?? "").trim();
 		if (n) return `t:${n}`;
 		let r = (t.sig ?? "").trim();
-		return r ? `s:${r}` : `h:${eC(e.summary)}`;
+		return r ? `s:${r}` : `h:${nC(e.summary)}`;
 	}, o = /* @__PURE__ */ new Map(), s = /* @__PURE__ */ new Map();
 	for (let e of r) {
 		let t = a(e), n = o.get(t);
@@ -48428,7 +48488,7 @@ function aw(e, t) {
 		restRight: t.filter((e) => !l.has(e))
 	};
 }
-function ow(e, t, n) {
+function cw(e, t, n) {
 	if (n.size === 0) return {
 		pairs: [],
 		restLeft: e,
@@ -48436,25 +48496,25 @@ function ow(e, t, n) {
 	};
 	let r = /* @__PURE__ */ new Map();
 	for (let t of e) {
-		let e = lC(t);
+		let e = dC(t);
 		r.has(e) || r.set(e, []), r.get(e).push(t);
 	}
-	for (let e of r.values()) e.sort((e, t) => (cC(e.key) ?? 0) - (cC(t.key) ?? 0));
-	let i = [...t].sort((e, t) => e.section === t.section ? e.paragraph === t.paragraph ? (cC(e.key) ?? 0) - (cC(t.key) ?? 0) : e.paragraph - t.paragraph : e.section - t.section), a = /* @__PURE__ */ new Set(), o = /* @__PURE__ */ new Set(), s = [];
+	for (let e of r.values()) e.sort((e, t) => (uC(e.key) ?? 0) - (uC(t.key) ?? 0));
+	let i = [...t].sort((e, t) => e.section === t.section ? e.paragraph === t.paragraph ? (uC(e.key) ?? 0) - (uC(t.key) ?? 0) : e.paragraph - t.paragraph : e.section - t.section), a = /* @__PURE__ */ new Set(), o = /* @__PURE__ */ new Set(), s = [];
 	for (let e of i) {
-		let t = n.get(lC(e));
+		let t = n.get(dC(e));
 		if (!t) continue;
-		let i = r.get(lC(t));
+		let i = r.get(dC(t));
 		if (!i?.length) continue;
 		let c = null, l = -1;
 		for (let t of i) {
 			if (a.has(t)) continue;
-			let n = pw(t, e);
+			let n = hw(t, e);
 			if (n < 0) continue;
-			let r = n + MS;
+			let r = n + PS;
 			r > l && (l = r, c = t);
 		}
-		c && l >= NS && (a.add(c), o.add(e), s.push({
+		c && l >= FS && (a.add(c), o.add(e), s.push({
 			left: c,
 			right: e
 		}));
@@ -48465,7 +48525,7 @@ function ow(e, t, n) {
 		restRight: t.filter((e) => !o.has(e))
 	};
 }
-var sw = {
+var lw = {
 	caseSensitive: !0,
 	ignoreWhitespace: !0,
 	kinds: [
@@ -48476,32 +48536,32 @@ var sw = {
 		"chart",
 		"paragraphMeta"
 	]
-}, cw = null;
-function lw(e, t, n) {
+}, uw = null;
+function dw(e, t, n) {
 	let r = [], i = new Map(e.controls.map((e) => [`${e.kind}::${e.key}`, e])), a = new Map(t.controls.map((e) => [`${e.kind}::${e.key}`, e])), o = [], s = [], c = /* @__PURE__ */ new Set([...i.keys(), ...a.keys()]);
 	for (let e of c) {
 		let t = i.get(e), n = a.get(e);
 		if (t && n) {
-			(t.summary !== n.summary || t.kind !== n.kind) && r.push(...pC(t, n, `modified:${e}`));
+			(t.summary !== n.summary || t.kind !== n.kind) && r.push(...hC(t, n, `modified:${e}`));
 			continue;
 		}
 		t && o.push(t), n && s.push(n);
 	}
-	let { pins: l, restLeft: u, restRight: d } = aw(o, s);
-	for (let { left: e, right: t } of l) (e.summary !== t.summary || e.kind !== t.kind) && r.push(...pC(e, t, `table-pin:${e.key}=>${t.key}`));
+	let { pins: l, restLeft: u, restRight: d } = sw(o, s);
+	for (let { left: e, right: t } of l) (e.summary !== t.summary || e.kind !== t.kind) && r.push(...hC(e, t, `table-pin:${e.key}=>${t.key}`));
 	let f = u, p = d;
 	if (n && n.size > 0) {
-		let e = ow(u, d, n);
-		for (let { left: t, right: n } of e.pairs) (t.summary !== n.summary || t.kind !== n.kind) && r.push(...pC(t, n, `align-slot:${t.key}=>${n.key}`));
+		let e = cw(u, d, n);
+		for (let { left: t, right: n } of e.pairs) (t.summary !== n.summary || t.kind !== n.kind) && r.push(...hC(t, n, `align-slot:${t.key}=>${n.key}`));
 		f = e.restLeft, p = e.restRight;
 	}
-	let m = uw(f, p), h = new Set(m.map((e) => e.left)), g = new Set(m.map((e) => e.right));
-	for (let { left: e, right: t } of m) (e.summary !== t.summary || e.type !== t.type || e.kind !== t.kind) && r.push(...pC(e, t, `fallback-modified:${e.key}=>${t.key}`));
+	let m = fw(f, p), h = new Set(m.map((e) => e.left)), g = new Set(m.map((e) => e.right));
+	for (let { left: e, right: t } of m) (e.summary !== t.summary || e.type !== t.type || e.kind !== t.kind) && r.push(...hC(e, t, `fallback-modified:${e.key}=>${t.key}`));
 	for (let e of p) {
 		if (g.has(e)) continue;
 		let t = `${e.kind}::${e.key}`;
 		r.push({
-			id: nC(e.kind, `added:${t}`),
+			id: iC(e.kind, `added:${t}`),
 			kind: e.kind,
 			severity: "added",
 			path: {
@@ -48509,7 +48569,7 @@ function lw(e, t, n) {
 				paragraph: e.paragraph,
 				controlKey: t
 			},
-			title: `${oC(e.kind)} 추가`,
+			title: `${cC(e.kind)} 추가`,
 			leftPreview: "",
 			rightPreview: e.summary,
 			rightAnchor: e.anchor
@@ -48519,7 +48579,7 @@ function lw(e, t, n) {
 		if (h.has(e)) continue;
 		let t = `${e.kind}::${e.key}`;
 		r.push({
-			id: nC(e.kind, `removed:${t}`),
+			id: iC(e.kind, `removed:${t}`),
 			kind: e.kind,
 			severity: "removed",
 			path: {
@@ -48527,7 +48587,7 @@ function lw(e, t, n) {
 				paragraph: e.paragraph,
 				controlKey: t
 			},
-			title: `${oC(e.kind)} 삭제`,
+			title: `${cC(e.kind)} 삭제`,
 			leftPreview: e.summary,
 			rightPreview: "",
 			leftAnchor: e.anchor
@@ -48535,13 +48595,13 @@ function lw(e, t, n) {
 	}
 	return r;
 }
-function uw(e, t) {
+function fw(e, t) {
 	let n = [], r = /* @__PURE__ */ new Set();
 	for (let i = 0; i < t.length; i += 1) {
 		let a = t[i], o = -1, s = -1;
 		for (let t = 0; t < e.length; t += 1) {
 			if (r.has(t)) continue;
-			let n = e[t], i = pw(n, a);
+			let n = e[t], i = hw(n, a);
 			i > s && (s = i, o = t);
 		}
 		o >= 0 && s >= 2.75 && (r.add(o), n.push({
@@ -48551,8 +48611,8 @@ function uw(e, t) {
 	}
 	return n;
 }
-function dw(e, t) {
-	let n = dC(e.summary), r = dC(t.summary);
+function pw(e, t) {
+	let n = pC(e.summary), r = pC(t.summary);
 	if ((n.r ?? "") !== (r.r ?? "") || (n.c ?? "") !== (r.c ?? "")) return .08;
 	let i = (e) => {
 		let t = e.cprev;
@@ -48560,15 +48620,15 @@ function dw(e, t) {
 		let n = e.tprev;
 		return n && n !== "(없음)" ? n : e.txt ?? "";
 	}, a = i(n), o = i(r);
-	if (a || o) return IC(a, o);
+	if (a || o) return RC(a, o);
 	let s = n.csha ?? "", c = r.csha ?? "";
-	return s && c && s === c ? 1 : IC(e.summary.replace(/\s+/g, " "), t.summary.replace(/\s+/g, " "));
+	return s && c && s === c ? 1 : RC(e.summary.replace(/\s+/g, " "), t.summary.replace(/\s+/g, " "));
 }
-function fw(e, t) {
-	let n = dw(e, t);
-	return n >= FS ? 0 : n <= IS ? 1 : (FS - n) / .38;
+function mw(e, t) {
+	let n = pw(e, t);
+	return n >= LS ? 0 : n <= RS ? 1 : (LS - n) / .38;
 }
-function pw(e, t) {
+function hw(e, t) {
 	if (e.kind !== t.kind) return -1;
 	let n = 0;
 	if (e.type === t.type && (n += 1.2), e.summary === t.summary) n += 2.6;
@@ -48576,18 +48636,18 @@ function pw(e, t) {
 		let r = e.summary.toLowerCase(), i = t.summary.toLowerCase();
 		r.includes("table") && i.includes("table") && (n += 1), r.includes("shape") && i.includes("shape") && (n += .8);
 	}
-	let r = cC(e.key), i = cC(t.key);
+	let r = uC(e.key), i = uC(t.key);
 	r != null && i != null && r === i && (n += 1.15), e.section === t.section && (n += .45);
 	let a = Math.abs(e.anchor.pageIndex - t.anchor.pageIndex);
 	a === 0 ? n += .9 : a === 1 && (n += .45);
 	let o = Math.abs(e.anchor.x - t.anchor.x), s = Math.abs(e.anchor.y - t.anchor.y), c = Math.abs(e.anchor.width - t.anchor.width), l = Math.abs(e.anchor.height - t.anchor.height);
 	if (o < 120 ? n += .35 : o < 260 && (n += .18), s < 80 ? n += .6 : s < 180 && (n += .3), c < 45 && l < 45 ? n += .45 : c < 120 && l < 120 && (n += .22), e.kind === "table" && t.kind === "table" && e.summary !== t.summary) {
-		let r = fw(e, t);
-		n -= PS * r;
+		let r = mw(e, t);
+		n -= IS * r;
 	}
 	return n;
 }
-function mw(e, t, n) {
+function gw(e, t, n) {
 	let r = /* @__PURE__ */ new Map(), i = /* @__PURE__ */ new Map(), a = /* @__PURE__ */ new Map(), o = /* @__PURE__ */ new Map();
 	for (let e of t.paragraphs) r.set(`${e.section}:${e.paragraph}`, e), a.set(e.stableId, e);
 	for (let e of n.paragraphs) i.set(`${e.section}:${e.paragraph}`, e), o.set(e.stableId, e);
@@ -48625,18 +48685,18 @@ function mw(e, t, n) {
 		}
 	}
 }
-function hw(e, t, n) {
-	cw = n;
-	let r = n.strategy ?? "alignment", i = VS(n);
-	LS = {
+function _w(e, t, n) {
+	uw = n;
+	let r = n.strategy ?? "alignment", i = US(n);
+	zS = {
 		deadline: Date.now() + i.maxComputeMs,
 		bailedOut: !1
 	};
-	let a = DC(r, e, t);
-	if (nS()) {
-		let n = xC(e), i = xC(t), o = 0;
+	let a = kC(r, e, t);
+	if (iS()) {
+		let n = CC(e), i = CC(t), o = 0;
 		if (n && i) for (let e of n.keys()) i.has(e) && (o += 1);
-		rS("[① stable_id] 스냅샷 요약", {
+		aS("[① stable_id] 스냅샷 요약", {
 			left: e.meta.name,
 			right: t.meta.name,
 			leftParas: e.paragraphs.length,
@@ -48653,7 +48713,7 @@ function hw(e, t, n) {
 				id: e.stableId ? `${e.stableId.slice(0, 14)}…` : "(빈)",
 				t: e.text.slice(0, 32)
 			}))
-		}), rS("[② 전략·폴백]", {
+		}), aS("[② 전략·폴백]", {
 			optionsStrategy: r,
 			textMode: a,
 			mapsBuildOk: !!(n && i),
@@ -48662,10 +48722,10 @@ function hw(e, t, n) {
 		});
 	}
 	let o = a === "identity" ? {
-		diffs: EC(e, t, n.kinds),
+		diffs: OC(e, t, n.kinds),
 		rightToLeftPara: /* @__PURE__ */ new Map()
-	} : iw(e, t), s = kC([...o.diffs, ...lw(e, t, o.rightToLeftPara)].filter((e) => n.kinds.includes(e.kind)), e, t);
-	mw(s, e, t), nS() && LS?.bailedOut && rS("[성능 가드레일] 타임버짓 초과로 일부 구간을 greedy/fallback으로 처리했습니다."), s.sort((e, t) => {
+	} : ow(e, t), s = jC([...o.diffs, ...dw(e, t, o.rightToLeftPara)].filter((e) => n.kinds.includes(e.kind)), e, t);
+	gw(s, e, t), iS() && zS?.bailedOut && aS("[성능 가드레일] 타임버짓 초과로 일부 구간을 greedy/fallback으로 처리했습니다."), s.sort((e, t) => {
 		let n = e.path.section ?? 0, r = t.path.section ?? 0;
 		return n === r ? (e.path.paragraph ?? 0) - (t.path.paragraph ?? 0) : n - r;
 	});
@@ -48680,29 +48740,29 @@ function hw(e, t, n) {
 			textCompareStrategyUsed: a
 		};
 	} finally {
-		LS = null, cw = null;
+		zS = null, uw = null;
 	}
 }
-async function gw(e, t, n, r, i) {
-	return hw(await yC(e, t, i), await yC(n, r, i), i);
+async function vw(e, t, n, r, i) {
+	return _w(await xC(e, t, i), await xC(n, r, i), i);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/history/idb-store.ts
-var _w = "rhwpStudioDocHistory", vw = 1, yw = "historyMeta", bw = "historyBlobs", xw = 24, Sw = /* @__PURE__ */ new Map();
-function Cw() {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/history/idb-store.ts
+var yw = "rhwpStudioDocHistory", bw = 1, xw = "historyMeta", Sw = "historyBlobs", Cw = 24, ww = /* @__PURE__ */ new Map();
+function Tw() {
 	return typeof indexedDB < "u";
 }
-function ww() {
-	return Cw() ? new Promise((e) => {
-		let t = indexedDB.open(_w, vw);
+function Ew() {
+	return Tw() ? new Promise((e) => {
+		let t = indexedDB.open(yw, bw);
 		t.onerror = () => e(null), t.onsuccess = () => e(t.result), t.onupgradeneeded = () => {
 			let e = t.result;
-			e.objectStoreNames.contains(yw) || e.createObjectStore(yw, { keyPath: "id" }), e.objectStoreNames.contains(bw) || e.createObjectStore(bw, { keyPath: "id" });
+			e.objectStoreNames.contains(xw) || e.createObjectStore(xw, { keyPath: "id" }), e.objectStoreNames.contains(Sw) || e.createObjectStore(Sw, { keyPath: "id" });
 		};
 	}) : Promise.resolve(null);
 }
-async function Tw(e, t) {
-	let n = await ww();
+async function Dw(e, t) {
+	let n = await Ew();
 	if (!n) return t();
 	try {
 		return await e(n);
@@ -48710,27 +48770,27 @@ async function Tw(e, t) {
 		n.close();
 	}
 }
-async function Ew() {
-	return [...Sw.values()].map((e) => e.meta).sort((e, t) => t.createdAt - e.createdAt);
+async function Ow() {
+	return [...ww.values()].map((e) => e.meta).sort((e, t) => t.createdAt - e.createdAt);
 }
-async function Dw() {
-	return Tw(async (e) => new Promise((t, n) => {
-		let r = e.transaction(yw, "readonly").objectStore(yw).getAll();
+async function kw() {
+	return Dw(async (e) => new Promise((t, n) => {
+		let r = e.transaction(xw, "readonly").objectStore(xw).getAll();
 		r.onsuccess = () => {
 			t((r.result ?? []).sort((e, t) => t.createdAt - e.createdAt));
 		}, r.onerror = () => n(r.error);
-	}), Ew);
+	}), Ow);
 }
-async function Ow(e) {
-	let t = Sw.get(e);
+async function Aw(e) {
+	let t = ww.get(e);
 	return t ? t.irSnapshot ? {
 		kind: "ir",
 		snapshot: t.irSnapshot
 	} : t.legacyBytes ? {
 		kind: "legacy",
 		bytes: t.legacyBytes
-	} : null : Tw(async (t) => new Promise((n, r) => {
-		let i = t.transaction(bw, "readonly").objectStore(bw).get(e);
+	} : null : Dw(async (t) => new Promise((n, r) => {
+		let i = t.transaction(Sw, "readonly").objectStore(Sw).get(e);
 		i.onsuccess = () => {
 			let e = i.result;
 			if (!e) {
@@ -48759,23 +48819,23 @@ async function Ow(e) {
 		}, i.onerror = () => r(i.error);
 	}), async () => null);
 }
-async function kw(e) {
+async function jw(e) {
 	let t = await new Promise((t, n) => {
-		let r = e.transaction(yw, "readonly").objectStore(yw).getAll();
+		let r = e.transaction(xw, "readonly").objectStore(xw).getAll();
 		r.onsuccess = () => t(r.result ?? []), r.onerror = () => n(r.error);
 	});
-	if (t.length < xw) return;
+	if (t.length < Cw) return;
 	t.sort((e, t) => e.createdAt - t.createdAt);
-	let n = t.slice(0, t.length - xw + 1);
+	let n = t.slice(0, t.length - Cw + 1);
 	for (let t of n) await new Promise((n, r) => {
-		let i = e.transaction([yw, bw], "readwrite");
-		i.objectStore(yw).delete(t.id), i.objectStore(bw).delete(t.id), i.oncomplete = () => n(), i.onerror = () => r(i.error);
+		let i = e.transaction([xw, Sw], "readwrite");
+		i.objectStore(xw).delete(t.id), i.objectStore(Sw).delete(t.id), i.oncomplete = () => n(), i.onerror = () => r(i.error);
 	});
 }
-function Aw(e) {
+function Mw(e) {
 	return JSON.parse(JSON.stringify(e));
 }
-async function jw(e, t, n) {
+async function Nw(e, t, n) {
 	let r = globalThis.crypto?.randomUUID?.() ?? `h_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`, i = Date.now(), a = JSON.stringify(n), o = new TextEncoder().encode(a).length, s = {
 		id: r,
 		label: e.trim() || `스냅샷 ${new Date(i).toLocaleString("ko-KR")}`,
@@ -48783,21 +48843,21 @@ async function jw(e, t, n) {
 		sourceFileName: t,
 		byteLength: o,
 		storageKind: "ir"
-	}, c = await ww();
+	}, c = await Ew();
 	if (!c) {
-		for (; Sw.size >= xw;) {
-			let e = [...Sw.entries()].sort((e, t) => e[1].meta.createdAt - t[1].meta.createdAt)[0];
-			e && Sw.delete(e[0]);
+		for (; ww.size >= Cw;) {
+			let e = [...ww.entries()].sort((e, t) => e[1].meta.createdAt - t[1].meta.createdAt)[0];
+			e && ww.delete(e[0]);
 		}
-		return Sw.set(r, {
+		return ww.set(r, {
 			meta: s,
-			irSnapshot: Aw(n)
+			irSnapshot: Mw(n)
 		}), s;
 	}
 	try {
-		return await kw(c), await new Promise((e, t) => {
-			let n = c.transaction([yw, bw], "readwrite");
-			n.objectStore(yw).put(s), n.objectStore(bw).put({
+		return await jw(c), await new Promise((e, t) => {
+			let n = c.transaction([xw, Sw], "readwrite");
+			n.objectStore(xw).put(s), n.objectStore(Sw).put({
 				id: r,
 				snapshotJson: a
 			}), n.oncomplete = () => e(), n.onerror = () => t(n.error);
@@ -48806,21 +48866,21 @@ async function jw(e, t, n) {
 		c.close();
 	}
 }
-async function Mw(e) {
-	Sw.delete(e), await Tw(async (t) => new Promise((n, r) => {
-		let i = t.transaction([yw, bw], "readwrite");
-		i.objectStore(yw).delete(e), i.objectStore(bw).delete(e), i.oncomplete = () => n(), i.onerror = () => r(i.error);
+async function Pw(e) {
+	ww.delete(e), await Dw(async (t) => new Promise((n, r) => {
+		let i = t.transaction([xw, Sw], "readwrite");
+		i.objectStore(xw).delete(e), i.objectStore(Sw).delete(e), i.oncomplete = () => n(), i.onerror = () => r(i.error);
 	}), async () => {});
 }
-async function Nw() {
-	Sw.clear(), await Tw(async (e) => new Promise((t, n) => {
-		let r = e.transaction([yw, bw], "readwrite");
-		r.objectStore(yw).clear(), r.objectStore(bw).clear(), r.oncomplete = () => t(), r.onerror = () => n(r.error);
+async function Fw() {
+	ww.clear(), await Dw(async (e) => new Promise((t, n) => {
+		let r = e.transaction([xw, Sw], "readwrite");
+		r.objectStore(xw).clear(), r.objectStore(Sw).clear(), r.oncomplete = () => t(), r.onerror = () => n(r.error);
 	}), async () => {});
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/history-dialog.ts
-var Pw = {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/history-dialog.ts
+var Iw = {
 	caseSensitive: !0,
 	ignoreWhitespace: !0,
 	kinds: [
@@ -48833,7 +48893,7 @@ var Pw = {
 	],
 	strategy: "identity",
 	performanceTuning: { maxComputeMs: 3e3 }
-}, Fw = class {
+}, Lw = class {
 	services;
 	compareSessionStore;
 	_open = !1;
@@ -48886,7 +48946,7 @@ var Pw = {
 		f.className = "compare-kinds-title", f.textContent = z("dialog.history.resTitle.text"), n.appendChild(f), this.resultMetaEl = document.createElement("span"), this.resultMetaEl.className = "compare-result-meta", this.resultMetaEl.textContent = z("dialog.history.resultMetaEl.text"), this.resultListEl = document.createElement("ul"), this.resultListEl.className = "compare-result-list", n.appendChild(this.resultMetaEl), n.appendChild(this.resultListEl), this.wrap.appendChild(n);
 	}
 	async refreshList() {
-		this.entries = await Dw(), this.listEl.replaceChildren();
+		this.entries = await kw(), this.listEl.replaceChildren();
 		for (let e of this.entries) {
 			let t = document.createElement("li");
 			t.className = "history-entry", e.id === this.selectedId && t.classList.add("selected"), t.dataset.id = e.id;
@@ -48900,8 +48960,8 @@ var Pw = {
 	async onSaveSnapshot() {
 		let { wasm: e } = this.services;
 		try {
-			let t = this.labelInput.value.trim() || (/* @__PURE__ */ new Date()).toLocaleString("ko-KR"), n = bC(e, t, Pw);
-			await jw(t, e.fileName, n), this.labelInput.value = "", await this.refreshList(), this.resultMetaEl.textContent = z("dialog.history.resultMetaEl.text.xf2c8ca");
+			let t = this.labelInput.value.trim() || (/* @__PURE__ */ new Date()).toLocaleString("ko-KR"), n = SC(e, t, Iw);
+			await Nw(t, e.fileName, n), this.labelInput.value = "", await this.refreshList(), this.resultMetaEl.textContent = z("dialog.history.resultMetaEl.text.xf2c8ca");
 		} catch (e) {
 			let t = e instanceof Error ? e.message : String(e);
 			this.resultMetaEl.textContent = z("dialog.history.resultMetaEl.text.xa25915", { p1: t });
@@ -48912,10 +48972,10 @@ var Pw = {
 			this.resultMetaEl.textContent = z("dialog.history.resultMetaEl.text.x907c5c");
 			return;
 		}
-		await Mw(this.selectedId), this.selectedId = null, await this.refreshList(), this.resultMetaEl.textContent = z("dialog.history.resultMetaEl.text.xcb9669"), this.resultListEl.replaceChildren();
+		await Pw(this.selectedId), this.selectedId = null, await this.refreshList(), this.resultMetaEl.textContent = z("dialog.history.resultMetaEl.text.xcb9669"), this.resultListEl.replaceChildren();
 	}
 	async onClearAll() {
-		window.confirm(z("dialog.history.onClearAll.message")) && (await Nw(), this.selectedId = null, await this.refreshList(), this.resultMetaEl.textContent = z("dialog.history.resultMetaEl.text.xfa846c"), this.resultListEl.replaceChildren());
+		window.confirm(z("dialog.history.onClearAll.message")) && (await Fw(), this.selectedId = null, await this.refreshList(), this.resultMetaEl.textContent = z("dialog.history.resultMetaEl.text.xfa846c"), this.resultListEl.replaceChildren());
 	}
 	async onCompareWithCurrent() {
 		let { wasm: e } = this.services;
@@ -48923,7 +48983,7 @@ var Pw = {
 			this.resultMetaEl.textContent = z("dialog.history.resultMetaEl.text.x63539d");
 			return;
 		}
-		let t = await Ow(this.selectedId);
+		let t = await Aw(this.selectedId);
 		if (!t) {
 			this.resultMetaEl.textContent = z("dialog.history.resultMetaEl.text.xe65823");
 			return;
@@ -48933,8 +48993,8 @@ var Pw = {
 		try {
 			let i;
 			if (t.kind === "ir") {
-				let n = bC(e, r, Pw);
-				i = hw(t.snapshot, n, Pw);
+				let n = SC(e, r, Iw);
+				i = _w(t.snapshot, n, Iw);
 			} else {
 				let a;
 				try {
@@ -48943,7 +49003,7 @@ var Pw = {
 					this.resultMetaEl.textContent = z("dialog.history.resultMetaEl.text.x3aca78");
 					return;
 				}
-				i = await gw(t.bytes, n, a, r, Pw);
+				i = await vw(t.bytes, n, a, r, Iw);
 			}
 			console.log("[rhwp:history] 최종 Diff 배열", i.diffItems), this.compareSessionStore.set(i);
 			let a = i.textCompareStrategyUsed === "identity" ? z("dialog.history.onCompareWithCurrent.text.x9cae02") : z("dialog.history.onCompareWithCurrent.text.x09d3e7");
@@ -48963,7 +49023,7 @@ var Pw = {
 		for (let [t, n] of e.entries()) {
 			let e = document.createElement("li");
 			e.className = "compare-result-item", e.dataset.diffId = n.id;
-			let r = tS(n), i = this.formatPreviewText(this.sanitizeControlPreview(n.leftPreview)), a = this.formatPreviewText(this.sanitizeControlPreview(n.rightPreview)), o = n.kind === "text" || n.severity !== "modified" ? `<div class="compare-result-preview">L: ${this.escape(i)} / R: ${this.escape(a)}</div>` : "", s = n.inlineTextDiff !== void 0 && n.inlineTextDiff !== "" ? `<div class="compare-result-inline-diff">${this.escape(this.formatInlineDiffText(n.inlineTextDiff))}</div>` : "", c = this.renderValueDiff(n);
+			let r = rS(n), i = this.formatPreviewText(this.sanitizeControlPreview(n.leftPreview)), a = this.formatPreviewText(this.sanitizeControlPreview(n.rightPreview)), o = n.kind === "text" || n.severity !== "modified" ? `<div class="compare-result-preview">L: ${this.escape(i)} / R: ${this.escape(a)}</div>` : "", s = n.inlineTextDiff !== void 0 && n.inlineTextDiff !== "" ? `<div class="compare-result-inline-diff">${this.escape(this.formatInlineDiffText(n.inlineTextDiff))}</div>` : "", c = this.renderValueDiff(n);
 			e.innerHTML = `<strong>[${this.escape(this.kindLabel(n.kind))}] ${this.escape(n.title)}${r ? ` <span class="compare-result-location">(${this.escape(r)})</span>` : ""}</strong>${o}${c}${s}`, e.addEventListener("click", () => {
 				this.compareSessionStore.gotoDiff(t), this.resultListEl.querySelectorAll(".compare-result-item.active").forEach((e) => e.classList.remove("active")), e.classList.add("active"), e.scrollIntoView({ block: "nearest" });
 			}), this.resultListEl.appendChild(e);
@@ -49131,7 +49191,7 @@ var Pw = {
 	kindLabel(e) {
 		return e === "table" ? "표" : e === "shape" ? "도형" : e === "image" ? "이미지" : e === "chart" ? "그래프" : e === "text" ? "텍스트" : "메타";
 	}
-}, Iw = class {
+}, Rw = class {
 	_open = !1;
 	wrap;
 	titleEl;
@@ -49178,7 +49238,7 @@ var Pw = {
 		let t = this.session.diffItems[e];
 		if (!t) return;
 		await this.ensureCompareDocumentsLoaded();
-		let n = tS(t);
+		let n = rS(t);
 		this.metaEl.textContent = n ? `[${t.kind}] ${t.title}\n${n}` : `[${t.kind}] ${t.title}`, this.leftPane.innerHTML = this.highlightPreview(t, "left"), this.rightPane.innerHTML = this.highlightPreview(t, "right"), this.renderRealDocumentPreview(t);
 	}
 	build() {
@@ -49213,7 +49273,7 @@ var Pw = {
 			t ? (r = t.left, i = t.right) : (r = this.formatInspectorText(e.leftPreview || "(없음)"), i = this.formatInspectorText(e.rightPreview || "(없음)"));
 		} else r = this.formatInspectorText(e.leftPreview || "(없음)"), i = this.formatInspectorText(e.rightPreview || "(없음)");
 		let a = t === "left" ? e.leftPreview : e.rightPreview, o = t === "left" ? r : i;
-		if ($x(a)) return `<pre>${this.escape(o)}</pre>`;
+		if (tS(a)) return `<pre>${this.escape(o)}</pre>`;
 		if (n === "added" && t === "right" || n === "removed" && t === "left") return `<pre><mark>${this.escape(o)}</mark></pre>`;
 		if (n !== "modified") return `<pre>${this.escape(o)}</pre>`;
 		let s = r, c = i, l = 0, u = Math.min(s.length, c.length);
@@ -49364,7 +49424,7 @@ var Pw = {
 		}
 		let o = this.resolveRenderAnchor(t, a, e);
 		if (!o) {
-			let t = eS(a, e), o = z(e === "left" ? "dialog.compareResult.renderSidePage.text" : "dialog.compareResult.renderSidePage.text.xf4ba2c");
+			let t = nS(a, e), o = z(e === "left" ? "dialog.compareResult.renderSidePage.text" : "dialog.compareResult.renderSidePage.text.xf4ba2c");
 			i.textContent = t ? `${t} · ${o}` : o;
 			let s = n.getContext("2d");
 			s && s.clearRect(0, 0, n.width, n.height), r.style.display = "none";
@@ -49375,7 +49435,7 @@ var Pw = {
 			let o = t.getPageInfo(s.pageIndex), l = e === "left" ? this.leftCanvasWrap : this.rightCanvasWrap, u = Math.max(260, l.clientWidth - 10), d = Math.max(.25, Math.min(1.25, u / Math.max(1, o.width))), f = s.pageIndex, p = () => {
 				try {
 					n.width = Math.max(1, Math.ceil(o.width * d)), n.height = Math.max(1, Math.ceil(o.height * d)), t.renderPageToCanvasFiltered(f, n, d, "all");
-					let u = eS(a, e), p = z("dialog.compareResult.renderSidePage.text.xe4e036", { p1: s.pageIndex + 1 }), m = c ? "" : z("dialog.compareResult.renderSidePage.text.x86b17f");
+					let u = nS(a, e), p = z("dialog.compareResult.renderSidePage.text.xe4e036", { p1: s.pageIndex + 1 }), m = c ? "" : z("dialog.compareResult.renderSidePage.text.x86b17f");
 					c ? (r.style.display = "block", r.style.left = `${Math.max(0, Math.floor(s.x * d))}px`, r.style.top = `${Math.max(0, Math.floor(s.y * d))}px`, r.style.width = `${Math.max(14, Math.floor(s.width * d))}px`, r.style.height = `${Math.max(14, Math.floor(s.height * d))}px`) : r.style.display = "none", i.textContent = z("dialog.compareResult.statusEl.text.x124792", {
 						p1: u ? `${u} · ` : "",
 						p2: p,
@@ -49392,7 +49452,7 @@ var Pw = {
 			i.textContent = z("dialog.compareResult.statusEl.text.x85cf7a", { p1: e instanceof Error ? e.message : String(e) }), r.style.display = "none";
 		}
 	}
-}, Lw = {
+}, zw = {
 	caseSensitive: !0,
 	ignoreWhitespace: !0,
 	kinds: [
@@ -49413,7 +49473,7 @@ var Pw = {
 		maxComputeMs: 2200,
 		hardSegmentCells: 16e4
 	}
-}, Rw = class {
+}, Bw = class {
 	services;
 	compareSessionStore;
 	_open = !1;
@@ -49468,7 +49528,7 @@ var Pw = {
 		let d = document.createElement("div");
 		d.className = "compare-strategy-row";
 		let f = document.createElement("label");
-		f.className = "compare-checkbox", this.caseSensitiveCheck = document.createElement("input"), this.caseSensitiveCheck.type = "checkbox", this.caseSensitiveCheck.id = "doc-compare-case-sensitive", this.caseSensitiveCheck.checked = Lw.caseSensitive;
+		f.className = "compare-checkbox", this.caseSensitiveCheck = document.createElement("input"), this.caseSensitiveCheck.type = "checkbox", this.caseSensitiveCheck.id = "doc-compare-case-sensitive", this.caseSensitiveCheck.checked = zw.caseSensitive;
 		let p = document.createElement("span");
 		p.textContent = z("dialog.compare.caseSpan.text"), f.append(this.caseSensitiveCheck, p), d.appendChild(f), u.appendChild(d), n.appendChild(u);
 		let m = document.createElement("div");
@@ -49520,8 +49580,8 @@ var Pw = {
 		}
 		this.running = !0, this.runBtn.disabled = !0, this.openTwoPaneBtn.disabled = !0, this.runBtn.textContent = z("dialog.compare.runBtn.text.xba14a1"), this.resultMetaEl.textContent = z("dialog.compare.resultMetaEl.text.x642b28"), this.resultListEl.replaceChildren();
 		try {
-			let e = await gw(this.leftFile.bytes, this.leftFile.fileName, this.rightFile.bytes, this.rightFile.fileName, {
-				...Lw,
+			let e = await vw(this.leftFile.bytes, this.leftFile.fileName, this.rightFile.bytes, this.rightFile.fileName, {
+				...zw,
 				caseSensitive: this.caseSensitiveCheck.checked
 			});
 			await this.loadRightDocumentToEditor(this.rightFile), this.compareSessionStore.set(e), this.services.eventBus.emit("compare:mode-changed", !0);
@@ -49546,7 +49606,7 @@ var Pw = {
 			return;
 		}
 		let t = Math.max(0, e.currentDiffIndex);
-		this.resultWindow ??= new Iw(), this.leftFile && this.rightFile && this.resultWindow.show(e, this.compareSessionStore, t, {
+		this.resultWindow ??= new Rw(), this.leftFile && this.rightFile && this.resultWindow.show(e, this.compareSessionStore, t, {
 			left: this.leftFile,
 			right: this.rightFile
 		});
@@ -49573,11 +49633,11 @@ var Pw = {
 		for (let [t, n] of e.entries()) {
 			let e = document.createElement("li");
 			e.className = "compare-result-item", e.dataset.diffId = n.id;
-			let r = tS(n), i = this.renderValueDiff(n), a = this.formatPreviewText(this.sanitizeControlPreview(n.leftPreview)), o = this.formatPreviewText(this.sanitizeControlPreview(n.rightPreview)), s = n.kind === "text" || n.severity !== "modified" ? `<div class="compare-result-preview">L: ${this.escape(a)} / R: ${this.escape(o)}</div>` : "";
+			let r = rS(n), i = this.renderValueDiff(n), a = this.formatPreviewText(this.sanitizeControlPreview(n.leftPreview)), o = this.formatPreviewText(this.sanitizeControlPreview(n.rightPreview)), s = n.kind === "text" || n.severity !== "modified" ? `<div class="compare-result-preview">L: ${this.escape(a)} / R: ${this.escape(o)}</div>` : "";
 			e.innerHTML = `<strong>[${this.escape(this.kindLabel(n.kind))}] ${this.escape(n.title)}${r ? ` <span class="compare-result-location">(${this.escape(r)})</span>` : ""}</strong>${s}${i}`, e.addEventListener("click", () => {
 				this.compareSessionStore.gotoDiff(t);
 				let n = this.compareSessionStore.get();
-				n && (this.resultWindow ??= new Iw(), this.leftFile && this.rightFile ? this.resultWindow.show(n, this.compareSessionStore, t, {
+				n && (this.resultWindow ??= new Rw(), this.leftFile && this.rightFile ? this.resultWindow.show(n, this.compareSessionStore, t, {
 					left: this.leftFile,
 					right: this.rightFile
 				}) : this.resultWindow.show(n, this.compareSessionStore, t)), this.resultListEl.querySelectorAll(".compare-result-item.active").forEach((e) => e.classList.remove("active")), e.classList.add("active"), e.scrollIntoView({ block: "nearest" });
@@ -49734,7 +49794,7 @@ var Pw = {
 	kindLabel(e) {
 		return e === "table" ? "표" : e === "shape" ? "도형" : e === "image" ? "이미지" : e === "chart" ? "그래프" : e === "text" ? "텍스트" : "메타";
 	}
-}, zw = class {
+}, Vw = class {
 	eventBus;
 	session = null;
 	constructor(e) {
@@ -49771,13 +49831,13 @@ var Pw = {
 	}
 };
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/command/format-paste-availability.ts
-function Bw(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/command/format-paste-availability.ts
+function Hw(e) {
 	return e.hasDocument && e.hasCopiedFormat && !e.isFormMode && (e.hasSelection || e.inCellSelectionMode);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/command/commands/edit.ts
-var Vw = null, Hw = null, Uw = null, Ww = null, Gw = [
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/command/commands/edit.ts
+var Uw = null, Ww = null, Gw = null, Kw = null, qw = [
 	{
 		id: "edit:undo",
 		label: z("command.edit.undo.label"),
@@ -49842,7 +49902,7 @@ var Vw = null, Hw = null, Uw = null, Ww = null, Gw = [
 		id: "edit:format-paste",
 		label: z("command.edit.formatPaste.label"),
 		icon: "icon-format-copy",
-		canExecute: Bw,
+		canExecute: Hw,
 		execute(e) {
 			e.getInputHandler()?.performFormatPaste();
 		}
@@ -49875,11 +49935,11 @@ var Vw = null, Hw = null, Uw = null, Ww = null, Gw = [
 		shortcutLabel: "Ctrl+F",
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			if (Vw && Vw.isOpen()) {
-				Vw.focusInput();
+			if (Uw && Uw.isOpen()) {
+				Uw.focusInput();
 				return;
 			}
-			Vw = new Zx(e, "find"), Vw.show();
+			Uw = new $x(e, "find"), Uw.show();
 		}
 	},
 	{
@@ -49890,11 +49950,11 @@ var Vw = null, Hw = null, Uw = null, Ww = null, Gw = [
 		shortcutLabel: "Ctrl+F2",
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			if (Vw && Vw.isOpen()) {
-				Vw.switchMode("replace"), Vw.focusInput();
+			if (Uw && Uw.isOpen()) {
+				Uw.switchMode("replace"), Uw.focusInput();
 				return;
 			}
-			Vw = new Zx(e, "replace"), Vw.show();
+			Uw = new $x(e, "replace"), Uw.show();
 		}
 	},
 	{
@@ -49903,12 +49963,12 @@ var Vw = null, Hw = null, Uw = null, Ww = null, Gw = [
 		shortcutLabel: "Ctrl+L",
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			if (Vw && Vw.isOpen()) Vw.findNext();
-			else if (Zx.lastQuery) {
+			if (Uw && Uw.isOpen()) Uw.findNext();
+			else if ($x.lastQuery) {
 				let t = e.getInputHandler();
 				if (!t) return;
 				let n = t.getCursorPosition();
-				Xx(t, e.wasm.searchText(Zx.lastQuery, n.sectionIndex, n.paragraphIndex, n.charOffset, !0, Zx.lastCaseSensitive, !0));
+				Qx(t, e.wasm.searchText($x.lastQuery, n.sectionIndex, n.paragraphIndex, n.charOffset, !0, $x.lastCaseSensitive, !0));
 			}
 		}
 	},
@@ -49919,7 +49979,7 @@ var Vw = null, Hw = null, Uw = null, Ww = null, Gw = [
 		shortcutLabel: "Alt+Shift+V",
 		canExecute: () => !0,
 		execute(e) {
-			Ww ||= new zw(e.eventBus), Hw?.isOpen() && Hw.hide(), !(Uw && Uw.isOpen()) && (Uw = new Rw(e, Ww), Uw.show());
+			Kw ||= new Vw(e.eventBus), Ww?.isOpen() && Ww.hide(), !(Gw && Gw.isOpen()) && (Gw = new Bw(e, Kw), Gw.show());
 		}
 	},
 	{
@@ -49929,7 +49989,7 @@ var Vw = null, Hw = null, Uw = null, Ww = null, Gw = [
 		shortcutLabel: "Ctrl+Shift+H",
 		canExecute: () => !0,
 		execute(e) {
-			Ww ||= new zw(e.eventBus), Uw?.isOpen() && Uw.hide(), !(Hw && Hw.isOpen()) && (Hw = new Fw(e, Ww), Hw.show());
+			Kw ||= new Vw(e.eventBus), Gw?.isOpen() && Gw.hide(), !(Ww && Ww.isOpen()) && (Ww = new Lw(e, Kw), Ww.show());
 		}
 	},
 	{
@@ -49939,7 +49999,7 @@ var Vw = null, Hw = null, Uw = null, Ww = null, Gw = [
 		shortcutLabel: "Alt+G",
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			new Qx(e).show();
+			new eS(e).show();
 		}
 	},
 	{
@@ -49955,7 +50015,7 @@ var Vw = null, Hw = null, Uw = null, Ww = null, Gw = [
 			if (console.log("[field:edit] fieldInfo:", n), !n || n.fieldId == null) return;
 			let r = e.wasm.getClickHereProps(n.fieldId);
 			if (console.log("[field:edit] props:", r), !r.ok) return;
-			let i = new Yx();
+			let i = new Zx();
 			i.onApply = (e) => {
 				console.log("[field:edit] apply:", e);
 				try {
@@ -49991,43 +50051,43 @@ var Vw = null, Hw = null, Uw = null, Ww = null, Gw = [
 			t && t.confirmRemoveCurrentField?.();
 		}
 	}
-], Kw = "(prefers-color-scheme: dark)", qw = "meta[name=\"theme-color\"]", Jw = "meta[name=\"color-scheme\"]";
-function Yw() {
-	return window.matchMedia?.(Kw).matches ?? !1;
+], Jw = "(prefers-color-scheme: dark)", Yw = "meta[name=\"theme-color\"]", Xw = "meta[name=\"color-scheme\"]";
+function Zw() {
+	return window.matchMedia?.(Jw).matches ?? !1;
 }
-function Xw(e) {
-	let t = document.querySelector(qw);
+function Qw(e) {
+	let t = document.querySelector(Yw);
 	t && (t.content = getComputedStyle(e).getPropertyValue("--ui-bg-light").trim() || "#f5f5f5");
 }
-function Zw(e, t) {
+function $w(e, t) {
 	let n = `only ${t}`;
 	e.style.colorScheme = n;
-	let r = document.querySelector(Jw);
+	let r = document.querySelector(Xw);
 	r && (r.content = n);
 }
-function Qw() {
+function eT() {
 	return R.getThemeSettings().mode;
 }
-function $w(e = Qw()) {
-	return e === "dark" ? "dark" : e === "light" ? "light" : Yw() ? "dark" : "light";
+function tT(e = eT()) {
+	return e === "dark" ? "dark" : e === "light" ? "light" : Zw() ? "dark" : "light";
 }
-function eT() {
+function nT() {
 	return R.getThemeSettings().skin;
 }
-function tT(e = Qw()) {
-	let t = $w(e), n = document.documentElement;
-	return n.dataset.themeMode = e, n.dataset.themeEffective = t, nT(n), Zw(n, t), Xw(n), t;
+function rT(e = eT()) {
+	let t = tT(e), n = document.documentElement;
+	return n.dataset.themeMode = e, n.dataset.themeEffective = t, iT(n), $w(n, t), Qw(n), t;
 }
-function nT(e, t = eT()) {
+function iT(e, t = nT()) {
 	t === "default" ? delete e.dataset.themeSkin : e.dataset.themeSkin = t;
 }
-function rT(e) {
-	return R.setThemeMode(e), tT(e);
+function aT(e) {
+	return R.setThemeMode(e), rT(e);
 }
-function iT(e) {
-	return R.setThemeSkin(e), tT();
+function oT(e) {
+	return R.setThemeSkin(e), rT();
 }
-function aT(e = Qw(), t = eT()) {
+function sT(e = eT(), t = nT()) {
 	for (let t of document.querySelectorAll("[data-theme-mode-choice]")) {
 		let n = t.dataset.themeModeChoice === e;
 		t.classList.toggle("active", n), t.setAttribute("aria-checked", String(n));
@@ -50037,22 +50097,22 @@ function aT(e = Qw(), t = eT()) {
 		e.classList.toggle("active", n), e.setAttribute("aria-checked", String(n));
 	}
 }
-function oT(e) {
+function cT(e) {
 	let t = () => {
-		let t = Qw(), n = tT(t);
-		aT(t), e?.(n, t);
+		let t = eT(), n = rT(t);
+		sT(t), e?.(n, t);
 	};
 	t();
-	let n = window.matchMedia?.(Kw);
+	let n = window.matchMedia?.(Jw);
 	if (!n) return () => {};
 	let r = () => {
-		Qw() === "system" && t();
+		eT() === "system" && t();
 	};
 	return typeof n.addEventListener == "function" ? (n.addEventListener("change", r), () => n.removeEventListener("change", r)) : (n.addListener(r), () => n.removeListener(r));
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/grid-settings-dialog.ts
-var sT = class extends V {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/grid-settings-dialog.ts
+var lT = class extends V {
 	visibleInput;
 	horizontalInput;
 	verticalInput;
@@ -50156,7 +50216,7 @@ var sT = class extends V {
 	clampMoveStep(e) {
 		return Number.isFinite(e) ? Math.min(50, Math.max(.5, e)) : this.currentMoveStepMm;
 	}
-}, cT = 7200 / 25.4, lT = [{
+}, uT = 7200 / 25.4, dT = [{
 	key: "basic",
 	cmd: "view:toolbox-basic",
 	nameKey: "ui.toolbox.basic",
@@ -50173,13 +50233,13 @@ var sT = class extends V {
 	attribute: "data-toolbox-format",
 	elementId: "style-bar"
 }];
-function uT(e) {
+function fT(e) {
 	return e ? "shown" : "hidden";
 }
-function dT(e, t) {
-	for (let n of lT) {
+function pT(e, t) {
+	for (let n of dT) {
 		let r = t[n.key];
-		e.documentElement.dataset[n.datasetKey] = uT(r);
+		e.documentElement.dataset[n.datasetKey] = fT(r);
 		for (let t of e.querySelectorAll(`[data-cmd="${n.cmd}"]`)) if (t.classList.toggle("active", r), t.getAttribute("aria-controls") === n.elementId) {
 			let e = z(r ? "ui.toolbox.collapseLabel" : "ui.toolbox.expandLabel", { p1: z(n.nameKey) });
 			t.setAttribute("aria-expanded", String(r)), t.setAttribute("aria-label", e), t.setAttribute("title", n.shortcut ? `${e} (${n.shortcut})` : e);
@@ -50187,25 +50247,25 @@ function dT(e, t) {
 	}
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/zoom-dialog-state.ts
-var fT = [
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/zoom-dialog-state.ts
+var mT = [
 	100,
 	125,
 	150,
 	200,
 	300,
 	500
-], pT = So * 100, mT = 500, hT = .005;
-function gT(e) {
+], hT = So * 100, gT = 500, _T = .005;
+function vT(e) {
 	let t = e.trim();
 	if (t === "") return {
 		valid: !1,
 		message: "사용자 정의 배율을 입력하세요."
 	};
 	let n = Number(t);
-	return Number.isFinite(n) ? Number.isInteger(n) ? n < pT || n > mT ? {
+	return Number.isFinite(n) ? Number.isInteger(n) ? n < hT || n > gT ? {
 		valid: !1,
-		message: `${pT}~${mT}% 사이의 배율을 입력하세요.`
+		message: `${hT}~${gT}% 사이의 배율을 입력하세요.`
 	} : {
 		valid: !0,
 		percent: n
@@ -50217,26 +50277,26 @@ function gT(e) {
 		message: "사용자 정의 배율은 숫자로 입력하세요."
 	};
 }
-function _T(e) {
-	return Number.isFinite(e) ? Math.max(pT, Math.min(mT, Math.round(e))) : 100;
+function yT(e) {
+	return Number.isFinite(e) ? Math.max(hT, Math.min(gT, Math.round(e))) : 100;
 }
-function vT(e, t) {
-	for (let t of fT) if (Math.abs(e - t / 100) <= hT) return {
+function bT(e, t) {
+	for (let t of mT) if (Math.abs(e - t / 100) <= _T) return {
 		kind: "preset",
 		percent: t
 	};
-	return Math.abs(e - t.fitWidth) <= hT ? { kind: "fitWidth" } : Math.abs(e - t.fitPage) <= hT ? { kind: "fitPage" } : {
+	return Math.abs(e - t.fitWidth) <= _T ? { kind: "fitWidth" } : Math.abs(e - t.fitPage) <= _T ? { kind: "fitPage" } : {
 		kind: "custom",
-		percent: _T(e * 100)
+		percent: yT(e * 100)
 	};
 }
-function yT(e) {
+function xT(e) {
 	return e.kind === "fitWidth" || e.kind === "fitPage" ? e.kind : "none";
 }
-function bT(e) {
-	return wo(e.arrangement).kind === "multiple" ? "fitPage" : yT(e.zoomChoice);
+function ST(e) {
+	return wo(e.arrangement).kind === "multiple" ? "fitPage" : xT(e.zoomChoice);
 }
-function xT(e) {
+function CT(e) {
 	let t = wo(e.arrangement);
 	if (t.kind === "multiple") return Lc("fitPage", {
 		containerWidth: e.viewportWidth,
@@ -50257,12 +50317,12 @@ function xT(e) {
 			pageGap: e.pageGap
 		}) ?? 1;
 		case "preset":
-		case "custom": return _T(e.zoomChoice.percent) / 100;
+		case "custom": return yT(e.zoomChoice.percent) / 100;
 	}
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/zoom-dialog.ts
-var ST = "zoom-dialog-custom-error", CT = class extends V {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/zoom-dialog.ts
+var wT = "zoom-dialog-custom-error", TT = class extends V {
 	initialChoice;
 	initialArrangement;
 	initialPageMovement;
@@ -50274,7 +50334,7 @@ var ST = "zoom-dialog-custom-error", CT = class extends V {
 	wheelHorizontalInput;
 	inputEnterHandler = null;
 	constructor(e) {
-		super(z("dialog.zoom.title"), 540), this.initialChoice = vT(e.currentZoom, e.fitZooms), this.initialArrangement = wo(e.arrangement), this.initialPageMovement = As(e.pageMovement), this.callback = e.onConfirm;
+		super(z("dialog.zoom.title"), 540), this.initialChoice = bT(e.currentZoom, e.fitZooms), this.initialArrangement = wo(e.arrangement), this.initialPageMovement = As(e.pageMovement), this.callback = e.onConfirm;
 	}
 	show() {
 		super.show(), this.dialog.classList.add("zoom-dialog");
@@ -50293,7 +50353,7 @@ var ST = "zoom-dialog-custom-error", CT = class extends V {
 	onConfirm() {
 		let e = this.selectedValue("zoom-choice"), t;
 		if (e === "custom" && !this.customInput.disabled) {
-			let e = gT(this.customInput.value);
+			let e = vT(this.customInput.value);
 			if (!e.valid) return this.showCustomZoomError(e.message), !1;
 			t = e.percent, this.clearCustomZoomError();
 		}
@@ -50312,14 +50372,14 @@ var ST = "zoom-dialog-custom-error", CT = class extends V {
 		t.className = "zoom-dialog-grid";
 		let n = document.createElement("div"), r = document.createElement("div");
 		n.className = "zoom-dialog-choice-column", r.className = "zoom-dialog-choice-column";
-		for (let e of fT) n.appendChild(this.radioRow("zoom-choice", `preset:${e}`, `${e}%`, this.initialChoice.kind === "preset" && this.initialChoice.percent === e));
+		for (let e of mT) n.appendChild(this.radioRow("zoom-choice", `preset:${e}`, `${e}%`, this.initialChoice.kind === "preset" && this.initialChoice.percent === e));
 		r.append(this.radioRow("zoom-choice", "fitWidth", z("dialog.zoom.radioRow.label"), this.initialChoice.kind === "fitWidth"), this.radioRow("zoom-choice", "fitPage", z("dialog.zoom.radioRow.label.xc096df"), this.initialChoice.kind === "fitPage"));
 		let i = this.radioRow("zoom-choice", "custom", z("dialog.zoom.radioRow.label.x0b64ca"), this.initialChoice.kind === "custom");
-		this.customInput = this.numberInput(this.initialChoice.kind === "custom" ? this.initialChoice.percent : 100, pT, mT, z("dialog.zoom.createZoomSection.label")), this.customInput.setAttribute("aria-describedby", ST), this.customInput.setAttribute("aria-invalid", "false"), this.customInput.addEventListener("input", () => {
-			gT(this.customInput.value).valid && this.clearCustomZoomError();
+		this.customInput = this.numberInput(this.initialChoice.kind === "custom" ? this.initialChoice.percent : 100, hT, gT, z("dialog.zoom.createZoomSection.label")), this.customInput.setAttribute("aria-describedby", wT), this.customInput.setAttribute("aria-invalid", "false"), this.customInput.addEventListener("input", () => {
+			vT(this.customInput.value).valid && this.clearCustomZoomError();
 		});
 		let a = document.createElement("span");
-		return a.className = "dialog-unit", a.textContent = "%", i.append(this.customInput, a), this.customError = document.createElement("p"), this.customError.id = ST, this.customError.className = "zoom-dialog-custom-error", this.customError.setAttribute("role", "alert"), this.customError.hidden = !0, r.append(i, this.customError), t.append(n, r), e.appendChild(t), e.addEventListener("change", () => this.updateDependentInputs()), queueMicrotask(() => this.updateDependentInputs()), e;
+		return a.className = "dialog-unit", a.textContent = "%", i.append(this.customInput, a), this.customError = document.createElement("p"), this.customError.id = wT, this.customError.className = "zoom-dialog-custom-error", this.customError.setAttribute("role", "alert"), this.customError.hidden = !0, r.append(i, this.customError), t.append(n, r), e.appendChild(t), e.addEventListener("change", () => this.updateDependentInputs()), queueMicrotask(() => this.updateDependentInputs()), e;
 	}
 	createMovementSection() {
 		let e = this.section(z("dialog.zoom.section.label.xbd5df6")), t = document.createElement("div");
@@ -50369,10 +50429,10 @@ var ST = "zoom-dialog-custom-error", CT = class extends V {
 	zoomChoiceFromValue(e, t) {
 		return e.startsWith("preset:") ? {
 			kind: "preset",
-			percent: _T(Number(e.slice(7)))
+			percent: yT(Number(e.slice(7)))
 		} : e === "fitWidth" ? { kind: "fitWidth" } : e === "fitPage" ? { kind: "fitPage" } : {
 			kind: "custom",
-			percent: t ?? _T(Number(this.customInput.value))
+			percent: t ?? yT(Number(this.customInput.value))
 		};
 	}
 	showCustomZoomError(e) {
@@ -50403,8 +50463,8 @@ var ST = "zoom-dialog-custom-error", CT = class extends V {
 			e.disabled = t;
 		}), this.customInput.disabled = t || this.selectedValue("zoom-choice") !== "custom", this.customInput.disabled && this.clearCustomZoomError(), this.columnsInput.disabled = !t, this.rowsInput.disabled = !t, this.wheelHorizontalInput.disabled = !e;
 	}
-}, wT = 10;
-function TT(e, t) {
+}, ET = 10;
+function DT(e, t) {
 	if (e.wasm.pageCount === 0) return null;
 	let n = document.getElementById("scroll-container");
 	if (!n) return null;
@@ -50415,18 +50475,18 @@ function TT(e, t) {
 		pageWidth: r.width,
 		pageHeight: r.height,
 		arrangement: t,
-		pageGap: wT
+		pageGap: ET
 	};
 }
-function ET(e, t) {
+function OT(e, t) {
 	let n = e.getViewportManager();
 	if (!n) return;
-	let r = TT(e, R.getViewSettings().pageArrangement);
+	let r = DT(e, R.getViewSettings().pageArrangement);
 	if (!r) return;
 	let i = Lc(t, r);
 	i !== null && n.setZoom(i, Ts, t);
 }
-function DT(e, t) {
+function kT(e, t) {
 	return {
 		id: `view:zoom-${e}`,
 		label: `${e}%`,
@@ -50436,65 +50496,65 @@ function DT(e, t) {
 		}
 	};
 }
-function OT(e, t) {
+function AT(e, t) {
 	return {
 		id: `view:theme-${e}`,
 		label: t,
 		execute(t) {
-			let n = rT(e);
-			aT(e), t.eventBus.emit("theme-changed", {
+			let n = aT(e);
+			sT(e), t.eventBus.emit("theme-changed", {
 				mode: e,
 				effective: n
 			}), t.eventBus.emit("document-view-changed");
 		}
 	};
 }
-function kT(e, t) {
+function jT(e, t) {
 	return {
 		id: `view:skin-${e}`,
 		label: t,
 		execute(t) {
-			let n = iT(e);
-			aT(), t.eventBus.emit("theme-changed", {
+			let n = oT(e);
+			sT(), t.eventBus.emit("theme-changed", {
 				mode: R.getThemeSettings().mode,
 				effective: n
 			}), t.eventBus.emit("document-view-changed");
 		}
 	};
 }
-function AT(e, t) {
+function MT(e, t) {
 	document.querySelectorAll("[data-cmd=\"view:ctrl-mark\"]").forEach((t) => {
 		t.classList.toggle("active", e);
 	}), document.querySelectorAll("[data-cmd=\"view:para-mark\"]").forEach((e) => {
 		e.classList.toggle("active", t);
 	});
 }
-var jT = !R.getViewSettings().clipView;
-function MT(e) {
-	jT = e, document.querySelectorAll("[data-cmd=\"view:toggle-clip\"]").forEach((t) => {
+var NT = !R.getViewSettings().clipView;
+function PT(e) {
+	NT = e, document.querySelectorAll("[data-cmd=\"view:toggle-clip\"]").forEach((t) => {
 		t.classList.toggle("active", !e);
 	});
 }
-function NT() {
+function FT() {
 	let e = R.getViewSettings();
-	dT(document, {
+	pT(document, {
 		basic: e.toolbarBasic,
 		format: e.toolbarFormat
 	});
 }
-function PT(e) {
+function IT(e) {
 	let t = e.getInputHandler();
 	t?.updateCaret?.(!0), requestAnimationFrame(() => t?.updateCaret?.(!0));
 }
-function FT(e) {
+function LT(e) {
 	let t = 0, n = e.getInputHandler(), r = n ? n.cursor : null;
 	typeof r?.rect?.pageIndex == "number" && (t = r.rect.pageIndex);
-	let i = e.wasm.getPageInfo(t), a = e.wasm.getDocumentInfo(), o = e.wasm.getSectionDef(i.sectionIndex ?? 0), s = e.wasm.getPageBorderFill(i.sectionIndex ?? 0), c = e.wasm.getPageDef(i.sectionIndex ?? 0), l = IT(c.marginLeft / cT), u = IT((c.marginTop + c.marginHeader) / cT), d = a.hwp3Variant && s.basis === "page" ? IT(o.columnSpacing / cT) : 0, f = d > 0 ? IT(IT(c.marginTop / cT) + IT(c.marginHeader / cT) + d) : u;
+	let i = e.wasm.getPageInfo(t), a = e.wasm.getDocumentInfo(), o = e.wasm.getSectionDef(i.sectionIndex ?? 0), s = e.wasm.getPageBorderFill(i.sectionIndex ?? 0), c = e.wasm.getPageDef(i.sectionIndex ?? 0), l = RT(c.marginLeft / uT), u = RT((c.marginTop + c.marginHeader) / uT), d = a.hwp3Variant && s.basis === "page" ? RT(o.columnSpacing / uT) : 0, f = d > 0 ? RT(RT(c.marginTop / uT) + RT(c.marginHeader / uT) + d) : u;
 	return {
 		defaults: {
 			page: {
 				x: 0,
-				y: IT(f - u)
+				y: RT(f - u)
 			},
 			paper: {
 				x: l,
@@ -50513,11 +50573,11 @@ function FT(e) {
 		}
 	};
 }
-function IT(e) {
+function RT(e) {
 	return Math.round(e * 100) / 100;
 }
-function LT(e, t) {
-	if (!RT(e.offsetXmm, 0) || !RT(e.offsetYmm, 0)) return e;
+function zT(e, t) {
+	if (!BT(e.offsetXmm, 0) || !BT(e.offsetYmm, 0)) return e;
 	let n = t[e.origin];
 	return {
 		...e,
@@ -50525,10 +50585,10 @@ function LT(e, t) {
 		offsetYmm: n.y
 	};
 }
-function RT(e, t) {
+function BT(e, t) {
 	return Number.isFinite(e) && Math.abs(e - t) < .01;
 }
-var zT = [
+var VT = [
 	{
 		id: "view:zoom-in",
 		label: z("command.view.zoomIn.label"),
@@ -50557,28 +50617,28 @@ var zT = [
 		execute(e) {
 			let t = e.getViewportManager();
 			if (!t) return;
-			let n = R.getViewSettings(), r = n.pageArrangement, i = TT(e, r);
+			let n = R.getViewSettings(), r = n.pageArrangement, i = DT(e, r);
 			if (!i) return;
 			let a = {
 				fitWidth: Lc("fitWidth", i) ?? 1,
 				fitPage: Lc("fitPage", i) ?? 1
 			};
-			new CT({
+			new TT({
 				currentZoom: t.getZoom(),
 				fitZooms: a,
 				arrangement: r,
 				pageMovement: n.pageMovement,
 				onConfirm(t) {
-					let n = TT(e, t.arrangement);
+					let n = DT(e, t.arrangement);
 					if (!n) return;
-					let r = xT({
+					let r = CT({
 						...t,
 						viewportWidth: n.containerWidth,
 						viewportHeight: n.containerHeight,
 						pageWidth: n.pageWidth,
 						pageHeight: n.pageHeight,
 						pageGap: n.pageGap
-					}), i = bT(t);
+					}), i = ST(t);
 					R.setPageViewSettings(t.arrangement, t.pageMovement, i);
 					let a = R.getViewSettings(), o = {
 						arrangement: a.pageArrangement,
@@ -50599,7 +50659,7 @@ var zT = [
 		label: z("command.view.zoomFitPage.label"),
 		shortcutLabel: "Ctrl+G,P",
 		execute(e) {
-			ET(e, "fitPage");
+			OT(e, "fitPage");
 		}
 	},
 	{
@@ -50607,23 +50667,23 @@ var zT = [
 		label: z("command.view.zoomFitWidth.label"),
 		shortcutLabel: "Ctrl+G,W",
 		execute(e) {
-			ET(e, "fitWidth");
+			OT(e, "fitWidth");
 		}
 	},
-	DT(50),
-	DT(75),
-	DT(100, "Ctrl+G,Q"),
-	DT(125),
-	DT(150),
-	DT(200),
-	DT(300),
-	DT(500),
-	OT("system", z("command.view.themeModeCommand.system")),
-	OT("light", z("command.view.themeModeCommand.light")),
-	OT("dark", z("command.view.themeModeCommand.dark")),
-	kT("oldschool", z("command.view.themeSkinCommand.oldschool")),
-	kT("default", z("command.view.themeSkinCommand.default")),
-	kT("flat", z("command.view.themeSkinCommand.flat")),
+	kT(50),
+	kT(75),
+	kT(100, "Ctrl+G,Q"),
+	kT(125),
+	kT(150),
+	kT(200),
+	kT(300),
+	kT(500),
+	AT("system", z("command.view.themeModeCommand.system")),
+	AT("light", z("command.view.themeModeCommand.light")),
+	AT("dark", z("command.view.themeModeCommand.dark")),
+	jT("oldschool", z("command.view.themeSkinCommand.oldschool")),
+	jT("default", z("command.view.themeSkinCommand.default")),
+	jT("flat", z("command.view.themeSkinCommand.flat")),
 	{
 		id: "view:form-mode",
 		label: z("command.view.formMode.registryLabel"),
@@ -50641,7 +50701,7 @@ var zT = [
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
 			let t = !e.getContext().showControlCodes;
-			e.wasm.setShowControlCodes(t), e.wasm.setShowParagraphMarks(t), R.setShowControlCodes(t), R.setShowParagraphMarks(t), AT(t, t), PT(e), e.eventBus.emit("document-view-changed");
+			e.wasm.setShowControlCodes(t), e.wasm.setShowParagraphMarks(t), R.setShowControlCodes(t), R.setShowParagraphMarks(t), MT(t, t), IT(e), e.eventBus.emit("document-view-changed");
 		}
 	},
 	{
@@ -50652,7 +50712,7 @@ var zT = [
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
 			let t = e.getContext(), n = !t.showParagraphMarks;
-			e.wasm.setShowParagraphMarks(n), R.setShowParagraphMarks(n), AT(t.showControlCodes, n), PT(e), e.eventBus.emit("document-view-changed");
+			e.wasm.setShowParagraphMarks(n), R.setShowParagraphMarks(n), MT(t.showControlCodes, n), IT(e), e.eventBus.emit("document-view-changed");
 		}
 	},
 	{
@@ -50672,8 +50732,8 @@ var zT = [
 		label: z("command.view.toggleClip.label"),
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			let t = !jT;
-			e.wasm.setClipEnabled(t), R.setClipView(!t), MT(t), e.eventBus.emit("document-view-changed");
+			let t = !NT;
+			e.wasm.setClipEnabled(t), R.setClipView(!t), PT(t), e.eventBus.emit("document-view-changed");
 		}
 	},
 	{
@@ -50695,8 +50755,8 @@ var zT = [
 		icon: "icon-grid",
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			let t = e.getInputHandler(), n = FT(e);
-			new sT(LT(vc(), n.defaults), n.bases, t?.getGridStepMm() ?? 3, (n, r) => {
+			let t = e.getInputHandler(), n = LT(e);
+			new lT(zT(vc(), n.defaults), n.bases, t?.getGridStepMm() ?? 3, (n, r) => {
 				let i = yc(n);
 				t?.setGridStep(r), document.querySelectorAll("[data-cmd=\"view:toggle-grid\"]").forEach((e) => {
 					e.classList.toggle("active", i.visible);
@@ -50709,17 +50769,17 @@ var zT = [
 		label: z("command.view.toolboxBasic.label"),
 		shortcutLabel: "Ctrl+F1",
 		execute() {
-			R.setToolbarBasic(!R.getViewSettings().toolbarBasic), NT();
+			R.setToolbarBasic(!R.getViewSettings().toolbarBasic), FT();
 		}
 	},
 	{
 		id: "view:toolbox-format",
 		label: z("command.view.toolboxFormat.label"),
 		execute() {
-			R.setToolbarFormat(!R.getViewSettings().toolbarFormat), NT();
+			R.setToolbarFormat(!R.getViewSettings().toolbarFormat), FT();
 		}
 	}
-], BT = [
+], HT = [
 	z("dialog.charShape.label"),
 	z("dialog.charShape.label.x885288"),
 	z("dialog.charShape.label.x8a6f8c"),
@@ -50729,10 +50789,10 @@ var zT = [
 	z("dialog.charShape.label.x35b98e"),
 	z("dialog.charShape.label.x2f0255")
 ];
-function VT() {
+function UT() {
 	return Array.from(De).sort((e, t) => e.localeCompare(t, "ko"));
 }
-var HT = [
+var WT = [
 	{
 		id: "bold",
 		title: z("dialog.charShape.buildFontList.tooltip")
@@ -50766,7 +50826,7 @@ var HT = [
 		title: z("dialog.charShape.buildFontList.tooltip.x6f4624")
 	}
 ];
-function UT(e) {
+function GT(e) {
 	let t = document.createElement("span");
 	switch (t.textContent = z("dialog.charShape.span.text"), e) {
 		case "bold":
@@ -50802,7 +50862,7 @@ function UT(e) {
 	}
 	return t;
 }
-var WT = class {
+var KT = class {
 	wasm;
 	eventBus;
 	overlay;
@@ -50906,7 +50966,7 @@ var WT = class {
 		let t = this.row();
 		t.appendChild(this.label(z("dialog.charShape.label.label"))), this.baseSizeInput = this.numberInput(1, 4096, .5), this.baseSizeInput.style.width = "60px", t.appendChild(this.baseSizeInput), t.appendChild(this.unit("pt")), e.appendChild(t);
 		let n = this.createFieldset(z("dialog.charShape.createFieldset.label")), r = this.row();
-		r.appendChild(this.label(z("dialog.charShape.label.label.x093fb3"))), this.langSelect = document.createElement("select"), this.langSelect.className = "dialog-select", this.langSelect.style.width = "72px", BT.forEach((e, t) => {
+		r.appendChild(this.label(z("dialog.charShape.label.label.x093fb3"))), this.langSelect = document.createElement("select"), this.langSelect.className = "dialog-select", this.langSelect.style.width = "72px", HT.forEach((e, t) => {
 			let n = document.createElement("option");
 			n.value = String(t), n.textContent = e, this.langSelect.appendChild(n);
 		}), this.langSelect.addEventListener("change", () => {
@@ -50915,7 +50975,7 @@ var WT = class {
 		let i = this.label(z("dialog.charShape.label.label.xd3c479"));
 		i.style.marginLeft = "12px", r.appendChild(i), this.fontSelect = document.createElement("select"), this.fontSelect.className = "dialog-select", this.fontSelect.style.width = "140px";
 		let a = document.createElement("optgroup");
-		a.label = "웹 글꼴", VT().forEach((e) => {
+		a.label = "웹 글꼴", UT().forEach((e) => {
 			let t = document.createElement("option");
 			t.value = e, t.textContent = e, a.appendChild(t);
 		}), this.fontSelect.appendChild(a);
@@ -50937,9 +50997,9 @@ var WT = class {
 		let u = this.label(z("dialog.charShape.label.label.x73fc3a"));
 		u.style.marginLeft = "16px", l.appendChild(u), this.langInputs["cs-spacing"] = this.numberInput(-50, 50), this.langInputs["cs-spacing"].style.width = "50px", l.appendChild(this.langInputs["cs-spacing"]), l.appendChild(this.unit("%")), n.appendChild(l), e.appendChild(n);
 		let d = this.createFieldset(z("dialog.charShape.createFieldset.label.xa49da9")), f = this.row();
-		f.style.gap = "2px", HT.forEach((e) => {
+		f.style.gap = "2px", WT.forEach((e) => {
 			let t = document.createElement("button");
-			t.className = "cs-icon-btn", t.title = e.title, t.appendChild(UT(e.id)), t.addEventListener("click", () => {
+			t.className = "cs-icon-btn", t.title = e.title, t.appendChild(GT(e.id)), t.addEventListener("click", () => {
 				e.id === "superscript" && !t.classList.contains("active") ? this.attrBtns.subscript?.classList.remove("active") : e.id === "subscript" && !t.classList.contains("active") && this.attrBtns.superscript?.classList.remove("active"), t.classList.toggle("active"), this.updatePreview();
 			}), f.appendChild(t), this.attrBtns[e.id] = t;
 		}), d.appendChild(f);
@@ -51369,43 +51429,43 @@ var WT = class {
 	}
 };
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/para-shape-helpers.ts
-function GT(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/para-shape-helpers.ts
+function qT(e) {
 	let t = document.createElement("fieldset");
 	t.className = "cs-fieldset";
 	let n = document.createElement("legend");
 	return n.textContent = e, t.appendChild(n), t;
 }
-function KT() {
+function JT() {
 	let e = document.createElement("div");
 	return e.className = "dialog-row", e;
 }
-function qT(e) {
+function YT(e) {
 	let t = document.createElement("span");
 	return t.className = "dialog-label", t.textContent = e, t;
 }
-function JT(e, t, n) {
+function XT(e, t, n) {
 	let r = document.createElement("input");
 	return r.type = "number", r.className = "dialog-input", e !== void 0 && (r.min = String(e)), t !== void 0 && (r.max = String(t)), n !== void 0 && (r.step = String(n)), r;
 }
-function YT(e) {
+function ZT(e) {
 	let t = document.createElement("span");
 	return t.className = "dialog-unit", t.textContent = e, t;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/para-shape-tab-builders.ts
-function XT(e, t) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/para-shape-tab-builders.ts
+function QT(e, t) {
 	let n = document.createElement("tr");
 	t.forEach((e) => {
 		let t = document.createElement("th");
 		t.textContent = e, n.appendChild(t);
 	}), e.appendChild(n);
 }
-function ZT(e, t) {
+function $T(e, t) {
 	let n = document.createElement("td");
 	n.textContent = t, e.appendChild(n);
 }
-function QT(e) {
+function eE(e) {
 	let t = [
 		z("dialog.paraShapeTabBuilders.appendTableCell.label.x8d60c4"),
 		z("dialog.paraShapeTabBuilders.appendTableCell.label.x19b0fb"),
@@ -51504,7 +51564,7 @@ function QT(e) {
 	let v = document.createElement("table");
 	v.className = "ps-tab-table";
 	let y = document.createElement("thead");
-	XT(y, [z("dialog.paraShapeTabBuilders.appendTableCell.label.x2c24e8"), z("dialog.paraShapeTabBuilders.appendHeaderRow.label")]), v.appendChild(y);
+	QT(y, [z("dialog.paraShapeTabBuilders.appendTableCell.label.x2c24e8"), z("dialog.paraShapeTabBuilders.appendHeaderRow.label")]), v.appendChild(y);
 	let b = document.createElement("tbody");
 	v.appendChild(b);
 	let x = document.createElement("div");
@@ -51522,7 +51582,7 @@ function QT(e) {
 	let D = document.createElement("table");
 	D.className = "ps-tab-table";
 	let ee = document.createElement("thead");
-	XT(ee, [z("dialog.paraShapeTabBuilders.appendTableCell.label.x2c24e8"), z("dialog.paraShapeTabBuilders.appendHeaderRow.label")]), D.appendChild(ee);
+	QT(ee, [z("dialog.paraShapeTabBuilders.appendTableCell.label.x2c24e8"), z("dialog.paraShapeTabBuilders.appendHeaderRow.label")]), D.appendChild(ee);
 	let O = document.createElement("tbody");
 	D.appendChild(O);
 	let k = document.createElement("div");
@@ -51578,7 +51638,7 @@ function QT(e) {
 	function he() {
 		b.replaceChildren(), e.currentTabStops.forEach((n, r) => {
 			let i = document.createElement("tr");
-			r === e.selectedTabIndex && (i.className = "selected"), ZT(i, `${(n.position / 100).toFixed(1)} pt`), ZT(i, t[n.type] ?? "?"), i.addEventListener("click", () => {
+			r === e.selectedTabIndex && (i.className = "selected"), $T(i, `${(n.position / 100).toFixed(1)} pt`), $T(i, t[n.type] ?? "?"), i.addEventListener("click", () => {
 				e.selectedTabIndex = r, he();
 			}), b.appendChild(i);
 		});
@@ -51586,7 +51646,7 @@ function QT(e) {
 	function ge() {
 		O.replaceChildren(), e.deletedTabStops.forEach((e, n) => {
 			let r = document.createElement("tr");
-			ZT(r, `${(e.position / 100).toFixed(1)} pt`), ZT(r, t[e.type] ?? "?"), r.addEventListener("dblclick", () => me(n)), r.title = z("dialog.paraShapeTabBuilders.tr.tooltip"), O.appendChild(r);
+			$T(r, `${(e.position / 100).toFixed(1)} pt`), $T(r, t[e.type] ?? "?"), r.addEventListener("dblclick", () => me(n)), r.title = z("dialog.paraShapeTabBuilders.tr.tooltip"), O.appendChild(r);
 		});
 	}
 	return {
@@ -51603,15 +51663,15 @@ function QT(e) {
 		renderDeletedTabList: ge
 	};
 }
-function $T(e, t) {
+function tE(e, t) {
 	let n = document.createElement("div");
 	n.className = "dialog-tab-panel";
-	let r = GT(z("dialog.paraShapeTabBuilders.createFieldset.label")), i = document.createElement("div");
+	let r = qT(z("dialog.paraShapeTabBuilders.createFieldset.label")), i = document.createElement("div");
 	i.className = "ps-border-layout";
 	let a = document.createElement("div");
 	a.className = "ps-border-left";
-	let o = KT();
-	o.appendChild(qT(z("dialog.paraShapeTabBuilders.label.label")));
+	let o = JT();
+	o.appendChild(YT(z("dialog.paraShapeTabBuilders.label.label")));
 	let s = document.createElement("select");
 	s.className = "dialog-select", s.style.width = "100px";
 	for (let [e, t] of [
@@ -51638,8 +51698,8 @@ function $T(e, t) {
 		n.value = e, n.textContent = t, s.appendChild(n);
 	}
 	s.addEventListener("change", () => _e()), o.appendChild(s), a.appendChild(o);
-	let c = KT();
-	c.appendChild(qT(z("dialog.paraShapeTabBuilders.label.label.x53f378")));
+	let c = JT();
+	c.appendChild(YT(z("dialog.paraShapeTabBuilders.label.label.x53f378")));
 	let l = document.createElement("select");
 	l.className = "dialog-select", l.style.width = "100px", [
 		"0.1 mm",
@@ -51662,15 +51722,15 @@ function $T(e, t) {
 		let n = document.createElement("option");
 		n.value = String(t), n.textContent = e, l.appendChild(n);
 	}), l.addEventListener("change", () => _e()), c.appendChild(l), a.appendChild(c);
-	let u = KT();
-	u.appendChild(qT(z("dialog.paraShapeTabBuilders.label.label.xb7d4ad")));
+	let u = JT();
+	u.appendChild(YT(z("dialog.paraShapeTabBuilders.label.label.xb7d4ad")));
 	let d = document.createElement("input");
 	d.type = "color", d.value = "#000000", d.className = "cs-color-btn", d.style.width = "100px", d.addEventListener("input", () => _e()), u.appendChild(d), a.appendChild(u);
-	let f = KT(), p = document.createElement("input");
+	let f = JT(), p = document.createElement("input");
 	p.type = "checkbox", p.id = "ps-bd-connect";
 	let m = document.createElement("label");
 	m.htmlFor = "ps-bd-connect", m.textContent = z("dialog.paraShapeTabBuilders.connectLabel.text"), f.appendChild(p), f.appendChild(m), a.appendChild(f);
-	let h = KT(), g = document.createElement("input");
+	let h = JT(), g = document.createElement("input");
 	g.type = "checkbox", g.id = "ps-bd-apply-imm", g.checked = !0;
 	let _ = document.createElement("label");
 	_.htmlFor = "ps-bd-apply-imm", _.textContent = z("dialog.paraShapeTabBuilders.applyLabel.text"), h.appendChild(g), h.appendChild(_), a.appendChild(h), i.appendChild(a);
@@ -51714,8 +51774,8 @@ function $T(e, t) {
 		r.className = "ps-preset-btn", r.textContent = e, r.title = t, r.addEventListener("click", n), x.appendChild(r);
 	}
 	v.appendChild(x), i.appendChild(v), r.appendChild(i), n.appendChild(r);
-	let C = GT(z("dialog.paraShapeTabBuilders.createFieldset.label.x807c30")), w = KT();
-	w.appendChild(qT(z("dialog.paraShapeTabBuilders.label.label.x18d3e6")));
+	let C = qT(z("dialog.paraShapeTabBuilders.createFieldset.label.x807c30")), w = JT();
+	w.appendChild(YT(z("dialog.paraShapeTabBuilders.label.label.x18d3e6")));
 	let T = document.createElement("select");
 	T.className = "dialog-select", T.style.width = "100px";
 	for (let [e, t] of [["none", z("dialog.paraShapeTabBuilders.updateBdPreview.label.x5ab3b7")], ["solid", z("dialog.paraShapeTabBuilders.updateBdPreview.label.x013035")]]) {
@@ -51725,11 +51785,11 @@ function $T(e, t) {
 	w.appendChild(T);
 	let E = document.createElement("input");
 	E.type = "color", E.value = "#ffffff", E.className = "cs-color-btn", E.style.marginLeft = "6px", w.appendChild(E), C.appendChild(w);
-	let D = KT();
-	D.appendChild(qT(z("dialog.paraShapeTabBuilders.label.label.x51d4f5")));
+	let D = JT();
+	D.appendChild(YT(z("dialog.paraShapeTabBuilders.label.label.x51d4f5")));
 	let ee = document.createElement("input");
 	ee.type = "color", ee.value = "#000000", ee.className = "cs-color-btn", D.appendChild(ee);
-	let O = qT(z("dialog.paraShapeTabBuilders.label.label.xb8c7cc"));
+	let O = YT(z("dialog.paraShapeTabBuilders.label.label.xb8c7cc"));
 	O.style.marginLeft = "10px", D.appendChild(O);
 	let k = document.createElement("select");
 	k.className = "dialog-select", k.style.width = "90px";
@@ -51746,13 +51806,13 @@ function $T(e, t) {
 		n.value = e, n.textContent = t, k.appendChild(n);
 	}
 	D.appendChild(k), C.appendChild(D), n.appendChild(C);
-	let te = GT(z("dialog.paraShapeTabBuilders.createFieldset.label.x0ad57d")), A = [], j = document.createElement("div");
+	let te = qT(z("dialog.paraShapeTabBuilders.createFieldset.label.x0ad57d")), A = [], j = document.createElement("div");
 	j.className = "ps-spacing-grid";
 	let ne = (e) => {
 		let t = document.createElement("div");
-		t.className = "ps-spacing-cell", t.appendChild(qT(e));
-		let n = JT(0, 999, .01);
-		return n.style.width = "55px", t.appendChild(n), t.appendChild(YT("mm")), [t, n];
+		t.className = "ps-spacing-cell", t.appendChild(YT(e));
+		let n = XT(0, 999, .01);
+		return n.style.width = "55px", t.appendChild(n), t.appendChild(ZT("mm")), [t, n];
 	}, [re, ie] = ne(z("dialog.paraShapeTabBuilders.makeCell.label")), [ae, oe] = ne(z("dialog.paraShapeTabBuilders.makeCell.label.x93c89b"));
 	A.push(ie, oe), j.appendChild(re), j.appendChild(ae);
 	let [se, ce] = ne(z("dialog.paraShapeTabBuilders.makeCell.label.x34c256")), [le, ue] = ne(z("dialog.paraShapeTabBuilders.makeCell.label.x79dae2"));
@@ -51838,8 +51898,8 @@ function $T(e, t) {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/para-shape-dialog.ts
-var eE = [
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/para-shape-dialog.ts
+var nE = [
 	{
 		value: "justify",
 		label: z("dialog.paraShape.label"),
@@ -51870,7 +51930,7 @@ var eE = [
 		label: z("dialog.paraShape.label.x0ef550"),
 		cssClass: "sb-al-split"
 	}
-], tE = [
+], rE = [
 	{
 		value: "Percent",
 		label: z("dialog.paraShape.label.x48248d")
@@ -51887,26 +51947,26 @@ var eE = [
 		value: "Minimum",
 		label: z("dialog.paraShape.label.x153b4a")
 	}
-], nE = 100;
-function rE(e) {
+], iE = 100;
+function aE(e) {
 	return e * 72 / 96;
 }
-function iE(e) {
-	return Math.round(e * nE * 2);
-}
-function aE(e) {
-	return Math.round(e * nE);
-}
 function oE(e) {
-	return Math.max(0, Math.min(9999, e));
+	return Math.round(e * iE * 2);
 }
 function sE(e) {
-	return Math.round(e * 150);
+	return Math.round(e * iE);
 }
 function cE(e) {
+	return Math.max(0, Math.min(9999, e));
+}
+function lE(e) {
+	return Math.round(e * 150);
+}
+function uE(e) {
 	return Math.round(e * 75);
 }
-var lE = class {
+var dE = class {
 	wasm;
 	eventBus;
 	overlay;
@@ -52040,8 +52100,8 @@ var lE = class {
 	buildBasicPanel() {
 		let e = document.createElement("div");
 		e.className = "dialog-tab-panel";
-		let t = GT(z("dialog.paraShape.createFieldset.label")), n = document.createElement("div");
-		n.className = "ps-align-row", eE.forEach((e) => {
+		let t = qT(z("dialog.paraShape.createFieldset.label")), n = document.createElement("div");
+		n.className = "ps-align-row", nE.forEach((e) => {
 			let t = document.createElement("button");
 			t.className = "ps-align-btn", t.title = e.label;
 			let r = document.createElement("span");
@@ -52051,37 +52111,37 @@ var lE = class {
 		}), t.appendChild(n), e.appendChild(t);
 		let r = document.createElement("div");
 		r.className = "ps-two-col";
-		let i = GT(z("dialog.paraShape.createFieldset.label.xcd8cef")), a = KT(), o = qT(z("dialog.paraShape.label.label"));
-		o.style.minWidth = "62px", o.style.textAlign = "right", a.appendChild(o), this.marginLeftInput = JT(0, 999, .1), this.marginLeftInput.style.width = "60px", a.appendChild(this.marginLeftInput), a.appendChild(YT("pt")), i.appendChild(a);
-		let s = KT(), c = qT(z("dialog.paraShape.label.label.x90513b"));
-		c.style.minWidth = "62px", c.style.textAlign = "right", s.appendChild(c), this.marginRightInput = JT(0, 999, .1), this.marginRightInput.style.width = "60px", s.appendChild(this.marginRightInput), s.appendChild(YT("pt")), i.appendChild(s);
-		let l = GT(z("dialog.paraShape.createFieldset.label.x89510d"));
+		let i = qT(z("dialog.paraShape.createFieldset.label.xcd8cef")), a = JT(), o = YT(z("dialog.paraShape.label.label"));
+		o.style.minWidth = "62px", o.style.textAlign = "right", a.appendChild(o), this.marginLeftInput = XT(0, 999, .1), this.marginLeftInput.style.width = "60px", a.appendChild(this.marginLeftInput), a.appendChild(ZT("pt")), i.appendChild(a);
+		let s = JT(), c = YT(z("dialog.paraShape.label.label.x90513b"));
+		c.style.minWidth = "62px", c.style.textAlign = "right", s.appendChild(c), this.marginRightInput = XT(0, 999, .1), this.marginRightInput.style.width = "60px", s.appendChild(this.marginRightInput), s.appendChild(ZT("pt")), i.appendChild(s);
+		let l = qT(z("dialog.paraShape.createFieldset.label.x89510d"));
 		this.firstLineRadios = [];
-		let u = KT(), d = document.createElement("input");
-		d.type = "radio", d.name = "ps-first-line", d.value = "normal", this.firstLineRadios.push(d), u.appendChild(d), u.appendChild(qT(z("dialog.paraShape.label.label.xecfda9"))), l.appendChild(u);
-		let f = KT();
+		let u = JT(), d = document.createElement("input");
+		d.type = "radio", d.name = "ps-first-line", d.value = "normal", this.firstLineRadios.push(d), u.appendChild(d), u.appendChild(YT(z("dialog.paraShape.label.label.xecfda9"))), l.appendChild(u);
+		let f = JT();
 		f.style.whiteSpace = "nowrap";
 		let p = document.createElement("input");
 		p.type = "radio", p.name = "ps-first-line", p.value = "indent", this.firstLineRadios.push(p), f.appendChild(p);
-		let m = qT(z("dialog.paraShape.label.label.x5fd558"));
-		m.style.whiteSpace = "nowrap", f.appendChild(m), this.indentInput = JT(0, 999, .1), this.indentInput.style.width = "50px", f.appendChild(this.indentInput), f.appendChild(YT("pt")), l.appendChild(f);
-		let h = KT(), g = document.createElement("input");
+		let m = YT(z("dialog.paraShape.label.label.x5fd558"));
+		m.style.whiteSpace = "nowrap", f.appendChild(m), this.indentInput = XT(0, 999, .1), this.indentInput.style.width = "50px", f.appendChild(this.indentInput), f.appendChild(ZT("pt")), l.appendChild(f);
+		let h = JT(), g = document.createElement("input");
 		g.type = "radio", g.name = "ps-first-line", g.value = "hanging", this.firstLineRadios.push(g), h.appendChild(g);
-		let _ = qT(z("dialog.paraShape.label.label.x6b4a43"));
+		let _ = YT(z("dialog.paraShape.label.label.x6b4a43"));
 		_.style.whiteSpace = "nowrap", h.appendChild(_), l.appendChild(h), this.firstLineRadios.forEach((e) => {
 			e.addEventListener("change", () => {
 				this.indentInput.disabled = e.value === "normal" && e.checked, this.updatePreview();
 			});
 		}), r.appendChild(i), r.appendChild(l), e.appendChild(r);
-		let v = GT(z("dialog.paraShape.createFieldset.label.x0ad57d")), y = KT();
-		y.appendChild(qT(z("dialog.paraShape.label.label.x8f5075"))), this.lineSpacingTypeSelect = document.createElement("select"), this.lineSpacingTypeSelect.className = "dialog-select", this.lineSpacingTypeSelect.style.width = "100px", tE.forEach((e) => {
+		let v = qT(z("dialog.paraShape.createFieldset.label.x0ad57d")), y = JT();
+		y.appendChild(YT(z("dialog.paraShape.label.label.x8f5075"))), this.lineSpacingTypeSelect = document.createElement("select"), this.lineSpacingTypeSelect.className = "dialog-select", this.lineSpacingTypeSelect.style.width = "100px", rE.forEach((e) => {
 			let t = document.createElement("option");
 			t.value = e.value, t.textContent = e.label, this.lineSpacingTypeSelect.appendChild(t);
-		}), this.lineSpacingTypeSelect.addEventListener("change", () => this.onLineSpacingTypeChange()), y.appendChild(this.lineSpacingTypeSelect), this.lineSpacingInput = JT(0, 9999, 1), this.lineSpacingInput.style.width = "55px", this.lineSpacingInput.style.marginLeft = "6px", y.appendChild(this.lineSpacingInput), this.lineSpacingUnitLabel = YT("%"), y.appendChild(this.lineSpacingUnitLabel), v.appendChild(y);
-		let b = KT();
-		b.appendChild(qT(z("dialog.paraShape.label.label.xbc6080"))), this.spacingBeforeInput = JT(0, 999, .1), this.spacingBeforeInput.style.width = "55px", b.appendChild(this.spacingBeforeInput), b.appendChild(YT("pt"));
-		let x = qT(z("dialog.paraShape.label.label.x241c37"));
-		return x.style.marginLeft = "12px", b.appendChild(x), this.spacingAfterInput = JT(0, 999, .1), this.spacingAfterInput.style.width = "55px", b.appendChild(this.spacingAfterInput), b.appendChild(YT("pt")), v.appendChild(b), e.appendChild(v), this.previewEl = document.createElement("div"), this.previewEl.className = "ps-preview", this.previewEl.textContent = z("dialog.paraShape.previewEl.text"), e.appendChild(this.previewEl), e;
+		}), this.lineSpacingTypeSelect.addEventListener("change", () => this.onLineSpacingTypeChange()), y.appendChild(this.lineSpacingTypeSelect), this.lineSpacingInput = XT(0, 9999, 1), this.lineSpacingInput.style.width = "55px", this.lineSpacingInput.style.marginLeft = "6px", y.appendChild(this.lineSpacingInput), this.lineSpacingUnitLabel = ZT("%"), y.appendChild(this.lineSpacingUnitLabel), v.appendChild(y);
+		let b = JT();
+		b.appendChild(YT(z("dialog.paraShape.label.label.xbc6080"))), this.spacingBeforeInput = XT(0, 999, .1), this.spacingBeforeInput.style.width = "55px", b.appendChild(this.spacingBeforeInput), b.appendChild(ZT("pt"));
+		let x = YT(z("dialog.paraShape.label.label.x241c37"));
+		return x.style.marginLeft = "12px", b.appendChild(x), this.spacingAfterInput = XT(0, 999, .1), this.spacingAfterInput.style.width = "55px", b.appendChild(this.spacingAfterInput), b.appendChild(ZT("pt")), v.appendChild(b), e.appendChild(v), this.previewEl = document.createElement("div"), this.previewEl.className = "ps-preview", this.previewEl.textContent = z("dialog.paraShape.previewEl.text"), e.appendChild(this.previewEl), e;
 	}
 	buildExtendedPanel() {
 		let e = document.createElement("div");
@@ -52140,15 +52200,15 @@ var lE = class {
 			let n = document.createElement("option");
 			n.value = e, n.textContent = t, this.verticalAlignSelect.appendChild(n);
 		}), s.appendChild(c), s.appendChild(this.verticalAlignSelect), i.appendChild(s);
-		let l = GT(z("dialog.paraShape.createFieldset.label.x47b371")), u = KT();
-		u.appendChild(qT(z("dialog.paraShape.label.label.x631688"))), this.koreanBreakSelect = document.createElement("select"), this.koreanBreakSelect.className = "dialog-select", this.koreanBreakSelect.style.width = "100px";
+		let l = qT(z("dialog.paraShape.createFieldset.label.x47b371")), u = JT();
+		u.appendChild(YT(z("dialog.paraShape.label.label.x631688"))), this.koreanBreakSelect = document.createElement("select"), this.koreanBreakSelect.className = "dialog-select", this.koreanBreakSelect.style.width = "100px";
 		for (let [e, t] of [["0", z("dialog.paraShape.buildExtendedPanel.label")], ["1", z("dialog.paraShape.buildExtendedPanel.label.xe09d1a")]]) {
 			let n = document.createElement("option");
 			n.value = e, n.textContent = t, this.koreanBreakSelect.appendChild(n);
 		}
 		u.appendChild(this.koreanBreakSelect), l.appendChild(u);
-		let d = KT();
-		d.appendChild(qT(z("dialog.paraShape.label.label.xd7f637"))), this.englishBreakSelect = document.createElement("select"), this.englishBreakSelect.className = "dialog-select", this.englishBreakSelect.style.width = "100px";
+		let d = JT();
+		d.appendChild(YT(z("dialog.paraShape.label.label.xd7f637"))), this.englishBreakSelect = document.createElement("select"), this.englishBreakSelect.className = "dialog-select", this.englishBreakSelect.style.width = "100px";
 		for (let [e, t] of [
 			["0", z("dialog.paraShape.buildExtendedPanel.label.x88aa1c")],
 			["1", z("dialog.paraShape.buildExtendedPanel.label.x87dbf5")],
@@ -52160,10 +52220,10 @@ var lE = class {
 		return d.appendChild(this.englishBreakSelect), l.appendChild(d), e.appendChild(l), e.appendChild(i), e;
 	}
 	buildTabSettingsPanel() {
-		return this.tabResult = QT(this.tabState), this.tabResult.panel;
+		return this.tabResult = eE(this.tabState), this.tabResult.panel;
 	}
 	buildBorderPanel() {
-		return this.borderResult = $T(this.borderStates, this.bdSideToggles), this.borderResult.panel;
+		return this.borderResult = tE(this.borderStates, this.bdSideToggles), this.borderResult.panel;
 	}
 	onLineSpacingTypeChange() {
 		this.lineSpacingTypeSelect.value === "Percent" ? (this.lineSpacingUnitLabel.textContent = "%", this.lineSpacingInput.step = "1") : (this.lineSpacingUnitLabel.textContent = "pt", this.lineSpacingInput.step = "0.1"), this.updatePreview();
@@ -52173,11 +52233,11 @@ var lE = class {
 		if (!e) return;
 		Object.values(this.alignBtns).forEach((e) => e.classList.remove("active"));
 		let t = e.alignment || "justify";
-		this.alignBtns[t] && this.alignBtns[t].classList.add("active"), this.marginLeftInput.value = rE(e.marginLeft ?? 0).toFixed(1), this.marginRightInput.value = rE(e.marginRight ?? 0).toFixed(1);
+		this.alignBtns[t] && this.alignBtns[t].classList.add("active"), this.marginLeftInput.value = aE(e.marginLeft ?? 0).toFixed(1), this.marginRightInput.value = aE(e.marginRight ?? 0).toFixed(1);
 		let n = e.indent ?? 0;
-		n > 0 ? (this.firstLineRadios[1].checked = !0, this.indentInput.value = rE(n).toFixed(1), this.indentInput.disabled = !1) : n < 0 ? (this.firstLineRadios[2].checked = !0, this.indentInput.value = rE(Math.abs(n)).toFixed(1), this.indentInput.disabled = !1) : (this.firstLineRadios[0].checked = !0, this.indentInput.value = "0.0", this.indentInput.disabled = !0);
+		n > 0 ? (this.firstLineRadios[1].checked = !0, this.indentInput.value = aE(n).toFixed(1), this.indentInput.disabled = !1) : n < 0 ? (this.firstLineRadios[2].checked = !0, this.indentInput.value = aE(Math.abs(n)).toFixed(1), this.indentInput.disabled = !1) : (this.firstLineRadios[0].checked = !0, this.indentInput.value = "0.0", this.indentInput.disabled = !0);
 		let r = e.lineSpacingType || "Percent";
-		this.lineSpacingTypeSelect.value = r, r === "Percent" ? (this.lineSpacingInput.value = String(e.lineSpacing ?? 160), this.lineSpacingUnitLabel.textContent = "%", this.lineSpacingInput.step = "1") : (this.lineSpacingInput.value = rE(e.lineSpacing ?? 0).toFixed(1), this.lineSpacingUnitLabel.textContent = "pt", this.lineSpacingInput.step = "0.1"), this.spacingBeforeInput.value = rE(e.spacingBefore ?? 0).toFixed(1), this.spacingAfterInput.value = rE(e.spacingAfter ?? 0).toFixed(1);
+		this.lineSpacingTypeSelect.value = r, r === "Percent" ? (this.lineSpacingInput.value = String(e.lineSpacing ?? 160), this.lineSpacingUnitLabel.textContent = "%", this.lineSpacingInput.step = "1") : (this.lineSpacingInput.value = aE(e.lineSpacing ?? 0).toFixed(1), this.lineSpacingUnitLabel.textContent = "pt", this.lineSpacingInput.step = "0.1"), this.spacingBeforeInput.value = aE(e.spacingBefore ?? 0).toFixed(1), this.spacingAfterInput.value = aE(e.spacingAfter ?? 0).toFixed(1);
 		let i = e.headType || "None";
 		this.headTypeRadios.forEach((e) => {
 			e.checked = e.value === i;
@@ -52233,22 +52293,22 @@ var lE = class {
 		if (!t) return e;
 		let n = this.getSelectedAlignment();
 		n !== (t.alignment || "justify") && (e.alignment = n);
-		let r = iE(parseFloat(this.marginLeftInput.value) || 0);
-		r !== sE(t.marginLeft ?? 0) && (e.marginLeft = r);
-		let i = iE(parseFloat(this.marginRightInput.value) || 0);
-		i !== sE(t.marginRight ?? 0) && (e.marginRight = i);
+		let r = oE(parseFloat(this.marginLeftInput.value) || 0);
+		r !== lE(t.marginLeft ?? 0) && (e.marginLeft = r);
+		let i = oE(parseFloat(this.marginRightInput.value) || 0);
+		i !== lE(t.marginRight ?? 0) && (e.marginRight = i);
 		let a = 0, o = this.firstLineRadios.find((e) => e.checked);
-		o?.value === "indent" ? a = iE(parseFloat(this.indentInput.value) || 0) : o?.value === "hanging" && (a = -iE(parseFloat(this.indentInput.value) || 0)), a !== sE(t.indent ?? 0) && (e.indent = a);
+		o?.value === "indent" ? a = oE(parseFloat(this.indentInput.value) || 0) : o?.value === "hanging" && (a = -oE(parseFloat(this.indentInput.value) || 0)), a !== lE(t.indent ?? 0) && (e.indent = a);
 		let s = this.lineSpacingTypeSelect.value;
 		s !== (t.lineSpacingType || "Percent") && (e.lineSpacingType = s);
 		let c;
-		c = s === "Percent" ? oE(parseInt(this.lineSpacingInput.value) || 160) : aE(oE(parseFloat(this.lineSpacingInput.value) || 0));
-		let l = (t.lineSpacingType || "Percent") === "Percent" ? t.lineSpacing ?? 160 : cE(t.lineSpacing ?? 0);
+		c = s === "Percent" ? cE(parseInt(this.lineSpacingInput.value) || 160) : sE(cE(parseFloat(this.lineSpacingInput.value) || 0));
+		let l = (t.lineSpacingType || "Percent") === "Percent" ? t.lineSpacing ?? 160 : uE(t.lineSpacing ?? 0);
 		c !== l && (e.lineSpacing = c);
-		let u = aE(parseFloat(this.spacingBeforeInput.value) || 0);
-		u !== cE(t.spacingBefore ?? 0) && (e.spacingBefore = u);
-		let d = aE(parseFloat(this.spacingAfterInput.value) || 0);
-		d !== cE(t.spacingAfter ?? 0) && (e.spacingAfter = d);
+		let u = sE(parseFloat(this.spacingBeforeInput.value) || 0);
+		u !== uE(t.spacingBefore ?? 0) && (e.spacingBefore = u);
+		let d = sE(parseFloat(this.spacingAfterInput.value) || 0);
+		d !== uE(t.spacingAfter ?? 0) && (e.spacingAfter = d);
 		let f = this.headTypeRadios.find((e) => e.checked)?.value || "None";
 		f !== (t.headType || "None") && (e.headType = f);
 		let p = parseInt(this.paraLevelSelect.value) || 0;
@@ -52370,7 +52430,7 @@ var lE = class {
 	}
 };
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/numbering-defaults.ts
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/numbering-defaults.ts
 function U(e) {
 	return e.split("[::]").filter((e, t, n) => t < n.length - 1);
 }
@@ -52378,7 +52438,7 @@ function W(e) {
 	return e.split("[::]").filter((e, t, n) => t < n.length - 1);
 }
 U("^1.[::]^2.[::]^3)[::]^4)[::](^5)[::](^6)[::]^7[::]^8[::][::][::]"), W(";;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;9;;1;[::];;50;;1;1;10;;1;[::];;50;;1;1;3;;1;[::]"), U("^1.[::]^2.[::]^3)[::]^4)[::](^5)[::](^6)[::]^7[::]^8[::][::][::]"), W(";;50;;1;;0;;1;[::];;50;;1;;8;;1;[::];;50;;1;;0;;1;[::];;50;;1;;8;;1;[::];;50;;1;;0;;1;[::];;50;;1;;8;;1;[::];;50;;1;;1;;1;[::];;50;;1;;9;;1;[::];;50;;1;;0;;1;[::];;50;;1;;0;;1;[::]"), U("^1[::]^2[::]^3[::]^4[::](^5)[::](^6)[::]^7[::]^8[::][::][::]"), W(";;50;;1;1;2;;1;[::];;50;;1;1;4;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;7;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), U("^1.[::]^2.[::]▶[::](^4)[::](^5)[::]-[::]^7[::]^8[::][::][::]"), W(";;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;9;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), U("^1.[::]^2.[::]^3.[::]^4)[::](^5)[::](^6)[::]^7)[::][::][::][::]"), W(";;50;;1;1;2;;1;[::];;50;;1;1;4;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;3;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), U("^1.[::]^1.^2.[::]^1.^2.^3.[::]^1.^2.^3.^4.[::]^1.^2.^3.^4.^5.[::]^1.^2.^3.^4.^5.^6.[::]^1.^2.^3.^4.^5.^6.^7.[::]^1.^2.^3.^4.^5.^6.^7.^8.[::]^1.^2.^3.^4.^5.^6.^7.^8.^9.[::]^1.^2.^3.^4.^5.^6.^7.^8.^9.^:.[::]"), W(";;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), U("^1.[::]^1.^2[::]^1.^2.^3[::]^1.^2.^3.^4[::]^1.^2.^3.^4.^5[::]^1.^2.^3.^4.^5.^6[::]^1.^2.^3.^4.^5.^6.^7[::]^1.^2.^3.^4.^5.^6.^7.^8[::]^1.^2.^3.^4.^5.^6.^7.^8.^9[::]^1.^2.^3.^4.^5.^6.^7.^8.^9.^:[::]"), W(";;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), U("^1.[::]^2.[::]^3.[::]^4)[::](^5)[::](^6)[::]^7)[::][::][::][::]"), W(";;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;3;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), U("제^1장[::]제^2절[::]제^3항[::]-[::][::][::][::][::][::][::]"), W(";;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), U("[::][::]▶[::][::][::]▶[::]-[::]"), W(";;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), U("^1.[::][::][::][::][::][::][::][::][::][::]"), W(";;50;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::]"), U("[::][::][::][::][::][::][::][::][::][::]"), W(";;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::]"), U("^1.[::]^2.[::]^3)[::]^4)[::](^5)[::](^6)[::]^7[::]^8[::][::][::]"), W(";;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;9;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), U("(^1)[::](^2)[::](^3)[::]^4)[::]^5)[::]^6)[::]^7[::]^8[::]^9[::][::]"), W(";;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;9;;1;[::];;50;;1;1;7;;1;[::];;50;;1;1;0;;1;[::]"), U("^1)[::]^2)[::]^3)[::](^4)[::](^5)[::](^6)[::]^7[::]^8[::]^9[::][::]"), W(";;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;9;;1;[::];;50;;1;1;7;;1;[::];;50;;1;1;0;;1;[::]"), U("^1[::](^2)[::](^3)[::]^4)[::]^5)[::]^6)[::]-[::][::][::][::]"), W(";;50;;1;1;1;;1;[::];;50;;1;1;10;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;10;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), U("^1)[::]^2)[::](^3)[::](^4)[::](^5)[::]^6[::]-[::][::][::][::]"), W(";;50;;1;1;8;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), U("(^1)[::](^2)[::](^3)[::]^4)[::]^5)[::]^6[::]-[::][::][::][::]"), W(";;50;;1;1;10;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), U("^1.[::]^2.[::]^3.[::]^4)[::]^5)[::]^6)[::]^7[::]^8[::][::][::]"), W(";;50;;1;1;2;;1;[::];;50;;1;1;4;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;3;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;7;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), U("^1.[::]^2.[::](^3)[::](^4)[::]^5)[::]^6)[::]-[::][::][::][::]"), W(";;50;;1;1;3;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;3;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;3;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), U("^1.[::]^2.[::]^3,[::](^4)[::](^5)[::](^6)[::]^7[::]^8[::]^9[::][::]"), W(";;50;;1;1;4;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;7;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;9;;1;[::];;50;;1;1;0;;1;[::]"), U("^1.[::]^1.^2.[::]^1.^2.^3.[::]^1.^2.^3.^4.[::]^1.^2.^3.^4.^5.[::]^1.^2.^3.^4.^5.^6.[::]^1.^2.^3.^4.^5.^6.^7.[::]^1.^2.^3.^4.^5.^6.^7.^8.[::]^1.^2.^3.^4.^5.^6.^7.^8.^9.[::]^1.^2.^3.^4.^5.^6.^7.^8.^9.^:.[::]"), W(";;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]");
-var uE = [
+var fE = [
 	{
 		name: "●",
 		char: "",
@@ -52480,7 +52540,7 @@ var uE = [
 	HANGUL_JAMO: 10,
 	HANGUL_MIXED: 8,
 	HANJA: 7
-}, dE = [
+}, pE = [
 	{
 		label: z("dialog.numbering.label"),
 		levelFormats: [
@@ -52629,12 +52689,12 @@ var uE = [
 		]
 	}
 ];
-function fE(e, t) {
+function mE(e, t) {
 	switch (t) {
 		case G.DIGIT: return String(e);
 		case G.CIRCLE_DIGIT: return e >= 1 && e <= 20 ? "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳"[e - 1] : String(e);
-		case G.ROMAN_UPPER: return pE(e);
-		case G.ROMAN_LOWER: return pE(e).toLowerCase();
+		case G.ROMAN_UPPER: return hE(e);
+		case G.ROMAN_LOWER: return hE(e).toLowerCase();
 		case G.ALPHA_UPPER: return e >= 1 && e <= 26 ? String.fromCharCode(64 + e) : String(e);
 		case G.ALPHA_LOWER: return e >= 1 && e <= 26 ? String.fromCharCode(96 + e) : String(e);
 		case G.HANGUL_SYLLABLE:
@@ -52644,7 +52704,7 @@ function fE(e, t) {
 		default: return String(e);
 	}
 }
-function pE(e) {
+function hE(e) {
 	let t = [
 		1e3,
 		900,
@@ -52677,10 +52737,10 @@ function pE(e) {
 	for (let e = 0; e < t.length; e++) for (; i >= t[e];) r += n[e], i -= t[e];
 	return r;
 }
-function mE(e, t) {
+function gE(e, t) {
 	let n = [];
 	for (let r = 0; r < 7; r++) {
-		let i = "  ".repeat(r), a = e.levelFormats[r], o = fE(t, e.numberFormats[r]), s = a.replace(`^${r + 1}`, o);
+		let i = "  ".repeat(r), a = e.levelFormats[r], o = mE(t, e.numberFormats[r]), s = a.replace(`^${r + 1}`, o);
 		n.push(`${i}${z("dialog.numbering.previewLine", {
 			p1: r + 1,
 			p2: s
@@ -52688,7 +52748,7 @@ function mE(e, t) {
 	}
 	return n.join("\n");
 }
-var hE = class extends V {
+var _E = class extends V {
 	wasm;
 	eventBus;
 	selectedPreset = 0;
@@ -52732,8 +52792,8 @@ var hE = class extends V {
 		n.className = "nd-bullet-cell", n.textContent = z("dialog.numbering.noneCell.text"), n.addEventListener("click", () => {
 			t.querySelectorAll(".nd-bullet-cell").forEach((e) => e.classList.remove("selected")), n.classList.add("selected"), this.selectedBulletIdx = -1;
 		}), t.appendChild(n);
-		for (let e = 0; e < uE.length; e++) {
-			let n = uE[e], r = document.createElement("div");
+		for (let e = 0; e < fE.length; e++) {
+			let n = fE[e], r = document.createElement("div");
 			r.className = "nd-bullet-cell", this.currentBulletChar && n.char === this.currentBulletChar && (r.classList.add("selected"), this.selectedBulletIdx = e);
 			let i = document.createElement("span");
 			i.className = "nd-bullet-char", i.textContent = n.displayChar, r.appendChild(i), r.title = n.name, r.addEventListener("click", () => {
@@ -52751,8 +52811,8 @@ var hE = class extends V {
 		r.className = "nd-radio-group";
 		let i = this.currentHeadType === "None" || this.currentNumberingId === 0 ? 0 : 1;
 		this.selectedPreset = i, this.restartMode = this.currentRestartMode;
-		for (let e = 0; e < dE.length; e++) {
-			let t = dE[e], n = document.createElement("label");
+		for (let e = 0; e < pE.length; e++) {
+			let t = pE[e], n = document.createElement("label");
 			n.className = "nd-radio-label";
 			let a = document.createElement("input");
 			a.type = "radio", a.name = "nd-preset", a.value = String(e), e === i && (a.checked = !0), a.addEventListener("change", () => {
@@ -52810,14 +52870,14 @@ var hE = class extends V {
 	}
 	updatePreview() {
 		if (!this.previewEl) return;
-		let e = dE[this.selectedPreset];
-		this.previewEl.textContent = mE(e, this.startNumber);
+		let e = pE[this.selectedPreset];
+		this.previewEl.textContent = gE(e, this.startNumber);
 	}
 	onConfirm() {
 		if (this.activeTab === "bullet") {
 			if (this.selectedBulletIdx < 0) this.onApply?.(0, 0, 1);
 			else {
-				let e = uE[this.selectedBulletIdx];
+				let e = fE[this.selectedBulletIdx];
 				this.onApplyBullet?.(e.char);
 			}
 			return;
@@ -52826,7 +52886,7 @@ var hE = class extends V {
 			this.onApply?.(0, 0, 1);
 			return;
 		}
-		let e = dE[this.selectedPreset], t = JSON.stringify({
+		let e = pE[this.selectedPreset], t = JSON.stringify({
 			levelFormats: e.levelFormats,
 			numberFormats: e.numberFormats,
 			startNumber: this.startNumber
@@ -52839,14 +52899,14 @@ var hE = class extends V {
 	show() {
 		super.show();
 	}
-}, gE = {
+}, vE = {
 	justify: z("dialog.style.label"),
 	left: z("dialog.style.label.x8d60c4"),
 	right: z("dialog.style.label.x19b0fb"),
 	center: z("dialog.style.label.x55b22e"),
 	distribute: z("dialog.style.label.x88b36c"),
 	split: z("dialog.style.label.xb68e8e")
-}, _E = class extends V {
+}, yE = class extends V {
 	wasm;
 	eventBus;
 	services;
@@ -52938,7 +52998,7 @@ var hE = class extends V {
 		}), n.appendChild(i), this.infoPanel.appendChild(n);
 	}
 	buildParaInfo(e) {
-		let t = (e) => (e * 72 / 96).toFixed(1), n = gE[e.alignment ?? "justify"] ?? e.alignment, r = e.lineSpacingType ?? "Percent", i = e.lineSpacing ?? 160, a = e.marginLeft == null ? "0.0" : t(e.marginLeft), o = e.marginRight == null ? "0.0" : t(e.marginRight), s = e.indent == null ? "0.0" : t(e.indent), c = parseFloat(s), l = c > 0 ? z("dialog.style.buildParaInfo.text", { p1: s }) : c < 0 ? z("dialog.style.buildParaInfo.text.xe1aaaa", { p1: Math.abs(c).toFixed(1) }) : z("dialog.style.buildParaInfo.text.xfaa1dd"), u = r === "Percent" ? `${i} %` : `${t(i)} pt`, d = this.styles.find((e) => e.id === this.selectedId), f = (d ? this.styles.find((e) => e.id === d.nextStyleId) : null)?.name ?? d?.name ?? "";
+		let t = (e) => (e * 72 / 96).toFixed(1), n = vE[e.alignment ?? "justify"] ?? e.alignment, r = e.lineSpacingType ?? "Percent", i = e.lineSpacing ?? 160, a = e.marginLeft == null ? "0.0" : t(e.marginLeft), o = e.marginRight == null ? "0.0" : t(e.marginRight), s = e.indent == null ? "0.0" : t(e.indent), c = parseFloat(s), l = c > 0 ? z("dialog.style.buildParaInfo.text", { p1: s }) : c < 0 ? z("dialog.style.buildParaInfo.text.xe1aaaa", { p1: Math.abs(c).toFixed(1) }) : z("dialog.style.buildParaInfo.text.xfaa1dd"), u = r === "Percent" ? `${i} %` : `${t(i)} pt`, d = this.styles.find((e) => e.id === this.selectedId), f = (d ? this.styles.find((e) => e.id === d.nextStyleId) : null)?.name ?? d?.name ?? "";
 		return [
 			`왼쪽 여백: ${a} pt&nbsp;&nbsp;&nbsp;첫 줄: ${l}`,
 			`오른쪽 여백: ${o} pt&nbsp;&nbsp;&nbsp;정렬 방식: ${n}`,
@@ -52996,7 +53056,7 @@ var hE = class extends V {
 		let t = this.styles.find((t) => t.id === e);
 		this.currentStyleLabel && (this.currentStyleLabel.textContent = t?.name ?? ""), this.renderList(), this.updateInfo();
 	}
-}, vE = class extends V {
+}, bE = class extends V {
 	wasm;
 	eventBus;
 	services;
@@ -53082,14 +53142,14 @@ var hE = class extends V {
 	}
 	openParaDialog() {
 		if (this.addMode && this.styleInfo.id < 0) {
-			let e = new lE(this.wasm, this.eventBus);
+			let e = new dE(this.wasm, this.eventBus);
 			e.onApply = (e) => {
 				this.paraModsJson = JSON.stringify(e);
 			}, e.show(this.baseInfo.paraProps ?? {});
 			return;
 		}
 		try {
-			let e = this.wasm.getStyleDetail(this.styleInfo.id), t = new lE(this.wasm, this.eventBus);
+			let e = this.wasm.getStyleDetail(this.styleInfo.id), t = new dE(this.wasm, this.eventBus);
 			t.onApply = (e) => {
 				this.paraModsJson = JSON.stringify(e);
 			}, t.show(e.paraProps);
@@ -53099,7 +53159,7 @@ var hE = class extends V {
 	}
 	openCharDialog() {
 		if (this.addMode && this.styleInfo.id < 0) {
-			let e = new WT(this.wasm, this.eventBus);
+			let e = new KT(this.wasm, this.eventBus);
 			e.onApply = (e) => {
 				if (e.fontName) {
 					let t = this.wasm.findOrCreateFontId(e.fontName);
@@ -53110,7 +53170,7 @@ var hE = class extends V {
 			return;
 		}
 		try {
-			let e = this.wasm.getStyleDetail(this.styleInfo.id), t = new WT(this.wasm, this.eventBus);
+			let e = this.wasm.getStyleDetail(this.styleInfo.id), t = new KT(this.wasm, this.eventBus);
 			t.onApply = (e) => {
 				if (e.fontName) {
 					let t = this.wasm.findOrCreateFontId(e.fontName);
@@ -53166,39 +53226,39 @@ var hE = class extends V {
 	hide() {
 		super.hide(), this.onClose?.();
 	}
-}, yE = 7200 / 25.4;
-function bE(e, t) {
+}, xE = 7200 / 25.4;
+function SE(e, t) {
 	return parseFloat(e ?? "") || t;
 }
-function xE(e, t) {
+function CE(e, t) {
 	return parseInt(e ?? "") || t;
 }
-function SE(e) {
-	return Math.round(bE(e, 0) * yE);
+function wE(e) {
+	return Math.round(SE(e, 0) * xE);
 }
-function CE(e) {
-	return (e / yE).toFixed(2);
+function TE(e) {
+	return (e / xE).toFixed(2);
 }
-function wE(e, t) {
-	return Number(bE(e, 0).toFixed(2)) === Number(CE(t));
+function EE(e, t) {
+	return Number(SE(e, 0).toFixed(2)) === Number(TE(t));
 }
-function TE(e, t, n, r) {
-	wE(n, r) || (e[t] = Math.max(0, SE(n)));
+function DE(e, t, n, r) {
+	EE(n, r) || (e[t] = Math.max(0, wE(n)));
 }
-function EE(e, t, n, r) {
-	wE(n, r) || (e[t] = SE(n));
+function OE(e, t, n, r) {
+	EE(n, r) || (e[t] = wE(n));
 }
-function DE(e) {
+function kE(e) {
 	let t = e.replace("#", ""), n = parseInt(t.substring(0, 2), 16), r = parseInt(t.substring(2, 4), 16);
 	return parseInt(t.substring(4, 6), 16) << 16 | r << 8 | n;
 }
 function K(e, t, n, r) {
 	n !== r && (e[t] = n);
 }
-function OE(e, t, n) {
+function AE(e, t, n) {
 	e[t] = n;
 }
-function kE(e) {
+function jE(e) {
 	let t = e % 3, n = Math.floor(e / 3);
 	return t === 0 ? {
 		direction: "Left",
@@ -53211,75 +53271,75 @@ function kE(e) {
 		vertAlign: "Top"
 	};
 }
-function AE(e, t, n) {
-	K(e, "sizeProtect", n.sizeProtect, t.sizeProtect ?? !1), !n.sizeProtect && (TE(e, "width", n.width, t.width), TE(e, "height", n.height, t.height));
-}
-function jE(e, t, n) {
-	K(e, "treatAsChar", n.treatAsChar, t.treatAsChar), !n.treatAsChar && (K(e, "textWrap", n.horzRelTo === "TakePlace" ? "TopAndBottom" : n.textWrap, t.textWrap), n.horzRelTo !== "TakePlace" && K(e, "horzRelTo", n.horzRelTo, t.horzRelTo), K(e, "horzAlign", n.horzAlign, t.horzAlign), EE(e, "horzOffset", n.horzOffset, t.horzOffset), K(e, "vertRelTo", n.vertRelTo, t.vertRelTo), K(e, "vertAlign", n.vertAlign, t.vertAlign), EE(e, "vertOffset", n.vertOffset, t.vertOffset), K(e, "restrictInPage", n.restrictInPage, t.restrictInPage ?? !0), K(e, "allowOverlap", n.allowOverlap, t.allowOverlap ?? !1));
-}
 function ME(e, t, n) {
-	n.rotation && !n.rotation.disabled && K(e, "rotationAngle", xE(n.rotation.value, 0), t.rotationAngle ?? 0), n.horzFlip && !n.horzFlip.disabled && K(e, "horzFlip", n.horzFlip.value, !!t.horzFlip), n.vertFlip && !n.vertFlip.disabled && K(e, "vertFlip", n.vertFlip.value, !!t.vertFlip);
+	K(e, "sizeProtect", n.sizeProtect, t.sizeProtect ?? !1), !n.sizeProtect && (DE(e, "width", n.width, t.width), DE(e, "height", n.height, t.height));
 }
 function NE(e, t, n) {
-	n.left !== void 0 && K(e, "outerMarginLeft", SE(n.left), t.outerMarginLeft ?? 0), n.right !== void 0 && K(e, "outerMarginRight", SE(n.right), t.outerMarginRight ?? 0), n.top !== void 0 && K(e, "outerMarginTop", SE(n.top), t.outerMarginTop ?? 0), n.bottom !== void 0 && K(e, "outerMarginBottom", SE(n.bottom), t.outerMarginBottom ?? 0);
+	K(e, "treatAsChar", n.treatAsChar, t.treatAsChar), !n.treatAsChar && (K(e, "textWrap", n.horzRelTo === "TakePlace" ? "TopAndBottom" : n.textWrap, t.textWrap), n.horzRelTo !== "TakePlace" && K(e, "horzRelTo", n.horzRelTo, t.horzRelTo), K(e, "horzAlign", n.horzAlign, t.horzAlign), OE(e, "horzOffset", n.horzOffset, t.horzOffset), K(e, "vertRelTo", n.vertRelTo, t.vertRelTo), K(e, "vertAlign", n.vertAlign, t.vertAlign), OE(e, "vertOffset", n.vertOffset, t.vertOffset), K(e, "restrictInPage", n.restrictInPage, t.restrictInPage ?? !0), K(e, "allowOverlap", n.allowOverlap, t.allowOverlap ?? !1));
 }
-function PE(e, t) {
-	if (!t.present) return;
-	let n = t.activeIndex >= 0 && t.activeIndex !== 4;
-	if (OE(e, "hasCaption", n), !n) return;
-	let r = kE(t.activeIndex);
-	OE(e, "captionDirection", r.direction), OE(e, "captionVertAlign", r.vertAlign), OE(e, "captionWidth", SE(t.size)), OE(e, "captionSpacing", SE(t.gap)), OE(e, "captionIncludeMargin", t.includeMargin);
+function PE(e, t, n) {
+	n.rotation && !n.rotation.disabled && K(e, "rotationAngle", CE(n.rotation.value, 0), t.rotationAngle ?? 0), n.horzFlip && !n.horzFlip.disabled && K(e, "horzFlip", n.horzFlip.value, !!t.horzFlip), n.vertFlip && !n.vertFlip.disabled && K(e, "vertFlip", n.vertFlip.value, !!t.vertFlip);
 }
 function FE(e, t, n) {
-	n.color !== void 0 && K(e, "borderColor", DE(n.color), t.borderColor ?? 0), n.width !== void 0 && K(e, "borderWidth", SE(n.width), t.borderWidth ?? 0);
+	n.left !== void 0 && K(e, "outerMarginLeft", wE(n.left), t.outerMarginLeft ?? 0), n.right !== void 0 && K(e, "outerMarginRight", wE(n.right), t.outerMarginRight ?? 0), n.top !== void 0 && K(e, "outerMarginTop", wE(n.top), t.outerMarginTop ?? 0), n.bottom !== void 0 && K(e, "outerMarginBottom", wE(n.bottom), t.outerMarginBottom ?? 0);
 }
-function IE(e, t, n, r) {
-	FE(e, t, n), n.type !== void 0 && K(e, "lineType", xE(n.type, 0), t.lineType ?? 1), n.end !== void 0 && K(e, "lineEndShape", xE(n.end, 0), t.lineEndShape ?? 0), r && (n.arrowStart !== void 0 && K(e, "arrowStart", xE(n.arrowStart, 0), t.arrowStart ?? 0), n.arrowEnd !== void 0 && K(e, "arrowEnd", xE(n.arrowEnd, 0), t.arrowEnd ?? 0), n.arrowStartSize !== void 0 && K(e, "arrowStartSize", xE(n.arrowStartSize, 0), t.arrowStartSize ?? 0), n.arrowEndSize !== void 0 && K(e, "arrowEndSize", xE(n.arrowEndSize, 0), t.arrowEndSize ?? 0));
+function IE(e, t) {
+	if (!t.present) return;
+	let n = t.activeIndex >= 0 && t.activeIndex !== 4;
+	if (AE(e, "hasCaption", n), !n) return;
+	let r = jE(t.activeIndex);
+	AE(e, "captionDirection", r.direction), AE(e, "captionVertAlign", r.vertAlign), AE(e, "captionWidth", wE(t.size)), AE(e, "captionSpacing", wE(t.gap)), AE(e, "captionIncludeMargin", t.includeMargin);
 }
 function LE(e, t, n) {
-	K(e, "tbMarginLeft", SE(n.marginLeft), t.tbMarginLeft ?? 0), K(e, "tbMarginRight", SE(n.marginRight), t.tbMarginRight ?? 0), K(e, "tbMarginTop", SE(n.marginTop), t.tbMarginTop ?? 0), K(e, "tbMarginBottom", SE(n.marginBottom), t.tbMarginBottom ?? 0), K(e, "tbVerticalAlign", n.verticalAlign ?? "Top", t.tbVerticalAlign ?? "Top");
+	n.color !== void 0 && K(e, "borderColor", kE(n.color), t.borderColor ?? 0), n.width !== void 0 && K(e, "borderWidth", wE(n.width), t.borderWidth ?? 0);
 }
-function RE(e, t, n) {
+function RE(e, t, n, r) {
+	LE(e, t, n), n.type !== void 0 && K(e, "lineType", CE(n.type, 0), t.lineType ?? 1), n.end !== void 0 && K(e, "lineEndShape", CE(n.end, 0), t.lineEndShape ?? 0), r && (n.arrowStart !== void 0 && K(e, "arrowStart", CE(n.arrowStart, 0), t.arrowStart ?? 0), n.arrowEnd !== void 0 && K(e, "arrowEnd", CE(n.arrowEnd, 0), t.arrowEnd ?? 0), n.arrowStartSize !== void 0 && K(e, "arrowStartSize", CE(n.arrowStartSize, 0), t.arrowStartSize ?? 0), n.arrowEndSize !== void 0 && K(e, "arrowEndSize", CE(n.arrowEndSize, 0), t.arrowEndSize ?? 0));
+}
+function zE(e, t, n) {
+	K(e, "tbMarginLeft", wE(n.marginLeft), t.tbMarginLeft ?? 0), K(e, "tbMarginRight", wE(n.marginRight), t.tbMarginRight ?? 0), K(e, "tbMarginTop", wE(n.marginTop), t.tbMarginTop ?? 0), K(e, "tbMarginBottom", wE(n.marginBottom), t.tbMarginBottom ?? 0), K(e, "tbVerticalAlign", n.verticalAlign ?? "Top", t.tbVerticalAlign ?? "Top");
+}
+function BE(e, t, n) {
 	let r = 0;
-	n.customChecked && n.customValue !== void 0 ? r = xE(n.customValue, 0) : n.activeIndex === 1 ? r = 20 : n.activeIndex === 2 && (r = 50), K(e, "roundRate", r, t.roundRate ?? 0);
+	n.customChecked && n.customValue !== void 0 ? r = CE(n.customValue, 0) : n.activeIndex === 1 ? r = 20 : n.activeIndex === 2 && (r = 50), K(e, "roundRate", r, t.roundRate ?? 0);
 }
-function zE(e) {
+function VE(e) {
 	return e.solidChecked ? "solid" : e.gradientChecked ? "gradient" : "none";
 }
-function BE(e, t) {
-	t.solidColors && (OE(e, "fillBgColor", DE(t.solidColors.face)), OE(e, "fillPatColor", DE(t.solidColors.pattern)), t.patternType !== void 0 && OE(e, "fillPatType", xE(t.patternType, -1)));
-}
-function VE(e, t) {
-	t.gradientType !== void 0 && OE(e, "gradientType", xE(t.gradientType, 1)), t.gradientAngle !== void 0 && OE(e, "gradientAngle", xE(t.gradientAngle, 0)), t.gradientCenterX !== void 0 && OE(e, "gradientCenterX", xE(t.gradientCenterX, 0)), t.gradientCenterY !== void 0 && OE(e, "gradientCenterY", xE(t.gradientCenterY, 0)), t.gradientBlur !== void 0 && OE(e, "gradientBlur", xE(t.gradientBlur, 0));
-}
-function HE(e, t, n) {
-	let r = zE(n);
-	K(e, "fillType", r, t.fillType ?? "none"), r === "solid" && BE(e, n), r === "gradient" && VE(e, n), n.transparency !== void 0 && (r === "solid" || r === "gradient") && OE(e, "fillAlpha", Math.round(xE(n.transparency, 0) * 255 / 100));
+function HE(e, t) {
+	t.solidColors && (AE(e, "fillBgColor", kE(t.solidColors.face)), AE(e, "fillPatColor", kE(t.solidColors.pattern)), t.patternType !== void 0 && AE(e, "fillPatType", CE(t.patternType, -1)));
 }
 function UE(e, t) {
+	t.gradientType !== void 0 && AE(e, "gradientType", CE(t.gradientType, 1)), t.gradientAngle !== void 0 && AE(e, "gradientAngle", CE(t.gradientAngle, 0)), t.gradientCenterX !== void 0 && AE(e, "gradientCenterX", CE(t.gradientCenterX, 0)), t.gradientCenterY !== void 0 && AE(e, "gradientCenterY", CE(t.gradientCenterY, 0)), t.gradientBlur !== void 0 && AE(e, "gradientBlur", CE(t.gradientBlur, 0));
+}
+function WE(e, t, n) {
+	let r = VE(n);
+	K(e, "fillType", r, t.fillType ?? "none"), r === "solid" && HE(e, n), r === "gradient" && UE(e, n), n.transparency !== void 0 && (r === "solid" || r === "gradient") && AE(e, "fillAlpha", Math.round(CE(n.transparency, 0) * 255 / 100));
+}
+function GE(e, t) {
 	if (!t.present) return;
 	let n = t.activeIndex > 0 ? t.activeIndex : 0;
-	OE(e, "shadowType", n), n > 0 ? (OE(e, "shadowColor", DE(t.color)), OE(e, "shadowOffsetX", SE(t.offsetX)), OE(e, "shadowOffsetY", SE(t.offsetY))) : (OE(e, "shadowOffsetX", 0), OE(e, "shadowOffsetY", 0));
+	AE(e, "shadowType", n), n > 0 ? (AE(e, "shadowColor", kE(t.color)), AE(e, "shadowOffsetX", wE(t.offsetX)), AE(e, "shadowOffsetY", wE(t.offsetY))) : (AE(e, "shadowOffsetX", 0), AE(e, "shadowOffsetY", 0));
 }
-function WE(e, t, n, r) {
-	NE(e, t, r.outerMargin), PE(e, r.caption), IE(e, n, r.line, !1);
+function KE(e, t, n, r) {
+	FE(e, t, r.outerMargin), IE(e, r.caption), RE(e, n, r.line, !1);
 }
-function GE(e, t, n) {
-	LE(e, t, n.shapeTextBox), ME(e, t, n.transform), IE(e, t, n.line, !0), RE(e, t, n.shapeCorner), HE(e, t, n.shapeFill), UE(e, n.shapeShadow);
-}
-function KE(e, t, n) {
-	if (n.common.sizeProtect || !n.image.scale || !(t.originalWidth > 0)) return;
-	let r = Math.max(1, Math.min(1e3, bE(n.image.scale.x, 100))), i = Math.max(1, Math.min(1e3, bE(n.image.scale.y, 100))), a = Math.round(t.originalWidth * r / 100), o = Math.round(t.originalHeight * i / 100);
-	K(e, "width", a, t.width), K(e, "height", o, t.height);
-}
-function qE(e, t, n, r) {
-	t && (K(e, n[0], Math.max(0, SE(t.left)), r[0]), K(e, n[1], Math.max(0, SE(t.top)), r[1]), K(e, n[2], Math.max(0, SE(t.right)), r[2]), K(e, n[3], Math.max(0, SE(t.bottom)), r[3]));
+function qE(e, t, n) {
+	zE(e, t, n.shapeTextBox), PE(e, t, n.transform), RE(e, t, n.line, !0), BE(e, t, n.shapeCorner), WE(e, t, n.shapeFill), GE(e, n.shapeShadow);
 }
 function JE(e, t, n) {
-	n.effectControlsPresent && n.selectedEffect !== void 0 && K(e, "effect", n.selectedEffect === "Original" ? "RealPic" : n.selectedEffect, t.effect ?? "RealPic"), n.brightness !== void 0 && K(e, "brightness", Math.max(-100, Math.min(100, xE(n.brightness, 0))), t.brightness ?? 0), n.contrast !== void 0 && K(e, "contrast", Math.max(-100, Math.min(100, xE(n.contrast, 0))), t.contrast ?? 0), n.transparency !== void 0 && K(e, "transparency", Math.max(0, Math.min(100, xE(n.transparency, 0))), t.transparency ?? 0);
+	if (n.common.sizeProtect || !n.image.scale || !(t.originalWidth > 0)) return;
+	let r = Math.max(1, Math.min(1e3, SE(n.image.scale.x, 100))), i = Math.max(1, Math.min(1e3, SE(n.image.scale.y, 100))), a = Math.round(t.originalWidth * r / 100), o = Math.round(t.originalHeight * i / 100);
+	K(e, "width", a, t.width), K(e, "height", o, t.height);
 }
-function YE(e, t, n) {
-	ME(e, t, n.transform), NE(e, t, n.outerMargin), PE(e, n.caption), FE(e, t, n.line), KE(e, t, n), qE(e, n.image.crop, [
+function YE(e, t, n, r) {
+	t && (K(e, n[0], Math.max(0, wE(t.left)), r[0]), K(e, n[1], Math.max(0, wE(t.top)), r[1]), K(e, n[2], Math.max(0, wE(t.right)), r[2]), K(e, n[3], Math.max(0, wE(t.bottom)), r[3]));
+}
+function XE(e, t, n) {
+	n.effectControlsPresent && n.selectedEffect !== void 0 && K(e, "effect", n.selectedEffect === "Original" ? "RealPic" : n.selectedEffect, t.effect ?? "RealPic"), n.brightness !== void 0 && K(e, "brightness", Math.max(-100, Math.min(100, CE(n.brightness, 0))), t.brightness ?? 0), n.contrast !== void 0 && K(e, "contrast", Math.max(-100, Math.min(100, CE(n.contrast, 0))), t.contrast ?? 0), n.transparency !== void 0 && K(e, "transparency", Math.max(0, Math.min(100, CE(n.transparency, 0))), t.transparency ?? 0);
+}
+function ZE(e, t, n) {
+	PE(e, t, n.transform), FE(e, t, n.outerMargin), IE(e, n.caption), LE(e, t, n.line), JE(e, t, n), YE(e, n.image.crop, [
 		"cropLeft",
 		"cropTop",
 		"cropRight",
@@ -53289,7 +53349,7 @@ function YE(e, t, n) {
 		t.cropTop ?? 0,
 		t.cropRight ?? 0,
 		t.cropBottom ?? 0
-	]), qE(e, n.image.padding, [
+	]), YE(e, n.image.padding, [
 		"paddingLeft",
 		"paddingTop",
 		"paddingRight",
@@ -53299,13 +53359,13 @@ function YE(e, t, n) {
 		t.paddingTop ?? 0,
 		t.paddingRight ?? 0,
 		t.paddingBottom ?? 0
-	]), JE(e, t, n.image);
+	]), XE(e, t, n.image);
 }
-function XE(e, t, n, r) {
+function QE(e, t, n, r) {
 	let i = {};
-	return AE(i, t, r.common), jE(i, t, r.common), K(i, "description", r.common.description, t.description), e === "image" ? YE(i, t, r) : n && (e === "ole" ? WE(i, t, n, r) : GE(i, n, r)), i;
+	return ME(i, t, r.common), NE(i, t, r.common), K(i, "description", r.common.description, t.description), e === "image" ? ZE(i, t, r) : n && (e === "ole" ? KE(i, t, n, r) : qE(i, n, r)), i;
 }
-function ZE(e, t) {
+function $E(e, t) {
 	return e === "image" ? t.headerFooter ? {
 		kind: "header-footer-picture",
 		sec: t.sec,
@@ -53338,12 +53398,12 @@ function ZE(e, t) {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/picture-props-dialog.ts
-var QE = 7200 / 25.4;
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/picture-props-dialog.ts
+var eD = 7200 / 25.4;
 function q(e) {
-	return e / QE;
+	return e / eD;
 }
-function $E(e) {
+function tD(e) {
 	let t = e >> 16 & 255, n = e >> 8 & 255;
 	return "#" + [
 		e & 255,
@@ -53351,7 +53411,7 @@ function $E(e) {
 		t
 	].map((e) => e.toString(16).padStart(2, "0")).join("");
 }
-var eD = {
+var nD = {
 	basic: z("dialog.pictureProps.tab.basic"),
 	margin: z("dialog.pictureProps.tab.margin"),
 	line: z("dialog.pictureProps.tab.line"),
@@ -53362,7 +53422,7 @@ var eD = {
 	reflection: z("dialog.pictureProps.tab.reflection"),
 	glow: z("dialog.pictureProps.tab.glow"),
 	softEdge: z("dialog.pictureProps.tab.softEdge")
-}, tD = [
+}, rD = [
 	"basic",
 	"margin",
 	"line",
@@ -53371,23 +53431,23 @@ var eD = {
 	"reflection",
 	"glow",
 	"softEdge"
-], nD = [
+], iD = [
 	"basic",
 	"margin",
 	"line",
 	"fill",
 	"textbox",
 	"shadow"
-], rD = [
+], aD = [
 	"basic",
 	"margin",
 	"line"
-], iD = [
+], oD = [
 	"basic",
 	"margin",
 	"line",
 	"shadow"
-], aD = 4e3, oD = class {
+], sD = 4e3, cD = class {
 	overlay;
 	dialog;
 	built = !1;
@@ -53561,10 +53621,10 @@ var eD = {
 	}
 	rebuildTabs() {
 		this.tabGroup.replaceChildren(), this.body.replaceChildren(), this.tabs = [], this.panels = [], this.sizeLockControls = [];
-		let e = this.objectType === "ole" ? rD : this.objectType === "line" ? iD : this.objectType === "shape" || this.objectType === "group" ? nD : tD;
+		let e = this.objectType === "ole" ? aD : this.objectType === "line" ? oD : this.objectType === "shape" || this.objectType === "group" ? iD : rD;
 		e.forEach((e, t) => {
 			let n = document.createElement("button");
-			n.className = "dialog-tab", n.dataset.tab = e, n.textContent = eD[e], n.addEventListener("click", () => this.switchTab(t)), this.tabGroup.appendChild(n), this.tabs.push(n);
+			n.className = "dialog-tab", n.dataset.tab = e, n.textContent = nD[e], n.addEventListener("click", () => this.switchTab(t)), this.tabGroup.appendChild(n), this.tabs.push(n);
 		});
 		let t = {
 			basic: () => this.buildBasicPanel(),
@@ -53579,7 +53639,7 @@ var eD = {
 			softEdge: () => this.buildSoftEdgePanel()
 		};
 		e.forEach((e) => {
-			let n = t[e], r = n ? n() : this.buildStubPanel(eD[e]);
+			let n = t[e], r = n ? n() : this.buildStubPanel(nD[e]);
 			r.dataset.tab = e, this.panels.push(r), this.body.appendChild(r);
 		});
 	}
@@ -54491,7 +54551,7 @@ var eD = {
 		}
 	}
 	applyPropertyPatch(e) {
-		let t = ZE(this.objectType, {
+		let t = $E(this.objectType, {
 			sec: this.sec,
 			para: this.para,
 			ci: this.ci,
@@ -54514,12 +54574,12 @@ var eD = {
 			this.showDescriptionPrompt();
 			return;
 		}
-		let e = XE(this.objectType, this.props, this.shapeProps, this.captureApplyForm());
+		let e = QE(this.objectType, this.props, this.shapeProps, this.captureApplyForm());
 		Object.keys(e).length > 0 && this.applyPropertyPatch(e), this.hide();
 	}
 	populateFromProps() {
 		if (this.props) {
-			if (this.picFileNameInput && this.picEmbedCheck && (this.props.externalPath ? (this.picFileNameInput.value = this.props.externalPath, this.picEmbedCheck.checked = !1) : (this.picFileNameInput.value = z("dialog.pictureProps.picFileNameInput.value"), this.picEmbedCheck.checked = !0)), this.widthInput.value = CE(this.props.width), this.heightInput.value = CE(this.props.height), this.sizeFixedCheck.checked = this.props.sizeProtect ?? !1, this.treatAsCharCheck.checked = this.props.treatAsChar, this.selectWrap(this.wrapValues.indexOf(this.props.textWrap)), this.horzRelSelect.value = this.props.textWrap === "TopAndBottom" ? "TakePlace" : this.props.horzRelTo, this.horzAlignSelect.value = this.props.horzAlign, this.horzOffsetInput.value = CE(this.props.horzOffset), this.vertRelSelect.value = this.props.vertRelTo, this.vertAlignSelect.value = this.props.vertAlign, this.vertOffsetInput.value = CE(this.props.vertOffset), this.pageAreaLimitCheck.checked = this.props.restrictInPage ?? !0, this.overlapAllowCheck.checked = this.props.allowOverlap ?? !1, this.descInput.value = this.props.description, this.skewHInput.value = "0", this.skewVInput.value = "0", this.updatePositionVisibility(), this.updateOverlapOption(), (this.objectType === "shape" || this.objectType === "line" || this.objectType === "group" || this.objectType === "ole") && this.shapeProps) {
+			if (this.picFileNameInput && this.picEmbedCheck && (this.props.externalPath ? (this.picFileNameInput.value = this.props.externalPath, this.picEmbedCheck.checked = !1) : (this.picFileNameInput.value = z("dialog.pictureProps.picFileNameInput.value"), this.picEmbedCheck.checked = !0)), this.widthInput.value = TE(this.props.width), this.heightInput.value = TE(this.props.height), this.sizeFixedCheck.checked = this.props.sizeProtect ?? !1, this.treatAsCharCheck.checked = this.props.treatAsChar, this.selectWrap(this.wrapValues.indexOf(this.props.textWrap)), this.horzRelSelect.value = this.props.textWrap === "TopAndBottom" ? "TakePlace" : this.props.horzRelTo, this.horzAlignSelect.value = this.props.horzAlign, this.horzOffsetInput.value = TE(this.props.horzOffset), this.vertRelSelect.value = this.props.vertRelTo, this.vertAlignSelect.value = this.props.vertAlign, this.vertOffsetInput.value = TE(this.props.vertOffset), this.pageAreaLimitCheck.checked = this.props.restrictInPage ?? !0, this.overlapAllowCheck.checked = this.props.allowOverlap ?? !1, this.descInput.value = this.props.description, this.skewHInput.value = "0", this.skewVInput.value = "0", this.updatePositionVisibility(), this.updateOverlapOption(), (this.objectType === "shape" || this.objectType === "line" || this.objectType === "group" || this.objectType === "ole") && this.shapeProps) {
 				let e = this.shapeProps, t = this.objectType === "ole";
 				if (this.rotationInput && (this.rotationInput.value = String(e.rotationAngle ?? 0), this.rotationInput.disabled = t), this.horzFlipCheck && (this.horzFlipCheck.checked = !!e.horzFlip, this.horzFlipCheck.disabled = t), this.vertFlipCheck && (this.vertFlipCheck.checked = !!e.vertFlip, this.vertFlipCheck.disabled = t), t) {
 					if (this.outerMarginLeftInput && (this.outerMarginLeftInput.value = q(this.props.outerMarginLeft ?? 0).toFixed(2)), this.outerMarginRightInput && (this.outerMarginRightInput.value = q(this.props.outerMarginRight ?? 0).toFixed(2)), this.outerMarginTopInput && (this.outerMarginTopInput.value = q(this.props.outerMarginTop ?? 0).toFixed(2)), this.outerMarginBottomInput && (this.outerMarginBottomInput.value = q(this.props.outerMarginBottom ?? 0).toFixed(2)), this.captionBtns.length > 0) {
@@ -54533,13 +54593,13 @@ var eD = {
 					let t = e.tbVerticalAlign ?? "Top";
 					this.tbVertAlignBtns.forEach((e) => e.classList.toggle("active", e.dataset.value === t));
 				}
-				if (this.lineColorInput && e.borderColor !== void 0 && (this.lineColorInput.value = $E(e.borderColor)), this.lineWidthInput && e.borderWidth !== void 0 && (this.lineWidthInput.value = q(e.borderWidth).toFixed(2)), this.lineTypeSelect && e.lineType !== void 0 && (this.lineTypeSelect.value = String(e.lineType)), this.lineEndSelect && e.lineEndShape !== void 0 && (this.lineEndSelect.value = String(e.lineEndShape)), !t && this.arrowStartSelect && e.arrowStart !== void 0 && (this.arrowStartSelect.value = String(e.arrowStart)), !t && this.arrowEndSelect && e.arrowEnd !== void 0 && (this.arrowEndSelect.value = String(e.arrowEnd)), !t && this.arrowStartSizeSelect && e.arrowStartSize !== void 0 && (this.arrowStartSizeSelect.value = String(e.arrowStartSize)), !t && this.arrowEndSizeSelect && e.arrowEndSize !== void 0 && (this.arrowEndSizeSelect.value = String(e.arrowEndSize)), !t && this.cornerBtns.length > 0 && e.roundRate !== void 0) {
+				if (this.lineColorInput && e.borderColor !== void 0 && (this.lineColorInput.value = tD(e.borderColor)), this.lineWidthInput && e.borderWidth !== void 0 && (this.lineWidthInput.value = q(e.borderWidth).toFixed(2)), this.lineTypeSelect && e.lineType !== void 0 && (this.lineTypeSelect.value = String(e.lineType)), this.lineEndSelect && e.lineEndShape !== void 0 && (this.lineEndSelect.value = String(e.lineEndShape)), !t && this.arrowStartSelect && e.arrowStart !== void 0 && (this.arrowStartSelect.value = String(e.arrowStart)), !t && this.arrowEndSelect && e.arrowEnd !== void 0 && (this.arrowEndSelect.value = String(e.arrowEnd)), !t && this.arrowStartSizeSelect && e.arrowStartSize !== void 0 && (this.arrowStartSizeSelect.value = String(e.arrowStartSize)), !t && this.arrowEndSizeSelect && e.arrowEndSize !== void 0 && (this.arrowEndSizeSelect.value = String(e.arrowEndSize)), !t && this.cornerBtns.length > 0 && e.roundRate !== void 0) {
 					let t = e.roundRate;
 					t === 0 ? this.cornerBtns.forEach((e, t) => e.classList.toggle("active", t === 0)) : t >= 50 ? this.cornerBtns.forEach((e, t) => e.classList.toggle("active", t === 2)) : t > 0 && t < 50 && (this.cornerCustomRadio && (this.cornerCustomRadio.checked = !0), this.cornerCustomInput && (this.cornerCustomInput.value = String(t), this.cornerCustomInput.disabled = !1), this.cornerBtns.forEach((e) => e.classList.remove("active")));
 				}
 				if (!t) {
 					let t = e.fillType ?? "none";
-					if (this.fillNoneRadio && (this.fillNoneRadio.checked = t === "none"), this.fillSolidRadio && (this.fillSolidRadio.checked = t === "solid"), this.fillGradientRadio && (this.fillGradientRadio.checked = t === "gradient"), this.solidFaceColor && e.fillBgColor !== void 0 && (this.solidFaceColor.value = $E(e.fillBgColor)), this.solidPatColor && e.fillPatColor !== void 0 && (this.solidPatColor.value = $E(e.fillPatColor)), this.solidPatternSelect && e.fillPatType, this.gradTypeSelect && e.gradientType, this.gradCenterXInput && e.gradientCenterX !== void 0 && (this.gradCenterXInput.value = String(e.gradientCenterX)), this.gradCenterYInput && e.gradientCenterY !== void 0 && (this.gradCenterYInput.value = String(e.gradientCenterY)), this.gradBlurInput && e.gradientBlur !== void 0 && (this.gradBlurInput.value = String(e.gradientBlur)), this.gradTiltInput && e.gradientAngle !== void 0 && (this.gradTiltInput.value = String(e.gradientAngle)), this.fillTransInput && e.fillAlpha !== void 0) {
+					if (this.fillNoneRadio && (this.fillNoneRadio.checked = t === "none"), this.fillSolidRadio && (this.fillSolidRadio.checked = t === "solid"), this.fillGradientRadio && (this.fillGradientRadio.checked = t === "gradient"), this.solidFaceColor && e.fillBgColor !== void 0 && (this.solidFaceColor.value = tD(e.fillBgColor)), this.solidPatColor && e.fillPatColor !== void 0 && (this.solidPatColor.value = tD(e.fillPatColor)), this.solidPatternSelect && e.fillPatType, this.gradTypeSelect && e.gradientType, this.gradCenterXInput && e.gradientCenterX !== void 0 && (this.gradCenterXInput.value = String(e.gradientCenterX)), this.gradCenterYInput && e.gradientCenterY !== void 0 && (this.gradCenterYInput.value = String(e.gradientCenterY)), this.gradBlurInput && e.gradientBlur !== void 0 && (this.gradBlurInput.value = String(e.gradientBlur)), this.gradTiltInput && e.gradientAngle !== void 0 && (this.gradTiltInput.value = String(e.gradientAngle)), this.fillTransInput && e.fillAlpha !== void 0) {
 						let t = Math.round(e.fillAlpha * 100 / 255);
 						this.fillTransInput.value = String(t), this.fillTransInput.disabled = !1;
 					}
@@ -54547,7 +54607,7 @@ var eD = {
 						let t = e.shadowType ?? 0;
 						this.shadowTypeBtns.forEach((e, n) => e.classList.toggle("active", n === t));
 						let n = t > 0;
-						this.shadowColorInput.disabled = !n, this.shadowHInput.disabled = !n, this.shadowVInput.disabled = !n, this.shadowDirBtns.forEach((e) => e.disabled = !n), e.shadowColor !== void 0 && (this.shadowColorInput.value = $E(e.shadowColor)), e.shadowOffsetX !== void 0 && (this.shadowHInput.value = q(e.shadowOffsetX).toFixed(1)), e.shadowOffsetY !== void 0 && (this.shadowVInput.value = q(e.shadowOffsetY).toFixed(1));
+						this.shadowColorInput.disabled = !n, this.shadowHInput.disabled = !n, this.shadowVInput.disabled = !n, this.shadowDirBtns.forEach((e) => e.disabled = !n), e.shadowColor !== void 0 && (this.shadowColorInput.value = tD(e.shadowColor)), e.shadowOffsetX !== void 0 && (this.shadowHInput.value = q(e.shadowOffsetX).toFixed(1)), e.shadowOffsetY !== void 0 && (this.shadowVInput.value = q(e.shadowOffsetY).toFixed(1));
 					}
 					if (this.solidArea) {
 						let e = t === "solid", n = t === "gradient";
@@ -54562,7 +54622,7 @@ var eD = {
 						this.captionBtns.forEach((e, n) => e.classList.toggle("active", n === t)), this.captionSizeInput.value = q(e.captionWidth ?? 0).toFixed(2), this.captionGapInput.value = q(e.captionSpacing ?? 0).toFixed(2), this.captionExpandCheck.checked = !!e.captionIncludeMargin;
 					} else this.captionBtns.forEach((e) => e.classList.remove("active")), this.captionSizeInput.value = "30.00", this.captionGapInput.value = "3.00", this.captionExpandCheck.checked = !1;
 				}
-				if (this.lineColorInput && e.borderColor !== void 0 && (this.lineColorInput.value = $E(e.borderColor)), this.lineWidthInput && e.borderWidth !== void 0 && (this.lineWidthInput.value = q(e.borderWidth).toFixed(2)), this.picScaleXInput && e.originalWidth > 0 && (this.picScaleXInput.value = (e.width / e.originalWidth * 100).toFixed(2), this.picScaleYInput.value = (e.height / e.originalHeight * 100).toFixed(2)), this.picCropLeftInput && (this.picCropLeftInput.value = q(e.cropLeft ?? 0).toFixed(2), this.picCropTopInput.value = q(e.cropTop ?? 0).toFixed(2), this.picCropRightInput.value = q(e.cropRight ?? 0).toFixed(2), this.picCropBottomInput.value = q(e.cropBottom ?? 0).toFixed(2)), this.picPadLeftInput && (this.picPadLeftInput.value = q(e.paddingLeft ?? 0).toFixed(2), this.picPadTopInput.value = q(e.paddingTop ?? 0).toFixed(2), this.picPadRightInput.value = q(e.paddingRight ?? 0).toFixed(2), this.picPadBottomInput.value = q(e.paddingBottom ?? 0).toFixed(2)), this.picEffectRadios.length > 0) {
+				if (this.lineColorInput && e.borderColor !== void 0 && (this.lineColorInput.value = tD(e.borderColor)), this.lineWidthInput && e.borderWidth !== void 0 && (this.lineWidthInput.value = q(e.borderWidth).toFixed(2)), this.picScaleXInput && e.originalWidth > 0 && (this.picScaleXInput.value = (e.width / e.originalWidth * 100).toFixed(2), this.picScaleYInput.value = (e.height / e.originalHeight * 100).toFixed(2)), this.picCropLeftInput && (this.picCropLeftInput.value = q(e.cropLeft ?? 0).toFixed(2), this.picCropTopInput.value = q(e.cropTop ?? 0).toFixed(2), this.picCropRightInput.value = q(e.cropRight ?? 0).toFixed(2), this.picCropBottomInput.value = q(e.cropBottom ?? 0).toFixed(2)), this.picPadLeftInput && (this.picPadLeftInput.value = q(e.paddingLeft ?? 0).toFixed(2), this.picPadTopInput.value = q(e.paddingTop ?? 0).toFixed(2), this.picPadRightInput.value = q(e.paddingRight ?? 0).toFixed(2), this.picPadBottomInput.value = q(e.paddingBottom ?? 0).toFixed(2)), this.picEffectRadios.length > 0) {
 					let t = e.effect ?? "RealPic";
 					this.picEffectRadios.forEach((n) => {
 						n.checked = n.value === t || n.value === "Original" && t === "RealPic" && (e.brightness !== 0 || e.contrast !== 0);
@@ -54615,9 +54675,9 @@ var eD = {
 		let a = document.createElement("div");
 		a.className = "cs-left-col";
 		let o = document.createElement("textarea");
-		o.className = "pp-desc-textarea", o.maxLength = aD, o.value = this.descInput.value, a.appendChild(o);
+		o.className = "pp-desc-textarea", o.maxLength = sD, o.value = this.descInput.value, a.appendChild(o);
 		let s = document.createElement("div");
-		s.className = "pp-desc-error", s.style.color = "#c00", s.style.fontSize = "11px", s.style.display = "none", s.textContent = z("dialog.pictureProps.errorLabel.text", { p1: aD }), a.appendChild(s);
+		s.className = "pp-desc-error", s.style.color = "#c00", s.style.fontSize = "11px", s.style.display = "none", s.textContent = z("dialog.pictureProps.errorLabel.text", { p1: sD }), a.appendChild(s);
 		let c = document.createElement("div");
 		c.className = "cs-right-col";
 		let l = document.createElement("button");
@@ -54682,7 +54742,7 @@ var eD = {
 		let n = document.createElement("input");
 		return n.type = "checkbox", t.appendChild(n), t.appendChild(document.createTextNode(` ${e}`)), t;
 	}
-}, sD = 8e3, cD = [
+}, lD = 8e3, uD = [
 	{
 		id: "struct",
 		name: z("dialog.equationEditor.label"),
@@ -55436,9 +55496,9 @@ var eD = {
 		]
 	}
 ];
-function lD() {
+function dD() {
 	let e = [];
-	for (let t of cD) for (let n of t.items) {
+	for (let t of uD) for (let n of t.items) {
 		let r = n.hwp.split(/[\s{}_^]/).find((e) => e.length > 0) || n.label;
 		e.push({
 			name: r,
@@ -55450,7 +55510,7 @@ function lD() {
 	}
 	return e;
 }
-var uD = lD(), dD = class {
+var fD = dD(), pD = class {
 	services;
 	wasm;
 	eventBus;
@@ -55493,7 +55553,7 @@ var uD = lD(), dD = class {
 			console.warn("[EquationEditor] 수식 속성 가져오기 실패:", e);
 			return;
 		}
-		this.scriptArea.value = this.origProps.script || "", this.scriptErrorLabel.style.display = "none", this.fontSizeInput.value = String(Math.round(this.origProps.fontSize / 100)), this.colorInput.value = fD(this.origProps.color), this.searchInput.value = "", this.searchResults.style.display = "none", this.origProps.script && /\\[a-zA-Z]/.test(this.origProps.script) ? this.setMode("latex") : this.setMode("hwp"), document.body.appendChild(this.overlay), setTimeout(() => {
+		this.scriptArea.value = this.origProps.script || "", this.scriptErrorLabel.style.display = "none", this.fontSizeInput.value = String(Math.round(this.origProps.fontSize / 100)), this.colorInput.value = mD(this.origProps.color), this.searchInput.value = "", this.searchResults.style.display = "none", this.origProps.script && /\\[a-zA-Z]/.test(this.origProps.script) ? this.setMode("latex") : this.setMode("hwp"), document.body.appendChild(this.overlay), setTimeout(() => {
 			this.scriptArea.focus(), this.updatePreview();
 		}, 50);
 	}
@@ -55518,9 +55578,9 @@ var uD = lD(), dD = class {
 			e.preventDefault(), this.setMode("latex");
 		}), this.latexHint.appendChild(a), r.appendChild(this.latexHint), this.previewContainer = document.createElement("div"), this.previewContainer.className = "eq-preview", r.appendChild(this.previewContainer);
 		let o = document.createElement("div");
-		o.className = "eq-script-wrap", this.scriptArea = document.createElement("textarea"), this.scriptArea.className = "eq-script", this.scriptArea.rows = 4, this.scriptArea.spellcheck = !1, this.scriptArea.maxLength = sD, this.scriptArea.addEventListener("input", () => {
+		o.className = "eq-script-wrap", this.scriptArea = document.createElement("textarea"), this.scriptArea.className = "eq-script", this.scriptArea.rows = 4, this.scriptArea.spellcheck = !1, this.scriptArea.maxLength = lD, this.scriptArea.addEventListener("input", () => {
 			this.schedulePreview(), this.onScriptInput();
-		}), this.scriptArea.addEventListener("keydown", (e) => this.onScriptKeydown(e)), this.acDropdown = document.createElement("div"), this.acDropdown.className = "eq-autocomplete", this.acDropdown.style.display = "none", o.append(this.scriptArea, this.acDropdown), r.appendChild(o), this.scriptErrorLabel = document.createElement("div"), this.scriptErrorLabel.className = "eq-script-error", this.scriptErrorLabel.style.color = "#c00", this.scriptErrorLabel.style.fontSize = "11px", this.scriptErrorLabel.style.display = "none", this.scriptErrorLabel.textContent = z("dialog.equationEditor.scriptErrorLabel.text", { p1: sD }), r.appendChild(this.scriptErrorLabel);
+		}), this.scriptArea.addEventListener("keydown", (e) => this.onScriptKeydown(e)), this.acDropdown = document.createElement("div"), this.acDropdown.className = "eq-autocomplete", this.acDropdown.style.display = "none", o.append(this.scriptArea, this.acDropdown), r.appendChild(o), this.scriptErrorLabel = document.createElement("div"), this.scriptErrorLabel.className = "eq-script-error", this.scriptErrorLabel.style.color = "#c00", this.scriptErrorLabel.style.fontSize = "11px", this.scriptErrorLabel.style.display = "none", this.scriptErrorLabel.textContent = z("dialog.equationEditor.scriptErrorLabel.text", { p1: lD }), r.appendChild(this.scriptErrorLabel);
 		let s = document.createElement("div");
 		s.className = "dialog-row eq-props-row";
 		let c = document.createElement("span");
@@ -55553,7 +55613,7 @@ var uD = lD(), dD = class {
 	}
 	buildTabs() {
 		this.tabContainer.replaceChildren();
-		for (let e of cD) {
+		for (let e of uD) {
 			let t = document.createElement("button");
 			t.className = "eq-tab" + (e.id === this.activeTabId ? " eq-tab-active" : ""), t.textContent = e.name, t.dataset.tabId = e.id, t.addEventListener("click", () => {
 				this.activeTabId = e.id, this.tabContainer.querySelectorAll(".eq-tab").forEach((e) => e.classList.remove("eq-tab-active")), t.classList.add("eq-tab-active"), this.refreshToolbar();
@@ -55563,7 +55623,7 @@ var uD = lD(), dD = class {
 	}
 	refreshToolbar() {
 		this.toolbarContent.replaceChildren();
-		let e = cD.find((e) => e.id === this.activeTabId);
+		let e = uD.find((e) => e.id === this.activeTabId);
 		if (e) for (let t of e.items) {
 			let e = document.createElement("button");
 			e.className = "eq-toolbar-btn", e.textContent = t.label;
@@ -55579,7 +55639,7 @@ var uD = lD(), dD = class {
 			this.hideAutocomplete();
 			return;
 		}
-		let i = r[1].toLowerCase(), a = uD.filter((e) => e.name.toLowerCase().startsWith(i) || e.display.includes(i)).slice(0, 8);
+		let i = r[1].toLowerCase(), a = fD.filter((e) => e.name.toLowerCase().startsWith(i) || e.display.includes(i)).slice(0, 8);
 		if (a.length === 0) {
 			this.hideAutocomplete();
 			return;
@@ -55616,7 +55676,7 @@ var uD = lD(), dD = class {
 			this.searchResults.style.display = "none";
 			return;
 		}
-		let t = uD.filter((t) => t.name.toLowerCase().includes(e) || t.display.includes(e) || t.group.toLowerCase().includes(e)).slice(0, 12);
+		let t = fD.filter((t) => t.name.toLowerCase().includes(e) || t.display.includes(e) || t.group.toLowerCase().includes(e)).slice(0, 12);
 		if (t.length === 0) {
 			this.searchResults.style.display = "none";
 			return;
@@ -55651,10 +55711,10 @@ var uD = lD(), dD = class {
 			this.showPreviewMessage("eq-preview-empty", z("dialog.equationEditor.showPreviewMessage.label"));
 			return;
 		}
-		let t = (parseInt(this.fontSizeInput.value, 10) || 10) * 100, n = pD(this.colorInput.value);
+		let t = (parseInt(this.fontSizeInput.value, 10) || 10) * 100, n = hD(this.colorInput.value);
 		try {
 			let r = this.wasm.renderEquationPreview(e, t, n);
-			this.previewContainer.replaceChildren(), wy(this.previewContainer, r);
+			this.previewContainer.replaceChildren(), Ey(this.previewContainer, r);
 		} catch (e) {
 			this.showPreviewMessage("eq-preview-error", z("dialog.equationEditor.showPreviewMessage.label.xf1847f")), console.warn("[EquationEditor] 미리보기 오류:", e);
 		}
@@ -55671,7 +55731,7 @@ var uD = lD(), dD = class {
 			return;
 		}
 		this.scriptErrorLabel.style.display = "none";
-		let t = (parseInt(this.fontSizeInput.value, 10) || 10) * 100, n = pD(this.colorInput.value), r = {};
+		let t = (parseInt(this.fontSizeInput.value, 10) || 10) * 100, n = hD(this.colorInput.value), r = {};
 		if (e !== this.origProps.script && (r.script = e), t !== this.origProps.fontSize && (r.fontSize = t), n !== this.origProps.color && (r.color = n), Object.keys(r).length > 0) {
 			let e = () => {
 				this.noteRef ? this.wasm.setNoteEquationProperties(this.noteRef, r) : this.wasm.setEquationProperties(this.sec, this.para, this.ci, this.cellIdx, this.cellParaIdx, r);
@@ -55690,46 +55750,46 @@ var uD = lD(), dD = class {
 		this.hide();
 	}
 };
-function fD(e) {
+function mD(e) {
 	return "#" + [
 		e & 255,
 		e >> 8 & 255,
 		e >> 16 & 255
 	].map((e) => e.toString(16).padStart(2, "0")).join("");
 }
-function pD(e) {
+function hD(e) {
 	let t = e.replace("#", ""), n = parseInt(t.substring(0, 2), 16), r = parseInt(t.substring(2, 4), 16);
 	return parseInt(t.substring(4, 6), 16) << 16 | r << 8 | n;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/equation-props-dialog.ts
-var mD = [
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/equation-props-dialog.ts
+var gD = [
 	"basic",
 	"margin",
 	"equation"
-], hD = {
+], _D = {
 	basic: z("dialog.equationProps.tab.basic"),
 	margin: z("dialog.equationProps.tab.margin"),
 	equation: z("dialog.equationProps.tab.equation")
 };
-function gD(e) {
+function vD(e) {
 	return e * 25.4 / 7200;
 }
-function _D(e) {
-	return typeof e == "number" && Number.isFinite(e) ? gD(e).toFixed(2) : "";
+function yD(e) {
+	return typeof e == "number" && Number.isFinite(e) ? vD(e).toFixed(2) : "";
 }
-function vD(e) {
+function bD(e) {
 	return "#" + [
 		e & 255,
 		e >> 8 & 255,
 		e >> 16 & 255
 	].map((e) => e.toString(16).padStart(2, "0")).join("");
 }
-function yD(e) {
+function xD(e) {
 	let t = e.replace("#", ""), n = parseInt(t.substring(0, 2), 16), r = parseInt(t.substring(2, 4), 16);
 	return parseInt(t.substring(4, 6), 16) << 16 | r << 8 | n;
 }
-var bD = class {
+var SD = class {
 	wasm;
 	eventBus;
 	services;
@@ -55803,9 +55863,9 @@ var bD = class {
 		}), Lf(this.dialog, e);
 	}
 	rebuildTabs() {
-		this.tabGroup.replaceChildren(), this.body.replaceChildren(), this.tabs = [], this.panels = [], mD.forEach((e, t) => {
+		this.tabGroup.replaceChildren(), this.body.replaceChildren(), this.tabs = [], this.panels = [], gD.forEach((e, t) => {
 			let n = document.createElement("button");
-			n.className = "dialog-tab", n.dataset.tab = e, n.textContent = hD[e], n.addEventListener("click", () => this.switchTab(t)), this.tabGroup.appendChild(n), this.tabs.push(n);
+			n.className = "dialog-tab", n.dataset.tab = e, n.textContent = _D[e], n.addEventListener("click", () => this.switchTab(t)), this.tabGroup.appendChild(n), this.tabs.push(n);
 			let r = e === "basic" ? this.buildBasicPanel() : e === "margin" ? this.buildMarginCaptionPanel() : this.buildEquationPanel();
 			r.dataset.tab = e, this.body.appendChild(r), this.panels.push(r);
 		}), this.switchTab(0);
@@ -55846,11 +55906,11 @@ var bD = class {
 		return this.scriptArea = document.createElement("textarea"), this.scriptArea.className = "eq-props-script", this.scriptArea.rows = 6, this.scriptArea.readOnly = !0, n.appendChild(this.scriptArea), e.appendChild(n), e;
 	}
 	populate() {
-		this.props && (this.widthInput.value = _D(this.props.width), this.heightInput.value = _D(this.props.height), this.treatAsCharInput.checked = this.props.treatAsChar ?? !0, this.horzOffsetInput.value = _D(this.props.horzOffset ?? 0), this.vertOffsetInput.value = _D(this.props.vertOffset ?? 0), this.outerMarginLeftInput.value = _D(this.props.outerMarginLeft ?? 0), this.outerMarginRightInput.value = _D(this.props.outerMarginRight ?? 0), this.outerMarginTopInput.value = _D(this.props.outerMarginTop ?? 0), this.outerMarginBottomInput.value = _D(this.props.outerMarginBottom ?? 0), this.captionPositionSelect.value = this.captionPositionLabel(), this.captionWidthInput.value = this.props.hasCaption ? _D(this.props.captionWidth ?? 0) : "", this.captionSpacingInput.value = this.props.hasCaption ? _D(this.props.captionSpacing ?? 0) : "", this.fontNameInput.value = this.props.fontName || "", this.fontSizeInput.value = String(Math.round(this.props.fontSize / 100)), this.colorInput.value = vD(this.props.color), this.baselineInput.value = String(this.props.baseline ?? 0), this.scriptArea.value = this.props.script || "", this.switchTab(0));
+		this.props && (this.widthInput.value = yD(this.props.width), this.heightInput.value = yD(this.props.height), this.treatAsCharInput.checked = this.props.treatAsChar ?? !0, this.horzOffsetInput.value = yD(this.props.horzOffset ?? 0), this.vertOffsetInput.value = yD(this.props.vertOffset ?? 0), this.outerMarginLeftInput.value = yD(this.props.outerMarginLeft ?? 0), this.outerMarginRightInput.value = yD(this.props.outerMarginRight ?? 0), this.outerMarginTopInput.value = yD(this.props.outerMarginTop ?? 0), this.outerMarginBottomInput.value = yD(this.props.outerMarginBottom ?? 0), this.captionPositionSelect.value = this.captionPositionLabel(), this.captionWidthInput.value = this.props.hasCaption ? yD(this.props.captionWidth ?? 0) : "", this.captionSpacingInput.value = this.props.hasCaption ? yD(this.props.captionSpacing ?? 0) : "", this.fontNameInput.value = this.props.fontName || "", this.fontSizeInput.value = String(Math.round(this.props.fontSize / 100)), this.colorInput.value = bD(this.props.color), this.baselineInput.value = String(this.props.baseline ?? 0), this.scriptArea.value = this.props.script || "", this.switchTab(0));
 	}
 	handleOk() {
 		if (!this.props) return;
-		let e = Math.max(1, Math.min(127, parseInt(this.fontSizeInput.value, 10) || 10)) * 100, t = yD(this.colorInput.value), n = parseInt(this.baselineInput.value, 10) || 0, r = this.fontNameInput.value.trim(), i = {};
+		let e = Math.max(1, Math.min(127, parseInt(this.fontSizeInput.value, 10) || 10)) * 100, t = xD(this.colorInput.value), n = parseInt(this.baselineInput.value, 10) || 0, r = this.fontNameInput.value.trim(), i = {};
 		if (e !== this.props.fontSize && (i.fontSize = e), t !== this.props.color && (i.color = t), n !== this.props.baseline && (i.baseline = n), r && r !== this.props.fontName && (i.fontName = r), Object.keys(i).length > 0) {
 			let e = () => {
 				this.noteRef ? this.wasm.setNoteEquationProperties(this.noteRef, i) : this.wasm.setEquationProperties(this.sec, this.para, this.ci, this.cellIdx, this.cellParaIdx, i);
@@ -55869,7 +55929,7 @@ var bD = class {
 		this.hide();
 	}
 	openEditor() {
-		this.hide(), new dD(this.wasm, this.eventBus, this.services).open(this.sec, this.para, this.ci, this.cellIdx, this.cellParaIdx, this.noteRef);
+		this.hide(), new pD(this.wasm, this.eventBus, this.services).open(this.sec, this.para, this.ci, this.cellIdx, this.cellParaIdx, this.noteRef);
 	}
 	captionPositionLabel() {
 		if (!this.props?.hasCaption) return "없음";
@@ -55932,20 +55992,20 @@ var bD = class {
 		let e = document.createElement("button");
 		return e.className = "pp-wrap-btn", e.type = "button", e.textContent = "▤", e.disabled = !0, e;
 	}
-}, xD = 7200 / 25.4;
-function SD(e) {
-	return Math.round(e * 25.4 / 7200 * 10) / 10;
-}
-function CD(e) {
-	return Math.round(e * xD);
-}
+}, CD = 7200 / 25.4;
 function wD(e) {
 	return Math.round(e * 25.4 / 7200 * 10) / 10;
 }
 function TD(e) {
-	return Math.round(e * xD);
+	return Math.round(e * CD);
 }
-var ED = "var(--doc-paper)", DD = "var(--ui-border-light)", OD = "currentColor", kD = class extends V {
+function ED(e) {
+	return Math.round(e * 25.4 / 7200 * 10) / 10;
+}
+function DD(e) {
+	return Math.round(e * CD);
+}
+var OD = "var(--doc-paper)", kD = "var(--ui-border-light)", AD = "currentColor", jD = class extends V {
 	wasm;
 	eventBus;
 	tableCtx;
@@ -56347,7 +56407,7 @@ var ED = "var(--doc-paper)", DD = "var(--ui-border-light)", OD = "currentColor",
 			}
 		].forEach((e) => {
 			let t = document.createElement("button");
-			t.type = "button", t.className = "tcp-caption-item", wy(t, e.svg), t.dataset.dir = String(e.dir), t.dataset.sub = String(e.sub), t.addEventListener("click", () => {
+			t.type = "button", t.className = "tcp-caption-item", Ey(t, e.svg), t.dataset.dir = String(e.dir), t.dataset.sub = String(e.sub), t.addEventListener("click", () => {
 				this.captionPosBtns.forEach((e) => e.classList.remove("active")), t.classList.add("active");
 				let n = e.dir === -1;
 				this.captionFieldsWrap.classList.toggle("tcp-disabled", n), n || (this.captionDirSelect.value = String(e.dir)), this.updateCaptionWidthState();
@@ -56455,14 +56515,14 @@ var ED = "var(--doc-paper)", DD = "var(--ui-border-light)", OD = "currentColor",
 				let e = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 				e.setAttribute("viewBox", "0 0 48 10");
 				let n = document.createElementNS("http://www.w3.org/2000/svg", "line");
-				n.setAttribute("x1", "0"), n.setAttribute("y1", "3"), n.setAttribute("x2", "48"), n.setAttribute("y2", "3"), n.setAttribute("stroke", OD), n.setAttribute("stroke-width", "1");
+				n.setAttribute("x1", "0"), n.setAttribute("y1", "3"), n.setAttribute("x2", "48"), n.setAttribute("y2", "3"), n.setAttribute("stroke", AD), n.setAttribute("stroke-width", "1");
 				let r = document.createElementNS("http://www.w3.org/2000/svg", "line");
-				r.setAttribute("x1", "0"), r.setAttribute("y1", "7"), r.setAttribute("x2", "48"), r.setAttribute("y2", "7"), r.setAttribute("stroke", OD), r.setAttribute("stroke-width", "1"), e.appendChild(n), e.appendChild(r), t.appendChild(e);
+				r.setAttribute("x1", "0"), r.setAttribute("y1", "7"), r.setAttribute("x2", "48"), r.setAttribute("y2", "7"), r.setAttribute("stroke", AD), r.setAttribute("stroke-width", "1"), e.appendChild(n), e.appendChild(r), t.appendChild(e);
 			} else {
 				let n = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 				n.setAttribute("viewBox", "0 0 48 10");
 				let r = document.createElementNS("http://www.w3.org/2000/svg", "line");
-				r.setAttribute("x1", "0"), r.setAttribute("y1", "5"), r.setAttribute("x2", "48"), r.setAttribute("y2", "5"), r.setAttribute("stroke", OD), r.setAttribute("stroke-width", "1.5"), e.dash && r.setAttribute("stroke-dasharray", e.dash), n.appendChild(r), t.appendChild(n);
+				r.setAttribute("x1", "0"), r.setAttribute("y1", "5"), r.setAttribute("x2", "48"), r.setAttribute("y2", "5"), r.setAttribute("stroke", AD), r.setAttribute("stroke-width", "1.5"), e.dash && r.setAttribute("stroke-dasharray", e.dash), n.appendChild(r), t.appendChild(n);
 			}
 			t.addEventListener("click", () => {
 				this.borderLineTypeGrid.querySelectorAll(".tcp-line-type-item").forEach((e) => e.classList.remove("active")), t.classList.add("active"), this.borderSelectedLineType = e.type;
@@ -56570,11 +56630,11 @@ var ED = "var(--doc-paper)", DD = "var(--ui-border-light)", OD = "currentColor",
 		if (!e) return;
 		for (; e.firstChild;) e.removeChild(e.firstChild);
 		let t = "http://www.w3.org/2000/svg", n = document.createElementNS(t, "rect");
-		n.setAttribute("x", "0"), n.setAttribute("y", "0"), n.setAttribute("width", "120"), n.setAttribute("height", "100"), n.style.setProperty("fill", ED), e.appendChild(n);
+		n.setAttribute("x", "0"), n.setAttribute("y", "0"), n.setAttribute("width", "120"), n.setAttribute("height", "100"), n.style.setProperty("fill", OD), e.appendChild(n);
 		let r = document.createElementNS(t, "line");
-		r.setAttribute("x1", "60"), r.setAttribute("y1", "5"), r.setAttribute("x2", "60"), r.setAttribute("y2", "95"), r.style.setProperty("stroke", DD), r.setAttribute("stroke-width", "0.5"), r.setAttribute("stroke-dasharray", "3,2"), e.appendChild(r);
+		r.setAttribute("x1", "60"), r.setAttribute("y1", "5"), r.setAttribute("x2", "60"), r.setAttribute("y2", "95"), r.style.setProperty("stroke", kD), r.setAttribute("stroke-width", "0.5"), r.setAttribute("stroke-dasharray", "3,2"), e.appendChild(r);
 		let i = document.createElementNS(t, "line");
-		i.setAttribute("x1", "5"), i.setAttribute("y1", "50"), i.setAttribute("x2", "115"), i.setAttribute("y2", "50"), i.style.setProperty("stroke", DD), i.setAttribute("stroke-width", "0.5"), i.setAttribute("stroke-dasharray", "3,2"), e.appendChild(i);
+		i.setAttribute("x1", "5"), i.setAttribute("y1", "50"), i.setAttribute("x2", "115"), i.setAttribute("y2", "50"), i.style.setProperty("stroke", kD), i.setAttribute("stroke-width", "0.5"), i.setAttribute("stroke-dasharray", "3,2"), e.appendChild(i);
 		let a = (n, r, i, a, o) => {
 			if (o.type === 0) return;
 			let s = Math.max(.5, (o.width + 1) * .7), c = {
@@ -56684,7 +56744,7 @@ var ED = "var(--doc-paper)", DD = "var(--ui-border-light)", OD = "currentColor",
 	}
 	updateBgPreview() {
 		if (!this.bgColorRadio.checked) {
-			this.bgPreviewBox.style.background = ED;
+			this.bgPreviewBox.style.background = OD;
 			return;
 		}
 		let e = this.bgColorPicker.value, t = parseInt(this.bgPatternTypeSelect.value, 10);
@@ -56704,20 +56764,20 @@ var ED = "var(--doc-paper)", DD = "var(--ui-border-light)", OD = "currentColor",
 	}
 	populateFields() {
 		let e = this.cellProps, t = this.tableProps;
-		if (this.cellWidthInput.value = SD(e.width).toFixed(1), this.cellHeightInput.value = SD(e.height).toFixed(1), this.updateCellSizeState(), this.cellPaddingInputs.left.value = wD(e.paddingLeft).toFixed(1), this.cellPaddingInputs.right.value = wD(e.paddingRight).toFixed(1), this.cellPaddingInputs.top.value = wD(e.paddingTop).toFixed(1), this.cellPaddingInputs.bottom.value = wD(e.paddingBottom).toFixed(1), this.cellPaddingCheck.checked = e.applyInnerMargin ?? !1, this.updateCellPaddingState(), this.setButtonGroupActive(this.cellVAlignBtns, e.verticalAlign), this.setButtonGroupActive(this.cellTextDirBtns, e.textDirection), this.cellHeaderCheck.checked = e.isHeader, this.cellProtectCheck.checked = e.cellProtect ?? !1, this.cellFieldNameInput.value = e.fieldName ?? "", this.cellEditableCheck.checked = e.editableInForm ?? !1, this.tablePageBreakSelect.value = String(t.pageBreak ?? 0), this.tableRepeatHeaderCheck.checked = t.repeatHeader, this.tablePaddingInputs.left.value = wD(t.paddingLeft).toFixed(1), this.tablePaddingInputs.right.value = wD(t.paddingRight).toFixed(1), this.tablePaddingInputs.top.value = wD(t.paddingTop).toFixed(1), this.tablePaddingInputs.bottom.value = wD(t.paddingBottom).toFixed(1), t.tableWidth != null && (this.basicWidthInput.value = SD(t.tableWidth).toFixed(1), this.basicWidthInput.readOnly = !0, this.basicWidthInput.style.removeProperty("background")), t.tableHeight != null && (this.basicHeightInput.value = SD(t.tableHeight).toFixed(1), this.basicHeightInput.readOnly = !0, this.basicHeightInput.style.removeProperty("background")), this.treatAsCharCheck.checked = t.treatAsChar ?? !0, this.selectWrap(this.wrapValues.indexOf(t.textWrap ?? "Square")), this.horzRelSelect.value = t.horzRelTo ?? "Paper", this.horzAlignSelect.value = t.horzAlign ?? "Left", this.horzOffsetInput.value = SD(t.horzOffset ?? 0).toFixed(1), this.vertRelSelect.value = t.vertRelTo ?? "Paper", this.vertAlignSelect.value = t.vertAlign ?? "Top", this.vertOffsetInput.value = SD(t.vertOffset ?? 0).toFixed(1), this.restrictInPageCheck.checked = t.restrictInPage ?? !0, this.allowOverlapCheck.checked = t.allowOverlap ?? !1, this.keepWithAnchorCheck.checked = t.keepWithAnchor ?? !1, this.updatePositionVisibility(), this.marginOuterInputs.left.value = wD(t.outerLeft ?? 0).toFixed(1), this.marginOuterInputs.right.value = wD(t.outerRight ?? 0).toFixed(1), this.marginOuterInputs.top.value = wD(t.outerTop ?? 0).toFixed(1), this.marginOuterInputs.bottom.value = wD(t.outerBottom ?? 0).toFixed(1), this.captionSpacingInput.value = "3.0", this.captionWidthInput.value = "30.0", t.hasCaption) {
+		if (this.cellWidthInput.value = wD(e.width).toFixed(1), this.cellHeightInput.value = wD(e.height).toFixed(1), this.updateCellSizeState(), this.cellPaddingInputs.left.value = ED(e.paddingLeft).toFixed(1), this.cellPaddingInputs.right.value = ED(e.paddingRight).toFixed(1), this.cellPaddingInputs.top.value = ED(e.paddingTop).toFixed(1), this.cellPaddingInputs.bottom.value = ED(e.paddingBottom).toFixed(1), this.cellPaddingCheck.checked = e.applyInnerMargin ?? !1, this.updateCellPaddingState(), this.setButtonGroupActive(this.cellVAlignBtns, e.verticalAlign), this.setButtonGroupActive(this.cellTextDirBtns, e.textDirection), this.cellHeaderCheck.checked = e.isHeader, this.cellProtectCheck.checked = e.cellProtect ?? !1, this.cellFieldNameInput.value = e.fieldName ?? "", this.cellEditableCheck.checked = e.editableInForm ?? !1, this.tablePageBreakSelect.value = String(t.pageBreak ?? 0), this.tableRepeatHeaderCheck.checked = t.repeatHeader, this.tablePaddingInputs.left.value = ED(t.paddingLeft).toFixed(1), this.tablePaddingInputs.right.value = ED(t.paddingRight).toFixed(1), this.tablePaddingInputs.top.value = ED(t.paddingTop).toFixed(1), this.tablePaddingInputs.bottom.value = ED(t.paddingBottom).toFixed(1), t.tableWidth != null && (this.basicWidthInput.value = wD(t.tableWidth).toFixed(1), this.basicWidthInput.readOnly = !0, this.basicWidthInput.style.removeProperty("background")), t.tableHeight != null && (this.basicHeightInput.value = wD(t.tableHeight).toFixed(1), this.basicHeightInput.readOnly = !0, this.basicHeightInput.style.removeProperty("background")), this.treatAsCharCheck.checked = t.treatAsChar ?? !0, this.selectWrap(this.wrapValues.indexOf(t.textWrap ?? "Square")), this.horzRelSelect.value = t.horzRelTo ?? "Paper", this.horzAlignSelect.value = t.horzAlign ?? "Left", this.horzOffsetInput.value = wD(t.horzOffset ?? 0).toFixed(1), this.vertRelSelect.value = t.vertRelTo ?? "Paper", this.vertAlignSelect.value = t.vertAlign ?? "Top", this.vertOffsetInput.value = wD(t.vertOffset ?? 0).toFixed(1), this.restrictInPageCheck.checked = t.restrictInPage ?? !0, this.allowOverlapCheck.checked = t.allowOverlap ?? !1, this.keepWithAnchorCheck.checked = t.keepWithAnchor ?? !1, this.updatePositionVisibility(), this.marginOuterInputs.left.value = ED(t.outerLeft ?? 0).toFixed(1), this.marginOuterInputs.right.value = ED(t.outerRight ?? 0).toFixed(1), this.marginOuterInputs.top.value = ED(t.outerTop ?? 0).toFixed(1), this.marginOuterInputs.bottom.value = ED(t.outerBottom ?? 0).toFixed(1), this.captionSpacingInput.value = "3.0", this.captionWidthInput.value = "30.0", t.hasCaption) {
 			let e = t.captionDirection ?? 3, n = t.captionVertAlign ?? 0;
-			this.captionDirSelect.value = String(e), this.captionSpacingInput.value = wD(t.captionSpacing ?? 0).toFixed(1), this.captionWidthInput.value = SD(t.captionWidth ?? 0).toFixed(1);
+			this.captionDirSelect.value = String(e), this.captionSpacingInput.value = ED(t.captionSpacing ?? 0).toFixed(1), this.captionWidthInput.value = wD(t.captionWidth ?? 0).toFixed(1);
 			let r = this.captionPosBtns.find((t) => t.dataset.dir === String(e) && t.dataset.sub === String(n));
 			r && r.classList.add("active"), this.captionFieldsWrap.classList.remove("tcp-disabled");
 		} else {
 			let e = this.captionPosBtns.find((e) => e.dataset.dir === "-1");
 			e && e.classList.add("active"), this.captionFieldsWrap.classList.add("tcp-disabled");
 		}
-		this.updateCaptionWidthState(), this.borderCellSpacingInput && (this.borderCellSpacingInput.value = wD(t.cellSpacing).toFixed(1), this.populateBorderFromTarget()), this.bgNoneRadio && this.populateBgFromTarget();
+		this.updateCaptionWidthState(), this.borderCellSpacingInput && (this.borderCellSpacingInput.value = ED(t.cellSpacing).toFixed(1), this.populateBorderFromTarget()), this.bgNoneRadio && this.populateBgFromTarget();
 	}
 	pwhCurrentCellProps() {
 		let e = {};
-		this.cellApplySizeCheck.checked && (e.width = CD(parseFloat(this.cellWidthInput.value) || 0), e.height = CD(parseFloat(this.cellHeightInput.value) || 0)), e.applyInnerMargin = this.cellPaddingCheck.checked, this.cellPaddingCheck.checked && (e.paddingLeft = TD(parseFloat(this.cellPaddingInputs.left.value) || 0), e.paddingRight = TD(parseFloat(this.cellPaddingInputs.right.value) || 0), e.paddingTop = TD(parseFloat(this.cellPaddingInputs.top.value) || 0), e.paddingBottom = TD(parseFloat(this.cellPaddingInputs.bottom.value) || 0));
+		this.cellApplySizeCheck.checked && (e.width = TD(parseFloat(this.cellWidthInput.value) || 0), e.height = TD(parseFloat(this.cellHeightInput.value) || 0)), e.applyInnerMargin = this.cellPaddingCheck.checked, this.cellPaddingCheck.checked && (e.paddingLeft = DD(parseFloat(this.cellPaddingInputs.left.value) || 0), e.paddingRight = DD(parseFloat(this.cellPaddingInputs.right.value) || 0), e.paddingTop = DD(parseFloat(this.cellPaddingInputs.top.value) || 0), e.paddingBottom = DD(parseFloat(this.cellPaddingInputs.bottom.value) || 0));
 		let t = this.cellVAlignBtns.findIndex((e) => e.classList.contains("active"));
 		t >= 0 && (e.verticalAlign = t);
 		let n = this.cellTextDirBtns.findIndex((e) => e.classList.contains("active"));
@@ -56749,29 +56809,29 @@ var ED = "var(--doc-paper)", DD = "var(--ui-border-light)", OD = "currentColor",
 			textWrap: this.getSelectedWrap(),
 			vertRelTo: this.vertRelSelect.value,
 			vertAlign: this.vertAlignSelect.value,
-			vertOffset: CD(parseFloat(this.vertOffsetInput.value) || 0),
+			vertOffset: TD(parseFloat(this.vertOffsetInput.value) || 0),
 			horzRelTo: this.horzRelSelect.value,
 			horzAlign: this.horzAlignSelect.value,
-			horzOffset: CD(parseFloat(this.horzOffsetInput.value) || 0),
+			horzOffset: TD(parseFloat(this.horzOffsetInput.value) || 0),
 			restrictInPage: this.restrictInPageCheck.checked,
 			allowOverlap: this.allowOverlapCheck.checked,
 			keepWithAnchor: this.keepWithAnchorCheck.checked,
 			pageBreak: a,
 			repeatHeader: this.tableRepeatHeaderCheck.checked,
-			paddingLeft: TD(parseFloat(this.tablePaddingInputs.left.value) || 0),
-			paddingRight: TD(parseFloat(this.tablePaddingInputs.right.value) || 0),
-			paddingTop: TD(parseFloat(this.tablePaddingInputs.top.value) || 0),
-			paddingBottom: TD(parseFloat(this.tablePaddingInputs.bottom.value) || 0),
-			cellSpacing: this.borderCellSpacingInput ? TD(parseFloat(this.borderCellSpacingInput.value) || 0) : this.tableProps.cellSpacing,
-			outerLeft: TD(parseFloat(this.marginOuterInputs.left.value) || 0),
-			outerRight: TD(parseFloat(this.marginOuterInputs.right.value) || 0),
-			outerTop: TD(parseFloat(this.marginOuterInputs.top.value) || 0),
-			outerBottom: TD(parseFloat(this.marginOuterInputs.bottom.value) || 0)
+			paddingLeft: DD(parseFloat(this.tablePaddingInputs.left.value) || 0),
+			paddingRight: DD(parseFloat(this.tablePaddingInputs.right.value) || 0),
+			paddingTop: DD(parseFloat(this.tablePaddingInputs.top.value) || 0),
+			paddingBottom: DD(parseFloat(this.tablePaddingInputs.bottom.value) || 0),
+			cellSpacing: this.borderCellSpacingInput ? DD(parseFloat(this.borderCellSpacingInput.value) || 0) : this.tableProps.cellSpacing,
+			outerLeft: DD(parseFloat(this.marginOuterInputs.left.value) || 0),
+			outerRight: DD(parseFloat(this.marginOuterInputs.right.value) || 0),
+			outerTop: DD(parseFloat(this.marginOuterInputs.top.value) || 0),
+			outerBottom: DD(parseFloat(this.marginOuterInputs.bottom.value) || 0)
 		}, s = this.captionPosBtns.find((e) => e.classList.contains("active")), c = s ? parseInt(s.dataset.dir, 10) : -1;
 		if (o.hasCaption = c !== -1, c !== -1) {
 			o.captionDirection = parseInt(this.captionDirSelect.value, 10);
 			let e = this.captionPosBtns.find((e) => e.classList.contains("active"));
-			o.captionVertAlign = e ? parseInt(e.dataset.sub, 10) : 0, o.captionSpacing = TD(parseFloat(this.captionSpacingInput.value) || 0), o.captionWidth = CD(parseFloat(this.captionWidthInput.value) || 0);
+			o.captionVertAlign = e ? parseInt(e.dataset.sub, 10) : 0, o.captionSpacing = DD(parseFloat(this.captionSpacingInput.value) || 0), o.captionWidth = TD(parseFloat(this.captionWidthInput.value) || 0);
 		}
 		this.mode === "table" && this.borderTarget === "table" && this.borderEdits && (o.borderLeft = this.borderEdits[0], o.borderRight = this.borderEdits[1], o.borderTop = this.borderEdits[2], o.borderBottom = this.borderEdits[3]), this.mode === "table" && this.bgTarget === "table" && this.bgColorRadio && (this.bgColorRadio.checked ? (o.fillType = "solid", o.fillColor = this.bgColorPicker.value, o.patternColor = this.bgPatternColorPicker.value, o.patternType = parseInt(this.bgPatternTypeSelect.value, 10)) : o.fillType = "none");
 		let l = () => {
@@ -56835,7 +56895,7 @@ var ED = "var(--doc-paper)", DD = "var(--ui-border-light)", OD = "currentColor",
 	setButtonGroupActive(e, t) {
 		e.forEach((e, n) => e.classList.toggle("active", n === t));
 	}
-}, AD = [
+}, MD = [
 	{
 		id: "format:bold",
 		label: z("command.format.bold.registryLabel"),
@@ -57063,7 +57123,7 @@ var ED = "var(--doc-paper)", DD = "var(--ui-border-light)", OD = "currentColor",
 			if (!t) return;
 			let n = t.getCharProperties(), r = t.getSelection();
 			if (!r) return;
-			let i = new WT(e.wasm, e.eventBus);
+			let i = new KT(e.wasm, e.eventBus);
 			i.onApply = (n) => {
 				if (n.fontName) {
 					let t = e.wasm.findOrCreateFontId(n.fontName);
@@ -57086,7 +57146,7 @@ var ED = "var(--doc-paper)", DD = "var(--ui-border-light)", OD = "currentColor",
 			let n = t.getParaProperties(), r = t.getSelection(), i = t.getCursorPosition(), a = r ?? {
 				start: i,
 				end: i
-			}, o = new lE(e.wasm, e.eventBus);
+			}, o = new dE(e.wasm, e.eventBus);
 			o.onApply = (e) => {
 				t.applyParaPropsToRange(a.start, a.end, e);
 			}, o.onClose = () => t.focus(), o.show(n);
@@ -57135,7 +57195,7 @@ var ED = "var(--doc-paper)", DD = "var(--ui-border-light)", OD = "currentColor",
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
-			let n = t.getParaProperties(), r = new hE(e.wasm, e.eventBus);
+			let n = t.getParaProperties(), r = new _E(e.wasm, e.eventBus);
 			if (r.currentHeadType = n.headType ?? "None", r.currentNumberingId = n.numberingId ?? 0, r.currentRestartMode = n.numberingRestartMode ?? 0, n.headType === "Bullet" && n.numberingId && n.numberingId > 0) try {
 				let t = e.wasm.getBulletList().find((e) => e.id === n.numberingId);
 				t && (r.currentBulletChar = t.rawCode ? String.fromCodePoint(t.rawCode) : t.char);
@@ -57190,11 +57250,11 @@ var ED = "var(--doc-paper)", DD = "var(--ui-border-light)", OD = "currentColor",
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
-			let n = new _E(e.wasm, e.eventBus, e);
+			let n = new yE(e.wasm, e.eventBus, e);
 			n.onEditRequest = (t) => {
 				let r = e.wasm.getStyleList().find((e) => e.id === t);
 				if (!r) return;
-				let i = new vE(e.wasm, e.eventBus, "edit", {
+				let i = new bE(e.wasm, e.eventBus, "edit", {
 					id: r.id,
 					name: r.name,
 					englishName: r.englishName,
@@ -57212,7 +57272,7 @@ var ED = "var(--doc-paper)", DD = "var(--ui-border-light)", OD = "currentColor",
 				} catch {
 					r = {};
 				}
-				let i = new vE(e.wasm, e.eventBus, "add", void 0, r, e);
+				let i = new bE(e.wasm, e.eventBus, "add", void 0, r, e);
 				i.onSave = () => n.refresh(), i.show();
 			}, n.onApply = (e) => {
 				t.applyStyle(e);
@@ -57235,10 +57295,10 @@ var ED = "var(--doc-paper)", DD = "var(--ui-border-light)", OD = "currentColor",
 					let n = t.getSelectedPictureRef();
 					if (!n) return;
 					if (n.type === "equation") {
-						new bD(e.wasm, e.eventBus, e).open(n.sec, n.ppi, n.ci, n.cellIdx, n.cellParaIdx, n.noteRef);
+						new SD(e.wasm, e.eventBus, e).open(n.sec, n.ppi, n.ci, n.cellIdx, n.cellParaIdx, n.noteRef);
 						return;
 					}
-					new oD(e.wasm, e.eventBus, e).open(n.sec, n.ppi, n.ci, n.type);
+					new cD(e.wasm, e.eventBus, e).open(n.sec, n.ppi, n.ci, n.type);
 					return;
 				}
 				if (t.isInTableObjectSelection()) {
@@ -57249,12 +57309,12 @@ var ED = "var(--doc-paper)", DD = "var(--ui-border-light)", OD = "currentColor",
 						ppi: n.parentParaIndex,
 						ci: n.controlIndex
 					};
-					new kD(e.wasm, e.eventBus, r, n.cellIndex, "table", e).show();
+					new jD(e.wasm, e.eventBus, r, n.cellIndex, "table", e).show();
 				}
 			}
 		}
 	}
-], jD = class extends V {
+], ND = class extends V {
 	initial;
 	apply;
 	textInput;
@@ -57321,7 +57381,7 @@ var ED = "var(--doc-paper)", DD = "var(--ui-border-light)", OD = "currentColor",
 		};
 		this.uriInput.addEventListener("input", t), this.textInput.addEventListener("input", t), t(), this.uriInput.focus(), this.uriInput.select();
 	}
-}, MD = class extends V {
+}, PD = class extends V {
 	edit;
 	cancel;
 	accepted = !1;
@@ -57342,12 +57402,12 @@ var ED = "var(--doc-paper)", DD = "var(--ui-border-light)", OD = "currentColor",
 		super.hide(), this.accepted ? this.edit() : this.cancel();
 	}
 };
-function ND(e, t) {
-	new MD(e, t).show();
+function FD(e, t) {
+	new PD(e, t).show();
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/command/commands/hyperlink.ts
-var PD = {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/command/commands/hyperlink.ts
+var ID = {
 	id: "insert:hyperlink",
 	label: z("command.insert.hyperlink.label"),
 	icon: "icon-hyperlink",
@@ -57408,7 +57468,7 @@ var PD = {
 			}
 			let m = () => {
 				if (e.wasm.documentGeneration !== l || e.getInputHandler() !== n) return;
-				let t = new jD({
+				let t = new ND({
 					text: f,
 					uri: u?.uri ?? "",
 					existing: !!u,
@@ -57416,25 +57476,25 @@ var PD = {
 				}, p);
 				t.afterClose = () => n.focus(), t.show();
 			};
-			u && t?.action !== "edit" ? ND(m, () => n.focus()) : m();
+			u && t?.action !== "edit" ? FD(m, () => n.focus()) : m();
 		} catch (e) {
 			H({ message: e instanceof Error ? e.message : String(e) });
 		}
 	}
-}, FD = {
-	...PD,
+}, LD = {
+	...ID,
 	id: "hyperlink:edit",
 	label: z("command.hyperlink.edit.registryLabel"),
 	shortcutLabel: void 0,
-	execute: (e) => PD.execute(e, { action: "edit" })
-}, ID = {
-	...PD,
+	execute: (e) => ID.execute(e, { action: "edit" })
+}, RD = {
+	...ID,
 	id: "hyperlink:remove",
 	label: z("command.hyperlink.remove.registryLabel"),
 	shortcutLabel: void 0,
 	opensDialog: !1,
-	execute: (e) => PD.execute(e, { action: "remove" })
-}, LD = class {
+	execute: (e) => ID.execute(e, { action: "remove" })
+}, zD = class {
 	el = null;
 	keyHandler = null;
 	outsideHandler = null;
@@ -57475,19 +57535,19 @@ var PD = {
 		this.hide();
 	}
 };
-function RD() {
+function BD() {
 	return {
 		text: "0",
 		origin: { kind: "new" }
 	};
 }
-function zD(e) {
+function VD(e) {
 	return {
 		text: e === "scatter" ? "0" : "",
 		origin: "new"
 	};
 }
-function BD(e) {
+function HD(e) {
 	let t = e.series ?? [], n = e.labels ?? [], r = e.axis === "scatter" ? "scatter" : "category", i = Math.max(n.length, ...t.map((e) => e.values.length), 0);
 	return {
 		axis: r,
@@ -57528,14 +57588,14 @@ function BD(e) {
 		}))
 	};
 }
-function VD(e) {
+function UD(e) {
 	return {
 		source: e.source,
 		name: e.name,
 		cells: [...e.cells]
 	};
 }
-function HD(e, t, n) {
+function WD(e, t, n) {
 	return {
 		...e,
 		series: t,
@@ -57543,8 +57603,8 @@ function HD(e, t, n) {
 		rowCount: n.length
 	};
 }
-function UD(e, t, n, r) {
-	let i = e.series.map(VD), a = i[t]?.cells;
+function GD(e, t, n, r) {
+	let i = e.series.map(UD), a = i[t]?.cells;
 	return !a || !a[n] ? e : (a[n] = {
 		...a[n],
 		text: r
@@ -57553,14 +57613,14 @@ function UD(e, t, n, r) {
 		series: i
 	});
 }
-function WD(e, t, n) {
-	let r = e.series.map(VD);
+function KD(e, t, n) {
+	let r = e.series.map(UD);
 	return r[t] ? (r[t].name = n, {
 		...e,
 		series: r
 	}) : e;
 }
-function GD(e, t, n) {
+function qD(e, t, n) {
 	let r = [...e.labels];
 	return r[t] ? (r[t] = {
 		...r[t],
@@ -57570,20 +57630,20 @@ function GD(e, t, n) {
 		labels: r
 	}) : e;
 }
-function KD(e, t) {
-	let n = ZD(t, 0, e.rowCount), r = e.series.map((e) => {
+function JD(e, t) {
+	let n = $D(t, 0, e.rowCount), r = e.series.map((e) => {
 		let t = [...e.cells];
-		return t.splice(n, 0, RD()), {
+		return t.splice(n, 0, BD()), {
 			source: e.source,
 			name: e.name,
 			cells: t
 		};
 	}), i = [...e.labels];
-	return i.splice(n, 0, zD(e.axis)), HD(e, r, i);
+	return i.splice(n, 0, VD(e.axis)), WD(e, r, i);
 }
-function qD(e, t) {
+function YD(e, t) {
 	if (e.rowCount <= 1) return e;
-	let n = ZD(t, 0, e.rowCount - 1), r = e.series.map((e) => {
+	let n = $D(t, 0, e.rowCount - 1), r = e.series.map((e) => {
 		let t = [...e.cells];
 		return t.splice(n, 1), {
 			source: e.source,
@@ -57591,52 +57651,52 @@ function qD(e, t) {
 			cells: t
 		};
 	}), i = [...e.labels];
-	return i.splice(n, 1), HD(e, r, i);
+	return i.splice(n, 1), WD(e, r, i);
 }
-function JD(e, t) {
-	let n = ZD(t, 0, e.series.length), r = e.series.map(VD);
+function XD(e, t) {
+	let n = $D(t, 0, e.series.length), r = e.series.map(UD);
 	return r.splice(n, 0, {
 		source: null,
-		name: e.templateNamed ? XD(e, n) : null,
-		cells: Array.from({ length: e.rowCount }, RD)
+		name: e.templateNamed ? QD(e, n) : null,
+		cells: Array.from({ length: e.rowCount }, BD)
 	}), {
 		...e,
 		series: r
 	};
 }
-function YD(e, t) {
+function ZD(e, t) {
 	if (e.series.length <= 1) return e;
-	let n = ZD(t, 0, e.series.length - 1), r = e.series.map(VD);
+	let n = $D(t, 0, e.series.length - 1), r = e.series.map(UD);
 	return r.splice(n, 1), {
 		...e,
 		series: r
 	};
 }
-function XD(e, t) {
+function QD(e, t) {
 	let n = new Set(e.series.map((e) => e.name).filter((e) => e !== null)), r = t + 1;
 	for (; n.has(`계열 ${r}`);) r += 1;
 	return `계열 ${r}`;
 }
-function ZD(e, t, n) {
+function $D(e, t, n) {
 	return e < t ? t : e > n ? n : e;
 }
-function QD(e) {
+function eO(e) {
 	return e.series.map((e) => e.cells.map((e) => e.text));
 }
-function $D(e) {
+function tO(e) {
 	return e.labels.map((e) => e.text);
 }
-function eO(e) {
+function nO(e) {
 	return e.series.map((e) => e.name);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/chart-data-dialog.ts
-var tO = "원본이 빈 값(결측)이라 이 자리는 고칠 수 없습니다 — 행을 새로 넣으면 값을 쓸 수 있습니다.", nO = "원본에 이 계열의 값이 없던 자리입니다.", rO = "이 계열은 이름 칸(c:tx)이 없어 이름을 넣을 자리가 없습니다.", iO = "셀을 우클릭하면 행·계열을 넣거나 지울 수 있습니다.", aO = "원형 차트는 첫 계열만 그리므로, 추가한 계열은 화면에 나타나지 않습니다.", oO = "주식형 캔들은 첫·끝 계열을 몸통으로 삼습니다 — 양끝을 바꾸면 그림이 깨집니다.";
-function sO(e, t) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/chart-data-dialog.ts
+var rO = "원본이 빈 값(결측)이라 이 자리는 고칠 수 없습니다 — 행을 새로 넣으면 값을 쓸 수 있습니다.", iO = "원본에 이 계열의 값이 없던 자리입니다.", aO = "이 계열은 이름 칸(c:tx)이 없어 이름을 넣을 자리가 없습니다.", oO = "셀을 우클릭하면 행·계열을 넣거나 지울 수 있습니다.", sO = "원형 차트는 첫 계열만 그리므로, 추가한 계열은 화면에 나타나지 않습니다.", cO = "주식형 캔들은 첫·끝 계열을 몸통으로 삼습니다 — 양끝을 바꾸면 그림이 깨집니다.";
+function lO(e, t) {
 	let n = e.container ?? [], r = t.container ?? [];
 	return e.section === t.section && e.paragraph === t.paragraph && e.control === t.control && n.length === r.length && n.every((e, t) => e.kind === r[t].kind && e.control === r[t].control && e.paragraph === r[t].paragraph && e.cell === r[t].cell);
 }
-var cO = class extends V {
+var uO = class extends V {
 	wasm;
 	eventBus;
 	services;
@@ -57645,19 +57705,19 @@ var cO = class extends V {
 	model = null;
 	gridWrap;
 	errorEl;
-	menu = new LD();
+	menu = new zD();
 	constructor(e, t, n) {
 		super(z("dialog.chartData.sameChartAddress.title"), 560, !1), this.wasm = e, this.eventBus = t, this.services = n;
 	}
 	open(e) {
 		let t = this.wasm.getChartDataByIndex(e.index);
-		return !t.ok || !t.series || t.series.length === 0 ? !1 : (this.chart = e, this.data = t, this.model = BD(t), this.show(), this.renderGrid(), !0);
+		return !t.ok || !t.series || t.series.length === 0 ? !1 : (this.chart = e, this.data = t, this.model = HD(t), this.show(), this.renderGrid(), !0);
 	}
 	createBody() {
 		let e = document.createElement("div");
 		e.className = "chart-data-body", this.gridWrap = document.createElement("div"), this.gridWrap.className = "chart-data-grid-wrap", e.appendChild(this.gridWrap), this.errorEl = document.createElement("div"), this.errorEl.className = "chart-data-error", this.errorEl.style.display = "none", e.appendChild(this.errorEl);
 		let t = document.createElement("div");
-		return t.className = "chart-data-note", t.textContent = iO, e.appendChild(t), e;
+		return t.className = "chart-data-note", t.textContent = oO, e.appendChild(t), e;
 	}
 	applyModel(e) {
 		e !== this.model && (this.model = e, this.renderGrid());
@@ -57671,11 +57731,11 @@ var cO = class extends V {
 		let i = r.createTHead().insertRow(), a = document.createElement("th");
 		a.textContent = t ? "X" : z("dialog.chartData.corner.text"), i.appendChild(a), e.series.forEach((e, t) => {
 			let n = document.createElement("th");
-			if (n.dataset.series = String(t), e.name === null) n.className = "chart-data-series-locked", n.textContent = z("dialog.chartData.th.text", { p1: t + 1 }), n.title = rO;
+			if (n.dataset.series = String(t), e.name === null) n.className = "chart-data-series-locked", n.textContent = z("dialog.chartData.th.text", { p1: t + 1 }), n.title = aO;
 			else {
 				let r = this.textInput(e.name, z("dialog.chartData.textInput.label"));
 				r.addEventListener("input", () => {
-					this.markText(r), this.model = WD(this.model, t, r.value);
+					this.markText(r), this.model = KD(this.model, t, r.value);
 				}), n.appendChild(r);
 			}
 			i.appendChild(n);
@@ -57686,15 +57746,15 @@ var cO = class extends V {
 			if (a.dataset.row = String(r), n) {
 				let n = e.labels[r], i = t ? this.numberInput(n.text) : this.textInput(n.text, z(t ? "dialog.chartData.renderGrid.label" : "dialog.chartData.renderGrid.label.xc19837"));
 				n.origin === "new" && i.classList.add("chart-data-new"), i.addEventListener("input", () => {
-					t ? this.markCell(i) : this.markText(i), this.model = GD(this.model, r, i.value);
+					t ? this.markCell(i) : this.markText(i), this.model = qD(this.model, r, i.value);
 				}), a.appendChild(i);
 			} else a.textContent = e.labels[r].text || String(r + 1), a.title = z(t ? "dialog.chartData.labelCell.tooltip" : "dialog.chartData.labelCell.tooltip.x3df2db");
 			i.appendChild(a), e.series.forEach((e, t) => {
 				let n = i.insertCell();
 				n.dataset.series = String(t), n.dataset.row = String(r);
 				let a = e.cells[r], o = this.numberInput(a.text);
-				a.origin.kind === "empty" || a.origin.kind === "absent" ? (o.disabled = !0, o.title = a.origin.kind === "empty" ? tO : nO) : (a.origin.kind === "new" && o.classList.add("chart-data-new"), o.addEventListener("input", () => {
-					this.markCell(o), this.model = UD(this.model, t, r, o.value);
+				a.origin.kind === "empty" || a.origin.kind === "absent" ? (o.disabled = !0, o.title = a.origin.kind === "empty" ? rO : iO) : (a.origin.kind === "new" && o.classList.add("chart-data-new"), o.addEventListener("input", () => {
+					this.markCell(o), this.model = GD(this.model, t, r, o.value);
 				})), n.appendChild(o);
 			});
 		}
@@ -57723,37 +57783,37 @@ var cO = class extends V {
 			type: "command",
 			label: z("dialog.chartData.menuItems.label"),
 			disabledReason: a,
-			run: () => this.applyModel(KD(e, n))
+			run: () => this.applyModel(JD(e, n))
 		}, {
 			type: "command",
 			label: z("dialog.chartData.menuItems.label.x3b565a"),
 			disabledReason: a,
-			run: () => this.applyModel(KD(e, n + 1))
+			run: () => this.applyModel(JD(e, n + 1))
 		}, {
 			type: "command",
 			label: z("dialog.chartData.menuItems.label.x928e00"),
 			disabledReason: a ?? (e.rowCount <= 1 ? "마지막 행은 지울 수 없습니다." : void 0),
-			run: () => this.applyModel(qD(e, n))
+			run: () => this.applyModel(YD(e, n))
 		}), r !== null) {
 			i.length > 0 && i.push({ type: "separator" });
-			let n = e.series.length - 1, a = t.hasUpDownBars === !0, o = t.plot === "pie" || t.plot === "ofPie" ? aO : void 0;
+			let n = e.series.length - 1, a = t.hasUpDownBars === !0, o = t.plot === "pie" || t.plot === "ofPie" ? sO : void 0;
 			i.push({
 				type: "command",
 				label: z("dialog.chartData.menuItems.label.x49f4ca"),
-				disabledReason: a && r === 0 ? oO : void 0,
+				disabledReason: a && r === 0 ? cO : void 0,
 				note: o,
-				run: () => this.applyModel(JD(e, r))
+				run: () => this.applyModel(XD(e, r))
 			}, {
 				type: "command",
 				label: z("dialog.chartData.menuItems.label.x1e0262"),
-				disabledReason: a && r === n ? oO : void 0,
+				disabledReason: a && r === n ? cO : void 0,
 				note: o,
-				run: () => this.applyModel(JD(e, r + 1))
+				run: () => this.applyModel(XD(e, r + 1))
 			}, {
 				type: "command",
 				label: z("dialog.chartData.menuItems.label.xb8a829"),
-				disabledReason: e.series.length <= 1 ? "마지막 계열은 지울 수 없습니다." : a && (r === 0 || r === n) ? oO : void 0,
-				run: () => this.applyModel(YD(e, r))
+				disabledReason: e.series.length <= 1 ? "마지막 계열은 지울 수 없습니다." : a && (r === 0 || r === n) ? cO : void 0,
+				run: () => this.applyModel(ZD(e, r))
 			});
 		}
 		return i;
@@ -57786,7 +57846,7 @@ var cO = class extends V {
 	onConfirm() {
 		let e = this.chart, t = this.data, n = this.model;
 		if (!e || !t || !n) return;
-		let r = QD(n), i = n.labelsUsable ? $D(n) : void 0, a = eO(n);
+		let r = eO(n), i = n.labelsUsable ? tO(n) : void 0, a = nO(n);
 		if (this.hasBrokenInput()) return this.showError(z("dialog.chartData.showError.label")), !1;
 		if (!Mf(t, r, i, a)) return;
 		let o = Af(t, r, i, a), s = jf(t, r, i, o ? {
@@ -57810,7 +57870,7 @@ var cO = class extends V {
 			kind: "snapshot",
 			operationType: "objectProps",
 			operation: () => {
-				let t = this.wasm.listCharts().find((t) => sO(t, e));
+				let t = this.wasm.listCharts().find((t) => lO(t, e));
 				if (!t) return null;
 				let n = this.wasm.setChartDataByIndex(t.index, s);
 				return n.ok ? (n.changedCount ?? 0) === 0 ? (u.outcome = "noop", null) : (u.outcome = "applied", l.getCursorPosition()) : (u.outcome = "refused", u.invalid = n.invalid ?? [], null);
@@ -57820,13 +57880,13 @@ var cO = class extends V {
 	}
 };
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/unicode-block.ts
-function lO(e, t) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/unicode-block.ts
+function dO(e, t) {
 	return e >= t.start && e <= t.end;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/symbols-dialog.ts
-var uO = [
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/symbols-dialog.ts
+var fO = [
 	{
 		name: z("dialog.symbols.label"),
 		start: 32,
@@ -58017,7 +58077,7 @@ var uO = [
 		start: 65280,
 		end: 65519
 	}
-], dO = 16, fO = "rhwp-symbols-recent", pO = 32, mO = class {
+], pO = 16, mO = "rhwp-symbols-recent", hO = 32, gO = class {
 	services;
 	_open = !1;
 	overlay;
@@ -58028,7 +58088,7 @@ var uO = [
 	previewCell;
 	recentGrid;
 	selectedChar = null;
-	currentBlock = uO[0];
+	currentBlock = fO[0];
 	captureHandler = null;
 	constructor(e) {
 		this.services = e;
@@ -58062,7 +58122,7 @@ var uO = [
 		i.className = "sym-block-col";
 		let a = document.createElement("div");
 		a.className = "sym-label", a.textContent = z("dialog.symbols.blockLabel.text"), i.appendChild(a), this.blockList = document.createElement("div"), this.blockList.className = "sym-block-list";
-		for (let e of uO) {
+		for (let e of fO) {
 			let t = document.createElement("div");
 			t.className = "sym-block-item", t.textContent = e.name, t.addEventListener("click", () => this.selectBlock(e)), this.blockList.appendChild(t);
 		}
@@ -58088,16 +58148,16 @@ var uO = [
 	}
 	selectBlock(e) {
 		this.currentBlock = e;
-		let t = this.blockList.querySelectorAll(".sym-block-item"), n = uO.indexOf(e);
+		let t = this.blockList.querySelectorAll(".sym-block-item"), n = fO.indexOf(e);
 		t.forEach((e, t) => {
 			e.classList.toggle("selected", t === n);
 		}), t[n]?.scrollIntoView({ block: "nearest" }), this.renderGrid(e), this.selectedChar = null, this.codeLabel.textContent = e.start.toString(16).toUpperCase().padStart(4, "0"), this.previewCell.textContent = "";
 	}
 	renderGrid(e) {
 		this.charGrid.replaceChildren();
-		let t = e.end - e.start + 1, n = Math.ceil(t / dO);
-		for (let t = 0; t < n; t++) for (let n = 0; n < dO; n++) {
-			let r = e.start + t * dO + n, i = document.createElement("div");
+		let t = e.end - e.start + 1, n = Math.ceil(t / pO);
+		for (let t = 0; t < n; t++) for (let n = 0; n < pO; n++) {
+			let r = e.start + t * pO + n, i = document.createElement("div");
 			if (i.className = "sym-cell", r <= e.end) {
 				let e = String.fromCodePoint(r);
 				i.textContent = e, i.title = `U+${r.toString(16).toUpperCase().padStart(4, "0")}`, i.addEventListener("click", () => this.selectChar(e, r)), i.addEventListener("dblclick", () => {
@@ -58108,7 +58168,7 @@ var uO = [
 		}
 	}
 	selectChar(e, t) {
-		if (this.selectedChar = e, this.codeLabel.textContent = t.toString(16).toUpperCase().padStart(4, "0"), this.previewCell.textContent = e, this.charGrid.querySelectorAll(".sym-cell.selected").forEach((e) => e.classList.remove("selected")), lO(t, this.currentBlock)) {
+		if (this.selectedChar = e, this.codeLabel.textContent = t.toString(16).toUpperCase().padStart(4, "0"), this.previewCell.textContent = e, this.charGrid.querySelectorAll(".sym-cell.selected").forEach((e) => e.classList.remove("selected")), dO(t, this.currentBlock)) {
 			let e = t - this.currentBlock.start;
 			this.charGrid.querySelectorAll(".sym-cell")[e]?.classList.add("selected");
 		}
@@ -58125,7 +58185,7 @@ var uO = [
 	}
 	getRecentChars() {
 		try {
-			let e = localStorage.getItem(fO);
+			let e = localStorage.getItem(mO);
 			return e ? JSON.parse(e) : [];
 		} catch {
 			return [];
@@ -58133,7 +58193,7 @@ var uO = [
 	}
 	addToRecent(e) {
 		let t = this.getRecentChars().filter((t) => t !== e);
-		t.unshift(e), t.length > pO && (t.length = pO), localStorage.setItem(fO, JSON.stringify(t));
+		t.unshift(e), t.length > hO && (t.length = hO), localStorage.setItem(mO, JSON.stringify(t));
 	}
 	updateRecent() {
 		this.recentGrid.replaceChildren();
@@ -58152,7 +58212,7 @@ var uO = [
 			}), this.recentGrid.appendChild(e);
 		}
 	}
-}, hO = class {
+}, _O = class {
 	services;
 	_open = !1;
 	overlay;
@@ -58349,7 +58409,7 @@ var uO = [
 			}
 		}), r ? this.refreshList() : (this.statusLabel.style.color = "#c00", this.statusLabel.textContent = i ?? z("dialog.bookmark.statusLabel.text.x3ec6b4"));
 	}
-}, gO = [
+}, vO = [
 	{
 		value: "1",
 		label: z("dialog.endnoteShape.label"),
@@ -58405,7 +58465,7 @@ var uO = [
 		label: z("dialog.endnoteShape.label.xd07f40"),
 		css: "double"
 	}
-], _O = [
+], yO = [
 	{
 		value: "0",
 		label: "0.1mm",
@@ -58486,12 +58546,12 @@ var uO = [
 		label: "5mm",
 		px: 10.5
 	}
-], vO = /* @__PURE__ */ "#000000.#ffffff.#ff0000.#ff7f00.#ffff00.#00b050.#00b0f0.#0000ff.#7030a0.#808080.#c0c0c0.#c00000.#ffc000.#92d050.#00b050.#00b0f0.#002060.#7030a0.#f4cccc.#fce5cd.#fff2cc.#d9ead3.#d9eaf7.#d9d2e9.#eadcf8.#e6e6e6.#f9cb9c.#ffe599.#b6d7a8.#76a5af.#6fa8dc.#8e7cc3".split("."), yO = 0;
-function bO(e) {
+], bO = /* @__PURE__ */ "#000000.#ffffff.#ff0000.#ff7f00.#ffff00.#00b050.#00b0f0.#0000ff.#7030a0.#808080.#c0c0c0.#c00000.#ffc000.#92d050.#00b050.#00b0f0.#002060.#7030a0.#f4cccc.#fce5cd.#fff2cc.#d9ead3.#d9eaf7.#d9d2e9.#eadcf8.#e6e6e6.#f9cb9c.#ffe599.#b6d7a8.#76a5af.#6fa8dc.#8e7cc3".split("."), xO = 0;
+function SO(e) {
 	let t = (e || "").trim();
 	return /^#[0-9a-fA-F]{6}$/.test(t) ? t.toLowerCase() : "#000000";
 }
-function xO(e) {
+function CO(e) {
 	switch ((e || "").trim()) {
 		case "sectionEnd":
 		case "belowText":
@@ -58500,7 +58560,7 @@ function xO(e) {
 		default: return "documentEnd";
 	}
 }
-function SO(e) {
+function wO(e) {
 	switch ((e || "").trim()) {
 		case "restartSection":
 		case "restartPage":
@@ -58511,18 +58571,18 @@ function SO(e) {
 		default: return "continue";
 	}
 }
-function CO(e) {
-	return Math.round(e / cT * 10) / 10;
+function TO(e) {
+	return Math.round(e / uT * 10) / 10;
 }
-function wO(e, t = 300) {
-	return Number.isFinite(e) ? Math.round(Math.min(t, Math.max(0, e)) * cT) : 0;
+function EO(e, t = 300) {
+	return Number.isFinite(e) ? Math.round(Math.min(t, Math.max(0, e)) * uT) : 0;
 }
-var TO = class extends V {
+var DO = class extends V {
 	wasm;
 	eventBus;
 	sectionIdx;
 	services;
-	radioNameSuffix = ++yO;
+	radioNameSuffix = ++xO;
 	settings;
 	numberFormatSelect;
 	prefixInput;
@@ -58575,14 +58635,14 @@ var TO = class extends V {
 			separatorLineType: this.separatorCheck.checked ? parseInt(this.lineTypeSelect.value, 10) : 0,
 			separatorLineWidth: this.separatorCheck.checked ? parseInt(this.lineWidthSelect.value, 10) : 0,
 			separatorColor: this.lineColorInput.value,
-			separatorLength: this.separatorCheck.checked ? wO(parseFloat(this.separatorLengthInput.value) || 0) : 0,
-			separatorMarginTop: wO(parseFloat(this.marginTopInput.value) || 0),
-			noteSpacing: wO(parseFloat(this.noteSpacingInput.value) || 0),
-			separatorMarginBottom: wO(parseFloat(this.marginBottomInput.value) || 0),
+			separatorLength: this.separatorCheck.checked ? EO(parseFloat(this.separatorLengthInput.value) || 0) : 0,
+			separatorMarginTop: EO(parseFloat(this.marginTopInput.value) || 0),
+			noteSpacing: EO(parseFloat(this.noteSpacingInput.value) || 0),
+			separatorMarginBottom: EO(parseFloat(this.marginBottomInput.value) || 0),
 			numbering: this.numberingRestart.checked ? "restartSection" : "continue",
 			placement: this.placementSection.checked ? "sectionEnd" : "documentEnd"
 		}, t = Object.keys(e).every((t) => e[t] === this.settings[t]), n = () => this.wasm.applyEndnoteShape(this.sectionIdx, e);
-		return Dy({
+		return ky({
 			services: this.services,
 			label: "EndnoteShapeDialog",
 			operationType: "endnoteShape",
@@ -58593,7 +58653,7 @@ var TO = class extends V {
 		});
 	}
 	populate() {
-		this.numberFormatSelect.value = this.settings.numberFormat || "digit", this.prefixInput.value = this.settings.prefixChar || "", this.suffixInput.value = this.settings.suffixChar || ")", this.separatorCheck.checked = this.settings.separatorEnabled !== !1, this.setLineTypeValue(this.settings.separatorLineType ?? 1), this.setLineWidthValue(this.settings.separatorLineWidth ?? 1), this.setSeparatorColor(this.settings.separatorColor), this.updateLineTypePreview(), this.updateLineWidthPreview(), this.separatorLengthModeSelect.value = "custom", this.separatorLengthInput.value = String(CO(this.settings.separatorLength || wO(50))), this.marginTopInput.value = String(CO(this.settings.separatorMarginTop || 0)), this.noteSpacingInput.value = String(CO(this.settings.noteSpacing || 0)), this.marginBottomInput.value = String(CO(this.settings.separatorMarginBottom || 0)), this.setNumberingRadio(SO(this.settings.numbering)), this.setPlacementRadio(xO(this.settings.placement)), this.updateSeparatorEnabled();
+		this.numberFormatSelect.value = this.settings.numberFormat || "digit", this.prefixInput.value = this.settings.prefixChar || "", this.suffixInput.value = this.settings.suffixChar || ")", this.separatorCheck.checked = this.settings.separatorEnabled !== !1, this.setLineTypeValue(this.settings.separatorLineType ?? 1), this.setLineWidthValue(this.settings.separatorLineWidth ?? 1), this.setSeparatorColor(this.settings.separatorColor), this.updateLineTypePreview(), this.updateLineWidthPreview(), this.separatorLengthModeSelect.value = "custom", this.separatorLengthInput.value = String(TO(this.settings.separatorLength || EO(50))), this.marginTopInput.value = String(TO(this.settings.separatorMarginTop || 0)), this.noteSpacingInput.value = String(TO(this.settings.noteSpacing || 0)), this.marginBottomInput.value = String(TO(this.settings.separatorMarginBottom || 0)), this.setNumberingRadio(wO(this.settings.numbering)), this.setPlacementRadio(CO(this.settings.placement)), this.updateSeparatorEnabled();
 	}
 	numberGroup() {
 		let e = this.group(z("dialog.endnoteShape.group.label"));
@@ -58718,8 +58778,8 @@ var TO = class extends V {
 		return t.style.cssText = "display:inline-flex;align-items:center;gap:8px;min-width:0;", t.append(...e), t;
 	}
 	buildLineTypeControl() {
-		this.lineTypeSelect = this.hiddenSelect(gO.map((e) => [e.value, e.label])), this.lineTypeButton = this.previewButton(), this.lineTypeMenu = this.popupMenu(178);
-		for (let e of gO) {
+		this.lineTypeSelect = this.hiddenSelect(vO.map((e) => [e.value, e.label])), this.lineTypeButton = this.previewButton(), this.lineTypeMenu = this.popupMenu(178);
+		for (let e of vO) {
 			let t = this.menuOption(() => {
 				this.setLineTypeValue(e.value), this.updateLineTypePreview(), this.closePopupMenus();
 			});
@@ -58730,8 +58790,8 @@ var TO = class extends V {
 		}), this.updateLineTypePreview();
 	}
 	buildLineWidthControl() {
-		this.lineWidthSelect = this.hiddenSelect(_O.map((e) => [e.value, e.label])), this.lineWidthButton = this.previewButton(), this.lineWidthMenu = this.popupMenu(136);
-		for (let e of _O) {
+		this.lineWidthSelect = this.hiddenSelect(yO.map((e) => [e.value, e.label])), this.lineWidthButton = this.previewButton(), this.lineWidthMenu = this.popupMenu(136);
+		for (let e of yO) {
 			let t = this.menuOption(() => {
 				this.setLineWidthValue(e.value), this.updateLineWidthPreview(), this.closePopupMenus();
 			}), n = document.createElement("span");
@@ -58743,7 +58803,7 @@ var TO = class extends V {
 	}
 	buildColorControl() {
 		this.lineColorInput = document.createElement("input"), this.lineColorInput.type = "color", this.lineColorInput.value = "#000000", this.lineColorInput.style.cssText = ["position:absolute;left:0;top:0;width:1px;height:1px;opacity:0;", "pointer-events:none;border:0;padding:0;"].join(""), this.lineColorInput.addEventListener("input", () => this.setSeparatorColor(this.lineColorInput.value)), this.lineColorInput.addEventListener("change", () => this.setSeparatorColor(this.lineColorInput.value)), this.lineColorButton = this.previewButton(), this.lineColorButton.style.width = "74px", this.lineColorMenu = this.popupMenu(220), this.lineColorMenu.style.display = "none", this.lineColorMenu.dataset.display = "grid", this.lineColorMenu.style.gridTemplateColumns = "repeat(8, 20px)", this.lineColorMenu.style.gap = "4px", this.lineColorMenu.style.padding = "8px";
-		for (let e of vO) {
+		for (let e of bO) {
 			let t = document.createElement("button");
 			t.type = "button", t.title = e, t.dataset.color = e, t.style.cssText = ["width:20px;height:20px;border:1px solid var(--color-border);background:var(--color-surface);padding:0;", "display:flex;align-items:center;justify-content:center;cursor:pointer;"].join("");
 			let n = document.createElement("span");
@@ -58807,28 +58867,28 @@ var TO = class extends V {
 		return n.style.cssText = ["display:block;width:62px;height:0;border-top-style:solid;", `border-top-width:${e.px}px;border-top-color:var(--color-text);`].join(""), t.appendChild(n), t;
 	}
 	updateLineTypePreview() {
-		let e = gO.find((e) => e.value === this.lineTypeSelect.value) ?? gO[0];
+		let e = vO.find((e) => e.value === this.lineTypeSelect.value) ?? vO[0];
 		this.setLineTypeValue(e.value), this.replaceButtonPreview(this.lineTypeButton, this.linePreview(e, 2, "var(--color-text)"));
 	}
 	updateLineWidthPreview() {
-		let e = _O.find((e) => e.value === this.lineWidthSelect.value) ?? _O[0];
+		let e = yO.find((e) => e.value === this.lineWidthSelect.value) ?? yO[0];
 		this.setLineWidthValue(e.value), this.replaceButtonPreview(this.lineWidthButton, this.widthPreview(e));
 	}
 	setLineTypeValue(e) {
-		let t = String(e ?? ""), n = gO.find((e) => e.value === t) ?? gO[0];
+		let t = String(e ?? ""), n = vO.find((e) => e.value === t) ?? vO[0];
 		this.lineTypeSelect.value = n.value;
 	}
 	setLineWidthValue(e) {
-		let t = String(e ?? ""), n = _O.find((e) => e.value === t) ?? _O[0];
+		let t = String(e ?? ""), n = yO.find((e) => e.value === t) ?? yO[0];
 		this.lineWidthSelect.value = n.value;
 	}
 	setSeparatorColor(e) {
-		this.lineColorInput.value = bO(e), this.updateColorPreview();
+		this.lineColorInput.value = SO(e), this.updateColorPreview();
 	}
 	updateColorPreview() {
-		let e = bO(this.lineColorInput.value), t = document.createElement("span");
+		let e = SO(this.lineColorInput.value), t = document.createElement("span");
 		t.style.cssText = [`display:block;width:44px;height:16px;background:${e};`, "border:1px solid var(--color-border-dark);"].join(""), this.replaceButtonPreview(this.lineColorButton, t), this.lineColorMenu?.querySelectorAll("button[data-color]").forEach((t) => {
-			let n = bO(t.dataset.color) === e;
+			let n = SO(t.dataset.color) === e;
 			t.style.outline = n ? "2px solid var(--color-primary)" : "none", t.style.outlineOffset = n ? "1px" : "0";
 		});
 	}
@@ -58878,7 +58938,7 @@ var TO = class extends V {
 		let n = document.createElement("label");
 		return n.style.cssText = "display:inline-flex;align-items:center;gap:6px;margin:4px 14px 4px 0;font-size:13px;", n.append(e, document.createTextNode(t)), n;
 	}
-}, EO = class extends V {
+}, OO = class extends V {
 	guideInput;
 	memoInput;
 	nameInput;
@@ -58902,7 +58962,7 @@ var TO = class extends V {
 		let i = document.createElement("label");
 		i.className = "field-edit-label", i.textContent = z("dialog.fieldInsert.guideLabel.text"), r.appendChild(i), this.guideInput = document.createElement("input"), this.guideInput.type = "text", this.guideInput.className = "field-edit-input", this.guideInput.value = "입력하세요", this.guideInput.maxLength = 250, r.appendChild(this.guideInput), this.guideErrorLabel = document.createElement("div"), this.guideErrorLabel.className = "field-edit-error", this.guideErrorLabel.style.color = "#c00", this.guideErrorLabel.style.fontSize = "11px", this.guideErrorLabel.style.display = "none", this.guideErrorLabel.textContent = z("dialog.fieldInsert.guideErrorLabel.text", { p1: 250 }), r.appendChild(this.guideErrorLabel);
 		let a = document.createElement("label");
-		a.className = "field-edit-label", a.textContent = z("dialog.fieldInsert.memoLabel.text"), r.appendChild(a), this.memoInput = document.createElement("textarea"), this.memoInput.className = "field-edit-textarea", this.memoInput.rows = 4, this.memoInput.maxLength = Jx, r.appendChild(this.memoInput), this.memoErrorLabel = document.createElement("div"), this.memoErrorLabel.className = "field-edit-error", this.memoErrorLabel.style.color = "#c00", this.memoErrorLabel.style.fontSize = "11px", this.memoErrorLabel.style.display = "none", this.memoErrorLabel.textContent = z("dialog.fieldInsert.memoErrorLabel.text", { p1: Jx }), r.appendChild(this.memoErrorLabel);
+		a.className = "field-edit-label", a.textContent = z("dialog.fieldInsert.memoLabel.text"), r.appendChild(a), this.memoInput = document.createElement("textarea"), this.memoInput.className = "field-edit-textarea", this.memoInput.rows = 4, this.memoInput.maxLength = Xx, r.appendChild(this.memoInput), this.memoErrorLabel = document.createElement("div"), this.memoErrorLabel.className = "field-edit-error", this.memoErrorLabel.style.color = "#c00", this.memoErrorLabel.style.fontSize = "11px", this.memoErrorLabel.style.display = "none", this.memoErrorLabel.textContent = z("dialog.fieldInsert.memoErrorLabel.text", { p1: Xx }), r.appendChild(this.memoErrorLabel);
 		let o = document.createElement("label");
 		o.className = "field-edit-label", o.textContent = z("dialog.fieldInsert.nameLabel.text"), r.appendChild(o), this.nameInput = document.createElement("input"), this.nameInput.type = "text", this.nameInput.className = "field-edit-input", this.nameInput.maxLength = 250, r.appendChild(this.nameInput), this.nameErrorLabel = document.createElement("div"), this.nameErrorLabel.className = "field-edit-error", this.nameErrorLabel.style.color = "#c00", this.nameErrorLabel.style.fontSize = "11px", this.nameErrorLabel.style.display = "none", this.nameErrorLabel.textContent = z("dialog.fieldInsert.nameErrorLabel.text", { p1: 250 }), r.appendChild(this.nameErrorLabel);
 		let s = document.createElement("label");
@@ -58929,7 +58989,7 @@ var TO = class extends V {
 		}
 		this.guideInput.value = "입력하세요", this.memoInput.value = "", this.nameInput.value = "", this.editableCheckbox.checked = !0, this.guideInput.focus(), this.guideInput.select();
 	}
-}, DO = [{
+}, kO = [{
 	title: z("dialog.shapePicker.tooltip"),
 	columns: 5,
 	items: [
@@ -58994,21 +59054,21 @@ var TO = class extends V {
 			icon: "↝"
 		}
 	]
-}], OO = null;
-function kO() {
-	OO &&= (OO.remove(), null), document.removeEventListener("mousedown", AO, !0);
+}], AO = null;
+function jO() {
+	AO &&= (AO.remove(), null), document.removeEventListener("mousedown", MO, !0);
 }
-function AO(e) {
-	OO && !OO.contains(e.target) && kO();
+function MO(e) {
+	AO && !AO.contains(e.target) && jO();
 }
-function jO(e, t) {
-	if (OO) {
-		kO();
+function NO(e, t) {
+	if (AO) {
+		jO();
 		return;
 	}
 	let n = document.createElement("div");
 	n.className = "shape-picker";
-	for (let e of DO) {
+	for (let e of kO) {
 		let r = document.createElement("div");
 		r.className = "shape-picker-title", r.textContent = e.title, n.appendChild(r);
 		let i = document.createElement("div");
@@ -59020,19 +59080,19 @@ function jO(e, t) {
 			r.className = "shape-picker-icon", r.textContent = n.icon;
 			let a = document.createElement("span");
 			a.className = "shape-picker-label", a.textContent = n.label, e.appendChild(r), e.appendChild(a), e.addEventListener("click", () => {
-				kO(), t.onSelect(n.type);
+				jO(), t.onSelect(n.type);
 			}), i.appendChild(e);
 		}
 		n.appendChild(i);
 	}
 	let r = e.getBoundingClientRect();
-	n.style.position = "fixed", n.style.left = `${r.left}px`, n.style.top = `${r.bottom + 2}px`, document.body.appendChild(n), OO = n, setTimeout(() => {
-		document.addEventListener("mousedown", AO, !0);
+	n.style.position = "fixed", n.style.left = `${r.left}px`, n.style.top = `${r.bottom + 2}px`, document.body.appendChild(n), AO = n, setTimeout(() => {
+		document.addEventListener("mousedown", MO, !0);
 	}, 0);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/command/commands/insert.ts
-function MO(e, t, n, r) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/command/commands/insert.ts
+function PO(e, t, n, r) {
 	return {
 		id: e,
 		label: t,
@@ -59042,14 +59102,14 @@ function MO(e, t, n, r) {
 		execute() {}
 	};
 }
-var NO = null, PO = null, FO = null, IO = null, LO = null, RO = null, zO = null, BO = null;
-function VO(e, t, n, r, i) {
+var FO = null, IO = null, LO = null, RO = null, zO = null, BO = null, VO = null, HO = null;
+function UO(e, t, n, r, i) {
 	let a = e.wasm.getNoteEditInfo(n, r, i);
 	if (!a?.ok) return;
 	let o = t.cursor;
 	o?.enterFootnoteMode && (o.enterFootnoteMode(n, r, i, a.footnoteIndex ?? 0, a.pageNum ?? 0), o.setFnCursorPosition(a.fnParaIndex ?? 0, a.charOffset ?? 2), e.eventBus.emit("footnoteModeChanged", !0), t.active = !0, t.updateCaret?.(), t.textarea?.focus());
 }
-function HO(e, t) {
+function WO(e, t) {
 	let n = e.getInputHandler();
 	if (!n) return;
 	let r = n.getPosition(), i;
@@ -59060,9 +59120,9 @@ function HO(e, t) {
 			if (i = t === "footnote" ? e.insertFootnote(r.sectionIndex, r.paragraphIndex, r.charOffset) : e.insertEndnote(r.sectionIndex, r.paragraphIndex, r.charOffset), !i.ok) throw Error(`[insert:${t}] 삽입 실패`);
 			return r;
 		}
-	}), i && VO(e, n, r.sectionIndex, i.paraIdx, i.controlIdx);
+	}), i && UO(e, n, r.sectionIndex, i.paraIdx, i.controlIdx);
 }
-var UO = [
+var GO = [
 	{
 		id: "insert:shape",
 		label: z("command.insert.shape.label"),
@@ -59070,7 +59130,7 @@ var UO = [
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
 			let t = document.getElementById("tb-shape");
-			t && jO(t, { onSelect(t) {
+			t && NO(t, { onSelect(t) {
 				let n = e.getInputHandler();
 				n && n.enterShapePlacementMode(t);
 			} });
@@ -59144,7 +59204,7 @@ var UO = [
 					if (r = e.insertEquation(n.sectionIndex, n.paragraphIndex, n.charOffset, "", 1e3, 0), !r.ok) throw Error("[insert:equation] 삽입 실패");
 					return n;
 				}
-			}), r && (FO ??= new dD(e.wasm, e.eventBus, e), FO.open(n.sectionIndex, r.paraIdx, r.controlIdx));
+			}), r && (LO ??= new pD(e.wasm, e.eventBus, e), LO.open(n.sectionIndex, r.paraIdx, r.controlIdx));
 		}
 	},
 	{
@@ -59157,7 +59217,7 @@ var UO = [
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getCursorPosition();
-			BO = new EO(), BO.onApply = (r) => {
+			HO = new OO(), HO.onApply = (r) => {
 				try {
 					t.executeOperation({
 						kind: "snapshot",
@@ -59174,27 +59234,27 @@ var UO = [
 				} catch (e) {
 					console.warn("[insert:field] 누름틀 삽입 실패:", e);
 				}
-			}, BO.show();
+			}, HO.show();
 		}
 	},
-	MO("insert:caption-top", z("command.insert.captionTop.registryLabel")),
-	MO("insert:caption-lt", z("command.insert.captionLt.registryLabel")),
-	MO("insert:caption-lm", z("command.insert.captionLm.registryLabel")),
-	MO("insert:caption-lb", z("command.insert.captionLb.registryLabel")),
-	MO("insert:caption-rt", z("command.insert.captionRt.registryLabel")),
-	MO("insert:caption-rm", z("command.insert.captionRm.registryLabel")),
-	MO("insert:caption-rb", z("command.insert.captionRb.registryLabel")),
-	MO("insert:caption-bottom", z("command.insert.captionBottom.registryLabel")),
-	MO("insert:caption-none", z("command.insert.captionNone.label")),
-	MO("insert:para-band", z("command.insert.paraBand.label")),
-	MO("insert:comment", z("command.insert.comment.label"), "icon-comment"),
+	PO("insert:caption-top", z("command.insert.captionTop.registryLabel")),
+	PO("insert:caption-lt", z("command.insert.captionLt.registryLabel")),
+	PO("insert:caption-lm", z("command.insert.captionLm.registryLabel")),
+	PO("insert:caption-lb", z("command.insert.captionLb.registryLabel")),
+	PO("insert:caption-rt", z("command.insert.captionRt.registryLabel")),
+	PO("insert:caption-rm", z("command.insert.captionRm.registryLabel")),
+	PO("insert:caption-rb", z("command.insert.captionRb.registryLabel")),
+	PO("insert:caption-bottom", z("command.insert.captionBottom.registryLabel")),
+	PO("insert:caption-none", z("command.insert.captionNone.label")),
+	PO("insert:para-band", z("command.insert.paraBand.label")),
+	PO("insert:comment", z("command.insert.comment.label"), "icon-comment"),
 	{
 		id: "insert:footnote",
 		label: z("command.insert.footnote.label"),
 		icon: "icon-footnote",
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			HO(e, "footnote");
+			WO(e, "footnote");
 		}
 	},
 	{
@@ -59203,7 +59263,7 @@ var UO = [
 		icon: "icon-endnote",
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			HO(e, "endnote");
+			WO(e, "endnote");
 		}
 	},
 	{
@@ -59226,7 +59286,7 @@ var UO = [
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
 			let t = e.getInputHandler()?.getPosition()?.sectionIndex ?? 0;
-			zO = new TO(e.wasm, e.eventBus, t, e), zO.show();
+			VO = new DO(e.wasm, e.eventBus, t, e), VO.show();
 		}
 	},
 	{
@@ -59237,12 +59297,12 @@ var UO = [
 		shortcutLabel: "Alt+F10",
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			LO ||= new mO(e), LO.show();
+			zO ||= new gO(e), zO.show();
 		}
 	},
-	PD,
-	FD,
 	ID,
+	LD,
+	RD,
 	{
 		id: "insert:bookmark",
 		opensDialog: !0,
@@ -59250,7 +59310,7 @@ var UO = [
 		shortcutLabel: "Ctrl+K,B",
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			RO ||= new hO(e), RO.show();
+			BO ||= new _O(e), BO.show();
 		}
 	},
 	{
@@ -59264,16 +59324,16 @@ var UO = [
 			let n = t.getSelectedPictureRef();
 			if (!n) return;
 			if (n.type === "equation") {
-				IO ||= new bD(e.wasm, e.eventBus, e), IO.open(n.sec, n.ppi, n.ci, n.cellIdx, n.cellParaIdx, n.noteRef);
+				RO ||= new SD(e.wasm, e.eventBus, e), RO.open(n.sec, n.ppi, n.ci, n.cellIdx, n.cellParaIdx, n.noteRef);
 				return;
 			}
-			NO ||= new oD(e.wasm, e.eventBus, e);
+			FO ||= new cD(e.wasm, e.eventBus, e);
 			let r = n.cellPath ?? (n.cellIdx !== void 0 && n.cellParaIdx !== void 0 && n.outerTableControlIdx !== void 0 && (n.type === "shape" || n.type === "line" || n.type === "image" || n.type === "ole") ? [{
 				controlIdx: n.outerTableControlIdx,
 				cellIdx: n.cellIdx,
 				cellParaIdx: n.cellParaIdx
 			}] : void 0);
-			NO.open(n.sec, n.ppi, n.ci, n.type, n.headerFooter, r, r ? n.ci : void 0);
+			FO.open(n.sec, n.ppi, n.ci, n.type, n.headerFooter, r, r ? n.ci : void 0);
 		}
 	},
 	{
@@ -59294,9 +59354,9 @@ var UO = [
 			} catch {
 				return;
 			}
-			i && (PO ||= new cO(e.wasm, e.eventBus, e), PO.afterClose = () => {
+			i && (IO ||= new uO(e.wasm, e.eventBus, e), IO.afterClose = () => {
 				requestAnimationFrame(() => t.focus());
-			}, PO.open(i));
+			}, IO.open(i));
 		}
 	},
 	{
@@ -59311,7 +59371,7 @@ var UO = [
 			if (!(!n || n.type !== "equation" && n.type !== "ole")) {
 				if (n.type === "ole") {
 					let e = n, r;
-					if (GO(t, "promoteOleEquation", (t) => {
+					if (qO(t, "promoteOleEquation", (t) => {
 						if (r = t.promoteOleEquation(e.sec, e.ppi, e.ci), !r?.ok) throw Error("[insert:equation-edit] 레거시 OLE 수식 전환 실패");
 					}), !r) return;
 					t.selectPictureObject(e.sec, r.paraIdx, r.controlIdx, "equation"), n = {
@@ -59321,7 +59381,7 @@ var UO = [
 						type: "equation"
 					};
 				}
-				FO ||= new dD(e.wasm, e.eventBus, e), FO.open(n.sec, n.ppi, n.ci, n.cellIdx, n.cellParaIdx, n.noteRef);
+				LO ||= new pD(e.wasm, e.eventBus, e), LO.open(n.sec, n.ppi, n.ci, n.cellIdx, n.cellParaIdx, n.noteRef);
 			}
 		}
 	},
@@ -59336,7 +59396,7 @@ var UO = [
 			if (!n || n.type === "equation" || n.type === "group") return;
 			let r;
 			try {
-				r = WO(e, n);
+				r = KO(e, n);
 			} catch {
 				return;
 			}
@@ -59369,7 +59429,7 @@ var UO = [
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getSelectedPictureRef();
-			n && n.type === "shape" && qO(t, n, "front");
+			n && n.type === "shape" && YO(t, n, "front");
 		}
 	},
 	{
@@ -59380,7 +59440,7 @@ var UO = [
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getSelectedPictureRef();
-			n && n.type === "shape" && qO(t, n, "forward");
+			n && n.type === "shape" && YO(t, n, "forward");
 		}
 	},
 	{
@@ -59391,7 +59451,7 @@ var UO = [
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getSelectedPictureRef();
-			n && n.type === "shape" && qO(t, n, "backward");
+			n && n.type === "shape" && YO(t, n, "backward");
 		}
 	},
 	{
@@ -59402,7 +59462,7 @@ var UO = [
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getSelectedPictureRef();
-			n && n.type === "shape" && qO(t, n, "back");
+			n && n.type === "shape" && YO(t, n, "back");
 		}
 	},
 	{
@@ -59413,9 +59473,9 @@ var UO = [
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getSelectedPictureRef();
-			n && (GO(t, "deleteObject", (e) => {
+			n && (qO(t, "deleteObject", (e) => {
 				n.type === "shape" || n.type === "line" || n.type === "group" || n.type === "ole" ? e.deleteShapeControl(n.sec, n.ppi, n.ci) : n.type === "equation" ? e.deleteEquationControl(n.sec, n.ppi, n.ci) : n.cellPath && n.cellPath.length > 0 ? e.deleteCellPictureControlByPath(n.sec, n.ppi, n.cellPath, n.ci) : e.deletePictureControl(n.sec, n.ppi, n.ci);
-			}, KO), t.exitPictureObjectSelectionAndAfterEdit());
+			}, JO), t.exitPictureObjectSelectionAndAfterEdit());
 		}
 	},
 	{
@@ -59433,9 +59493,9 @@ var UO = [
 			}));
 			try {
 				let e;
-				GO(t, "groupShapes", (t) => {
+				qO(t, "groupShapes", (t) => {
 					e = t.groupShapes(r, i);
-				}, KO), t.exitPictureObjectSelectionAndAfterEdit(), e && t.selectPictureObject(r, e.paraIdx, e.controlIdx, "group");
+				}, JO), t.exitPictureObjectSelectionAndAfterEdit(), e && t.selectPictureObject(r, e.paraIdx, e.controlIdx, "group");
 			} catch (e) {
 				console.warn("[group-shapes] 개체 묶기 실패:", e);
 			}
@@ -59450,9 +59510,9 @@ var UO = [
 			if (!t) return;
 			let n = t.getSelectedPictureRef();
 			if (n && n.type === "group") try {
-				GO(t, "ungroupShape", (e) => {
+				qO(t, "ungroupShape", (e) => {
 					e.ungroupShape(n.sec, n.ppi, n.ci);
-				}, KO), t.exitPictureObjectSelectionAndAfterEdit();
+				}, JO), t.exitPictureObjectSelectionAndAfterEdit();
 			} catch (e) {
 				console.warn("[ungroup-shapes] 개체 풀기 실패:", e);
 			}
@@ -59463,7 +59523,7 @@ var UO = [
 		label: z("command.insert.rotateCw.label"),
 		canExecute: (e) => e.inPictureObjectSelection,
 		execute(e) {
-			ZO(e, 90);
+			$O(e, 90);
 		}
 	},
 	{
@@ -59471,7 +59531,7 @@ var UO = [
 		label: z("command.insert.rotateCcw.label"),
 		canExecute: (e) => e.inPictureObjectSelection,
 		execute(e) {
-			ZO(e, -90);
+			$O(e, -90);
 		}
 	},
 	{
@@ -59479,7 +59539,7 @@ var UO = [
 		label: z("command.insert.flipHorz.label"),
 		canExecute: (e) => e.inPictureObjectSelection,
 		execute(e) {
-			QO(e, "horzFlip");
+			ek(e, "horzFlip");
 		}
 	},
 	{
@@ -59487,14 +59547,14 @@ var UO = [
 		label: z("command.insert.flipVert.label"),
 		canExecute: (e) => e.inPictureObjectSelection,
 		execute(e) {
-			QO(e, "vertFlip");
+			ek(e, "vertFlip");
 		}
 	}
 ];
-function WO(e, t) {
+function KO(e, t) {
 	return Fu(e.wasm, t);
 }
-function GO(e, t, n, r) {
+function qO(e, t, n, r) {
 	let i = e.getPositionOutsideSelectedPicture() ?? e.getCursorPosition();
 	e.executeOperation({
 		kind: "snapshot",
@@ -59503,68 +59563,68 @@ function GO(e, t, n, r) {
 		meta: r?.refresh ? { refresh: r.refresh } : void 0
 	});
 }
-var KO = { refresh: "none" };
-function qO(e, t, n) {
+var JO = { refresh: "none" };
+function YO(e, t, n) {
 	let r = e.getPositionOutsideSelectedPicture() ?? e.getCursorPosition();
 	e.executeOperation({
 		kind: "command",
 		command: new Xd(t.sec, t.ppi, t.ci, n, r),
-		meta: KO
+		meta: JO
 	}), e.exitPictureObjectSelectionAndAfterEdit();
 }
-function JO(e, t, n, r) {
+function XO(e, t, n, r) {
 	e.executeOperation({
 		kind: "command",
 		command: new Jd(t, n, r),
 		meta: { refresh: "full" }
 	});
 }
-function YO(e) {
+function ZO(e) {
 	return e.type === "shape";
 }
-function XO(e, t, n, r, i, a) {
-	if (YO(n)) {
-		JO(t, n, i, a);
+function QO(e, t, n, r, i, a) {
+	if (ZO(n)) {
+		XO(t, n, i, a);
 		return;
 	}
-	GO(t, r, (e) => {
+	qO(t, r, (e) => {
 		Iu(e, n, a);
 	});
 }
-function ZO(e, t) {
+function $O(e, t) {
 	let n = e.getInputHandler();
 	if (!n) return;
 	let r = n.getSelectedPictureRef();
 	if (!r || r.type === "equation" || r.type === "group" || r.type === "line") return;
-	let i = WO(e, r);
+	let i = KO(e, r);
 	if (i.sizeProtect) return;
 	let a = i.rotationAngle ?? 0, o = a + t;
-	o = (o % 360 + 360) % 360, o > 180 && (o -= 360), XO(e, n, r, "rotateObject", { rotationAngle: a }, { rotationAngle: o });
+	o = (o % 360 + 360) % 360, o > 180 && (o -= 360), QO(e, n, r, "rotateObject", { rotationAngle: a }, { rotationAngle: o });
 }
-function QO(e, t) {
+function ek(e, t) {
 	let n = e.getInputHandler();
 	if (!n) return;
 	let r = n.getSelectedPictureRef();
 	if (!r || r.type === "equation" || r.type === "group" || r.type === "line") return;
-	let i = WO(e, r);
+	let i = KO(e, r);
 	if (i.sizeProtect) return;
 	let a = !!i[t];
-	XO(e, n, r, "flipObject", { [t]: a }, { [t]: !a });
+	QO(e, n, r, "flipObject", { [t]: a }, { [t]: !a });
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/table-create-dialog.ts
-var $O = 8, ek = 10, tk = 16;
-function nk(e) {
-	return Math.round(e * cT);
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/table-create-dialog.ts
+var tk = 8, nk = 10, rk = 16;
+function ik(e) {
+	return Math.round(e * uT);
 }
-function rk(e, t) {
+function ak(e, t) {
 	let n = Math.floor(e / t), r = e - n * t;
 	return Array.from({ length: t }, () => {
 		let e = n + +(r > 0);
 		return r -= +(r > 0), Math.max(1, e);
 	});
 }
-var ik = class {
+var ok = class {
 	overlay;
 	popup;
 	label;
@@ -59599,9 +59659,9 @@ var ik = class {
 		n.style.cssText = "padding:6px;";
 		let r = document.createElement("div");
 		r.style.cssText = "position:relative;width:178px;height:142px;cursor:pointer;", this.cells = [];
-		for (let e = 0; e < $O; e++) for (let t = 0; t < ek; t++) {
+		for (let e = 0; e < tk; e++) for (let t = 0; t < nk; t++) {
 			let n = document.createElement("div");
-			n.style.cssText = `position:absolute;width:${tk}px;height:${tk}px;left:${t * 18}px;top:${e * 18}px;border:1px solid var(--color-border);box-sizing:border-box;background:var(--color-surface);`, n.dataset.row = String(e), n.dataset.col = String(t), r.appendChild(n), this.cells.push(n);
+			n.style.cssText = `position:absolute;width:${rk}px;height:${rk}px;left:${t * 18}px;top:${e * 18}px;border:1px solid var(--color-border);box-sizing:border-box;background:var(--color-surface);`, n.dataset.row = String(e), n.dataset.col = String(t), r.appendChild(n), this.cells.push(n);
 		}
 		r.addEventListener("mousemove", (e) => {
 			let t = r.getBoundingClientRect(), n = e.clientX - t.left, i = e.clientY - t.top, a = Math.min(9, Math.max(0, Math.floor(n / 18))), o = Math.min(7, Math.max(0, Math.floor(i / 18)));
@@ -59647,25 +59707,25 @@ var ik = class {
 		i.className = "dialog-body", i.style.cssText = "display:flex;gap:16px;padding:12px 16px;";
 		let a = document.createElement("div");
 		a.style.cssText = "flex:1;";
-		let o = ak(z("dialog.tableCreate.createSection.label")), s = ok(o, z("dialog.tableCreate.createSpinnerRow.label"), 5, 1, 256), c = ok(o, z("dialog.tableCreate.createSpinnerRow.label.x623beb"), 5, 1, 256);
+		let o = sk(z("dialog.tableCreate.createSection.label")), s = ck(o, z("dialog.tableCreate.createSpinnerRow.label"), 5, 1, 256), c = ck(o, z("dialog.tableCreate.createSpinnerRow.label.x623beb"), 5, 1, 256);
 		a.appendChild(o);
-		let l = ak(z("dialog.tableCreate.createSection.label.x65cf09")), u = document.createElement("div");
-		u.className = "dialog-row", u.appendChild(sk(z("dialog.tableCreate.makeLabel.label")));
+		let l = sk(z("dialog.tableCreate.createSection.label.x65cf09")), u = document.createElement("div");
+		u.className = "dialog-row", u.appendChild(lk(z("dialog.tableCreate.makeLabel.label")));
 		let d = document.createElement("select");
-		d.className = "dialog-select", d.style.width = "90px", d.appendChild(Ty("fit", z("dialog.tableCreate.makeOption.label"))), d.appendChild(Ty("custom", z("dialog.tableCreate.makeOption.label.x5d9e2b"))), u.appendChild(d);
+		d.className = "dialog-select", d.style.width = "90px", d.appendChild(Dy("fit", z("dialog.tableCreate.makeOption.label"))), d.appendChild(Dy("custom", z("dialog.tableCreate.makeOption.label.x5d9e2b"))), u.appendChild(d);
 		let f = document.createElement("input");
-		f.className = "dialog-input", f.type = "number", f.step = "0.1", f.value = "148.0", f.style.cssText = "width:60px;margin-left:6px;", f.disabled = !0, u.appendChild(f), u.appendChild(ck("mm")), l.appendChild(u), d.addEventListener("change", () => {
+		f.className = "dialog-input", f.type = "number", f.step = "0.1", f.value = "148.0", f.style.cssText = "width:60px;margin-left:6px;", f.disabled = !0, u.appendChild(f), u.appendChild(uk("mm")), l.appendChild(u), d.addEventListener("change", () => {
 			f.disabled = d.value === "fit";
 		});
 		let p = document.createElement("div");
-		p.className = "dialog-row", p.appendChild(sk(z("dialog.tableCreate.makeLabel.label.x3cc869")));
+		p.className = "dialog-row", p.appendChild(lk(z("dialog.tableCreate.makeLabel.label.x3cc869")));
 		let m = document.createElement("select");
-		m.className = "dialog-select", m.style.width = "90px", m.appendChild(Ty("auto", z("dialog.tableCreate.makeOption.label.x53a1a1"))), m.appendChild(Ty("custom", z("dialog.tableCreate.makeOption.label.x5d9e2b"))), p.appendChild(m);
+		m.className = "dialog-select", m.style.width = "90px", m.appendChild(Dy("auto", z("dialog.tableCreate.makeOption.label.x53a1a1"))), m.appendChild(Dy("custom", z("dialog.tableCreate.makeOption.label.x5d9e2b"))), p.appendChild(m);
 		let h = document.createElement("input");
-		h.className = "dialog-input", h.type = "number", h.step = "0.1", h.value = "22.6", h.style.cssText = "width:60px;margin-left:6px;", h.disabled = !0, p.appendChild(h), p.appendChild(ck("mm")), l.appendChild(p), m.addEventListener("change", () => {
+		h.className = "dialog-input", h.type = "number", h.step = "0.1", h.value = "22.6", h.style.cssText = "width:60px;margin-left:6px;", h.disabled = !0, p.appendChild(h), p.appendChild(uk("mm")), l.appendChild(p), m.addEventListener("change", () => {
 			h.disabled = m.value === "auto";
 		}), a.appendChild(l);
-		let g = ak(z("dialog.tableCreate.createSection.label.x5babec")), _ = document.createElement("div");
+		let g = sk(z("dialog.tableCreate.createSection.label.x5babec")), _ = document.createElement("div");
 		_.className = "dialog-row";
 		let v = document.createElement("input");
 		v.type = "checkbox", v.id = "tc-treat-as-char", v.checked = !1;
@@ -59685,8 +59745,8 @@ var ik = class {
 		}
 		function T() {
 			let e = Math.max(1, Math.min(256, parseInt(s.value, 10) || 2)), t = Math.max(1, Math.min(256, parseInt(c.value, 10) || 3)), n = { treatAsChar: v.checked };
-			if (d.value === "custom" && (n.colWidths = rk(nk(Math.max(1, parseFloat(f.value) || 148)), t)), m.value === "custom") {
-				let t = nk(Math.max(1, parseFloat(h.value) || 22.6));
+			if (d.value === "custom" && (n.colWidths = ak(ik(Math.max(1, parseFloat(f.value) || 148)), t)), m.value === "custom") {
+				let t = ik(Math.max(1, parseFloat(h.value) || 22.6));
 				n.rowHeights = Array.from({ length: e }, () => t);
 			}
 			w(), C.onApply && C.onApply(e, t, n);
@@ -59694,31 +59754,31 @@ var ik = class {
 		document.body.appendChild(e), s.focus(), s.select();
 	}
 };
-function ak(e) {
+function sk(e) {
 	let t = document.createElement("div");
 	t.className = "dialog-section";
 	let n = document.createElement("div");
 	return n.className = "dialog-section-title", n.textContent = e, t.appendChild(n), t;
 }
-function ok(e, t, n, r, i) {
+function ck(e, t, n, r, i) {
 	let a = document.createElement("div");
 	a.className = "dialog-row";
-	let o = sk(t);
+	let o = lk(t);
 	a.appendChild(o);
 	let s = document.createElement("input");
 	return s.id = `pwh-table-count-${Math.random().toString(36).slice(2)}`, o.htmlFor = s.id, s.className = "dialog-input", s.type = "number", s.min = String(r), s.max = String(i), s.value = String(n), s.style.width = "70px", a.appendChild(s), e.appendChild(a), s;
 }
-function sk(e) {
+function lk(e) {
 	let t = document.createElement("label");
 	return t.className = "dialog-label", t.textContent = e, t;
 }
-function ck(e) {
+function uk(e) {
 	let t = document.createElement("span");
 	return t.className = "dialog-unit", t.textContent = e, t;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/cell-split-dialog.ts
-var lk = class {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/cell-split-dialog.ts
+var dk = class {
 	onApply = null;
 	overlay = null;
 	dialog = null;
@@ -59795,19 +59855,19 @@ var lk = class {
 		let n = this.equalHeightCheck.checked, r = this.mergeFirstCheck.checked;
 		this.hide(), this.onApply && this.onApply(e, t, n, r);
 	}
-}, uk = [
+}, fk = [
 	"Left",
 	"Right",
 	"Top",
 	"Bottom"
-], dk = [
+], pk = [
 	"left",
 	"right",
 	"top",
 	"bottom",
 	"insideVertical",
 	"insideHorizontal"
-], fk = [
+], mk = [
 	"fillType",
 	"fillColor",
 	"patternColor",
@@ -59819,13 +59879,13 @@ var lk = class {
 	"diagonalColor",
 	"centerLine"
 ];
-function pk(e) {
+function hk(e) {
 	let t = {};
-	for (let n of fk) e[n] !== void 0 && (t[n] = e[n]);
-	for (let n of uk) t["border" + n] = e["border" + n];
+	for (let n of mk) e[n] !== void 0 && (t[n] = e[n]);
+	for (let n of fk) t["border" + n] = e["border" + n];
 	return t;
 }
-function mk(e, t, n) {
+function gk(e, t, n) {
 	if (!Array.isArray(e) || !t || !n) throw Error("셀 선택 범위를 확인할 수 없습니다.");
 	let { startRow: r, endRow: i, startCol: a, endCol: o } = t;
 	if (![
@@ -59834,7 +59894,7 @@ function mk(e, t, n) {
 		a,
 		o
 	].every(Number.isInteger) || r > i || a > o) throw Error("셀 선택 범위를 확인할 수 없습니다.");
-	for (let [e, t] of Object.entries(n)) if (!dk.includes(e) || !t || !Number.isInteger(t.type) || t.type < 0 || t.type > 8 || !Number.isInteger(t.width) || t.width < 0 || t.width > 15 || !/^#[0-9a-f]{6}$/i.test(t.color)) throw Error("선 모양을 확인해 주세요.");
+	for (let [e, t] of Object.entries(n)) if (!pk.includes(e) || !t || !Number.isInteger(t.type) || t.type < 0 || t.type > 8 || !Number.isInteger(t.width) || t.width < 0 || t.width > 15 || !/^#[0-9a-f]{6}$/i.test(t.color)) throw Error("선 모양을 확인해 주세요.");
 	let s = e.filter((e) => e.row <= i && e.row + e.rowSpan - 1 >= r && e.col <= o && e.col + e.colSpan - 1 >= a);
 	if (!s.length) throw Error("선택된 셀이 없습니다.");
 	if (s.some((e) => e.row < r || e.col < a || e.row + e.rowSpan - 1 > i || e.col + e.colSpan - 1 > o)) throw Error("병합 셀 전체를 선택한 뒤 다시 시도해 주세요.");
@@ -59846,7 +59906,7 @@ function mk(e, t, n) {
 			Top: e.row === r ? "top" : "insideHorizontal",
 			Bottom: e.row + e.rowSpan - 1 === i ? "bottom" : "insideHorizontal"
 		}, s = {};
-		for (let e of uk) n[t[e]] && (s[e] = { ...n[t[e]] });
+		for (let e of fk) n[t[e]] && (s[e] = { ...n[t[e]] });
 		Object.keys(s).length && c.push({
 			cellIndex: e.cellIdx,
 			borders: s
@@ -59862,23 +59922,23 @@ function mk(e, t, n) {
 	}
 	return c;
 }
-function hk(e, t, n) {
+function _k(e, t, n) {
 	if (!n.length) return !1;
 	let { sec: r, ppi: i, ci: a } = t;
 	return e.runInBatch(() => {
 		for (let t of n) {
-			let n = e.getCellOwnProperties(r, i, a, t.cellIndex), o = pk(n);
-			for (let e of uk) o["border" + e] = t.borders[e] ?? n["border" + e];
+			let n = e.getCellOwnProperties(r, i, a, t.cellIndex), o = hk(n);
+			for (let e of fk) o["border" + e] = t.borders[e] ?? n["border" + e];
 			if (!e.setCellProperties(r, i, a, t.cellIndex, o)?.ok) throw Error("셀 테두리를 적용하지 못했습니다.");
 		}
 	}), !0;
 }
-function gk(e, t, n, r) {
+function vk(e, t, n, r) {
 	let { sec: i, ppi: a, ci: o } = t;
 	e.runInBatch(() => {
 		for (let t of n) {
 			let n = {
-				...pk(e.getCellOwnProperties(i, a, o, t)),
+				...hk(e.getCellOwnProperties(i, a, o, t)),
 				...r
 			};
 			if (!e.setCellProperties(i, a, o, t, n)?.ok) throw Error("셀 테두리/배경을 적용하지 못했습니다.");
@@ -59886,15 +59946,15 @@ function gk(e, t, n, r) {
 	});
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/pwh-cell-border-dialog.ts
-var _k = [
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/pwh-cell-border-dialog.ts
+var yk = [
 	"left",
 	"right",
 	"top",
 	"bottom",
 	"insideVertical",
 	"insideHorizontal"
-], vk = {
+], bk = {
 	left: "Left",
 	right: "Right",
 	top: "Top",
@@ -59902,7 +59962,7 @@ var _k = [
 	insideVertical: "Right",
 	insideHorizontal: "Bottom"
 };
-function yk(e) {
+function xk(e) {
 	let { sec: t, ppi: n, ci: r } = e.tableCtx, i = e.wasm.getTableDimensions(t, n, r);
 	return {
 		dims: i,
@@ -59912,8 +59972,8 @@ function yk(e) {
 		}))
 	};
 }
-function bk(e, t) {
-	let n = t === "border" ? e.borderScopeRadios : t === "bg" ? e.bgScopeRadios : e.diagScopeRadios, { dims: r, boxes: i } = yk(e);
+function Sk(e, t) {
+	let n = t === "border" ? e.borderScopeRadios : t === "bg" ? e.bgScopeRadios : e.diagScopeRadios, { dims: r, boxes: i } = xk(e);
 	if (n?.find((e) => e.checked)?.value === "all") return {
 		range: {
 			startRow: 0,
@@ -59939,29 +59999,29 @@ function bk(e, t) {
 		boxes: i
 	};
 }
-function xk(e, t) {
+function Ck(e, t) {
 	return e.filter((e) => e.row <= t.endRow && e.row + e.rowSpan - 1 >= t.startRow && e.col <= t.endCol && e.col + e.colSpan - 1 >= t.startCol);
 }
-function Sk(e, t, n, r) {
-	let i = xk(t, n).filter((e) => r === "left" ? e.col === n.startCol : r === "right" ? e.col + e.colSpan - 1 === n.endCol : r === "top" ? e.row === n.startRow : r === "bottom" ? e.row + e.rowSpan - 1 === n.endRow : r === "insideVertical" ? e.col + e.colSpan - 1 < n.endCol : e.row + e.rowSpan - 1 < n.endRow), { sec: a, ppi: o, ci: s } = e.tableCtx, c = i.map((t) => e.wasm.getCellOwnProperties(a, o, s, t.cellIdx)["border" + vk[r]]).filter(Boolean);
+function wk(e, t, n, r) {
+	let i = Ck(t, n).filter((e) => r === "left" ? e.col === n.startCol : r === "right" ? e.col + e.colSpan - 1 === n.endCol : r === "top" ? e.row === n.startRow : r === "bottom" ? e.row + e.rowSpan - 1 === n.endRow : r === "insideVertical" ? e.col + e.colSpan - 1 < n.endCol : e.row + e.rowSpan - 1 < n.endRow), { sec: a, ppi: o, ci: s } = e.tableCtx, c = i.map((t) => e.wasm.getCellOwnProperties(a, o, s, t.cellIdx)["border" + bk[r]]).filter(Boolean);
 	if (!c.length) return null;
 	let l = JSON.stringify(c[0]);
 	return c.every((e) => JSON.stringify(e) === l) ? c[0] : null;
 }
-function Ck(e, t) {
+function Tk(e, t) {
 	let n = document.createElement(e);
 	return t && (n.className = t), n;
 }
-function wk(e, t) {
-	let n = Ck("label", "pwh-border-field"), r = Ck("span");
+function Ek(e, t) {
+	let n = Tk("label", "pwh-border-field"), r = Tk("span");
 	return r.textContent = e, n.append(r, t), n;
 }
-function Tk(e, t, n = "") {
-	let r = Ck("button", n);
+function Dk(e, t, n = "") {
+	let r = Tk("button", n);
 	return r.type = "button", r.textContent = e, r.addEventListener("click", t), r;
 }
-function Ek(e) {
-	let t = Ck("div", "pwh-border-tab"), n = Ck("div", "pwh-border-layout"), r = Ck("div", "pwh-border-controls"), i = Ck("select", "dialog-select");
+function Ok(e) {
+	let t = Tk("div", "pwh-border-tab"), n = Tk("div", "pwh-border-layout"), r = Tk("div", "pwh-border-controls"), i = Tk("select", "dialog-select");
 	i.setAttribute("aria-label", "선 종류");
 	for (let [e, t] of [
 		[0, "없음"],
@@ -59974,11 +60034,11 @@ function Ek(e) {
 		[7, "원형 파선"],
 		[8, "이중선"]
 	]) {
-		let n = Ck("option");
+		let n = Tk("option");
 		n.value = String(e), n.textContent = t, i.append(n);
 	}
 	i.value = "1";
-	let a = Ck("select", "dialog-select");
+	let a = Tk("select", "dialog-select");
 	a.setAttribute("aria-label", "선 굵기"), [
 		"0.1",
 		"0.12",
@@ -59997,16 +60057,16 @@ function Ek(e) {
 		"4.0",
 		"5.0"
 	].forEach((e, t) => {
-		let n = Ck("option");
+		let n = Tk("option");
 		n.value = String(t), n.textContent = e + " mm", a.append(n);
 	}), a.value = "1";
-	let o = Ck("input");
+	let o = Tk("input");
 	o.type = "color", o.value = "#000000", o.setAttribute("aria-label", "선 색");
-	let s = Ck("input");
+	let s = Tk("input");
 	s.type = "checkbox", s.checked = !0;
-	let c = Ck("label", "pwh-border-immediate");
-	c.append(s, document.createTextNode("선 모양 바로 적용")), r.append(wk("종류", i), wk("굵기", a), wk("색", o), c);
-	let l = Ck("div", "pwh-border-preview-area"), u = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+	let c = Tk("label", "pwh-border-immediate");
+	c.append(s, document.createTextNode("선 모양 바로 적용")), r.append(Ek("종류", i), Ek("굵기", a), Ek("색", o), c);
+	let l = Tk("div", "pwh-border-preview-area"), u = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 	u.setAttribute("viewBox", "0 0 180 180"), u.classList.add("pwh-border-preview"), u.setAttribute("aria-label", "셀 테두리 미리보기");
 	let d = {}, f = {
 		left: [
@@ -60046,7 +60106,7 @@ function Ek(e) {
 			90
 		]
 	};
-	for (let e of _k) {
+	for (let e of yk) {
 		let t = document.createElementNS("http://www.w3.org/2000/svg", "line"), n = f[e];
 		[
 			"x1",
@@ -60071,10 +60131,10 @@ function Ek(e) {
 		width: Number(a.value),
 		color: o.value
 	}), h = (t) => {
-		let n = new Set(Dk(e));
+		let n = new Set(kk(e));
 		p.marked = new Set(t.filter((e) => n.has(e)));
 		for (let e of p.marked) p.actions[e] = m();
-		Ok(e);
+		Ak(e);
 	}, g = [
 		[
 			"left",
@@ -60106,24 +60166,24 @@ function Ek(e) {
 			"안쪽 가로",
 			"inside-h"
 		]
-	], _ = Ck("div", "pwh-border-board");
+	], _ = Tk("div", "pwh-border-board");
 	_.append(u);
 	for (let [e, t, n] of g) {
-		let r = Tk(t, () => h([e]), "pwh-edge pwh-edge-" + n);
+		let r = Dk(t, () => h([e]), "pwh-edge pwh-edge-" + n);
 		r.setAttribute("aria-label", t + " 선"), r.dataset.edge = e, _.append(r);
 	}
 	l.append(_);
-	let v = Ck("div", "pwh-border-presets");
-	v.append(Tk("모두", () => h(_k)), Tk("바깥쪽", () => h([
+	let v = Tk("div", "pwh-border-presets");
+	v.append(Dk("모두", () => h(yk)), Dk("바깥쪽", () => h([
 		"left",
 		"right",
 		"top",
 		"bottom"
-	])), Tk("안쪽", () => h(["insideVertical", "insideHorizontal"]))), l.append(v), n.append(r, l), t.append(n);
+	])), Dk("안쪽", () => h(["insideVertical", "insideHorizontal"]))), l.append(v), n.append(r, l), t.append(n);
 	let y = () => {
 		if (s.checked) {
 			for (let e of p.marked) p.actions[e] = m();
-			Ok(e);
+			Ak(e);
 		}
 	};
 	for (let e of [
@@ -60132,19 +60192,19 @@ function Ek(e) {
 		o
 	]) e.addEventListener("change", y);
 	o.addEventListener("input", y), t.append(e.buildScopeSection("border"));
-	for (let t of e.borderScopeRadios) t.addEventListener("change", () => Ok(e));
+	for (let t of e.borderScopeRadios) t.addEventListener("change", () => Ak(e));
 	return t;
 }
-function Dk(e) {
-	let { range: t } = bk(e, "border");
-	return _k.filter((n) => n !== "insideVertical" || e.applyMode !== "asOne" && t.endCol > t.startCol).filter((n) => n !== "insideHorizontal" || e.applyMode !== "asOne" && t.endRow > t.startRow);
+function kk(e) {
+	let { range: t } = Sk(e, "border");
+	return yk.filter((n) => n !== "insideVertical" || e.applyMode !== "asOne" && t.endCol > t.startCol).filter((n) => n !== "insideHorizontal" || e.applyMode !== "asOne" && t.endRow > t.startRow);
 }
-function Ok(e) {
+function Ak(e) {
 	let t = e.pwhBorderState;
 	if (!t || !e.cellProps) return;
-	let { range: n, boxes: r } = bk(e, "border"), i = new Set(Dk(e));
-	for (let a of _k) {
-		let o = t.actions[a] ?? Sk(e, r, n, a), s = t.lines[a];
+	let { range: n, boxes: r } = Sk(e, "border"), i = new Set(kk(e));
+	for (let a of yk) {
+		let o = t.actions[a] ?? wk(e, r, n, a), s = t.lines[a];
 		s.setAttribute("stroke", o && o.type !== 0 ? o.color : "#cbd3d8"), s.setAttribute("stroke-width", o && o.type !== 0 ? String(o.type === 8 ? 1 : Math.max(1, Math.min(5, (o.width + 2) * .6))) : "1"), s.setAttribute("stroke-dasharray", o && o.type !== 0 ? {
 			2: "7 4",
 			3: "2 3",
@@ -60159,13 +60219,13 @@ function Ok(e) {
 		l && (l.disabled = !i.has(a));
 	}
 }
-function kk(e) {
+function jk(e) {
 	let t = e.dialog.querySelector(".dialog-footer");
 	if (!t) return;
 	let n = t.querySelector(".dialog-btn-primary");
 	if (n && (n.textContent = "설정"), !t.querySelector("[data-pwh-apply]")) {
-		let n = Tk("적용", () => {
-			Ak(e) && Ok(e);
+		let n = Dk("적용", () => {
+			Mk(e) && Ak(e);
 		}, "dialog-btn");
 		n.dataset.pwhApply = "1", t.append(n);
 	}
@@ -60175,9 +60235,9 @@ function kk(e) {
 	};
 	r?.addEventListener("change", a("bgDirty")), r?.addEventListener("input", a("bgDirty")), i?.addEventListener("change", a("diagDirty")), i?.addEventListener("click", (t) => {
 		t.target.closest(".tcp-diag-btn") && (e.pwhBorderState.diagDirty = !0);
-	}), Ok(e);
+	}), Ak(e);
 }
-function Ak(e) {
+function Mk(e) {
 	let t = e.pwhBorderState, n = t.actions, r = Object.keys(n).length > 0;
 	if (!r && !t.bgDirty && !t.diagDirty) return !0;
 	try {
@@ -60185,7 +60245,7 @@ function Ak(e) {
 		if (!a) throw Error("편집기를 다시 열고 시도해 주세요.");
 		if ((a.getCellTableContext?.()?.cellPath?.length ?? 0) > 1) throw Error("중첩 표의 셀 테두리는 아직 변경할 수 없습니다.");
 		if (a.hasExcludedCellSelection?.()) throw Error("선택에서 제외된 셀이 있습니다. 이어진 셀 영역을 선택해 주세요.");
-		let o = bk(e, "border"), s = r && e.applyMode !== "asOne" ? mk(o.boxes, o.range, n) : [], c = t.bgDirty ? bk(e, "bg") : null, l = t.diagDirty ? bk(e, "diag") : null, u = e.bgColorRadio.checked ? {
+		let o = Sk(e, "border"), s = r && e.applyMode !== "asOne" ? gk(o.boxes, o.range, n) : [], c = t.bgDirty ? Sk(e, "bg") : null, l = t.diagDirty ? Sk(e, "diag") : null, u = e.bgColorRadio.checked ? {
 			fillType: "solid",
 			fillColor: e.bgColorPicker.value,
 			patternColor: e.bgPatternColorPicker.value,
@@ -60233,9 +60293,9 @@ function Ak(e) {
 						s.set(r, a);
 					}
 				} else {
-					r && hk(t, i, s);
+					r && _k(t, i, s);
 					let e = (e, n) => {
-						e && gk(t, i, xk(e.boxes, e.range).map((e) => e.cellIdx), n);
+						e && vk(t, i, Ck(e.boxes, e.range).map((e) => e.cellIdx), n);
 					};
 					e(c, u), e(l, d);
 				}
@@ -60250,8 +60310,8 @@ function Ak(e) {
 	}
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/cell-border-bg-dialog.ts
-var jk = "var(--doc-paper)", Mk = "var(--ui-border-light)", Nk = [
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/cell-border-bg-dialog.ts
+var Nk = "var(--doc-paper)", Pk = "var(--ui-border-light)", Fk = [
 	["0", z("option.diagonalLineTypeOptions.0")],
 	["1", z("option.diagonalLineTypeOptions.1")],
 	["2", z("option.diagonalLineTypeOptions.2")],
@@ -60270,7 +60330,7 @@ var jk = "var(--doc-paper)", Mk = "var(--ui-border-light)", Nk = [
 	["15", z("option.diagonalLineTypeOptions.15")],
 	["16", z("option.diagonalLineTypeOptions.16")],
 	["17", z("option.diagonalLineTypeOptions.17")]
-], Pk = [
+], Ik = [
 	["0", "0.1mm"],
 	["1", "0.12mm"],
 	["2", "0.15mm"],
@@ -60287,7 +60347,7 @@ var jk = "var(--doc-paper)", Mk = "var(--ui-border-light)", Nk = [
 	["13", "3.0mm"],
 	["14", "4.0mm"],
 	["15", "5.0mm"]
-], Fk = [
+], Lk = [
 	.1,
 	.12,
 	.15,
@@ -60305,11 +60365,11 @@ var jk = "var(--doc-paper)", Mk = "var(--ui-border-light)", Nk = [
 	4,
 	5
 ];
-function Ik(e) {
-	let t = Fk[e] ?? Fk[0];
+function Rk(e) {
+	let t = Lk[e] ?? Lk[0];
 	return Math.min(8, Math.max(.8, t * 2.6));
 }
-var Lk = class extends V {
+var zk = class extends V {
 	wasm;
 	eventBus;
 	tableCtx;
@@ -60372,7 +60432,7 @@ var Lk = class extends V {
 	show() {
 		super.show(), this.dialog.classList.add("tcp-border-bg-dialog");
 		let { sec: e, ppi: t, ci: n } = this.tableCtx;
-		this.cellProps = this.applyMode === "each" ? this.wasm.getCellOwnProperties(e, t, n, this.cellIdx) : this.wasm.getCellProperties(e, t, n, this.cellIdx), this.populateFields(), kk(this);
+		this.cellProps = this.applyMode === "each" ? this.wasm.getCellOwnProperties(e, t, n, this.cellIdx) : this.wasm.getCellProperties(e, t, n, this.cellIdx), this.populateFields(), jk(this);
 	}
 	createBody() {
 		let e = document.createElement("div");
@@ -60410,7 +60470,7 @@ var Lk = class extends V {
 		for (let t = 0; t < this.tabs.length; t++) this.tabs[t].classList.toggle("active", t === e), this.panels[t].classList.toggle("active", t === e);
 	}
 	buildBorderTab() {
-		return Ek(this);
+		return Ok(this);
 	}
 	applyBorderDir(e) {
 		let t = {
@@ -60430,7 +60490,7 @@ var Lk = class extends V {
 		if (!e) return;
 		for (; e.firstChild;) e.removeChild(e.firstChild);
 		let t = "http://www.w3.org/2000/svg", n = document.createElementNS(t, "rect");
-		n.setAttribute("x", "0"), n.setAttribute("y", "0"), n.setAttribute("width", "120"), n.setAttribute("height", "100"), n.style.setProperty("fill", jk), e.appendChild(n);
+		n.setAttribute("x", "0"), n.setAttribute("y", "0"), n.setAttribute("width", "120"), n.setAttribute("height", "100"), n.style.setProperty("fill", Nk), e.appendChild(n);
 		for (let [n, r, i, a] of [[
 			"60",
 			"5",
@@ -60443,7 +60503,7 @@ var Lk = class extends V {
 			"50"
 		]]) {
 			let o = document.createElementNS(t, "line");
-			o.setAttribute("x1", n), o.setAttribute("y1", r), o.setAttribute("x2", i), o.setAttribute("y2", a), o.style.setProperty("stroke", Mk), o.setAttribute("stroke-width", "0.5"), o.setAttribute("stroke-dasharray", "3,2"), e.appendChild(o);
+			o.setAttribute("x1", n), o.setAttribute("y1", r), o.setAttribute("x2", i), o.setAttribute("y2", a), o.style.setProperty("stroke", Pk), o.setAttribute("stroke-width", "0.5"), o.setAttribute("stroke-dasharray", "3,2"), e.appendChild(o);
 		}
 		let r = {
 			2: "6,3",
@@ -60499,7 +60559,7 @@ var Lk = class extends V {
 	}
 	updateBgPreview() {
 		if (!this.bgColorRadio.checked) {
-			this.bgPreviewBox.style.background = jk;
+			this.bgPreviewBox.style.background = Nk;
 			return;
 		}
 		let e = this.bgColorPicker.value, t = parseInt(this.bgPatternTypeSelect.value, 10);
@@ -60525,9 +60585,9 @@ var Lk = class extends V {
 		let n = document.createElement("div");
 		n.className = "tcp-diag-controls";
 		let r = this.createSection(z("dialog.cellBorderBg.createSection.label.x6ac29f")), i = this.row();
-		i.appendChild(this.label(z("dialog.cellBorderBg.label.label.x2ec5ae"))), this.diagLineTypeSelect = this.selectOptions(Nk), this.diagLineTypeSelect.addEventListener("change", () => this.updateDiagonalPreview()), i.appendChild(this.diagLineTypeSelect), r.appendChild(i);
+		i.appendChild(this.label(z("dialog.cellBorderBg.label.label.x2ec5ae"))), this.diagLineTypeSelect = this.selectOptions(Fk), this.diagLineTypeSelect.addEventListener("change", () => this.updateDiagonalPreview()), i.appendChild(this.diagLineTypeSelect), r.appendChild(i);
 		let a = this.row();
-		a.appendChild(this.label(z("dialog.cellBorderBg.label.label"))), this.diagWidthSelect = this.selectOptions(Pk), this.diagWidthSelect.addEventListener("change", () => this.updateDiagonalPreview()), a.appendChild(this.diagWidthSelect), r.appendChild(a);
+		a.appendChild(this.label(z("dialog.cellBorderBg.label.label"))), this.diagWidthSelect = this.selectOptions(Ik), this.diagWidthSelect.addEventListener("change", () => this.updateDiagonalPreview()), a.appendChild(this.diagWidthSelect), r.appendChild(a);
 		let o = this.row();
 		o.appendChild(this.label(z("dialog.cellBorderBg.label.label.xa002ac"))), this.diagColorInput = document.createElement("input"), this.diagColorInput.type = "color", this.diagColorInput.value = "#000000", this.diagColorInput.style.width = "40px", this.diagColorInput.style.height = "22px", this.diagColorInput.addEventListener("input", () => this.updateDiagonalPreview()), o.appendChild(this.diagColorInput), r.appendChild(o), n.appendChild(r);
 		let s = this.createSection(z("dialog.cellBorderBg.createSection.label.xb76080")), c = this.row();
@@ -60732,10 +60792,10 @@ var Lk = class extends V {
 		if (!e) return;
 		for (; e.firstChild;) e.removeChild(e.firstChild);
 		let t = "http://www.w3.org/2000/svg", n = document.createElementNS(t, "rect");
-		n.setAttribute("x", "20"), n.setAttribute("y", "16"), n.setAttribute("width", "120"), n.setAttribute("height", "88"), n.style.setProperty("fill", jk), n.setAttribute("stroke", "var(--color-border)"), e.appendChild(n);
+		n.setAttribute("x", "20"), n.setAttribute("y", "16"), n.setAttribute("width", "120"), n.setAttribute("height", "88"), n.style.setProperty("fill", Nk), n.setAttribute("stroke", "var(--color-border)"), e.appendChild(n);
 		let r = parseInt(this.diagLineTypeSelect?.value ?? "0", 10);
 		if (r === 0) return;
-		let i = this.diagColorInput?.value ?? "#000000", a = Ik(parseInt(this.diagWidthSelect?.value ?? "0", 10)), o = {
+		let i = this.diagColorInput?.value ?? "#000000", a = Rk(parseInt(this.diagWidthSelect?.value ?? "0", 10)), o = {
 			2: "7,4",
 			3: "2,3",
 			4: "8,3,2,3",
@@ -60786,7 +60846,7 @@ var Lk = class extends V {
 		return [...i];
 	}
 	onConfirm() {
-		return Ak(this);
+		return Mk(this);
 	}
 	createSection(e) {
 		let t = document.createElement("div");
@@ -60817,7 +60877,7 @@ var Lk = class extends V {
 		}
 		return t;
 	}
-}, Rk = [
+}, Bk = [
 	{
 		name: "SUM",
 		desc: "합계"
@@ -60906,7 +60966,7 @@ var Lk = class extends V {
 		name: "TAN",
 		desc: "탄젠트"
 	}
-], zk = [
+], Vk = [
 	{
 		value: "",
 		label: z("dialog.formula.label")
@@ -60927,7 +60987,7 @@ var Lk = class extends V {
 		value: "below",
 		label: z("dialog.formula.label.x73df79")
 	}
-], Bk = [
+], Hk = [
 	{
 		value: "default",
 		label: z("dialog.formula.label.xa5b30c")
@@ -60944,7 +61004,7 @@ var Lk = class extends V {
 		value: "decimal2",
 		label: z("dialog.formula.label.xf5b781")
 	}
-], Vk = class extends V {
+], Uk = class extends V {
 	services;
 	wasm;
 	eventBus;
@@ -60959,7 +61019,7 @@ var Lk = class extends V {
 	}
 	createBody() {
 		let e = document.createElement("div");
-		e.className = "formula-dialog-body", e.appendChild(this.createRow(z("dialog.formula.createRow.label"), () => (this.formulaInput = document.createElement("input"), this.formulaInput.type = "text", this.formulaInput.className = "formula-input", this.formulaInput.value = "=", this.formulaInput.placeholder = "=SUM(A1:A5)", this.formulaInput))), e.appendChild(this.createRow(z("dialog.formula.createRow.label.xe97392"), () => (this.funcSelect = document.createElement("select"), this.funcSelect.className = "formula-select", this.funcSelect.appendChild(Ty("", z("dialog.formula.makeOption.label"))), Rk.forEach((e) => this.funcSelect.appendChild(Ty(e.name, `${e.name} - ${e.desc}`))), this.funcSelect.addEventListener("change", () => {
+		e.className = "formula-dialog-body", e.appendChild(this.createRow(z("dialog.formula.createRow.label"), () => (this.formulaInput = document.createElement("input"), this.formulaInput.type = "text", this.formulaInput.className = "formula-input", this.formulaInput.value = "=", this.formulaInput.placeholder = "=SUM(A1:A5)", this.formulaInput))), e.appendChild(this.createRow(z("dialog.formula.createRow.label.xe97392"), () => (this.funcSelect = document.createElement("select"), this.funcSelect.className = "formula-select", this.funcSelect.appendChild(Dy("", z("dialog.formula.makeOption.label"))), Bk.forEach((e) => this.funcSelect.appendChild(Dy(e.name, `${e.name} - ${e.desc}`))), this.funcSelect.addEventListener("change", () => {
 			let e = this.funcSelect.value;
 			if (e) {
 				let t = this.formulaInput.selectionStart ?? this.formulaInput.value.length, n = this.formulaInput.value.substring(0, t), r = this.formulaInput.value.substring(t);
@@ -60967,13 +61027,13 @@ var Lk = class extends V {
 			}
 		}), this.funcSelect))), e.appendChild(this.createRow(z("dialog.formula.createRow.label.x7dcf38"), () => {
 			let e = document.createElement("select");
-			return e.className = "formula-select", zk.forEach((t) => e.appendChild(Ty(t.value, t.label))), e.addEventListener("change", () => {
+			return e.className = "formula-select", Vk.forEach((t) => e.appendChild(Dy(t.value, t.label))), e.addEventListener("change", () => {
 				if (e.value) {
 					let t = this.formulaInput.selectionStart ?? this.formulaInput.value.length, n = this.formulaInput.value.substring(0, t), r = this.formulaInput.value.substring(t);
 					this.formulaInput.value = n + e.value + r, this.formulaInput.focus(), e.value = "";
 				}
 			}), e;
-		})), e.appendChild(this.createRow(z("dialog.formula.createRow.label.xb85e7a"), () => (this.formatSelect = document.createElement("select"), this.formatSelect.className = "formula-select", Bk.forEach((e) => this.formatSelect.appendChild(Ty(e.value, e.label))), this.formatSelect)));
+		})), e.appendChild(this.createRow(z("dialog.formula.createRow.label.xb85e7a"), () => (this.formatSelect = document.createElement("select"), this.formatSelect.className = "formula-select", Hk.forEach((e) => this.formatSelect.appendChild(Dy(e.value, e.label))), this.formatSelect)));
 		let t = document.createElement("div");
 		t.className = "formula-row";
 		let n = document.createElement("label");
@@ -61031,8 +61091,8 @@ var Lk = class extends V {
 	}
 };
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/command/block-calculation-plan.ts
-function Hk(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/command/block-calculation-plan.ts
+function Wk(e) {
 	if (!Number.isInteger(e) || e < 0) return null;
 	let t = e + 1, n = "";
 	for (; t > 0;) {
@@ -61041,20 +61101,20 @@ function Hk(e) {
 	}
 	return n;
 }
-function Uk(e, t) {
-	let n = Hk(t);
+function Gk(e, t) {
+	let n = Wk(t);
 	return !n || !Number.isInteger(e) || e < 0 ? null : `${n}${e + 1}`;
 }
-function Wk(e) {
+function Kk(e) {
 	return e.some((e) => e.some((e) => (e.rowSpan ?? 1) !== 1 || (e.colSpan ?? 1) !== 1));
 }
-function Gk(e) {
+function qk(e) {
 	let { range: t, cells: n } = e, r = t.endRow - t.startRow + 1, i = t.endCol - t.startCol + 1;
-	if (e.nested || e.hasExcludedCells || r <= 0 || i <= 0 || r * i <= 1 || n.length !== r || n.some((e) => e.length !== i) || Wk(n)) return null;
+	if (e.nested || e.hasExcludedCells || r <= 0 || i <= 0 || r * i <= 1 || n.length !== r || n.some((e) => e.length !== i) || Kk(n)) return null;
 	let a = i >= 2 && n.every((e) => e[i - 1].empty);
 	if (a === (r >= 2 && n[r - 1].every((e) => e.empty))) return null;
 	if (a) {
-		let n = Hk(t.startCol), i = Hk(t.endCol - 1);
+		let n = Wk(t.startCol), i = Wk(t.endCol - 1);
 		return !n || !i ? null : {
 			orientation: "horizontal",
 			jobs: Array.from({ length: r }, (r, a) => {
@@ -61069,7 +61129,7 @@ function Gk(e) {
 	}
 	let o = [];
 	for (let n = t.startCol; n <= t.endCol; n += 1) {
-		let r = Uk(t.startRow, n), i = Uk(t.endRow - 1, n);
+		let r = Gk(t.startRow, n), i = Gk(t.endRow - 1, n);
 		if (!r || !i) return null;
 		o.push({
 			targetRow: t.endRow,
@@ -61082,7 +61142,7 @@ function Gk(e) {
 		jobs: o
 	};
 }
-function Kk(e, t) {
+function Jk(e, t) {
 	if (e.length === 0) return !1;
 	try {
 		return e.every((e) => t(e, !1).ok);
@@ -61091,13 +61151,13 @@ function Kk(e, t) {
 	}
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/table-row-column-dialog.ts
-var qk = 63;
-function Jk(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/table-row-column-dialog.ts
+var Yk = 63;
+function Xk(e) {
 	let t = Number.parseInt(e, 10);
-	return Number.isFinite(t) ? Math.max(1, Math.min(qk, t)) : 1;
+	return Number.isFinite(t) ? Math.max(1, Math.min(Yk, t)) : 1;
 }
-function Yk(e, t, n, r, i) {
+function Zk(e, t, n, r, i) {
 	let a = document.createElement("label");
 	a.style.display = "flex", a.style.alignItems = "center", a.style.gap = "6px", a.style.minHeight = "24px";
 	let o = document.createElement("input");
@@ -61105,7 +61165,7 @@ function Yk(e, t, n, r, i) {
 		o.checked && i(t);
 	}), a.appendChild(o), a.appendChild(document.createTextNode(n)), a;
 }
-var Xk = class extends V {
+var Qk = class extends V {
 	onApply = null;
 	mode;
 	countInput;
@@ -61128,25 +61188,25 @@ var Xk = class extends V {
 		let i = (e) => {
 			this.mode = e;
 		};
-		r.appendChild(Yk(this.radioName, "row-above", "위쪽에 줄 추가하기", this.mode === "row-above", i)), r.appendChild(Yk(this.radioName, "row-below", "아래쪽에 줄 추가하기", this.mode === "row-below", i)), r.appendChild(Yk(this.radioName, "col-left", "왼쪽에 칸 추가하기", this.mode === "col-left", i)), r.appendChild(Yk(this.radioName, "col-right", "오른쪽에 칸 추가하기", this.mode === "col-right", i)), t.appendChild(r);
+		r.appendChild(Zk(this.radioName, "row-above", "위쪽에 줄 추가하기", this.mode === "row-above", i)), r.appendChild(Zk(this.radioName, "row-below", "아래쪽에 줄 추가하기", this.mode === "row-below", i)), r.appendChild(Zk(this.radioName, "col-left", "왼쪽에 칸 추가하기", this.mode === "col-left", i)), r.appendChild(Zk(this.radioName, "col-right", "오른쪽에 칸 추가하기", this.mode === "col-right", i)), t.appendChild(r);
 		let a = document.createElement("div");
 		a.className = "dialog-row", a.style.marginTop = "10px";
 		let o = document.createElement("label");
-		o.className = "dialog-label", o.textContent = z("dialog.tableRowColumn.countLabel.text"), o.style.width = "78px", this.countInput = document.createElement("input"), this.countInput.type = "number", this.countInput.className = "dialog-input", this.countInput.min = "1", this.countInput.max = String(qk), this.countInput.value = "1", this.countInput.style.width = "64px", this.countInput.addEventListener("input", () => {
-			this.countInput.value = String(Jk(this.countInput.value));
+		o.className = "dialog-label", o.textContent = z("dialog.tableRowColumn.countLabel.text"), o.style.width = "78px", this.countInput = document.createElement("input"), this.countInput.type = "number", this.countInput.className = "dialog-input", this.countInput.min = "1", this.countInput.max = String(Yk), this.countInput.value = "1", this.countInput.style.width = "64px", this.countInput.addEventListener("input", () => {
+			this.countInput.value = String(Xk(this.countInput.value));
 		}), this.countInput.addEventListener("keydown", (e) => {
 			e.key === "Enter" && (e.preventDefault(), this.onConfirm(), this.hide());
 		});
 		let s = document.createElement("span");
-		return s.className = "dialog-unit", s.textContent = z("dialog.tableRowColumn.hint.text", { p1: qk }), a.appendChild(o), a.appendChild(this.countInput), a.appendChild(s), t.appendChild(a), e.appendChild(t), e;
+		return s.className = "dialog-unit", s.textContent = z("dialog.tableRowColumn.hint.text", { p1: Yk }), a.appendChild(o), a.appendChild(this.countInput), a.appendChild(s), t.appendChild(a), e.appendChild(t), e;
 	}
 	onConfirm() {
 		this.onApply?.({
 			mode: this.mode,
-			count: Jk(this.countInput.value)
+			count: Xk(this.countInput.value)
 		});
 	}
-}, Zk = class extends V {
+}, $k = class extends V {
 	onApply = null;
 	mode;
 	radioName = `table-delete-row-column-${Math.random().toString(36).slice(2)}`;
@@ -61168,30 +61228,30 @@ var Xk = class extends V {
 		let i = (e) => {
 			this.mode = e;
 		};
-		return r.appendChild(Yk(this.radioName, "row", "줄", this.mode === "row", i)), r.appendChild(Yk(this.radioName, "col", "칸", this.mode === "col", i)), t.appendChild(r), e.appendChild(t), e;
+		return r.appendChild(Zk(this.radioName, "row", "줄", this.mode === "row", i)), r.appendChild(Zk(this.radioName, "col", "칸", this.mode === "col", i)), t.appendChild(r), e.appendChild(t), e;
 	}
 	onConfirm() {
 		this.onApply?.({ mode: this.mode });
 	}
-}, Qk = (e) => e.inTable, $k = (e) => e.inTable || e.inCellSelectionMode, eA = (e) => e.hasMultiCellSelection, tA = () => !1;
-function nA(e, t) {
+}, eA = (e) => e.inTable, tA = (e) => e.inTable || e.inCellSelectionMode, nA = (e) => e.hasMultiCellSelection, rA = () => !1;
+function iA(e, t) {
 	try {
 		e();
 	} catch (e) {
 		console.error(`[table] ${t} 실패:`, e);
 	}
 }
-function rA(e, t, n, r, i) {
+function aA(e, t, n, r, i) {
 	let a = e.getCellParagraphCount(t, n, r, i);
 	for (let o = 0; o < a; o += 1) if (e.getCellParagraphLength(t, n, r, i, o) > 0) return !1;
 	return !0;
 }
-function iA(e, t, n, r, i, a) {
+function oA(e, t, n, r, i, a) {
 	if (i.startRow < 0 || i.startCol < 0 || i.endRow >= a.rowCount || i.endCol >= a.colCount) return null;
 	let o = /* @__PURE__ */ new Map();
 	for (let s = 0; s < a.cellCount; s += 1) {
 		let a = e.getCellInfo(t, n, r, s);
-		if (!sA(a, i)) continue;
+		if (!lA(a, i)) continue;
 		let c = `${a.row}:${a.col}`;
 		if (o.has(c)) return null;
 		o.set(c, {
@@ -61207,7 +61267,7 @@ function iA(e, t, n, r, i, a) {
 			let i = o.get(`${a}:${s}`);
 			if (!i) return null;
 			c.push({
-				empty: rA(e, t, n, r, i.cellIdx),
+				empty: aA(e, t, n, r, i.cellIdx),
 				rowSpan: i.rowSpan,
 				colSpan: i.colSpan
 			});
@@ -61216,22 +61276,22 @@ function iA(e, t, n, r, i, a) {
 	}
 	return s;
 }
-function aA(e) {
+function sA(e) {
 	return !!(e?.isInCellSelectionMode?.() && e.hasExcludedCellSelection?.());
 }
-function oA(e) {
+function cA(e) {
 	let t = e instanceof Error ? e.message : String(e);
 	return t.includes("표 크기") && t.includes("초과");
 }
-function sA(e, t) {
+function lA(e, t) {
 	return e.row >= t.startRow && e.row <= t.endRow && e.col >= t.startCol && e.col <= t.endCol;
 }
-function cA(e, t, n, r) {
+function uA(e, t, n, r) {
 	return {
 		id: e,
 		label: t,
 		shortcutLabel: r,
-		canExecute: Qk,
+		canExecute: eA,
 		execute(t) {
 			let r = t.getInputHandler();
 			if (!r) return;
@@ -61239,9 +61299,9 @@ function cA(e, t, n, r) {
 			if (i.parentParaIndex !== void 0 && i.controlIndex !== void 0 && i.cellIndex !== void 0) try {
 				let e = r.getCellTableContext(), a = r.getSelectedCellRange();
 				if (!e || !a || !r.isInCellSelectionMode() || (e.cellPath?.length ?? 0) > 1 || r.hasExcludedCellSelection()) return;
-				let { sec: o, ppi: s, ci: c } = e, l = t.wasm.getTableDimensions(o, s, c), u = iA(t.wasm, o, s, c, a, l);
+				let { sec: o, ppi: s, ci: c } = e, l = t.wasm.getTableDimensions(o, s, c), u = oA(t.wasm, o, s, c, a, l);
 				if (!u) return;
-				let d = Gk({
+				let d = qk({
 					range: a,
 					cells: u,
 					functionName: n,
@@ -61250,8 +61310,8 @@ function cA(e, t, n, r) {
 				});
 				if (!d) return;
 				let f = (e, t, n) => JSON.parse(e.evaluateTableFormula(o, s, c, t.targetRow, t.targetCol, t.formula, n));
-				if (!Kk(d.jobs, (e, n) => f(t.wasm, e, n))) return;
-				nA(() => r.executeOperation({
+				if (!Jk(d.jobs, (e, n) => f(t.wasm, e, n))) return;
+				iA(() => r.executeOperation({
 					kind: "snapshot",
 					operationType: "tableBlockCalc",
 					operation: (e) => {
@@ -61265,18 +61325,18 @@ function cA(e, t, n, r) {
 		}
 	};
 }
-function lA(e) {
+function dA(e) {
 	let t = e.getInputHandler();
 	if (!t) return;
 	let n = t.getCursorPosition();
-	n.parentParaIndex !== void 0 && n.controlIndex !== void 0 && n.cellIndex !== void 0 && new Vk(e.wasm, e.eventBus, {
+	n.parentParaIndex !== void 0 && n.controlIndex !== void 0 && n.cellIndex !== void 0 && new Uk(e.wasm, e.eventBus, {
 		sec: n.sectionIndex,
 		ppi: n.parentParaIndex,
 		ci: n.controlIndex,
 		cellIndex: n.cellIndex
 	}, e).show();
 }
-function uA(e) {
+function fA(e) {
 	let t = e.getInputHandler();
 	if (!t) return null;
 	let n = t.getCursorPosition();
@@ -61286,14 +61346,14 @@ function uA(e) {
 		cellInfo: e.wasm.getCellInfo(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex)
 	};
 }
-function dA(e) {
+function pA(e) {
 	e.textarea?.focus();
 }
-function fA(e, t, n) {
-	let r = uA(e);
+function mA(e, t, n) {
+	let r = fA(e);
 	if (!r) return;
 	let { ih: i, pos: a, cellInfo: o } = r;
-	nA(() => i.executeOperation({
+	iA(() => i.executeOperation({
 		kind: "snapshot",
 		operationType: t.startsWith("row") ? "insertTableRow" : "insertTableColumn",
 		operation: (e) => {
@@ -61311,9 +61371,9 @@ function fA(e, t, n) {
 			}
 			return a;
 		}
-	}), "줄/칸 추가"), dA(i);
+	}), "줄/칸 추가"), pA(i);
 }
-function pA(e, t, n, r, i, a, o, s) {
+function hA(e, t, n, r, i, a, o, s) {
 	if (o <= 0 || s <= 0) return null;
 	let c = Math.min(i, o - 1), l = Math.min(a, s - 1), u = e.getTableCellBboxes(t, n, r).find((e) => c >= e.row && c < e.row + e.rowSpan && l >= e.col && l < e.col + e.colSpan);
 	return {
@@ -61321,17 +61381,17 @@ function pA(e, t, n, r, i, a, o, s) {
 		cellParaIndex: 0
 	};
 }
-function mA(e, t) {
-	let n = uA(e);
+function gA(e, t) {
+	let n = fA(e);
 	if (!n) return;
 	let { ih: r, pos: i, cellInfo: a } = n;
-	nA(() => r.executeOperation({
+	iA(() => r.executeOperation({
 		kind: "snapshot",
 		operationType: t === "row" ? "deleteTableRow" : "deleteTableColumn",
 		operation: (e) => {
 			let n = t === "row" ? e.deleteTableRow(i.sectionIndex, i.parentParaIndex, i.controlIndex, a.row) : e.deleteTableColumn(i.sectionIndex, i.parentParaIndex, i.controlIndex, a.col);
 			if (!n.ok) return i;
-			let r = pA(e, i.sectionIndex, i.parentParaIndex, i.controlIndex, a.row, a.col, n.rowCount, n.colCount);
+			let r = hA(e, i.sectionIndex, i.parentParaIndex, i.controlIndex, a.row, a.col, n.rowCount, n.colCount);
 			return r ? {
 				...i,
 				charOffset: 0,
@@ -61342,9 +61402,9 @@ function mA(e, t) {
 				charOffset: 0
 			};
 		}
-	}), "줄/칸 지우기"), dA(r);
+	}), "줄/칸 지우기"), pA(r);
 }
-var hA = [
+var _A = [
 	{
 		id: "table:create",
 		label: z("command.table.create.label"),
@@ -61356,10 +61416,10 @@ var hA = [
 			if (!n) return;
 			let r = n.getCursorPosition();
 			if (r.parentParaIndex !== void 0) return;
-			let i = new ik();
+			let i = new ok();
 			i.onApply = (t, n, i) => {
 				let a = e.getInputHandler();
-				a && (nA(() => a.executeOperation({
+				a && (iA(() => a.executeOperation({
 					kind: "snapshot",
 					operationType: "createTable",
 					operation: (e) => {
@@ -61382,7 +61442,7 @@ var hA = [
 						} : r;
 					}
 				}), "표 만들기"), a.textarea?.focus());
-			}, i.onClose = () => dA(n), t?.pwhDetailed ? i.showInputDialog() : i.show(t?.anchorEl);
+			}, i.onClose = () => pA(n), t?.pwhDetailed ? i.showInputDialog() : i.show(t?.anchorEl);
 		}
 	},
 	{
@@ -61401,7 +61461,7 @@ var hA = [
 					ppi: n.ppi,
 					ci: n.ci
 				};
-				new kD(e.wasm, e.eventBus, r, 0, "table", e).show();
+				new jD(e.wasm, e.eventBus, r, 0, "table", e).show();
 				return;
 			}
 			let n = t.getCursorPosition();
@@ -61411,14 +61471,14 @@ var hA = [
 				ppi: n.parentParaIndex,
 				ci: n.controlIndex
 			};
-			new kD(e.wasm, e.eventBus, r, n.cellIndex, "cell", e).show();
+			new jD(e.wasm, e.eventBus, r, n.cellIndex, "cell", e).show();
 		}
 	},
 	{
 		id: "table:border-each",
 		opensDialog: !0,
 		label: "셀 테두리/배경",
-		canExecute: $k,
+		canExecute: tA,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
@@ -61429,14 +61489,14 @@ var hA = [
 				ppi: n.parentParaIndex,
 				ci: n.controlIndex
 			}, i = t.isInCellSelectionMode?.() ? t.getSelectedCellRange?.() ?? null : null;
-			new Lk(e.wasm, e.eventBus, r, n.cellIndex, "each", i, e).show();
+			new zk(e.wasm, e.eventBus, r, n.cellIndex, "each", i, e).show();
 		}
 	},
 	{
 		id: "table:border-one",
 		opensDialog: !0,
 		label: z("command.table.borderOne.registryLabel"),
-		canExecute: eA,
+		canExecute: nA,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t || !t.hasMultiCellSelection()) return;
@@ -61447,7 +61507,7 @@ var hA = [
 				ppi: n.parentParaIndex,
 				ci: n.controlIndex
 			};
-			new Lk(e.wasm, e.eventBus, r, n.cellIndex, "asOne", t.getSelectedCellRange(), e).show();
+			new zk(e.wasm, e.eventBus, r, n.cellIndex, "asOne", t.getSelectedCellRange(), e).show();
 		}
 	},
 	{
@@ -61455,12 +61515,12 @@ var hA = [
 		opensDialog: !0,
 		label: z("command.table.insertRowCol.label"),
 		shortcutLabel: "Alt+Enter",
-		canExecute: Qk,
+		canExecute: eA,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
-			let n = new Xk();
-			n.onApply = ({ mode: t, count: n }) => fA(e, t, n), n.afterClose = () => dA(t), n.show();
+			let n = new Qk();
+			n.onApply = ({ mode: t, count: n }) => mA(e, t, n), n.afterClose = () => pA(t), n.show();
 		}
 	},
 	{
@@ -61468,25 +61528,25 @@ var hA = [
 		opensDialog: !0,
 		label: z("command.table.deleteRowCol.label"),
 		shortcutLabel: "Alt+Delete",
-		canExecute: Qk,
+		canExecute: eA,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
-			let n = new Zk();
-			n.onApply = ({ mode: t }) => mA(e, t), n.afterClose = () => dA(t), n.show();
+			let n = new $k();
+			n.onApply = ({ mode: t }) => gA(e, t), n.afterClose = () => pA(t), n.show();
 		}
 	},
 	{
 		id: "table:insert-row-above",
 		label: z("command.table.insertRowAbove.registryLabel"),
-		canExecute: Qk,
+		canExecute: eA,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getCursorPosition();
 			if (n.parentParaIndex === void 0 || n.controlIndex === void 0 || n.cellIndex === void 0) return;
 			let r = e.wasm.getCellInfo(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex);
-			nA(() => t.executeOperation({
+			iA(() => t.executeOperation({
 				kind: "snapshot",
 				operationType: "insertTableRow",
 				operation: (e) => (e.insertTableRow(n.sectionIndex, n.parentParaIndex, n.controlIndex, r.row, !1), n)
@@ -61496,14 +61556,14 @@ var hA = [
 	{
 		id: "table:insert-row-below",
 		label: z("command.table.insertRowBelow.registryLabel"),
-		canExecute: Qk,
+		canExecute: eA,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getCursorPosition();
 			if (n.parentParaIndex === void 0 || n.controlIndex === void 0 || n.cellIndex === void 0) return;
 			let r = e.wasm.getCellInfo(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex);
-			nA(() => t.executeOperation({
+			iA(() => t.executeOperation({
 				kind: "snapshot",
 				operationType: "insertTableRow",
 				operation: (e) => (e.insertTableRow(n.sectionIndex, n.parentParaIndex, n.controlIndex, r.row, !0), n)
@@ -61513,14 +61573,14 @@ var hA = [
 	{
 		id: "table:insert-col-left",
 		label: z("command.table.insertColLeft.registryLabel"),
-		canExecute: Qk,
+		canExecute: eA,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getCursorPosition();
 			if (n.parentParaIndex === void 0 || n.controlIndex === void 0 || n.cellIndex === void 0) return;
 			let r = e.wasm.getCellInfo(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex);
-			nA(() => t.executeOperation({
+			iA(() => t.executeOperation({
 				kind: "snapshot",
 				operationType: "insertTableColumn",
 				operation: (e) => (e.insertTableColumn(n.sectionIndex, n.parentParaIndex, n.controlIndex, r.col, !1), n)
@@ -61530,14 +61590,14 @@ var hA = [
 	{
 		id: "table:insert-col-right",
 		label: z("command.table.insertColRight.registryLabel"),
-		canExecute: Qk,
+		canExecute: eA,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getCursorPosition();
 			if (n.parentParaIndex === void 0 || n.controlIndex === void 0 || n.cellIndex === void 0) return;
 			let r = e.wasm.getCellInfo(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex);
-			nA(() => t.executeOperation({
+			iA(() => t.executeOperation({
 				kind: "snapshot",
 				operationType: "insertTableColumn",
 				operation: (e) => (e.insertTableColumn(n.sectionIndex, n.parentParaIndex, n.controlIndex, r.col, !0), n)
@@ -61547,14 +61607,14 @@ var hA = [
 	{
 		id: "table:delete-row",
 		label: z("command.table.deleteRow.registryLabel"),
-		canExecute: Qk,
+		canExecute: eA,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getCursorPosition();
 			if (n.parentParaIndex === void 0 || n.controlIndex === void 0 || n.cellIndex === void 0) return;
 			let r = e.wasm.getCellInfo(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex);
-			nA(() => t.executeOperation({
+			iA(() => t.executeOperation({
 				kind: "snapshot",
 				operationType: "deleteTableRow",
 				operation: (e) => (e.deleteTableRow(n.sectionIndex, n.parentParaIndex, n.controlIndex, r.row), n)
@@ -61564,14 +61624,14 @@ var hA = [
 	{
 		id: "table:delete-col",
 		label: z("command.table.deleteCol.registryLabel"),
-		canExecute: Qk,
+		canExecute: eA,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getCursorPosition();
 			if (n.parentParaIndex === void 0 || n.controlIndex === void 0 || n.cellIndex === void 0) return;
 			let r = e.wasm.getCellInfo(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex);
-			nA(() => t.executeOperation({
+			iA(() => t.executeOperation({
 				kind: "snapshot",
 				operationType: "deleteTableColumn",
 				operation: (e) => (e.deleteTableColumn(n.sectionIndex, n.parentParaIndex, n.controlIndex, r.col), n)
@@ -61583,16 +61643,16 @@ var hA = [
 		opensDialog: !0,
 		label: z("command.table.cellSplit.label"),
 		shortcutLabel: "S",
-		canExecute: Qk,
+		canExecute: eA,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getCursorPosition();
 			if (n.parentParaIndex === void 0 || n.controlIndex === void 0 || n.cellIndex === void 0) return;
-			let r = t.getSelectedCellRange?.(), i = t.getCellTableContext?.(), a = r && i && (r.startRow !== r.endRow || r.startCol !== r.endCol), o = e.wasm.getCellInfo(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex), s = new lk(!a && (o.rowSpan > 1 || o.colSpan > 1));
+			let r = t.getSelectedCellRange?.(), i = t.getCellTableContext?.(), a = r && i && (r.startRow !== r.endRow || r.startCol !== r.endCol), o = e.wasm.getCellInfo(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex), s = new dk(!a && (o.rowSpan > 1 || o.colSpan > 1));
 			s.onApply = (t, s, c, l) => {
 				let u = e.getInputHandler();
-				u && (nA(() => u.executeOperation({
+				u && (iA(() => u.executeOperation({
 					kind: "snapshot",
 					operationType: "splitTableCell",
 					operation: (e) => (a && r && i ? e.splitTableCellsInRange(i.sec, i.ppi, i.ci, r.startRow, r.startCol, r.endRow, r.endCol, t, s, c) : e.splitTableCellInto(n.sectionIndex, n.parentParaIndex, n.controlIndex, o.row, o.col, t, s, c, l), n)
@@ -61609,7 +61669,7 @@ var hA = [
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getSelectedCellRange(), r = t.getCellTableContext();
-			n && r && (n.startRow !== n.endRow || n.startCol !== n.endCol) && (nA(() => t.executeOperation({
+			n && r && (n.startRow !== n.endRow || n.startCol !== n.endCol) && (iA(() => t.executeOperation({
 				kind: "snapshot",
 				operationType: "mergeTableCells",
 				operation: (e) => (e.mergeTableCells(r.sec, r.ppi, r.ci, n.startRow, n.startCol, n.endRow, n.endCol), t.getCursorPosition())
@@ -61624,9 +61684,9 @@ var hA = [
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getSelectedCellRange?.(), r = t.getCellTableContext?.();
-			n && r && (aA(t) || r.cellPath && r.cellPath.length > 1 || (nA(() => {
+			n && r && (sA(t) || r.cellPath && r.cellPath.length > 1 || (iA(() => {
 				e.wasm.copyTableCellsTransposed(r.sec, r.ppi, r.ci, n.startRow, n.startCol, n.endRow, n.endCol);
-			}, "행/열 바꿈 복사"), dA(t)));
+			}, "행/열 바꿈 복사"), pA(t)));
 		}
 	},
 	{
@@ -61637,7 +61697,7 @@ var hA = [
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getCursorPosition();
-			(n.cellPath?.length ?? 0) > 1 || (nA(() => t.executeOperation({
+			(n.cellPath?.length ?? 0) > 1 || (iA(() => t.executeOperation({
 				kind: "snapshot",
 				operationType: "pasteTableCellsTransposed",
 				operation: (r) => {
@@ -61676,7 +61736,7 @@ var hA = [
 								cellParaIndex: 0
 							};
 						} catch (e) {
-							if (!oA(e)) throw e;
+							if (!cA(e)) throw e;
 						}
 						return i(a.sec, a.ppi, 0);
 					}
@@ -61685,14 +61745,14 @@ var hA = [
 						try {
 							r.pasteTableCellsTransposed(n.sectionIndex, n.parentParaIndex, n.controlIndex, t.row, t.col);
 						} catch (e) {
-							if (!oA(e)) throw e;
+							if (!cA(e)) throw e;
 							return i(n.sectionIndex, n.parentParaIndex, 0);
 						}
 						return n;
 					}
 					return i(n.sectionIndex, n.paragraphIndex, n.charOffset);
 				}
-			}), "행/열 바꿈 붙여넣기"), dA(t));
+			}), "행/열 바꿈 붙여넣기"), pA(t));
 		}
 	},
 	{
@@ -61706,7 +61766,7 @@ var hA = [
 			let n = t.getCursorPosition();
 			if (n?.parentParaIndex === void 0 || n.controlIndex === void 0 || n.cellIndex === void 0 || (n.cellPath?.length ?? 0) > 1) return;
 			let { sectionIndex: r, parentParaIndex: i, controlIndex: a, cellIndex: o } = n;
-			nA(() => {
+			iA(() => {
 				let n = e.wasm.getCellInfo(r, i, a, o);
 				if (n.row === 0) {
 					console.warn("[table:split] 첫 번째 줄에서는 표 나누기를 할 수 없습니다.");
@@ -61746,7 +61806,7 @@ var hA = [
 				if (e?.parentParaIndex === void 0 || e.controlIndex === void 0 || (e.cellPath?.length ?? 0) > 1) return;
 				n = e.sectionIndex, r = e.parentParaIndex, i = e.controlIndex;
 			}
-			nA(() => {
+			iA(() => {
 				t.executeOperation({
 					kind: "snapshot",
 					operationType: "mergeTableWithNext",
@@ -61764,7 +61824,7 @@ var hA = [
 			if (!t) return;
 			let n = t.getSelectedTableRef();
 			if (n) {
-				nA(() => t.executeOperation({
+				iA(() => t.executeOperation({
 					kind: "snapshot",
 					operationType: "deleteTable",
 					operation: (e) => (e.deleteTableControl(n.sec, n.ppi, n.ci), {
@@ -61776,7 +61836,7 @@ var hA = [
 				return;
 			}
 			let r = t.getCursorPosition();
-			r.parentParaIndex !== void 0 && r.controlIndex !== void 0 && nA(() => t.executeOperation({
+			r.parentParaIndex !== void 0 && r.controlIndex !== void 0 && iA(() => t.executeOperation({
 				kind: "snapshot",
 				operationType: "deleteTable",
 				operation: (e) => (e.deleteTableControl(r.sectionIndex, r.parentParaIndex, r.controlIndex), {
@@ -61809,7 +61869,7 @@ var hA = [
 			}
 			if (!o) return;
 			let s = 0;
-			if (!o.hasCaption) nA(() => t.executeOperation({
+			if (!o.hasCaption) iA(() => t.executeOperation({
 				kind: "snapshot",
 				operationType: "toggleTableCaption",
 				operation: (e) => (s = e.setTableProperties(n, r, i, { hasCaption: !0 })?.captionCharOffset ?? 3, {
@@ -61830,40 +61890,40 @@ var hA = [
 		id: "table:cell-height-equal",
 		label: z("command.table.cellHeightEqual.label"),
 		shortcutLabel: "H",
-		canExecute: tA,
+		canExecute: rA,
 		execute() {}
 	},
 	{
 		id: "table:cell-width-equal",
 		label: z("command.table.cellWidthEqual.label"),
 		shortcutLabel: "W",
-		canExecute: tA,
+		canExecute: rA,
 		execute() {}
 	},
 	{
 		id: "table:formula",
 		label: z("command.table.formula.registryLabel"),
 		shortcutLabel: "Ctrl+M,F",
-		canExecute: Qk,
+		canExecute: eA,
 		execute(e) {
-			lA(e);
+			dA(e);
 		}
 	},
 	{
 		id: "table:block-formula",
 		label: z("command.table.blockFormula.label"),
-		canExecute: Qk,
+		canExecute: eA,
 		execute(e) {
-			lA(e);
+			dA(e);
 		}
 	},
-	cA("table:block-sum", z("command.table.blockSum.label"), "SUM", "Ctrl+Shift+S"),
-	cA("table:block-avg", z("command.table.blockAvg.label"), "AVERAGE", "Ctrl+Shift+A"),
-	cA("table:block-product", z("command.table.blockProduct.label"), "PRODUCT", "Ctrl+Shift+P"),
+	uA("table:block-sum", z("command.table.blockSum.label"), "SUM", "Ctrl+Shift+S"),
+	uA("table:block-avg", z("command.table.blockAvg.label"), "AVERAGE", "Ctrl+Shift+A"),
+	uA("table:block-product", z("command.table.blockProduct.label"), "PRODUCT", "Ctrl+Shift+P"),
 	{
 		id: "table:thousand-sep",
 		label: z("command.table.thousandSep.label"),
-		canExecute: Qk,
+		canExecute: eA,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
@@ -61892,7 +61952,7 @@ var hA = [
 	{
 		id: "table:decimal-add",
 		label: z("command.table.decimalAdd.label"),
-		canExecute: Qk,
+		canExecute: eA,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
@@ -61919,7 +61979,7 @@ var hA = [
 	{
 		id: "table:decimal-remove",
 		label: z("command.table.decimalRemove.label"),
-		canExecute: Qk,
+		canExecute: eA,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
@@ -61943,19 +62003,19 @@ var hA = [
 			}
 		}
 	}
-], gA = 7200 / 25.4;
-function _A(e) {
-	return Math.round(e / gA * 100) / 100;
+], vA = 7200 / 25.4;
+function yA(e) {
+	return Math.round(e / vA * 100) / 100;
 }
-function vA(e) {
-	return Number.isFinite(e) ? Math.round(Math.min(25, Math.max(0, e)) * gA) : 0;
+function bA(e) {
+	return Number.isFinite(e) ? Math.round(Math.min(25, Math.max(0, e)) * vA) : 0;
 }
-var yA = [
+var xA = [
 	"Left",
 	"Right",
 	"Top",
 	"Bottom"
-], bA = "var(--doc-paper)", xA = "#d0d0d0", SA = class extends V {
+], SA = "var(--doc-paper)", CA = "#d0d0d0", wA = class extends V {
 	wasm;
 	eventBus;
 	sectionIdx;
@@ -62035,14 +62095,14 @@ var yA = [
 		let e = this.radioValue("page-border-apply", "all"), t = {
 			...this.settings,
 			basis: this.basisPaper.checked ? "paper" : "page",
-			spacingLeft: vA(parseFloat(this.spacingInputs.Left.value)),
-			spacingRight: vA(parseFloat(this.spacingInputs.Right.value)),
-			spacingTop: vA(parseFloat(this.spacingInputs.Top.value)),
-			spacingBottom: vA(parseFloat(this.spacingInputs.Bottom.value)),
-			borderLeft: this.borderNoneCheck.checked ? CA() : { ...this.borderEdits.Left },
-			borderRight: this.borderNoneCheck.checked ? CA() : { ...this.borderEdits.Right },
-			borderTop: this.borderNoneCheck.checked ? CA() : { ...this.borderEdits.Top },
-			borderBottom: this.borderNoneCheck.checked ? CA() : { ...this.borderEdits.Bottom },
+			spacingLeft: bA(parseFloat(this.spacingInputs.Left.value)),
+			spacingRight: bA(parseFloat(this.spacingInputs.Right.value)),
+			spacingTop: bA(parseFloat(this.spacingInputs.Top.value)),
+			spacingBottom: bA(parseFloat(this.spacingInputs.Bottom.value)),
+			borderLeft: this.borderNoneCheck.checked ? TA() : { ...this.borderEdits.Left },
+			borderRight: this.borderNoneCheck.checked ? TA() : { ...this.borderEdits.Right },
+			borderTop: this.borderNoneCheck.checked ? TA() : { ...this.borderEdits.Top },
+			borderBottom: this.borderNoneCheck.checked ? TA() : { ...this.borderEdits.Bottom },
 			fillType: this.bgColorRadio.checked ? "solid" : "none",
 			fillColor: this.bgColorInput.value,
 			patternColor: this.bgPatternColorInput.value,
@@ -62052,7 +62112,7 @@ var yA = [
 			hideFill: e === "exceptFirst",
 			applyPage: e === "exceptFirst" ? "exceptFirst" : "all"
 		}, n = () => this.wasm.setPageBorderFill(this.sectionIdx, t);
-		return Dy({
+		return ky({
 			services: this.services,
 			label: "PageBorderDialog",
 			operationType: "pageBorder",
@@ -62072,7 +62132,7 @@ var yA = [
 		let a = this.row();
 		a.append(this.label(z("dialog.pageBorder.label.label.xa002ac")), this.buildColorInput()), this.immediateCheck = this.checkbox(z("dialog.pageBorder.checkbox.label")), this.immediateCheck.checked = !0, this.borderNoneCheck = this.checkbox(z("dialog.pageBorder.checkbox.label.xaae65c")), this.borderNoneCheck.addEventListener("change", () => this.handleBorderNoneChange()), r.append(i, a, this.checkboxRow(this.immediateCheck), this.checkboxRow(this.borderNoneCheck));
 		let o = document.createElement("div");
-		return o.style.cssText = "display:grid;grid-template-columns:28px 142px 28px;grid-template-rows:26px 112px 26px;gap:4px;align-items:center;justify-items:center;", this.previewSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg"), this.previewSvg.setAttribute("viewBox", "0 0 142 112"), this.previewSvg.style.cssText = `width:142px;height:112px;grid-column:2;grid-row:2;background:${bA};`, o.append(this.sideButton("위쪽", "Top", "2", "1"), this.sideButton("왼쪽", "Left", "1", "2"), this.previewSvg, this.sideButton("오른쪽", "Right", "3", "2"), this.sideButton("아래쪽", "Bottom", "2", "3"), this.sideButton("모두", "All", "3", "3")), n.append(r, o), t.appendChild(n), e.appendChild(t), e.appendChild(this.positionGroup()), e.appendChild(this.applyGroup()), e.appendChild(this.dialogConfigRow()), e;
+		return o.style.cssText = "display:grid;grid-template-columns:28px 142px 28px;grid-template-rows:26px 112px 26px;gap:4px;align-items:center;justify-items:center;", this.previewSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg"), this.previewSvg.setAttribute("viewBox", "0 0 142 112"), this.previewSvg.style.cssText = `width:142px;height:112px;grid-column:2;grid-row:2;background:${SA};`, o.append(this.sideButton("위쪽", "Top", "2", "1"), this.sideButton("왼쪽", "Left", "1", "2"), this.previewSvg, this.sideButton("오른쪽", "Right", "3", "2"), this.sideButton("아래쪽", "Bottom", "2", "3"), this.sideButton("모두", "All", "3", "3")), n.append(r, o), t.appendChild(n), e.appendChild(t), e.appendChild(this.positionGroup()), e.appendChild(this.applyGroup()), e.appendChild(this.dialogConfigRow()), e;
 	}
 	buildBackgroundTab() {
 		let e = this.tabContent();
@@ -62131,7 +62191,7 @@ var yA = [
 			e.checked = !0;
 		}), this.basisPaper.checked = this.settings.basis === "paper";
 		let e = this.dialog.querySelector("input[name=\"page-border-basis\"][value=\"page\"]");
-		e && (e.checked = this.settings.basis === "page"), this.spacingInputs.Left.value = String(_A(this.settings.spacingLeft)), this.spacingInputs.Right.value = String(_A(this.settings.spacingRight)), this.spacingInputs.Top.value = String(_A(this.settings.spacingTop)), this.spacingInputs.Bottom.value = String(_A(this.settings.spacingBottom));
+		e && (e.checked = this.settings.basis === "page"), this.spacingInputs.Left.value = String(yA(this.settings.spacingLeft)), this.spacingInputs.Right.value = String(yA(this.settings.spacingRight)), this.spacingInputs.Top.value = String(yA(this.settings.spacingTop)), this.spacingInputs.Bottom.value = String(yA(this.settings.spacingBottom));
 		let t = Object.values(this.borderEdits).some((e) => e.type !== 0);
 		this.borderNoneCheck.checked = !t;
 		let n = Object.values(this.borderEdits).find((e) => e.type !== 0) ?? this.settings.borderTop;
@@ -62282,31 +62342,31 @@ var yA = [
 		}), this.syncBorderNoneCheck(), this.updateBorderPreview();
 	}
 	applyToActiveSides() {
-		let e = yA.filter((e) => this.isSideActive(e));
+		let e = xA.filter((e) => this.isSideActive(e));
 		e.length !== 0 && this.applyToSides(e);
 	}
 	handleBorderNoneChange() {
 		this.borderNoneCheck.checked && this.clearAllSides(), this.updateBorderPreview();
 	}
 	toggleSide(e) {
-		this.isSideActive(e) ? this.borderEdits[e] = CA() : this.borderEdits[e] = { ...this.currentBorder() }, this.syncBorderNoneCheck(), this.updateBorderPreview();
+		this.isSideActive(e) ? this.borderEdits[e] = TA() : this.borderEdits[e] = { ...this.currentBorder() }, this.syncBorderNoneCheck(), this.updateBorderPreview();
 	}
 	toggleAllSides() {
-		let e = yA.every((e) => this.isSideActive(e)) ? CA() : this.currentBorder();
-		yA.forEach((t) => {
+		let e = xA.every((e) => this.isSideActive(e)) ? TA() : this.currentBorder();
+		xA.forEach((t) => {
 			this.borderEdits[t] = { ...e };
 		}), this.syncBorderNoneCheck(), this.updateBorderPreview();
 	}
 	clearAllSides() {
-		yA.forEach((e) => {
-			this.borderEdits[e] = CA();
+		xA.forEach((e) => {
+			this.borderEdits[e] = TA();
 		});
 	}
 	isSideActive(e) {
 		return this.borderEdits[e].type !== 0;
 	}
 	syncBorderNoneCheck() {
-		this.borderNoneCheck.checked = !yA.some((e) => this.isSideActive(e));
+		this.borderNoneCheck.checked = !xA.some((e) => this.isSideActive(e));
 	}
 	currentBorder() {
 		return {
@@ -62318,7 +62378,7 @@ var yA = [
 	updateBorderPreview() {
 		for (; this.previewSvg.firstChild;) this.previewSvg.removeChild(this.previewSvg.firstChild);
 		let e = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-		if (e.setAttribute("x", "12"), e.setAttribute("y", "8"), e.setAttribute("width", "118"), e.setAttribute("height", "96"), e.style.fill = bA, e.style.stroke = xA, this.previewSvg.appendChild(e), !this.borderNoneCheck.checked) for (let [e, t, n, r, i] of [
+		if (e.setAttribute("x", "12"), e.setAttribute("y", "8"), e.setAttribute("width", "118"), e.setAttribute("height", "96"), e.style.fill = SA, e.style.stroke = CA, this.previewSvg.appendChild(e), !this.borderNoneCheck.checked) for (let [e, t, n, r, i] of [
 			[
 				"Top",
 				12,
@@ -62352,7 +62412,7 @@ var yA = [
 			if (a.type === 0) continue;
 			let o = document.createElementNS("http://www.w3.org/2000/svg", "line");
 			o.setAttribute("x1", String(t)), o.setAttribute("y1", String(n)), o.setAttribute("x2", String(r)), o.setAttribute("y2", String(i)), o.setAttribute("stroke", a.color), o.setAttribute("stroke-width", String(Math.max(1, a.width + 1)));
-			let s = wA(a.type);
+			let s = EA(a.type);
 			s && o.setAttribute("stroke-dasharray", s), this.previewSvg.appendChild(o);
 		}
 	}
@@ -62360,14 +62420,14 @@ var yA = [
 		return this.dialog.querySelector(`input[name="${e}"]:checked`)?.value || t;
 	}
 };
-function CA() {
+function TA() {
 	return {
 		type: 0,
 		width: 0,
 		color: "#000000"
 	};
 }
-function wA(e) {
+function EA(e) {
 	switch (e) {
 		case 2: return "8,4";
 		case 3: return "2,4";
@@ -62378,15 +62438,15 @@ function wA(e) {
 	}
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/section-settings-dialog.ts
-var TA = 100;
-function EA(e) {
-	return Math.round(e / TA * 10) / 10;
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/section-settings-dialog.ts
+var DA = 100;
+function OA(e) {
+	return Math.round(e / DA * 10) / 10;
 }
-function DA(e) {
-	return Math.round(e * TA);
+function kA(e) {
+	return Math.round(e * DA);
 }
-var OA = "110px", kA = class extends V {
+var AA = "110px", jA = class extends V {
 	services;
 	wasm;
 	eventBus;
@@ -62437,8 +62497,8 @@ var OA = "110px", kA = class extends V {
 			pictureNum: this.getNumComboValue(this.pictureNumCombo),
 			tableNum: this.getNumComboValue(this.tableNumCombo),
 			equationNum: this.getNumComboValue(this.equationNumCombo),
-			columnSpacing: Math.max(0, DA(parseFloat(this.columnSpacingInput.value) || 0)),
-			defaultTabSpacing: Math.max(0, DA(parseFloat(this.defaultTabSpacingInput.value) || 0)),
+			columnSpacing: Math.max(0, kA(parseFloat(this.columnSpacingInput.value) || 0)),
+			defaultTabSpacing: Math.max(0, kA(parseFloat(this.defaultTabSpacingInput.value) || 0)),
 			hideHeader: this.hideHeaderCheck.checked,
 			hideFooter: this.hideHeaderCheck.checked,
 			hideMasterPage: this.hideMasterPageCheck.checked,
@@ -62448,7 +62508,7 @@ var OA = "110px", kA = class extends V {
 		}, i = this.applyScopeSelect.value, a = () => i === "all" ? this.wasm.setSectionDefAll(r) : this.wasm.setSectionDef(this.sectionIdx, r);
 		if (i !== "all") {
 			let e = this.wasm.getSectionDef(this.sectionIdx);
-			return Ey({
+			return Oy({
 				services: this.services,
 				label: "SectionSettingsDialog",
 				command: (t) => ({
@@ -62464,7 +62524,7 @@ var OA = "110px", kA = class extends V {
 			idx: t,
 			before: this.wasm.getSectionDef(t)
 		}));
-		return Ey({
+		return Oy({
 			services: this.services,
 			label: "SectionSettingsDialog",
 			command: (e) => ({
@@ -62478,7 +62538,7 @@ var OA = "110px", kA = class extends V {
 	}
 	populateFields() {
 		let e = this.sectionDef;
-		e.pageNum > 0 ? (this.pageNumCombo.select.value = "custom", this.pageNumCombo.input.value = String(e.pageNum), this.pageNumCombo.input.style.display = "") : e.pageNumType === 1 ? (this.pageNumCombo.select.value = "odd", this.pageNumCombo.input.style.display = "none") : e.pageNumType === 2 ? (this.pageNumCombo.select.value = "even", this.pageNumCombo.input.style.display = "none") : (this.pageNumCombo.select.value = "continue", this.pageNumCombo.input.style.display = "none"), this.setNumComboValue(this.pictureNumCombo, e.pictureNum), this.setNumComboValue(this.tableNumCombo, e.tableNum), this.setNumComboValue(this.equationNumCombo, e.equationNum), this.hideHeaderCheck.checked = e.hideHeader || e.hideFooter, this.hideMasterPageCheck.checked = e.hideMasterPage, this.hideBorderCheck.checked = e.hideBorder || e.hideFill, this.hideEmptyLineCheck.checked = e.hideEmptyLine, this.columnSpacingInput.value = EA(e.columnSpacing).toFixed(1), this.defaultTabSpacingInput.value = EA(e.defaultTabSpacing).toFixed(1);
+		e.pageNum > 0 ? (this.pageNumCombo.select.value = "custom", this.pageNumCombo.input.value = String(e.pageNum), this.pageNumCombo.input.style.display = "") : e.pageNumType === 1 ? (this.pageNumCombo.select.value = "odd", this.pageNumCombo.input.style.display = "none") : e.pageNumType === 2 ? (this.pageNumCombo.select.value = "even", this.pageNumCombo.input.style.display = "none") : (this.pageNumCombo.select.value = "continue", this.pageNumCombo.input.style.display = "none"), this.setNumComboValue(this.pictureNumCombo, e.pictureNum), this.setNumComboValue(this.tableNumCombo, e.tableNum), this.setNumComboValue(this.equationNumCombo, e.equationNum), this.hideHeaderCheck.checked = e.hideHeader || e.hideFooter, this.hideMasterPageCheck.checked = e.hideMasterPage, this.hideBorderCheck.checked = e.hideBorder || e.hideFill, this.hideEmptyLineCheck.checked = e.hideEmptyLine, this.columnSpacingInput.value = OA(e.columnSpacing).toFixed(1), this.defaultTabSpacingInput.value = OA(e.defaultTabSpacing).toFixed(1);
 	}
 	getNumComboValue(e) {
 		return e.select.value === "custom" ? Math.max(1, parseInt(e.input.value) || 1) : 0;
@@ -62496,13 +62556,13 @@ var OA = "110px", kA = class extends V {
 		let n = document.createElement("div");
 		n.className = "dialog-row";
 		let r = document.createElement("span");
-		return r.className = "dialog-label", r.style.minWidth = OA, r.textContent = e, n.appendChild(r), n.appendChild(t.select), n.appendChild(t.input), n;
+		return r.className = "dialog-label", r.style.minWidth = AA, r.textContent = e, n.appendChild(r), n.appendChild(t.select), n.appendChild(t.input), n;
 	}
 	labeledRowSimple(e, t, n) {
 		let r = document.createElement("div");
 		r.className = "dialog-row";
 		let i = document.createElement("span");
-		if (i.className = "dialog-label", i.style.minWidth = OA, i.textContent = e, r.appendChild(i), r.appendChild(t), n) {
+		if (i.className = "dialog-label", i.style.minWidth = AA, i.textContent = e, r.appendChild(i), r.appendChild(t), n) {
 			let e = document.createElement("span");
 			e.className = "dialog-unit", e.textContent = n, r.appendChild(e);
 		}
@@ -62555,14 +62615,14 @@ var OA = "110px", kA = class extends V {
 			input: t
 		};
 	}
-}, AA = 7200 / 25.4;
-function jA(e) {
-	return Math.round(e / AA * 10) / 10;
+}, MA = 7200 / 25.4;
+function NA(e) {
+	return Math.round(e / MA * 10) / 10;
 }
-function MA(e) {
-	return Math.round(e * AA);
+function PA(e) {
+	return Math.round(e * MA);
 }
-var NA = "80px", PA = class extends V {
+var FA = "80px", IA = class extends V {
 	services;
 	wasm;
 	eventBus;
@@ -62582,7 +62642,7 @@ var NA = "80px", PA = class extends V {
 			let n = document.createElement("div");
 			n.style.cssText = "display:flex;align-items:center;margin-bottom:10px;gap:8px;";
 			let r = document.createElement("label");
-			return r.textContent = t, r.style.cssText = `min-width:${NA};font-size:13px;`, n.appendChild(r), e.appendChild(n), n;
+			return r.textContent = t, r.style.cssText = `min-width:${FA};font-size:13px;`, n.appendChild(r), e.appendChild(n), n;
 		}, n = t(z("dialog.columnSettings.addRow.label"));
 		this.countInput = document.createElement("input"), this.countInput.type = "number", this.countInput.min = "1", this.countInput.max = "8", this.countInput.style.cssText = "width:60px;padding:4px 6px;font-size:13px;", n.appendChild(this.countInput);
 		let r = t(z("dialog.columnSettings.addRow.label.x2ec5ae"));
@@ -62604,14 +62664,14 @@ var NA = "80px", PA = class extends V {
 	populateFields() {
 		try {
 			let e = this.wasm.getColumnDef(this.sectionIdx);
-			this.countInput.value = String(Math.max(e.columnCount, 1)), this.typeSelect.value = String(e.columnType), this.sameWidthCheck.checked = e.sameWidth, this.spacingInput.value = String(jA(e.spacing));
+			this.countInput.value = String(Math.max(e.columnCount, 1)), this.typeSelect.value = String(e.columnType), this.sameWidthCheck.checked = e.sameWidth, this.spacingInput.value = String(NA(e.spacing));
 		} catch {
 			this.countInput.value = "1", this.typeSelect.value = "0", this.sameWidthCheck.checked = !0, this.spacingInput.value = "8";
 		}
 	}
 	onConfirm() {
-		let e = Math.max(1, Math.min(8, parseInt(this.countInput.value, 10) || 1)), t = Math.max(0, Math.min(2, parseInt(this.typeSelect.value, 10) || 0)), n = +!!this.sameWidthCheck.checked, r = Math.max(0, Math.min(32767, MA(parseFloat(this.spacingInput.value) || 0))), i = () => this.wasm.setColumnDef(this.sectionIdx, e, t, n, r);
-		return Dy({
+		let e = Math.max(1, Math.min(8, parseInt(this.countInput.value, 10) || 1)), t = Math.max(0, Math.min(2, parseInt(this.typeSelect.value, 10) || 0)), n = +!!this.sameWidthCheck.checked, r = Math.max(0, Math.min(32767, PA(parseFloat(this.spacingInput.value) || 0))), i = () => this.wasm.setColumnDef(this.sectionIdx, e, t, n, r);
+		return ky({
 			services: this.services,
 			label: "ColumnSettingsDialog",
 			operationType: "columnSettings",
@@ -62621,7 +62681,7 @@ var NA = "80px", PA = class extends V {
 			}
 		});
 	}
-}, FA = class extends V {
+}, LA = class extends V {
 	services;
 	wasm;
 	eventBus;
@@ -62647,7 +62707,7 @@ var NA = "80px", PA = class extends V {
 		let e = parseInt(this.numInput.value, 10);
 		if (isNaN(e) || e < 1 || e > 65535) return !1;
 		let t = () => this.wasm.insertNewNumber(this.cursorPos.sec, this.cursorPos.para, this.cursorPos.offset, e);
-		return Dy({
+		return ky({
 			services: this.services,
 			label: "NewNumberDialog",
 			operationType: "insertNewNumber",
@@ -62659,8 +62719,8 @@ var NA = "80px", PA = class extends V {
 	}
 };
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/command/commands/page.ts
-function IA(e, t, n, r, i) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/command/commands/page.ts
+function RA(e, t, n, r, i) {
 	let { sectionIndex: a, applyTo: o } = r;
 	JSON.parse(e.wasm.getHeaderFooter(a, i, o)).exists || t.executeOperation({
 		kind: "snapshot",
@@ -62668,15 +62728,15 @@ function IA(e, t, n, r, i) {
 		operation: (e) => (e.createHeaderFooter(a, i, o), n)
 	});
 }
-function LA(e, t) {
+function zA(e, t) {
 	let n = e.getInputHandler();
 	if (!n) return;
 	let r = n.cursor;
 	if (!r) return;
 	let i = r.rect?.pageIndex ?? 0, a = e.wasm.getHeaderFooterEditTarget(i, t);
-	IA(e, n, r.getPosition(), a, t), r.enterHeaderFooterMode(t, a.sectionIndex, a.applyTo, i), Pl(e.eventBus, r), n.updateCaret?.(), n.textarea?.focus();
+	RA(e, n, r.getPosition(), a, t), r.enterHeaderFooterMode(t, a.sectionIndex, a.applyTo, i), Pl(e.eventBus, r), n.updateCaret?.(), n.textarea?.focus();
 }
-function RA(e, t) {
+function BA(e, t) {
 	let n = e.getInputHandler();
 	if (!n) return;
 	let r = n.cursor;
@@ -62697,7 +62757,7 @@ function RA(e, t) {
 		console.warn("[page] 필드 삽입 실패:", e);
 	}
 }
-function zA(e, t) {
+function VA(e, t) {
 	let n = e.getInputHandler();
 	if (!n) return;
 	let r = n.cursor;
@@ -62705,7 +62765,7 @@ function zA(e, t) {
 	let i = r.rect?.pageIndex ?? 0, a = r.headerFooterMode === "header", o = e.wasm.navigateHeaderFooterByPage(i, a, t);
 	o.ok && (r.switchHeaderFooterTarget(o.isHeader, o.sectionIdx, o.applyTo, o.pageIndex), Pl(e.eventBus, r), n.updateCaret?.(), n.textarea?.focus());
 }
-function BA(e, t, n, r) {
+function HA(e, t, n, r) {
 	let i = e.getInputHandler();
 	if (!i) return;
 	let a = i.cursor, o;
@@ -62724,7 +62784,7 @@ function BA(e, t, n, r) {
 	let s = i.textarea;
 	s?.focus(), setTimeout(() => s?.focus(), 50);
 }
-var VA = [
+var UA = [
 	{
 		id: "page:setup",
 		opensDialog: !0,
@@ -62734,7 +62794,7 @@ var VA = [
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
 			let t = e.getInputHandler(), n = (t ? t.cursor : null)?.getPosition()?.sectionIndex ?? 0;
-			new Vy(e.wasm, e.eventBus, n, e).show();
+			new Uy(e.wasm, e.eventBus, n, e).show();
 		}
 	},
 	{
@@ -62744,7 +62804,7 @@ var VA = [
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
 			let t = e.getInputHandler(), n = (t ? t.cursor : null)?.getPosition()?.sectionIndex ?? 0;
-			new SA(e.wasm, e.eventBus, n, e).show();
+			new wA(e.wasm, e.eventBus, n, e).show();
 		}
 	},
 	{
@@ -62752,7 +62812,7 @@ var VA = [
 		label: z("command.page.headerCreate.registryLabel"),
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			LA(e, !0);
+			zA(e, !0);
 		}
 	},
 	{
@@ -62760,7 +62820,7 @@ var VA = [
 		label: z("command.page.footerCreate.registryLabel"),
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			LA(e, !1);
+			zA(e, !1);
 		}
 	},
 	{
@@ -62805,7 +62865,7 @@ var VA = [
 		label: z("command.page.headerfooterPrev.registryLabel"),
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			zA(e, -1);
+			VA(e, -1);
 		}
 	},
 	{
@@ -62813,7 +62873,7 @@ var VA = [
 		label: z("command.page.headerfooterNext.registryLabel"),
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			zA(e, 1);
+			VA(e, 1);
 		}
 	},
 	{
@@ -62827,7 +62887,7 @@ var VA = [
 			let n = t.cursor;
 			if (!n) return;
 			let r = n.getPosition(), i = e.wasm, a = e.eventBus;
-			i && a && new FA(i, a, {
+			i && a && new LA(i, a, {
 				sec: r.sectionIndex,
 				para: r.paragraphIndex,
 				offset: r.charOffset
@@ -62876,7 +62936,7 @@ var VA = [
 		label: z("command.page.insertFieldPagenum.registryLabel"),
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			RA(e, 1);
+			BA(e, 1);
 		}
 	},
 	{
@@ -62884,7 +62944,7 @@ var VA = [
 		label: z("command.page.insertFieldTotalpage.registryLabel"),
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			RA(e, 2);
+			BA(e, 2);
 		}
 	},
 	{
@@ -62892,7 +62952,7 @@ var VA = [
 		label: z("command.page.insertFieldFilename.registryLabel"),
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			RA(e, 3);
+			BA(e, 3);
 		}
 	},
 	{
@@ -62900,7 +62960,7 @@ var VA = [
 		label: z("command.page.applyHfTemplate.registryLabel"),
 		canExecute: (e) => e.hasDocument,
 		execute(e, t) {
-			BA(e, t?.isHeader === "true", parseInt(t?.applyTo ?? "0", 10), parseInt(t?.templateId ?? "0", 10));
+			HA(e, t?.isHeader === "true", parseInt(t?.applyTo ?? "0", 10), parseInt(t?.templateId ?? "0", 10));
 		}
 	},
 	{
@@ -63097,7 +63157,7 @@ var VA = [
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getPosition();
-			new PA(e.wasm, e.eventBus, n.sectionIndex, e).show();
+			new IA(e.wasm, e.eventBus, n.sectionIndex, e).show();
 		}
 	},
 	{
@@ -63109,13 +63169,13 @@ var VA = [
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.cursor?.getPosition()?.sectionIndex ?? 0;
-			new kA(e.wasm, e.eventBus, n, e).show();
+			new jA(e.wasm, e.eventBus, n, e).show();
 		}
 	}
 ];
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/font-set-edit-dialog.ts
-function HA() {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/font-set-edit-dialog.ts
+function WA() {
 	let e = /* @__PURE__ */ new Set();
 	for (let t of De) e.add(t);
 	return [
@@ -63124,7 +63184,7 @@ function HA() {
 		"monospace"
 	].forEach((t) => e.add(t)), Array.from(e).sort((e, t) => e.localeCompare(t, "ko"));
 }
-var UA = class extends V {
+var GA = class extends V {
 	nameInput;
 	langSelects = [];
 	editTarget;
@@ -63135,7 +63195,7 @@ var UA = class extends V {
 	createBody() {
 		let e = document.createElement("div");
 		e.className = "fse-body";
-		let t = HA(), n = mn(), r = [
+		let t = WA(), n = mn(), r = [
 			"korean",
 			"english",
 			"chinese",
@@ -63191,7 +63251,7 @@ var UA = class extends V {
 		};
 		this.onApply(t);
 	}
-}, WA = class extends V {
+}, KA = class extends V {
 	listEl;
 	infoEl;
 	selectedIndex = -1;
@@ -63245,7 +63305,7 @@ var UA = class extends V {
 		}
 		let t = document.createElement("div");
 		t.className = "fs-info-name", t.textContent = e.name, this.infoEl.appendChild(t), zc.forEach((t, n) => {
-			let r = GA(e, n), i = document.createElement("div");
+			let r = qA(e, n), i = document.createElement("div");
 			i.className = "fs-info-row";
 			let a = document.createElement("span");
 			a.className = "fs-info-label", a.textContent = t;
@@ -63254,14 +63314,14 @@ var UA = class extends V {
 		});
 	}
 	onAdd() {
-		new UA(null, (e) => {
+		new GA(null, (e) => {
 			R.addFontSet(e) ? this.refreshList() : alert(z("dialog.fontSet.onAdd.message"));
 		}).show();
 	}
 	onEdit() {
 		if (this.selectedIndex < 0) return;
 		let e = R.getUserFontSets()[this.selectedIndex];
-		e && new UA(e, (e) => {
+		e && new GA(e, (e) => {
 			if (R.getAllFontSets().some((t, n) => n !== Vc.length + this.selectedIndex && t.name === e.name)) {
 				alert(z("dialog.fontSet.onEdit.message"));
 				return;
@@ -63276,7 +63336,7 @@ var UA = class extends V {
 	}
 	onConfirm() {}
 };
-function GA(e, t) {
+function qA(e, t) {
 	return e[[
 		"korean",
 		"english",
@@ -63288,8 +63348,8 @@ function GA(e, t) {
 	][t] ?? "korean"];
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/options-dialog.ts
-var KA = class extends V {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/options-dialog.ts
+var JA = class extends V {
 	eventBus;
 	showRecentCheck;
 	recentCountInput;
@@ -63339,7 +63399,7 @@ var KA = class extends V {
 		l.className = "opt-desc", l.textContent = z("dialog.options.fontSetDesc.text"), s.appendChild(l);
 		let u = document.createElement("button");
 		u.className = "dialog-btn opt-fontset-btn", u.textContent = z("dialog.options.fontSetBtn.text"), u.addEventListener("click", () => {
-			new WA().show();
+			new KA().show();
 		}), s.appendChild(u), e.appendChild(s);
 		let d = document.createElement("div");
 		d.className = "dialog-section";
@@ -63357,7 +63417,7 @@ var KA = class extends V {
 		_.className = "opt-local-status";
 		let v = (e) => {
 			let t = Sn();
-			_.textContent = e ?? YA(t), g.disabled = !t.stored, h.textContent = t.stored ? z("dialog.options.localBtn.text.x827ff8") : z("dialog.options.localBtn.text");
+			_.textContent = e ?? ZA(t), g.disabled = !t.stored, h.textContent = t.stored ? z("dialog.options.localBtn.text.x827ff8") : z("dialog.options.localBtn.text");
 		};
 		return v(z("dialog.options.updateLocalStatus.label")), un().then(() => v(), () => v(z("dialog.options.updateLocalStatus.label.x562451"))), h.addEventListener("click", async () => {
 			if (!pt()) {
@@ -63372,7 +63432,7 @@ var KA = class extends V {
 					source: "options-dialog"
 				});
 			} catch (e) {
-				v(ZA(e));
+				v($A(e));
 			}
 			h.disabled = !1;
 		}), g.addEventListener("click", async () => {
@@ -63394,12 +63454,12 @@ var KA = class extends V {
 		let i = document.createElement("div");
 		i.className = "dialog-section-title", i.textContent = z("dialog.options.saveTitle.text"), r.appendChild(i);
 		let a = document.createElement("p");
-		a.className = "opt-desc", a.textContent = z("dialog.options.desc.text"), r.appendChild(a), this.recoveryEnabledCheck = document.createElement("input"), this.recoveryEnabledCheck.type = "checkbox", this.recoveryEnabledCheck.id = "opt-recovery-enabled", this.recoveryEnabledCheck.checked = t.recoveryEnabled, this.recoveryIntervalInput = document.createElement("input"), this.recoveryIntervalInput.type = "number", this.recoveryIntervalInput.className = "dialog-input opt-interval-input", this.recoveryIntervalInput.min = "1", this.recoveryIntervalInput.max = "120", this.recoveryIntervalInput.value = String(t.recoveryIntervalMinutes), r.appendChild(qA({
+		a.className = "opt-desc", a.textContent = z("dialog.options.desc.text"), r.appendChild(a), this.recoveryEnabledCheck = document.createElement("input"), this.recoveryEnabledCheck.type = "checkbox", this.recoveryEnabledCheck.id = "opt-recovery-enabled", this.recoveryEnabledCheck.checked = t.recoveryEnabled, this.recoveryIntervalInput = document.createElement("input"), this.recoveryIntervalInput.type = "number", this.recoveryIntervalInput.className = "dialog-input opt-interval-input", this.recoveryIntervalInput.min = "1", this.recoveryIntervalInput.max = "120", this.recoveryIntervalInput.value = String(t.recoveryIntervalMinutes), r.appendChild(YA({
 			checkbox: this.recoveryEnabledCheck,
 			labelText: z("dialog.options.createFilePanel.label"),
 			numberInput: this.recoveryIntervalInput,
 			unitText: z("dialog.options.createFilePanel.label.x3f334d")
-		})), this.idleSaveEnabledCheck = document.createElement("input"), this.idleSaveEnabledCheck.type = "checkbox", this.idleSaveEnabledCheck.id = "opt-idle-save-enabled", this.idleSaveEnabledCheck.checked = t.idleSaveEnabled, this.idleDelayInput = document.createElement("input"), this.idleDelayInput.type = "number", this.idleDelayInput.className = "dialog-input opt-interval-input", this.idleDelayInput.min = "5", this.idleDelayInput.max = "600", this.idleDelayInput.value = String(t.idleDelaySeconds), r.appendChild(qA({
+		})), this.idleSaveEnabledCheck = document.createElement("input"), this.idleSaveEnabledCheck.type = "checkbox", this.idleSaveEnabledCheck.id = "opt-idle-save-enabled", this.idleSaveEnabledCheck.checked = t.idleSaveEnabled, this.idleDelayInput = document.createElement("input"), this.idleDelayInput.type = "number", this.idleDelayInput.className = "dialog-input opt-interval-input", this.idleDelayInput.min = "5", this.idleDelayInput.max = "600", this.idleDelayInput.value = String(t.idleDelaySeconds), r.appendChild(YA({
 			checkbox: this.idleSaveEnabledCheck,
 			labelText: z("dialog.options.createFilePanel.label.xa5fe57"),
 			numberInput: this.idleDelayInput,
@@ -63427,13 +63487,13 @@ var KA = class extends V {
 			recentFontCount: e
 		}), R.updateAutosaveSettings({
 			recoveryEnabled: this.recoveryEnabledCheck.checked,
-			recoveryIntervalMinutes: JA(this.recoveryIntervalInput.value, 10, 1, 120),
+			recoveryIntervalMinutes: XA(this.recoveryIntervalInput.value, 10, 1, 120),
 			idleSaveEnabled: this.idleSaveEnabledCheck.checked,
-			idleDelaySeconds: JA(this.idleDelayInput.value, 10, 5, 600)
+			idleDelaySeconds: XA(this.idleDelayInput.value, 10, 5, 600)
 		}), R.setShowPdfPrintGuidance(this.pdfPrintGuidanceCheck.checked), this.eventBus?.emit("autosave-settings-changed", { source: "options-dialog" });
 	}
 };
-function qA(e) {
+function YA(e) {
 	let t = document.createElement("div");
 	t.className = "dialog-row opt-row opt-autosave-row";
 	let n = document.createElement("label");
@@ -63441,58 +63501,58 @@ function qA(e) {
 	let r = document.createElement("span");
 	return r.className = "opt-count-label", r.textContent = e.unitText, t.appendChild(e.checkbox), t.appendChild(n), t.appendChild(e.numberInput), t.appendChild(r), t;
 }
-function JA(e, t, n, r) {
+function XA(e, t, n, r) {
 	let i = Number.parseInt(e, 10);
 	return Number.isFinite(i) ? Math.min(r, Math.max(n, i)) : t;
 }
-function YA(e) {
+function ZA(e) {
 	if (e.lastError) return `저장소 접근 실패: ${e.lastError}`;
 	if (!e.stored) return e.method === "font-presence-probe" ? z("dialog.options.localStatus.noStoredFirefox") : e.supported ? z("dialog.options.localStatus.noStored") : z("dialog.options.localStatus.unsupported");
-	let t = XA(e.detectedAt), n = t ? ` · ${t}` : "";
+	let t = QA(e.detectedAt), n = t ? ` · ${t}` : "";
 	return e.source === "font-presence-probe" ? `문서별 확인 결과 저장됨: 사용 가능 ${e.count}개 / 확인한 글꼴 ${e.checkedFamilies.length}개${n}` : e.checkedFamilies.length > 0 ? `로컬 글꼴 결과 저장됨: 사용 가능 ${e.count}개 / 문서 후보 ${e.checkedFamilies.length}개 / 열거 누락 확인 ${e.probedFamilies.length}개${n}` : `로컬 글꼴 열거 결과 저장됨: ${e.count}개 · 문서별 누락 후보는 문서를 열 때 추가 확인${n}`;
 }
-function XA(e) {
+function QA(e) {
 	if (!e) return "";
 	let t = new Date(e);
 	if (Number.isNaN(t.getTime())) return "";
 	let n = (e) => String(e).padStart(2, "0");
 	return `${t.getFullYear()}.${n(t.getMonth() + 1)}.${n(t.getDate())} ${n(t.getHours())}:${n(t.getMinutes())}`;
 }
-function ZA(e) {
+function $A(e) {
 	let t = typeof e == "object" && e && "name" in e ? String(e.name ?? "") : "", n = `${t} ${e instanceof Error ? e.message : String(e ?? "")}`.toLowerCase();
 	return t === "NotAllowedError" || n.includes("permission") || n.includes("denied") ? "로컬 글꼴 접근 권한이 허용되지 않았습니다. 브라우저 권한 설정에서 허용한 뒤 다시 시도해 주세요." : "글꼴 감지에 실패했습니다. 웹 대체 글꼴로 계속 사용할 수 있습니다.";
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/command/commands/tool.ts
-var QA = [{
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/command/commands/tool.ts
+var ej = [{
 	id: "tool:options",
 	opensDialog: !0,
 	label: z("command.tool.options.label"),
 	execute(e) {
-		new KA(e.eventBus).show();
+		new JA(e.eventBus).show();
 	}
 }];
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/command/pwa-file-handling.ts
-async function $A(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/command/pwa-file-handling.ts
+async function tj(e) {
 	let t = await e.getFile();
 	return {
 		name: t.name,
 		bytes: new Uint8Array(await t.arrayBuffer())
 	};
 }
-async function ej(e, t) {
+async function nj(e, t) {
 	let n = e.files ?? [];
 	if (n.length === 0) return;
 	n.length > 1 && t.notifyMultipleFiles?.(n.length);
 	let r = n[0];
-	if (!Bb(r.name)) {
+	if (!Hb(r.name)) {
 		t.notifyUnsupportedFile(r.name);
 		return;
 	}
 	try {
-		let { bytes: e, name: n } = await $A(r);
-		if (!Bb(n)) {
+		let { bytes: e, name: n } = await tj(r);
+		if (!Hb(n)) {
 			t.notifyUnsupportedFile(n);
 			return;
 		}
@@ -63506,14 +63566,14 @@ async function ej(e, t) {
 		t.notifyError(e);
 	}
 }
-function tj(e, t) {
+function rj(e, t) {
 	return e.launchQueue?.setConsumer ? (e.launchQueue.setConsumer((e) => {
-		ej(e, t);
+		nj(e, t);
 	}), !0) : !1;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/context-menu.ts
-var nj = class {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/context-menu.ts
+var ij = class {
 	dispatcher;
 	registry;
 	el = null;
@@ -63547,7 +63607,7 @@ var nj = class {
 			let a = document.createTextNode(e.label ?? n.label);
 			if (i.appendChild(a), n.shortcutLabel) {
 				let e = document.createElement("span");
-				e.className = "md-shortcut", e.textContent = yh(n.shortcutLabel), i.appendChild(e);
+				e.className = "md-shortcut", e.textContent = xh(n.shortcutLabel), i.appendChild(e);
 			}
 			i.addEventListener("click", (e) => {
 				e.stopPropagation(), !i.classList.contains("disabled") && (this.dispatcher.dispatch(t), this.hide());
@@ -63572,7 +63632,7 @@ var nj = class {
 	dispose() {
 		this.hide();
 	}
-}, rj = class {
+}, aj = class {
 	registry;
 	dispatcher;
 	overlay = null;
@@ -63634,7 +63694,7 @@ var nj = class {
 	}
 	filter(e) {
 		let t = e.trim().toLowerCase();
-		return t ? this.items.filter((e) => !!(e.label.toLowerCase().includes(t) || e.id.toLowerCase().includes(t) || e.shortcutLabel && (e.shortcutLabel.toLowerCase().includes(t) || yh(e.shortcutLabel).toLowerCase().includes(t)))) : this.items;
+		return t ? this.items.filter((e) => !!(e.label.toLowerCase().includes(t) || e.id.toLowerCase().includes(t) || e.shortcutLabel && (e.shortcutLabel.toLowerCase().includes(t) || xh(e.shortcutLabel).toLowerCase().includes(t)))) : this.items;
 	}
 	renderList(e) {
 		if (this.list) {
@@ -63649,7 +63709,7 @@ var nj = class {
 				let i = document.createElement("span");
 				if (i.className = "cp-item-label", i.textContent = t.label, r.appendChild(i), t.shortcutLabel) {
 					let e = document.createElement("span");
-					e.className = "cp-item-shortcut", e.textContent = yh(t.shortcutLabel), r.appendChild(e);
+					e.className = "cp-item-shortcut", e.textContent = xh(t.shortcutLabel), r.appendChild(e);
 				}
 				r.addEventListener("mousedown", (t) => {
 					t.preventDefault(), this.selectedIdx = n, this.executeSelected(e);
@@ -63676,26 +63736,26 @@ var nj = class {
 		let t = (e ?? this.filter(this.input?.value ?? ""))[this.selectedIdx];
 		t && (this.close(), this.dispatcher.dispatch(t.id));
 	}
-}, ij = 3;
-function aj(e) {
+}, oj = 3;
+function sj(e) {
 	let t = e.hwpmlVersion ? ` ${e.hwpmlVersion}` : "", n = [e.hmlSavable === !0 ? `HML${t} 문서를 열었습니다. HML로 의미를 보존해 저장할 수 있지만 원본 바이트와 동일하지는 않습니다.` : `HML${t} 문서를 열었습니다. 보존할 수 없는 요소가 있어 HML로는 저장할 수 없습니다. HWP 또는 HWPX로 저장하세요.`];
 	if (e.warnings.length === 0) return n.join("\n");
 	n.push(`지원하지 않거나 변환된 요소 ${e.warnings.length}건이 있습니다.`);
-	for (let t of e.warnings.slice(0, ij)) n.push(`${t.xmlPath}: ${t.message}`);
-	return e.warnings.length > ij && n.push(`그 외 ${e.warnings.length - ij}건`), n.join("\n");
+	for (let t of e.warnings.slice(0, oj)) n.push(`${t.xmlPath}: ${t.message}`);
+	return e.warnings.length > oj && n.push(`그 외 ${e.warnings.length - oj}건`), n.join("\n");
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/hml-import-warning.ts
-function oj(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/hml-import-warning.ts
+function cj(e) {
 	H({
-		message: aj(e),
+		message: sj(e),
 		durationMs: 0,
 		confirmLabel: z("dialog.hmlImportWarning.message")
 	});
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/drop-confirm-dialog.ts
-var sj = class extends V {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/drop-confirm-dialog.ts
+var lj = class extends V {
 	fileName;
 	resolve;
 	constructor(e) {
@@ -63722,12 +63782,12 @@ var sj = class extends V {
 		});
 	}
 };
-function cj(e) {
-	return new sj(e).showAsync();
+function uj(e) {
+	return new lj(e).showAsync();
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/ui/chrome-mode.ts
-var lj = [
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/ui/chrome-mode.ts
+var dj = [
 	"file:new-doc",
 	"file:open",
 	"file:open-recent",
@@ -63740,13 +63800,13 @@ var lj = [
 	"file:export-doc",
 	"file:print-to-pdf",
 	"file:print"
-], uj = ["edit:compare-documents"];
-function dj(e) {
+], fj = ["edit:compare-documents"];
+function pj(e) {
 	if (!(e.ctrlKey || e.metaKey) || e.altKey) return !1;
 	let t = e.key.toLowerCase();
 	return t === "s" || t === "ㄴ" || t === "p" || t === "ㅔ";
 }
-function fj(e = "") {
+function mj(e = "") {
 	let t = new URLSearchParams(e).get("chrome"), n = t?.trim().toLowerCase();
 	return n ? n === "embed" ? {
 		mode: "embed",
@@ -63767,8 +63827,8 @@ function fj(e = "") {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/document-dirty-state.ts
-var pj = class {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/document-dirty-state.ts
+var hj = class {
 	dirty = !1;
 	beforeUnloadWindow = null;
 	eventBus;
@@ -63799,12 +63859,12 @@ var pj = class {
 			reason: t
 		}));
 	}
-}, mj = /* @__PURE__ */ new Set([
+}, gj = /* @__PURE__ */ new Set([
 	"serif",
 	"sans-serif",
 	"monospace"
 ]);
-function hj(e) {
+function _j(e) {
 	let t = /* @__PURE__ */ new Set();
 	for (let n of e ?? []) {
 		let e = n.trim();
@@ -63812,18 +63872,18 @@ function hj(e) {
 	}
 	return Array.from(t).sort((e, t) => e.localeCompare(t, "ko"));
 }
-function gj(e) {
+function vj(e) {
 	if (De.has(e)) return e;
 	let t = ci(e, 0, 0);
 	return t && t !== e && De.has(t) ? t : null;
 }
-function _j(e, t = {}) {
+function yj(e, t = {}) {
 	let n = Sn(), r = t.localFonts ?? hn(), i = new Set(r), a = t.localSupported ?? n.supported, o = t.localSnapshotLoaded ?? n.loaded, s = t.localSnapshotStored ?? n.stored, c = t.localSnapshotComplete ?? (t.localSnapshotStored === void 0 ? n.complete : t.localSnapshotStored), l = t.localSnapshotSource ?? n.source, u = t.localCheckedFonts ?? n.checkedFamilies, d = new Set(u), f = t.detectionMethod ?? ht(), p = {
 		available: 0,
 		needsLocalCheck: 0,
 		webSubstitute: 0,
 		missing: 0
-	}, m = hj(e).map((e) => {
+	}, m = _j(e).map((e) => {
 		let n = t.localFonts === void 0 ? gn(e) : null;
 		if (i.has(e) || n) return p.available++, {
 			fontName: e,
@@ -63838,13 +63898,13 @@ function _j(e, t = {}) {
 			source: "local",
 			substituteFont: o
 		};
-		if (mj.has(e) || De.has(e)) return p.available++, {
+		if (gj.has(e) || De.has(e)) return p.available++, {
 			fontName: e,
 			status: "available",
-			source: mj.has(e) ? "generic" : "web",
+			source: gj.has(e) ? "generic" : "web",
 			substituteFont: null
 		};
-		let l = gj(e);
+		let l = vj(e);
 		return a && (!s || !c && !d.has(e)) ? (p.needsLocalCheck++, {
 			fontName: e,
 			status: "needs-local-check",
@@ -63877,49 +63937,49 @@ function _j(e, t = {}) {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/recovery/autosave-store.ts
-var vj = "rhwpStudioAutosave", yj = 1, bj = "drafts", xj = 12, Sj = /* @__PURE__ */ new Map();
-function Cj() {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/recovery/autosave-store.ts
+var bj = "rhwpStudioAutosave", xj = 1, Sj = "drafts", Cj = 12, wj = /* @__PURE__ */ new Map();
+function Tj() {
 	return typeof indexedDB < "u";
 }
-function wj(e) {
+function Ej(e) {
 	return new Uint8Array(e);
 }
-function Tj(e) {
+function Dj(e) {
 	let t = new Uint8Array(e.byteLength);
 	return t.set(e), t.buffer;
 }
-function Ej(e) {
+function Oj(e) {
 	return {
 		...e,
-		data: wj(e.data)
+		data: Ej(e.data)
 	};
 }
-function Dj(e) {
+function kj(e) {
 	return {
 		...e,
 		byteLength: e.byteLength,
 		data: new Uint8Array(e.data ?? /* @__PURE__ */ new ArrayBuffer(0))
 	};
 }
-function Oj(e) {
+function Aj(e) {
 	return {
 		...e,
 		byteLength: e.data.byteLength,
-		data: Tj(e.data)
+		data: Dj(e.data)
 	};
 }
-function kj() {
-	return Cj() ? new Promise((e) => {
-		let t = indexedDB.open(vj, yj);
+function jj() {
+	return Tj() ? new Promise((e) => {
+		let t = indexedDB.open(bj, xj);
 		t.onerror = () => e(null), t.onsuccess = () => e(t.result), t.onupgradeneeded = () => {
 			let e = t.result;
-			e.objectStoreNames.contains(bj) || e.createObjectStore(bj, { keyPath: "id" });
+			e.objectStoreNames.contains(Sj) || e.createObjectStore(Sj, { keyPath: "id" });
 		};
 	}) : Promise.resolve(null);
 }
-async function Aj(e, t) {
-	let n = await kj();
+async function Mj(e, t) {
+	let n = await jj();
 	if (!n) return t();
 	try {
 		return await e(n);
@@ -63927,67 +63987,67 @@ async function Aj(e, t) {
 		n.close();
 	}
 }
-async function jj() {
-	if (Sj.size <= xj) return;
-	let e = [...Sj.values()].sort((e, t) => e.savedAt - t.savedAt).slice(0, Sj.size - xj);
-	for (let t of e) Sj.delete(t.id);
-}
-async function Mj(e) {
-	let t = await new Promise((t, n) => {
-		let r = e.transaction(bj, "readonly").objectStore(bj).getAll();
-		r.onsuccess = () => t(r.result ?? []), r.onerror = () => n(r.error);
-	});
-	if (t.length <= xj) return;
-	let n = t.sort((e, t) => e.savedAt - t.savedAt).slice(0, t.length - xj);
-	for (let t of n) await new Promise((n, r) => {
-		let i = e.transaction(bj, "readwrite");
-		i.objectStore(bj).delete(t.id), i.oncomplete = () => n(), i.onerror = () => r(i.error);
-	});
-}
-function Nj() {
-	return globalThis.crypto?.randomUUID?.() ?? `draft_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+async function Nj() {
+	if (wj.size <= Cj) return;
+	let e = [...wj.values()].sort((e, t) => e.savedAt - t.savedAt).slice(0, wj.size - Cj);
+	for (let t of e) wj.delete(t.id);
 }
 async function Pj(e) {
-	let t = Ej({
+	let t = await new Promise((t, n) => {
+		let r = e.transaction(Sj, "readonly").objectStore(Sj).getAll();
+		r.onsuccess = () => t(r.result ?? []), r.onerror = () => n(r.error);
+	});
+	if (t.length <= Cj) return;
+	let n = t.sort((e, t) => e.savedAt - t.savedAt).slice(0, t.length - Cj);
+	for (let t of n) await new Promise((n, r) => {
+		let i = e.transaction(Sj, "readwrite");
+		i.objectStore(Sj).delete(t.id), i.oncomplete = () => n(), i.onerror = () => r(i.error);
+	});
+}
+function Fj() {
+	return globalThis.crypto?.randomUUID?.() ?? `draft_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+}
+async function Ij(e) {
+	let t = Oj({
 		...e,
 		byteLength: e.data.byteLength
 	});
-	await Aj(async (e) => {
-		await Mj(e), await new Promise((n, r) => {
-			let i = e.transaction(bj, "readwrite");
-			i.objectStore(bj).put(Oj(t)), i.oncomplete = () => n(), i.onerror = () => r(i.error);
+	await Mj(async (e) => {
+		await Pj(e), await new Promise((n, r) => {
+			let i = e.transaction(Sj, "readwrite");
+			i.objectStore(Sj).put(Aj(t)), i.oncomplete = () => n(), i.onerror = () => r(i.error);
 		});
 	}, async () => {
-		Sj.set(t.id, t), await jj();
+		wj.set(t.id, t), await Nj();
 	});
 }
-async function Fj() {
-	return Aj(async (e) => new Promise((t, n) => {
-		let r = e.transaction(bj, "readonly").objectStore(bj).getAll();
+async function Lj() {
+	return Mj(async (e) => new Promise((t, n) => {
+		let r = e.transaction(Sj, "readonly").objectStore(Sj).getAll();
 		r.onsuccess = () => {
-			t((r.result ?? []).map(Dj).sort((e, t) => t.savedAt - e.savedAt));
+			t((r.result ?? []).map(kj).sort((e, t) => t.savedAt - e.savedAt));
 		}, r.onerror = () => n(r.error);
-	}), async () => [...Sj.values()].map(Ej).sort((e, t) => t.savedAt - e.savedAt));
+	}), async () => [...wj.values()].map(Oj).sort((e, t) => t.savedAt - e.savedAt));
 }
-async function Ij(e) {
-	Sj.delete(e), await Aj(async (t) => new Promise((n, r) => {
-		let i = t.transaction(bj, "readwrite");
-		i.objectStore(bj).delete(e), i.oncomplete = () => n(), i.onerror = () => r(i.error);
+async function Rj(e) {
+	wj.delete(e), await Mj(async (t) => new Promise((n, r) => {
+		let i = t.transaction(Sj, "readwrite");
+		i.objectStore(Sj).delete(e), i.oncomplete = () => n(), i.onerror = () => r(i.error);
 	}), async () => {});
 }
-async function Lj() {
-	Sj.clear(), await Aj(async (e) => new Promise((t, n) => {
-		let r = e.transaction(bj, "readwrite");
-		r.objectStore(bj).clear(), r.oncomplete = () => t(), r.onerror = () => n(r.error);
+async function zj() {
+	wj.clear(), await Mj(async (e) => new Promise((t, n) => {
+		let r = e.transaction(Sj, "readwrite");
+		r.objectStore(Sj).clear(), r.oncomplete = () => t(), r.onerror = () => n(r.error);
 	}), async () => {});
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/recovery/autosave-manager.ts
-var Rj = 1e4, zj = 6e5;
-function Bj(e, t) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/recovery/autosave-manager.ts
+var Bj = 1e4, Vj = 6e5;
+function Hj(e, t) {
 	return typeof e == "string" && e.length > 0 ? e : t;
 }
-var Vj = class {
+var Uj = class {
 	exportBytes;
 	isRecoveryBlocked;
 	now;
@@ -64004,25 +64064,25 @@ var Vj = class {
 	discardGeneration = 0;
 	scheduleSettings;
 	constructor(e) {
-		this.exportBytes = e.exportBytes, this.isRecoveryBlocked = e.isRecoveryBlocked ?? (() => !1), this.scheduleSettings = Hj({
+		this.exportBytes = e.exportBytes, this.isRecoveryBlocked = e.isRecoveryBlocked ?? (() => !1), this.scheduleSettings = Wj({
 			recoveryEnabled: !0,
-			recoveryIntervalMs: e.minSaveIntervalMs ?? zj,
+			recoveryIntervalMs: e.minSaveIntervalMs ?? Vj,
 			idleEnabled: !0,
-			idleDelayMs: e.debounceMs ?? Rj,
+			idleDelayMs: e.debounceMs ?? Bj,
 			...e.schedule ?? {}
-		}), this.now = e.now ?? (() => Date.now()), this.idFactory = e.idFactory ?? Nj, this.store = e.store ?? {
-			saveDraft: Pj,
-			deleteDraft: Ij
+		}), this.now = e.now ?? (() => Date.now()), this.idFactory = e.idFactory ?? Fj, this.store = e.store ?? {
+			saveDraft: Ij,
+			deleteDraft: Rj
 		}, this.logger = e.logger ?? console, this.onStatus = e.onStatus;
 	}
 	connect(e) {
 		let t = e.on("document-dirty-changed", (e) => {
 			let t = e;
-			t?.dirty ? this.schedule(Bj(t.reason, "document-dirty")) : this.discardCurrentDraft(Bj(t?.reason, "document-clean"));
+			t?.dirty ? this.schedule(Hj(t.reason, "document-dirty")) : this.discardCurrentDraft(Hj(t?.reason, "document-clean"));
 		}), n = e.on("document-mutated", (e) => {
-			this.schedule(Bj(e, "document-mutated"));
+			this.schedule(Hj(e, "document-mutated"));
 		}), r = e.on("document-changed", (e) => {
-			this.schedule(Bj(e, "document-changed"));
+			this.schedule(Hj(e, "document-changed"));
 		});
 		return () => {
 			t(), n(), r(), this.dispose();
@@ -64041,7 +64101,7 @@ var Vj = class {
 	}
 	updateSchedule(e) {
 		let t = !!(this.idleTimer || this.recoveryTimer || this.pendingReason);
-		this.scheduleSettings = Hj({
+		this.scheduleSettings = Wj({
 			...this.scheduleSettings,
 			...e
 		}), this.current && (this.cancelTimers(), t && (this.scheduleSettings.recoveryEnabled || this.scheduleSettings.idleEnabled) && this.schedule("autosave-settings-changed"));
@@ -64133,45 +64193,45 @@ var Vj = class {
 		}
 	}
 };
-function Hj(e) {
+function Wj(e) {
 	return {
 		recoveryEnabled: e.recoveryEnabled,
-		recoveryIntervalMs: Uj(e.recoveryIntervalMs, zj, 0),
+		recoveryIntervalMs: Gj(e.recoveryIntervalMs, Vj, 0),
 		idleEnabled: e.idleEnabled,
-		idleDelayMs: Uj(e.idleDelayMs, Rj, 0)
+		idleDelayMs: Gj(e.idleDelayMs, Bj, 0)
 	};
 }
-function Uj(e, t, n) {
+function Gj(e, t, n) {
 	let r = typeof e == "number" ? e : Number(e);
 	return Number.isFinite(r) ? Math.max(n, Math.round(r)) : t;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/recovery/recovery-format.ts
-function Wj(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/recovery/recovery-format.ts
+function Kj(e) {
 	let t = e.trim() || "문서.hwp", n = t.lastIndexOf(".");
 	if (n <= 0) return t;
 	let r = t.slice(n).toLowerCase();
 	return r === ".hwp" || r === ".hwpx" || r === ".hml" ? t.slice(0, n) : t;
 }
-function Gj(e) {
-	return `${Wj(e)} 복구본.hwp`;
+function qj(e) {
+	return `${Kj(e)} 복구본.hwp`;
 }
-function Kj(e) {
+function Jj(e) {
 	return !Number.isFinite(e) || e <= 0 ? "저장 시각 알 수 없음" : new Date(e).toLocaleString("ko-KR");
 }
-function qj(e) {
+function Yj(e) {
 	if (!Number.isFinite(e) || e < 0) return "크기 알 수 없음";
 	if (e < 1024) return `${e} B`;
 	let t = e / 1024;
 	return t < 1024 ? `${t.toFixed(1)} KB` : `${(t / 1024).toFixed(1)} MB`;
 }
-function Jj(e) {
+function Xj(e) {
 	let t = e.sourceFormat.toUpperCase(), n = ["hwpx", "hml"].includes(e.sourceFormat.toLowerCase()) ? " → HWP 복구본" : "";
-	return `${Kj(e.savedAt)} · ${qj(e.byteLength)} · ${t}${n}`;
+	return `${Jj(e.savedAt)} · ${Yj(e.byteLength)} · ${t}${n}`;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/recovery/recovery-ui.ts
-var Yj = class extends V {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/recovery/recovery-ui.ts
+var Zj = class extends V {
 	drafts;
 	resolve;
 	selectedDraftId;
@@ -64205,7 +64265,7 @@ var Yj = class extends V {
 				}
 			})(), a.style.fontWeight = "600";
 			let o = document.createElement("div");
-			o.textContent = Jj(e), o.style.fontSize = "12px", o.style.color = "var(--text-muted, #8b95a1)", i.append(a, o), t.append(n, i), r.appendChild(t);
+			o.textContent = Xj(e), o.style.fontSize = "12px", o.style.color = "var(--text-muted, #8b95a1)", i.append(a, o), t.append(n, i), r.appendChild(t);
 		}
 		return e.appendChild(r), e;
 	}
@@ -64233,12 +64293,12 @@ var Yj = class extends V {
 		});
 	}
 };
-function Xj(e) {
-	return new Yj(e).showAsync();
+function Qj(e) {
+	return new Zj(e).showAsync();
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/cell-selection-renderer.ts
-var Zj = class {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/cell-selection-renderer.ts
+var $j = class {
 	container;
 	virtualScroll;
 	onPhaseChange;
@@ -64284,8 +64344,8 @@ var Zj = class {
 	}
 };
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/cell-selection-phase.ts
-function Qj(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/cell-selection-phase.ts
+function eM(e) {
 	switch (e) {
 		case 1: return "셀 선택 · 방향키로 이동";
 		case 2: return "셀 범위 선택 · 방향키로 확장";
@@ -64293,24 +64353,24 @@ function Qj(e) {
 	}
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/table-object-renderer.ts
-var $j = "http://www.w3.org/2000/svg";
-function eM(e, t, n, r) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/table-object-renderer.ts
+var tM = "http://www.w3.org/2000/svg";
+function nM(e, t, n, r) {
 	let i = r ? Math.max(n, 10) : n, a = i / 2, o = document.createElement("div");
 	if (o.style.cssText = `position:absolute;left:${e - a}px;top:${t - a}px;width:${i}px;height:${i}px;box-sizing:border-box;pointer-events:none;`, !r) return o.style.background = "#fff", o.style.border = "1px solid #000", o;
 	o.style.background = "rgba(255,255,255,0.9)", o.style.border = "1px solid #777", o.style.borderRadius = "50%";
 	let s = document.createElement("div");
 	return s.style.cssText = `position:absolute;left:50%;top:50%;width:${Math.max(i - 1, 1)}px;height:1px;background:#777;transform:translate(-50%,-50%) rotate(45deg);transform-origin:center;`, o.appendChild(s), o;
 }
-function tM(e, t) {
-	let n = document.createElementNS($j, "svg");
+function rM(e, t) {
+	let n = document.createElementNS(tM, "svg");
 	return n.style.width = e, n.style.height = t, n.style.overflow = "visible", n;
 }
-function nM(e, t, n, r, i, a, o) {
-	let s = document.createElementNS($j, "line");
+function iM(e, t, n, r, i, a, o) {
+	let s = document.createElementNS(tM, "line");
 	return s.setAttribute("x1", String(e)), s.setAttribute("y1", String(t)), s.setAttribute("x2", String(n)), s.setAttribute("y2", String(r)), s.setAttribute("stroke", i), s.setAttribute("stroke-width", String(a)), o && s.setAttribute("stroke-dasharray", o), s;
 }
-var rM = class e {
+var aM = class e {
 	container;
 	virtualScroll;
 	showRotateHandle;
@@ -64378,7 +64438,7 @@ var rM = class e {
 			}
 		];
 		for (let e of y) {
-			let [t, n] = g(e.lx, e.ly), r = eM(t, n, v, i);
+			let [t, n] = g(e.lx, e.ly), r = nM(t, n, v, i);
 			this.layer.appendChild(r), this.handles.push({
 				dir: e.dir,
 				el: r,
@@ -64391,10 +64451,10 @@ var rM = class e {
 			if (!i) {
 				let e = document.createElement("div");
 				e.style.cssText = "position:absolute;left:0;top:0;width:0;height:0;pointer-events:none;";
-				let t = tM("", "");
-				t.style.position = "absolute", t.style.pointerEvents = "none", t.appendChild(nM(a, o, s, c, "#4CAF50", 1)), e.appendChild(t), this.layer.appendChild(e), this.extraEls.push(e);
+				let t = rM("", "");
+				t.style.position = "absolute", t.style.pointerEvents = "none", t.appendChild(iM(a, o, s, c, "#4CAF50", 1)), e.appendChild(t), this.layer.appendChild(e), this.extraEls.push(e);
 			}
-			let l = i ? eM(s, c, t, !0) : document.createElement("div");
+			let l = i ? nM(s, c, t, !0) : document.createElement("div");
 			i || (l.style.cssText = `position:absolute;left:${s - n}px;top:${c - n}px;width:${t}px;height:${t}px;background:#4CAF50;border:1px solid #388E3C;border-radius:50%;box-sizing:border-box;pointer-events:none;`), this.layer.appendChild(l), this.handles.push({
 				dir: "rotate",
 				el: l,
@@ -64407,7 +64467,7 @@ var rM = class e {
 		if (this.clear(), this.ensureAttached(), t.length === 0) return;
 		let i = this.container.querySelector("#scroll-content")?.clientWidth ?? 0;
 		for (let e of t) {
-			let t = this.virtualScroll.getPageOffset(e.pageIndex), r = this.virtualScroll.getPageLeftResolved(e.pageIndex, i), { left: a, top: o, width: s, height: c } = $p({
+			let t = this.virtualScroll.getPageOffset(e.pageIndex), r = this.virtualScroll.getPageLeftResolved(e.pageIndex, i), { left: a, top: o, width: s, height: c } = tm({
 				pageIndex: e.pageIndex,
 				x: e.x,
 				y: e.y,
@@ -64418,7 +64478,7 @@ var rM = class e {
 		}
 		let a = e.HANDLE_SIZE;
 		for (let o of t) {
-			let t = this.virtualScroll.getPageOffset(o.pageIndex), s = this.virtualScroll.getPageLeftResolved(o.pageIndex, i), { left: c, top: l, width: u, height: d } = $p({
+			let t = this.virtualScroll.getPageOffset(o.pageIndex), s = this.virtualScroll.getPageLeftResolved(o.pageIndex, i), { left: c, top: l, width: u, height: d } = tm({
 				pageIndex: o.pageIndex,
 				x: o.x,
 				y: o.y,
@@ -64467,7 +64527,7 @@ var rM = class e {
 				}
 			];
 			for (let e of f) {
-				let t = eM(e.cx, e.cy, a, r);
+				let t = nM(e.cx, e.cy, a, r);
 				this.layer.appendChild(t), this.handles.push({
 					dir: e.dir,
 					el: t,
@@ -64481,7 +64541,7 @@ var rM = class e {
 					let e = document.createElement("div");
 					e.style.cssText = `position:absolute;left:${a}px;top:${o}px;width:1px;height:${i}px;background:#4CAF50;pointer-events:none;`, this.layer.appendChild(e), this.extraEls.push(e);
 				}
-				let s = r ? eM(a, o, t, !0) : document.createElement("div");
+				let s = r ? nM(a, o, t, !0) : document.createElement("div");
 				r || (s.style.cssText = `position:absolute;left:${a - n}px;top:${o - n}px;width:${t}px;height:${t}px;background:#4CAF50;border:1px solid #388E3C;border-radius:50%;box-sizing:border-box;pointer-events:none;`), this.layer.appendChild(s), this.handles.push({
 					dir: "rotate",
 					el: s,
@@ -64497,8 +64557,8 @@ var rM = class e {
 		if (!r) {
 			let e = document.createElement("div");
 			e.style.cssText = "position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;";
-			let t = tM("100%", "100%");
-			t.appendChild(nM(s, c, l, u, "#000", 1, "4,2")), e.appendChild(t), this.layer.appendChild(e), this.extraEls.push(e);
+			let t = rM("100%", "100%");
+			t.appendChild(iM(s, c, l, u, "#000", 1, "4,2")), e.appendChild(t), this.layer.appendChild(e), this.extraEls.push(e);
 		}
 		let d = e.HANDLE_SIZE, f = d / 2, p = [[
 			"sw",
@@ -64565,7 +64625,7 @@ var rM = class e {
 		this.clear(), this.layer.remove();
 	}
 };
-function iM(e, t = 1) {
+function oM(e, t = 1) {
 	let n = [...new Set(e)].sort((e, t) => e - t), r = [], i = /* @__PURE__ */ new Map();
 	for (let e of n) {
 		let n = r[r.length - 1];
@@ -64576,8 +64636,8 @@ function iM(e, t = 1) {
 		indexByCoord: i
 	};
 }
-var aM = .5;
-function oM(e, t = aM) {
+var sM = .5;
+function cM(e, t = sM) {
 	if (e.length <= 1) return e.map((e) => ({ ...e }));
 	let n = [...e].sort((e, t) => e.start - t.start), r = [{ ...n[0] }];
 	for (let e of n.slice(1)) {
@@ -64586,7 +64646,7 @@ function oM(e, t = aM) {
 	}
 	return r;
 }
-function sM(e, t, n, r) {
+function lM(e, t, n, r) {
 	let i = /* @__PURE__ */ new Map(), a = /* @__PURE__ */ new Map(), o = (e, t, n, r) => {
 		let i = e.get(t);
 		i ? i.push({
@@ -64607,16 +64667,16 @@ function sM(e, t, n, r) {
 		let u = n.get(r(s.x + s.w));
 		u !== void 0 && o(a, u, s.y, s.y + s.h);
 	}
-	for (let [e, t] of i) i.set(e, oM(t));
-	for (let [e, t] of a) a.set(e, oM(t));
+	for (let [e, t] of i) i.set(e, cM(t));
+	for (let [e, t] of a) a.set(e, cM(t));
 	return {
 		rowSpans: i,
 		colSpans: a
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/engine/table-resize-renderer.ts
-var cM = class e {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/engine/table-resize-renderer.ts
+var uM = class e {
 	container;
 	virtualScroll;
 	layer;
@@ -64637,7 +64697,7 @@ var cM = class e {
 		};
 		let t = (e) => Math.round(e * 10) / 10, n = /* @__PURE__ */ new Set(), r = /* @__PURE__ */ new Set();
 		for (let i of e) n.add(t(i.y)), n.add(t(i.y + i.h)), r.add(t(i.x)), r.add(t(i.x + i.w));
-		let i = iM(n), a = iM(r), { rowSpans: o, colSpans: s } = sM(e, i.indexByCoord, a.indexByCoord, t);
+		let i = oM(n), a = oM(r), { rowSpans: o, colSpans: s } = lM(e, i.indexByCoord, a.indexByCoord, t);
 		return {
 			rowLines: i.positions.map((e, t) => ({
 				y: e,
@@ -64748,51 +64808,51 @@ var cM = class e {
 	}
 };
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/ruler-pin-geometry.ts
-function lM(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/ruler-pin-geometry.ts
+function dM(e) {
 	return Math.round(e * 7200 / 96);
 }
-function uM(e) {
+function fM(e) {
 	return Math.round(e * 150);
 }
-function dM(e, t, n, r, i) {
+function pM(e, t, n, r, i) {
 	return e === "left" ? t + r * i : t + n - r * i;
 }
-function fM(e, t, n, r) {
+function mM(e, t, n, r) {
 	return e + (t + Math.max(n, 0)) * r;
 }
-function pM(e, t, n) {
+function hM(e, t, n) {
 	if (e === "pageMarginLeft" || e === "pageMarginRight") {
 		let r = e === "pageMarginLeft", i = r ? (t - n.pageLeft) / n.zoom : (n.pageLeft + n.pageDisplayWidth - t) / n.zoom, a = r === n.bindingMirrored ? 0 : n.pageGutterPx, o = Math.max(0, i - a), s = r === n.bindingMirrored ? "right" : "left";
 		return {
 			kind: "pageMargin",
 			pageIdx: n.pageIdx,
 			marginKind: s,
-			hwpunit: lM(o)
+			hwpunit: dM(o)
 		};
 	}
 	return {
 		kind: "paraProps",
-		props: { indent: uM(Math.max(0, (t - n.refLeft) / n.zoom - n.paraMarginLeftPx)) }
+		props: { indent: fM(Math.max(0, (t - n.refLeft) / n.zoom - n.paraMarginLeftPx)) }
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/ruler-scale.ts
-var mM = 96 / 25.4, hM = 30, gM = 3.5, _M = 10;
-function vM(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/ruler-scale.ts
+var gM = 96 / 25.4, _M = 30, vM = 3.5, yM = 10;
+function bM(e) {
 	let t = Number.isFinite(e) && e > 0 ? e : 1, n = 10 ** Math.floor(Math.log10(t)), r = t / n;
 	return r <= 1 ? n : r <= 2 ? 2 * n : r <= 5 ? 5 * n : 10 * n;
 }
-function yM(e) {
-	let t = mM * (Number.isFinite(e) && e > 0 ? e : 1);
+function xM(e) {
+	let t = gM * (Number.isFinite(e) && e > 0 ? e : 1);
 	return {
-		labelStepMm: vM(Math.max(_M, hM / t)),
-		tickStepMm: vM(gM / t)
+		labelStepMm: bM(Math.max(yM, _M / t)),
+		tickStepMm: bM(vM / t)
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/ruler-label-geometry.ts
-function bM(e, t, n, r) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/ruler-label-geometry.ts
+function SM(e, t, n, r) {
 	if (![
 		e,
 		t,
@@ -64803,12 +64863,12 @@ function bM(e, t, n, r) {
 	return e - i >= n && e + i <= a;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/ruler.ts
-var xM = 96 / 25.4, SM = 20, CM = 6, wM = 8;
-function TM(e, t) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/ruler.ts
+var CM = 96 / 25.4, wM = 20, TM = 6, EM = 8;
+function DM(e, t) {
 	return getComputedStyle(document.documentElement).getPropertyValue(e).trim() || t;
 }
-var EM = class e {
+var OM = class e {
 	hCanvas;
 	vCanvas;
 	container;
@@ -64869,17 +64929,17 @@ var EM = class e {
 	}
 	palette() {
 		return {
-			bgMargin: TM("--ruler-bg", "#d0d0d0"),
-			bgBody: TM("--ruler-body", "#ffffff"),
-			tick: TM("--ruler-tick", "#555555"),
-			text: TM("--ruler-text", "#333333"),
-			marker: TM("--ruler-marker", "#4080c0")
+			bgMargin: DM("--ruler-bg", "#d0d0d0"),
+			bgBody: DM("--ruler-body", "#ffffff"),
+			tick: DM("--ruler-tick", "#555555"),
+			text: DM("--ruler-text", "#333333"),
+			marker: DM("--ruler-marker", "#4080c0")
 		};
 	}
 	syncCanvasSize(e) {
-		let t = this.container.clientWidth, n = this.container.clientHeight, r = Math.round(t * e), i = Math.round(n * e), a = Math.round(SM * e);
+		let t = this.container.clientWidth, n = this.container.clientHeight, r = Math.round(t * e), i = Math.round(n * e), a = Math.round(wM * e);
 		this.hCanvas.width !== r && (this.hCanvas.width = r), this.hCanvas.height !== a && (this.hCanvas.height = a), this.vCanvas.width !== a && (this.vCanvas.width = a), this.vCanvas.height !== i && (this.vCanvas.height = i);
-		let o = `${t}px`, s = `${n}px`, c = `${SM}px`;
+		let o = `${t}px`, s = `${n}px`, c = `${wM}px`;
 		this.hCanvas.style.width !== o && (this.hCanvas.style.width = o), this.hCanvas.style.height !== c && (this.hCanvas.style.height = c), this.vCanvas.style.width !== c && (this.vCanvas.style.width = c), this.vCanvas.style.height !== s && (this.vCanvas.style.height = s);
 	}
 	scheduleUpdate() {
@@ -64936,7 +64996,7 @@ var EM = class e {
 	}
 	onHPinDown(e) {
 		if (!this.canStartPinDrag(e)) return;
-		let t = this.hCanvas.getBoundingClientRect(), n = e.clientX - t.left, r = e.clientY - t.top, i = this.hPins.find((e) => Math.abs(e.x - n) <= wM && Math.abs(e.y - r) <= wM);
+		let t = this.hCanvas.getBoundingClientRect(), n = e.clientX - t.left, r = e.clientY - t.top, i = this.hPins.find((e) => Math.abs(e.x - n) <= EM && Math.abs(e.y - r) <= EM);
 		i && (this.hDrag = {
 			kind: i.kind,
 			pageIdx: this.hPageIdx,
@@ -64945,7 +65005,7 @@ var EM = class e {
 		}, this.beginPinDrag(e, this.hCanvas));
 	}
 	minPinGap() {
-		return Math.max(10 * xM * this.viewportManager.getZoom(), 17);
+		return Math.max(10 * CM * this.viewportManager.getZoom(), 17);
 	}
 	hDragRange(e) {
 		let t = this.minPinGap(), n = (e) => this.hPins.find((t) => t.kind === e)?.x, r = this.hPageLeft + this.hPageDisplayWidth;
@@ -64967,11 +65027,11 @@ var EM = class e {
 		}
 		if (this.dragPointerId !== null) return;
 		let t = this.hCanvas.getBoundingClientRect(), n = e.clientX - t.left, r = e.clientY - t.top;
-		this.hCanvas.style.cursor = this.hPins.some((e) => Math.abs(e.x - n) <= wM && Math.abs(e.y - r) <= wM) ? "ew-resize" : "default";
+		this.hCanvas.style.cursor = this.hPins.some((e) => Math.abs(e.x - n) <= EM && Math.abs(e.y - r) <= EM) ? "ew-resize" : "default";
 	}
 	onVPinDown(e) {
 		if (!this.canStartPinDrag(e)) return;
-		let t = e.clientY - this.vCanvas.getBoundingClientRect().top, n = this.vPins.find((e) => Math.abs(e.y - t) <= wM);
+		let t = e.clientY - this.vCanvas.getBoundingClientRect().top, n = this.vPins.find((e) => Math.abs(e.y - t) <= EM);
 		n && (this.vDrag = {
 			kind: n.kind,
 			pageIdx: n.pageIdx,
@@ -64996,7 +65056,7 @@ var EM = class e {
 		}
 		if (this.dragPointerId !== null) return;
 		let t = e.clientY - this.vCanvas.getBoundingClientRect().top;
-		this.vCanvas.style.cursor = this.vPins.some((e) => Math.abs(e.y - t) <= wM) ? "ns-resize" : "default";
+		this.vCanvas.style.cursor = this.vPins.some((e) => Math.abs(e.y - t) <= EM) ? "ns-resize" : "default";
 	}
 	static clampToRange(e, t) {
 		return Math.min(Math.max(e, t.min), Math.max(t.min, t.max));
@@ -65035,7 +65095,7 @@ var EM = class e {
 		this.hDrag = null, this.vDrag = null, this.dragCanvas = null, this.dragPointerId = null, document.removeEventListener("pointermove", this.onPinDragMoveBound), document.removeEventListener("pointerup", this.onPinDragUpBound), document.removeEventListener("pointercancel", this.onPinDragCancelBound), window.removeEventListener("blur", this.onPinDragBlurBound), e?.removeEventListener("lostpointercapture", this.onPinDragCancelBound), t !== null && e?.hasPointerCapture(t) && e.releasePointerCapture(t), this.hCanvas.style.cursor = "default", this.vCanvas.style.cursor = "default";
 	}
 	commitHDrag(e) {
-		this.onCommitPin?.(pM(e.kind, e.x, this.hDropContext(e.pageIdx)));
+		this.onCommitPin?.(hM(e.kind, e.x, this.hDropContext(e.pageIdx)));
 	}
 	hDropContext(e) {
 		return {
@@ -65055,7 +65115,7 @@ var EM = class e {
 			kind: "pageMargin",
 			pageIdx: e.pageIdx,
 			marginKind: e.kind,
-			hwpunit: lM(a)
+			hwpunit: dM(a)
 		});
 	}
 	drawTriangleDown(e, t, n, r) {
@@ -65067,7 +65127,7 @@ var EM = class e {
 	drawHorizontal(e) {
 		let t = this.hCtx;
 		if (!t) return;
-		let n = this.hCanvas.width / e, r = SM;
+		let n = this.hCanvas.width / e, r = wM;
 		t.save(), t.setTransform(e, 0, 0, e, 0, 0);
 		let i = this.palette();
 		t.fillStyle = i.bgMargin, t.fillRect(0, 0, n, r);
@@ -65081,7 +65141,7 @@ var EM = class e {
 			this.hPins = [], t.restore();
 			return;
 		}
-		let l = this.getPageScreenLeft(a, s), u = c.width * o, d = $c(a, this.focusedPageIndex) || this.hDrag?.kind === "paraIndent" && this.hDrag.pageIdx === a, f = dM("left", l, u, c.bodyLeft, o), p = dM("right", l, u, c.width - c.bodyRight, o), m = this.hDrag?.kind === "pageMarginLeft" ? this.hDrag.x : f, h = this.hDrag?.kind === "pageMarginRight" ? this.hDrag.x : p;
+		let l = this.getPageScreenLeft(a, s), u = c.width * o, d = $c(a, this.focusedPageIndex) || this.hDrag?.kind === "paraIndent" && this.hDrag.pageIdx === a, f = pM("left", l, u, c.bodyLeft, o), p = pM("right", l, u, c.width - c.bodyRight, o), m = this.hDrag?.kind === "pageMarginLeft" ? this.hDrag.x : f, h = this.hDrag?.kind === "pageMarginRight" ? this.hDrag.x : p;
 		if (d && this.inCell) {
 			let e = l + this.cellX * o, n = l + (this.cellX + this.cellWidth) * o;
 			t.fillStyle = i.bgBody, t.fillRect(e, 0, n - e, r);
@@ -65098,7 +65158,7 @@ var EM = class e {
 			t.fillStyle = i.bgBody, t.fillRect(s, 0, u - s, r);
 		} else t.fillStyle = i.bgBody, t.fillRect(m, 0, h - m, r);
 		t.strokeStyle = i.tick, t.lineWidth = 1, t.beginPath(), t.moveTo(l, 0), t.lineTo(l, r), t.moveTo(l + u, 0), t.lineTo(l + u, r), t.stroke();
-		let g = xM * o, _ = Math.ceil(c.width / xM), v = yM(o), y = Math.max(1, Math.round(v.labelStepMm / v.tickStepMm)), b = Math.max(1, Math.round(y / 2)), x = Math.floor(_ / v.tickStepMm);
+		let g = CM * o, _ = Math.ceil(c.width / CM), v = xM(o), y = Math.max(1, Math.round(v.labelStepMm / v.tickStepMm)), b = Math.max(1, Math.round(y / 2)), x = Math.floor(_ / v.tickStepMm);
 		t.strokeStyle = i.tick, t.fillStyle = i.text, t.lineWidth = .5, t.font = "9px sans-serif", t.textAlign = "center", t.textBaseline = "top";
 		for (let e = 0; e <= x; e++) {
 			let i = e * v.tickStepMm, a = l + i * g;
@@ -65109,7 +65169,7 @@ var EM = class e {
 				let e = i / 10;
 				if (e > 0) {
 					let n = `${e}`;
-					bM(a, t.measureText(n).width, l, u) && t.fillText(n, a, 1);
+					SM(a, t.measureText(n).width, l, u) && t.fillText(n, a, 1);
 				}
 			} else o = e % b === 0 ? 6 : 3;
 			t.beginPath(), t.moveTo(a, r), t.lineTo(a, r - o), t.stroke();
@@ -65122,7 +65182,7 @@ var EM = class e {
 			kind: "pageMarginRight",
 			x: h,
 			y: r
-		}), this.drawTriangleUp(t, m, r, CM), this.drawTriangleUp(t, h, r, CM), this.hasParaInfo && d) {
+		}), this.drawTriangleUp(t, m, r, TM), this.drawTriangleUp(t, h, r, TM), this.hasParaInfo && d) {
 			let e, n;
 			if (this.inCell) e = l + this.cellX * o, n = l + (this.cellX + this.cellWidth) * o;
 			else if (c.columns && c.columns.length > 1) {
@@ -65137,19 +65197,19 @@ var EM = class e {
 				let r = c.columns[t];
 				e = l + r.x * o, n = l + (r.x + r.width) * o;
 			} else e = f, n = p;
-			let r = fM(e, this.paraMarginLeftPx, this.paraIndentPx, o);
+			let r = mM(e, this.paraMarginLeftPx, this.paraIndentPx, o);
 			this.hDrag?.kind === "paraIndent" && (r = this.hDrag.x), this.hRefLeft = e, this.hRefRight = n, this.hPins.push({
 				kind: "paraIndent",
 				x: r,
 				y: 0
-			}), this.drawTriangleDown(t, r, 0, CM);
+			}), this.drawTriangleDown(t, r, 0, TM);
 		}
 		t.restore();
 	}
 	drawVertical(e) {
 		let t = this.vCtx;
 		if (!t) return;
-		let n = SM, r = this.vCanvas.height / e;
+		let n = wM, r = this.vCanvas.height / e;
 		t.save(), t.setTransform(e, 0, 0, e, 0, 0);
 		let i = this.palette();
 		t.fillStyle = i.bgMargin, t.fillRect(0, 0, n, r);
@@ -65158,7 +65218,7 @@ var EM = class e {
 			this.vPins = [], t.restore();
 			return;
 		}
-		let o = this.viewportManager.getZoom(), s = this.viewportManager.getScrollY(), c = xM * o, l = yM(o), u = Math.max(1, Math.round(l.labelStepMm / l.tickStepMm)), d = Math.max(1, Math.round(u / 2)), f = a;
+		let o = this.viewportManager.getZoom(), s = this.viewportManager.getScrollY(), c = CM * o, l = xM(o), u = Math.max(1, Math.round(l.labelStepMm / l.tickStepMm)), d = Math.max(1, Math.round(u / 2)), f = a;
 		this.vPins = [];
 		let p = this.virtualScroll.isGridMode(), m = this.virtualScroll.getPageOffset(f) - s, h = this.pageInfoOrNull(f);
 		if (!h) {
@@ -65179,7 +65239,7 @@ var EM = class e {
 			y: b,
 			pageIdx: f
 		});
-		let x = Math.ceil(h.height / xM), S = Math.floor(x / l.tickStepMm);
+		let x = Math.ceil(h.height / CM), S = Math.floor(x / l.tickStepMm);
 		t.strokeStyle = i.tick, t.fillStyle = i.text, t.lineWidth = .5, t.font = "9px sans-serif", t.textAlign = "center", t.textBaseline = "middle";
 		for (let e = 0; e <= S; e++) {
 			let i = e * l.tickStepMm, a = m + i * c;
@@ -65192,24 +65252,24 @@ var EM = class e {
 			} else o = e % d === 0 ? 6 : 3;
 			t.beginPath(), t.moveTo(n, a), t.lineTo(n - o, a), t.stroke();
 		}
-		p || (t.fillStyle = i.marker, this.drawTriangleDown(t, n / 2, y, CM), this.drawTriangleUp(t, n / 2, b, CM)), t.restore();
+		p || (t.fillStyle = i.marker, this.drawTriangleDown(t, n / 2, y, TM), this.drawTriangleUp(t, n / 2, b, TM)), t.restore();
 	}
 	dispose() {
 		this.clearPinDrag(), this.rafId &&= (cancelAnimationFrame(this.rafId), 0);
 		for (let e of this.unsubscribers) e();
 		this.unsubscribers = [], this.hCanvas.removeEventListener("pointerdown", this.onHPinDownBound), this.hCanvas.removeEventListener("pointermove", this.onHPinHoverBound), this.vCanvas.removeEventListener("pointerdown", this.onVPinDownBound), this.vCanvas.removeEventListener("pointermove", this.onVPinHoverBound);
 	}
-}, DM = 1e3;
-DM / 2;
-var OM = 24;
-function kM(e) {
+}, kM = 1e3;
+kM / 2;
+var AM = 24;
+function jM(e) {
 	return Number.isFinite(e) ? Math.max(10, Math.min(500, e)) : 100;
 }
-function AM(e) {
-	return Number.isFinite(e) ? Math.max(0, Math.min(DM, e)) : 500;
+function MM(e) {
+	return Number.isFinite(e) ? Math.max(0, Math.min(kM, e)) : 500;
 }
-function jM(e) {
-	let t = kM(e);
+function NM(e) {
+	let t = jM(e);
 	if (t === 100) return 500;
 	if (t < 100) {
 		let e = Math.log(t / 10) / Math.log(10);
@@ -65218,9 +65278,9 @@ function jM(e) {
 	let n = Math.log(t / 100) / Math.log(5);
 	return Math.round(500 + n * 500);
 }
-function MM(e, t = !0) {
-	let n = AM(e);
-	if (t && Math.abs(n - 500) <= OM) return 100;
+function PM(e, t = !0) {
+	let n = MM(e);
+	if (t && Math.abs(n - 500) <= AM) return 100;
 	if (n <= 500) {
 		let e = n / 500;
 		return Math.round(10 * 10 ** e);
@@ -65228,20 +65288,20 @@ function MM(e, t = !0) {
 	let r = (n - 500) / 500;
 	return Math.round(100 * 5 ** r);
 }
-function NM(e, t, n) {
+function FM(e, t, n) {
 	if (n === "mac") {
-		let r = yh(t, n).replace(/-$/, "−");
+		let r = xh(t, n).replace(/-$/, "−");
 		return `${z(`ui.zoom.${e}`)} (${r})`;
 	}
 	let r = t === "Ctrl++" ? "Ctrl + +" : "Ctrl + -";
 	return `${z(`ui.zoom.${e}`)} (${r})`;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/renderer-session.ts
-function PM(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/renderer-session.ts
+function IM(e) {
 	return e instanceof Error ? e.message : String(e);
 }
-var FM = class {
+var LM = class {
 	request;
 	canvaskitMode;
 	canvaskitSurface;
@@ -65300,7 +65360,7 @@ var FM = class {
 	fallbackForCurrentDecision(e, t, n, r) {
 		let i = this.decisionSnapshot();
 		if (t !== i.key) return null;
-		let a = this.selection(i, "canvas2d", n, r, this.current?.diagnostics.preflight ?? null, PM(e));
+		let a = this.selection(i, "canvas2d", n, r, this.current?.diagnostics.preflight ?? null, IM(e));
 		return this.current = a, this.pending = null, a;
 	}
 	diagnostics() {
@@ -65334,7 +65394,7 @@ var FM = class {
 			try {
 				r = this.readPreflight(e);
 			} catch (e) {
-				return this.selection(t, "canvas2d", "autoPreflightIncomplete", "canvaskitDocumentPreflightIncomplete", null, PM(e));
+				return this.selection(t, "canvas2d", "autoPreflightIncomplete", "canvaskitDocumentPreflightIncomplete", null, IM(e));
 			}
 			if (!r.complete || r.status === "incomplete") return this.selection(t, "canvas2d", "autoPreflightIncomplete", "canvaskitDocumentPreflightIncomplete", r);
 			if (!r.eligible || r.status !== "eligible") return this.selection(t, "canvas2d", "autoIneligible", "canvaskitDocumentIneligible", r);
@@ -65343,14 +65403,14 @@ var FM = class {
 		try {
 			i = await this.ensureCanvasKitRenderer();
 		} catch (e) {
-			return this.selection(t, "canvas2d", "canvaskitInitializationFailed", "canvaskitInitializationFailed", r, PM(e), PM(e));
+			return this.selection(t, "canvas2d", "canvaskitInitializationFailed", "canvaskitInitializationFailed", r, IM(e), IM(e));
 		}
 		if (this.decisionKey() !== n) return this.selection(t, "canvas2d", "superseded", "canvaskitRevisionInvalidated", r);
 		if (this.options.prepareCanvasKitDocument) {
 			try {
 				await this.options.prepareCanvasKitDocument(i, r);
 			} catch (e) {
-				if (this.decisionKey() === n) return this.selection(t, "canvas2d", "canvaskitResourcePreparationFailed", "canvaskitResourcePreparationFailed", r, PM(e));
+				if (this.decisionKey() === n) return this.selection(t, "canvas2d", "canvaskitResourcePreparationFailed", "canvaskitResourcePreparationFailed", r, IM(e));
 			}
 			if (this.decisionKey() !== n) return this.selection(t, "canvas2d", "superseded", "canvaskitRevisionInvalidated", r);
 		}
@@ -65370,7 +65430,7 @@ var FM = class {
 			if (this.disposed) throw t.dispose(), Error("RendererSession was disposed during CanvasKit initialization");
 			return this.canvaskitInitialization === e && (this.canvaskitRenderer = t, this.canvaskitInitialization = null, this.canvaskitInitializationError = null), t;
 		}, (t) => {
-			throw this.canvaskitInitialization === e && (this.canvaskitInitialization = null, this.canvaskitInitializationError = PM(t)), t;
+			throw this.canvaskitInitialization === e && (this.canvaskitInitialization = null, this.canvaskitInitializationError = IM(t)), t;
 		});
 		return this.canvaskitInitialization = e, e;
 	}
@@ -65414,36 +65474,36 @@ var FM = class {
 			documentDigest: this.documentDigest
 		};
 	}
-}, IM = "rhwp-busy", LM = 0;
-function RM(e) {
-	LM += 1, LM === 1 && e.classList.add(IM);
+}, RM = "rhwp-busy", zM = 0;
+function BM(e) {
+	zM += 1, zM === 1 && e.classList.add(RM);
 }
-function zM(e) {
-	LM !== 0 && (--LM, LM === 0 && e.classList.remove(IM));
+function VM(e) {
+	zM !== 0 && (--zM, zM === 0 && e.classList.remove(RM));
 }
-async function BM(e, t) {
-	RM(e);
+async function HM(e, t) {
+	BM(e);
 	try {
 		return await t();
 	} finally {
-		zM(e);
+		VM(e);
 	}
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/view/page-indicator.ts
-function VM(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/view/page-indicator.ts
+function UM(e) {
 	return typeof e == "number" && Number.isFinite(e) && e >= 1;
 }
-function HM(e) {
-	return VM(e.documentPageNumber) ? Math.floor(e.documentPageNumber) : e.pageIndex + 1;
+function WM(e) {
+	return UM(e.documentPageNumber) ? Math.floor(e.documentPageNumber) : e.pageIndex + 1;
 }
-function UM(e) {
+function GM(e) {
 	return z("ui.sbPage.text", {
-		p1: HM(e),
+		p1: WM(e),
 		p2: e.totalPages
 	});
 }
-var WM = [
+var KM = [
 	"transferable-array-buffer",
 	"hml-export",
 	"renderer-diagnostics-v1",
@@ -65459,22 +65519,22 @@ var WM = [
 	"target-navigation-v1",
 	"document-change-events-v1"
 ];
-function GM(e) {
+function qM(e) {
 	return typeof e == "object" && !!e;
 }
-function KM(e) {
-	return qM(e) && e.version === 1 && Array.isArray(e.capabilities) && e.capabilities.includes("transferable-array-buffer");
+function JM(e) {
+	return YM(e) && e.version === 1 && Array.isArray(e.capabilities) && e.capabilities.includes("transferable-array-buffer");
 }
-function qM(e) {
-	return GM(e) && e.type === "rhwp-connect" && Number.isSafeInteger(e.version) && typeof e.sessionId == "string" && e.sessionId.length > 0;
+function YM(e) {
+	return qM(e) && e.type === "rhwp-connect" && Number.isSafeInteger(e.version) && typeof e.sessionId == "string" && e.sessionId.length > 0;
 }
-function JM(e, t) {
-	return YM(e, t) && e.version === 1 && typeof e.method == "string" && e.method.length > 0;
+function XM(e, t) {
+	return ZM(e, t) && e.version === 1 && typeof e.method == "string" && e.method.length > 0;
 }
-function YM(e, t) {
-	return GM(e) && e.type === "rhwp-request" && e.sessionId === t && Number.isSafeInteger(e.id);
+function ZM(e, t) {
+	return qM(e) && e.type === "rhwp-request" && e.sessionId === t && Number.isSafeInteger(e.id);
 }
-function XM(e) {
+function QM(e) {
 	if (!e || e === "null") return !1;
 	try {
 		let t = new URL(e).protocol;
@@ -65484,8 +65544,8 @@ function XM(e) {
 	}
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/document-agent/types.ts
-var ZM = [
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/document-agent/types.ts
+var $M = [
 	"CAPABILITY_UNSUPPORTED",
 	"INVALID_COMMAND",
 	"DOCUMENT_EPOCH_MISMATCH",
@@ -65509,45 +65569,45 @@ var ZM = [
 		super(t), this.name = "DocumentAgentError", this.code = e, n !== void 0 && (this.recovered = n);
 	}
 };
-function QM(e) {
-	return e instanceof Error && ZM.includes(e.code);
+function eN(e) {
+	return e instanceof Error && $M.includes(e.code);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/document-agent/contract.ts
-var $M = /^[0-9a-f]{64}$/;
-function eN(e, t) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/document-agent/contract.ts
+var tN = /^[0-9a-f]{64}$/;
+function nN(e, t) {
 	if (typeof e != "object" || !e || Array.isArray(e)) throw new J("INVALID_COMMAND", `${t}은 객체여야 합니다.`);
 	return e;
 }
-function tN(e, t, n) {
+function rN(e, t, n) {
 	let r = Object.keys(e).sort(), i = [...t].sort();
 	if (r.length !== i.length || r.some((e, t) => e !== i[t])) throw new J("INVALID_COMMAND", `${n} 필드가 strict schema와 다릅니다.`);
 }
-function nN(e, t, n) {
+function iN(e, t, n) {
 	if (!Number.isSafeInteger(e) || e < t) throw new J("INVALID_COMMAND", `${n}은 ${t} 이상의 safe integer여야 합니다.`);
 }
-function rN(e, t) {
-	if (typeof e != "string" || !$M.test(e)) throw new J("INVALID_COMMAND", `${t}은 lowercase SHA-256 hex여야 합니다.`);
+function aN(e, t) {
+	if (typeof e != "string" || !tN.test(e)) throw new J("INVALID_COMMAND", `${t}은 lowercase SHA-256 hex여야 합니다.`);
 }
-function iN(e) {
+function oN(e) {
 	if (typeof e != "string" || e.length < 1 || e.length > 128) throw new J("INVALID_COMMAND", "commandId 길이는 1..=128이어야 합니다.");
 }
-function aN(e) {
-	let t = eN(e, "target");
-	if (tN(t, [
+function sN(e) {
+	let t = nN(e, "target");
+	if (rN(t, [
 		"kind",
 		"section",
 		"paragraph",
 		"charOffset",
 		"length"
 	], "target"), t.kind !== "body_paragraph") throw new J("INVALID_COMMAND", "target.kind는 body_paragraph여야 합니다.");
-	if (nN(t.section, 0, "target.section"), nN(t.paragraph, 0, "target.paragraph"), t.charOffset !== 0) throw new J("INVALID_COMMAND", "target.charOffset은 0이어야 합니다.");
-	if (nN(t.length, 0, "target.length"), t.length > 4e3) throw new J("INVALID_COMMAND", "target.length는 4000 이하여야 합니다.");
+	if (iN(t.section, 0, "target.section"), iN(t.paragraph, 0, "target.paragraph"), t.charOffset !== 0) throw new J("INVALID_COMMAND", "target.charOffset은 0이어야 합니다.");
+	if (iN(t.length, 0, "target.length"), t.length > 4e3) throw new J("INVALID_COMMAND", "target.length는 4000 이하여야 합니다.");
 	return t;
 }
-function oN(e) {
-	let t = eN(e, "command");
-	if (tN(t, [
+function cN(e) {
+	let t = nN(e, "command");
+	if (rN(t, [
 		"schemaVersion",
 		"commandId",
 		"expectedDocumentEpoch",
@@ -65559,18 +65619,18 @@ function oN(e) {
 		"expectedAdjacentContextSha256",
 		"replacement"
 	], "command"), t.schemaVersion !== 1) throw new J("INVALID_COMMAND", "schemaVersion은 1이어야 합니다.");
-	iN(t.commandId), nN(t.expectedDocumentEpoch, 1, "expectedDocumentEpoch"), nN(t.expectedChangeSeq, 0, "expectedChangeSeq"), rN(t.expectedDocumentSha256, "expectedDocumentSha256");
-	let n = aN(t.target);
-	if (rN(t.expectedBeforeSha256, "expectedBeforeSha256"), rN(t.expectedFormatSha256, "expectedFormatSha256"), rN(t.expectedAdjacentContextSha256, "expectedAdjacentContextSha256"), typeof t.replacement != "string" || Array.from(t.replacement).length > 4e3) throw new J("INVALID_COMMAND", "replacement는 4000자 이하 문자열이어야 합니다.");
+	oN(t.commandId), iN(t.expectedDocumentEpoch, 1, "expectedDocumentEpoch"), iN(t.expectedChangeSeq, 0, "expectedChangeSeq"), aN(t.expectedDocumentSha256, "expectedDocumentSha256");
+	let n = sN(t.target);
+	if (aN(t.expectedBeforeSha256, "expectedBeforeSha256"), aN(t.expectedFormatSha256, "expectedFormatSha256"), aN(t.expectedAdjacentContextSha256, "expectedAdjacentContextSha256"), typeof t.replacement != "string" || Array.from(t.replacement).length > 4e3) throw new J("INVALID_COMMAND", "replacement는 4000자 이하 문자열이어야 합니다.");
 	if (/[\u0000-\u001f\u007f]/u.test(t.replacement)) throw new J("INVALID_COMMAND", "replacement에 control 문자를 넣을 수 없습니다.");
 	return {
 		...t,
 		target: n
 	};
 }
-function sN(e) {
-	let t = eN(e, "command");
-	if (tN(t, [
+function lN(e) {
+	let t = nN(e, "command");
+	if (rN(t, [
 		"schemaVersion",
 		"commandId",
 		"expectedDocumentEpoch",
@@ -65578,37 +65638,37 @@ function sN(e) {
 		"expectedAfterDocumentSha256",
 		"expectedAfterSha256"
 	], "command"), t.schemaVersion !== 1) throw new J("INVALID_COMMAND", "schemaVersion은 1이어야 합니다.");
-	return iN(t.commandId), nN(t.expectedDocumentEpoch, 1, "expectedDocumentEpoch"), nN(t.expectedChangeSeq, 0, "expectedChangeSeq"), rN(t.expectedAfterDocumentSha256, "expectedAfterDocumentSha256"), rN(t.expectedAfterSha256, "expectedAfterSha256"), t;
+	return oN(t.commandId), iN(t.expectedDocumentEpoch, 1, "expectedDocumentEpoch"), iN(t.expectedChangeSeq, 0, "expectedChangeSeq"), aN(t.expectedAfterDocumentSha256, "expectedAfterDocumentSha256"), aN(t.expectedAfterSha256, "expectedAfterSha256"), t;
 }
-function cN(e, t) {
-	tN(e, [], t);
-}
-function lN(e, t, n) {
-	return tN(e, [t], n), e[t];
-}
-//#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/embed/rpc-router.ts
-function uN(e) {
-	return typeof e == "object" && e ? e : {};
+function uN(e, t) {
+	rN(e, [], t);
 }
 function dN(e, t, n) {
+	return rN(e, [t], n), e[t];
+}
+//#endregion
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/embed/rpc-router.ts
+function fN(e) {
+	return typeof e == "object" && e ? e : {};
+}
+function pN(e, t, n) {
 	let r = Object.keys(e).filter((e) => !t.includes(e));
 	if (r.length > 0) throw Error(`${n} contains unknown field: ${r.sort()[0]}`);
 }
-function fN(e) {
+function mN(e) {
 	if (typeof e != "string" || e.length === 0) throw Error("id must be a non-empty string");
 	return e;
 }
-function pN(e, t) {
+function hN(e, t) {
 	if (e instanceof Uint8Array) return e;
 	if (e instanceof ArrayBuffer || t && Array.isArray(e)) return new Uint8Array(e);
 	throw Error("loadFile requires binary data");
 }
-async function mN(e, t, n, r = !1) {
-	let i = uN(t);
+async function gN(e, t, n, r = !1) {
+	let i = fN(t);
 	switch (e) {
 		case "ready": return n.ready();
-		case "loadFile": return n.loadFile(pN(i.data, r), typeof i.fileName == "string" ? i.fileName : "document.hwp", i.skipUnsavedGuard === !0, i.suppressDialogs === !0);
+		case "loadFile": return n.loadFile(hN(i.data, r), typeof i.fileName == "string" ? i.fileName : "document.hwp", i.skipUnsavedGuard === !0, i.suppressDialogs === !0);
 		case "pageCount": return n.pageCount();
 		case "getRendererDiagnostics": {
 			let e = i.page ?? 0;
@@ -65616,12 +65676,12 @@ async function mN(e, t, n, r = !1) {
 			return n.getRendererDiagnostics(e);
 		}
 		case "getFontDecisionTrace": {
-			dN(i, ["page", "limits"], "getFontDecisionTrace params");
+			pN(i, ["page", "limits"], "getFontDecisionTrace params");
 			let e = i.page ?? 0;
 			if (!Number.isSafeInteger(e) || e < 0) throw Error("page must be a non-negative safe integer");
-			let t = i.limits === void 0 ? {} : uN(i.limits);
+			let t = i.limits === void 0 ? {} : fN(i.limits);
 			if (i.limits !== void 0 && (typeof i.limits != "object" || i.limits === null || Array.isArray(i.limits))) throw Error("limits must be an object");
-			dN(t, ["maxCharacters"], "getFontDecisionTrace limits");
+			pN(t, ["maxCharacters"], "getFontDecisionTrace limits");
 			let r = t.maxCharacters ?? 1024;
 			if (!Number.isSafeInteger(r) || r < 1 || r > 4096) throw Error("maxCharacters must be a safe integer in 1..=4096");
 			return n.getFontDecisionTrace(e, r);
@@ -65633,31 +65693,31 @@ async function mN(e, t, n, r = !1) {
 		case "getHmlSaveState": return n.getHmlSaveState();
 		case "exportHwpVerify": return n.exportHwpVerify();
 		case "notifySaved": return n.notifySaved(typeof i.fileName == "string" && i.fileName.length > 0 ? i.fileName : void 0);
-		case "getDocumentState": return cN(i, "getDocumentState params"), n.getDocumentState();
-		case "getSelectionContext": return cN(i, "getSelectionContext params"), n.getSelectionContext();
-		case "applyTextCommand": return n.applyTextCommand(oN(lN(i, "command", "applyTextCommand params")));
-		case "revertTextCommand": return n.revertTextCommand(sN(lN(i, "command", "revertTextCommand params")));
-		case "focusTarget": return n.focusTarget(aN(lN(i, "target", "focusTarget params")));
+		case "getDocumentState": return uN(i, "getDocumentState params"), n.getDocumentState();
+		case "getSelectionContext": return uN(i, "getSelectionContext params"), n.getSelectionContext();
+		case "applyTextCommand": return n.applyTextCommand(cN(dN(i, "command", "applyTextCommand params")));
+		case "revertTextCommand": return n.revertTextCommand(lN(dN(i, "command", "revertTextCommand params")));
+		case "focusTarget": return n.focusTarget(sN(dN(i, "target", "focusTarget params")));
 		case "automation.list": return n.automationList();
 		case "automation.menuModel": return n.automationMenuModel();
-		case "automation.isEnabled": return n.automationIsEnabled(fN(i.id));
-		case "automation.execute": return n.automationExecute(fN(i.id), typeof i.params == "object" && i.params !== null ? i.params : void 0, { allowDialog: i.allowDialog === !0 });
+		case "automation.isEnabled": return n.automationIsEnabled(mN(i.id));
+		case "automation.execute": return n.automationExecute(mN(i.id), typeof i.params == "object" && i.params !== null ? i.params : void 0, { allowDialog: i.allowDialog === !0 });
 		case "automation.context": return n.automationContext();
 		case "plugin.list": return n.pluginList();
-		case "plugin.load": return n.pluginLoad(fN(i.id));
-		case "plugin.unload": return n.pluginUnload(fN(i.id));
-		case "plugin.invoke": return n.pluginInvoke(fN(i.id), fN(i.method), Array.isArray(i.args) ? i.args : []);
+		case "plugin.load": return n.pluginLoad(mN(i.id));
+		case "plugin.unload": return n.pluginUnload(mN(i.id));
+		case "plugin.invoke": return n.pluginInvoke(mN(i.id), mN(i.method), Array.isArray(i.args) ? i.args : []);
 		case "chrome.get": return n.chromeGet();
-		case "chrome.set": return n.chromeSet(uN(i.visibility));
+		case "chrome.set": return n.chromeSet(fN(i.visibility));
 		default: throw Error(`Unknown method: ${e}`);
 	}
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/embed/runtime.ts
-function hN(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/embed/runtime.ts
+function _N(e) {
 	return e instanceof Error ? e.message : String(e);
 }
-function gN(e, t) {
+function vN(e, t) {
 	if (!(t.result instanceof Uint8Array)) {
 		e.postMessage(t);
 		return;
@@ -65668,22 +65728,22 @@ function gN(e, t) {
 		result: n
 	}, [n.buffer]);
 }
-function _N(e) {
+function yN(e) {
 	e && (e.onmessage = null, e.close());
 }
-function vN(e) {
-	for (let t of e) _N(t);
+function bN(e) {
+	for (let t of e) yN(t);
 }
-function yN(e, t, n, r, i) {
+function xN(e, t, n, r, i) {
 	return e.onmessage = async ({ data: i }) => {
-		if (!YM(i, t)) return;
+		if (!ZM(i, t)) return;
 		let a = {
 			type: "rhwp-response",
 			version: 1,
 			sessionId: t,
 			id: i.id
 		};
-		if (!JM(i, t)) {
+		if (!XM(i, t)) {
 			a.error = typeof i.version == "number" && Number.isSafeInteger(i.version) && i.version !== 1 ? {
 				code: "UNSUPPORTED_VERSION",
 				message: `Unsupported embed protocol version: ${i.version}`,
@@ -65691,7 +65751,7 @@ function yN(e, t, n, r, i) {
 			} : {
 				code: "INVALID_REQUEST",
 				message: "Invalid embed request."
-			}, gN(e, a);
+			}, vN(e, a);
 			return;
 		}
 		let o = {
@@ -65705,25 +65765,25 @@ function yN(e, t, n, r, i) {
 			a.error = {
 				code: "UNSUPPORTED_CAPABILITY",
 				message: `${o} was not negotiated by the client.`
-			}, gN(e, a);
+			}, vN(e, a);
 			return;
 		}
 		try {
-			a.result = await mN(i.method, i.params, r);
+			a.result = await gN(i.method, i.params, r);
 		} catch (e) {
-			let t = QM(e) ? e : null;
+			let t = eN(e) ? e : null;
 			a.error = {
 				code: t?.code ?? "RPC_ERROR",
-				message: hN(e),
+				message: _N(e),
 				...typeof t?.recovered == "boolean" ? { recovered: t.recovered } : {}
 			};
 		}
-		gN(e, a);
+		vN(e, a);
 	}, e.start(), e.postMessage({
 		type: "rhwp-connected",
 		version: 1,
 		sessionId: t,
-		capabilities: WM
+		capabilities: KM
 	}), i?.((n) => {
 		e.postMessage({
 			type: "rhwp-event",
@@ -65734,7 +65794,7 @@ function yN(e, t, n, r, i) {
 		});
 	}) ?? (() => {});
 }
-function bN(e, t) {
+function SN(e, t) {
 	e.start(), e.postMessage({
 		type: "rhwp-connect-error",
 		version: 1,
@@ -65744,9 +65804,9 @@ function bN(e, t) {
 			message: t.version === 1 ? "필수 embed capability를 지원하지 않습니다." : `지원하지 않는 embed protocol version: ${t.version}`,
 			supportedVersions: [1]
 		}
-	}), _N(e);
+	}), yN(e);
 }
-async function xN(e, t) {
+async function CN(e, t) {
 	let n = e.data, r = n?.type === "hwpctl-load" && n.data;
 	if (!r && (n?.type !== "rhwp-request" || !n.method)) return;
 	let i = r ? "loadFile" : n.method, a = r ? n : n.params, o = {
@@ -65755,40 +65815,40 @@ async function xN(e, t) {
 	};
 	try {
 		if (i === "applyTextCommand" || i === "revertTextCommand") throw Error("Legacy embed transport cannot execute document mutations.");
-		let e = await mN(i, a, t, !0);
+		let e = await gN(i, a, t, !0);
 		o.result = e instanceof Uint8Array ? Array.from(e) : e;
 	} catch (e) {
-		o.error = hN(e);
+		o.error = _N(e);
 	}
 	e.source?.postMessage(o, { targetOrigin: e.origin });
 }
-function SN(e) {
+function wN(e) {
 	let t = /* @__PURE__ */ new Set(), n = e.parentWindow === e.hostWindow, r = null, i = (i) => {
 		let a = Array.from(i.ports), o = n && i.data?.type === "rhwp-request";
-		if (i.source !== e.parentWindow || !XM(i.origin) && !o) {
-			vN(a);
+		if (i.source !== e.parentWindow || !QM(i.origin) && !o) {
+			bN(a);
 			return;
 		}
 		let s = i.data?.type === "rhwp-connect" ? a.shift() : void 0;
-		if (vN(a), r && i.origin !== r.origin) {
-			_N(s);
+		if (bN(a), r && i.origin !== r.origin) {
+			yN(s);
 			return;
 		}
 		if (s) {
-			if (!qM(i.data)) {
-				_N(s);
+			if (!YM(i.data)) {
+				yN(s);
 				return;
 			}
-			if (!KM(i.data)) {
-				bN(s, i.data);
+			if (!JM(i.data)) {
+				SN(s, i.data);
 				return;
 			}
 			if (r) {
-				_N(s);
+				yN(s);
 				return;
 			}
 			t.add(s);
-			let n = yN(s, i.data.sessionId, i.data.capabilities, e.handlers, i.data.capabilities.includes("document-change-events-v1") ? e.subscribeDocumentChanged : void 0);
+			let n = xN(s, i.data.sessionId, i.data.capabilities, e.handlers, i.data.capabilities.includes("document-change-events-v1") ? e.subscribeDocumentChanged : void 0);
 			r = {
 				origin: i.origin,
 				sessionId: i.data.sessionId,
@@ -65797,17 +65857,17 @@ function SN(e) {
 			};
 			return;
 		}
-		r || xN(i, e.handlers);
+		r || CN(i, e.handlers);
 	};
 	return e.hostWindow.addEventListener("message", i), () => {
 		e.hostWindow.removeEventListener("message", i), r?.offDocumentChanged();
-		for (let e of t) _N(e);
+		for (let e of t) yN(e);
 		t.clear(), r = null;
 	};
 }
 //#endregion
 //#region ../pwh-build/rhwp-studio/node_modules/@noble/hashes/sha2.js
-var CN = /* @__PURE__ */ Uint32Array.from([
+var TN = /* @__PURE__ */ Uint32Array.from([
 	1116352408,
 	1899447441,
 	3049323471,
@@ -65872,7 +65932,7 @@ var CN = /* @__PURE__ */ Uint32Array.from([
 	2756734187,
 	3204031479,
 	3329325298
-]), wN = /* @__PURE__ */ new Uint32Array(64), TN = class extends ca {
+]), EN = /* @__PURE__ */ new Uint32Array(64), DN = class extends ca {
 	A = 0;
 	B = 0;
 	C = 0;
@@ -65904,38 +65964,38 @@ var CN = /* @__PURE__ */ Uint32Array.from([
 		return (e ||= new this.constructor()).set(...this.get()), this._cloneIntoMeta(e);
 	}
 	process(e, t) {
-		for (let n = 0; n < 16; n++, t += 4) wN[n] = e.getUint32(t, !1);
+		for (let n = 0; n < 16; n++, t += 4) EN[n] = e.getUint32(t, !1);
 		for (let e = 16; e < 64; e++) {
-			let t = wN[e - 15], n = wN[e - 2], r = Ji(t, 7) ^ Ji(t, 18) ^ t >>> 3, i = Ji(n, 17) ^ Ji(n, 19) ^ n >>> 10;
-			wN[e] = i + wN[e - 7] + r + wN[e - 16] | 0;
+			let t = EN[e - 15], n = EN[e - 2], r = Ji(t, 7) ^ Ji(t, 18) ^ t >>> 3, i = Ji(n, 17) ^ Ji(n, 19) ^ n >>> 10;
+			EN[e] = i + EN[e - 7] + r + EN[e - 16] | 0;
 		}
 		let { A: n, B: r, C: i, D: a, E: o, F: s, G: c, H: l } = this;
 		for (let e = 0; e < 64; e++) {
-			let t = Ji(o, 6) ^ Ji(o, 11) ^ Ji(o, 25), u = l + t + oa(o, s, c) + CN[e] + wN[e] | 0, d = (Ji(n, 2) ^ Ji(n, 13) ^ Ji(n, 22)) + sa(n, r, i) | 0;
+			let t = Ji(o, 6) ^ Ji(o, 11) ^ Ji(o, 25), u = l + t + oa(o, s, c) + TN[e] + EN[e] | 0, d = (Ji(n, 2) ^ Ji(n, 13) ^ Ji(n, 22)) + sa(n, r, i) | 0;
 			l = c, c = s, s = o, o = a + u | 0, a = i, i = r, r = n, n = u + d | 0;
 		}
 		n = n + this.A | 0, r = r + this.B | 0, i = i + this.C | 0, a = a + this.D | 0, o = o + this.E | 0, s = s + this.F | 0, c = c + this.G | 0, l = l + this.H | 0, this.set(n, r, i, a, o, s, c, l);
 	}
 	roundClean() {
-		Ki(wN);
+		Ki(EN);
 	}
 	destroy() {
 		this.destroyed = !0, this.set(0, 0, 0, 0, 0, 0, 0, 0), Ki(this.buffer);
 	}
-}, EN = class extends TN {
+}, ON = class extends DN {
 	constructor() {
 		super(32, la);
 	}
-}, DN = /* @__PURE__ */ ia(() => new EN(), /* @__PURE__ */ aa(1));
+}, kN = /* @__PURE__ */ ia(() => new ON(), /* @__PURE__ */ aa(1));
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/core/font-decision-trace.ts
-function ON(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/core/font-decision-trace.ts
+function AN(e) {
 	return [...new Set(e.filter(Boolean))];
 }
-function kN(e) {
+function jN(e) {
 	return e.split(",")[0].trim().replace(/^(["'])|(["'])$/g, "");
 }
-function AN(e, t, n) {
+function MN(e, t, n) {
 	let r = e.document.face ?? e.layoutName.normalizedFace ?? e.paint.canvas2d.requested ?? "", i = di(r, e.document.altType ?? 0, e.document.languageSlot ?? 0), a = i.candidates, o = [...i.ruleIds], s = null, c = null;
 	for (let e of a) {
 		if (gn(e) || n.has(e)) {
@@ -65961,13 +66021,13 @@ function AN(e, t, n) {
 		candidates: a,
 		resolved: null,
 		source: s,
-		capabilities: ON(l),
-		failures: ON(u),
-		ruleIds: ON(o)
+		capabilities: AN(l),
+		failures: AN(u),
+		ruleIds: AN(o)
 	};
 }
-function jN(e, t) {
-	let n = kN(e.paint.canvaskit.requested ?? e.layoutName.normalizedFace ?? e.document.face ?? "");
+function NN(e, t) {
+	let n = jN(e.paint.canvaskit.requested ?? e.layoutName.normalizedFace ?? e.document.face ?? "");
 	if (t.canvasKitEvidence) return t.canvasKitEvidence(e) || {
 		status: "notObserved",
 		certainty: "notObserved",
@@ -65983,7 +66043,7 @@ function jN(e, t) {
 		status: "notObserved",
 		certainty: "planned",
 		requested: n || null,
-		candidates: ON([n, ...i.sources.flatMap((e) => e.aliases)]),
+		candidates: AN([n, ...i.sources.flatMap((e) => e.aliases)]),
 		resolved: null,
 		source: r ? "local" : "bundled",
 		capabilities: ["canvaskitSfntPlanAvailable"],
@@ -66001,14 +66061,14 @@ function jN(e, t) {
 		ruleIds: i.ruleIds
 	};
 }
-function MN(e, t, n = !1) {
+function PN(e, t, n = !1) {
 	if (Array.isArray(e)) {
-		let r = e.map((e) => MN(e, t, n));
+		let r = e.map((e) => PN(e, t, n));
 		return [
 			"capabilities",
 			"failures",
 			"knownLimitations"
-		].includes(t ?? "") && r.every((e) => typeof e == "string") ? ON(r).sort() : r;
+		].includes(t ?? "") && r.every((e) => typeof e == "string") ? AN(r).sort() : r;
 	}
 	if (typeof e == "object" && e) {
 		let t = {};
@@ -66020,30 +66080,30 @@ function MN(e, t, n = !1) {
 			"elapsedMs",
 			"durationMs",
 			"stack"
-		].includes(r) || (t[r] = MN(e[r], r, n));
+		].includes(r) || (t[r] = PN(e[r], r, n));
 		return t;
 	}
 	return e;
 }
-function NN(e) {
-	let t = `${JSON.stringify(MN(e, void 0, !0), null, 2)}\n`;
-	return na(DN(new TextEncoder().encode(t)));
+function FN(e) {
+	let t = `${JSON.stringify(PN(e, void 0, !0), null, 2)}\n`;
+	return na(kN(new TextEncoder().encode(t)));
 }
-function PN(e) {
+function IN(e) {
 	if (typeof e != "object" || !e || e.schemaVersion !== 1 || !Array.isArray(e.records)) throw Error("WASM font decision trace must be a schemaVersion 1 envelope");
 }
-function FN(e, t = {}) {
+function LN(e, t = {}) {
 	let n = JSON.parse(e);
-	PN(n);
+	IN(n);
 	let r = structuredClone(n), i = t.localState ?? Sn(), a = t.detectedOsFonts ?? qe();
-	for (let e of r.records) e.paint.canvas2d = AN(e, i, a), e.paint.canvaskit = jN(e, t);
+	for (let e of r.records) e.paint.canvas2d = MN(e, i, a), e.paint.canvaskit = NN(e, t);
 	let o = r.records.map((e) => e.paint.canvas2d.status), s = r.records.map((e) => e.paint.canvaskit.status);
 	return r.backendSummary.canvas2d = {
 		status: o.every((e) => e === "complete") ? "complete" : "notObserved",
-		reasons: ON(r.records.flatMap((e) => e.paint.canvas2d.failures))
+		reasons: AN(r.records.flatMap((e) => e.paint.canvas2d.failures))
 	}, r.backendSummary.canvaskit = {
 		status: s.every((e) => e === "complete") ? "complete" : "notObserved",
-		reasons: ON(r.records.flatMap((e) => e.paint.canvaskit.failures))
+		reasons: AN(r.records.flatMap((e) => e.paint.canvaskit.failures))
 	}, r.reasons.push({
 		code: "backendNotObserved",
 		detail: "Canvas2D and CanvasKit evidence was read from current snapshots without loading fonts or rendering."
@@ -66052,12 +66112,12 @@ function FN(e, t = {}) {
 		detail: "The current CanvasKit snapshot could not be joined safely to this source record."
 	}), r.normalizedHash = {
 		algorithm: "sha256",
-		value: NN(r)
+		value: FN(r)
 	}, r;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/document-agent/pwh-document-state-cache.mjs
-function IN() {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/document-agent/pwh-document-state-cache.mjs
+function RN() {
 	let e = null, t = 0;
 	function n(e) {
 		if (!e || !["hwp", "hwpx"].includes(e.format) || typeof e.dirty != "boolean" || ![
@@ -66092,51 +66152,51 @@ function IN() {
 	});
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/document-agent/controller.ts
-var LN = 4e3, RN = 3e3, zN = new TextEncoder();
-function BN(e) {
-	return na(DN(e));
-}
-function VN(e) {
-	return BN(zN.encode(e));
-}
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/document-agent/controller.ts
+var zN = 4e3, BN = 3e3, VN = new TextEncoder();
 function HN(e) {
+	return na(kN(e));
+}
+function UN(e) {
+	return HN(VN.encode(e));
+}
+function WN(e) {
 	return Array.from(e).length;
 }
-function UN(e, t) {
+function GN(e, t) {
 	if (!Number.isSafeInteger(e) || e < 0) throw new J("TARGET_FORMAT_MISMATCH", `${t}을 확인할 수 없습니다.`);
 	return e;
 }
-function WN(e, t) {
-	if (t.kind !== "body_paragraph" || t.charOffset !== 0 || !Number.isSafeInteger(t.section) || !Number.isSafeInteger(t.paragraph) || !Number.isSafeInteger(t.length) || t.section < 0 || t.paragraph < 0 || t.length < 0 || t.length > LN || t.section >= e.getSectionCount() || t.paragraph >= e.getParagraphCount(t.section) || e.getParagraphLength(t.section, t.paragraph) !== t.length) throw new J("TARGET_NOT_FOUND", "exact body paragraph target을 찾을 수 없습니다.");
+function KN(e, t) {
+	if (t.kind !== "body_paragraph" || t.charOffset !== 0 || !Number.isSafeInteger(t.section) || !Number.isSafeInteger(t.paragraph) || !Number.isSafeInteger(t.length) || t.section < 0 || t.paragraph < 0 || t.length < 0 || t.length > zN || t.section >= e.getSectionCount() || t.paragraph >= e.getParagraphCount(t.section) || e.getParagraphLength(t.section, t.paragraph) !== t.length) throw new J("TARGET_NOT_FOUND", "exact body paragraph target을 찾을 수 없습니다.");
 }
-function GN(e, t, n, r) {
+function qN(e, t, n, r) {
 	let i = [], a = Math.max(r, 1);
-	for (let r = 0; r < a; r += 1) i.push(UN(e.getCharPropertiesAt(t, n, r).charShapeId, "charShapeId"));
+	for (let r = 0; r < a; r += 1) i.push(GN(e.getCharPropertiesAt(t, n, r).charShapeId, "charShapeId"));
 	return i;
 }
-function KN(e, t, n) {
+function JN(e, t, n) {
 	let r = e.getParagraphLength(t, n);
 	return {
 		section: t,
 		paragraph: n,
 		length: r,
-		textSha256: VN(r > 0 ? e.getTextRange(t, n, 0, r) : ""),
-		paraShapeId: UN(e.getParaPropertiesAt(t, n).paraShapeId, "paraShapeId"),
-		styleId: UN(e.getStyleAt(t, n).id, "styleId"),
-		charShapeIds: GN(e, t, n, r),
+		textSha256: UN(r > 0 ? e.getTextRange(t, n, 0, r) : ""),
+		paraShapeId: GN(e.getParaPropertiesAt(t, n).paraShapeId, "paraShapeId"),
+		styleId: GN(e.getStyleAt(t, n).id, "styleId"),
+		charShapeIds: qN(e, t, n, r),
 		controls: e.getControlTextPositions(t, n)
 	};
 }
-function qN(e, t) {
-	let n = t.paragraph > 0 ? KN(e, t.section, t.paragraph - 1) : null, r = t.paragraph + 1 < e.getParagraphCount(t.section) ? KN(e, t.section, t.paragraph + 1) : null;
-	return VN(JSON.stringify({
+function YN(e, t) {
+	let n = t.paragraph > 0 ? JN(e, t.section, t.paragraph - 1) : null, r = t.paragraph + 1 < e.getParagraphCount(t.section) ? JN(e, t.section, t.paragraph + 1) : null;
+	return UN(JSON.stringify({
 		schemaVersion: 1,
 		previous: n,
 		next: r
 	}));
 }
-function JN(e, t) {
+function XN(e, t) {
 	for (let n = 0; n <= t.length; n += 1) if (e.getFieldInfoAt({
 		sectionIndex: t.section,
 		paragraphIndex: t.paragraph,
@@ -66144,43 +66204,43 @@ function JN(e, t) {
 	}).inField) return !0;
 	return !1;
 }
-function YN(e, t) {
-	if (WN(e, t), e.getControlTextPositions(t.section, t.paragraph).length > 0 || JN(e, t)) throw new J("TARGET_FORMAT_MISMATCH", "컨트롤 또는 필드가 포함된 문단은 에이전트 명령으로 편집할 수 없습니다.");
-	let n = GN(e, t.section, t.paragraph, t.length), r = n[0];
+function ZN(e, t) {
+	if (KN(e, t), e.getControlTextPositions(t.section, t.paragraph).length > 0 || XN(e, t)) throw new J("TARGET_FORMAT_MISMATCH", "컨트롤 또는 필드가 포함된 문단은 에이전트 명령으로 편집할 수 없습니다.");
+	let n = qN(e, t.section, t.paragraph, t.length), r = n[0];
 	if (!n.every((e) => e === r)) throw new J("TARGET_FORMAT_MISMATCH", "혼합 글자 서식 문단은 에이전트 명령으로 편집할 수 없습니다.");
-	let i = UN(e.getParaPropertiesAt(t.section, t.paragraph).paraShapeId, "paraShapeId"), a = UN(e.getStyleAt(t.section, t.paragraph).id, "styleId"), o = t.length > 0 ? e.getTextRange(t.section, t.paragraph, 0, t.length) : "";
+	let i = GN(e.getParaPropertiesAt(t.section, t.paragraph).paraShapeId, "paraShapeId"), a = GN(e.getStyleAt(t.section, t.paragraph).id, "styleId"), o = t.length > 0 ? e.getTextRange(t.section, t.paragraph, 0, t.length) : "";
 	return {
 		text: o,
-		textSha256: VN(o),
-		formatSha256: VN(JSON.stringify({
+		textSha256: UN(o),
+		formatSha256: UN(JSON.stringify({
 			schemaVersion: 1,
 			charShapeId: r,
 			paraShapeId: i,
 			styleId: a
 		})),
-		adjacentContextSha256: qN(e, t),
+		adjacentContextSha256: YN(e, t),
 		charShapeId: r,
 		paraShapeId: i,
 		styleId: a
 	};
 }
-function XN(e, t) {
+function QN(e, t) {
 	let n = [];
-	for (let r = 0; r < e.getSectionCount(); r += 1) for (let i = 0; i < e.getParagraphCount(r); i += 1) (r !== t.section || i !== t.paragraph) && n.push(KN(e, r, i));
-	return VN(JSON.stringify({
+	for (let r = 0; r < e.getSectionCount(); r += 1) for (let i = 0; i < e.getParagraphCount(r); i += 1) (r !== t.section || i !== t.paragraph) && n.push(JN(e, r, i));
+	return UN(JSON.stringify({
 		schemaVersion: 1,
 		sectionCount: e.getSectionCount(),
 		paragraphCounts: Array.from({ length: e.getSectionCount() }, (t, n) => e.getParagraphCount(n)),
 		paragraphs: n
 	}));
 }
-function ZN(e, t) {
+function $N(e, t) {
 	let n = e.borrowDocumentHandle();
 	if (!n) throw new J("TARGET_NOT_FOUND", "문서가 로드되지 않았습니다.");
-	return BN(t === "hwpx" ? n.exportHwpx() : n.exportHwp());
+	return HN(t === "hwpx" ? n.exportHwpx() : n.exportHwp());
 }
-function QN(e) {
-	return VN(JSON.stringify({
+function eP(e) {
+	return UN(JSON.stringify({
 		schemaVersion: e.schemaVersion,
 		commandId: e.commandId,
 		expectedDocumentEpoch: e.expectedDocumentEpoch,
@@ -66193,8 +66253,8 @@ function QN(e) {
 		replacement: e.replacement
 	}));
 }
-function $N(e) {
-	return VN(JSON.stringify({
+function tP(e) {
+	return UN(JSON.stringify({
 		schemaVersion: e.schemaVersion,
 		commandId: e.commandId,
 		expectedDocumentEpoch: e.expectedDocumentEpoch,
@@ -66203,14 +66263,14 @@ function $N(e) {
 		expectedAfterSha256: e.expectedAfterSha256
 	}));
 }
-function eP(e, t) {
+function nP(e, t) {
 	return e.parentParaIndex === void 0 && t.parentParaIndex === void 0 && e.sectionIndex === t.sectionIndex && e.paragraphIndex === t.paragraphIndex;
 }
-function tP(e, t) {
-	return eP(e, t) && e.charOffset === t.charOffset;
+function rP(e, t) {
+	return nP(e, t) && e.charOffset === t.charOffset;
 }
-var nP = class {
-	pwhStateCache = IN();
+var iP = class {
+	pwhStateCache = RN();
 	pwhStateCacheOff = null;
 	getPresentationDocumentState() {
 		if (this.syncGeneration(), !this.pwhStateCacheOff) {
@@ -66227,7 +66287,7 @@ var nP = class {
 		return {
 			schemaVersion: 1,
 			...e,
-			documentSha256: this.pwhStateCache.read(e, () => ZN(this.deps.wasm, e.format))
+			documentSha256: this.pwhStateCache.read(e, () => $N(this.deps.wasm, e.format))
 		};
 	}
 	deps;
@@ -66255,15 +66315,15 @@ var nP = class {
 			changeSeq: this.changeSeq,
 			dirty: this.deps.isDirty(),
 			pageCount: this.deps.wasm.pageCount,
-			documentSha256: ZN(this.deps.wasm, e)
+			documentSha256: $N(this.deps.wasm, e)
 		};
 	}
 	getSelectionContext() {
 		this.syncGeneration();
-		let e = this.deps.input.getCursorPosition(), t = this.pageFor(e.sectionIndex, e.paragraphIndex), n = this.deps.input.getSelection(), r = !n || tP(n.start, n.end), i = null, a = !1, o = null;
+		let e = this.deps.input.getCursorPosition(), t = this.pageFor(e.sectionIndex, e.paragraphIndex), n = this.deps.input.getSelection(), r = !n || rP(n.start, n.end), i = null, a = !1, o = null;
 		if (e.parentParaIndex === void 0 && e.sectionIndex >= 0 && e.paragraphIndex >= 0 && e.sectionIndex < this.deps.wasm.getSectionCount() && e.paragraphIndex < this.deps.wasm.getParagraphCount(e.sectionIndex)) {
 			let t = this.deps.wasm.getParagraphLength(e.sectionIndex, e.paragraphIndex);
-			if (t <= LN) {
+			if (t <= zN) {
 				i = {
 					kind: "body_paragraph",
 					section: e.sectionIndex,
@@ -66272,15 +66332,15 @@ var nP = class {
 					length: t
 				};
 				try {
-					YN(this.deps.wasm, i), this.currentFormat(), a = !0;
+					ZN(this.deps.wasm, i), this.currentFormat(), a = !0;
 				} catch {
 					a = !1;
 				}
 			}
 		}
-		if (!r && n && eP(n.start, n.end)) {
+		if (!r && n && nP(n.start, n.end)) {
 			let e = n.end.charOffset - n.start.charOffset;
-			e >= 0 && (o = VN(this.deps.wasm.getTextRange(n.start.sectionIndex, n.start.paragraphIndex, n.start.charOffset, e)));
+			e >= 0 && (o = UN(this.deps.wasm.getTextRange(n.start.sectionIndex, n.start.paragraphIndex, n.start.charOffset, e)));
 		}
 		return {
 			schemaVersion: 1,
@@ -66295,22 +66355,22 @@ var nP = class {
 	}
 	async applyTextCommand(e) {
 		this.syncGeneration();
-		let t = QN(e), n = this.journal.get(e.commandId);
+		let t = eP(e), n = this.journal.get(e.commandId);
 		if (n) {
 			if (n.status === "applied" && n.applyBindingSha256 === t && this.isCurrentReceiptState(n.applyReceipt, n.afterTarget, n.applyReceipt.afterTextSha256)) return n.applyReceipt;
 			throw new J("COMMAND_REPLAY_MISMATCH", "같은 commandId가 다른 binding 또는 terminal 상태로 이미 사용되었습니다.");
 		}
 		let r = this.now(), i = this.getDocumentState();
 		this.assertApplyFence(e, i);
-		let a = YN(this.deps.wasm, e.target);
+		let a = ZN(this.deps.wasm, e.target);
 		if (a.textSha256 !== e.expectedBeforeSha256) throw new J("TARGET_PREIMAGE_MISMATCH", "target before SHA가 다릅니다.");
 		if (a.formatSha256 !== e.expectedFormatSha256) throw new J("TARGET_FORMAT_MISMATCH", "target format SHA가 다릅니다.");
 		if (a.adjacentContextSha256 !== e.expectedAdjacentContextSha256) throw new J("TARGET_CONTEXT_MISMATCH", "target adjacent context SHA가 다릅니다.");
-		let o = XN(this.deps.wasm, e.target);
+		let o = QN(this.deps.wasm, e.target);
 		this.assertWithinBudget(r);
 		let s = {
 			...e.target,
-			length: HN(e.replacement)
+			length: WN(e.replacement)
 		}, c, l = "", u = this.changeSeq;
 		try {
 			await this.deps.input.executeDocumentAgentOperation({
@@ -66323,12 +66383,12 @@ var nP = class {
 						t.beginDeferredPagination?.(), n = !0;
 						let u = t.replaceText(e.target.section, e.target.paragraph, 0, e.target.length, e.replacement);
 						if (!u.ok || u.newLength !== s.length) throw new J("TRANSACTION_FAILED", "replaceText가 target을 교체하지 못했습니다.");
-						if (s.length > 0 && t.setCharShapeId(e.target.section, e.target.paragraph, 0, s.length, a.charShapeId), t.setParaShapeId(e.target.section, e.target.paragraph, a.paraShapeId), t.flushDeferredPagination?.(), n = !1, c = YN(t, s), c.text !== e.replacement) throw new J("TARGET_PREIMAGE_MISMATCH", "target postimage가 replacement와 다릅니다.");
+						if (s.length > 0 && t.setCharShapeId(e.target.section, e.target.paragraph, 0, s.length, a.charShapeId), t.setParaShapeId(e.target.section, e.target.paragraph, a.paraShapeId), t.flushDeferredPagination?.(), n = !1, c = ZN(t, s), c.text !== e.replacement) throw new J("TARGET_PREIMAGE_MISMATCH", "target postimage가 replacement와 다릅니다.");
 						if (c.formatSha256 !== a.formatSha256) throw new J("TARGET_FORMAT_MISMATCH", "target format이 변경되었습니다.");
 						if (c.adjacentContextSha256 !== a.adjacentContextSha256) throw new J("TARGET_CONTEXT_MISMATCH", "adjacent context가 변경되었습니다.");
-						if (XN(t, s) !== o) throw new J("NON_TARGET_CHANGED", "target 밖 semantic manifest가 변경되었습니다.");
+						if (QN(t, s) !== o) throw new J("NON_TARGET_CHANGED", "target 밖 semantic manifest가 변경되었습니다.");
 						if (t.pageCount !== i.pageCount) throw new J("PAGE_COUNT_CHANGED", "문서 페이지 수가 변경되었습니다.");
-						return l = ZN(t, i.format), this.assertWithinBudget(r), {
+						return l = $N(t, i.format), this.assertWithinBudget(r), {
 							sectionIndex: s.section,
 							paragraphIndex: s.paragraph,
 							charOffset: s.length
@@ -66392,7 +66452,7 @@ var nP = class {
 	}
 	async revertTextCommand(e) {
 		this.syncGeneration();
-		let t = $N(e), n = this.journal.get(e.commandId);
+		let t = tP(e), n = this.journal.get(e.commandId);
 		if (n?.status === "reverted") {
 			if (n.revertBindingSha256 === t && n.revertReceipt && this.isCurrentReceiptState(n.revertReceipt, n.beforeTarget, n.revertReceipt.afterTextSha256)) return n.revertReceipt;
 			throw new J("COMMAND_REPLAY_MISMATCH", "revert command binding 또는 현재 terminal receipt 상태가 다릅니다.");
@@ -66402,9 +66462,9 @@ var nP = class {
 		if (e.expectedDocumentEpoch !== i.documentEpoch) throw new J("DOCUMENT_EPOCH_MISMATCH", "document epoch가 다릅니다.");
 		if (e.expectedChangeSeq !== i.changeSeq) throw new J("CHANGE_SEQ_MISMATCH", "changeSeq가 다릅니다.");
 		if (e.expectedAfterDocumentSha256 !== i.documentSha256) throw new J("DOCUMENT_SHA_MISMATCH", "after document SHA가 다릅니다.");
-		let a = YN(this.deps.wasm, n.afterTarget);
+		let a = ZN(this.deps.wasm, n.afterTarget);
 		if (a.textSha256 !== e.expectedAfterSha256 || a.textSha256 !== n.applyReceipt.afterTextSha256) throw new J("TARGET_PREIMAGE_MISMATCH", "revert target after SHA가 다릅니다.");
-		if (XN(this.deps.wasm, n.afterTarget) !== n.nonTargetManifestSha256) throw new J("COMMAND_NOT_LATEST", "target 밖 변경이 있어 되돌릴 수 없습니다.");
+		if (QN(this.deps.wasm, n.afterTarget) !== n.nonTargetManifestSha256) throw new J("COMMAND_NOT_LATEST", "target 밖 변경이 있어 되돌릴 수 없습니다.");
 		this.assertWithinBudget(r);
 		let o = "", s, c = this.changeSeq;
 		try {
@@ -66418,12 +66478,12 @@ var nP = class {
 						t.beginDeferredPagination?.(), a = !0;
 						let e = t.replaceText(n.afterTarget.section, n.afterTarget.paragraph, 0, n.afterTarget.length, n.beforeText);
 						if (!e.ok || e.newLength !== n.beforeTarget.length) throw new J("TRANSACTION_FAILED", "inverse replaceText가 실패했습니다.");
-						if (n.beforeTarget.length > 0 && t.setCharShapeId(n.beforeTarget.section, n.beforeTarget.paragraph, 0, n.beforeTarget.length, n.beforeEvidence.charShapeId), t.setParaShapeId(n.beforeTarget.section, n.beforeTarget.paragraph, n.beforeEvidence.paraShapeId), t.flushDeferredPagination?.(), a = !1, s = YN(t, n.beforeTarget), s.textSha256 !== n.beforeEvidence.textSha256) throw new J("TARGET_PREIMAGE_MISMATCH", "before target 복원이 일치하지 않습니다.");
+						if (n.beforeTarget.length > 0 && t.setCharShapeId(n.beforeTarget.section, n.beforeTarget.paragraph, 0, n.beforeTarget.length, n.beforeEvidence.charShapeId), t.setParaShapeId(n.beforeTarget.section, n.beforeTarget.paragraph, n.beforeEvidence.paraShapeId), t.flushDeferredPagination?.(), a = !1, s = ZN(t, n.beforeTarget), s.textSha256 !== n.beforeEvidence.textSha256) throw new J("TARGET_PREIMAGE_MISMATCH", "before target 복원이 일치하지 않습니다.");
 						if (s.formatSha256 !== n.beforeEvidence.formatSha256) throw new J("TARGET_FORMAT_MISMATCH", "before format 복원이 일치하지 않습니다.");
 						if (s.adjacentContextSha256 !== n.beforeEvidence.adjacentContextSha256) throw new J("TARGET_CONTEXT_MISMATCH", "before context 복원이 일치하지 않습니다.");
-						if (XN(t, n.beforeTarget) !== n.nonTargetManifestSha256) throw new J("NON_TARGET_CHANGED", "revert가 target 밖을 변경했습니다.");
+						if (QN(t, n.beforeTarget) !== n.nonTargetManifestSha256) throw new J("NON_TARGET_CHANGED", "revert가 target 밖을 변경했습니다.");
 						if (t.pageCount !== n.applyReceipt.pageCountBefore) throw new J("PAGE_COUNT_CHANGED", "revert 뒤 페이지 수가 다릅니다.");
-						return o = ZN(t, i.format), this.assertWithinBudget(r), {
+						return o = $N(t, i.format), this.assertWithinBudget(r), {
 							sectionIndex: n.beforeTarget.section,
 							paragraphIndex: n.beforeTarget.paragraph,
 							charOffset: n.beforeTarget.length
@@ -66475,7 +66535,7 @@ var nP = class {
 		}), l;
 	}
 	focusTarget(e) {
-		this.syncGeneration(), WN(this.deps.wasm, e);
+		this.syncGeneration(), KN(this.deps.wasm, e);
 		let t = this.pageFor(e.section, e.paragraph);
 		return {
 			focused: this.deps.input.focusBodyParagraph(e.section, e.paragraph, e.length),
@@ -66501,21 +66561,21 @@ var nP = class {
 		if (this.changeSeq !== t) throw new J("CHANGE_SEQ_MISMATCH", "transaction 직전 changeSeq가 바뀌었습니다.");
 	}
 	assertWithinBudget(e) {
-		if (this.now() - e > RN) throw new J("COMMAND_TOO_SLOW", "문서 명령이 3초 상한을 넘었습니다.");
+		if (this.now() - e > BN) throw new J("COMMAND_TOO_SLOW", "문서 명령이 3초 상한을 넘었습니다.");
 	}
 	syncGeneration() {
 		let e = this.deps.wasm.documentGeneration;
 		e !== this.documentEpoch && (this.documentEpoch = e, this.changeSeq = 0, this.latest = null, this.journal.clear());
 	}
 	normalizeExecutionError(e) {
-		if (QM(e)) return e.code === "TRANSACTION_FAILED" && e.recovered === void 0 ? new J(e.code, e.message, !0) : e;
+		if (eN(e)) return e.code === "TRANSACTION_FAILED" && e.recovered === void 0 ? new J(e.code, e.message, !0) : e;
 		let t = e, n = t.cause;
 		return t.code === "RENDER_FAILED" && typeof t.recovered == "boolean" ? n?.code === "COMMAND_TOO_SLOW" ? new J("COMMAND_TOO_SLOW", typeof n.message == "string" ? n.message : "command time budget을 초과했습니다.", t.recovered) : new J("RENDER_FAILED", typeof t.message == "string" ? t.message : "render commit이 실패했습니다.", t.recovered) : new J("TRANSACTION_FAILED", e instanceof Error ? e.message : String(e), !(e instanceof AggregateError));
 	}
 	isCurrentReceiptState(e, t, n) {
 		try {
 			let r = this.getDocumentState();
-			return r.documentEpoch !== e.documentEpoch || r.changeSeq !== e.afterChangeSeq || r.documentSha256 !== e.afterDocumentSha256 ? !1 : YN(this.deps.wasm, t).textSha256 === n;
+			return r.documentEpoch !== e.documentEpoch || r.changeSeq !== e.afterChangeSeq || r.documentSha256 !== e.afterDocumentSha256 ? !1 : ZN(this.deps.wasm, t).textSha256 === n;
 		} catch {
 			return !1;
 		}
@@ -66529,8 +66589,8 @@ var nP = class {
 	}
 };
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/pwh-desktop-body-style.mjs
-async function rP({ document: e, read: t, command: n }) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/pwh-desktop-body-style.mjs
+async function aP({ document: e, read: t, command: n }) {
 	let r = t(), i = n.expected;
 	if (!r?.ready || [
 		"documentEpoch",
@@ -66588,7 +66648,7 @@ async function rP({ document: e, read: t, command: n }) {
 		changes: { paragraphs: a.length }
 	};
 }
-async function iP({ document: e, read: t, command: n }) {
+async function oP({ document: e, read: t, command: n }) {
 	let r = t(), i = n.expected;
 	if (!r?.ready || [
 		"documentEpoch",
@@ -66628,7 +66688,7 @@ async function iP({ document: e, read: t, command: n }) {
 		}
 	};
 }
-async function aP({ document: e, read: t, command: n, bytes: r, sameContext: i }) {
+async function sP({ document: e, read: t, command: n, bytes: r, sameContext: i }) {
 	let a = t();
 	if (!a?.ready || !i(a, n.expected) || a.selection || a.kind !== "body_text" || a.cursor?.parentParaIndex != null || a.cursor?.cellPath?.length) throw Error("본문 커서나 문서가 바뀌었습니다. 다시 요청하세요.");
 	let o = n.image, s = n.widthMm;
@@ -66658,13 +66718,13 @@ async function aP({ document: e, read: t, command: n, bytes: r, sameContext: i }
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/pwh-table-style.mjs
-var oP = (e) => typeof e == "string" ? JSON.parse(e) : e, sP = (e, t) => JSON.stringify(e) === JSON.stringify(t), cP = (e) => typeof e == "string" && /^#[0-9a-f]{6}$/i.test(e);
-async function lP(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/pwh-table-style.mjs
+var cP = (e) => typeof e == "string" ? JSON.parse(e) : e, lP = (e, t) => JSON.stringify(e) === JSON.stringify(t), uP = (e) => typeof e == "string" && /^#[0-9a-f]{6}$/i.test(e);
+async function dP(e) {
 	return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify(e))))).map((e) => e.toString(16).padStart(2, "0")).join("");
 }
-function uP(e, t, n, r) {
-	let i = oP(e.getTableDimensions(t, n, r));
+function fP(e, t, n, r) {
+	let i = cP(e.getTableDimensions(t, n, r));
 	if (!i?.cellCount || i.cellCount > 256) throw Error("Table size exceeds supported limits");
 	let a = 0, o = [];
 	for (let s = 0; s < i.cellCount; s++) {
@@ -66675,8 +66735,8 @@ function uP(e, t, n, r) {
 			if (a += c, a > 24e3) throw Error("Table text exceeds supported limits");
 			let l = [], u;
 			for (let i = 0; i < Math.max(1, c); i++) {
-				let a = oP(e.getCellCharPropertiesAt(t, n, r, s, o, i));
-				sP(a, u) || (l.push({
+				let a = cP(e.getCellCharPropertiesAt(t, n, r, s, o, i));
+				lP(a, u) || (l.push({
 					offset: i,
 					format: a
 				}), u = a);
@@ -66684,52 +66744,52 @@ function uP(e, t, n, r) {
 			i.push({
 				length: c,
 				text: e.getTextInCell(t, n, r, s, o, 0, c),
-				format: oP(e.getCellParaPropertiesAt(t, n, r, s, o)),
+				format: cP(e.getCellParaPropertiesAt(t, n, r, s, o)),
 				formats: l
 			});
 		}
 		o.push({
-			geometry: oP(e.getCellInfo(t, n, r, s)),
-			properties: oP(e.getCellProperties(t, n, r, s)),
+			geometry: cP(e.getCellInfo(t, n, r, s)),
+			properties: cP(e.getCellProperties(t, n, r, s)),
 			paragraphs: i
 		});
 	}
 	return {
 		dimensions: i,
-		properties: oP(e.getTableProperties(t, n, r)),
+		properties: cP(e.getTableProperties(t, n, r)),
 		cells: o
 	};
 }
-async function dP(e, t) {
+async function pP(e, t) {
 	if (t.kind !== "cell_block" || !t.table?.selectedCellsComplete || !t.table.selectedCells?.length) return null;
 	let { sec: n, ppi: r, ci: i, cellPath: a } = t.table.source;
 	if (a?.length > 1) return null;
 	let o = t.table.selectedCells.map((e) => e.cellIndex);
 	if (o.length > 256) return null;
-	let s = uP(e, n, r, i);
+	let s = fP(e, n, r, i);
 	return {
 		kind: "table_cells",
 		epoch: t.documentState.documentEpoch,
 		section: n,
 		controlIndex: i,
 		cells: o,
-		sha256: await lP(s)
+		sha256: await dP(s)
 	};
 }
-async function fP(e, t, n) {
+async function mP(e, t, n) {
 	if (t?.kind !== "table_cells" || t.epoch !== n.documentState?.documentEpoch) throw Error("Table request expired; reopen request");
 	let r = null, i = e.getParagraphCount(t.section);
 	if (i > 2e4) throw Error("Too many paragraphs");
 	for (let n = 0; n < i; n++) {
-		let i = oP(e.getControlTextPositions(t.section, n));
+		let i = cP(e.getControlTextPositions(t.section, n));
 		for (let a = 0; a < i.length; a++) {
 			let i;
 			try {
-				i = uP(e, t.section, n, a);
+				i = fP(e, t.section, n, a);
 			} catch {
 				continue;
 			}
-			if (await lP(i) === t.sha256) {
+			if (await dP(i) === t.sha256) {
 				if (r) throw Error("Ambiguous table target");
 				r = {
 					sec: t.section,
@@ -66743,7 +66803,7 @@ async function fP(e, t, n) {
 	if (!r) throw Error("Requested table changed or was deleted");
 	return r;
 }
-function pP(e, t) {
+function hP(e, t) {
 	if (!Array.isArray(e) || !e.length || e.length > 256) throw Error("Provide 1 to 256 cell styles");
 	let n = /* @__PURE__ */ new Set();
 	for (let r of e) {
@@ -66764,7 +66824,7 @@ function pP(e, t) {
 			"fillColor",
 			"textColor",
 			"borderColor"
-		]) if (r[e] !== void 0 && !cP(r[e])) throw Error("Use #RRGGBB colors");
+		]) if (r[e] !== void 0 && !uP(r[e])) throw Error("Use #RRGGBB colors");
 		if (r.fontFamily !== void 0 && (typeof r.fontFamily != "string" || !r.fontFamily.trim() || r.fontFamily.length > 100) || r.fontSize !== void 0 && (!Number.isFinite(r.fontSize) || r.fontSize < 600 || r.fontSize > 7200)) throw Error("Invalid font");
 		if (r.borders !== void 0) {
 			if (!r.borders || typeof r.borders != "object" || Array.isArray(r.borders) || !Object.keys(r.borders).length) throw Error("Specify at least one border");
@@ -66777,7 +66837,7 @@ function pP(e, t) {
 				"color",
 				"type",
 				"width"
-			].includes(e)) || !cP(t.color) || ![
+			].includes(e)) || !uP(t.color) || ![
 				0,
 				1,
 				2,
@@ -66792,11 +66852,11 @@ function pP(e, t) {
 		].includes(r.alignment) || r.borderWidth !== void 0 && (!Number.isInteger(r.borderWidth) || r.borderWidth < 0 || r.borderWidth > 6 || !r.borderColor)) throw Error("Invalid cell style");
 	}
 }
-function mP(e) {
-	if (oP(e)?.ok === !1) throw Error("Cell style operation failed");
+function gP(e) {
+	if (cP(e)?.ok === !1) throw Error("Cell style operation failed");
 }
-function hP(e, t, n) {
-	pP(n, n.map((e) => e.cellIndex));
+function _P(e, t, n) {
+	hP(n, n.map((e) => e.cellIndex));
 	let { sec: r, ppi: i, ci: a, snapshot: o } = t, s = /* @__PURE__ */ new Map(), c = {
 		Left: "Right",
 		Right: "Left",
@@ -66825,14 +66885,14 @@ function hP(e, t, n) {
 			if (r === "Left" ? a.col + a.colSpan === t.col && l : r === "Right" ? t.col + t.colSpan === a.col && l : r === "Top" ? a.row + a.rowSpan === t.row && u : t.row + t.rowSpan === a.row && u) {
 				if (!(r === "Left" || r === "Right" ? t.row <= a.row && t.row + t.rowSpan >= a.row + a.rowSpan : t.col <= a.col && t.col + t.colSpan >= a.col + a.colSpan)) throw Error("A neighbouring merged cell extends beyond the requested edge");
 				let e = n + ":" + c[r], o = s.get(e);
-				if (o && !sP(o, i)) throw Error("Conflicting borders on a shared edge");
+				if (o && !lP(o, i)) throw Error("Conflicting borders on a shared edge");
 				s.set(e, i);
 			}
 		}
 	}
 	for (let e of n) for (let [t, n] of Object.entries(e.borders || {})) {
 		let r = s.get(e.cellIndex + ":" + t);
-		if (r && !sP(r, n)) throw Error("Conflicting borders on a shared edge");
+		if (r && !lP(r, n)) throw Error("Conflicting borders on a shared edge");
 	}
 	for (let t of n) {
 		let n = o.cells[t.cellIndex];
@@ -66858,7 +66918,7 @@ function hP(e, t, n) {
 			"Top",
 			"Bottom"
 		]) s["border" + e] || (s["border" + e] = n.properties["border" + e]);
-		Object.keys(s).length && mP(e.setCellProperties(r, i, a, t.cellIndex, s));
+		Object.keys(s).length && gP(e.setCellProperties(r, i, a, t.cellIndex, s));
 		for (let o = 0; o < n.paragraphs.length; o++) {
 			let s = n.paragraphs[o], c = {};
 			for (let e of [
@@ -66866,16 +66926,16 @@ function hP(e, t, n) {
 				"bold",
 				"fontSize"
 			]) t[e] !== void 0 && (c[e] = t[e]);
-			t.fontFamily && (c.fontIds = Array.from({ length: 7 }, (n, r) => e.findOrCreateFontIdForLang(r, t.fontFamily))), Object.keys(c).length && s.length && mP(e.applyCharFormatInCell(r, i, a, t.cellIndex, o, 0, s.length, JSON.stringify(c))), t.alignment && mP(e.applyParaFormatInCell(r, i, a, t.cellIndex, o, JSON.stringify({ alignment: t.alignment })));
+			t.fontFamily && (c.fontIds = Array.from({ length: 7 }, (n, r) => e.findOrCreateFontIdForLang(r, t.fontFamily))), Object.keys(c).length && s.length && gP(e.applyCharFormatInCell(r, i, a, t.cellIndex, o, 0, s.length, JSON.stringify(c))), t.alignment && gP(e.applyParaFormatInCell(r, i, a, t.cellIndex, o, JSON.stringify({ alignment: t.alignment })));
 		}
 	}
 	e.flushDeferredPagination();
-	let l = uP(e, r, i, a);
-	if (!sP(o.dimensions, l.dimensions) || !sP(o.properties, l.properties)) throw Error("Table structure or placement changed");
+	let l = fP(e, r, i, a);
+	if (!lP(o.dimensions, l.dimensions) || !lP(o.properties, l.properties)) throw Error("Table structure or placement changed");
 	for (let e = 0; e < o.cells.length; e++) {
 		let t = o.cells[e], r = l.cells[e], i = n.find((t) => t.cellIndex === e);
-		if (!sP(t.paragraphs.map((e) => e.text), r.paragraphs.map((e) => e.text)) || t.properties.width !== r.properties.width) throw Error("Cell content or width changed");
-		if (!sP(t.geometry, r.geometry)) throw Error("Cell geometry changed");
+		if (!lP(t.paragraphs.map((e) => e.text), r.paragraphs.map((e) => e.text)) || t.properties.width !== r.properties.width) throw Error("Cell content or width changed");
+		if (!lP(t.geometry, r.geometry)) throw Error("Cell geometry changed");
 		if (!i) {
 			let n = (t) => {
 				let n = { ...t.properties };
@@ -66892,7 +66952,7 @@ function hP(e, t, n) {
 					paragraphs: t.paragraphs
 				};
 			};
-			if (!sP(n(t), n(r))) throw Error("Unselected cell changed outside a shared border");
+			if (!lP(n(t), n(r))) throw Error("Unselected cell changed outside a shared border");
 		}
 		for (let t of [
 			"Left",
@@ -66909,7 +66969,7 @@ function hP(e, t, n) {
 				"Right",
 				"Top",
 				"Bottom"
-			]) if (!i.borderColor && !Object.hasOwn(i.borders || {}, n) && !s.has(e + ":" + n) && !sP(t.properties["border" + n], r.properties["border" + n])) throw Error("Unrequested border changed");
+			]) if (!i.borderColor && !Object.hasOwn(i.borders || {}, n) && !s.has(e + ":" + n) && !lP(t.properties["border" + n], r.properties["border" + n])) throw Error("Unrequested border changed");
 		}
 		if (i?.fillColor && r.properties.fillColor.toLowerCase() !== i.fillColor.toLowerCase()) throw Error("Cell fill verification failed");
 		for (let [e, t] of Object.entries(i?.borders || {})) {
@@ -66937,29 +66997,29 @@ function hP(e, t, n) {
 		cellIndices: n.map((e) => e.cellIndex)
 	};
 }
-async function gP(e, t) {
-	let n = [], r = 0, i = oP(e.getControls()).filter((e) => e.ctrlId === "tbl" && e.list !== 0).length;
+async function vP(e, t) {
+	let n = [], r = 0, i = cP(e.getControls()).filter((e) => e.ctrlId === "tbl" && e.list !== 0).length;
 	for (let t = 0; t < e.getSectionCount(); t++) {
 		let i = e.getParagraphCount(t);
 		if (i > 2e4) throw Error("Too many paragraphs");
 		for (let a = 0; a < i; a++) {
-			let i = oP(e.getControlTextPositions(t, a));
+			let i = cP(e.getControlTextPositions(t, a));
 			for (let o = 0; o < i.length; o++) {
 				let i;
 				try {
-					i = oP(e.getTableDimensions(t, a, o));
+					i = cP(e.getTableDimensions(t, a, o));
 				} catch {
 					continue;
 				}
 				if (!i?.cellCount) continue;
-				let s = uP(e, t, a, o);
+				let s = fP(e, t, a, o);
 				if (r += s.cells.length, n.length >= 64 || r > 2048) throw Error("Document table plan exceeds supported limits");
 				n.push({
 					sec: t,
 					ppi: a,
 					ci: o,
 					snapshot: s,
-					sha256: await lP(s)
+					sha256: await dP(s)
 				});
 			}
 		}
@@ -66970,7 +67030,7 @@ async function gP(e, t) {
 		unsupported: i
 	};
 }
-var _P = (e) => {
+var yP = (e) => {
 	let t = e?.paragraphs.find((e) => e.length) || e?.paragraphs[0], n = t?.formats[0]?.format || {};
 	return {
 		fontFamily: n.fontFamily || "맑은 고딕",
@@ -66981,15 +67041,15 @@ var _P = (e) => {
 		alignment: t?.format.alignment || "left"
 	};
 };
-function vP(e) {
+function bP(e) {
 	let t = e.snapshot.cells, n = t.find((e) => e.properties.isHeader) || t.find((e) => e.geometry.row === 0), r = t.find((e) => e.geometry.row > 0 && !e.properties.isHeader) || n, i = r?.properties.borderBottom || {
 		type: 1,
 		width: 1,
 		color: "#b8c6d4"
 	};
 	return {
-		header: _P(n),
-		body: _P(r),
+		header: yP(n),
+		body: yP(r),
 		border: {
 			color: i.color,
 			width: i.width,
@@ -67001,7 +67061,7 @@ function vP(e) {
 		headerRows: 1
 	};
 }
-function yP(e) {
+function xP(e) {
 	if (!e || Object.keys(e).some((e) => ![
 		"header",
 		"body",
@@ -67017,7 +67077,7 @@ function yP(e) {
 			"bold",
 			"alignment"
 		].includes(e))) throw Error("Invalid header/body theme");
-		pP([{
+		hP([{
 			cellIndex: 0,
 			...e[t]
 		}], [0]);
@@ -67030,7 +67090,7 @@ function yP(e) {
 		"outerLeft",
 		"outerRight",
 		"vertical"
-	].includes(e)) || !cP(t.color) || !Number.isInteger(t.width) || t.width < 0 || t.width > 6 || ![
+	].includes(e)) || !uP(t.color) || !Number.isInteger(t.width) || t.width < 0 || t.width > 6 || ![
 		0,
 		1,
 		2,
@@ -67042,8 +67102,8 @@ function yP(e) {
 	].some((e) => typeof t[e] != "boolean")) throw Error("Invalid table border theme");
 	if (!Number.isInteger(e.headerRows) || e.headerRows < 0 || e.headerRows > 10) throw Error("Invalid header row count");
 }
-function bP(e, t, n = t.headerRows) {
-	yP(t);
+function SP(e, t, n = t.headerRows) {
+	xP(t);
 	let { rowCount: r, colCount: i } = e.snapshot.dimensions, a = t.border;
 	return e.snapshot.cells.map((e, r) => {
 		let o = e.geometry, s = n > 0 && (e.properties.isHeader || o.row < n), c = (e) => ({
@@ -67064,12 +67124,12 @@ function bP(e, t, n = t.headerRows) {
 	});
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/pwh-desktop-table-plan.mjs
-async function xP(e, t) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/pwh-desktop-table-plan.mjs
+async function CP(e, t) {
 	let n = t?.documentState;
 	if (!Number.isSafeInteger(n?.documentEpoch) || !Number.isSafeInteger(n?.changeSeq) || typeof n?.documentSha256 != "string") throw Error("Document revision is required");
 	return {
-		...await gP(e, t),
+		...await vP(e, t),
 		revision: {
 			epoch: n.documentEpoch,
 			seq: n.changeSeq,
@@ -67077,11 +67137,11 @@ async function xP(e, t) {
 		}
 	};
 }
-async function SP(e, t, n, r, i) {
+async function wP(e, t, n, r, i) {
 	let a = n?.documentState, o = t?.revision;
 	if (!o || a?.documentEpoch !== o.epoch || a?.changeSeq !== o.seq || a?.documentSha256 !== o.sha256) throw Error("Table plan expired or document changed");
 	if (r === "document" && t.unsupported) throw Error("Nested/non-body tables need a supported table path before document-wide styling");
-	let s = await gP(e, n);
+	let s = await vP(e, n);
 	if (s.unsupported !== t.unsupported || s.refs.length !== t.refs.length) throw Error("Document table set changed");
 	for (let e = 0; e < t.refs.length; e++) {
 		let n = t.refs[e], r = s.refs[e];
@@ -67092,19 +67152,19 @@ async function SP(e, t, n, r, i) {
 	return [s.refs[i]];
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/pwh-collaboration-target.ts
-function CP(e, t, n) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/pwh-collaboration-target.ts
+function TP(e, t, n) {
 	if (!n) throw Error("요청 대상 식별 정보가 없습니다.");
 	let r = -1, i = e.getParagraphCount(t);
 	if (i > 2e4) throw Error("문단 추적 한도 초과");
-	for (let a = 0; a < i; a++) if (n.startsWith("content:") ? wP(e, t, a) === n : e.getParagraphStableId(t, a) === n) {
+	for (let a = 0; a < i; a++) if (n.startsWith("content:") ? EP(e, t, a) === n : e.getParagraphStableId(t, a) === n) {
 		if (r !== -1) throw Error("문단 식별자가 중복됩니다.");
 		r = a;
 	}
 	if (r < 0) throw Error("요청한 문단이 삭제되거나 다른 문서로 바뀌었습니다.");
 	return r;
 }
-function wP(e, t, n) {
+function EP(e, t, n) {
 	let r = e.getParagraphStableId(t, n);
 	if (r) return r;
 	let i = e.getParagraphLength(t, n);
@@ -67114,7 +67174,7 @@ function wP(e, t, n) {
 		paragraphFormat: e.getParaPropertiesAt(t, n)
 	});
 }
-async function TP(e, t) {
+async function DP(e, t) {
 	let n = t.documentState?.documentEpoch;
 	if (t.kind === "object" && t.objects?.length === 1 && t.objects[0].source.type === "image") {
 		let r = t.objects[0].source;
@@ -67171,7 +67231,7 @@ async function TP(e, t) {
 		for (let t = r.paragraphIndex; t <= i.paragraphIndex; t++) {
 			let n = e.getParagraphLength(r.sectionIndex, t), i = e.getTextRange(r.sectionIndex, t, 0, n);
 			a.push({
-				id: wP(e, r.sectionIndex, t),
+				id: EP(e, r.sectionIndex, t),
 				text: i,
 				length: n,
 				format: e.getCharPropertiesAt(r.sectionIndex, t, t === r.paragraphIndex ? r.charOffset : 0),
@@ -67189,12 +67249,12 @@ async function TP(e, t) {
 	}
 	return null;
 }
-async function EP(e, t, n) {
+async function OP(e, t, n) {
 	let r = t.target;
 	if (!r) throw Error("이전 요청은 대상 추적 정보를 포함하지 않습니다. 다시 요청하세요.");
 	if (n.documentState.documentEpoch !== r.epoch) throw Error("문서를 다시 열어 요청 대상이 만료됐습니다.");
 	if (r.kind === "body_text") {
-		let i = r.segments.map((t) => CP(e, r.section, t.id));
+		let i = r.segments.map((t) => TP(e, r.section, t.id));
 		if (i.some((e, t) => t && e !== i[t - 1] + 1)) throw Error("요청 범위에 문단이 추가·이동됐습니다.");
 		for (let t = 0; t < i.length; t++) {
 			let n = i[t], a = r.segments[t], o = e.getParagraphLength(r.section, n);
@@ -67216,7 +67276,7 @@ async function EP(e, t, n) {
 		};
 	}
 	if (r.kind === "cell_text") {
-		let i = r.parentId ? [CP(e, r.section, r.parentId)] : Array.from({ length: Math.min(e.getParagraphCount(r.section), 2e4) }, (e, t) => t), a = [];
+		let i = r.parentId ? [TP(e, r.section, r.parentId)] : Array.from({ length: Math.min(e.getParagraphCount(r.section), 2e4) }, (e, t) => t), a = [];
 		for (let t of i) try {
 			if (JSON.stringify(e.getTableProperties(r.section, t, r.controlIndex)) !== JSON.stringify(r.tableProperties)) continue;
 			r.segments.every((n, i) => {
@@ -67241,7 +67301,7 @@ async function EP(e, t, n) {
 		};
 	}
 	if (r.kind === "image") {
-		let i = r.source, a = [], o = r.parentId ? [CP(e, i.sec, r.parentId)] : Array.from({ length: Math.min(e.getParagraphCount(i.sec), 2e4) }, (e, t) => t);
+		let i = r.source, a = [], o = r.parentId ? [TP(e, i.sec, r.parentId)] : Array.from({ length: Math.min(e.getParagraphCount(i.sec), 2e4) }, (e, t) => t);
 		for (let t of o) {
 			let n = e.getControlTextPositions(i.sec, t);
 			for (let o = 0; o < n.length; o++) try {
@@ -67268,8 +67328,8 @@ async function EP(e, t, n) {
 	throw Error("지원되지 않는 요청 대상입니다.");
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/pwh-picture-replace.ts
-function DP(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/pwh-picture-replace.ts
+function kP(e) {
 	if (e?.kind !== "object" || e.objects?.length !== 1) throw Error("교체할 그림 하나를 선택하세요.");
 	let t = e.objects[0].source;
 	if (t?.type !== "image" || t.headerFooter || t.noteRef || ![
@@ -67289,8 +67349,8 @@ function DP(e) {
 		pathJson: JSON.stringify(n)
 	};
 }
-function OP(e, t, n, r) {
-	let { ref: i, path: a, pathJson: o } = DP(t), s = a.length ? e.getCellPicturePropertiesByPath(i.sec, i.ppi, a, i.ci) : e.getPictureProperties(i.sec, i.ppi, i.ci);
+function AP(e, t, n, r) {
+	let { ref: i, path: a, pathJson: o } = kP(t), s = a.length ? e.getCellPicturePropertiesByPath(i.sec, i.ppi, a, i.ci) : e.getPictureProperties(i.sec, i.ppi, i.ci);
 	if (JSON.stringify(s) !== JSON.stringify(t.objects[0].properties)) throw Error("그림 속성이 바뀌었습니다. 다시 선택하세요.");
 	let c = e.assignPictureImage(i.sec, i.ppi, o, i.ci, n, r.width, r.height, r.extension), l = typeof c == "string" ? JSON.parse(c) : c;
 	if (l?.ok !== !0) throw Error("그림 교체 실패");
@@ -67307,15 +67367,15 @@ function OP(e, t, n, r) {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/pwh-page-layout.ts
-var kP = {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/pwh-page-layout.ts
+var jP = {
 	A4: [59528, 84188],
 	A3: [84188, 119055],
 	B4: [72850, 103040],
 	B5: [51502, 72850],
 	Letter: [62208, 80496],
 	Legal: [62208, 102816]
-}, AP = {
+}, MP = {
 	left: "marginLeft",
 	right: "marginRight",
 	top: "marginTop",
@@ -67324,24 +67384,24 @@ var kP = {
 	footer: "marginFooter",
 	gutter: "marginGutter"
 };
-function jP(e) {
+function NP(e) {
 	if (!e || typeof e != "object" || Array.isArray(e) || Object.keys(e).some((e) => ![
 		"paper",
 		"orientation",
 		"marginsMm"
 	].includes(e)) || !Object.keys(e).length) throw Error("용지·방향·여백 중 변경할 설정을 지정하세요.");
-	if (e.paper !== void 0 && !kP[e.paper]) throw Error("지원되지 않는 용지입니다.");
+	if (e.paper !== void 0 && !jP[e.paper]) throw Error("지원되지 않는 용지입니다.");
 	if (e.orientation !== void 0 && !["portrait", "landscape"].includes(e.orientation)) throw Error("용지 방향을 확인하세요.");
-	if (e.marginsMm !== void 0 && (!e.marginsMm || typeof e.marginsMm != "object" || Array.isArray(e.marginsMm) || !Object.keys(e.marginsMm).length || Object.entries(e.marginsMm).some(([e, t]) => !AP[e] || typeof t != "number" || !Number.isFinite(t) || t < 0 || t > 150))) throw Error("여백은 0~150mm 범위의 숫자여야 합니다.");
+	if (e.marginsMm !== void 0 && (!e.marginsMm || typeof e.marginsMm != "object" || Array.isArray(e.marginsMm) || !Object.keys(e.marginsMm).length || Object.entries(e.marginsMm).some(([e, t]) => !MP[e] || typeof t != "number" || !Number.isFinite(t) || t < 0 || t > 150))) throw Error("여백은 0~150mm 범위의 숫자여야 합니다.");
 }
-function MP(e, t, n) {
-	jP(t);
+function PP(e, t, n) {
+	NP(t);
 	let r = e.getSectionCount();
 	if (n !== void 0 && (!Number.isInteger(n) || n < 0 || n >= r)) throw Error("구역 번호를 확인하세요.");
 	return Array.from({ length: n === void 0 ? r : 1 }, (r, i) => {
 		let a = n ?? i, o = e.getPageDef(a), s = typeof o == "string" ? JSON.parse(o) : o, c = { ...s };
-		t.paper && ([c.width, c.height] = kP[t.paper]), t.orientation !== void 0 && (c.landscape = t.orientation === "landscape");
-		for (let [e, n] of Object.entries(t.marginsMm || {})) c[AP[e]] = Math.round(Number(n) * 7200 / 25.4);
+		t.paper && ([c.width, c.height] = jP[t.paper]), t.orientation !== void 0 && (c.landscape = t.orientation === "landscape");
+		for (let [e, n] of Object.entries(t.marginsMm || {})) c[MP[e]] = Math.round(Number(n) * 7200 / 25.4);
 		let l = c.landscape ? c.height : c.width, u = c.landscape ? c.width : c.height;
 		if (l - c.marginLeft - c.marginRight - c.marginGutter < 2835 || u - c.marginTop - c.marginBottom < 2835) throw Error("여백을 적용하면 본문 영역이 너무 작습니다.");
 		return {
@@ -67351,8 +67411,8 @@ function MP(e, t, n) {
 		};
 	});
 }
-function NP(e, t, n) {
-	let r = MP(e, t, n);
+function FP(e, t, n) {
+	let r = PP(e, t, n);
 	for (let t of r) {
 		let n = e.setPageDef(t.section, t.after);
 		if ((typeof n == "string" ? JSON.parse(n) : n)?.ok === !1) throw Error("용지 설정 적용 실패");
@@ -67365,8 +67425,8 @@ function NP(e, t, n) {
 	return r;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/pwh-blank-compose.ts
-function PP(e) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/pwh-blank-compose.ts
+function IP(e) {
 	try {
 		if (e.getSectionCount() !== 1) return !1;
 		let t = e.getControls(), n = typeof t == "string" ? JSON.parse(t) : t;
@@ -67377,7 +67437,7 @@ function PP(e) {
 		return !1;
 	}
 }
-function FP(e) {
+function LP(e) {
 	if (!Array.isArray(e) || !e.length || e.length > 128) throw Error("초안은 1~128개 문단이어야 합니다.");
 	let t = 0;
 	for (let n of e) if (!n || typeof n.text != "string" || /[\r\n\u0000-\u0008\ufffc]/.test(n.text) || ![
@@ -67387,8 +67447,8 @@ function FP(e) {
 	].includes(n.role) || (t += n.text.length) > 24e3) throw Error("초안 문단·역할·길이를 확인하세요.");
 	if (!e.some((e) => e.text.trim())) throw Error("작성할 내용을 입력하세요.");
 }
-function IP(e, t) {
-	if (FP(t), !PP(e)) throw Error("빈 문서가 아닙니다. 기존 내용을 덮어쓰지 않았습니다.");
+function RP(e, t) {
+	if (LP(t), !IP(e)) throw Error("빈 문서가 아닙니다. 기존 내용을 덮어쓰지 않았습니다.");
 	let n = (e) => {
 		if ((typeof e == "string" ? JSON.parse(e) : e)?.ok === !1) throw Error("초안 적용 실패");
 	};
@@ -67410,45 +67470,45 @@ function IP(e, t) {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/pwh-request-state.mjs
-function LP(e, t, n = 0) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/pwh-request-state.mjs
+function zP(e, t, n = 0) {
 	if (e === t) return !0;
 	if (n > 32 || e === null || t === null || typeof e != "object" || typeof t != "object" || Array.isArray(e) !== Array.isArray(t)) return !1;
-	if (Array.isArray(e)) return e.length === t.length && e.every((e, r) => LP(e, t[r], n + 1));
+	if (Array.isArray(e)) return e.length === t.length && e.every((e, r) => zP(e, t[r], n + 1));
 	let r = Object.keys(e).sort(), i = Object.keys(t).sort();
-	return r.length === i.length && r.every((r, a) => r === i[a] && LP(e[r], t[r], n + 1));
+	return r.length === i.length && r.every((r, a) => r === i[a] && zP(e[r], t[r], n + 1));
 }
-function RP(e) {
+function BP(e) {
 	if (!e || typeof e != "object" || e.target != null) return e;
 	let { target: t, ...n } = e;
 	return n;
 }
-function zP(e, t) {
-	return LP(RP(e), RP(t));
+function VP(e, t) {
+	return zP(BP(e), BP(t));
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/pwh-table-content.mjs
-var BP = (e) => typeof e == "string" ? JSON.parse(e) : e, VP = (e) => {
-	let t = BP(e);
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/pwh-table-content.mjs
+var HP = (e) => typeof e == "string" ? JSON.parse(e) : e, UP = (e) => {
+	let t = HP(e);
 	if (t?.ok !== !0) throw Error("Table operation failed");
 	return t;
-}, HP = (e) => Array.from(e).length, UP = (e) => typeof e == "string" && e.length <= 24e3 && !/[\r\n\u0000-\u0008\u000b-\u001f\ufffc]/.test(e);
-function WP(e, t) {
+}, WP = (e) => Array.from(e).length, GP = (e) => typeof e == "string" && e.length <= 24e3 && !/[\r\n\u0000-\u0008\u000b-\u001f\ufffc]/.test(e);
+function KP(e, t) {
 	if (!Array.isArray(e) || !e.length || e.length > 256) throw Error("Provide 1 to 256 cell edits");
 	let n = /* @__PURE__ */ new Set(), r = 0;
 	for (let i of e) {
 		if (!i || Object.keys(i).some((e) => !["cellIndex", "paragraphs"].includes(e)) || !Number.isSafeInteger(i.cellIndex) || i.cellIndex < 0 || n.has(i.cellIndex) || t && !t.includes(i.cellIndex)) throw Error("Invalid, duplicate or unselected cell");
-		if (n.add(i.cellIndex), !Array.isArray(i.paragraphs) || !i.paragraphs.length || i.paragraphs.length > 128 || i.paragraphs.some((e) => !UP(e)) || (r += i.paragraphs.reduce((e, t) => e + t.length, 0)) > 24e3) throw Error("Invalid cell paragraphs; maximum total text is 24000 characters");
+		if (n.add(i.cellIndex), !Array.isArray(i.paragraphs) || !i.paragraphs.length || i.paragraphs.length > 128 || i.paragraphs.some((e) => !GP(e)) || (r += i.paragraphs.reduce((e, t) => e + t.length, 0)) > 24e3) throw Error("Invalid cell paragraphs; maximum total text is 24000 characters");
 	}
 }
-function GP(e, t, n, r) {
-	WP(n, r);
-	let i = uP(e, t.sec, t.ppi, t.ci);
+function qP(e, t, n, r) {
+	KP(n, r);
+	let i = fP(e, t.sec, t.ppi, t.ci);
 	for (let e of n) {
 		let t = i.cells[e.cellIndex];
 		if (!t || t.paragraphs.length !== e.paragraphs.length) throw Error("Keep the existing paragraph count in each cell");
 		for (let e of t.paragraphs) {
-			if (HP(e.text) !== e.length || !UP(e.text)) throw Error("Cell contains an object or unsupported text");
+			if (WP(e.text) !== e.length || !GP(e.text)) throw Error("Cell contains an object or unsupported text");
 			if (e.formats.length !== 1) throw Error("Cell has mixed character formatting; select a uniform cell");
 		}
 	}
@@ -67457,16 +67517,16 @@ function GP(e, t, n, r) {
 		snapshot: i
 	};
 }
-function KP(e, t, n, r) {
-	t = GP(e, t, n, r);
+function JP(e, t, n, r) {
+	t = qP(e, t, n, r);
 	let { sec: i, ppi: a, ci: o, snapshot: s } = t;
 	for (let t of n) for (let n = 0; n < t.paragraphs.length; n++) {
 		let r = s.cells[t.cellIndex].paragraphs[n], c = t.paragraphs[n];
-		r.length && VP(e.deleteTextInCell(i, a, o, t.cellIndex, n, 0, r.length)), c && (VP(e.insertTextInCell(i, a, o, t.cellIndex, n, 0, c)), VP(e.setCharShapeIdInCell(i, a, o, t.cellIndex, n, 0, HP(c), r.formats[0].format.charShapeId)));
+		r.length && UP(e.deleteTextInCell(i, a, o, t.cellIndex, n, 0, r.length)), c && (UP(e.insertTextInCell(i, a, o, t.cellIndex, n, 0, c)), UP(e.setCharShapeIdInCell(i, a, o, t.cellIndex, n, 0, WP(c), r.formats[0].format.charShapeId)));
 	}
 	e.flushDeferredPagination();
-	let c = uP(e, i, a, o);
-	if (!LP(s.dimensions, c.dimensions) || !LP(s.properties, c.properties)) throw Error("Table structure or placement changed");
+	let c = fP(e, i, a, o);
+	if (!zP(s.dimensions, c.dimensions) || !zP(s.properties, c.properties)) throw Error("Table structure or placement changed");
 	for (let e = 0; e < s.cells.length; e++) {
 		let t = s.cells[e], r = c.cells[e], i = n.find((t) => t.cellIndex === e), a = (e) => {
 			let { height: t, ...n } = e.properties;
@@ -67475,15 +67535,15 @@ function KP(e, t, n, r) {
 				properties: n
 			};
 		};
-		if (!LP(a(t), a(r))) throw Error("Cell structure or style changed");
+		if (!zP(a(t), a(r))) throw Error("Cell structure or style changed");
 		if (!i) {
-			if (!LP(t.paragraphs, r.paragraphs)) throw Error("Unselected cell changed");
+			if (!zP(t.paragraphs, r.paragraphs)) throw Error("Unselected cell changed");
 			continue;
 		}
 		if (r.paragraphs.length !== i.paragraphs.length) throw Error("Cell paragraph count changed");
 		for (let e = 0; e < r.paragraphs.length; e++) {
 			let n = t.paragraphs[e], a = r.paragraphs[e];
-			if (a.text !== i.paragraphs[e] || !LP(n.format, a.format) || a.formats.some((e) => !LP(e.format, n.formats[0].format))) throw Error("Cell content or formatting verification failed");
+			if (a.text !== i.paragraphs[e] || !zP(n.format, a.format) || a.formats.some((e) => !zP(e.format, n.formats[0].format))) throw Error("Cell content or formatting verification failed");
 		}
 	}
 	return {
@@ -67492,42 +67552,42 @@ function KP(e, t, n, r) {
 		structurePreserved: !0
 	};
 }
-function qP(e, t, n, r) {
-	if (typeof n != "string" || !n.trim() || n.length > 500 || !UP(n)) throw Error("표 제목은 줄바꿈 없는 1~500자로 입력하세요.");
-	r !== void 0 && pP([{
+function YP(e, t, n, r) {
+	if (typeof n != "string" || !n.trim() || n.length > 500 || !GP(n)) throw Error("표 제목은 줄바꿈 없는 1~500자로 입력하세요.");
+	r !== void 0 && hP([{
 		cellIndex: 0,
 		borders: r
 	}], [0]);
-	let { sec: i, ppi: a, ci: o } = t, s = uP(e, i, a, o), c = s.dimensions;
+	let { sec: i, ppi: a, ci: o } = t, s = fP(e, i, a, o), c = s.dimensions;
 	if (!c.rowCount || !c.colCount || c.rowCount >= 256 || (c.rowCount + 1) * c.colCount > 256) throw Error("제목 행을 추가할 수 없는 표 크기입니다.");
 	if (s.cells.some((e) => e.geometry.row === 0 && e.geometry.rowSpan > 1)) throw Error("첫 행에 세로 병합 셀이 있어 자동으로 제목을 추가할 수 없습니다.");
-	VP(e.insertTableRow(i, a, o, 0, !1)), c.colCount > 1 && VP(e.mergeTableCells(i, a, o, 0, 0, 0, c.colCount - 1));
-	let l = uP(e, i, a, o), u = l.cells.findIndex((e) => e.geometry.row === 0 && e.geometry.col === 0);
+	UP(e.insertTableRow(i, a, o, 0, !1)), c.colCount > 1 && UP(e.mergeTableCells(i, a, o, 0, 0, 0, c.colCount - 1));
+	let l = fP(e, i, a, o), u = l.cells.findIndex((e) => e.geometry.row === 0 && e.geometry.col === 0);
 	if (u < 0 || l.cells[u].geometry.colSpan !== c.colCount || l.dimensions.rowCount !== c.rowCount + 1 || l.dimensions.colCount !== c.colCount) throw Error("제목 행의 구조를 확인하지 못했습니다.");
 	for (let e of s.cells) {
 		let t = e.geometry, n = l.cells.find((e) => e.geometry.row === t.row + 1 && e.geometry.col === t.col), r = (e) => {
 			let { height: t, ...n } = e.properties;
 			return n;
 		};
-		if (!n || n.geometry.rowSpan !== t.rowSpan || n.geometry.colSpan !== t.colSpan || !LP(n.paragraphs, e.paragraphs) || !LP(r(n), r(e))) throw Error("기존 표 내용이나 구조·서식이 변경되었습니다.");
+		if (!n || n.geometry.rowSpan !== t.rowSpan || n.geometry.colSpan !== t.colSpan || !zP(n.paragraphs, e.paragraphs) || !zP(r(n), r(e))) throw Error("기존 표 내용이나 구조·서식이 변경되었습니다.");
 	}
 	if (l.cells[u].paragraphs.length !== 1 || l.cells[u].paragraphs[0].text) throw Error("새 제목 셀이 비어 있지 않습니다.");
-	if (KP(e, {
+	if (JP(e, {
 		sec: i,
 		ppi: a,
 		ci: o
 	}, [{
 		cellIndex: u,
 		paragraphs: [n]
-	}]), r !== void 0 && hP(e, {
+	}]), r !== void 0 && _P(e, {
 		sec: i,
 		ppi: a,
 		ci: o,
-		snapshot: uP(e, i, a, o)
+		snapshot: fP(e, i, a, o)
 	}, [{
 		cellIndex: u,
 		borders: r
-	}]), l = uP(e, i, a, o), l.cells[u].paragraphs[0].text !== n) throw Error("표 제목을 확인하지 못했습니다.");
+	}]), l = fP(e, i, a, o), l.cells[u].paragraphs[0].text !== n) throw Error("표 제목을 확인하지 못했습니다.");
 	return {
 		source: {
 			sec: i,
@@ -67541,7 +67601,7 @@ function qP(e, t, n, r) {
 		...r ? { bordersApplied: r } : {}
 	};
 }
-function JP(e) {
+function XP(e) {
 	if (!e || Object.keys(e).some((e) => ![
 		"rows",
 		"columns",
@@ -67561,7 +67621,7 @@ function JP(e) {
 			r.rowSpan ?? 1,
 			r.columnSpan ?? 1
 		].every(Number.isSafeInteger) || r.row < 0 || r.column < 0 || (r.rowSpan ?? 1) < 1 || (r.columnSpan ?? 1) < 1 || r.row + (r.rowSpan ?? 1) > e.rows || r.column + (r.columnSpan ?? 1) > e.columns) throw Error("Invalid cell coordinates or span");
-		if (WP([{
+		if (KP([{
 			cellIndex: 0,
 			paragraphs: r.paragraphs
 		}]), n += r.paragraphs.reduce((e, t) => e + t.length, 0), n > 24e3) throw Error("Table text exceeds 24000 characters");
@@ -67574,32 +67634,32 @@ function JP(e) {
 	if (t.size !== e.rows * e.columns) throw Error("Table grid has missing cells");
 	return e;
 }
-function YP(e, t, n) {
-	if (JP(n), t.parentParaIndex != null || t.cellPath?.length || t.headerFooter || t.noteRef) throw Error("Insert a new table at a body cursor outside existing cells");
+function ZP(e, t, n) {
+	if (XP(n), t.parentParaIndex != null || t.cellPath?.length || t.headerFooter || t.noteRef) throw Error("Insert a new table at a body cursor outside existing cells");
 	let { sectionIndex: r, paragraphIndex: i, charOffset: a } = t;
 	if (![
 		r,
 		i,
 		a
 	].every((e) => Number.isSafeInteger(e) && e >= 0) || a > e.getParagraphLength(r, i)) throw Error("Invalid insertion position");
-	let o = VP(e.createTable(r, i, a, n.rows, n.columns)), s = o.controlIdx, c = o.paraIdx;
+	let o = UP(e.createTable(r, i, a, n.rows, n.columns)), s = o.controlIdx, c = o.paraIdx;
 	if (!Number.isSafeInteger(s) || !Number.isSafeInteger(c)) throw Error("Missing created table address");
-	for (let t of n.cells) ((t.rowSpan ?? 1) > 1 || (t.columnSpan ?? 1) > 1) && VP(e.mergeTableCells(r, c, s, t.row, t.column, t.row + (t.rowSpan ?? 1) - 1, t.column + (t.columnSpan ?? 1) - 1));
-	let l = uP(e, r, c, s);
+	for (let t of n.cells) ((t.rowSpan ?? 1) > 1 || (t.columnSpan ?? 1) > 1) && UP(e.mergeTableCells(r, c, s, t.row, t.column, t.row + (t.rowSpan ?? 1) - 1, t.column + (t.columnSpan ?? 1) - 1));
+	let l = fP(e, r, c, s);
 	for (let t of n.cells) {
 		let n = l.cells.findIndex((e) => e.geometry.row === t.row && e.geometry.col === t.column);
 		if (n < 0) throw Error("Created cell not found");
 		let i = l.cells[n].geometry;
 		if (i.rowSpan !== (t.rowSpan ?? 1) || i.colSpan !== (t.columnSpan ?? 1)) throw Error("Created merge differs");
-		for (let i = 1; i < t.paragraphs.length; i++) VP(e.splitParagraphInCell(r, c, s, n, i - 1, 0));
+		for (let i = 1; i < t.paragraphs.length; i++) UP(e.splitParagraphInCell(r, c, s, n, i - 1, 0));
 	}
 	let u = {
 		sec: r,
 		ppi: c,
 		ci: s
-	}, d = uP(e, r, c, s);
+	}, d = fP(e, r, c, s);
 	return {
-		...KP(e, u, n.cells.map((e) => ({
+		...JP(e, u, n.cells.map((e) => ({
 			cellIndex: d.cells.findIndex((t) => t.geometry.row === e.row && t.geometry.col === e.column),
 			paragraphs: e.paragraphs
 		}))),
@@ -67609,19 +67669,19 @@ function YP(e, t, n) {
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/pwh-text-edit.mjs
-var XP = (e) => typeof e == "string" ? JSON.parse(e) : e, ZP = (e) => Array.from(e), QP = [
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/pwh-text-edit.mjs
+var QP = (e) => typeof e == "string" ? JSON.parse(e) : e, $P = (e) => Array.from(e), eF = [
 	"documentEpoch",
 	"changeSeq",
 	"documentSha256"
-], $P = (e) => Object.fromEntries(QP.map((t) => [t, (e?.documentState || e)?.[t]]));
-function eF(e, t) {
-	if (!e || QP.some((n) => e[n] !== $P(t)[n])) throw Error("문서 내용이 변경되었습니다. 텍스트를 다시 검색해 주세요.");
+], tF = (e) => Object.fromEntries(eF.map((t) => [t, (e?.documentState || e)?.[t]]));
+function nF(e, t) {
+	if (!e || eF.some((n) => e[n] !== tF(t)[n])) throw Error("문서 내용이 변경되었습니다. 텍스트를 다시 검색해 주세요.");
 }
-var tF = (e) => {
-	let t = XP(e);
+var rF = (e) => {
+	let t = QP(e);
 	if (t?.ok === !1 || t?.error) throw Error(t.error || "텍스트 수정 실패");
-}, nF = (e, t = !1) => typeof e == "string" && (t || e.length > 0) && e.length <= 12e3 && !/[\r\n\u0000-\u0008\u000b-\u001f\ufffc]/.test(e), rF = (e) => JSON.stringify(e.cellPath), iF = (e) => JSON.stringify([
+}, iF = (e, t = !1) => typeof e == "string" && (t || e.length > 0) && e.length <= 12e3 && !/[\r\n\u0000-\u0008\u000b-\u001f\ufffc]/.test(e), aF = (e) => JSON.stringify(e.cellPath), oF = (e) => JSON.stringify([
 	e.section,
 	e.paragraph,
 	(e.cellPath || []).map((e) => [
@@ -67630,7 +67690,7 @@ var tF = (e) => {
 		e.cellParaIndex
 	])
 ]);
-function aF(e) {
+function sF(e) {
 	let t = e.cellContext, n = e.cellPath || t && [{
 		controlIndex: t.ctrlIdx,
 		cellIndex: t.cellIdx,
@@ -67642,13 +67702,13 @@ function aF(e) {
 		...n?.length ? { cellPath: n } : {}
 	};
 }
-function oF(e, t) {
-	let n = t.cellPath ? e.getCellParagraphLengthByPath(t.section, t.paragraph, rF(t)) : e.getParagraphLength(t.section, t.paragraph);
+function cF(e, t) {
+	let n = t.cellPath ? e.getCellParagraphLengthByPath(t.section, t.paragraph, aF(t)) : e.getParagraphLength(t.section, t.paragraph);
 	if (n > 48e3) throw Error("문단이 텍스트 편집 한도를 넘습니다.");
-	return t.cellPath ? e.getTextInCellByPath(t.section, t.paragraph, rF(t), 0, n) : e.getTextRange(t.section, t.paragraph, 0, n);
+	return t.cellPath ? e.getTextInCellByPath(t.section, t.paragraph, aF(t), 0, n) : e.getTextRange(t.section, t.paragraph, 0, n);
 }
-function sF(e, t, n, r) {
-	let i = XP(t.cellPath ? e.getCharShapeRunsInCellByPath(t.section, t.paragraph, rF(t), n, r) : e.getCharShapeRuns(t.section, t.paragraph, n, r));
+function lF(e, t, n, r) {
+	let i = QP(t.cellPath ? e.getCharShapeRunsInCellByPath(t.section, t.paragraph, aF(t), n, r) : e.getCharShapeRuns(t.section, t.paragraph, n, r));
 	if (!Array.isArray(i)) throw Error("글자 서식을 읽지 못했습니다.");
 	let a = [], o = n;
 	for (let e of i) {
@@ -67658,16 +67718,16 @@ function sF(e, t, n, r) {
 	if (o !== r) throw Error("글자 서식 구간이 누락되었습니다.");
 	return a;
 }
-function cF(e, t, n, { cursor: r = 0, limit: i = 40 } = {}) {
-	if (!nF(n) || !Number.isSafeInteger(r) || r < 0 || !Number.isSafeInteger(i) || i < 1 || i > 100) throw Error("검색어와 검색 범위를 확인하세요.");
-	let a = XP(e.searchAllText(n, !0, !0));
+function uF(e, t, n, { cursor: r = 0, limit: i = 40 } = {}) {
+	if (!iF(n) || !Number.isSafeInteger(r) || r < 0 || !Number.isSafeInteger(i) || i < 1 || i > 100) throw Error("검색어와 검색 범위를 확인하세요.");
+	let a = QP(e.searchAllText(n, !0, !0));
 	if (!Array.isArray(a)) throw Error("텍스트 검색 결과가 올바르지 않습니다.");
 	if (r > a.length) throw Error("텍스트 검색 위치가 범위를 넘었습니다.");
 	let o = [], s = [], c = r, l = 0;
 	for (; c < a.length && s.length < i; c++) {
 		let t = a[c];
 		if (t.equationControl != null) continue;
-		let r = aF(t), i = oF(e, r), u = ZP(i).slice(t.charOffset, t.charOffset + t.length).join("");
+		let r = sF(t), i = cF(e, r), u = $P(i).slice(t.charOffset, t.charOffset + t.length).join("");
 		if (u !== n) throw Error("검색 위치의 원문을 확인하지 못했습니다.");
 		if (s.length && l + i.length > 48e3) break;
 		let d = {
@@ -67685,7 +67745,7 @@ function cF(e, t, n, { cursor: r = 0, limit: i = 40 } = {}) {
 		}), l += i.length;
 	}
 	return {
-		revision: $P(t),
+		revision: tF(t),
 		refs: o,
 		result: {
 			query: n,
@@ -67697,8 +67757,8 @@ function cF(e, t, n, { cursor: r = 0, limit: i = 40 } = {}) {
 		}
 	};
 }
-function lF(e, t, n) {
-	let r = ZP(e), i = ZP(t);
+function dF(e, t, n) {
+	let r = $P(e), i = $P(t);
 	if (n.length !== r.length) throw Error("글자 서식 길이가 다릅니다.");
 	if (!i.length) return [];
 	let a = 0, o = 0;
@@ -67712,24 +67772,24 @@ function lF(e, t, n) {
 	for (; f < s || p < c;) f < s && p < c && r[a + f] === i[a + p] ? (m = n[a + f], h = !1, d.push(m), f++, p++) : f < s && (p === c || u[(f + 1) * l + p] >= u[f * l + p + 1]) ? (h || (m = n[a + f]), h = !0, f++) : (d.push(m), p++);
 	return d.push(...n.slice(r.length - o)), d;
 }
-function uF(e, t, n, r) {
+function fF(e, t, n, r) {
 	if (!Array.isArray(n) || n.length < 1 || n.length > 100) throw Error("수정할 텍스트 범위를 1~100개 지정하세요.");
 	let i = [], a = /* @__PURE__ */ new Map(), o = 0;
 	for (let s of n) {
 		let n = t.get(s.searchId);
 		if (!n) throw Error("검색 결과가 만료되었습니다. 다시 검색하세요.");
-		eF(n.revision, r);
+		nF(n.revision, r);
 		let c = n.refs.find((e) => e.id === s.matchId);
-		if (!c || !nF(s.replacement, !0) || (o += s.replacement.length) > 48e3) throw Error("수정할 검색 결과와 내용을 확인하세요.");
-		let l = oF(e, c.source);
+		if (!c || !iF(s.replacement, !0) || (o += s.replacement.length) > 48e3) throw Error("수정할 검색 결과와 내용을 확인하세요.");
+		let l = cF(e, c.source);
 		if (l !== c.paragraphText) throw Error("검색한 문단이 변경되었습니다. 다시 검색해 주세요.");
-		let u = iF(c.source), d = sF(e, c.source, c.start, c.start + c.length), f = {
+		let u = oF(c.source), d = lF(e, c.source, c.start, c.start + c.length), f = {
 			...c,
 			replacement: s.replacement,
-			ids: lF(c.original, s.replacement, d)
+			ids: dF(c.original, s.replacement, d)
 		}, p = a.get(u) || {
 			source: c.source,
-			text: ZP(l),
+			text: $P(l),
 			parts: []
 		};
 		if (p.parts.some((e) => c.start < e.start + e.length && e.start < c.start + c.length)) throw Error("수정할 텍스트 범위가 겹칩니다.");
@@ -67737,7 +67797,7 @@ function uF(e, t, n, r) {
 	}
 	for (let e of a.values()) {
 		e.parts.sort((e, t) => t.start - e.start);
-		for (let t of e.parts) e.text.splice(t.start, t.length, ...ZP(t.replacement));
+		for (let t of e.parts) e.text.splice(t.start, t.length, ...$P(t.replacement));
 		e.expectedText = e.text.join("");
 	}
 	return {
@@ -67745,7 +67805,7 @@ function uF(e, t, n, r) {
 		count: i.length
 	};
 }
-function dF(e, t, n) {
+function pF(e, t, n) {
 	for (let r of t.groups) for (let t of r.parts) {
 		let r = t.source, i = r.cellPath?.[0], a = {
 			sectionIndex: r.section,
@@ -67759,21 +67819,21 @@ function dF(e, t, n) {
 				cellPath: r.cellPath
 			} : {}
 		};
-		n ? n(e, a, t.length, t.replacement) : r.cellPath ? (tF(e.deleteTextInCellByPath(r.section, r.paragraph, rF(r), t.start, t.length)), t.replacement && tF(e.insertTextInCellByPath(r.section, r.paragraph, rF(r), t.start, t.replacement))) : (tF(e.deleteText(r.section, r.paragraph, t.start, t.length)), t.replacement && tF(e.insertText(r.section, r.paragraph, t.start, t.replacement)));
+		n ? n(e, a, t.length, t.replacement) : r.cellPath ? (rF(e.deleteTextInCellByPath(r.section, r.paragraph, aF(r), t.start, t.length)), t.replacement && rF(e.insertTextInCellByPath(r.section, r.paragraph, aF(r), t.start, t.replacement))) : (rF(e.deleteText(r.section, r.paragraph, t.start, t.length)), t.replacement && rF(e.insertText(r.section, r.paragraph, t.start, t.replacement)));
 		for (let n = 0; n < t.ids.length;) {
 			let i = n + 1;
 			for (; i < t.ids.length && t.ids[i] === t.ids[n];) i++;
-			tF(r.cellPath ? e.setCharShapeIdInCellByPath(r.section, r.paragraph, rF(r), t.start + n, t.start + i, t.ids[n]) : e.setCharShapeId(r.section, r.paragraph, t.start + n, t.start + i, t.ids[n])), n = i;
+			rF(r.cellPath ? e.setCharShapeIdInCellByPath(r.section, r.paragraph, aF(r), t.start + n, t.start + i, t.ids[n]) : e.setCharShapeId(r.section, r.paragraph, t.start + n, t.start + i, t.ids[n])), n = i;
 		}
 	}
 	e.flushDeferredPagination();
-	for (let n of t.groups) if (oF(e, n.source) !== n.expectedText) throw Error("텍스트 수정 결과가 요청과 다릅니다.");
+	for (let n of t.groups) if (cF(e, n.source) !== n.expectedText) throw Error("텍스트 수정 결과가 요청과 다릅니다.");
 	return {
 		ranges: t.count,
 		paragraphs: t.groups.length
 	};
 }
-function fF(e, t) {
+function mF(e, t) {
 	let n = t.cellPath?.length ? t.cellPath : t.parentParaIndex == null ? void 0 : [{
 		controlIndex: t.controlIndex,
 		cellIndex: t.cellIndex,
@@ -67782,12 +67842,12 @@ function fF(e, t) {
 		section: t.sectionIndex,
 		paragraph: t.parentParaIndex ?? t.paragraphIndex,
 		...n ? { cellPath: n } : {}
-	}, i = e.groups.find((e) => iF(e.source) === iF(r));
+	}, i = e.groups.find((e) => oF(e.source) === oF(r));
 	if (!i) return t;
 	let a = t.charOffset, o = 0, s;
 	for (let e of [...i.parts].reverse()) {
 		if (a < e.start) break;
-		let t = ZP(e.replacement).length;
+		let t = $P(e.replacement).length;
 		if (a < e.start + e.length) {
 			s = e.start + o + Math.min(a - e.start, t);
 			break;
@@ -67796,16 +67856,16 @@ function fF(e, t) {
 	}
 	return {
 		...t,
-		charOffset: Math.max(0, Math.min(s ?? a + o, ZP(i.expectedText).length))
+		charOffset: Math.max(0, Math.min(s ?? a + o, $P(i.expectedText).length))
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/pwh-nested-table-paste.mjs
-var pF = (e) => typeof e == "string" ? JSON.parse(e) : e, mF = (e) => {
-	let t = pF(e);
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/pwh-nested-table-paste.mjs
+var hF = (e) => typeof e == "string" ? JSON.parse(e) : e, gF = (e) => {
+	let t = hF(e);
 	if (!t?.ok) throw Error("중첩 표 처리에 실패했습니다.");
 	return t;
-}, hF = (e) => e.reduce((e, t) => (e[t.ctrlId] = (e[t.ctrlId] || 0) + 1, e), {}), gF = (e, t) => {
+}, _F = (e) => e.reduce((e, t) => (e[t.ctrlId] = (e[t.ctrlId] || 0) + 1, e), {}), vF = (e, t) => {
 	let n = {};
 	for (let r of /* @__PURE__ */ new Set([...Object.keys(e), ...Object.keys(t)])) {
 		let i = (e[r] || 0) - (t[r] || 0);
@@ -67813,7 +67873,7 @@ var pF = (e) => typeof e == "string" ? JSON.parse(e) : e, mF = (e) => {
 	}
 	return n;
 };
-function _F(e) {
+function yF(e) {
 	if (typeof e != "string" || e.length > 8388608) return null;
 	let t = e.indexOf("[data-hwpjson]");
 	if (t < 0) return null;
@@ -67827,7 +67887,7 @@ function _F(e) {
 	}
 	return i;
 }
-function vF(e) {
+function bF(e) {
 	let t = e?.cursor, n = e?.table?.selectedCells;
 	if (!t || t.parentParaIndex == null || t.controlIndex == null || t.cellIndex == null || t.cellParaIndex == null || t.isTextBox || t.headerFooter || t.noteRef) throw Error("표 안의 셀에 커서를 놓고 다시 붙여넣으세요.");
 	let r = (e) => e && Object.fromEntries([
@@ -67840,39 +67900,39 @@ function vF(e) {
 		"cellParaIndex",
 		"cellPath"
 	].map((t) => [t, e[t]]));
-	if (e.selection && !LP(r(e.selection.start), r(e.selection.end)) || e.kind === "cell_block" && (!n || n.length !== 1 || n[0].cellIndex !== t.cellIndex)) throw Error("표를 넣을 셀 하나만 선택해 주세요.");
+	if (e.selection && !zP(r(e.selection.start), r(e.selection.end)) || e.kind === "cell_block" && (!n || n.length !== 1 || n[0].cellIndex !== t.cellIndex)) throw Error("표를 넣을 셀 하나만 선택해 주세요.");
 	return t;
 }
-function yF(e, t) {
-	return t.cellPath?.length > 1 ? mF(e.pasteInternalInCellByPath(t.sectionIndex, t.parentParaIndex, JSON.stringify(t.cellPath), t.charOffset)) : mF(e.pasteInternalInCell(t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, t.cellParaIndex, t.charOffset));
+function xF(e, t) {
+	return t.cellPath?.length > 1 ? gF(e.pasteInternalInCellByPath(t.sectionIndex, t.parentParaIndex, JSON.stringify(t.cellPath), t.charOffset)) : gF(e.pasteInternalInCell(t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, t.cellParaIndex, t.charOffset));
 }
-function bF(e, t) {
-	let n = vF(t);
+function SF(e, t) {
+	let n = bF(t);
 	if (!e.clipboardHasControl()) throw Error("복사한 표를 다시 선택해 복사하세요.");
-	let r = hF(pF(e.getControls()));
-	if (yF(e, n), (hF(pF(e.getControls())).tbl || 0) <= (r.tbl || 0)) throw Error("붙여넣은 표 개체를 확인하지 못했습니다.");
+	let r = _F(hF(e.getControls()));
+	if (xF(e, n), (_F(hF(e.getControls())).tbl || 0) <= (r.tbl || 0)) throw Error("붙여넣은 표 개체를 확인하지 못했습니다.");
 	return { ok: !0 };
 }
-function xF(e, t, n, r, i) {
-	let a = vF(t);
+function CF(e, t, n, r, i) {
+	let a = bF(t);
 	if (typeof n != "string" || !n || n.length > 8388608) throw Error("표 원본 정보를 확인하지 못했습니다.");
 	if (e.getSectionCount() !== 1 || a.sectionIndex !== 0) throw Error("여러 구역 문서에는 아직 표를 넣을 수 없습니다.");
 	let o = a.sectionIndex, s = e.getParagraphCount(o), c = s - 1;
 	if (c < 0) throw Error("문서의 본문을 확인하지 못했습니다.");
-	let l = pF(e.getControls()), u = e.getParagraphLength(o, c), d = e.getTextRange(o, c, 0, u), f = pF(e.getParaPropertiesAt(o, c)), p = Array.from({ length: Math.max(1, u) }, (t, n) => pF(e.getCharPropertiesAt(o, c, n)));
-	if (mF(e.insertPwhScratchParagraph(o, s)), e.getParagraphCount(o) !== s + 1) throw Error("임시 문단을 확인하지 못했습니다.");
+	let l = hF(e.getControls()), u = e.getParagraphLength(o, c), d = e.getTextRange(o, c, 0, u), f = hF(e.getParaPropertiesAt(o, c)), p = Array.from({ length: Math.max(1, u) }, (t, n) => hF(e.getCharPropertiesAt(o, c, n)));
+	if (gF(e.insertPwhScratchParagraph(o, s)), e.getParagraphCount(o) !== s + 1) throw Error("임시 문단을 확인하지 못했습니다.");
 	let m = s;
-	mF(r === "hancom" ? e.pasteHwpJson(o, m, 0, n) : e.pasteHtml(o, m, 0, n));
-	let h = pF(e.getControls()), g = h.filter((e) => e.list === 0 && e.para >= m), _ = g.filter((e) => e.ctrlId === "tbl");
+	gF(r === "hancom" ? e.pasteHwpJson(o, m, 0, n) : e.pasteHtml(o, m, 0, n));
+	let h = hF(e.getControls()), g = h.filter((e) => e.list === 0 && e.para >= m), _ = g.filter((e) => e.ctrlId === "tbl");
 	if (_.length !== 1 || g.length !== 1) throw Error("표 하나만 복사해 다시 붙여넣어 주세요.");
-	let v = _[0], y = pF(e.getTableDimensions(o, v.para, v.controlIndex));
+	let v = _[0], y = hF(e.getTableDimensions(o, v.para, v.controlIndex));
 	if (!y?.cellCount || y.cellCount > 256) throw Error("복사한 표의 크기를 확인하지 못했습니다.");
 	if (i) {
 		if (y.rowCount !== i.rows || y.colCount !== i.columns || y.cellCount !== i.cells.length) throw Error("원본 표의 행·열·병합을 보존하지 못했습니다.");
 		for (let [t, n] of i.cells.entries()) {
 			let r = -1;
 			for (let t = 0; t < y.cellCount; t++) {
-				let i = pF(e.getCellInfo(o, v.para, v.controlIndex, t));
+				let i = hF(e.getCellInfo(o, v.para, v.controlIndex, t));
 				if (i.row === n.row && i.col === n.column) {
 					if (i.rowSpan !== (n.rowSpan ?? 1) || i.colSpan !== (n.columnSpan ?? 1)) throw Error("원본 표의 병합을 보존하지 못했습니다.");
 					r = t;
@@ -67889,53 +67949,53 @@ function xF(e, t, n, r, i) {
 			if (c(s) !== c(n.paragraphs)) throw Error("원본 표의 셀 내용을 보존하지 못했습니다.");
 			let l = i.clipboardStyles?.[t];
 			if (l) {
-				let t = pF(e.getCellProperties(o, v.para, v.controlIndex, r));
+				let t = hF(e.getCellProperties(o, v.para, v.controlIndex, r));
 				if (l.fillColor && String(t.fillColor).toLowerCase() !== l.fillColor.toLowerCase()) throw Error("셀 배경을 보존하지 못했습니다.");
 				for (let t = 0; t < a; t++) {
 					if (!e.getCellParagraphLength(o, v.para, v.controlIndex, r, t)) continue;
-					let n = pF(e.getCellCharPropertiesAt(o, v.para, v.controlIndex, r, t, 0));
+					let n = hF(e.getCellCharPropertiesAt(o, v.para, v.controlIndex, r, t, 0));
 					for (let e of [
 						"bold",
 						"fontSize",
 						"fontFamily",
 						"textColor"
 					]) if (l[e] !== void 0 && String(n[e]).toLowerCase() !== String(l[e]).toLowerCase()) throw Error("셀 글자 서식을 보존하지 못했습니다.");
-					if (l.alignment && pF(e.getCellParaPropertiesAt(o, v.para, v.controlIndex, r, t)).alignment !== l.alignment) throw Error("셀 문단 정렬을 보존하지 못했습니다.");
+					if (l.alignment && hF(e.getCellParaPropertiesAt(o, v.para, v.controlIndex, r, t)).alignment !== l.alignment) throw Error("셀 문단 정렬을 보존하지 못했습니다.");
 				}
 			}
 		}
 	}
-	let b = gF(hF(h), hF(l)), x = e.getParagraphCount(o);
+	let b = vF(_F(h), _F(l)), x = e.getParagraphCount(o);
 	for (let t = m; t < x; t++) if (e.getParagraphLength(o, t) !== 0) throw Error("표 밖의 글이 함께 복사되어 중첩 표로 넣지 않았습니다.");
-	mF(e.copyControl(o, v.para, v.controlIndex, "[]")), mF(e.deleteTableControl(o, v.para, v.controlIndex));
+	gF(e.copyControl(o, v.para, v.controlIndex, "[]")), gF(e.deleteTableControl(o, v.para, v.controlIndex));
 	for (let t = e.getParagraphCount(o) - 1; t >= m; t--) {
-		if (e.getParagraphLength(o, t) !== 0 || pF(e.getControls()).some((e) => e.list === 0 && e.para === t)) throw Error("임시 표를 안전하게 정리하지 못했습니다.");
-		mF(e.deletePwhScratchParagraph(o, t));
+		if (e.getParagraphLength(o, t) !== 0 || hF(e.getControls()).some((e) => e.list === 0 && e.para === t)) throw Error("임시 표를 안전하게 정리하지 못했습니다.");
+		gF(e.deletePwhScratchParagraph(o, t));
 	}
-	if (e.getParagraphCount(o) !== s || e.getParagraphLength(o, c) !== u || e.getTextRange(o, c, 0, u) !== d || !LP(pF(e.getParaPropertiesAt(o, c)), f) || !LP(Array.from({ length: Math.max(1, u) }, (t, n) => pF(e.getCharPropertiesAt(o, c, n))), p) || !LP(pF(e.getControls()), l)) throw Error("원래 본문을 보존하지 못해 붙여넣기를 취소했습니다.");
-	if (yF(e, a), !LP(gF(hF(pF(e.getControls())), hF(l)), b)) throw Error("붙여넣은 표의 개체를 확인하지 못했습니다.");
+	if (e.getParagraphCount(o) !== s || e.getParagraphLength(o, c) !== u || e.getTextRange(o, c, 0, u) !== d || !zP(hF(e.getParaPropertiesAt(o, c)), f) || !zP(Array.from({ length: Math.max(1, u) }, (t, n) => hF(e.getCharPropertiesAt(o, c, n))), p) || !zP(hF(e.getControls()), l)) throw Error("원래 본문을 보존하지 못해 붙여넣기를 취소했습니다.");
+	if (xF(e, a), !zP(vF(_F(hF(e.getControls())), _F(l)), b)) throw Error("붙여넣은 표의 개체를 확인하지 못했습니다.");
 	return {
 		rows: y.rowCount,
 		columns: y.colCount,
 		cells: y.cellCount
 	};
 }
-function SF(e, t, n) {
-	return xF(e, t, n, "hancom");
+function wF(e, t, n) {
+	return CF(e, t, n, "hancom");
 }
-function CF(e, t, n, r) {
-	return xF(e, t, n, "html", r);
+function TF(e, t, n, r) {
+	return CF(e, t, n, "html", r);
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/pwh-table-clipboard.mjs
-var wF = (e) => String(e ?? "").replace(/[&<>"']/g, (e) => ({
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/pwh-table-clipboard.mjs
+var EF = (e) => String(e ?? "").replace(/[&<>"']/g, (e) => ({
 	"&": "&amp;",
 	"<": "&lt;",
 	">": "&gt;",
 	"\"": "&quot;",
 	"'": "&#39;"
-})[e]), TF = (e) => typeof e == "string" ? JSON.parse(e) : e;
-function EF(e, t) {
+})[e]), DF = (e) => typeof e == "string" ? JSON.parse(e) : e;
+function OF(e, t) {
 	if (!Array.isArray(t) || !t.length || new Set(t).size !== t.length) throw Error("Select table cells to copy");
 	let n = t.map((t) => e.cells[t]);
 	if (n.some((e) => !e)) throw Error("Invalid selected cell");
@@ -67950,16 +68010,16 @@ function EF(e, t) {
 			paragraphs: e.paragraphs.map((e) => e.text)
 		}))
 	};
-	JP(s);
+	XP(s);
 	for (let e of n) for (let t of e.paragraphs) if (Array.from(t.text).length !== t.length || /[\u0000-\u0008\ufffc]/.test(t.text)) throw Error("Selected cells contain an object; copy its source HWPX instead");
 	let c = Array.from({ length: s.rows }, () => []), l = Array.from({ length: s.rows }, () => Array(s.columns).fill(""));
 	return n.forEach((e, t) => {
 		let n = s.cells[t], r = e.properties, i = e.paragraphs.map((e) => {
 			let t = Array.from(e.text), n = e.formats.map((n, r) => {
 				let i = n.format, a = t.slice(n.offset, e.formats[r + 1]?.offset ?? t.length).join("");
-				return `<span style="font-family:${wF(i.fontFamily || "맑은 고딕")};font-size:${(i.fontSize || 1e3) / 100}pt;font-weight:${i.bold ? "bold" : "normal"};font-style:${i.italic ? "italic" : "normal"};color:${wF(i.textColor || "#000000")}">${wF(a)}</span>`;
+				return `<span style="font-family:${EF(i.fontFamily || "맑은 고딕")};font-size:${(i.fontSize || 1e3) / 100}pt;font-weight:${i.bold ? "bold" : "normal"};font-style:${i.italic ? "italic" : "normal"};color:${EF(i.textColor || "#000000")}">${EF(a)}</span>`;
 			}).join("");
-			return `<p style="margin:0;text-align:${wF(e.format.alignment || "left")}">${n || "<br>"}</p>`;
+			return `<p style="margin:0;text-align:${EF(e.format.alignment || "left")}">${n || "<br>"}</p>`;
 		}).join(""), a = [
 			"Left",
 			"Right",
@@ -67967,11 +68027,11 @@ function EF(e, t) {
 			"Bottom"
 		].map((e) => {
 			let t = r["border" + e];
-			return `border-${e.toLowerCase()}:${t?.type === 0 ? "none" : `${Math.max(.3, (t?.width || 1) * .25)}pt ${t?.type === 2 ? "dashed" : t?.type === 3 ? "dotted" : "solid"} ${wF(t?.color || "#000000")}`}`;
+			return `border-${e.toLowerCase()}:${t?.type === 0 ? "none" : `${Math.max(.3, (t?.width || 1) * .25)}pt ${t?.type === 2 ? "dashed" : t?.type === 3 ? "dotted" : "solid"} ${EF(t?.color || "#000000")}`}`;
 		}).join(";");
 		c[n.row].push({
 			column: n.column,
-			html: `<td rowspan="${n.rowSpan}" colspan="${n.columnSpan}" style="${a};padding:2pt;width:${(r.width || 0) / 100}pt;height:${(r.height || 0) / 100}pt;background:${wF(r.fillType === "solid" ? r.fillColor : "#ffffff")}">${i}</td>`
+			html: `<td rowspan="${n.rowSpan}" colspan="${n.columnSpan}" style="${a};padding:2pt;width:${(r.width || 0) / 100}pt;height:${(r.height || 0) / 100}pt;background:${EF(r.fillType === "solid" ? r.fillColor : "#ffffff")}">${i}</td>`
 		}), l[n.row][n.column] = n.paragraphs.join("\n");
 	}), {
 		spec: s,
@@ -67979,7 +68039,7 @@ function EF(e, t) {
 		html: `<table style="border-collapse:collapse">${c.map((e) => "<tr>" + e.sort((e, t) => e.column - t.column).map((e) => e.html).join("") + "</tr>").join("")}</table>`
 	};
 }
-function DF(e) {
+function kF(e) {
 	let t = [];
 	for (let n = e; n && n.tagName !== "BODY"; n = n.parentElement) t.unshift(n);
 	let n = {};
@@ -68011,7 +68071,7 @@ function DF(e) {
 	let f = (i["font-family"] || "").split(",")[0].trim().replace(/^['"]|['"]$/g, "");
 	return f && f.length <= 100 && (o.fontFamily = f), o;
 }
-function OF(e, t = globalThis.DOMParser) {
+function AF(e, t = globalThis.DOMParser) {
 	if (typeof e != "string" || !e.trim() || e.length > 8388608) return null;
 	if (typeof t != "function") throw Error("HTML parser unavailable");
 	!/<table\b/i.test(e) && /<(?:tr|td|th)\b/i.test(e) && (e = "<table>" + e + "</table>");
@@ -68060,7 +68120,7 @@ function OF(e, t = globalThis.DOMParser) {
 				rowSpan: e,
 				columnSpan: l,
 				paragraphs: u
-			}), a.push(DF(r));
+			}), a.push(kF(r));
 			for (let r = 0; r < e; r++) for (let e = 0; e < l; e++) {
 				let i = t + r + ":" + (n + e);
 				if (o.has(i)) throw Error("Overlapping clipboard cells");
@@ -68069,17 +68129,17 @@ function OF(e, t = globalThis.DOMParser) {
 			n += l, s = Math.max(s, n);
 		}
 	});
-	let l = JP({
+	let l = XP({
 		rows: c.length,
 		columns: s,
 		cells: i
 	});
 	return Object.defineProperty(l, "clipboardStyles", { value: a }), l;
 }
-function kF(e) {
+function jF(e) {
 	if (typeof e != "string" || !e.includes("	") || e.length > 24e3) return null;
 	let t = e.replace(/\r\n?/g, "\n").replace(/\n$/, "").split("\n").map((e) => e.split("	")), n = t[0]?.length;
-	return !n || t.some((e) => e.length !== n) ? null : JP({
+	return !n || t.some((e) => e.length !== n) ? null : XP({
 		rows: t.length,
 		columns: n,
 		cells: t.flatMap((e, t) => e.map((e, n) => ({
@@ -68089,7 +68149,7 @@ function kF(e) {
 		})))
 	});
 }
-function AF(e, t) {
+function MF(e, t) {
 	if (e && /<table\b/i.test(e)) {
 		let t = new DOMParser().parseFromString(e, "text/html").querySelectorAll("table");
 		if (t.length !== 1 || t[0].querySelector("table,img,svg,object,embed,math,iframe,video,canvas")) throw Error("이 HTML 표의 중첩 객체는 안전하게 가져올 수 없습니다.");
@@ -68101,11 +68161,11 @@ function AF(e, t) {
 	let n = Array.from({ length: t.rows }, () => []);
 	for (let e of t.cells) n[e.row].push({
 		column: e.column,
-		html: `<td rowspan="${e.rowSpan ?? 1}" colspan="${e.columnSpan ?? 1}">${e.paragraphs.map((e) => "<p>" + wF(e) + "</p>").join("")}</td>`
+		html: `<td rowspan="${e.rowSpan ?? 1}" colspan="${e.columnSpan ?? 1}">${e.paragraphs.map((e) => "<p>" + EF(e) + "</p>").join("")}</td>`
 	});
 	return "<table>" + n.map((e) => "<tr>" + e.sort((e, t) => e.column - t.column).map((e) => e.html).join("") + "</tr>").join("") + "</table>";
 }
-function jF(e) {
+function NF(e) {
 	if (typeof e != "string" || e.length > 8388608) return !1;
 	let t = e.indexOf("[data-hwpjson]"), n = e.indexOf("{", t), r = e.indexOf("-->", n);
 	if (t < 0 || n < 0 || r < 0) return !1;
@@ -68115,15 +68175,15 @@ function jF(e) {
 		return !1;
 	}
 }
-function MF(e, t, n) {
-	JP(n);
+function PF(e, t, n) {
+	XP(n);
 	let r = t.table?.source, i = t.cursor;
 	if (!r || r.cellPath?.length > 1) throw Error("중첩 표의 기존 셀에 덮어쓰기는 아직 지원하지 않습니다.");
 	let a = {
 		sec: r.sec,
 		ppi: r.ppi,
 		ci: r.ci
-	}, o = uP(e, a.sec, a.ppi, a.ci), s = t.kind === "cell_block" ? t.table.selectedCells : null, c = s?.length ? o.cells[s[0].cellIndex] : o.cells[i.cellIndex];
+	}, o = fP(e, a.sec, a.ppi, a.ci), s = t.kind === "cell_block" ? t.table.selectedCells : null, c = s?.length ? o.cells[s[0].cellIndex] : o.cells[i.cellIndex];
 	if (!c) throw Error("Choose a destination cell");
 	let l = s?.length ? Math.min(...s.map((e) => e.row)) : c.geometry.row, u = s?.length ? Math.min(...s.map((e) => e.col)) : c.geometry.col, d = s?.length > 1 ? new Set(s.map((e) => e.cellIndex)) : null, f = [];
 	for (let e of n.cells) {
@@ -68138,7 +68198,7 @@ function MF(e, t, n) {
 	}
 	if (d && d.size !== f.length) throw Error("복사한 표와 같은 크기의 셀 범위를 선택해 주세요.");
 	try {
-		GP(e, a, f.map((e) => ({
+		qP(e, a, f.map((e) => ({
 			cellIndex: e.cellIndex,
 			paragraphs: o.cells[e.cellIndex].paragraphs.map((e) => e.text)
 		})), d ? [...d] : void 0);
@@ -68146,7 +68206,7 @@ function MF(e, t, n) {
 		throw /mixed character formatting/i.test(e.message) ? Error("대상 셀에 여러 글자 서식이 섞여 있어 덮어쓰지 않았습니다.") : /contains an object/i.test(e.message) ? Error("대상 셀에 표나 그림이 있어 덮어쓰지 않았습니다.") : e;
 	}
 	let p = (e) => {
-		if (TF(e)?.ok !== !0) throw Error("Cell paragraph operation failed");
+		if (DF(e)?.ok !== !0) throw Error("Cell paragraph operation failed");
 	};
 	for (let t of f) {
 		let n = o.cells[t.cellIndex].paragraphs;
@@ -68156,9 +68216,9 @@ function MF(e, t, n) {
 			for (let r = n.length; r < t.paragraphs.length; r++) p(e.splitParagraphInCell(a.sec, a.ppi, a.ci, t.cellIndex, r - 1, 0));
 		}
 	}
-	return KP(e, a, f, d ? [...d] : void 0);
+	return JP(e, a, f, d ? [...d] : void 0);
 }
-function NF({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a, chooseTablePaste: o, enableNestedClipping: s }) {
+function FF({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a, chooseTablePaste: o, enableNestedClipping: s }) {
 	let c = !1, l = 0, u = null, d = (t, n) => {
 		let r = t.cellPath || [], i = r.length > 1 ? {
 			ci: r.at(-1).controlIndex,
@@ -68167,7 +68227,7 @@ function NF({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 			ci: t.ci,
 			owner: "[]"
 		};
-		if (TF(e.copyControl(t.sec, t.ppi, i.ci, i.owner))?.ok !== !0) throw Error("표를 복사하지 못했습니다.");
+		if (DF(e.copyControl(t.sec, t.ppi, i.ci, i.owner))?.ok !== !0) throw Error("표를 복사하지 못했습니다.");
 		let a = e.exportControlHtml(t.sec, t.ppi, i.ci, i.owner);
 		if (typeof a != "string" || !/<table\b/i.test(a)) throw Error("표의 복사 형식을 만들지 못했습니다.");
 		let o = crypto.randomUUID();
@@ -68193,8 +68253,8 @@ function NF({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 			if (o.length === t.cellCount) return d(a, i);
 			throw Error("중첩 표의 일부 셀 복사는 아직 지원하지 않습니다.");
 		}
-		let s = uP(e, a.sec, a.ppi, a.ci);
-		return o ??= s.cells.map((e, t) => t), o.length === s.dimensions.cellCount ? d(a, i) : EF(s, o);
+		let s = fP(e, a.sec, a.ppi, a.ci);
+		return o ??= s.cells.map((e, t) => t), o.length === s.dimensions.cellCount ? d(a, i) : OF(s, o);
 	};
 	document.addEventListener("copy", (e) => {
 		u = null;
@@ -68228,7 +68288,7 @@ function NF({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 	let m = async (e, t) => r(t, (n) => {
 		let r, i;
 		if (t.cursor?.parentParaIndex != null) {
-			r = MF(n, t, e);
+			r = PF(n, t, e);
 			let a = t.table.source;
 			i = {
 				sec: a.sec,
@@ -68237,15 +68297,15 @@ function NF({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 			};
 		} else {
 			if (t.selection) throw Error("Place a body cursor outside a selection before pasting a table");
-			r = YP(n, t.cursor, e), i = r.source;
+			r = ZP(n, t.cursor, e), i = r.source;
 		}
 		let a = (e.clipboardStyles || []).map((e, t) => ({
 			cellIndex: r.cellIndices[t],
 			...e
 		})).filter((e) => Object.keys(e).length > 1);
-		return a.length && hP(n, {
+		return a.length && _P(n, {
 			...i,
-			snapshot: uP(n, i.sec, i.ppi, i.ci)
+			snapshot: fP(n, i.sec, i.ppi, i.ci)
 		}, a), r;
 	});
 	return document.addEventListener("paste", (n) => {
@@ -68257,10 +68317,10 @@ function NF({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 		let d = structuredClone(t()), f = n.clipboardData;
 		if (!d.ready || !f) return;
 		let p = f.getData("text/html"), h = f.getData("text/plain"), g, _, v = d.cursor?.parentParaIndex != null, y = p.match(/<!--pwh-rich-table:([0-9a-f-]+)-->/i)?.[1], b = v && !!y && u?.token === y && u.epoch === d.documentState.documentEpoch && e.clipboardHasControl();
-		if (!v && jF(p)) return;
-		let x = v ? _F(p) : null;
+		if (!v && NF(p)) return;
+		let x = v ? yF(p) : null;
 		try {
-			!x && !b && (g = OF(p) || kF(h));
+			!x && !b && (g = AF(p) || jF(h));
 		} catch (e) {
 			_ = e;
 		}
@@ -68279,7 +68339,7 @@ function NF({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 						if (!g && !S && !p && !h) throw e;
 					}
 					if (e) {
-						if (d.cursor?.parentParaIndex == null && jF(e.html)) {
+						if (d.cursor?.parentParaIndex == null && NF(e.html)) {
 							let r = t();
 							if (JSON.stringify(r.documentState) !== JSON.stringify(d.documentState) || JSON.stringify(r.cursor) !== JSON.stringify(d.cursor)) throw Error("문서나 커서가 변경되어 붙여넣기를 취소했습니다.");
 							let i = new DataTransfer();
@@ -68295,7 +68355,7 @@ function NF({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 							}
 							return;
 						}
-						if (v && (p = e.html || p, h = e.text || h, x = _F(p)), x || (g = OF(e.html) || kF(e.text) || g, _ = null), !g && !x && !S && e.png) {
+						if (v && (p = e.html || p, h = e.text || h, x = yF(p)), x || (g = AF(e.html) || jF(e.text) || g, _ = null), !g && !x && !S && e.png) {
 							let r = t();
 							if (JSON.stringify(r.documentState) !== JSON.stringify(d.documentState) || JSON.stringify(r.cursor) !== JSON.stringify(d.cursor)) throw Error("문서나 커서가 변경되어 그림 붙여넣기를 취소했습니다.");
 							let i = Uint8Array.from(atob(e.png), (e) => e.charCodeAt(0)), a = new DataTransfer();
@@ -68318,11 +68378,11 @@ function NF({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 					let e = await o({ htmlOnly: !x && !b });
 					if (!e) return;
 					if (e === "nested") {
-						let e = !x && !b ? AF(p, g) : null;
-						await r(d, (t) => x ? SF(t, d, x) : b ? bF(t, d) : CF(t, d, e, g)), s?.(), i("셀 안에 표를 넣었습니다. 실행 취소 한 번으로 되돌릴 수 있습니다.");
+						let e = !x && !b ? MF(p, g) : null;
+						await r(d, (t) => x ? wF(t, d, x) : b ? SF(t, d) : TF(t, d, e, g)), s?.(), i("셀 안에 표를 넣었습니다. 실행 취소 한 번으로 되돌릴 수 있습니다.");
 						return;
 					}
-					if (g ||= OF(p) || kF(h), !g) throw Error("기존 셀에 붙일 표 내용을 확인하지 못했습니다.");
+					if (g ||= AF(p) || jF(h), !g) throw Error("기존 셀에 붙일 표 내용을 확인하지 못했습니다.");
 				}
 				if (_ && !g) throw _;
 				if (g) await m(g, d), i("표·셀 붙여넣기를 완료했습니다. 실행 취소 한 번으로 되돌릴 수 있습니다.");
@@ -68347,7 +68407,7 @@ function NF({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 		(async () => {
 			try {
 				let n = await a(), l = e.cursor?.parentParaIndex != null;
-				if (!l && jF(n.html)) {
+				if (!l && NF(n.html)) {
 					let r = t();
 					if (JSON.stringify(r.documentState) !== JSON.stringify(e.documentState) || JSON.stringify(r.cursor) !== JSON.stringify(e.cursor)) throw Error("문서나 커서가 변경되어 붙여넣기를 취소했습니다.");
 					let i = new DataTransfer();
@@ -68366,17 +68426,17 @@ function NF({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 					}
 					return;
 				}
-				let u = l ? _F(n.html) : null, d = u ? null : OF(n.html) || kF(n.text);
+				let u = l ? yF(n.html) : null, d = u ? null : AF(n.html) || jF(n.text);
 				if (l && (u || d)) {
 					let t = await o({ htmlOnly: !u });
 					if (!t) return;
 					if (t === "nested") {
-						let t = u ? null : AF(n.html, d);
-						await r(e, (n) => u ? SF(n, e, u) : CF(n, e, t, d)), s?.(), i("셀 안에 표를 넣었습니다. 실행 취소 한 번으로 되돌릴 수 있습니다.");
+						let t = u ? null : MF(n.html, d);
+						await r(e, (n) => u ? wF(n, e, u) : TF(n, e, t, d)), s?.(), i("셀 안에 표를 넣었습니다. 실행 취소 한 번으로 되돌릴 수 있습니다.");
 						return;
 					}
 				}
-				if (d ||= OF(n.html) || kF(n.text), !d) throw Error("클립보드에서 표 구조를 찾지 못했습니다. 한글에서 표 또는 셀을 다시 복사하거나 원본 HWPX를 열어 주세요.");
+				if (d ||= AF(n.html) || jF(n.text), !d) throw Error("클립보드에서 표 구조를 찾지 못했습니다. 한글에서 표 또는 셀을 다시 복사하거나 원본 HWPX를 열어 주세요.");
 				await m(d, e), i("한글 표·셀을 가져왔습니다.");
 			} catch (e) {
 				i(e.message, !0);
@@ -68388,8 +68448,8 @@ function NF({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 	};
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/pwh-table-paste-dialog.ts
-function PF(e = {}) {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/pwh-table-paste-dialog.ts
+function IF(e = {}) {
 	return new Promise((t) => {
 		class n extends V {
 			choice = null;
@@ -68421,12 +68481,12 @@ function PF(e = {}) {
 	});
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/collaboration-selection.ts
-var FF = 6e3, IF = 24, LF = 256, RF = 256, zF = 96;
-function BF(e, t = 0) {
-	return e == null ? null : typeof e == "string" ? e.slice(0, FF) : typeof e == "number" ? Number.isFinite(e) ? e : null : typeof e == "boolean" ? e : t > 7 || typeof e != "object" || ArrayBuffer.isView(e) ? null : Array.isArray(e) ? e.slice(0, zF).map((e) => BF(e, t + 1)) : Object.fromEntries(Object.entries(e).slice(0, 80).filter(([, e]) => typeof e != "function").map(([e, n]) => [e, BF(n, t + 1)]));
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/collaboration-selection.ts
+var LF = 6e3, RF = 24, zF = 256, BF = 256, VF = 96;
+function HF(e, t = 0) {
+	return e == null ? null : typeof e == "string" ? e.slice(0, LF) : typeof e == "number" ? Number.isFinite(e) ? e : null : typeof e == "boolean" ? e : t > 7 || typeof e != "object" || ArrayBuffer.isView(e) ? null : Array.isArray(e) ? e.slice(0, VF).map((e) => HF(e, t + 1)) : Object.fromEntries(Object.entries(e).slice(0, 80).filter(([, e]) => typeof e != "function").map(([e, n]) => [e, HF(n, t + 1)]));
 }
-function VF(e, t, n) {
+function UF(e, t, n) {
 	let r = (e?.cellPath || []).map((e) => ({
 		controlIndex: e.controlIndex ?? e.controlIdx,
 		cellIndex: e.cellIndex ?? e.cellIdx,
@@ -68434,20 +68494,20 @@ function VF(e, t, n) {
 	}));
 	return r.length && (t !== void 0 && (r[r.length - 1].cellParaIndex = t), n !== void 0 && (r[r.length - 1].cellIndex = n)), r;
 }
-function HF(e) {
-	return VF(e).at(-1)?.cellParaIndex ?? e.cellParaIndex ?? e.paragraphIndex;
+function WF(e) {
+	return UF(e).at(-1)?.cellParaIndex ?? e.cellParaIndex ?? e.paragraphIndex;
 }
-function UF(e, t) {
+function GF(e, t) {
 	if (!e || !t || e.sectionIndex !== t.sectionIndex) return !1;
 	if (e.parentParaIndex === void 0 || t.parentParaIndex === void 0) return e.parentParaIndex === void 0 && t.parentParaIndex === void 0;
 	if (e.parentParaIndex !== t.parentParaIndex) return !1;
-	let n = VF(e), r = VF(t);
+	let n = UF(e), r = UF(t);
 	return n.length || r.length ? JSON.stringify(n.map(({ controlIndex: e, cellIndex: t }) => [e, t])) === JSON.stringify(r.map(({ controlIndex: e, cellIndex: t }) => [e, t])) : e.controlIndex === t.controlIndex && e.cellIndex === t.cellIndex;
 }
-function WF(e) {
+function KF(e) {
 	let t = window;
 	function n(t = {}) {
-		let n = e.getInputHandler(), r = [], i = FF, a = (e, t, n, ...i) => {
+		let n = e.getInputHandler(), r = [], i = LF, a = (e, t, n, ...i) => {
 			if (typeof t?.[n] != "function") return r.push(`${e}: unavailable`), null;
 			try {
 				return t[n](...i);
@@ -68479,7 +68539,7 @@ function WF(e) {
 		let c = a("text selection", n, "getSelection"), l = a("cell selection mode", n, "isInCellSelectionMode") === !0, u = a("table object selection", n, "isInTableObjectSelection") === !0, d = a("picture object selection", n, "isInPictureObjectSelection") === !0, f = s.parentParaIndex !== void 0, p = !l && !u && !d && a("text submode coverage", n, "canEditHyperlink") === !0, m = d ? "object" : u ? "table_object" : l ? "cell_block" : p ? f ? s.isTextBox ? "textbox_text" : "cell_text" : "body_text" : "unsupported_submode";
 		m === "unsupported_submode" && r.push("Header/footer/footnote coordinates are not exposed by this bridge.");
 		function h(t, n, r, s) {
-			let c = t.parentParaIndex !== void 0, l = VF(t, n), u = c ? l.length ? a("cell paragraph length", e.wasm, "getCellParagraphLengthByPath", t.sectionIndex, t.parentParaIndex, JSON.stringify(l)) : a("cell paragraph length", e.wasm, "getCellParagraphLength", t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, n) : a("paragraph length", e.wasm, "getParagraphLength", t.sectionIndex, n);
+			let c = t.parentParaIndex !== void 0, l = UF(t, n), u = c ? l.length ? a("cell paragraph length", e.wasm, "getCellParagraphLengthByPath", t.sectionIndex, t.parentParaIndex, JSON.stringify(l)) : a("cell paragraph length", e.wasm, "getCellParagraphLength", t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, n) : a("paragraph length", e.wasm, "getParagraphLength", t.sectionIndex, n);
 			if (!Number.isInteger(u) || u < 0) return {
 				text: null,
 				length: null,
@@ -68497,9 +68557,9 @@ function WF(e) {
 			truncated: !1,
 			known: !1
 		}, _ = [];
-		if (p && c?.start && c?.end && UF(c.start, c.end)) {
-			let { start: t, end: n } = c, o = f ? HF(t) : t.paragraphIndex, s = f ? HF(n) : n.paragraphIndex, l = [], u = !1, d = !0;
-			for (let e = o; e <= Math.min(s, o + IF - 1); e++) {
+		if (p && c?.start && c?.end && GF(c.start, c.end)) {
+			let { start: t, end: n } = c, o = f ? WF(t) : t.paragraphIndex, s = f ? WF(n) : n.paragraphIndex, l = [], u = !1, d = !0;
+			for (let e = o; e <= Math.min(s, o + RF - 1); e++) {
 				let r = e === o ? t.charOffset : 0, a = e === s ? Math.max(0, n.charOffset - r) : 2 ** 53 - 1, c = h(t, e, r, a);
 				if (c.text === null ? d = !1 : l.push(c.text), u ||= c.truncated, !i && e < s) {
 					u = !0;
@@ -68509,21 +68569,21 @@ function WF(e) {
 			g = {
 				text: d ? l.join("\n") : null,
 				known: d,
-				truncated: u || s - o + 1 > IF
+				truncated: u || s - o + 1 > RF
 			};
-			let p = VF(t), m = f ? p.length > 1 ? a("selection rectangles", e.wasm, "getSelectionRectsInCellByPath", t.sectionIndex, t.parentParaIndex, JSON.stringify(p), o, t.charOffset, s, n.charOffset) : a("selection rectangles", e.wasm, "getSelectionRectsInCell", t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, o, t.charOffset, s, n.charOffset) : a("selection rectangles", e.wasm, "getSelectionRects", t.sectionIndex, t.paragraphIndex, t.charOffset, n.paragraphIndex, n.charOffset);
-			_ = Array.isArray(m) ? m.slice(0, zF) : [], Array.isArray(m) && m.length > zF && r.push("Selection rectangle list truncated.");
+			let p = UF(t), m = f ? p.length > 1 ? a("selection rectangles", e.wasm, "getSelectionRectsInCellByPath", t.sectionIndex, t.parentParaIndex, JSON.stringify(p), o, t.charOffset, s, n.charOffset) : a("selection rectangles", e.wasm, "getSelectionRectsInCell", t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, o, t.charOffset, s, n.charOffset) : a("selection rectangles", e.wasm, "getSelectionRects", t.sectionIndex, t.paragraphIndex, t.charOffset, n.paragraphIndex, n.charOffset);
+			_ = Array.isArray(m) ? m.slice(0, VF) : [], Array.isArray(m) && m.length > VF && r.push("Selection rectangle list truncated.");
 		} else p && !c ? g = {
 			text: "",
 			known: !0,
 			truncated: !1
-		} : c && !UF(c.start, c.end) && r.push("Selected text spans unsupported source containers.");
+		} : c && !GF(c.start, c.end) && r.push("Selected text spans unsupported source containers.");
 		let v = p ? {
 			position: {
 				...s,
 				charOffset: 0
 			},
-			...h(s, f ? HF(s) : s.paragraphIndex, 0, 2 ** 53 - 1)
+			...h(s, f ? WF(s) : s.paragraphIndex, 0, 2 ** 53 - 1)
 		} : null, y = {
 			character: a("current character properties", n, "getCharProperties"),
 			paragraph: a("current paragraph properties", n, "getParaProperties")
@@ -68534,16 +68594,16 @@ function WF(e) {
 			cellPath: s.cellPath
 		} : null, x = null;
 		if (b) {
-			let t = VF(b), i = t.length > 1, o = l ? a("selected cell range", n, "getSelectedCellRange") : null, s = l && a("excluded cells", n, "hasExcludedCellSelection") === !0, c = i ? a("table dimensions", e.wasm, "getTableDimensionsByPath", b.sec, b.ppi, JSON.stringify(t)) : a("table dimensions", e.wasm, "getTableDimensions", b.sec, b.ppi, b.ci), u = i ? a("cell rectangles", e.wasm, "getTableCellBboxesByPath", b.sec, b.ppi, JSON.stringify(t)) : a("cell rectangles", e.wasm, "getTableCellBboxes", b.sec, b.ppi, b.ci), d = [], f = 0;
+			let t = UF(b), i = t.length > 1, o = l ? a("selected cell range", n, "getSelectedCellRange") : null, s = l && a("excluded cells", n, "hasExcludedCellSelection") === !0, c = i ? a("table dimensions", e.wasm, "getTableDimensionsByPath", b.sec, b.ppi, JSON.stringify(t)) : a("table dimensions", e.wasm, "getTableDimensions", b.sec, b.ppi, b.ci), u = i ? a("cell rectangles", e.wasm, "getTableCellBboxesByPath", b.sec, b.ppi, JSON.stringify(t)) : a("cell rectangles", e.wasm, "getTableCellBboxes", b.sec, b.ppi, b.ci), d = [], f = 0;
 			if (s) r.push("Nonrectangular cell exclusions are not public; selectedCells is unknown.");
-			else if (o && Number.isInteger(c?.cellCount)) for (let n = 0; n < Math.min(c.cellCount, RF); n++) {
+			else if (o && Number.isInteger(c?.cellCount)) for (let n = 0; n < Math.min(c.cellCount, BF); n++) {
 				f++;
 				let r = {
 					...b,
 					cellPath: t
-				}, s = i ? a("cell information", e.wasm, "getCellInfoByPath", b.sec, b.ppi, JSON.stringify(VF(r, 0, n))) : a("cell information", e.wasm, "getCellInfo", b.sec, b.ppi, b.ci, n);
+				}, s = i ? a("cell information", e.wasm, "getCellInfoByPath", b.sec, b.ppi, JSON.stringify(UF(r, 0, n))) : a("cell information", e.wasm, "getCellInfo", b.sec, b.ppi, b.ci, n);
 				if (s && !(s.row > o.endRow || s.col > o.endCol || s.row + s.rowSpan <= o.startRow || s.col + s.colSpan <= o.startCol)) {
-					if (d.length >= LF) break;
+					if (d.length >= zF) break;
 					d.push({
 						cellIndex: n,
 						...s,
@@ -68551,7 +68611,7 @@ function WF(e) {
 							sec: b.sec,
 							ppi: b.ppi,
 							ci: b.ci,
-							...t.length ? { cellPath: VF(r, 0, n) } : {}
+							...t.length ? { cellPath: UF(r, 0, n) } : {}
 						}
 					});
 				}
@@ -68564,8 +68624,8 @@ function WF(e) {
 				selectedCellsComplete: !s && (!o || f >= (c?.cellCount ?? Infinity)),
 				scannedCellCount: f,
 				properties: i ? null : a("table properties", e.wasm, "getTableProperties", b.sec, b.ppi, b.ci),
-				rectangles: Array.isArray(u) ? u.slice(0, zF) : [],
-				rectanglesTruncated: Array.isArray(u) && u.length > zF
+				rectangles: Array.isArray(u) ? u.slice(0, VF) : [],
+				rectanglesTruncated: Array.isArray(u) && u.length > VF
 			};
 		}
 		let S = d ? a("selected objects", n, "getSelectedPictureRefs") : [], C = d ? a("selected object", n, "getSelectedPictureRef") : null, w = (Array.isArray(S) && S.length ? S : C ? [C] : []).slice(0, 16).map((t) => {
@@ -68604,7 +68664,7 @@ function WF(e) {
 				} : null
 			};
 		}), T = e.getDocumentAgent?.(), E = t.fresh === !1 && typeof T?.getPresentationDocumentState == "function" ? "getPresentationDocumentState" : "getDocumentState";
-		return BF({
+		return HF({
 			schemaVersion: 1,
 			ready: !0,
 			kind: m,
@@ -68619,11 +68679,11 @@ function WF(e) {
 			selectionRects: _,
 			coordinateSystem: "Source indices are zero-based; rectangles use unzoomed page CSS pixels.",
 			limits: {
-				maxTextCodePoints: FF,
-				maxParagraphs: IF,
-				maxCells: LF,
-				maxScannedCells: RF,
-				maxRectangles: zF
+				maxTextCodePoints: LF,
+				maxParagraphs: RF,
+				maxCells: zF,
+				maxScannedCells: BF,
+				maxRectangles: VF
 			},
 			unknown: [...new Set(r)].slice(0, 24)
 		});
@@ -68644,7 +68704,7 @@ function WF(e) {
 		try {
 			o = (e.wasm.getPageControlLayout(n)?.controls || []).filter((e) => r >= e.x && i >= e.y && r <= e.x + e.w && i <= e.y + e.h).slice(0, 16);
 		} catch {}
-		return BF({
+		return HF({
 			schemaVersion: 1,
 			ready: !0,
 			pageIndex: n,
@@ -68663,13 +68723,13 @@ function WF(e) {
 	return t.rhwpStudio ||= {}, t.rhwpStudio.collaboration = i, i;
 }
 //#endregion
-//#region ../pwh-test-temp/desktop-editor-build-81eaba99-39eb-455f-bf27-cfd448a2d533/rhwp-studio/src/pwh-inline-adapter.ts
-function GF(e) {
-	let t = WF(e), n = /* @__PURE__ */ new Map(), r = /* @__PURE__ */ new Map(), i = (n = !0) => {
+//#region ../pwh-test-temp/desktop-stage-031/pwh-test-temp/desktop-editor-build-17b866c4-7ae4-4c28-81bd-4a61dfb25dfd/rhwp-studio/src/pwh-inline-adapter.ts
+function qF(e) {
+	let t = KF(e), n = /* @__PURE__ */ new Map(), r = /* @__PURE__ */ new Map(), i = (n = !0) => {
 		let r = t.getSelectionContext({ fresh: n });
 		return {
 			...r,
-			blankDocument: !!r.ready && PP(e.wasm),
+			blankDocument: !!r.ready && IP(e.wasm),
 			requestScope: r.kind === "cell_block" && r.table?.selectedCells?.length || r.selection && r.selectedText?.text ? "selection" : r.kind === "object" ? "object" : "document",
 			pageSettings: r.ready ? Array.from({ length: Math.min(e.wasm.getSectionCount(), 32) }, (t, n) => ({
 				sectionIndex: n,
@@ -68686,7 +68746,7 @@ function GF(e) {
 		let t = structuredClone(i());
 		if (o(t)) {
 			try {
-				t.target = t.kind === "cell_block" ? await dP(e.wasm, t) : await TP(e.wasm, t);
+				t.target = t.kind === "cell_block" ? await pP(e.wasm, t) : await DP(e.wasm, t);
 			} catch {
 				t.target = null;
 			}
@@ -68701,11 +68761,11 @@ function GF(e) {
 		execute: s
 	});
 	let c = !1;
-	e.ready.then(() => NF({
+	e.ready.then(() => FF({
 		wasm: e.wasm,
 		read: () => i(),
 		getInput: () => e.getInputHandler(),
-		chooseTablePaste: PF,
+		chooseTablePaste: IF,
 		enableNestedClipping: () => {
 			R.getViewSettings().clipView && document.querySelector("[data-cmd=\"view:toggle-clip\"]")?.click();
 		},
@@ -68724,7 +68784,7 @@ function GF(e) {
 			if (c) throw Error("Another edit is being applied");
 			c = !0;
 			try {
-				if (!zP(i(), t)) throw Error("붙여넣는 동안 문서 또는 커서가 바뀌었습니다. 다시 붙여넣으세요.");
+				if (!VP(i(), t)) throw Error("붙여넣는 동안 문서 또는 커서가 바뀌었습니다. 다시 붙여넣으세요.");
 				let r = e.getInputHandler(), a = r.getCursorPosition();
 				await r.executeDocumentAgentOperation({
 					kind: "snapshot",
@@ -68815,20 +68875,20 @@ function GF(e) {
 		interacting: () => l || performance.now() - u < 1200,
 		capture: async () => {
 			let t = structuredClone(i());
-			return t.target = await TP(e.wasm, t), t;
+			return t.target = await DP(e.wasm, t), t;
 		},
 		export: () => e.wasm.exportHwpxWithReport(),
 		saved: (t) => e.saved(t),
 		recovered: () => e.recovered(),
 		legacyDrafts: () => e.legacyDrafts(),
 		async replacePicture(t, n) {
-			let r = i(), a = t.expected.target ? await EP(e.wasm, t.expected, r) : r;
+			let r = i(), a = t.expected.target ? await OP(e.wasm, t.expected, r) : r;
 			if (!t.expected.target && JSON.stringify(a) !== JSON.stringify(t.expected)) throw Error("문서·선택 상태가 바뀌었습니다. 다시 요청하세요.");
 			if (c) throw Error("이전 수정 적용 중입니다.");
 			c = !0;
 			let o = e.getInputHandler(), s = o.getCursorPosition(), l;
 			try {
-				let { ref: r, pathJson: c } = DP(a), u = e.wasm.getControlImageData(r.sec, r.ppi, r.ci, c), d = await createImageBitmap(new Blob([u])), f = await createImageBitmap(new Blob([n], { type: t.image.mediaType })), p = n, m = t.image, h = !1;
+				let { ref: r, pathJson: c } = kP(a), u = e.wasm.getControlImageData(r.sec, r.ppi, r.ci, c), d = await createImageBitmap(new Blob([u])), f = await createImageBitmap(new Blob([n], { type: t.image.mediaType })), p = n, m = t.image, h = !1;
 				try {
 					if (d.width * d.height > 16777216) throw Error("기존 이미지가 비율 보존 처리 한도를 초과합니다.");
 					if (d.width * f.height !== d.height * f.width) {
@@ -68851,13 +68911,13 @@ function GF(e) {
 				} finally {
 					d.close(), f.close();
 				}
-				if (t.expected.target) await EP(e.wasm, t.expected, i());
+				if (t.expected.target) await OP(e.wasm, t.expected, i());
 				else if (JSON.stringify(i()) !== JSON.stringify(t.expected)) throw Error("이미지 준비 중 문서·선택이 바뀌었습니다.");
 				await o.executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-picture-replace",
 					operation: (e) => (l = {
-						...OP(e, a, p, m),
+						...AP(e, a, p, m),
 						fit: "contain",
 						transparentPadding: h
 					}, s)
@@ -68875,7 +68935,7 @@ function GF(e) {
 		async tables(t) {
 			let r = i();
 			if (r.documentState.documentEpoch !== t.expected.documentState?.documentEpoch) throw Error("Table request expired");
-			let a = await xP(e.wasm, r), o = crypto.randomUUID();
+			let a = await CP(e.wasm, r), o = crypto.randomUUID();
 			return n.set(o, a), n.size > 8 && n.delete(n.keys().next().value), {
 				ok: !0,
 				tablePlan: {
@@ -68896,7 +68956,7 @@ function GF(e) {
 						})),
 						headerRows: e.snapshot.cells.filter((e) => e.properties.isHeader).map((e) => e.geometry.row),
 						sample: e.snapshot.cells.slice(0, 4).map((e) => e.paragraphs.map((e) => e.text).join(" ").slice(0, 160)),
-						theme: vP(e)
+						theme: bP(e)
 					}))
 				}
 			};
@@ -68904,7 +68964,7 @@ function GF(e) {
 		async textSearch(t) {
 			let n = i();
 			if (!n.ready || n.documentState.documentEpoch !== t.expected.documentState?.documentEpoch) throw Error("텍스트 검색 요청이 만료되었습니다.");
-			let a = cF(e.wasm, n, t.query, {
+			let a = uF(e.wasm, n, t.query, {
 				cursor: t.cursor,
 				limit: t.limit
 			}), o = crypto.randomUUID();
@@ -68922,11 +68982,11 @@ function GF(e) {
 			c = !0;
 			let n = e.getInputHandler(), a = n.getCursorPosition(), o;
 			try {
-				let s = uF(e.wasm, r, t.edits, i());
+				let s = fF(e.wasm, r, t.edits, i());
 				await n.executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-text-edit",
-					operation: (e) => (o = dF(e, s, nd), fF(s, a))
+					operation: (e) => (o = pF(e, s, nd), mF(s, a))
 				}, () => e.getCanvasView().refreshDocumentAgentMutation()), r.clear();
 			} finally {
 				c = !1;
@@ -68944,16 +69004,16 @@ function GF(e) {
 			let r = e.getInputHandler(), a = r.getCursorPosition(), o;
 			try {
 				let s = i(), c, l;
-				if (t.expected.target?.kind === "table_cells") c = await fP(e.wasm, t.expected.target, s), l = t.expected.target.cells;
+				if (t.expected.target?.kind === "table_cells") c = await mP(e.wasm, t.expected.target, s), l = t.expected.target.cells;
 				else {
 					let r = n.get(t.planId);
 					if (!r) throw Error("Inspect the table again");
-					[c] = await SP(e.wasm, r, s, "table", t.tableIndex);
+					[c] = await wP(e.wasm, r, s, "table", t.tableIndex);
 				}
-				GP(e.wasm, c, t.edits, l), await r.executeDocumentAgentOperation({
+				qP(e.wasm, c, t.edits, l), await r.executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-table-fill",
-					operation: (e) => (o = KP(e, c, t.edits, l), a)
+					operation: (e) => (o = JP(e, c, t.edits, l), a)
 				}, () => e.getCanvasView().refreshDocumentAgentMutation());
 			} finally {
 				c = !1;
@@ -68971,11 +69031,11 @@ function GF(e) {
 			let n;
 			try {
 				let r = i();
-				if (!zP(r, t.expected) || r.kind !== "body_text" || r.selection) throw Error("Insertion cursor or document changed");
+				if (!VP(r, t.expected) || r.kind !== "body_text" || r.selection) throw Error("Insertion cursor or document changed");
 				await e.getInputHandler().executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-table-insert",
-					operation: (e) => (n = YP(e, r.cursor, t.table), r.cursor)
+					operation: (e) => (n = ZP(e, r.cursor, t.table), r.cursor)
 				}, () => e.getCanvasView().refreshDocumentAgentMutation());
 			} finally {
 				c = !1;
@@ -68993,17 +69053,17 @@ function GF(e) {
 			let r;
 			try {
 				let a = i(), o;
-				if (t.expected.target?.kind === "table_cells") o = await fP(e.wasm, t.expected.target, a);
+				if (t.expected.target?.kind === "table_cells") o = await mP(e.wasm, t.expected.target, a);
 				else {
 					let r = n.get(t.planId);
 					if (!r) throw Error("표를 다시 분석하세요.");
-					[o] = await SP(e.wasm, r, a, "table", t.tableIndex);
+					[o] = await wP(e.wasm, r, a, "table", t.tableIndex);
 				}
 				let s = e.getInputHandler(), c = s.getCursorPosition();
 				await s.executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-table-title",
-					operation: (e) => (r = qP(e, o, t.title, t.borders), c)
+					operation: (e) => (r = YP(e, o, t.title, t.borders), c)
 				}, () => e.getCanvasView().refreshDocumentAgentMutation());
 			} finally {
 				c = !1;
@@ -69019,17 +69079,17 @@ function GF(e) {
 			let r = i(), a = e.getInputHandler(), o = a.getCursorPosition(), s, l, u = [];
 			if (t.styles) {
 				let i;
-				if (t.expected.target?.kind === "table_cells") i = await fP(e.wasm, t.expected.target, r);
+				if (t.expected.target?.kind === "table_cells") i = await mP(e.wasm, t.expected.target, r);
 				else {
 					let a = n.get(t.planId);
 					if (!a) throw Error("Inspect the table again");
-					[i] = await SP(e.wasm, a, r, "table", t.tableIndex);
+					[i] = await wP(e.wasm, a, r, "table", t.tableIndex);
 				}
 				s = [i], l = [t.styles];
 			} else {
 				let i = n.get(t.planId);
 				if (!i) throw Error("Table plan expired; inspect tables again");
-				s = await SP(e.wasm, i, r, t.scope, t.tableIndex), l = s.map((e, n) => bP(e, t.theme, t.headerRowsByTable?.[t.scope === "document" ? n : t.tableIndex] ?? t.theme.headerRows));
+				s = await wP(e.wasm, i, r, t.scope, t.tableIndex), l = s.map((e, n) => SP(e, t.theme, t.headerRowsByTable?.[t.scope === "document" ? n : t.tableIndex] ?? t.theme.headerRows));
 			}
 			if (c) throw Error("Another edit is being applied");
 			c = !0;
@@ -69039,7 +69099,7 @@ function GF(e) {
 					operationType: "pwh-table-style",
 					operation: (e) => {
 						for (let t = 0; t < s.length; t++) u.push({
-							...hP(e, s[t], l[t]),
+							..._P(e, s[t], l[t]),
 							section: s[t].sec,
 							paragraph: s[t].ppi
 						});
@@ -69083,7 +69143,7 @@ function GF(e) {
 				await s.executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-page-layout",
-					operation: (e) => (u = NP(e, t.patch, t.sectionIndex), l)
+					operation: (e) => (u = FP(e, t.patch, t.sectionIndex), l)
 				}, () => e.getCanvasView().refreshDocumentAgentMutation());
 			} finally {
 				c = !1;
@@ -69096,38 +69156,38 @@ function GF(e) {
 			};
 		},
 		async desktopBodyStyle(t) {
-			return rP({
+			return aP({
 				document: e,
 				read: i,
 				command: t
 			});
 		},
 		async desktopColumns(t) {
-			return iP({
+			return oP({
 				document: e,
 				read: i,
 				command: t
 			});
 		},
 		async desktopInsertImage(t, n) {
-			return aP({
+			return sP({
 				document: e,
 				read: i,
 				command: t,
 				bytes: n,
-				sameContext: zP
+				sameContext: VP
 			});
 		},
 		async compose(t) {
 			let n = i();
-			if (!n.blankDocument || !zP(n, t.expected)) throw Error("문서 상태가 바뀌었거나 빈 문서가 아닙니다. 다시 요청하세요.");
+			if (!n.blankDocument || !VP(n, t.expected)) throw Error("문서 상태가 바뀌었거나 빈 문서가 아닙니다. 다시 요청하세요.");
 			if (c) throw Error("이전 수정 적용 중입니다.");
 			c = !0;
 			try {
 				await e.getInputHandler().executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-blank-compose",
-					operation: (e) => IP(e, t.paragraphs)
+					operation: (e) => RP(e, t.paragraphs)
 				}, () => e.getCanvasView().refreshDocumentAgentMutation());
 			} finally {
 				c = !1;
@@ -69139,7 +69199,7 @@ function GF(e) {
 			};
 		},
 		async rewrite(t) {
-			let n = i(), r = t.expected.target ? await EP(e.wasm, t.expected, n) : n, a = e.getInputHandler();
+			let n = i(), r = t.expected.target ? await OP(e.wasm, t.expected, n) : n, a = e.getInputHandler();
 			if (!r.ready || !r.selection || !r.selectedText?.known || r.selectedText.truncated || ![
 				"body_text",
 				"cell_text",
@@ -69232,43 +69292,43 @@ function GF(e) {
 v(), jl();
 var Y = new io();
 ao(Y);
-var X = new oo(), KF = new pj(X);
-KF.installBeforeUnload(window);
-var qF = new Vj({
+var X = new oo(), JF = new hj(X);
+JF.installBeforeUnload(window);
+var YF = new Uj({
 	exportBytes: () => Y.exportHwp(),
 	isRecoveryBlocked: () => Y.requiresPasswordForSave,
-	schedule: wI(),
-	onStatus: TI
+	schedule: EI(),
+	onStatus: DI
 });
-qF.connect(X), oT((e, t) => {
+YF.connect(X), cT((e, t) => {
 	X.emit("theme-changed", {
 		mode: t,
 		effective: e
 	}), X.emit("command-state-changed");
-}), NT();
-var JF = dv(document.getElementById("icon-toolbar"));
-yv(document.getElementById("style-bar"));
-async function YF(e) {
-	let t = KF.isDirty();
-	return e && (Y.fileName = e), KF.markClean("host-save"), await qF.discardCurrentDraft("host-save"), {
+}), FT();
+var XF = pv(document.getElementById("icon-toolbar"));
+xv(document.getElementById("style-bar"));
+async function ZF(e) {
+	let t = JF.isDirty();
+	return e && (Y.fileName = e), JF.markClean("host-save"), await YF.discardCurrentDraft("host-save"), {
 		ok: !0,
 		wasDirty: t
 	};
 }
 window.rhwpStudio = {
-	notifySaved: (e) => YF(e),
+	notifySaved: (e) => ZF(e),
 	fonts: {
 		setProvider: On,
 		getState: Mn
 	}
 };
-var Z = null, Q = null, XF = null, ZF = null, QF = null, $F = null, eI = "normal", tI = null, nI = null, rI = null, iI = !1, aI = { disableExternalWebFonts: !1 };
-async function oI() {}
-var sI = fj("?chrome=embed"), cI = sI.mode;
-sI.unsupportedReason && console.warn(`[main] 지원하지 않는 chrome 값입니다: ${sI.requested}; full 프로파일을 사용합니다.`);
-var lI = new Pv();
-function uI() {
-	let e = Y.pageCount > 0, t = Q?.canEditCurrentFormField() ?? !1, n = eI === "form";
+var Z = null, Q = null, QF = null, $F = null, eI = null, tI = null, nI = "normal", rI = null, iI = null, aI = null, oI = !1, sI = { disableExternalWebFonts: !1 };
+async function cI() {}
+var lI = mj("?chrome=embed"), uI = lI.mode;
+lI.unsupportedReason && console.warn(`[main] 지원하지 않는 chrome 값입니다: ${lI.requested}; full 프로파일을 사용합니다.`);
+var dI = new Iv();
+function fI() {
+	let e = Y.pageCount > 0, t = Q?.canEditCurrentFormField() ?? !1, n = nI === "form";
 	return {
 		hasDocument: e,
 		hasSelection: Q?.hasSelection() ?? !1,
@@ -69281,7 +69341,7 @@ function uI() {
 		inPictureObjectSelection: Q?.isInPictureObjectSelection() ?? !1,
 		inField: Q?.isInField() ?? !1,
 		isEditable: !n || t,
-		editMode: eI,
+		editMode: nI,
 		isFormMode: n,
 		canEditFormField: t,
 		canUndo: Q?.canUndo() ?? !1,
@@ -69289,54 +69349,54 @@ function uI() {
 		zoom: Z?.getViewportManager().getZoom() ?? 1,
 		showControlCodes: Y.getShowControlCodes(),
 		showParagraphMarks: Y.getShowParagraphMarks(),
-		isDirty: KF.isDirty(),
+		isDirty: JF.isDirty(),
 		sourceFormat: e ? Y.getSourceFormat() : void 0
 	};
 }
-function dI(e) {
-	eI = e, Q?.setEditMode(e), document.documentElement.dataset.editMode = e, document.querySelectorAll("[data-cmd=\"view:form-mode\"]").forEach((t) => {
+function pI(e) {
+	nI = e, Q?.setEditMode(e), document.documentElement.dataset.editMode = e, document.querySelectorAll("[data-cmd=\"view:form-mode\"]").forEach((t) => {
 		t.classList.toggle("active", e === "form");
-	}), vI().textContent = z(e === "form" ? "ui.sbMessage.formMode" : "ui.sbMessage.editMode"), X.emit("edit-mode-changed", e), X.emit("command-state-changed");
+	}), bI().textContent = z(e === "form" ? "ui.sbMessage.formMode" : "ui.sbMessage.editMode"), X.emit("edit-mode-changed", e), X.emit("command-state-changed");
 }
-var fI = {
+var mI = {
 	eventBus: X,
 	wasm: Y,
-	documentState: KF,
-	getContext: uI,
+	documentState: JF,
+	getContext: fI,
 	getInputHandler: () => Q,
 	getViewportManager: () => Z?.getViewportManager() ?? null,
 	gotoPage: (e) => Z?.gotoPage(e) ?? !1,
 	refreshDocumentStatus: () => {
-		vI().textContent = z("ui.sbMessage.filePages", {
+		bI().textContent = z("ui.sbMessage.filePages", {
 			p1: Y.fileName,
 			p2: Y.pageCount
 		});
 	},
-	setEditMode: dI
-}, pI = new dy(lI, fI, X), mI = new Zv({
-	registry: lI,
-	dispatcher: pI,
-	getContext: uI,
+	setEditMode: pI
+}, hI = new py(dI, mI, X), gI = new $v({
+	registry: dI,
+	dispatcher: hI,
+	getContext: fI,
 	getMenuContainer: () => document.getElementById("menu-bar")
 });
-window.rhwpStudio.automation = mI;
-async function hI(e) {
+window.rhwpStudio.automation = gI;
+async function _I(e) {
 	throw Error(`허용되지 않은 플러그인: ${e}`);
 }
-var gI = new sy({
+var vI = new ly({
 	wasm: Y,
-	automation: mI,
+	automation: gI,
 	eventBus: X,
 	getInputHandler: () => Q,
-	loadDocument: (e, t) => iL(e, t ?? "document.hwp", null),
+	loadDocument: (e, t) => oL(e, t ?? "document.hwp", null),
 	createBlankDocument: () => {
-		dL();
+		pL();
 	},
-	resolve: hI
+	resolve: _I
 });
-window.rhwpStudio.plugins = gI, lI.registerAll(cI === "embed" ? qx.filter((e) => !lj.includes(e.id)) : qx), lI.registerAll(cI === "embed" ? Gw.filter((e) => !uj.includes(e.id)) : Gw), lI.registerAll(zT), lI.registerAll(AD), lI.registerAll(UO), lI.registerAll(hA), lI.registerAll(VA), lI.registerAll(QA);
-function _I() {
-	for (let e of [...lj, ...uj]) document.querySelectorAll(`[data-cmd="${e}"]`).forEach((e) => e.remove());
+window.rhwpStudio.plugins = vI, dI.registerAll(uI === "embed" ? Yx.filter((e) => !dj.includes(e.id)) : Yx), dI.registerAll(uI === "embed" ? qw.filter((e) => !fj.includes(e.id)) : qw), dI.registerAll(VT), dI.registerAll(MD), dI.registerAll(GO), dI.registerAll(_A), dI.registerAll(UA), dI.registerAll(ej);
+function yI() {
+	for (let e of [...dj, ...fj]) document.querySelectorAll(`[data-cmd="${e}"]`).forEach((e) => e.remove());
 	let e = document.querySelector(".menu-item[data-menu=\"file\"] .menu-dropdown");
 	if (!e) return;
 	e.querySelectorAll(".md-sub[data-recent]").forEach((e) => e.remove()), e.querySelectorAll(".md-sep").forEach((e) => {
@@ -69346,11 +69406,11 @@ function _I() {
 	let t = e.lastElementChild;
 	t?.classList.contains("md-sep") && t.remove();
 }
-cI === "embed" && _I(), cI === "embed" && document.addEventListener("keydown", (e) => {
-	dj(e) && e.preventDefault();
+uI === "embed" && yI(), uI === "embed" && document.addEventListener("keydown", (e) => {
+	pj(e) && e.preventDefault();
 }, !0);
-var vI = () => document.getElementById("sb-message"), yI = () => document.getElementById("sb-page"), bI = () => document.getElementById("sb-section"), xI = () => document.getElementById("sb-zoom-val"), SI = null, CI = null;
-function wI() {
+var bI = () => document.getElementById("sb-message"), xI = () => document.getElementById("sb-page"), SI = () => document.getElementById("sb-section"), CI = () => document.getElementById("sb-zoom-val"), wI = null, TI = null;
+function EI() {
 	let e = R.getAutosaveSettings();
 	return {
 		recoveryEnabled: e.recoveryEnabled,
@@ -69359,26 +69419,26 @@ function wI() {
 		idleDelayMs: e.idleDelaySeconds * 1e3
 	};
 }
-function TI(e) {
+function DI(e) {
 	let t = document.getElementById("sb-message");
 	if (!t) return;
-	if (SI &&= (clearTimeout(SI), null), e.state === "saving") {
-		CI === null && (CI = t.textContent ?? ""), t.textContent = "복구용 자동 저장 중...";
+	if (wI &&= (clearTimeout(wI), null), e.state === "saving") {
+		TI === null && (TI = t.textContent ?? ""), t.textContent = "복구용 자동 저장 중...";
 		return;
 	}
-	let n = CI ?? (e.state === "blocked" ? t.textContent ?? "" : null);
-	CI = null;
+	let n = TI ?? (e.state === "blocked" ? t.textContent ?? "" : null);
+	TI = null;
 	let r;
-	r = e.state === "saved" ? `복구용 자동 저장 완료 (${EI(e.byteLength)})` : e.state === "blocked" ? "보호 문서는 복구용 자동 저장을 하지 않습니다" : "복구용 자동 저장 실패", t.textContent = r, n !== null && n !== r && (SI = setTimeout(() => {
-		t.textContent === r && (t.textContent = n), SI = null;
+	r = e.state === "saved" ? `복구용 자동 저장 완료 (${OI(e.byteLength)})` : e.state === "blocked" ? "보호 문서는 복구용 자동 저장을 하지 않습니다" : "복구용 자동 저장 실패", t.textContent = r, n !== null && n !== r && (wI = setTimeout(() => {
+		t.textContent === r && (t.textContent = n), wI = null;
 	}, e.state === "saved" ? 1600 : 4e3));
 }
-function EI(e) {
+function OI(e) {
 	if (e < 1024) return `${e} B`;
 	let t = e / 1024;
 	return t < 1024 ? `${t.toFixed(1)} KiB` : `${(t / 1024).toFixed(1)} MiB`;
 }
-function DI() {
+function kI() {
 	return new Promise((e) => {
 		let t = !1, n = () => {
 			t || (t = !0, e());
@@ -69386,28 +69446,28 @@ function DI() {
 		window.setTimeout(n, 50), requestAnimationFrame(() => requestAnimationFrame(n));
 	});
 }
-async function OI(e, t) {
+async function AI(e, t) {
 	let n = Math.max(0, Math.min(100, Math.round(e)));
-	vI().textContent = `파일 로딩 ${n}% - ${t}`, await DI();
+	bI().textContent = `파일 로딩 ${n}% - ${t}`, await kI();
 }
-function kI(e) {
-	let t = Z?.getRenderBackend() === "canvaskit" ? $F?.getCanvasKitRenderer() ?? null : null;
+function jI(e) {
+	let t = Z?.getRenderBackend() === "canvaskit" ? tI?.getCanvasKitRenderer() ?? null : null;
 	if (!t || !e?.length) return;
 	let n = [...e];
 	(async () => {
-		await un(), await t.prepareLocalFonts(n), t === $F?.getCanvasKitRenderer() && Z?.getRenderBackend() === "canvaskit" && X.emit("document-view-changed");
+		await un(), await t.prepareLocalFonts(n), t === tI?.getCanvasKitRenderer() && Z?.getRenderBackend() === "canvaskit" && X.emit("document-view-changed");
 	})().catch((e) => {
 		console.warn("[CanvasKit] 로컬 Typeface 준비 실패, 기본 fallback으로 계속 표시합니다:", e);
 	});
 }
-async function AI() {
-	let e = vI();
+async function MI() {
+	let e = bI();
 	try {
-		aI = await Nv(), aI.disableExternalWebFonts && console.info("[main] 외부 웹폰트 사용 안 함 옵션이 켜져 있습니다."), e.textContent = aI.disableExternalWebFonts ? "로컬 폰트 준비 중..." : "웹폰트 로딩 중...", await Ye([], void 0, aI), e.textContent = "WASM 로딩 중...", await Y.initialize();
+		sI = await Fv(), sI.disableExternalWebFonts && console.info("[main] 외부 웹폰트 사용 안 함 옵션이 켜져 있습니다."), e.textContent = sI.disableExternalWebFonts ? "로컬 폰트 준비 중..." : "웹폰트 로딩 중...", await Ye([], void 0, sI), e.textContent = "WASM 로딩 중...", await Y.initialize();
 		let t = ec(window.location.search), n = tc(window.location.search);
 		n.mode;
 		let r = nc(window.location.search), i = rc(window.location.search);
-		tI = {
+		rI = {
 			backend: t.backend === "auto" ? {
 				...t,
 				backend: "canvas2d"
@@ -69418,11 +69478,11 @@ async function AI() {
 			canvaskitMode: n,
 			canvaskitSurface: r,
 			renderProfile: i
-		}, t.unsupportedReason && console.warn(`[main] 지원하지 않는 renderer 값입니다: ${t.requested}; Canvas2D를 사용합니다.`), n.unsupportedReason && console.warn(`[main] 지원하지 않는 CanvasKit mode입니다: ${n.requested}; default를 사용합니다.`), nI = t.unsupportedReason ?? null, $F = new FM(t, n, r, i, async (n, r) => (e.textContent = "CanvasKit 로딩 중...", { create() {
+		}, t.unsupportedReason && console.warn(`[main] 지원하지 않는 renderer 값입니다: ${t.requested}; Canvas2D를 사용합니다.`), n.unsupportedReason && console.warn(`[main] 지원하지 않는 CanvasKit mode입니다: ${n.requested}; default를 사용합니다.`), iI = t.unsupportedReason ?? null, tI = new LM(t, n, r, i, async (n, r) => (e.textContent = "CanvasKit 로딩 중...", { create() {
 			throw Error("This client uses the Canvas2D editor backend");
 		} }.create(n, r, { requirePreparedFontFamilies: t.backend === "auto" })), {
 			transformCanvasKitPreflight(e) {
-				return Ea(e, Ie(e.requiredFontFamilies, aI).unavailableFonts.map((e) => `fontUnavailable:${e}`));
+				return Ea(e, Ie(e.requiredFontFamilies, sI).unavailableFonts.map((e) => `fontUnavailable:${e}`));
 			},
 			async prepareCanvasKitDocument(e, t) {
 				if (An()) {
@@ -69433,7 +69493,7 @@ async function AI() {
 					await e.prepareHostFonts([...r.values()]);
 				}
 				if (!t) return;
-				let n = Ie(t.requiredFontFamilies, aI);
+				let n = Ie(t.requiredFontFamilies, sI);
 				if (n.unavailableFonts.length > 0) throw Error(`CanvasKit font family가 준비되지 않았습니다: ${n.unavailableFonts.join(", ")}`);
 				try {
 					await un(), await e.prepareLocalFonts(t.requiredFontFamilies);
@@ -69444,15 +69504,15 @@ async function AI() {
 			}
 		}), e.textContent = "HWP 파일을 선택해주세요.";
 		let a = document.getElementById("scroll-container");
-		Z = new vu(a, Y, X, $F), await oI(), Y.onExternalImagesInjected = () => {
+		Z = new vu(a, Y, X, tI), await cI(), Y.onExternalImagesInjected = () => {
 			Z?.loadDocument();
-		}, QF = new EM(document.getElementById("h-ruler"), document.getElementById("v-ruler"), a, X, Y, Z.getVirtualScroll(), Z.getViewportManager()), Q = new q_(a, Y, X, Z.getVirtualScroll(), Z.getViewportManager()), Q.setEditMode(eI), XF?.dispose(), XF = new nP({
+		}, eI = new OM(document.getElementById("h-ruler"), document.getElementById("v-ruler"), a, X, Y, Z.getVirtualScroll(), Z.getViewportManager()), Q = new Y_(a, Y, X, Z.getVirtualScroll(), Z.getViewportManager()), Q.setEditMode(nI), QF?.dispose(), QF = new iP({
 			wasm: Y,
 			input: Q,
 			eventBus: X,
-			isDirty: () => KF.isDirty(),
+			isDirty: () => JF.isDirty(),
 			render: () => Z.refreshDocumentAgentMutation()
-		}), QF.onCommitPin = (e) => {
+		}), eI.onCommitPin = (e) => {
 			if (Q) {
 				if (e.kind === "paraProps") {
 					Q.applyParaPropsAtCursor(e.props);
@@ -69467,46 +69527,46 @@ async function AI() {
 		}, Y.onBeforeExport = () => {
 			let e = Q?.getCursorPosition();
 			e && Y.setCaretPosition(e.sectionIndex, e.parentParaIndex ?? e.paragraphIndex, e.parentParaIndex === void 0 ? e.charOffset : 0);
-		}, ZF = new X_(document.getElementById("style-bar"), Y, X, pI), ZF.setEnabled(!1), Q.setDispatcher(pI), Q.setContextMenu(new nj(pI, lI)), Q.setCommandPalette(new rj(lI, pI)), Q.setCellSelectionRenderer(new Zj(a, Z.getVirtualScroll(), (e) => X.emit("cell-selection-phase-changed", e))), Q.setTableObjectRenderer(new rM(a, Z.getVirtualScroll())), Q.setTableResizeRenderer(new cM(a, Z.getVirtualScroll())), Q.setPictureObjectRenderer(new rM(a, Z.getVirtualScroll(), !0)), new xv(document.getElementById("menu-bar"), X, pI, lI, { onMenuOpen: (e) => {
-			e === "file" && sL();
+		}, $F = new Q_(document.getElementById("style-bar"), Y, X, hI), $F.setEnabled(!1), Q.setDispatcher(hI), Q.setContextMenu(new ij(hI, dI)), Q.setCommandPalette(new aj(dI, hI)), Q.setCellSelectionRenderer(new $j(a, Z.getVirtualScroll(), (e) => X.emit("cell-selection-phase-changed", e))), Q.setTableObjectRenderer(new aM(a, Z.getVirtualScroll())), Q.setTableResizeRenderer(new uM(a, Z.getVirtualScroll())), Q.setPictureObjectRenderer(new aM(a, Z.getVirtualScroll(), !0)), new Cv(document.getElementById("menu-bar"), X, hI, dI, { onMenuOpen: (e) => {
+			e === "file" && lL();
 		} }), document.querySelectorAll(".tb-btn[data-cmd]").forEach((e) => {
 			e.addEventListener("mousedown", (t) => {
 				t.preventDefault();
 				let n = e.dataset.cmd;
-				n && pI.dispatch(n, { anchorEl: e });
+				n && hI.dispatch(n, { anchorEl: e });
 			}), e.addEventListener("click", (t) => {
 				if (t.detail !== 0) return;
 				let n = e.dataset.cmd;
-				n && pI.dispatch(n, { anchorEl: e });
+				n && hI.dispatch(n, { anchorEl: e });
 			});
 		}), document.querySelectorAll(".tb-split").forEach((e) => {
 			let t = e.querySelector(".tb-split-arrow"), n = e.querySelector(".tb-split-menu");
 			t && (t.setAttribute("aria-haspopup", "menu"), t.setAttribute("aria-expanded", "false"), t.addEventListener("click", (t) => {
-				t.preventDefault(), t.stopPropagation(), ev(document, e);
+				t.preventDefault(), t.stopPropagation(), nv(document, e);
 				let n = !e.classList.contains("open");
-				$_(e, n, { focus: n && t.detail === 0 ? "first" : void 0 });
+				tv(e, n, { focus: n && t.detail === 0 ? "first" : void 0 });
 			}), t.addEventListener("keydown", (t) => {
-				(t.key === "ArrowDown" || t.key === "ArrowUp") && (t.preventDefault(), ev(document, e), $_(e, !0, { focus: t.key === "ArrowDown" ? "first" : "last" }));
+				(t.key === "ArrowDown" || t.key === "ArrowUp") && (t.preventDefault(), nv(document, e), tv(e, !0, { focus: t.key === "ArrowDown" ? "first" : "last" }));
 			})), e.querySelectorAll(".tb-split-item[data-cmd]").forEach((t) => {
 				t.addEventListener("click", (n) => {
-					n.preventDefault(), $_(e, !1, { returnFocus: n.detail === 0 });
+					n.preventDefault(), tv(e, !1, { returnFocus: n.detail === 0 });
 					let r = t.dataset.cmd;
-					r && pI.dispatch(r, { anchorEl: t });
+					r && hI.dispatch(r, { anchorEl: t });
 				});
 			}), n?.addEventListener("keydown", (t) => {
 				let n = t.target;
 				if (n instanceof Element) {
-					if (t.key === "Escape") t.preventDefault(), t.stopPropagation(), $_(e, !1, { returnFocus: !0 });
-					else if (t.key === "ArrowDown" || t.key === "ArrowUp") t.preventDefault(), tv(e, n, t.key === "ArrowDown" ? 1 : -1);
+					if (t.key === "Escape") t.preventDefault(), t.stopPropagation(), tv(e, !1, { returnFocus: !0 });
+					else if (t.key === "ArrowDown" || t.key === "ArrowUp") t.preventDefault(), rv(e, n, t.key === "ArrowDown" ? 1 : -1);
 					else if (t.key === "Home" || t.key === "End") {
 						t.preventDefault();
-						let n = Q_(e);
+						let n = ev(e);
 						(t.key === "Home" ? n[0] : n.at(-1))?.focus({ preventScroll: !0 });
 					}
 				}
 			});
 		}), document.addEventListener("mousedown", () => {
-			ev(document);
+			nv(document);
 		});
 		for (let e of ["icon-toolbar", "style-bar"]) {
 			let t = document.getElementById(e);
@@ -69514,46 +69574,46 @@ async function AI() {
 				e.target.tagName !== "INPUT" && e.target.tagName !== "SELECT" && e.preventDefault();
 			});
 		}
-		FI(), II(), BI(), jI(), PI(), (async () => {
-			await mL(), cI !== "embed" && await lL(), await fL();
-		})(), cI !== "embed" && tj(window, {
+		LI(), RI(), HI(), NI(), II(), (async () => {
+			await gL(), uI !== "embed" && await dL(), await mL();
+		})(), uI !== "embed" && rj(window, {
 			openDocumentBytes(e) {
 				X.emit("open-document-bytes", e);
 			},
 			notifyUnsupportedFile(e) {
-				_L(/* @__PURE__ */ Error(`지원하지 않는 파일 형식입니다: ${e}. HWP/HWPX/HML 파일만 지원합니다.`));
+				yL(/* @__PURE__ */ Error(`지원하지 않는 파일 형식입니다: ${e}. HWP/HWPX/HML 파일만 지원합니다.`));
 			},
 			notifyError(e) {
-				tL(e);
+				rL(e);
 			},
 			notifyMultipleFiles(e) {
 				console.warn(`[pwa-file-handling] 여러 파일(${e}개)이 전달되어 첫 번째 파일만 엽니다.`);
 			}
-		}), iI = !0;
+		}), oI = !0;
 	} catch (t) {
-		rI = t instanceof Error ? t.message : String(t), e.textContent = `WASM 초기화 실패: ${t}`, console.error("[main] WASM 초기화 실패:", t);
+		aI = t instanceof Error ? t.message : String(t), e.textContent = `WASM 초기화 실패: ${t}`, console.error("[main] WASM 초기화 실패:", t);
 	}
 }
-function jI() {
+function NI() {
 	document.addEventListener(Rf, () => {
 		Q?.isActive() && Q.focus();
 	});
 }
-var MI = /* @__PURE__ */ new Set([
+var PI = /* @__PURE__ */ new Set([
 	"PageUp",
 	"PageDown",
 	"Home",
 	"End"
-]), NI = /* @__PURE__ */ new Set([
+]), FI = /* @__PURE__ */ new Set([
 	"view:zoom-in",
 	"view:zoom-out",
 	"view:zoom-100",
 	"view:toolbox-basic"
 ]);
-function PI() {
+function II() {
 	document.addEventListener("keydown", (e) => {
-		if (fy(e.target)) return;
-		if (MI.has(e.key) && !e.altKey) {
+		if (my(e.target)) return;
+		if (PI.has(e.key) && !e.altKey) {
 			if (Q?.isActive()) {
 				Q.handleDocumentNavigationKey(e);
 				return;
@@ -69563,18 +69623,18 @@ function PI() {
 				return;
 			}
 		}
-		let t = xh(e, bh);
-		if (t && NI.has(t)) {
-			e.preventDefault(), pI.dispatch(t);
+		let t = Ch(e, Sh);
+		if (t && FI.has(t)) {
+			e.preventDefault(), hI.dispatch(t);
 			return;
 		}
 		if (Q?.isActive()) {
-			let t = xh(e, bh);
+			let t = Ch(e, Sh);
 			if (t === "edit:undo" || t === "edit:redo") {
-				let n = pI.dispatchWithResult(t);
+				let n = hI.dispatchWithResult(t);
 				(n.ok || n.reason === "threw") && e.preventDefault();
-			} else t === "edit:select-all" && my(e, document.querySelector(".modal-overlay"), () => {
-				pI.dispatchWithResult(t);
+			} else t === "edit:select-all" && gy(e, document.querySelector(".modal-overlay"), () => {
+				hI.dispatchWithResult(t);
 			}, () => {
 				Q?.focus();
 			});
@@ -69582,27 +69642,27 @@ function PI() {
 		}
 		let n = e.ctrlKey || e.metaKey;
 		if (e.altKey && !n && !e.shiftKey && (e.key === "n" || e.key === "N" || e.key === "ㅜ")) {
-			e.preventDefault(), pI.dispatch("file:new-doc");
+			e.preventDefault(), hI.dispatch("file:new-doc");
 			return;
 		}
 		if (n && !e.altKey && !e.shiftKey && (e.key === "o" || e.key === "O" || e.key === "ㅐ")) {
-			e.preventDefault(), pI.dispatch("file:open");
+			e.preventDefault(), hI.dispatch("file:open");
 			return;
 		}
 	}, !1);
 }
-function FI() {
+function LI() {
 	let e = document.getElementById("file-input");
 	e.addEventListener("change", async (t) => {
 		let n = t.target, r = n.dataset.skipUnsavedGuard === "true";
 		delete n.dataset.skipUnsavedGuard;
 		let i = n.files?.[0];
 		if (i) {
-			if (!Bb(i.name)) {
+			if (!Hb(i.name)) {
 				alert("HWP/HWPX/HML 파일만 지원합니다."), e.value = "";
 				return;
 			}
-			await nL(i, { skipUnsavedGuard: r }), e.value = "";
+			await iL(i, { skipUnsavedGuard: r }), e.value = "";
 		}
 	}), document.addEventListener("dragover", (e) => e.preventDefault()), document.addEventListener("drop", (e) => e.preventDefault());
 	let t = document.getElementById("scroll-container");
@@ -69621,14 +69681,14 @@ function FI() {
 			".gif",
 			".bmp",
 			".webp"
-		].some((e) => r.endsWith(e)), a = Bb(r);
-		if (!(cI === "embed" && a)) {
+		].some((e) => r.endsWith(e)), a = Hb(r);
+		if (!(uI === "embed" && a)) {
 			if (!i && !a) {
 				alert("HWP/HWPX/HML 파일 또는 이미지 파일만 지원합니다.");
 				return;
 			}
 			if (i) {
-				if (!await cj(n.name) || !Q || Y.pageCount === 0) return;
+				if (!await uj(n.name) || !Q || Y.pageCount === 0) return;
 				let t = new Uint8Array(await n.arrayBuffer()), r = n.name.split(".").pop()?.toLowerCase() || "png", i = new Image(), a = URL.createObjectURL(n);
 				try {
 					i.src = a, await i.decode();
@@ -69647,20 +69707,20 @@ function FI() {
 				}
 				return;
 			}
-			await nL(n);
+			await iL(n);
 		}
 	});
 }
-function II() {
+function RI() {
 	if (!Z) return;
-	let e = Z.getViewportManager(), t = document.getElementById("sb-zoom-in"), n = document.getElementById("sb-zoom-out"), r = document.getElementById("sb-zoom-range"), i = hh();
-	t.title = NM("zoomIn", "Ctrl++", i), n.title = NM("zoomOut", "Ctrl+-", i), t.addEventListener("click", () => {
-		pI.dispatch("view:zoom-in");
+	let e = Z.getViewportManager(), t = document.getElementById("sb-zoom-in"), n = document.getElementById("sb-zoom-out"), r = document.getElementById("sb-zoom-range"), i = _h();
+	t.title = FM("zoomIn", "Ctrl++", i), n.title = FM("zoomOut", "Ctrl+-", i), t.addEventListener("click", () => {
+		hI.dispatch("view:zoom-in");
 	}), n.addEventListener("click", () => {
-		pI.dispatch("view:zoom-out");
+		hI.dispatch("view:zoom-out");
 	}), r.addEventListener("input", () => {
-		let t = MM(Number(r.value));
-		r.value = String(jM(t)), r.setAttribute("aria-valuetext", `${t}%`), e.setZoom(t / 100);
+		let t = PM(Number(r.value));
+		r.value = String(NM(t)), r.setAttribute("aria-valuetext", `${t}%`), e.setZoom(t / 100);
 	}), r.addEventListener("keydown", (t) => {
 		let n = Math.round(e.getZoom() * 100), r = null;
 		switch (t.key) {
@@ -69688,50 +69748,50 @@ function II() {
 		}
 		t.preventDefault(), e.setZoom(r / 100);
 	}), document.getElementById("sb-zoom-fit-width").addEventListener("click", () => {
-		pI.dispatch("view:zoom-fit-width");
+		hI.dispatch("view:zoom-fit-width");
 	}), document.getElementById("sb-zoom-fit").addEventListener("click", () => {
-		pI.dispatch("view:zoom-fit-page");
+		hI.dispatch("view:zoom-fit-page");
 	}), document.getElementById("sb-zoom-display").addEventListener("click", () => {
-		pI.dispatch("view:zoom-dialog");
+		hI.dispatch("view:zoom-dialog");
 	});
 }
-var LI = 1, RI = [], zI = null;
-function BI() {
-	yI().addEventListener("click", () => {
-		pI.dispatch("edit:goto");
+var zI = 1, BI = [], VI = null;
+function HI() {
+	xI().addEventListener("click", () => {
+		hI.dispatch("edit:goto");
 	}), X.on("current-page-changed", (e, t) => {
 		let n = e, r = null;
 		if (Y.pageCount > 0) try {
 			r = Y.getPageInfo(n);
 		} catch {}
-		yI().textContent = UM({
+		xI().textContent = GM({
 			pageIndex: n,
 			totalPages: t,
 			documentPageNumber: r?.pageNumber
-		}), r && (bI().textContent = z("ui.sbSection.text", {
+		}), r && (SI().textContent = z("ui.sbSection.text", {
 			p1: r.sectionIndex + 1,
-			p2: LI
+			p2: zI
 		}));
 	}), X.on("zoom-fit-mode-changed", (e) => {
 		R.setZoomFitMode(Ic(e));
 	}), X.on("zoom-level-display", (e) => {
 		let t = Math.round(e * 100);
-		xI().textContent = `${t}%`;
+		CI().textContent = `${t}%`;
 		let n = document.getElementById("sb-zoom-range");
-		n && (n.value = String(jM(t)), n.setAttribute("aria-valuetext", `${t}%`));
+		n && (n.value = String(NM(t)), n.setAttribute("aria-valuetext", `${t}%`));
 	}), X.on("insert-mode-changed", (e) => {
 		document.getElementById("sb-mode").textContent = z(e ? "ui.sbMode.label" : "ui.sbMode.label.overwrite");
 	}), X.on("cell-selection-phase-changed", (e) => {
 		let t = document.getElementById("sb-cell-selection"), n = e;
 		t.hidden = n === null;
-		let r = n === null ? "" : Qj(n);
+		let r = n === null ? "" : eM(n);
 		t.textContent !== r && (t.textContent = r);
 	}), X.on("document-mutated", (e) => {
-		KF.markDirty(typeof e == "string" ? e : "document-mutated");
+		JF.markDirty(typeof e == "string" ? e : "document-mutated");
 	}), X.on("document-changed", (e) => {
-		KF.markDirty(typeof e == "string" ? e : "document-changed");
+		JF.markDirty(typeof e == "string" ? e : "document-changed");
 	}), X.on("renderer-selection-changed", (e) => {
-		nI = e.fallbackReason;
+		iI = e.fallbackReason;
 	}), kn(() => {
 		Z && Y.pageCount !== 0 && (Y.invalidateCanvasMetricFonts(), Z.refreshFontResources().catch((e) => {
 			console.warn("[HostFonts] View refresh failed:", e);
@@ -69739,9 +69799,9 @@ function BI() {
 	}), X.on("local-fonts-changed", () => {
 		if (!Z || Y.pageCount === 0) return;
 		let e = Sn(), t = `${e.detectedAt ?? "none"}:${e.source ?? "none"}:${e.count}`;
-		if (t !== zI) {
-			if (zI = t, Y.invalidateCanvasMetricFonts(), Z.getRenderBackend() === "canvaskit") {
-				kI(RI);
+		if (t !== VI) {
+			if (VI = t, Y.invalidateCanvasMetricFonts(), Z.getRenderBackend() === "canvaskit") {
+				jI(BI);
 				return;
 			}
 			X.emit("document-view-changed");
@@ -69751,7 +69811,7 @@ function BI() {
 	}), X.on("document-dirty-changed", () => {
 		X.emit("command-state-changed");
 	}), X.on("autosave-settings-changed", () => {
-		qF.updateSchedule(wI());
+		YF.updateSchedule(EI());
 	});
 	let e = document.getElementById("sb-field");
 	X.on("field-info-changed", (t) => {
@@ -69773,7 +69833,7 @@ function BI() {
 	let d = document.getElementById("hf-edit-status-live");
 	X.on("headerFooterModeChanged", (e) => {
 		let t = Fl(e), n = t !== "none";
-		if (r = n, JF?.resetToStart(), o && (o.hidden = !n), s) {
+		if (r = n, XF?.resetToStart(), o && (o.hidden = !n), s) {
 			let e = t === "none" ? "" : t.mode === "header" ? z("ui.tbHfLabel.header") : z("ui.tbHfLabel.footer"), n = t === "none" ? "" : Ml(t.applyTo);
 			s.textContent = t === "none" ? "" : z("ui.tbHfLabel.editing", {
 				p1: e,
@@ -69789,12 +69849,12 @@ function BI() {
 		}), a(), u && (n ? u.classList.add("hf-editing") : u.classList.remove("hf-editing"));
 	}), X.on("footnoteModeChanged", (e) => {
 		let t = e;
-		n = t, JF?.resetToStart(), c && (c.hidden = !t), l.forEach((e) => {
+		n = t, XF?.resetToStart(), c && (c.hidden = !t), l.forEach((e) => {
 			e.hidden = t;
 		}), a();
 	});
 }
-function VI(e) {
+function UI(e) {
 	if (e === "none") return;
 	let t = Z?.getViewportManager(), n = document.getElementById("scroll-container");
 	if (t && n && Y.pageCount !== 0) try {
@@ -69810,150 +69870,150 @@ function VI(e) {
 		console.warn("[main] 저장된 맞춤 배율 복원 실패:", e);
 	}
 }
-function HI() {
+function WI() {
 	let e = R.getViewSettings();
-	Y.setShowControlCodes(e.showControlCodes), Y.setShowParagraphMarks(e.showParagraphMarks), AT(e.showControlCodes, e.showParagraphMarks);
+	Y.setShowControlCodes(e.showControlCodes), Y.setShowParagraphMarks(e.showParagraphMarks), MT(e.showControlCodes, e.showParagraphMarks);
 	let t = !e.clipView;
-	Y.setClipEnabled(t), MT(t);
+	Y.setClipEnabled(t), PT(t);
 }
-async function UI(e, t, n = {}) {
-	let r = vI();
+async function GI(e, t, n = {}) {
+	let r = bI();
 	try {
-		Kr(e.fontSubstitutions), RI = [...e.fontsUsed ?? []], zI = null, console.log("[initDoc] 1. 폰트 로딩 시작"), await OI(55, "폰트 준비 중..."), e.fontsUsed?.length && await Ye(e.fontsUsed, (e, t) => {
+		Kr(e.fontSubstitutions), BI = [...e.fontsUsed ?? []], VI = null, console.log("[initDoc] 1. 폰트 로딩 시작"), await AI(55, "폰트 준비 중..."), e.fontsUsed?.length && await Ye(e.fontsUsed, (e, t) => {
 			let n = t > 0 ? 55 + Math.round(e / t * 20) : 65;
 			r.textContent = `파일 로딩 ${n}% - 폰트 로딩 중... (${e}/${t})`;
-		}, aI), console.log("[initDoc] 2. 폰트 로딩 완료"), await un(), await OI(75, "문서 상태 적용 중..."), LI = e.sectionCount ?? 1, bI().textContent = z("ui.sbSection.text", {
+		}, sI), console.log("[initDoc] 2. 폰트 로딩 완료"), await un(), await AI(75, "문서 상태 적용 중..."), zI = e.sectionCount ?? 1, SI().textContent = z("ui.sbSection.text", {
 			p1: 1,
-			p2: LI
-		}), HI(), console.log("[initDoc] 3. inputHandler deactivate"), Q?.deactivate(), console.log("[initDoc] 4. canvasView loadDocument"), await OI(82, "페이지 렌더 준비 중...");
+			p2: zI
+		}), WI(), console.log("[initDoc] 3. inputHandler deactivate"), Q?.deactivate(), console.log("[initDoc] 4. canvasView loadDocument"), await AI(82, "페이지 렌더 준비 중...");
 		let i = R.getViewSettings().zoomFitMode;
-		await Z?.loadDocument(), VI(i), kI(e.fontsUsed), console.log("[initDoc] 5. toolbar setEnabled"), await OI(90, "도구 모음 준비 중..."), ZF?.setEnabled(!0), console.log("[initDoc] 6. toolbar initFontDropdown + initStyleDropdown"), ZF?.initFontDropdown(e.fontsUsed), ZF?.initStyleDropdown(), console.log("[initDoc] 7. 사전 검증 및 로컬 글꼴 확인"), await OI(94, "문서 검증 및 글꼴 확인 중...");
+		await Z?.loadDocument(), UI(i), jI(e.fontsUsed), console.log("[initDoc] 5. toolbar setEnabled"), await AI(90, "도구 모음 준비 중..."), $F?.setEnabled(!0), console.log("[initDoc] 6. toolbar initFontDropdown + initStyleDropdown"), $F?.initFontDropdown(e.fontsUsed), $F?.initStyleDropdown(), console.log("[initDoc] 7. 사전 검증 및 로컬 글꼴 확인"), await AI(94, "문서 검증 및 글꼴 확인 중...");
 		try {
 			if (Y.getSourceFormat() === "hwpx") {
 				let e = Y.getValidationWarnings();
 				e.count > 0 && console.log(`[validation] ${e.count} warnings — 그대로 보기 (#2527)`, e.summary);
 			} else if (Y.getSourceFormat() === "hml") {
 				let e = Y.getHmlOpenMetadata();
-				e && oj(e);
+				e && cj(e);
 			}
 		} catch (e) {
 			console.warn("[validation] 감지 실패 (치명적이지 않음):", e);
 		}
-		n.suppressDialogs || await WI(e, t), console.log("[initDoc] 8. inputHandler activateWithCaretPosition"), await OI(96, "편집 상태 초기화 중..."), Q?.activateWithCaretPosition(), r.textContent = t, console.log("[initDoc] 9. 완료"), KF.markClean("document-initialized");
+		n.suppressDialogs || await KI(e, t), console.log("[initDoc] 8. inputHandler activateWithCaretPosition"), await AI(96, "편집 상태 초기화 중..."), Q?.activateWithCaretPosition(), r.textContent = t, console.log("[initDoc] 9. 완료"), JF.markClean("document-initialized");
 	} catch (e) {
 		if (console.error("[initDoc] 오류:", e), n.suppressDialogs) throw e;
 		window.innerWidth < 768 && alert(`초기화 오류: ${e}`);
 	}
 }
-async function WI(e, t) {
+async function KI(e, t) {
 	if (e.fontsUsed?.length) try {
 		Sn().loaded || await un();
-		let n = _j(e.fontsUsed);
+		let n = yj(e.fontsUsed);
 		if (!n.shouldPromptLocalAccess) return;
 		console.log(`[local-fonts] 감지 안내 모달 생략 — 대체 글꼴로 표시 (확인 필요 ${n.summary.needsLocalCheck}개, 문서 ${t})`);
 	} catch (e) {
 		console.warn("[local-fonts] 저장된 감지 결과 로드 실패 (치명적이지 않음):", e);
 	}
 }
-var GI = class extends Error {
+var qI = class extends Error {
 	constructor() {
 		super("문서 열기가 취소되었습니다."), this.name = "DocumentOpenCancelledError";
 	}
-}, KI = "비밀번호가 필요한 암호 문서", qI = "비밀번호가 일치하지 않거나 암호화 데이터가 손상되었습니다";
-function JI(e) {
-	return e instanceof GI;
-}
-function YI(e) {
-	return String(e).includes(KI);
-}
+}, JI = "비밀번호가 필요한 암호 문서", YI = "비밀번호가 일치하지 않거나 암호화 데이터가 손상되었습니다";
 function XI(e) {
-	return String(e).includes(qI);
+	return e instanceof qI;
 }
 function ZI(e) {
+	return String(e).includes(JI);
+}
+function QI(e) {
+	return String(e).includes(YI);
+}
+function $I(e) {
 	let t = String(e);
 	return t.includes("지원하지 않는 암호화 방식") ? /* @__PURE__ */ Error("지원하지 않는 암호화 방식의 문서입니다. 지원되는 HWP3/HWP5 암호 문서만 열 수 있습니다.") : t.includes("DRM") ? /* @__PURE__ */ Error("DRM으로 보호된 문서는 지원하지 않습니다.") : /* @__PURE__ */ Error("암호화된 문서를 열 수 없습니다. 문서가 손상되었는지 확인하세요.");
 }
-async function QI(e, t) {
+async function eL(e, t) {
 	let n;
 	for (;;) {
-		let r = await tb(t, n);
-		if (r === null) throw new GI();
+		let r = await rb(t, n);
+		if (r === null) throw new qI();
 		try {
 			Y.loadDocumentWithPassword(e, r, t);
 			return;
 		} catch (e) {
-			if (XI(e)) {
+			if (QI(e)) {
 				n = "암호가 일치하지 않거나 문서가 손상되었습니다. 다시 입력하세요.";
 				continue;
 			}
-			throw ZI(e);
+			throw $I(e);
 		} finally {
 			r = "";
 		}
 	}
 }
-async function $I(e, t) {
+async function tL(e, t) {
 	try {
 		return Y.loadDocument(e, t);
 	} catch (n) {
-		if (!YI(n)) throw n;
-		return await QI(e, t), Y.getDocumentInfo();
+		if (!ZI(n)) throw n;
+		return await eL(e, t), Y.getDocumentInfo();
 	}
 }
-function eL() {
+function nL() {
 	Z && Y.pageCount !== 0 && Z.loadDocument().catch((e) => {
 		console.warn("[main] 열기 실패 후 이전 문서 뷰 복구 실패:", e);
 	});
 }
-function tL(e) {
-	if (JI(e)) {
-		vI().textContent = "문서 열기를 취소했습니다.", eL();
+function rL(e) {
+	if (XI(e)) {
+		bI().textContent = "문서 열기를 취소했습니다.", nL();
 		return;
 	}
-	_L(e);
+	yL(e);
 }
-async function nL(e, t = {}) {
+async function iL(e, t = {}) {
 	try {
-		return await pL(t.skipUnsavedGuard) ? await BM(document.documentElement, async () => {
+		return await hL(t.skipUnsavedGuard) ? await HM(document.documentElement, async () => {
 			let n = performance.now();
-			await OI(0, "파일 읽는 중...");
+			await AI(0, "파일 읽는 중...");
 			let r = new Uint8Array(await e.arrayBuffer());
-			return await OI(15, "파일 읽기 완료"), await iL(r, e.name, t.fileHandle ?? null, n, { dataReadProgressShown: !0 }), !0;
+			return await AI(15, "파일 읽기 완료"), await oL(r, e.name, t.fileHandle ?? null, n, { dataReadProgressShown: !0 }), !0;
 		}) : !1;
 	} catch (e) {
-		return tL(e), !1;
+		return rL(e), !1;
 	}
 }
-function rL() {
+function aL() {
 	Z?.prepareDocumentLoad();
 }
-async function iL(e, t, n, r = performance.now(), i = {}) {
-	await BM(document.documentElement, async () => {
-		Z?.showBlankPage(), i.dataReadProgressShown || await OI(0, "문서 데이터 준비 중..."), await OI(25, "문서 파싱 및 쪽 계산 중...");
-		let a = await $I(e, t);
-		rL(), gI.notifyDocumentSwap(), X.emit("document-swapped"), await OI(45, "자동 저장 준비 중..."), qy(n), Y.currentFileHandle = n, i.skipRecent || (oL = !1, ux({
+async function oL(e, t, n, r = performance.now(), i = {}) {
+	await HM(document.documentElement, async () => {
+		Z?.showBlankPage(), i.dataReadProgressShown || await AI(0, "문서 데이터 준비 중..."), await AI(25, "문서 파싱 및 쪽 계산 중...");
+		let a = await tL(e, t);
+		aL(), vI.notifyDocumentSwap(), X.emit("document-swapped"), await AI(45, "자동 저장 준비 중..."), Yy(n), Y.currentFileHandle = n, i.skipRecent || (cL = !1, fx({
 			fileName: Y.fileName,
 			sourceFormat: Y.getSourceFormat(),
 			handle: n
-		}).catch((e) => console.warn("[recent] 최근 문서 기록 실패:", e))), await qF.beginDocument({
+		}).catch((e) => console.warn("[recent] 최근 문서 기록 실패:", e))), await YF.beginDocument({
 			fileName: Y.fileName,
 			sourceFormat: Y.getSourceFormat()
-		}, { discardPreviousDraft: !0 }), await OI(50, "문서 초기화 중...");
+		}, { discardPreviousDraft: !0 }), await AI(50, "문서 초기화 중...");
 		let o = performance.now() - r;
-		await UI(a, z("ui.sbMessage.filePagesTimed", {
+		await GI(a, z("ui.sbMessage.filePagesTimed", {
 			p1: t,
 			p2: a.pageCount,
 			p3: o.toFixed(1)
 		}), { suppressDialogs: i.suppressDialogs });
 	});
 }
-var aL = 8, oL = !1;
-async function sL() {
+var sL = 8, cL = !1;
+async function lL() {
 	let e = document.getElementById("recent-docs-panel");
 	if (!e) return;
 	let t;
 	try {
-		t = await dx();
+		t = await px();
 	} catch (e) {
 		console.warn("[recent] 최근 문서 조회 실패:", e);
 		return;
@@ -69977,7 +70037,7 @@ async function sL() {
 		disabled: !0
 	}));
 	else {
-		let e = oL ? t : t.slice(0, aL);
+		let e = cL ? t : t.slice(0, sL);
 		for (let t of e) r.append(n({
 			label: t.fileName,
 			cmd: "file:open-recent",
@@ -69985,10 +70045,10 @@ async function sL() {
 			right: t.sourceFormat.toUpperCase(),
 			title: t.fileName
 		}));
-		!oL && t.length > aL && r.append(n({
-			label: `최근 문서 더보기 (${t.length - aL}개)`,
+		!cL && t.length > sL && r.append(n({
+			label: `최근 문서 더보기 (${t.length - sL}개)`,
 			onClick: () => {
-				oL = !0, sL();
+				cL = !0, lL();
 			}
 		}));
 		let i = document.createElement("div");
@@ -69999,17 +70059,17 @@ async function sL() {
 	}
 	e.replaceChildren(r), e.closest(".md-sub")?.classList.toggle("disabled", t.length === 0);
 }
-function cL() {
+function uL() {
 	return new URLSearchParams(window.location.search).has("url");
 }
-async function lL() {
-	if (!cL()) try {
-		let e = (await Fj()).filter((e) => e.data.byteLength > 0);
-		if (e.length === 0 || Y.pageCount > 0 || KF.isDirty()) return;
-		let t = await Xj(e);
+async function dL() {
+	if (!uL()) try {
+		let e = (await Lj()).filter((e) => e.data.byteLength > 0);
+		if (e.length === 0 || Y.pageCount > 0 || JF.isDirty()) return;
+		let t = await Qj(e);
 		if (t.action === "later") return;
 		if (t.action === "delete-all") {
-			await Lj(), H({
+			await zj(), H({
 				message: "복구 후보를 삭제했습니다.",
 				durationMs: 2200
 			});
@@ -70018,45 +70078,45 @@ async function lL() {
 		let n = e.find((e) => e.id === t.draftId);
 		if (!n) return;
 		try {
-			await uL(n);
+			await fL(n);
 		} catch (e) {
-			tL(e);
+			rL(e);
 		}
 	} catch (e) {
 		console.warn("[autosave] 복구 후보 확인 실패:", e);
 	}
 }
-async function uL(e) {
-	let t = Gj(e.fileName);
-	await iL(new Uint8Array(e.data), t, null, performance.now(), { skipRecent: !0 }), await Ij(e.id), KF.markDirty("autosave-recovered"), H({
+async function fL(e) {
+	let t = qj(e.fileName);
+	await oL(new Uint8Array(e.data), t, null, performance.now(), { skipRecent: !0 }), await Rj(e.id), JF.markDirty("autosave-recovered"), H({
 		message: `"${t}" 복구본을 열었습니다.\n원본 파일은 자동으로 덮어쓰지 않습니다.`,
 		durationMs: 5e3
 	});
 }
-async function dL() {
-	let e = vI();
+async function pL() {
+	let e = bI();
 	try {
-		await BM(document.documentElement, async () => {
+		await HM(document.documentElement, async () => {
 			e.textContent = "새 문서 생성 중...";
 			let t = Y.createNewDocument();
-			rL(), gI.notifyDocumentSwap(), await qF.beginDocument({
+			aL(), vI.notifyDocumentSwap(), await YF.beginDocument({
 				fileName: Y.fileName,
 				sourceFormat: Y.getSourceFormat()
-			}, { discardPreviousDraft: !0 }), await UI(t, z("ui.sbMessage.newDocPages", { p1: t.pageCount }));
+			}, { discardPreviousDraft: !0 }), await GI(t, z("ui.sbMessage.newDocPages", { p1: t.pageCount }));
 		});
 	} catch (t) {
 		e.textContent = `새 문서 생성 실패: ${t}`, console.error("[main] 새 문서 생성 실패:", t);
 	}
 }
-async function fL() {
-	cI !== "embed" && (Y.pageCount > 0 || KF.isDirty() || await dL());
+async function mL() {
+	uI !== "embed" && (Y.pageCount > 0 || JF.isDirty() || await pL());
 }
-async function pL(e) {
-	return e === !0 || await Ix(fI, { allowLocalSave: cI !== "embed" });
+async function hL(e) {
+	return e === !0 || await Rx(mI, { allowLocalSave: uI !== "embed" });
 }
 X.on("create-new-document", (e) => {
 	(async () => {
-		await pL(e?.skipUnsavedGuard) && await dL();
+		await hL(e?.skipUnsavedGuard) && await pL();
 	})();
 }), X.on("open-document-bytes", async (e) => {
 	let t = e, n = (e, n) => {
@@ -70067,23 +70127,23 @@ X.on("create-new-document", (e) => {
 		});
 	};
 	try {
-		if (!await pL(t.skipUnsavedGuard)) {
+		if (!await hL(t.skipUnsavedGuard)) {
 			n(!1, "문서 열기가 취소되었습니다.");
 			return;
 		}
-		await iL(t.bytes, t.fileName, t.fileHandle), n(!0);
+		await oL(t.bytes, t.fileName, t.fileHandle), n(!0);
 	} catch (e) {
-		tL(e), n(!1, JI(e) ? "문서 열기가 취소되었습니다." : e instanceof Error ? e.message : String(e));
+		rL(e), n(!1, XI(e) ? "문서 열기가 취소되었습니다." : e instanceof Error ? e.message : String(e));
 	}
 }), X.on("equation-edit-request", () => {
-	pI.dispatch("insert:equation-edit");
+	hI.dispatch("insert:equation-edit");
 }), X.on("chart-data-edit-request", () => {
-	pI.dispatch("insert:chart-data-edit");
+	hI.dispatch("insert:chart-data-edit");
 });
-async function mL() {
+async function gL() {
 	let e = new URLSearchParams(window.location.search), t = e.get("url");
 	if (!t) return;
-	let n = e.get("filename") || t.split("/").pop()?.split("?")[0] || "document.hwp", r = vI();
+	let n = e.get("filename") || t.split("/").pop()?.split("?")[0] || "document.hwp", r = bI();
 	try {
 		r.textContent = "파일 로딩 중...", console.log(`[loadFromUrlParam] ${t}`);
 		let e;
@@ -70096,26 +70156,26 @@ async function mL() {
 			});
 			if (e.error) throw Error(e.error);
 			let r = new Uint8Array(e.data);
-			_o(r), await iL(r, n, null);
+			_o(r), await oL(r, n, null);
 			return;
 		}
 		else e = await fetch(t);
 		if (!e.ok) throw Error(`HTTP ${e.status}: ${e.statusText}`);
 		let i = e.headers.get("content-type"), a = await e.arrayBuffer(), o = new Uint8Array(a);
-		_o(o, i), await iL(o, n, null);
+		_o(o, i), await oL(o, n, null);
 	} catch (e) {
-		if (JI(e)) {
-			tL(e);
+		if (XI(e)) {
+			rL(e);
 			return;
 		}
-		if (t.startsWith("file:") && typeof chrome < "u" && await hL() === !1) {
-			gL();
+		if (t.startsWith("file:") && typeof chrome < "u" && await _L() === !1) {
+			vL();
 			return;
 		}
-		tL(e);
+		rL(e);
 	}
 }
-async function hL() {
+async function _L() {
 	let e = typeof chrome < "u" ? chrome.extension : void 0;
 	if (!e?.isAllowedFileSchemeAccess) return null;
 	try {
@@ -70124,8 +70184,8 @@ async function hL() {
 		return null;
 	}
 }
-function gL() {
-	let e = vI();
+function vL() {
+	let e = bI();
 	e && (e.textContent = "파일 로드 실패: 파일 URL 액세스 권한이 필요합니다."), console.error("[main] file:// 로드 실패 — 파일 URL 액세스 미허용 (#1131)"), H({
 		message: "로컬 파일을 열려면 확장 프로그램의 \"파일 URL에 대한 액세스 허용\"을 켜야 합니다.\n설정에서 권한을 허용한 뒤 파일을 다시 열어 주세요.",
 		durationMs: 0,
@@ -70138,16 +70198,16 @@ function gL() {
 		}
 	});
 }
-function _L(e) {
-	let t = `파일 로드 실패: ${String(e).replace(/^Error:\s*/, "")}`, n = vI();
-	n && (n.textContent = t), console.error("[main] 파일 로드 실패:", e), eL(), H({
+function yL(e) {
+	let t = `파일 로드 실패: ${String(e).replace(/^Error:\s*/, "")}`, n = bI();
+	n && (n.textContent = t), console.error("[main] 파일 로드 실패:", e), nL(), H({
 		message: t,
 		durationMs: 0,
 		confirmLabel: "확인"
 	});
 }
-var $ = AI();
-$.then(() => {}), SN({
+var $ = MI();
+$.then(() => {}), wN({
 	hostWindow: window,
 	parentWindow: window.parent,
 	subscribeDocumentChanged: (e) => X.on("document-agent-changed", e),
@@ -70156,8 +70216,8 @@ $.then(() => {}), SN({
 			return await $, !0;
 		},
 		async loadFile(e, t, n, r) {
-			if (await $, !await pL(n)) throw Error("문서 열기가 취소되었습니다.");
-			return await iL(e, t, null, void 0, { suppressDialogs: r }), { pageCount: Y.pageCount };
+			if (await $, !await hL(n)) throw Error("문서 열기가 취소되었습니다.");
+			return await oL(e, t, null, void 0, { suppressDialogs: r }), { pageCount: Y.pageCount };
 		},
 		async pageCount() {
 			return await $, Y.pageCount;
@@ -70167,11 +70227,11 @@ $.then(() => {}), SN({
 			let t = Z?.getRendererSessionDiagnostics() ?? null;
 			return {
 				schemaVersion: 1,
-				request: tI,
-				initialized: iI,
-				initializationError: rI,
+				request: rI,
+				initialized: oI,
+				initializationError: aI,
 				effectiveBackend: t?.effectiveBackend ?? null,
-				backendFallbackReason: t?.fallbackReason ?? nI,
+				backendFallbackReason: t?.fallbackReason ?? iI,
 				selection: t,
 				page: {
 					index: e,
@@ -70180,7 +70240,7 @@ $.then(() => {}), SN({
 			};
 		},
 		async getFontDecisionTrace(e, t) {
-			return await $, FN(Y.getFontDecisionTrace(e, t), { canvasKitEvidence: (t) => Z?.getCanvasKitFontDecisionEvidence(e, t) ?? null });
+			return await $, LN(Y.getFontDecisionTrace(e, t), { canvasKitEvidence: (t) => Z?.getCanvasKitFontDecisionEvidence(e, t) ?? null });
 		},
 		async getPageSvg(e) {
 			return await $, Y.renderPageSvg(e);
@@ -70201,73 +70261,73 @@ $.then(() => {}), SN({
 			return await $, JSON.parse(Y.exportHwpVerify());
 		},
 		async notifySaved(e) {
-			return await $, YF(e);
+			return await $, ZF(e);
 		},
 		async getDocumentState() {
-			if (await $, !XF) throw Error("Document agent is not initialized");
-			return XF.getDocumentState();
+			if (await $, !QF) throw Error("Document agent is not initialized");
+			return QF.getDocumentState();
 		},
 		async getSelectionContext() {
-			if (await $, !XF) throw Error("Document agent is not initialized");
-			return XF.getSelectionContext();
+			if (await $, !QF) throw Error("Document agent is not initialized");
+			return QF.getSelectionContext();
 		},
 		async applyTextCommand(e) {
-			if (await $, !XF) throw Error("Document agent is not initialized");
-			return XF.applyTextCommand(e);
+			if (await $, !QF) throw Error("Document agent is not initialized");
+			return QF.applyTextCommand(e);
 		},
 		async revertTextCommand(e) {
-			if (await $, !XF) throw Error("Document agent is not initialized");
-			return XF.revertTextCommand(e);
+			if (await $, !QF) throw Error("Document agent is not initialized");
+			return QF.revertTextCommand(e);
 		},
 		async focusTarget(e) {
-			if (await $, !XF) throw Error("Document agent is not initialized");
-			return XF.focusTarget(e);
+			if (await $, !QF) throw Error("Document agent is not initialized");
+			return QF.focusTarget(e);
 		},
 		async automationList() {
-			return await $, mI.listCommands();
+			return await $, gI.listCommands();
 		},
 		async automationMenuModel() {
-			return await $, mI.getMenuModel();
+			return await $, gI.getMenuModel();
 		},
 		async automationIsEnabled(e) {
-			return await $, mI.isEnabled(e);
+			return await $, gI.isEnabled(e);
 		},
 		async automationExecute(e, t, n) {
-			return await $, mI.execute(e, t, n);
+			return await $, gI.execute(e, t, n);
 		},
 		async automationContext() {
-			return await $, mI.getContext();
+			return await $, gI.getContext();
 		},
 		async pluginList() {
-			return await $, gI.list();
+			return await $, vI.list();
 		},
 		async pluginLoad(e) {
-			return await $, gI.load(e);
+			return await $, vI.load(e);
 		},
 		async pluginUnload(e) {
-			return await $, await gI.unload(e), { ok: !0 };
+			return await $, await vI.unload(e), { ok: !0 };
 		},
 		async pluginInvoke(e, t, n) {
-			return await $, gI.invoke(e, t, n);
+			return await $, vI.invoke(e, t, n);
 		},
 		async chromeGet() {
-			return ey();
+			return ny();
 		},
 		async chromeSet(e) {
-			return ty(e);
+			return ry(e);
 		}
 	}
-}), GF({
-	registry: lI,
+}), qF({
+	registry: dI,
 	ready: $,
 	getInputHandler: () => Q,
 	wasm: Y,
-	getDocumentAgent: () => XF,
+	getDocumentAgent: () => QF,
 	getCanvasView: () => Z,
-	load: (e, t) => iL(e, t, null, void 0, { suppressDialogs: !0 }),
-	saved: YF,
-	recovered: () => KF.markDirty("pwh-recovered"),
-	legacyDrafts: Fj
+	load: (e, t) => oL(e, t, null, void 0, { suppressDialogs: !0 }),
+	saved: ZF,
+	recovered: () => JF.markDirty("pwh-recovered"),
+	legacyDrafts: Lj
 });
 for (let e of [
 	"document-mutated",
