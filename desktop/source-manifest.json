@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pluginVersion": "0.6.31",
+  "pluginVersion": "0.6.32",
   "copyPolicy": "Original bytes; .test.mjs filenames renamed to .check.mjs for staged-only discovery.",
   "files": [
     {
@@ -24,26 +24,26 @@
     {
       "path": "standalone-pwh/app-smoke.check.mjs",
       "source": "standalone-pwh/app-smoke.test.mjs",
-      "size": 38659,
-      "sha256": "ef14cef5d602008b0c32fa6829d70f2edd5d33938702048bfa11f78d12114e85"
+      "size": 38720,
+      "sha256": "e01ee0ada122885b063af4022e4f1b6ac7f40aeabe2b454c7f6988255fabc26e"
     },
     {
       "path": "standalone-pwh/app.css",
       "source": "standalone-pwh/app.css",
-      "size": 11636,
-      "sha256": "41b37d7767bef0f56807dcd4eb960c328a299d5d5ed34f5410303f996b3ece2d"
+      "size": 13916,
+      "sha256": "d69e01dcb109cbaf0c33c3166b2a18b5a6af7e9db3c4927349e7b76137dce670"
     },
     {
       "path": "standalone-pwh/app.html",
       "source": "standalone-pwh/app.html",
-      "size": 8439,
-      "sha256": "acbee5a0a8bda2290ffb88884eab028bb5fee4ae37edb526411e3d6a7ec6229a"
+      "size": 13082,
+      "sha256": "1e264b91ea93d1e9afc17f7ced165a74ce96d53f9d25097fbb8988ad21ccee16"
     },
     {
       "path": "standalone-pwh/app.js",
       "source": "standalone-pwh/app.js",
-      "size": 32098,
-      "sha256": "ddea325b6d53785bc3bbd0e36f6493b318b2492d39d22cdadf2bd90defa89f55"
+      "size": 38540,
+      "sha256": "6f3aef29c613d35e9e5bb8dd2764149dfa96b7821ec8c220bc3b20c56b5d76a0"
     },
     {
       "path": "standalone-pwh/build-desktop-editor.mjs",
@@ -54,8 +54,8 @@
     {
       "path": "standalone-pwh/build-msi.mjs",
       "source": "standalone-pwh/build-msi.mjs",
-      "size": 14526,
-      "sha256": "25c3ee6c6435c74df39545ad5c62cc69fef2b00d6b90ba96f8f313dbe1ebff4c"
+      "size": 15243,
+      "sha256": "a714153d31d5119b921c0881a8b39126460ab240355ff304d1cebb1cf58b15e4"
     },
     {
       "path": "standalone-pwh/build-native-launcher.mjs",
@@ -66,14 +66,32 @@
     {
       "path": "standalone-pwh/build-offline.mjs",
       "source": "standalone-pwh/build-offline.mjs",
-      "size": 6564,
-      "sha256": "441f5ffa3cfc564415eb0077a7ab32446e3a1e0ab60822599058f096c63c688c"
+      "size": 7136,
+      "sha256": "eb61d1730b15ff3d4fa0e2bc3ffa9e452829ff47fcd88dbcb39367a78bc1b7b2"
     },
     {
       "path": "standalone-pwh/build-stoom-icon.mjs",
       "source": "standalone-pwh/build-stoom-icon.mjs",
       "size": 3972,
       "sha256": "b7fa8c0a0df7e190060516d5c187acab6757a5b5b47b76c3a65dcc271badfa01"
+    },
+    {
+      "path": "standalone-pwh/chatgpt-auth.mjs",
+      "source": "standalone-pwh/chatgpt-auth.mjs",
+      "size": 15100,
+      "sha256": "1af030f42bf6fca7e8d23e2812bff15bd8cbbd5b030b20d051c617d7d98227aa"
+    },
+    {
+      "path": "standalone-pwh/chatgpt-credentials.ps1",
+      "source": "standalone-pwh/chatgpt-credentials.ps1",
+      "size": 1253,
+      "sha256": "8b4d26bb76ac10a415f18e23e422a2c2edf69ed7149818b26cdb372ef7174a56"
+    },
+    {
+      "path": "standalone-pwh/chatgpt-store.mjs",
+      "source": "standalone-pwh/chatgpt-store.mjs",
+      "size": 5192,
+      "sha256": "1910be7043ffafa41b09c8f3b1628f4458298f1a8727394d06fc7fcc1c9418cb"
     },
     {
       "path": "standalone-pwh/client/editor.js",
@@ -85,7 +103,7 @@
       "path": "standalone-pwh/client/manifest.json",
       "source": "standalone-pwh/client/manifest.json",
       "size": 264,
-      "sha256": "83a716829a914c9723bd43a35e1b6796950690f8e97f8771af8d4c1a1b4e3e8b"
+      "sha256": "de07e2ac4fa77096ecf61dc9425f6cd2096e062180b7fca7f729d39327d73629"
     },
     {
       "path": "standalone-pwh/codex-agent.mjs",
@@ -94,16 +112,46 @@
       "sha256": "73d5ddff8df0b0d1191ab5fe2eb44d732645d9a61b6ca14af4591a90430058de"
     },
     {
+      "path": "standalone-pwh/CODEX-APACHE-LICENSE.txt",
+      "source": "standalone-pwh/CODEX-APACHE-LICENSE.txt",
+      "size": 10926,
+      "sha256": "d17f227e4df5da1600391338865ce0f3055211760a36688f816941d58232d8dc"
+    },
+    {
       "path": "standalone-pwh/codex-native-host.mjs",
       "source": "standalone-pwh/codex-native-host.mjs",
-      "size": 32142,
-      "sha256": "c5e240617fbfa4c08d73b2d557dbe02929613593ae4f493e813ec64bdaa55b58"
+      "size": 32149,
+      "sha256": "c1d1de5dbdfaf6470d62b2c2a0b5211285721bda23c2bba2ab492358b19fab21"
+    },
+    {
+      "path": "standalone-pwh/CODEX-NOTICE.txt",
+      "source": "standalone-pwh/CODEX-NOTICE.txt",
+      "size": 242,
+      "sha256": "9d71575ecfd9a843fc1677b0efb08053c6ba9fd686a0de1a6f5382fd3c220915"
+    },
+    {
+      "path": "standalone-pwh/CODEX-PCRE2-LICENSE.txt",
+      "source": "standalone-pwh/CODEX-PCRE2-LICENSE.txt",
+      "size": 3867,
+      "sha256": "9cf7ac6976099a1d856826d3ef1b093bd6b84489dc6100628ac79e740cf9885a"
     },
     {
       "path": "standalone-pwh/codex-plugin-setup.mjs",
       "source": "standalone-pwh/codex-plugin-setup.mjs",
       "size": 9951,
       "sha256": "12a86aa7ec2fbd14df10f19e00911019299a39e2eacf991d7060751b6c5b9451"
+    },
+    {
+      "path": "standalone-pwh/CODEX-RATATUI-MIT.txt",
+      "source": "standalone-pwh/CODEX-RATATUI-MIT.txt",
+      "size": 1132,
+      "sha256": "50eb43e8d742c9c61a9391e42b2184fce54dbd1893a1bb1c85b8c9ee217ab1f5"
+    },
+    {
+      "path": "standalone-pwh/CODEX-RIPGREP-MIT.txt",
+      "source": "standalone-pwh/CODEX-RIPGREP-MIT.txt",
+      "size": 1081,
+      "sha256": "0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f"
     },
     {
       "path": "standalone-pwh/codex-session-live.check.mjs",
@@ -114,8 +162,8 @@
     {
       "path": "standalone-pwh/codex-session.mjs",
       "source": "standalone-pwh/codex-session.mjs",
-      "size": 9710,
-      "sha256": "21da3a417b740d747e34d2b06a5c5710423d7c7236a41a0503d0bcbf675e74d6"
+      "size": 10463,
+      "sha256": "d52fe58df6fe11b9e99ef2c427d7054680b1d2dbf47d44d2a1c4b355ebbdae7e"
     },
     {
       "path": "standalone-pwh/convert-hwp.check.mjs",
@@ -186,8 +234,8 @@
     {
       "path": "standalone-pwh/host.mjs",
       "source": "standalone-pwh/host.mjs",
-      "size": 37382,
-      "sha256": "35649a9bc8488dd0e28e06f18b6ed971440c333572ccf451808612f5201f7149"
+      "size": 42724,
+      "sha256": "944f00c1279c7db9a4041fee4cba555fa2dad1e9ba020e604ebb69f10b349948"
     },
     {
       "path": "standalone-pwh/install.cmd",
@@ -244,6 +292,12 @@
       "sha256": "5888dbb9a1d2b18f2c3e6c5f6af1b39de658372b402a0577b002777f14c62ace"
     },
     {
+      "path": "standalone-pwh/official-codex-runtime.mjs",
+      "source": "standalone-pwh/official-codex-runtime.mjs",
+      "size": 5990,
+      "sha256": "c76eda238f04e6d54faaedfc2fbe52b28bc8416f48f7904f68b25355058a533a"
+    },
+    {
       "path": "standalone-pwh/preview-core.check.mjs",
       "source": "standalone-pwh/preview-core.test.mjs",
       "size": 3819,
@@ -276,8 +330,8 @@
     {
       "path": "standalone-pwh/settings.mjs",
       "source": "standalone-pwh/settings.mjs",
-      "size": 1801,
-      "sha256": "4ca81c251dd68a801762444c3071365b73ace5464e3fab37c4fb4a3e5f2e1de6"
+      "size": 1813,
+      "sha256": "df688247da41097611546b62be3bd2e0c7b713d97a4642e75f39e3f35020f116"
     },
     {
       "path": "standalone-pwh/steer-turn.check.mjs",
@@ -361,7 +415,7 @@
       "path": "standalone-pwh/version.json",
       "source": "standalone-pwh/version.json",
       "size": 21,
-      "sha256": "8c0feb56c8fce7b76610a96f099a03b07778f71b3174f89af16fbc51954d81e5"
+      "sha256": "9c001ac3a7c303c8c8084bc07a5884e735107d1e3fd9a32bb819d5fa0cbdca82"
     },
     {
       "path": "standalone-pwh/window-close-controller.mjs",

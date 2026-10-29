@@ -14,6 +14,9 @@ import {createLocalProvider,createCodexProvider} from './ai-providers.mjs';
 import {readSettings,writeSettings,validateSettings} from './settings.mjs';
 import {rewriteSelection} from './rewrite.mjs';
 import {createCodexSession} from './codex-session.mjs';
+import {createChatgptAuth} from './chatgpt-auth.mjs';
+import {directConnection,directModels,initializeDirect} from './official-codex-runtime.mjs';
+import {loadStoomRuntime} from '../bridge/hwp-codex-host.mjs';
 import {createDesktopFileManager} from './desktop-files.mjs';
 import {runEngine} from '../release-source/src/engine.mjs';
 import {sameRequestContext} from '../release-source/src/request-state.mjs';
@@ -46,9 +49,14 @@ async function stageDocument(bytes,{sourceName}={}){
  if(bytes.subarray(0,2).toString()!=='PK')throw Error('HWP 또는 HWPX 문서가 아닙니다.');
  const file=path.join(dir,'document.hwpx');await fs.writeFile(file,bytes,{flag:'wx'});return registerClientDocument(file);
 }
-async function providerFor(settings){
+async function providerFor(settings,{auth,runtimeRoot,home}={}){
  if(settings.provider==='local')return createLocalProvider({baseUrl:settings.localBaseUrl,model:settings.localModel});
  const modulePath=process.env.PWH_STOOM_MODULE||path.join(appRoot,'codex-native-host.mjs');
+ if(settings.provider==='chatgpt')return {async status(){
+  const account=await auth.status();if(!account.active)return {ready:false,models:[],message:'AI 설정에서 ChatGPT 계정을 연결해 주세요.'};
+  const token=await auth.getAccessToken(),{runtime}=await loadStoomRuntime(modulePath);const client=await directConnection({runtime,root:runtimeRoot,home,accessToken:token.accessToken});
+  try{await initializeDirect(client);return {ready:true,models:await directModels(client),account:account.accounts.find(a=>a.id===account.active)?.email||'',message:'ChatGPT 로그인 연결됨. 실제 모델 사용 가능 여부는 요청할 때 확인됩니다.'};}finally{client.close();}
+ }};
  return createCodexProvider({stoomModule:modulePath});
 }
 async function desktopEditorHtml(){
@@ -76,8 +84,14 @@ export async function createAppServer({initialBytes,initialPath,imported=false,c
  const desktopCommands=[],desktopTickets=new Map();
  const files=createDesktopFileManager({...(chooseFile?{choose:chooseFile}:{}),verify:async file=>(await runEngine(['info',file,'--json'])).data,register:registerClientDocument});
  if(initialPath&&!imported&&path.extname(initialPath).toLowerCase()==='.hwpx')files.setTarget(current.source,current.sourceSha256);
- let codexSession=null,codexSessionKey='',agentBusy=false,activeAgentSessionId=null,agentProgress=[],cancelRequested=false;
- function closeCodexSession(){codexSession?.close();codexSession=null;codexSessionKey='';}
+ const chatgptAuth=createChatgptAuth({dataRoot:path.join(appData,'chatgpt-auth')});
+ const chatgptRuntime={auth:chatgptAuth,runtimeRoot:process.env.PWH_CODEX_RUNTIME_DIR||path.join(appRoot,'codex-runtime'),home:path.join(appData,'chatgpt-runtime')};
+ let codexSession=null,codexSessionKey='',codexTokenHash='',codexSessionAccount='',credentialStamp='',checkingCredential=false,savedThread=null,agentBusy=false,activeAgentSessionId=null,agentProgress=[],cancelRequested=false;
+ function closeCodexSession({preserve=false}={}){if(preserve&&codexSession?.hasTurn&&codexSessionKey)savedThread={key:codexSessionKey,id:codexSession.threadId};else if(!preserve)savedThread=null;codexSession?.close();codexSession=null;codexSessionKey='';codexTokenHash='';codexSessionAccount='';credentialStamp='';}
+ async function currentCredentialStamp(){const st=await fs.stat(path.join(appData,'chatgpt-auth','credentials.dat'));return [st.size,st.mtimeMs,st.birthtimeMs,st.ino].join(':');}
+ // Each document tab has its own server. Stop an active session when another
+ // tab signs out or selects a different account, including while a turn runs.
+ const accountWatcher=setInterval(async()=>{if(!codexSession||!codexSessionAccount||checkingCredential)return;checkingCredential=true;const session=codexSession,accountId=codexSessionAccount;try{const stamp=await currentCredentialStamp();if(stamp!==credentialStamp){const state=await chatgptAuth.status();if(session!==codexSession)return;if(state.active!==accountId||!state.accounts.some(account=>account.id===accountId&&account.connected)){cancelRequested=true;closeCodexSession();}else credentialStamp=stamp;}}catch{if(session===codexSession){cancelRequested=true;closeCodexSession();}}finally{checkingCredential=false;}},1500);accountWatcher.unref();
  let lastActivity=Date.now();
  const assets={'/':'app.html','/app.js':'app.js','/app.css':'app.css','/stoom-mark.svg':'stoom-mark.svg','/stoom.ico':'stoom.ico'};
  const server=createServer(async(req,res)=>{
@@ -177,9 +191,15 @@ export async function createAppServer({initialBytes,initialPath,imported=false,c
     const sessionId=req.headers['x-pwh-session'],width=Number(req.headers['x-pwh-width']),height=Number(req.headers['x-pwh-height']);if(typeof sessionId!=='string'||!Number.isSafeInteger(width)||!Number.isSafeInteger(height)||width<1||height<1||width*height>16000000)throw Error('이미지 정보를 확인할 수 없습니다.');const bytes=await parse(req,8*1024*1024);const png=bytes.subarray(0,8).equals(Buffer.from('89504e470d0a1a0a','hex')),jpg=bytes.subarray(0,3).equals(Buffer.from('ffd8ff','hex'));if(!png&&!jpg)throw Error('PNG 또는 JPEG 그림을 선택하세요.');for(const [id,asset] of imageAssets)if(Date.now()-asset.createdAt>600000)imageAssets.delete(id);if(imageAssets.size>=8)imageAssets.delete(imageAssets.keys().next().value);const assetId=randomUUID(),metadata={assetId,sha256:createHash('sha256').update(bytes).digest('hex'),totalBytes:bytes.length,width,height,extension:png?'png':'jpg',mediaType:png?'image/png':'image/jpeg'};imageAssets.set(assetId,{sessionId,bytes,metadata,createdAt:Date.now()});return json(res,{assetId});
    }
    if(route==='/settings/read')return json(res,await readSettings(settingsPath));
-   if(route==='/settings/write')return json(res,await writeSettings(settingsPath,JSON.parse((await parse(req,8192)).toString())));
-   if(route==='/ai/status'){const settings=await readSettings(settingsPath),provider=await providerFor(settings);return json(res,await provider.status());}
-   if(route==='/ai/check'){const settings=validateSettings(JSON.parse((await parse(req,8192)).toString())),provider=await providerFor(settings);return json(res,await provider.status());}
+   if(route==='/settings/write'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 설정을 변경해 주세요.');const before=await readSettings(settingsPath),after=await writeSettings(settingsPath,JSON.parse((await parse(req,8192)).toString()));if(before.provider!==after.provider||before.codexModel!==after.codexModel||before.codexReasoningEffort!==after.codexReasoningEffort)closeCodexSession();return json(res,after);}
+   if(route==='/codex/disconnect'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 연결을 해제해 주세요.');const settings=await readSettings(settingsPath);if(settings.provider==='codex'){await writeSettings(settingsPath,{...settings,provider:'chatgpt'});closeCodexSession();}return json(res,{ok:true});}
+   if(route==='/chatgpt/status')return json(res,await chatgptAuth.status());
+   if(route==='/chatgpt/begin'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 로그인해 주세요.');const input=JSON.parse((await parse(req,8192)).toString());return json(res,await chatgptAuth.begin(input.accountId||null));}
+   if(route==='/chatgpt/select'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 계정을 바꿔 주세요.');const input=JSON.parse((await parse(req,8192)).toString());const result=await chatgptAuth.select(input.accountId);closeCodexSession();return json(res,result);}
+   if(route==='/chatgpt/welcome')return json(res,await chatgptAuth.acknowledgeWelcome());
+   if(route==='/chatgpt/signout'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 로그아웃해 주세요.');const input=JSON.parse((await parse(req,8192)).toString());closeCodexSession();return json(res,await chatgptAuth.signOut(input.accountId||null));}
+   if(route==='/ai/status'){const settings=await readSettings(settingsPath),provider=await providerFor(settings,chatgptRuntime);return json(res,await provider.status());}
+   if(route==='/ai/check'){const settings=validateSettings(JSON.parse((await parse(req,8192)).toString())),provider=await providerFor(settings,chatgptRuntime);return json(res,await provider.status());}
    if(route==='/ai/progress')return json(res,{events:agentProgress.splice(0,100)});
    if(route==='/ai/steer'){
     const input=JSON.parse((await parse(req,8192)).toString());
@@ -201,22 +221,26 @@ export async function createAppServer({initialBytes,initialPath,imported=false,c
     const input=JSON.parse((await parse(req,200000)).toString()),settings=await readSettings(settingsPath);
     if(typeof input.note!=='string'||!input.note.trim()||input.note.length>4000)throw Error('요청 내용을 입력하세요.');
     if(input.history!==undefined&&(!Array.isArray(input.history)||input.history.length>24||input.history.some(x=>!x||!['user','assistant'].includes(x.role)||typeof x.text!=='string'||x.text.length>6000)||input.history.reduce((n,x)=>n+x.text.length,0)>32000))throw Error('이전 대화를 확인할 수 없습니다.');
-    if(settings.provider==='codex'){
+    if(settings.provider==='codex'||settings.provider==='chatgpt'){
      if(agentBusy)throw Error('이전 AI 작업이 진행 중입니다.');agentBusy=true;activeAgentSessionId=input.sessionId;cancelRequested=false;agentProgress=[];
      try{
      const state=editorState({sessionId:input.sessionId});
      const request=input.requestId?editorRequest({requestId:input.requestId}):editorCapture({sessionId:input.sessionId,source:state.source,context:input.context,note:input.note});
      if(input.requestId&&(request.sessionId!==input.sessionId||request.note!==input.note||request.source!==state.source))throw Error('편집기 요청이 현재 문서와 일치하지 않습니다. 다시 요청해 주세요.');
-     const key=JSON.stringify([input.sessionId,settings.codexModel,settings.codexReasoningEffort]);
-     const restoring=key!==codexSessionKey;
-     if(restoring){closeCodexSession();codexSession=await createCodexSession({stoomModule:process.env.PWH_STOOM_MODULE||path.join(appRoot,'codex-native-host.mjs'),mcpUrl:`${origin}/${launchToken}/mcp`,bearerToken:agentToken,model:settings.codexModel||undefined,reasoningEffort:settings.codexReasoningEffort||undefined,notify:event=>{if(event.type==='text'&&typeof event.text==='string'){const last=agentProgress.at(-1);if(last?.type==='text'&&last.text.length+event.text.length<=160000)last.text+=event.text;else agentProgress.push({type:'text',text:event.text.slice(0,160000)});}else if(event.type==='tool')agentProgress.push(event);if(agentProgress.length>100)agentProgress.shift();}});codexSessionKey=key;}
+     const credentials=settings.provider==='chatgpt'?await chatgptAuth.getAccessToken():null;
+     const key=JSON.stringify([settings.provider,input.sessionId,settings.codexModel,settings.codexReasoningEffort,credentials?.accountId||'']);
+     const tokenHash=credentials?createHash('sha256').update(credentials.accessToken).digest('hex'):'';
+     const restoring=key!==codexSessionKey||tokenHash!==codexTokenHash;
+     let resumed=false;
+     if(restoring){if(codexSession&&codexSessionKey===key)closeCodexSession({preserve:true});else if(codexSession)closeCodexSession();const resumeId=credentials&&savedThread?.key===key?savedThread.id:null;codexSession=await createCodexSession({stoomModule:process.env.PWH_STOOM_MODULE||path.join(appRoot,'codex-native-host.mjs'),mcpUrl:`${origin}/${launchToken}/mcp`,bearerToken:agentToken,model:settings.codexModel||undefined,reasoningEffort:settings.codexReasoningEffort||undefined,...(credentials?{direct:{runtimeRoot:chatgptRuntime.runtimeRoot,home:chatgptRuntime.home,accessToken:credentials.accessToken,...(resumeId?{threadId:resumeId}:{})}}:{}),notify:event=>{if(event.type==='text'&&typeof event.text==='string'){const last=agentProgress.at(-1);if(last?.type==='text'&&last.text.length+event.text.length<=160000)last.text+=event.text;else agentProgress.push({type:'text',text:event.text.slice(0,160000)});}else if(event.type==='tool')agentProgress.push(event);if(agentProgress.length>100)agentProgress.shift();}});codexSessionKey=key;codexTokenHash=tokenHash;resumed=!!resumeId;}
+     if(credentials&&restoring){codexSessionAccount=credentials.accountId;credentialStamp=await currentCredentialStamp();const state=await chatgptAuth.status();if(state.active!==credentials.accountId||!state.accounts.some(account=>account.id===credentials.accountId&&account.connected))throw Error('ChatGPT 계정이 변경되었습니다. 다시 요청해 주세요.');}
      if(cancelRequested)throw Error('Codex 작업을 중지했습니다.');
      const asset=input.imageAssetId?imageAssets.get(input.imageAssetId):null;if(input.imageAssetId&&(!asset||asset.sessionId!==input.sessionId||Date.now()-asset.createdAt>600000))throw Error('첨부 그림이 만료되었습니다. 다시 첨부하세요.');
-     const result=await codexSession.send({requestId:request.requestId,sessionId:input.sessionId,note:input.note,history:restoring?input.history:undefined,imageAssetId:input.imageAssetId||undefined});
+     const result=await codexSession.send({requestId:request.requestId,sessionId:input.sessionId,note:input.note,history:restoring&&!resumed?input.history:undefined,imageAssetId:input.imageAssetId||undefined});
      return json(res,{text:result.text,applied:null});
-     }catch(error){closeCodexSession();throw error;}finally{agentBusy=false;activeAgentSessionId=null;}
+     }catch(error){closeCodexSession({preserve:settings.provider==='chatgpt'});throw error;}finally{agentBusy=false;activeAgentSessionId=null;}
     }
-    const provider=await providerFor(settings);
+    const provider=await providerFor(settings,chatgptRuntime);
     const status=await provider.status();if(!status.ready)throw Error(status.message||'AI 연결 상태를 확인하세요.');
     const generate=args=>provider.generate({...args,...(settings.codexModel&&settings.provider==='codex'?{model:settings.codexModel}:{})});
     if(input.context?.selection&&input.context?.selectedText?.text){
@@ -226,9 +250,9 @@ export async function createAppServer({initialBytes,initialPath,imported=false,c
     const result=await generate({prompt:input.note});return json(res,{text:result.text,applied:false});
    }
    return json(res,{error:'찾을 수 없는 요청입니다.'},404);
-  }catch(error){json(res,{error:error.message||'요청 처리에 실패했습니다.'},400);}
+  }catch(error){json(res,{error:error.message||'요청 처리에 실패했습니다.',...(error.code==='usage_limit'?{code:'usage_limit'}:{})},400);}
  });
- const idleTimer=setInterval(()=>{if(!agentBusy&&Date.now()-lastActivity>idleTimeoutMs)server.close();},15000);idleTimer.unref();server.once('close',()=>{clearInterval(idleTimer);closeCodexSession();});
+ const idleTimer=setInterval(()=>{if(!agentBusy&&Date.now()-lastActivity>idleTimeoutMs)server.close();},15000);idleTimer.unref();server.once('close',()=>{clearInterval(idleTimer);clearInterval(accountWatcher);closeCodexSession();chatgptAuth.close();});
  await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(port,'127.0.0.1',resolve);});
  return {server,url:`http://127.0.0.1:${server.address().port}/${launchToken}/`};
 }

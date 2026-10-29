@@ -3,11 +3,11 @@ import path from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {localApiBase} from './ai-providers.mjs';
 
-export const defaultSettings = Object.freeze({provider:'codex',localBaseUrl:'http://127.0.0.1:11434/v1',localModel:'',codexModel:'',codexReasoningEffort:''});
+export const defaultSettings = Object.freeze({provider:'chatgpt',localBaseUrl:'http://127.0.0.1:11434/v1',localModel:'',codexModel:'',codexReasoningEffort:''});
 export function validateSettings(input) {
  if (!input || typeof input !== 'object' || Array.isArray(input)) throw Error('AI 설정이 올바르지 않습니다.');
  const out={...defaultSettings,...input};
- if (!['codex','local'].includes(out.provider)) throw Error('AI 제공자를 선택하세요.');
+ if (!['chatgpt','codex','local'].includes(out.provider)) throw Error('AI 제공자를 선택하세요.');
  out.localBaseUrl=localApiBase(out.localBaseUrl);
  for(const key of ['localModel','codexModel']) if(typeof out[key]!=='string'||out[key].length>256||/[\x00-\x1f]/.test(out[key])) throw Error('AI 모델 이름이 올바르지 않습니다.');
  if(!['','none','minimal','low','medium','high','xhigh','max','ultra'].includes(out.codexReasoningEffort)) throw Error('Codex 추론 강도가 올바르지 않습니다.');

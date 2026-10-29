@@ -6,7 +6,7 @@
 
 Codex에서 사용하는 **Pwh 플러그인**과 독립 실행하는 **Pwh Desktop**이 같은 편집기와 조판 코어를 공유합니다. [rhwp](https://github.com/edwardkim/rhwp) 0.8.7을 기반으로 하며 Windows x64를 기준으로 개발합니다.
 
-현재 릴리스는 **Pwh 0.6.31 · Pwh Desktop 0.1.10**입니다. 두 설치 파일은 [하나의 GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases/tag/v0.6.31)에서 받을 수 있습니다.
+현재 릴리스는 **Pwh 0.6.32 · Pwh Desktop 0.1.11**입니다. 두 설치 파일은 [하나의 GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases/tag/v0.6.32)에서 받을 수 있습니다.
 
 ## 주요 기능
 
@@ -40,7 +40,7 @@ Pwh는 rhwp 0.8.7을 기반으로 조판 엔진에 다음 보완을 적용한 �
 ### Pwh Desktop
 
 1. [최신 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases/latest)에서 `PwhDesktop-<버전>.msi`를 내려받아 설치합니다.
-2. 앱에서 문서를 편집하고, AI를 사용할 때는 설치·로그인된 Codex 또는 별도로 준비한 로컬 AI 서버를 연결합니다.
+2. 앱의 AI 설정에서 **ChatGPT로 계속**을 선택해 OpenAI 계정을 연결하거나, 설치된 Codex 또는 별도로 준비한 로컬 AI 서버를 선택합니다. ChatGPT 연결에는 별도의 Codex 설치가 필요하지 않습니다.
 
 설치기에는 편집기와 엔진이 포함되어 있으며, Windows 설정 또는 제어판에서 제거할 수 있습니다. Codex가 설치되어 있으면 설치 중 Pwh 플러그인과 스킬의 갱신 또는 연결을 시도합니다. 기존 GitHub 연결을 갱신하려면 인터넷이 필요합니다. Codex가 없거나 연결이 실패해도 Desktop은 설치되며, 나중에 다시 연결할 수 있습니다.
 
@@ -116,6 +116,7 @@ AI에게 수정을 맡긴 부분은 그대로 두고 다른 영역을 편집할 
 ## 지원 범위
 
 - 현재 함께 편집하는 기능의 검증 기준은 **Codex 데스크톱**입니다. ChatGPT·Work의 모든 실행 환경에서 같은 동작을 보장하지 않습니다.
+- Pwh Desktop의 ChatGPT 직접 연결은 OpenAI 미리보기 기능을 사용합니다. 모델과 계정에 따라 사용 범위가 다르며 이미지 생성 등 일부 ChatGPT 내장 도구는 지원되지 않습니다.
 - 문서 열기·저장은 최대 **64 MiB**, AI 표 삽입·셀 채우기는 최대 **256칸·24,000자**를 지원합니다. 실제 처리 성능은 문서 복잡도에 따라 달라집니다.
 - 혼합 글자 서식, 중첩 표, 비직사각 셀 선택, 일부 객체와 특수 영역은 작업별 지원 범위가 다릅니다. 처리할 수 없는 구조는 적용 전에 안내합니다.
 - 셀 테두리·속성의 중첩 표 편집과 여러 갈래 대각선 조판은 현재 지원하지 않습니다. 기존 문서의 대각선 정보는 유지합니다.

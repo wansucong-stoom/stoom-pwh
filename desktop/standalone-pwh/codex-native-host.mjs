@@ -141,7 +141,7 @@ export function reviewFilesystem(tempDir, platform = process.platform) {
   return { [platform === 'win32' ? ':root' : ':minimal']: 'read', [tempDir]: 'read' };
 }
 
-function terminateOwnedChild(child) {
+export function terminateOwnedChild(child) {
   if (!child || child.exitCode !== null && child.exitCode !== undefined) return;
   if (process.platform === 'win32' && Number.isInteger(child.pid) && child.pid > 0) {
     const system = process.env.SystemRoot || process.env.SYSTEMROOT || 'C:\\Windows';
