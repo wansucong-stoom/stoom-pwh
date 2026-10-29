@@ -68,6 +68,15 @@ const patches = [
       {path: 'src/renderer/typeset/controls/tac_fit.rs', originalSha256: '31a9dfe9482ca8798b25b2c42ad2bf2ef02ce73b309959234a851276855be6d3', patchedSha256: '0168df5eacacf3b7c31fb6b13e1d18a6c7011e5415cce86dfefeecdc3f8d3b6f'},
     ],
   },
+  {
+    file: 'rhwp-0.8.7-unsegmented-float-flow.patch',
+    sha256: '174b98deb82291af3238e56b08b807c177e0478898091c652664ead2737c3f11',
+    sources: [
+      {path: 'src/renderer/float_placement.rs', originalSha256: '82759ab163aa6fe8f57aee13fefd68bcddbde11c57e468cbc34a2e2320b4044a', patchedSha256: '505a0bd578cc15d33a8bc84a2057250d5cbdf6227c0683e609aece799e6db013'},
+      {path: 'src/renderer/layout.rs', originalSha256: '81fef37b2cd464f007d721edcdaf938d6ba47439dc9418c8745bc7da927d7a61', patchedSha256: '9a331572f891129fb1674d29a1db72e209285f1c6e6904498fda6e81f19c223d'},
+      {path: 'src/renderer/typeset/table/host_spacing.rs', originalSha256: 'cd6908b0f9c258db1898418124c17d23e8e9ad3124176e4b1afa5663047ad4ef', patchedSha256: 'e355cff05386365f4637dee606251d4edbdd4ca6921410b24d70a44fe2ab195c'},
+    ],
+  },
 ];
 const help = `Usage: node scripts/build-patched-core.mjs
   --source-archive <fixed upstream source ZIP>

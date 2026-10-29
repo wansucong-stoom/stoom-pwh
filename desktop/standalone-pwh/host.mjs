@@ -34,14 +34,14 @@ async function blankDocument(){
  const core=await import(pathToFileURL(js).href);await core.default({module_or_path:await fs.readFile(wasm)});
  const doc=core.HwpDocument.createEmpty();try{doc.createBlankDocument();return Buffer.from(doc.exportHwpx());}finally{doc.free();}
 }
-async function stageDocument(bytes){
+async function stageDocument(bytes,{sourceName}={}){
  if(bytes.length<8||bytes.length>maxDocument)throw Error('64 MiB 이하의 HWP/HWPX 파일을 선택하세요.');
  const dir=path.join(appData,'documents',randomUUID());await fs.mkdir(dir,{recursive:true});
  const signature=bytes.subarray(0,8).toString('hex');
  if(signature==='d0cf11e0a1b11ae1'){
   const source=path.join(dir,'source.hwp'),converted=path.join(dir,'document.hwpx');await fs.writeFile(source,bytes,{flag:'wx'});
   const result=await convertHwp({executable:config.rhwpPath,source,output:converted});
-  return {...await registerClientDocument(converted),convertedFromHwp:true,...result};
+  return {...await registerClientDocument(converted),...(sourceName?{name:path.basename(sourceName)}:{}),convertedFromHwp:true,...result};
  }
  if(bytes.subarray(0,2).toString()!=='PK')throw Error('HWP 또는 HWPX 문서가 아닙니다.');
  const file=path.join(dir,'document.hwpx');await fs.writeFile(file,bytes,{flag:'wx'});return registerClientDocument(file);
@@ -53,8 +53,9 @@ async function providerFor(settings){
 }
 async function desktopEditorHtml(){
  let html=addDesktopVersion(await clientViewerHtml(),await desktopVersion(appRoot));const anchor=" window.addEventListener('pwh-status',event=>status(String(event.detail)));";if(!html.includes(anchor))throw Error('편집기 저장 연결을 확인하지 못했습니다.');
+ html=html.replace("status('본문에서 직접 편집하세요. 다시 쓸 부분을 드래그하고 채팅으로 요청할 수 있습니다.')","status('')");
  const dispatch="command.type==='openDocument'?await openDocument(command):";if(!html.includes(dispatch))throw Error('편집기 문서 서식 연결을 확인하지 못했습니다.');html=html.replace(dispatch,"command.type==='desktopBodyStyle'?window.pwhEditor.desktopBodyStyle(command):command.type==='desktopColumns'?window.pwhEditor.desktopColumns(command):command.type==='desktopImage'?window.pwhEditor.desktopInsertImage(command,await replacementBytes(command.image)):"+dispatch);
- html=html.replace(anchor,` window.pwhDesktopAcceptSave=async(d,seq)=>{const oldKey=recoveryKey();if(state.protectedRecoveryKey!==oldKey)await recoveryStore('delete',oldKey).catch(()=>{});state.documentId=d.documentId;state.source=d.source;state.sourceSha256=d.sourceSha256;state.checkpointSha=null;state.recoveryEligible=true;document.getElementById('pwh-title').textContent=d.name;document.getElementById('pwh-title').title=d.source;const same=window.pwhEditor.context().documentState.changeSeq===seq;if(same)await window.pwhEditor.saved(d.name);status(same?'저장했습니다.':'저장 후 추가 변경은 아직 미저장 상태입니다.');return same;};\n`+anchor);
+ html=html.replace(anchor,` window.pwhDesktopAcceptSave=async(d,seq)=>{const oldKey=recoveryKey();if(window.pwhEditor.context().documentState.changeSeq===seq&&state.protectedRecoveryKey!==oldKey)await recoveryStore('delete',oldKey).catch(()=>{});state.documentId=d.documentId;state.source=d.source;state.displayName=d.name;state.sourceSha256=d.sourceSha256;state.checkpointSha=null;state.recoveryEligible=true;document.getElementById('pwh-title').textContent=d.name;document.getElementById('pwh-title').title=d.source;if(window.pwhEditor.context().documentState.changeSeq===seq)await window.pwhEditor.saved(d.name);const current=window.pwhEditor.context().documentState,same=current.changeSeq===seq;if(!same&&!current.dirty)window.pwhEditor.recovered();status(same?'저장했습니다.':'저장 후 추가 변경은 아직 미저장 상태입니다.');return same;};\n`+anchor);
  html=html.replace('</head>',`<style>#pwh-import-table,#pwh-save{display:none!important}[data-menu="file"] [data-cmd="file:new-doc"],[data-menu="file"] [data-cmd="file:open"],[data-menu="file"] [data-cmd="file:save"],[data-menu="file"] [data-cmd="file:save-as"]{opacity:1!important;pointer-events:auto!important}</style></head>`);
  const dir=path.join(appRoot,'client');let manifest;
  try{manifest=JSON.parse(await fs.readFile(path.join(dir,'manifest.json'),'utf8'));}catch(error){if(error.code==='ENOENT')return html;throw error;}
@@ -63,17 +64,18 @@ async function desktopEditorHtml(){
  const editor=inlineEditorImageUrls(bytes.toString('utf8')).replace(/<\/script/gi,'<\\/script');
  return html.slice(0,start+marker.length)+editor+html.slice(end);
 }
-export async function createAppServer({initialBytes,initialPath,chooseFile,editorHtml=desktopEditorHtml,launchToken=randomBytes(24).toString('hex'),idleTimeoutMs=120000,port=0,nativeBranding}={}){
+export async function createAppServer({initialBytes,initialPath,imported=false,chooseFile,editorHtml=desktopEditorHtml,launchToken=randomBytes(24).toString('hex'),idleTimeoutMs=120000,port=0,nativeBranding}={}){
  if(nativeBranding&&!/^[0-9a-f]{32}$/.test(nativeBranding.token))throw Error('Windows 창 식별자가 올바르지 않습니다.');
  let nativePageGeneration=0;
- let current=initialPath?(path.extname(initialPath).toLowerCase()==='.hwp'?await stageDocument(await fs.readFile(path.resolve(initialPath))):await registerClientDocument(path.resolve(initialPath))):await stageDocument(initialBytes||await blankDocument());
+ let current=initialPath?(path.extname(initialPath).toLowerCase()==='.hwp'?await stageDocument(await fs.readFile(path.resolve(initialPath)),{sourceName:initialPath}):await registerClientDocument(path.resolve(initialPath))):await stageDocument(initialBytes||await blankDocument());
+ if(imported)current={...current,imported:true};
  const agentToken=randomBytes(32).toString('hex');
  let documentSnapshot=null;
  const readTools=[{name:'pwh_desktop_read_scan',description:'문서 전체를 엔진의 구조 순서로 읽습니다. 본문, 표 셀, 중첩 표와 지원되는 글상자 텍스트를 포함합니다. 표 서식 분석의 표 개수 제한과는 무관합니다. page 번호는 제공하지 않습니다. nextCursor를 끝까지 따라가고 truncated 여부를 확인하세요.',inputSchema:{type:'object',properties:{sessionId:{type:'string'},cursor:{type:'integer',minimum:0}},required:['sessionId']},annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false}},{name:'pwh_desktop_read_page',description:'한 페이지의 조판된 텍스트를 읽습니다. 페이지는 1부터 시작하며 표의 보이는 텍스트를 포함할 수 있습니다. 조판 결과와 글꼴에 따라 사용자 화면과 쪽 나눔이 다를 수 있고, 잘린 표의 숨은 텍스트는 포함되지 않습니다. 전체 내용은 pwh_desktop_read_scan도 확인하세요.',inputSchema:{type:'object',properties:{sessionId:{type:'string'},page:{type:'integer',minimum:1}},required:['sessionId','page']},annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false}}];
  const imageAssets=new Map();
  const desktopCommands=[],desktopTickets=new Map();
  const files=createDesktopFileManager({...(chooseFile?{choose:chooseFile}:{}),verify:async file=>(await runEngine(['info',file,'--json'])).data,register:registerClientDocument});
- if(initialPath&&path.extname(initialPath).toLowerCase()==='.hwpx')files.setTarget(current.source,current.sourceSha256);
+ if(initialPath&&!imported&&path.extname(initialPath).toLowerCase()==='.hwpx')files.setTarget(current.source,current.sourceSha256);
  let codexSession=null,codexSessionKey='',agentBusy=false,activeAgentSessionId=null,agentProgress=[],cancelRequested=false;
  function closeCodexSession(){codexSession?.close();codexSession=null;codexSessionKey='';}
  let lastActivity=Date.now();
@@ -162,8 +164,8 @@ export async function createAppServer({initialBytes,initialPath,chooseFile,edito
    if(route==='/initialize')return json(res,{document:current});
    if(route==='/new'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 문서를 바꿔 주세요.');current=await stageDocument(await blankDocument());files.clear();documentSnapshot=null;closeCodexSession();return json(res,{document:current});}
    if(route==='/open'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 문서를 바꿔 주세요.');current=await stageDocument(await parse(req,maxDocument));files.clear();documentSnapshot=null;closeCodexSession();return json(res,{document:current});}
-   if(route==='/file/open'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 문서를 바꿔 주세요.');const picked=await files.open();if(!picked)return json(res,{cancelled:true});const doc=path.extname(picked.file).toLowerCase()==='.hwp'?await stageDocument(await fs.readFile(picked.file)):await registerClientDocument(picked.file);if(path.extname(picked.file).toLowerCase()==='.hwpx'&&doc.sourceSha256!==picked.digest)throw Error('선택한 파일이 변경되었습니다. 다시 열어 주세요.');current=doc;files.clear();if(!doc.convertedFromHwp)files.setTarget(doc.source,doc.sourceSha256);documentSnapshot=null;closeCodexSession();return json(res,{document:doc});}
-   if(route==='/file/prepare'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 저장해 주세요.');const input=JSON.parse((await parse(req,8192)).toString());if(input.documentId!==current.documentId)throw Error('문서가 변경되었습니다. 다시 저장해 주세요.');return json(res,await files.prepare({mode:input.mode,documentId:current.documentId,suggestedName:current.convertedFromHwp?'문서.hwpx':current.name}));}
+   if(route==='/file/open'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 문서를 바꿔 주세요.');const picked=await files.open();if(!picked)return json(res,{cancelled:true});const doc=path.extname(picked.file).toLowerCase()==='.hwp'?await stageDocument(await fs.readFile(picked.file),{sourceName:picked.file}):await registerClientDocument(picked.file);if(path.extname(picked.file).toLowerCase()==='.hwpx'&&doc.sourceSha256!==picked.digest)throw Error('선택한 파일이 변경되었습니다. 다시 열어 주세요.');current=doc;files.clear();if(!doc.convertedFromHwp)files.setTarget(doc.source,doc.sourceSha256);documentSnapshot=null;closeCodexSession();return json(res,{document:doc});}
+   if(route==='/file/prepare'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 저장해 주세요.');const input=JSON.parse((await parse(req,8192)).toString());if(input.documentId!==current.documentId)throw Error('문서가 변경되었습니다. 다시 저장해 주세요.');return json(res,await files.prepare({mode:input.mode,documentId:current.documentId,suggestedName:current.convertedFromHwp?path.parse(current.name).name+'.hwpx':current.name}));}
    if(route==='/file/write'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 저장해 주세요.');const bytes=await parse(req,maxDocument),ticket=req.headers['x-pwh-ticket'],documentId=req.headers['x-pwh-document'];if(documentId!==current.documentId)throw Error('문서가 변경되었습니다. 다시 저장해 주세요.');const document=await files.write({ticket,documentId,bytes});current=document;return json(res,{document});}
    if(route==='/document/snapshot'){
     const sessionId=req.headers['x-pwh-session'],epoch=Number(req.headers['x-pwh-epoch']),seq=Number(req.headers['x-pwh-seq']);if(typeof sessionId!=='string'||!sessionId||!Number.isSafeInteger(epoch)||!Number.isSafeInteger(seq))throw Error('문서 상태를 확인하지 못했습니다.');

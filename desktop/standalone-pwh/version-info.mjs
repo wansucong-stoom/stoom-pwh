@@ -8,8 +8,8 @@ export async function desktopVersion(root){
  }catch{return null;}
 }
 export function addDesktopVersion(html,version){
- const marker='<small id="pwh-version"';
- if(!html.includes(marker))throw Error('조판기 버전 표시를 확인하지 못했습니다.');
- const label=version?`Desktop ${version}`:'Desktop 버전 확인 불가';
- return html.replace(marker,`<small id="desktop-version" style="white-space:nowrap">${label}</small>${marker}`);
+ const marker=/<small id="pwh-version"[^>]*>Pwh (\d+\.\d+\.\d+)<\/small>/i;
+ if(!marker.test(html))throw Error('조판기 버전 표시를 확인하지 못했습니다.');
+ const desktop=version||'버전 확인 불가';
+ return html.replace(marker,(_whole,pwh)=>`<small id="pwh-version" style="white-space:nowrap">Pwh Desktop ${desktop} (${pwh})</small>`);
 }

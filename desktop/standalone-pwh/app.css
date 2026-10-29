@@ -11,3 +11,5 @@ dialog{padding:0;border:1px solid #dce3e6;border-radius:13px;width:min(900px,cal
 main.ai-closed{grid-template-columns:minmax(0,1fr)}main.ai-closed aside,main.ai-closed #splitter{display:none}main.ai-closed #editor{grid-column:1;grid-row:1}.side-title strong{margin-right:auto}.side-title #close-ai{width:28px;height:28px;min-height:28px;padding:5px}#open-ai{font-size:12px}
 
 @media(max-width:760px){.app-header #open-ai{font-size:11px}}
+#desktop-workspace-status{max-width:30%;font-size:11px;color:#71848d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#document-notice{max-width:30%;font-size:11px;color:#596f79;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

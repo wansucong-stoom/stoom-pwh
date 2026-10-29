@@ -6,7 +6,7 @@
 
 Codex에서 사용하는 **Pwh 플러그인**과 독립 실행하는 **Pwh Desktop**이 같은 편집기와 조판 코어를 공유합니다. [rhwp](https://github.com/edwardkim/rhwp) 0.8.7을 기반으로 하며 Windows x64를 기준으로 개발합니다.
 
-현재 릴리스는 **Pwh 0.6.30 · Pwh Desktop 0.1.9**입니다. 두 설치 파일은 [하나의 GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases/tag/v0.6.30)에서 받을 수 있습니다.
+현재 릴리스는 **Pwh 0.6.31 · Pwh Desktop 0.1.10**입니다. 두 설치 파일은 [하나의 GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases/tag/v0.6.31)에서 받을 수 있습니다.
 
 ## 주요 기능
 
@@ -31,7 +31,7 @@ Pwh는 rhwp 0.8.7을 기반으로 조판 엔진에 다음 보완을 적용한 �
 - **편집 후 쪽 경계:** 저장된 글자처럼 취급한 표의 내용이 커졌을 때 늘어난 높이를 쪽 나눔에 반영하도록 보완했습니다.
 - **글자처럼 취급한 표 뒤 간격:** 특정 줄 간격 설정에서 표 다음 문단이 지나치게 가까워지는 문제를 보완했습니다.
 
-기준은 고정된 rhwp 0.8.7이며, 현재 편집기 런타임은 `rhwp-0.8.7-pwh-r5`입니다. 위 내용은 **편집기용 WASM 코어**에 적용됩니다. 별도의 네이티브 CLI와 Studio 출력 경로가 모두 같은 패치를 사용하는 것은 아닙니다.
+기준은 고정된 rhwp 0.8.7이며, 현재 편집기 런타임은 `rhwp-0.8.7-pwh-r6`입니다. 위 내용은 **편집기용 WASM 코어**에 적용됩니다. 별도의 네이티브 CLI와 Studio 출력 경로가 모두 같은 패치를 사용하는 것은 아닙니다.
 
 선택 표시, 글꼴, 표 복사와 셀 편집 등 Studio의 변경 및 AI 연결 기능은 **[rhwp 원본과 Pwh의 차이](docs/RHWP-DIFFERENCES.md)**에 구분해 정리했습니다. 적용 조건과 검증 방법은 [rhwp 엔진 패치 상세](docs/engine-patches/README.md)를 참고하세요. 이 변경이 rhwp 원본 프로젝트에 반영됐다는 뜻은 아닙니다.
 

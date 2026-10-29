@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pluginVersion": "0.6.30",
+  "pluginVersion": "0.6.31",
   "copyPolicy": "Original bytes; .test.mjs filenames renamed to .check.mjs for staged-only discovery.",
   "files": [
     {
@@ -8,12 +8,6 @@
       "source": "bridge/hwp-codex-host.mjs",
       "size": 26251,
       "sha256": "f455a32822068c927872ef8f7eeab4d8cc10d405ec55c8c8d0c05b32e7bec3d9"
-    },
-    {
-      "path": "standalone-pwh/NODE-LICENSE.txt",
-      "source": "standalone-pwh/NODE-LICENSE.txt",
-      "size": 157609,
-      "sha256": "5888dbb9a1d2b18f2c3e6c5f6af1b39de658372b402a0577b002777f14c62ace"
     },
     {
       "path": "standalone-pwh/ai-providers.check.mjs",
@@ -36,20 +30,20 @@
     {
       "path": "standalone-pwh/app.css",
       "source": "standalone-pwh/app.css",
-      "size": 11389,
-      "sha256": "59619196a09c7976e58aa2fb18d07cf014c8f737339b0b71267e204440d5d7f3"
+      "size": 11636,
+      "sha256": "41b37d7767bef0f56807dcd4eb960c328a299d5d5ed34f5410303f996b3ece2d"
     },
     {
       "path": "standalone-pwh/app.html",
       "source": "standalone-pwh/app.html",
-      "size": 8119,
-      "sha256": "0dc30f403e907e6e35f31d7d9aec48fba41c0c2d1f003c56ed865e49197817ae"
+      "size": 8439,
+      "sha256": "acbee5a0a8bda2290ffb88884eab028bb5fee4ae37edb526411e3d6a7ec6229a"
     },
     {
       "path": "standalone-pwh/app.js",
       "source": "standalone-pwh/app.js",
-      "size": 22517,
-      "sha256": "ccbe5a1408cabf36173e20882b64c29151ca96e6e5778ea7f028d3b8f2df297a"
+      "size": 32098,
+      "sha256": "ddea325b6d53785bc3bbd0e36f6493b318b2492d39d22cdadf2bd90defa89f55"
     },
     {
       "path": "standalone-pwh/build-desktop-editor.mjs",
@@ -60,8 +54,8 @@
     {
       "path": "standalone-pwh/build-msi.mjs",
       "source": "standalone-pwh/build-msi.mjs",
-      "size": 14495,
-      "sha256": "4ec753202f8235c336948c2995f8f87239db4abacd3451a2e4f6a2b83e8244a3"
+      "size": 14526,
+      "sha256": "25c3ee6c6435c74df39545ad5c62cc69fef2b00d6b90ba96f8f313dbe1ebff4c"
     },
     {
       "path": "standalone-pwh/build-native-launcher.mjs",
@@ -72,8 +66,8 @@
     {
       "path": "standalone-pwh/build-offline.mjs",
       "source": "standalone-pwh/build-offline.mjs",
-      "size": 6533,
-      "sha256": "670f384c798e59881d198f2d561e8812cfd2d927c3a7326c36ab2d10cb6236d7"
+      "size": 6564,
+      "sha256": "441f5ffa3cfc564415eb0077a7ab32446e3a1e0ab60822599058f096c63c688c"
     },
     {
       "path": "standalone-pwh/build-stoom-icon.mjs",
@@ -84,14 +78,14 @@
     {
       "path": "standalone-pwh/client/editor.js",
       "source": "standalone-pwh/client/editor.js",
-      "size": 2665344,
-      "sha256": "a2deea2a8871856453bb6490a4719e1f6cda43fc667b469445f81c2d4d141a37"
+      "size": 2673812,
+      "sha256": "8801021c91a57b222aa3b2b45b55e3ca477cafdf0fddfb02a07a6aa1240466df"
     },
     {
       "path": "standalone-pwh/client/manifest.json",
       "source": "standalone-pwh/client/manifest.json",
       "size": 264,
-      "sha256": "88ca0575afdb0fdf4476b2a0b98fb46858a89ab0e803b45391265c562b198d38"
+      "sha256": "83a716829a914c9723bd43a35e1b6796950690f8e97f8771af8d4c1a1b4e3e8b"
     },
     {
       "path": "standalone-pwh/codex-agent.mjs",
@@ -192,8 +186,8 @@
     {
       "path": "standalone-pwh/host.mjs",
       "source": "standalone-pwh/host.mjs",
-      "size": 36797,
-      "sha256": "580d9a334f83ebc38be564e916ef64e17fcb7cfdb7310c4d3c9c5fc97561eb17"
+      "size": 37382,
+      "sha256": "35649a9bc8488dd0e28e06f18b6ed971440c333572ccf451808612f5201f7149"
     },
     {
       "path": "standalone-pwh/install.cmd",
@@ -210,8 +204,8 @@
     {
       "path": "standalone-pwh/launch.mjs",
       "source": "standalone-pwh/launch.mjs",
-      "size": 3276,
-      "sha256": "603c10e7e8c95c13c98a9f712e97ce6be309c5b3dcb4eae6a3d1f91bf1d9416b"
+      "size": 3688,
+      "sha256": "e3f6a6689429169652b3ce3d205ee40263c9138d827325c1a7a918cc8c0c031e"
     },
     {
       "path": "standalone-pwh/launch.vbs",
@@ -242,6 +236,12 @@
       "source": "standalone-pwh/nested-visual-check.mjs",
       "size": 2236,
       "sha256": "aebf6084a057acee299e0fd1af3a7041dfc9ae787b0a07143260ea9388479fd2"
+    },
+    {
+      "path": "standalone-pwh/NODE-LICENSE.txt",
+      "source": "standalone-pwh/NODE-LICENSE.txt",
+      "size": 157609,
+      "sha256": "5888dbb9a1d2b18f2c3e6c5f6af1b39de658372b402a0577b002777f14c62ace"
     },
     {
       "path": "standalone-pwh/preview-core.check.mjs",
@@ -348,26 +348,32 @@
     {
       "path": "standalone-pwh/version-info.check.mjs",
       "source": "standalone-pwh/version-info.test.mjs",
-      "size": 1076,
-      "sha256": "2e7eb596fcb9729c5d627e4a39faa3776d81529663c27295c1ce37770dba86b3"
+      "size": 1144,
+      "sha256": "4940efa0840184d74570847b0cc2f41df595f862cc97342556f96f55d4ec77b2"
     },
     {
       "path": "standalone-pwh/version-info.mjs",
       "source": "standalone-pwh/version-info.mjs",
-      "size": 706,
-      "sha256": "733d5b1bc33bfdf1650c114375394acad99df7ba23af20bb7b8d73bab3651bee"
+      "size": 735,
+      "sha256": "51cd617f59a6d01595818c811d064bac227ca0e2b9e2bc528ed73845a5b2c821"
     },
     {
       "path": "standalone-pwh/version.json",
       "source": "standalone-pwh/version.json",
-      "size": 20,
-      "sha256": "e34e873ce5b5abbd17a7946de043e33120e50b8d6065133b8cf6de2660b68f00"
+      "size": 21,
+      "sha256": "8c0feb56c8fce7b76610a96f099a03b07778f71b3174f89af16fbc51954d81e5"
+    },
+    {
+      "path": "standalone-pwh/window-close-controller.mjs",
+      "source": "standalone-pwh/window-close-controller.mjs",
+      "size": 5269,
+      "sha256": "696ed5a34183adbf10ccdb8c11e550f039cd29315a6950a583e707006711bba9"
     },
     {
       "path": "standalone-pwh/workspace-child.mjs",
       "source": "standalone-pwh/workspace-child.mjs",
-      "size": 488,
-      "sha256": "8aae0bca0317c41965e6fb64f83c16d22ba40294103e536a27cd29f1239d8c70"
+      "size": 535,
+      "sha256": "fa27b1aef715cc53c74fbd06b648f7f6a40e4377ceab219ae3777d3794ad03d9"
     },
     {
       "path": "standalone-pwh/workspace-shell.check.mjs",
@@ -378,14 +384,14 @@
     {
       "path": "standalone-pwh/workspace-shell.mjs",
       "source": "standalone-pwh/workspace-shell.mjs",
-      "size": 9467,
-      "sha256": "7b3d0d201dcba28cb98dff6b8639785ea6af868874eb636a261821933a013808"
+      "size": 11795,
+      "sha256": "4b2b8245f363001f463cce05b114020c756227f844131884aaf0792fb5662c0b"
     },
     {
       "path": "standalone-pwh/workspace.css",
       "source": "standalone-pwh/workspace.css",
-      "size": 1684,
-      "sha256": "b35705612bbc11291e1ed5d9e9b39e15bf4eb033aab2cce67878bafd92cd850a"
+      "size": 2686,
+      "sha256": "3781b5ec031262e625293514a90faf095867ef30779f1dffe3ddaa210904d9d5"
     },
     {
       "path": "standalone-pwh/workspace.html",
@@ -396,8 +402,8 @@
     {
       "path": "standalone-pwh/workspace.js",
       "source": "standalone-pwh/workspace.js",
-      "size": 6615,
-      "sha256": "92918c33adda3c448f60be279ef5dcb9c9f7b31bb3772d63b2a4839ba966ef72"
+      "size": 16161,
+      "sha256": "8f9be85b8cd8a273f7c40b1ae7c140aa792c44eba29eeeb377258496785f2e58"
     }
   ]
 }
