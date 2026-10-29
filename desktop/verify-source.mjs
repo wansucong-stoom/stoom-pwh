@@ -34,7 +34,7 @@ const files=(await walk(root)).sort(),expected=[...listed.keys(),...generated].s
 let originalComparisons=0;
 for(const rel of files){
  assert.ok(!rel.endsWith('.test.mjs'),'Unstaged checks must not join repository test discovery');
- assert.ok(allowed.has(path.extname(rel).toLowerCase())||generated.has(rel)||rel==='standalone-pwh/client/manifest.json',`File type is outside the public source allowlist: ${rel}`);
+ assert.ok(allowed.has(path.extname(rel).toLowerCase())||generated.has(rel)||rel==='standalone-pwh/client/manifest.json'||rel==='standalone-pwh/version.json',`File type is outside the public source allowlist: ${rel}`);
  const bytes=await fs.readFile(path.join(root,...rel.split('/'))),record=listed.get(rel);
  if(record){assert.equal(bytes.length,record.size,`${rel}: size mismatch`);assert.equal(hash(bytes),record.sha256,`${rel}: SHA256 mismatch`);}
  if(path.extname(rel).toLowerCase()!=='.ico'){

@@ -19,6 +19,7 @@ import {runEngine} from '../release-source/src/engine.mjs';
 import {sameRequestContext} from '../release-source/src/request-state.mjs';
 import {scanDocumentText} from './document-scan.mjs';
 import {waitForEditorResult} from './editor-result-wait.mjs';
+import {desktopVersion,addDesktopVersion} from './version-info.mjs';
 
 const appRoot=path.dirname(fileURLToPath(import.meta.url));
 const appData=process.env.PWH_STANDALONE_DATA||path.join(os.homedir(),'.stoom-pwh-standalone');
@@ -51,7 +52,7 @@ async function providerFor(settings){
  return createCodexProvider({stoomModule:modulePath});
 }
 async function desktopEditorHtml(){
- let html=await clientViewerHtml();const anchor=" window.addEventListener('pwh-status',event=>status(String(event.detail)));";if(!html.includes(anchor))throw Error('편집기 저장 연결을 확인하지 못했습니다.');
+ let html=addDesktopVersion(await clientViewerHtml(),await desktopVersion(appRoot));const anchor=" window.addEventListener('pwh-status',event=>status(String(event.detail)));";if(!html.includes(anchor))throw Error('편집기 저장 연결을 확인하지 못했습니다.');
  const dispatch="command.type==='openDocument'?await openDocument(command):";if(!html.includes(dispatch))throw Error('편집기 문서 서식 연결을 확인하지 못했습니다.');html=html.replace(dispatch,"command.type==='desktopBodyStyle'?window.pwhEditor.desktopBodyStyle(command):command.type==='desktopColumns'?window.pwhEditor.desktopColumns(command):command.type==='desktopImage'?window.pwhEditor.desktopInsertImage(command,await replacementBytes(command.image)):"+dispatch);
  html=html.replace(anchor,` window.pwhDesktopAcceptSave=async(d,seq)=>{const oldKey=recoveryKey();if(state.protectedRecoveryKey!==oldKey)await recoveryStore('delete',oldKey).catch(()=>{});state.documentId=d.documentId;state.source=d.source;state.sourceSha256=d.sourceSha256;state.checkpointSha=null;state.recoveryEligible=true;document.getElementById('pwh-title').textContent=d.name;document.getElementById('pwh-title').title=d.source;const same=window.pwhEditor.context().documentState.changeSeq===seq;if(same)await window.pwhEditor.saved(d.name);status(same?'저장했습니다.':'저장 후 추가 변경은 아직 미저장 상태입니다.');return same;};\n`+anchor);
  html=html.replace('</head>',`<style>#pwh-import-table,#pwh-save{display:none!important}[data-menu="file"] [data-cmd="file:new-doc"],[data-menu="file"] [data-cmd="file:open"],[data-menu="file"] [data-cmd="file:save"],[data-menu="file"] [data-cmd="file:save-as"]{opacity:1!important;pointer-events:auto!important}</style></head>`);
