@@ -11,7 +11,7 @@ import {stagePreviewCore} from './preview-core.mjs';
 import {copyOfficialRuntime} from './official-codex-runtime.mjs';
 
 const root=path.dirname(fileURLToPath(import.meta.url)),workspace=path.dirname(root);
-const version=process.env.PWH_ZIP_VERSION||'0.1.11';
+const version=process.env.PWH_ZIP_VERSION||'0.1.14';
 if(!/^\d{1,3}\.\d{1,3}\.\d{1,5}$/.test(version)||version.split('.').some((n,i)=>Number(n)>(i===2?65535:255)))throw Error('ZIP 버전이 올바르지 않습니다.');
 const output=path.resolve(process.argv[2]||path.join(workspace,'dist',`PwhDesktop-${version}-offline.zip`));
 const runtimeArchive=process.env.PWH_OFFLINE_RUNTIME_ARCHIVE||path.join(os.homedir(),'.stoom-pwh','downloads',JSON.parse(await fs.readFile(new URL('../release-source/runtime-lock.json',import.meta.url),'utf8')).runtime.file);
@@ -31,12 +31,13 @@ const run=(program,args)=>new Promise((resolve,reject)=>{const p=spawn(program,a
 const unpack=path.join(stage,'unpack');await fs.mkdir(unpack);
 for(const entry of zipEntries(await fs.readFile(pwhZip))){const rel=entry.name.replace(/\/$/,'');if(!rel||path.isAbsolute(rel)||rel.split('/').includes('..'))throw Error('패키지 경로가 올바르지 않습니다.');const target=path.join(unpack,...rel.split('/'));if(entry.name.endsWith('/'))await fs.mkdir(target,{recursive:true});else{await fs.mkdir(path.dirname(target),{recursive:true});await fs.writeFile(target,entry.read(),{flag:'wx'});}}
 await fs.rename(path.join(unpack,'pwh'),path.join(pkg,'release-source'));
-for(const name of ['ai-providers.mjs','codex-agent.mjs','codex-session.mjs','codex-native-host.mjs','codex-plugin-setup.mjs','chatgpt-auth.mjs','chatgpt-store.mjs','chatgpt-credentials.ps1','official-codex-runtime.mjs','CODEX-APACHE-LICENSE.txt','CODEX-NOTICE.txt','CODEX-RATATUI-MIT.txt','CODEX-RIPGREP-MIT.txt','CODEX-PCRE2-LICENSE.txt','rewrite.mjs','settings.mjs','convert-hwp.mjs','desktop-files.mjs','document-scan.mjs','editor-result-wait.mjs','steer-turn.mjs','version-info.mjs','update-check.mjs','update-helper.mjs','workspace-child.mjs','workspace-shell.mjs','window-close-controller.mjs','workspace.html','workspace.css','workspace.js','file-dialog.ps1','host.mjs','launch.mjs','app.html','app.css','app.js','stoom-mark.svg','stoom.ico'])await copy(path.join(root,name),path.join('standalone-pwh',name));
+for(const name of ['ai-providers.mjs','generated-image.mjs','recent-documents.mjs','codex-agent.mjs','codex-session.mjs','codex-native-host.mjs','codex-plugin-setup.mjs','chatgpt-auth.mjs','chatgpt-store.mjs','chatgpt-credentials.ps1','official-codex-runtime.mjs','CODEX-APACHE-LICENSE.txt','CODEX-NOTICE.txt','CODEX-RATATUI-MIT.txt','CODEX-RIPGREP-MIT.txt','CODEX-PCRE2-LICENSE.txt','rewrite.mjs','settings.mjs','convert-hwp.mjs','desktop-files.mjs','document-scan.mjs','editor-result-wait.mjs','steer-turn.mjs','version-info.mjs','update-check.mjs','update-helper.mjs','workspace-child.mjs','workspace-shell.mjs','window-close-controller.mjs','workspace.html','workspace.css','workspace.js','file-dialog.ps1','host.mjs','launch.mjs','app.html','app.css','app.js','stoom-mark.svg','stoom.ico'])await copy(path.join(root,name),path.join('standalone-pwh',name));
 if(!process.env.PWH_CODEX_RUNTIME_DIR||!path.isAbsolute(process.env.PWH_CODEX_RUNTIME_DIR))throw Error('검증할 공식 Codex 앱 서버 패키지 경로를 지정해 주세요.');
 await copyOfficialRuntime(process.env.PWH_CODEX_RUNTIME_DIR,path.join(pkg,'standalone-pwh','codex-runtime'));
 await fs.writeFile(path.join(pkg,'standalone-pwh','version.json'),JSON.stringify({version})+'\n',{flag:'wx'});
 for(const name of ['editor.js','manifest.json'])await copy(path.join(root,'client',name),path.join('standalone-pwh','client',name));
 await copy(path.join(workspace,'bridge','hwp-codex-host.mjs'),path.join('bridge','hwp-codex-host.mjs'));
+await copy(path.join(workspace,'bridge','codex-image-host.mjs'),path.join('bridge','codex-image-host.mjs'));
 await copy(process.execPath,path.join('node','node.exe'));
 await copy(path.join(root,'NODE-LICENSE.txt'),path.join('node','LICENSE.txt'));
 await buildNativeLauncher(path.join(pkg,'PwhDesktop.exe'));

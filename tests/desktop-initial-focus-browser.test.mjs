@@ -18,14 +18,15 @@ test('Desktop restores initial editor focus without taking focus from chat', {
   // Reproduce an editor trying to focus while its native window is not ready.
   await page.addInitScript(()=>{const focus=HTMLElement.prototype.focus;window.__pwhTestFocusAllowed=false;HTMLElement.prototype.focus=function(...args){if(this.getAttribute('aria-label')==='문서 편집 입력'&&!window.__pwhTestFocusAllowed)return;return focus.apply(this,args);};});
   await page.goto(app.url);
+  await page.getByRole('button',{name:'새 문서 빈 문서에서 시작하기'}).click();
   const child=page.frameLocator('#documents iframe').first(),editor=child.frameLocator('#editor');
-  await editor.locator('textarea[aria-label="문서 편집 입력"]').waitFor({state:'attached',timeout:60000});await child.locator('#status').filter({hasText:'조판기 준비 완료'}).waitFor({timeout:60000});
+  await editor.locator('textarea[aria-label="문서 편집 입력"]').waitFor({state:'attached',timeout:60000});await child.locator('#status').waitFor({state:'hidden',timeout:60000});
   await editor.locator('body').evaluate(()=>window.__pwhTestFocusAllowed=true);
   if(process.env.PWH_FOCUS_DEBUG){console.log('root',await page.evaluate(()=>({has:document.hasFocus(),active:document.activeElement?.tagName})));console.log('child',await child.locator('body').evaluate(()=>({has:document.hasFocus(),active:document.activeElement?.id})));console.log('editor',await editor.locator('body').evaluate(()=>({has:document.hasFocus(),active:document.activeElement?.tagName,ready:window.pwhEditor?.context?.().ready,recovery:window.pwhRecoveryReady?.(),dialogs:[...document.querySelectorAll('dialog[open],.modal-overlay')].map(x=>x.outerHTML.slice(0,100))})));}
   await editor.locator('body').evaluate(async()=>{const input=document.querySelector('[aria-label="문서 편집 입력"]');for(let i=0;i<40;i++){if(document.activeElement===input&&document.hasFocus())return;await new Promise(resolve=>setTimeout(resolve,50));}throw Error('editor focus was not restored');});
   await page.keyboard.type('initial');assert.equal(await editor.locator('body').evaluate(()=>window.pwhEditor.context().paragraph.text),'initial');
   await editor.getByRole('button',{name:'새 문서 탭'}).click();await page.waitForFunction(()=>document.querySelectorAll('#documents iframe').length===2,null,{timeout:60000});
-  const child2=page.frameLocator('#documents iframe').nth(1),editor2=child2.frameLocator('#editor');await editor2.locator('textarea[aria-label="문서 편집 입력"]').waitFor({state:'attached',timeout:60000});await child2.locator('#status').filter({hasText:'조판기 준비 완료'}).waitFor({timeout:60000});
+  const child2=page.frameLocator('#documents iframe').nth(1),editor2=child2.frameLocator('#editor');await editor2.locator('textarea[aria-label="문서 편집 입력"]').waitFor({state:'attached',timeout:60000});await child2.locator('#status').waitFor({state:'hidden',timeout:60000});
   await child2.locator('#prompt').focus();await editor2.locator('body').evaluate(()=>window.__pwhTestFocusAllowed=true);await page.waitForTimeout(600);
   assert.equal(await child2.locator('#prompt').evaluate(el=>document.activeElement===el),true,'chat retains focus');await page.keyboard.type('chat');assert.equal(await child2.locator('#prompt').inputValue(),'chat');
  }finally{await browser.close();await new Promise(resolve=>app.server.close(resolve));}

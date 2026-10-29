@@ -12,8 +12,31 @@
   const response=await fetch(route,{method:'POST',headers:{'content-type':'application/json','x-pwh-request':'1'},body:JSON.stringify(data)});
   const value=await response.json();if(!response.ok)throw Error(value.error||'문서 탭을 열지 못했습니다.');return value;
  };
+ let recentRevision=0;
+ async function refreshHome(){
+  const revision=++recentRevision;
+  try{
+   const {documents}=await api('recent/list');if(revision!==recentRevision)return;
+   const list=$('home-recent-list');list.replaceChildren();$('home-empty').hidden=documents.length!==0;$('home-status').textContent='';
+   for(const item of documents){
+    const row=document.createElement('div');row.className='recent-row'+(item.available?'':' recent-missing');
+    const open=document.createElement('button');open.type='button';open.className='recent-open';open.title=item.path;open.setAttribute('aria-label',item.name+' 열기');open.onclick=()=>void openFromHome('recent/open',{id:item.id});
+    const icon=document.createElement('span');icon.className='recent-icon';icon.setAttribute('aria-hidden','true');icon.textContent=item.name.toLowerCase().endsWith('.hwpx')?'HWPX':'HWP';
+    const details=document.createElement('span');details.className='recent-details';const name=document.createElement('span');name.className='recent-name';name.textContent=item.name;const path=document.createElement('span');path.className='recent-path';path.textContent=item.path;details.append(name,path);
+    const date=document.createElement('span');date.className='recent-time';date.textContent=item.available?new Intl.DateTimeFormat('ko-KR',{year:'numeric',month:'short',day:'numeric'}).format(new Date(item.openedAt)):'파일을 열 수 없음';
+    const remove=document.createElement('button');remove.type='button';remove.className='recent-remove';remove.textContent='×';remove.title='최근 문서 목록에서 제거';remove.setAttribute('aria-label',item.name+' 최근 문서 목록에서 제거');remove.onclick=async()=>{try{await api('recent/remove',{id:item.id});await refreshHome();}catch(error){$('home-status').textContent=error.message;}};
+    open.append(icon,details,date);row.append(open,remove);list.append(row);
+   }
+   setFrozen();
+  }catch(error){if(revision===recentRevision)$('home-status').textContent='최근 문서를 불러오지 못했습니다. '+error.message;}
+ }
+ function showHome({focus=false}={}){
+  active=null;$('home-view').hidden=false;document.body.classList.remove('integrated-tabs');
+  for(const tab of tabs.values()){tab.frame.hidden=true;tab.element.setAttribute('aria-selected','false');tab.name.tabIndex=0;}
+  publishWorkspace();void refreshHome();if(focus)$('home-title').focus({preventScroll:true});
+ }
  function activate(id){
-  const tab=tabs.get(id);if(!tab)return;active=id;
+  const tab=tabs.get(id);if(!tab)return;active=id;$('home-view').hidden=true;document.body.classList.toggle('integrated-tabs',tab.tabsReady===true);
   for(const [key,item] of tabs){const selected=key===id;item.frame.hidden=!selected;item.element.setAttribute('aria-selected',String(selected));item.name.tabIndex=selected?0:-1;}publishWorkspace();
  }
  function add({id,url}){
@@ -22,7 +45,7 @@
   const close=document.createElement('button');close.className='tab-close';close.type='button';close.textContent='×';close.title='문서 닫기';close.setAttribute('aria-label','문서 닫기');close.onclick=()=>void closeTab(id);
   element.append(name,close);$('tabs').append(element);
   const frame=document.createElement('iframe'),childUrl=new URL(url);childUrl.searchParams.set('workspaceOrigin',location.origin);frame.src=childUrl.href;frame.title='문서와 AI 대화';frame.hidden=true;$('documents').append(frame);
-  tabs.set(id,{id,url,origin:new URL(url).origin,frame,element,name,title:'새 문서',dirty:true,busy:false,ready:false});activate(id);
+  tabs.set(id,{id,url,origin:new URL(url).origin,frame,element,name,title:'새 문서',dirty:true,busy:false,ready:false,tabsReady:false});activate(id);
  }
  function request(tab,kind,extra={},timeout=4000){
   return new Promise(resolve=>{
@@ -33,7 +56,7 @@
  }
  const inspect=tab=>request(tab,'inspect');
  const command=(tab,action,expected)=>request(tab,'command',{action,...expected?{expected}:{}},action==='save'?310000:10000);
- const setFrozen=()=>{const locked=updateLocked||closeLocked;$('documents').inert=locked;$('tabs').inert=locked;$('new-tab').disabled=locked||starting;publishWorkspace();};
+ const setFrozen=()=>{const locked=updateLocked||closeLocked;$('documents').inert=locked;$('tabs').inert=locked;$('new-tab').disabled=locked||starting;$('workspace-home').disabled=locked||starting;for(const button of $('home-view').querySelectorAll('button'))button.disabled=locked||starting;publishWorkspace();};
  const freeze=value=>{updateLocked=value;setFrozen();};
 
  function askToSave(name){
@@ -77,16 +100,13 @@
  async function rollback(items){for(const item of items)if(!item.skipPrepare)await command(item.tab,'abort-close');}
 
  async function closeTab(id){
-  const tab=tabs.get(id);if(!tab||updateLocked||closeLocked||starting)return;closingTabs++;closeLocked=true;setFrozen();let replacement=null,prepared=false;
+  const tab=tabs.get(id);if(!tab||updateLocked||closeLocked||starting)return;closingTabs++;closeLocked=true;setFrozen();let prepared=false;
   try{
    const item=await decide(tab);if(!item)return;
-   if(tabs.size===1)replacement=await api('tabs/new');
    prepared=!item.skipPrepare;await prepare(item);
-   if(replacement)add(replacement);
-   await api('tabs/close',{id});tab.frame.remove();tab.element.remove();tabs.delete(id);if(active===id)activate(tabs.keys().next().value);publishWorkspace();$('workspace-status').textContent='';
+   await api('tabs/close',{id});tab.frame.remove();tab.element.remove();tabs.delete(id);if(active===id){if(tabs.size)activate(tabs.keys().next().value);else showHome({focus:true});}else if(active===null)void refreshHome();publishWorkspace();$('workspace-status').textContent='';
   }catch(error){
    if(prepared)await command(tab,'abort-close');
-   if(replacement){await api('tabs/close',{id:replacement.id}).catch(()=>{});const extra=tabs.get(replacement.id);if(extra){extra.frame.remove();extra.element.remove();tabs.delete(extra.id);activate(id);}}
    $('workspace-status').textContent=error.message;
   }finally{closingTabs--;closeLocked=false;setFrozen();}
  }
@@ -114,11 +134,12 @@
    return;
   }
   if(state.type==='pwh-workspace-drop'){void openDroppedFiles(state.files);return;}
-  if(state.type==='pwh-workspace-tabs-ready'){document.body.classList.add('integrated-tabs');publishWorkspace();return;}
+  if(state.type==='pwh-workspace-tabs-ready'){tab.tabsReady=true;if(active===tab.id)document.body.classList.add('integrated-tabs');publishWorkspace();return;}
   if(state.type==='pwh-workspace-ui'){
    if(state.action==='activate'&&typeof state.id==='string')activate(state.id);
    else if(state.action==='close'&&typeof state.id==='string')void closeTab(state.id);
    else if(state.action==='new')$('new-tab').click();
+   else if(state.action==='home')showHome({focus:true});
    else if(state.action==='update')$('workspace-update').click();
    else if(state.action==='codex')$('codex-plugin-retry').click();
    return;
@@ -149,8 +170,18 @@
  document.addEventListener('dragover',event=>{if(event.dataTransfer?.types.includes('Files')&&Array.from(event.dataTransfer.items).some(item=>item.kind==='file'&&!item.type.startsWith('image/'))){event.preventDefault();event.dataTransfer.dropEffect='copy';}},true);
  document.addEventListener('drop',event=>{if(Array.from(event.dataTransfer?.files||[]).some(file=>/\.hwpx?$/i.test(file.name))){event.preventDefault();event.stopPropagation();if(event.isTrusted)void openDroppedFiles(event.dataTransfer.files);}},true);
  const viewObserver=new MutationObserver(()=>publishWorkspace());for(const id of ['workspace-status','workspace-update','codex-plugin-retry'])viewObserver.observe($(id),{childList:true,characterData:true,attributes:true,subtree:true});
+ $('workspace-home').onclick=()=>{if(!starting&&!updateLocked&&!closeLocked)showHome({focus:true});};
+ $('home-refresh').onclick=()=>void refreshHome();
+ $('home-new').onclick=()=>$('new-tab').click();
+ async function openFromHome(route,data={}){
+  if(starting||updateLocked||closeLocked)return;starting=true;setFrozen();$('home-status').textContent='';
+  try{const result=await api(route,data);if(!result.cancelled)add(result);$('workspace-status').textContent='';}
+  catch(error){$('home-status').textContent=error.message;}
+  finally{starting=false;setFrozen();}
+ }
+ $('home-open').onclick=()=>void openFromHome('tabs/open');
  $('new-tab').onclick=async()=>{if(starting||updateLocked||closeLocked)return;starting=true;setFrozen();try{add(await api('tabs/new'));$('workspace-status').textContent='';}catch(e){$('workspace-status').textContent=e.message;}finally{starting=false;setFrozen();}};
- async function documentsReady(){if(starting||closingTabs||closingWindow)return false;const states=await Promise.all([...tabs.values()].map(inspect));return !starting&&!closingTabs&&!closingWindow&&states.length>0&&states.every(state=>state&&state.ready===true&&!state.dirty&&!state.busy);}
+ async function documentsReady(){if(starting||closingTabs||closingWindow)return false;const states=await Promise.all([...tabs.values()].map(inspect));return !starting&&!closingTabs&&!closingWindow&&states.every(state=>state&&state.ready===true&&!state.dirty&&!state.busy);}
  $('workspace-update').onclick=async()=>{
   const button=$('workspace-update');button.disabled=true;
   try{
@@ -161,9 +192,6 @@
    setTimeout(async()=>{try{const result=await api('update/result');if(result.message){freeze(false);button.disabled=false;$('workspace-status').textContent=result.message;}}catch{}},95000);
   }catch(e){freeze(false);button.disabled=false;$('workspace-status').textContent=e.message;}
  };
- (async()=>{try{add(await api('tabs/initial'));}catch(e){$('workspace-status').textContent=e.message;}})();
- const codexResult=result=>{if(!result.status)return;$('codex-plugin-retry').hidden=result.status==='ready';if(result.status!=='ready')$('workspace-status').textContent=result.message||'Codex Pwh 연결을 확인해 주세요.';};
- $('codex-plugin-retry').onclick=async()=>{const button=$('codex-plugin-retry');button.disabled=true;$('workspace-status').textContent='Codex Pwh를 연결하고 있습니다.';try{const result=await api('codex-plugin/retry');codexResult(result);if(result.status==='ready')$('workspace-status').textContent=result.message;}catch(error){$('workspace-status').textContent=error.message;}finally{button.disabled=false;}};
- (async()=>{try{codexResult(await api('codex-plugin/status'));}catch{}})();
+ (async()=>{try{const initial=await api('tabs/initial');if(initial.home)showHome({focus:true});else add(initial);}catch(e){$('workspace-status').textContent=e.message;}})();
  (async()=>{try{const result=await api('update/result');if(result.message)$('workspace-status').textContent=result.message;const available=await api('update/status');if(available.version){const button=$('workspace-update');button.textContent='업데이트 '+available.version;button.title='새 버전 설치';button.hidden=false;}}catch{}})();
 })();

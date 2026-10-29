@@ -48,7 +48,7 @@ export async function directConnection({runtime,root,home,accessToken,mcpUrl,bea
  if(!path.isAbsolute(home)||typeof accessToken!=='string'||!accessToken||/[\x00-\x20]/.test(accessToken))throw Error('ChatGPT 연결 정보를 확인하지 못했습니다.');
  const exe=await verifyOfficialRuntime(root);await fs.mkdir(home,{recursive:true});
  const args=['--listen','stdio://',...directSettings.flatMap(setting=>['-c',setting])];
- if(mcpUrl){const url=new URL(mcpUrl);if(url.protocol!=='http:'||url.hostname!=='127.0.0.1'||url.username||url.password||!bearerToken)throw Error('문서 도구 주소를 확인하지 못했습니다.');args.push('-c',`mcp_servers.pwh.url=${JSON.stringify(mcpUrl)}`,'-c','mcp_servers.pwh.bearer_token_env_var="PWH_DESKTOP_AGENT_TOKEN"');}
+ if(mcpUrl){const url=new URL(mcpUrl);if(url.protocol!=='http:'||url.hostname!=='127.0.0.1'||url.username||url.password||!bearerToken)throw Error('문서 도구 주소를 확인하지 못했습니다.');args.push('-c','mcp_servers.pwh.tool_timeout_sec=360','-c',`mcp_servers.pwh.url=${JSON.stringify(mcpUrl)}`,'-c','mcp_servers.pwh.bearer_token_env_var="PWH_DESKTOP_AGENT_TOKEN"');}
  // Credentials exist only in the dedicated child process environment.
  return new runtime.CodexConnection(exe,{spawnImpl:(program,_args,options)=>spawnImpl(program,args,{...options,env:{...options.env,CODEX_HOME:home,ACCESS_TOKEN:accessToken,...(bearerToken?{PWH_DESKTOP_AGENT_TOKEN:bearerToken}:{})}}),killImpl:runtime.terminateOwnedChild,rpcTimeout:30000});
 }

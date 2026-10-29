@@ -7,12 +7,15 @@ import {fileURLToPath} from 'node:url';
 import {desktopVersion} from './version-info.mjs';
 import {checkForDesktopUpdate,downloadInstaller,scheduleDesktopUpdate} from './update-check.mjs';
 import {recordCodexPluginSetup} from './codex-plugin-setup.mjs';
+import {chooseDesktopFile} from './desktop-files.mjs';
+import {createRecentDocuments} from './recent-documents.mjs';
 
 const root=path.dirname(fileURLToPath(import.meta.url));
-export async function createWorkspaceServer({initialPath,nativeBranding,port=0,spawnImpl=spawn,updateServices}={}){
+export async function createWorkspaceServer({initialPath,nativeBranding,port=0,spawnImpl=spawn,updateServices,chooseFile=chooseDesktopFile,dataRoot:providedDataRoot}={}){
  const token=randomBytes(24).toString('hex'),tabs=new Map();let closing=false,generation=0;
- const dataRoot=process.env.PWH_STANDALONE_DATA||path.join(process.env.LOCALAPPDATA||process.env.HOME||root,'PwhDesktop');
+ const dataRoot=providedDataRoot||process.env.PWH_STANDALONE_DATA||path.join(process.env.LOCALAPPDATA||process.env.HOME||root,'PwhDesktop');
  const services=updateServices||{check:checkForDesktopUpdate,download:downloadInstaller,schedule:scheduleDesktopUpdate};
+ const recent=createRecentDocuments(dataRoot);let fileDialogBusy=false;
  // One nonblocking GitHub lookup per app start; offline operation is normal.
  const updateCheck=nativeBranding?desktopVersion(root).then(v=>v?services.check(v):null).catch(()=>null):Promise.resolve(null);
  let preparedUpdate=null,preparingUpdate=null,installingUpdate=false,codexSetup=null;
@@ -35,7 +38,7 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
   }
   throw Error('사용 가능한 문서 탭 연결을 찾지 못했습니다.');
  };
- let first=null;
+ let first=null,initialDelivered=false;
  const stopTab=tab=>{const timer=setTimeout(()=>tab.child.kill(),3000);timer.unref?.();tab.child.once('exit',()=>clearTimeout(timer));try{tab.child.stdin.end();}catch{tab.child.kill();}};
  const closeAll=()=>{if(closing)return;closing=true;for(const tab of tabs.values())stopTab(tab);tabs.clear();};
  const send=(res,data,code=200)=>{res.writeHead(code,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(data));};
@@ -53,7 +56,7 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
   if(req.method==='POST'&&route==='native/window-closing'&&req.headers.origin===origin){if(url.searchParams.get('instance')===String(generation))nativeBranding?.closing?.();closeAll();return send(res,{ok:true});}
   if(req.method==='POST'&&route==='tabs/closing'&&req.headers.origin===origin){closeAll();server.close();return send(res,{ok:true});}
   if(req.method!=='POST'||req.headers.origin!==origin||req.headers['x-pwh-request']!=='1')return send(res,{error:'허용되지 않은 요청입니다.'},403);
-  if(route==='tabs/initial'){if(!first)throw Error('처음 문서 탭이 이미 열렸습니다.');const value=first;first=null;return send(res,value);}
+  if(route==='tabs/initial'){if(initialDelivered)throw Error('처음 화면이 이미 열렸습니다.');initialDelivered=true;const value=first||{home:true};first=null;return send(res,value);}
   if(route==='native/request-close'){
    if(!nativeBranding?.complete||typeof nativeBranding.requestClose!=='function')throw Error('앱 창을 확인하지 못했습니다. 문서를 저장한 뒤 다시 닫아 주세요.');
    setTimeout(()=>nativeBranding.requestClose(),100);return send(res,{requested:true});
@@ -65,6 +68,13 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
    if(tabs.size+paths.length>12)throw Error('문서는 최대 12개까지 열 수 있습니다.');
    const opened=[],errors=[];for(const file of paths){try{opened.push(await makeTab(file));}catch(error){errors.push(path.basename(file)+': '+error.message);}}
    return send(res,{opened,errors});
+  }
+  if(route==='recent/list')return send(res,{documents:await recent.list()});
+  if(route==='recent/remove'){let body='';for await(const chunk of req){body+=chunk;if(body.length>1024)throw Error('최근 문서 요청이 너무 큽니다.');}await recent.remove(JSON.parse(body).id);return send(res,{ok:true});}
+  if(route==='recent/open'){let body='';for await(const chunk of req){body+=chunk;if(body.length>1024)throw Error('최근 문서 요청이 너무 큽니다.');}const file=await recent.open(JSON.parse(body).id);return send(res,await makeTab(file));}
+  if(route==='tabs/open'){
+   if(fileDialogBusy)throw Error('파일 선택창이 이미 열려 있습니다.');if(tabs.size>=12)throw Error('문서는 최대 12개까지 열 수 있습니다.');fileDialogBusy=true;
+   try{const picked=await chooseFile({mode:'Open'});if(picked?.cancelled)return send(res,{cancelled:true});const file=picked?.path;if(typeof file!=='string'||!path.isAbsolute(file)||!/\.hwpx?$/i.test(file))throw Error('HWP 또는 HWPX 문서를 선택하세요.');const stat=await fs.lstat(file);if(!stat.isFile()||stat.isSymbolicLink()||stat.size>64*1024*1024)throw Error('64 MiB 이하의 일반 문서를 선택하세요.');return send(res,await makeTab(file));}finally{fileDialogBusy=false;}
   }
   if(route==='tabs/import'){
    let name;try{name=decodeURIComponent(String(req.headers['x-pwh-filename']||''));}catch{throw Error('파일 이름을 확인하지 못했습니다.');}
@@ -102,6 +112,6 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
   return send(res,{error:'찾을 수 없는 요청입니다.'},404);
  }catch(error){return send(res,{error:error.message||'문서 탭을 열지 못했습니다.'},400);}});
  server.once('close',closeAll);await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(port,'127.0.0.1',resolve);});
- try{first=await makeTab(initialPath);}catch(error){server.close();throw error;}
+ try{if(initialPath)first=await makeTab(initialPath);}catch(error){server.close();throw error;}
  return {server,url:`http://127.0.0.1:${server.address().port}/${token}/`};
 }

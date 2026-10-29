@@ -18,3 +18,19 @@ main.ai-closed{grid-template-columns:minmax(0,1fr)}main.ai-closed aside,main.ai-
 @media(max-width:760px){.app-header #open-ai{font-size:11px}}
 #desktop-workspace-status{max-width:30%;font-size:11px;color:#71848d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #document-notice{max-width:30%;font-size:11px;color:#596f79;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Settings live beside the composer; keep the document header compact. */
+.app-header{height:40px;gap:12px;padding:0 14px}.app-header #settings{display:none!important}#status:empty{display:none}#composer-settings{display:inline-flex!important}.app-brand img{width:29px;height:23px}
+
+#desktop-codex-retry{display:none!important}.app-header:has(#status:empty):has(#document-notice[hidden]):has(#desktop-workspace-status[hidden]):has(#desktop-update[hidden]):has(#open-ai[hidden]){display:none}
+
+/* Anchor the model panel to the full composer row, including during AI work. */
+main{grid-template-columns:minmax(200px,var(--chat-width,19.333333%)) 6px minmax(240px,1fr)}
+.composer-actions{position:relative}
+#model-menu{position:static}
+.model-panel{right:0;bottom:calc(100% + 8px);width:270px;max-width:100%;max-height:calc(100dvh - 160px);overflow-y:auto;overflow-x:hidden}
+.model-panel select{min-width:0;max-width:100%}
+#quick-status{overflow-wrap:anywhere}
+@media(max-width:760px){main{grid-template-columns:minmax(160px,var(--chat-width,24%)) 6px minmax(200px,1fr)}.model-panel{padding:12px}.model-panel-actions{gap:8px}}
+#ai-pane{container-type:inline-size}
+@container(max-width:280px){.conversation-empty{padding-left:8px;padding-right:4px}.conversation-empty h1{font-size:15px;word-break:keep-all}}
