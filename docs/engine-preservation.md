@@ -86,6 +86,11 @@ inputs separately. Native CLI, editor SDK and the historical full Studio retain
 their verified prior bytes. `scripts/preserve-patched-runtime.py` verifies and
 repackages this reviewed delta without weakening the original preservation tool.
 
+Revision 5 additionally accounts for the actual height of saved inline tables
+whose plain-text rows grew beyond their stored sizes. This prevents later text
+from being laid out past the page boundary while preserving the document's
+saved table properties. Both Pwh and Pwh Desktop use the same rebuilt core.
+
 ## Upgrade from an earlier preserved runtime
 
 Keep the old runtime and install r4 into a new directory. The installer refuses

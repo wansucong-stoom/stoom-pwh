@@ -7,8 +7,9 @@
  setInterval(()=>reportWorkspace(),1500);
  const say=(text,user=false)=>{$('conversation-empty').hidden=true;const node=document.createElement('div');node.className='message'+(user?' user':'');node.textContent=text;$('conversation').append(node);node.scrollIntoView({block:'nearest'});return node;};
  let aiUserChoice=false;
- function setAiOpen(open){document.querySelector('main').classList.toggle('ai-closed',!open);$('toggle-ai').textContent=open?'AI 대화 닫기':'AI 대화 열기';$('toggle-ai').title=$('toggle-ai').textContent;$('toggle-ai').setAttribute('aria-expanded',String(open));}
- $('toggle-ai').onclick=()=>{aiUserChoice=true;setAiOpen(document.querySelector('main').classList.contains('ai-closed'));};
+ function setAiOpen(open){document.querySelector('main').classList.toggle('ai-closed',!open);$('open-ai').hidden=open;$('open-ai').setAttribute('aria-expanded',String(open));}
+ $('close-ai').onclick=()=>{aiUserChoice=true;setAiOpen(false);$('open-ai').focus();};
+ $('open-ai').onclick=()=>{aiUserChoice=true;setAiOpen(true);$('close-ai').focus();};
  const settingsSections={connection:'AI 연결',codex:'Codex',local:'로컬 AI'},settingsTabs=Array.from(document.querySelectorAll('[data-settings-section]'));
  function showSettingsSection(name,{focus=false}={}){if(!settingsSections[name])return;for(const tab of settingsTabs){const active=tab.dataset.settingsSection===name;tab.setAttribute('aria-selected',String(active));tab.tabIndex=active?0:-1;$('panel-'+tab.dataset.settingsSection).hidden=!active;if(active&&focus)tab.focus();}$('settings-title').textContent=settingsSections[name];dialog.querySelector('.settings-scroll').scrollTop=0;}
  for(const tab of settingsTabs){tab.onclick=()=>showSettingsSection(tab.dataset.settingsSection);tab.onkeydown=event=>{const index=settingsTabs.indexOf(tab);let next;if(event.key==='ArrowDown'||event.key==='ArrowRight')next=(index+1)%settingsTabs.length;else if(event.key==='ArrowUp'||event.key==='ArrowLeft')next=(index+settingsTabs.length-1)%settingsTabs.length;else if(event.key==='Home')next=0;else if(event.key==='End')next=settingsTabs.length-1;if(next!==undefined){event.preventDefault();showSettingsSection(settingsTabs[next].dataset.settingsSection,{focus:true});}};}

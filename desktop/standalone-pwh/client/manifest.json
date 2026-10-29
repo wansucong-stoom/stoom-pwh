@@ -1,6 +1,6 @@
 {
-  "sha256": "3bd9970ef6255ab06d7c2d5dc5e14f34b9835117d70b1e22a4e3a32353aa12eb",
-  "baseVersion": "0.6.28",
-  "baseEditorSha256": "8140a6fc9776bac8a2b68bca551f7f6eb9c9d5ae92df796c4419ed3c23958012",
+  "sha256": "4eca84240e688105426d4311dc43cd19047d489f0e41b4ef593f9c71a431c6ac",
+  "baseVersion": "0.6.29",
+  "baseEditorSha256": "bec5dc1242bef9461a849965b4495f78e602d1bea72a137ec91cf79148100739",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f"
 }

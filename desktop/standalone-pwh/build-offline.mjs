@@ -10,7 +10,7 @@ import {buildNativeLauncher} from './build-native-launcher.mjs';
 import {stagePreviewCore} from './preview-core.mjs';
 
 const root=path.dirname(fileURLToPath(import.meta.url)),workspace=path.dirname(root);
-const version=process.env.PWH_ZIP_VERSION||'0.1.6';
+const version=process.env.PWH_ZIP_VERSION||'0.1.7';
 if(!/^\d{1,3}\.\d{1,3}\.\d{1,5}$/.test(version)||version.split('.').some((n,i)=>Number(n)>(i===2?65535:255)))throw Error('ZIP 버전이 올바르지 않습니다.');
 const output=path.resolve(process.argv[2]||path.join(workspace,'dist',`PwhDesktop-${version}-offline.zip`));
 const runtimeArchive=process.env.PWH_OFFLINE_RUNTIME_ARCHIVE||path.join(os.homedir(),'.stoom-pwh','downloads',JSON.parse(await fs.readFile(new URL('../release-source/runtime-lock.json',import.meta.url),'utf8')).runtime.file);

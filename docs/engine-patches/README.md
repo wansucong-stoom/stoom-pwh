@@ -102,7 +102,7 @@ hide overflow by changing view preferences, or contain document/page identifiers
 The r4 runtime promotes this patch after source, synthetic and real-document
 regression gates. Its editor WASM is 13,758,962 bytes with SHA256
 `22516f486ced5fbff3a957b34e0d48adf77a05f8c0e80d8b7ff834d35ef5919b`.
-The reproducible build script applies all three patches and verifies every
+The reproducible build script applies all four patches and verifies every
 before/after source hash. Regression commands and synthetic fixtures are in
 [`tests/engine-source-ownership`](../../tests/engine-source-ownership/README.md).
 
@@ -116,6 +116,7 @@ before/after source hash. Regression commands and synthetic fixtures are in
 | Patch SHA256 | `5a2427c162ee3928b7edecbaabad10936700c7db02f25a5436fb0a74a92bd221` |
 | Inline-table spacing patch SHA256 | `a9f6a533debe686f6e89ec06870e47ccb0357635f8303775467ceb6cfca9da7a` |
 | Nested source ownership patch SHA256 | `346e2885cb5720574515167db94448f256e5d210d729ee63e2c0ac732e5b2a96` |
+| Stored grown-table pagination patch SHA256 | `596bf711aaf4494438c76e0b77aa29741c93f2cdb9b75c5b49e3e4c3364eade3` |
 | `saved/blank2010.hwp` | 13,824 bytes; `43f472751fafefb8c66b0f831660ebed51e443a46bebe44c75bba918154ce4c9` |
 | Rust / Cargo | `1.93.1` |
 | Compilation target | `wasm32-unknown-unknown` |
@@ -135,6 +136,12 @@ The third patch applies after the two existing patches:
 | --- | --- | --- |
 | `src/renderer/layout/table_layout.rs` | `c3df908c978e4aef7876b555c4a4c7b85749587194b4755d43e4c5ae9c67c238` | `7f294df11f7dc48611cdcfbf8a7fa813763778dd9c4573cd619c06bc4c26990a` |
 | `src/renderer/layout/table_partial.rs` | `9e0a4d66d00906d4c949481088dba04d81d1f04ac1091b09188d65a9140ddeab` | `cebac7b673a9c051bf31e64bcc6d2310f669b74a97bfd6351d663a9cc5b452d6` |
+
+The fourth patch preserves the measured height of a saved inline table whose
+plain-text rows have grown beyond their stored sizes, and consumes that same
+height in pagination. It leaves stored cell sizes, text and nested-table
+viewport rules unchanged. The synthetic saved-table fixture checks page
+containment and export/reopen content preservation.
 
 Obtain the pinned source ZIP from the immutable engine-r2 release:
 <https://github.com/wansucong-stoom/stoom-pwh/releases/download/engine-rhwp-0.8.7-pwh-r2/pwh-upstream-rhwp-0.8.7-1a76570e8339.zip>.
@@ -228,7 +235,7 @@ upstream glue (`70cde06a369fa7fd4fc8bc8f3d6acaee158596ba1a116a2c72159002b0b5654e
 The independently repeated **first-patch-only** build was 13,751,774 bytes with SHA256
 `2af00b34b622b33d341d0be5a78f00d56dcd50d74fddca1ec71dd5d5474af907`.
 It is historical evidence for the row-floor fix, not the identity of the
-historical two-patch build. The current script builds all three patches and records their
+historical two-patch build. The current script builds all four patches and records their
 individual input/output source hashes in `BUILD-RECORD.json`.
 The verified **two-patch production** rebuild was 13,752,323 bytes with SHA256
 `a9c082330122e79120f8e0976f94837cc62625261fbb77c2fa2f51d6cb3e09d8`.
