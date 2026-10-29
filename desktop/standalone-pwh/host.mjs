@@ -18,6 +18,7 @@ import {createDesktopFileManager} from './desktop-files.mjs';
 import {runEngine} from '../release-source/src/engine.mjs';
 import {sameRequestContext} from '../release-source/src/request-state.mjs';
 import {scanDocumentText} from './document-scan.mjs';
+import {waitForEditorResult} from './editor-result-wait.mjs';
 
 const appRoot=path.dirname(fileURLToPath(import.meta.url));
 const appData=process.env.PWH_STANDALONE_DATA||path.join(os.homedir(),'.stoom-pwh-standalone');
@@ -141,7 +142,15 @@ export async function createAppServer({initialBytes,initialPath,chooseFile,edito
     if(message.method==='tools/call'&&message.params?.name==='pwh_desktop_insert_image'){
      const args=message.params.arguments||{},context=editorState({sessionId:args.sessionId})?.context,asset=imageAssets.get(args.assetId);if(!context||!sameRequestContext(context,args.expected))throw Error('본문 커서가 변경되었습니다. 현재 상태를 다시 읽어 주세요.');if(!asset||asset.sessionId!==args.sessionId||Date.now()-asset.createdAt>600000)throw Error('첨부 그림이 없거나 만료되었습니다.');if(!Number.isFinite(args.widthMm)||args.widthMm<20||args.widthMm>160||desktopCommands.length>=16)throw Error('그림 너비 또는 요청을 확인해 주세요.');const ticketId=randomUUID(),ticket={ticketId,sessionId:args.sessionId,status:'pending'};desktopTickets.set(ticketId,ticket);if(desktopTickets.size>128)desktopTickets.delete(desktopTickets.keys().next().value);desktopCommands.push({ticketId,type:'desktopImage',expected:structuredClone(args.expected),image:asset.metadata,widthMm:args.widthMm,sessionId:args.sessionId});return json(res,{jsonrpc:'2.0',id:message.id,result:{content:[{type:'text',text:JSON.stringify(ticket)}],structuredContent:ticket}});
     }
-    if(message.method==='tools/call'&&message.params?.name==='pwh_desktop_result'){const ticket=desktopTickets.get(message.params.arguments?.ticketId);if(!ticket)throw Error('본문 서식 요청을 찾을 수 없습니다.');return json(res,{jsonrpc:'2.0',id:message.id,result:{content:[{type:'text',text:JSON.stringify(ticket)}],structuredContent:ticket}});}
+    if(message.method==='tools/call'&&message.params?.name==='pwh_desktop_result'){
+     const controller=new AbortController();res.once('close',()=>controller.abort());
+     const ticket=await waitForEditorResult(()=>{const value=desktopTickets.get(message.params.arguments?.ticketId);if(!value)throw Error('본문 서식 요청을 찾을 수 없습니다.');return value;},{signal:controller.signal});
+     return json(res,{jsonrpc:'2.0',id:message.id,result:{content:[{type:'text',text:JSON.stringify(ticket)}],structuredContent:ticket}});
+    }
+    if(message.method==='tools/call'&&message.params?.name==='pwh_editor_result'){
+     const controller=new AbortController();res.once('close',()=>controller.abort());
+     await waitForEditorResult(()=>editorResult(message.params.arguments||{}),{signal:controller.signal});
+    }
     if(message.method==='tools/call'&&!agentTools.has(message.params?.name))return json(res,{jsonrpc:'2.0',id:message.id,error:{code:-32601,message:'지원하지 않는 도구입니다.'}});
     if(!['initialize','ping','tools/call'].includes(message.method))return json(res,{jsonrpc:'2.0',id:message.id,error:{code:-32601,message:'지원하지 않는 요청입니다.'}});
     const reply=await handleRequest(message);
