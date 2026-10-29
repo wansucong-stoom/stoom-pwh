@@ -1,6 +1,6 @@
 {
   "name": "pwh",
-  "version": "0.6.27",
+  "version": "0.6.28",
   "description": "AI에게 한글 문서 초안 작성과 기존 문서 수정을 요청하고, Codex 편집기에서 같은 문서를 함께 보며 수정하는 HWPX 협업 플러그인.",
   "author": {
     "name": "Wansucong the STOOM"

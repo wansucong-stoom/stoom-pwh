@@ -7,6 +7,7 @@ import {applyCellEdits,prepareCellEdits,insertStructuredTable,addTableTitle} fro
 import {sameRequestContext} from './pwh-request-state.mjs';
 import {createTextSearchPlan,prepareTextEdits,applyTextEdits,textEditCursor} from './pwh-text-edit.mjs';
 import {installTableClipboard} from './pwh-table-clipboard.mjs';
+import {createAgentReveal} from './pwh-agent-reveal.mjs';
 import {chooseTablePaste} from './pwh-table-paste-dialog';
 import {userSettings} from './core/user-settings';
 import {showToast} from './ui/toast';
@@ -15,6 +16,7 @@ import { installSelectionBridge } from './collaboration-selection';
 
 export function installInlineEditor(d:any) {
  const bridge=installSelectionBridge(d);
+ const agentReveal=createAgentReveal({wasm:d.wasm,getCanvasView:()=>d.getCanvasView(),document,window});
  const tablePlans=new Map<string,any>();
  const textPlans=new Map<string,any>();
  const read=(fresh=true)=>{const c:any=bridge.getSelectionContext({fresh});return {...c,blankDocument:!!c.ready&&blankBody(d.wasm),requestScope:c.kind==='cell_block'&&c.table?.selectedCells?.length?'selection':c.selection&&c.selectedText?.text?'selection':c.kind==='object'?'object':'document',pageSettings:c.ready?Array.from({length:Math.min(d.wasm.getSectionCount(),32)},(_,i)=>({sectionIndex:i,...d.wasm.getPageDef(i)})):[]};};
@@ -106,6 +108,8 @@ export function installInlineEditor(d:any) {
     const prepared=prepareTextEdits(d.wasm,textPlans,command.edits,read());
     await input.executeDocumentAgentOperation({kind:'snapshot',operationType:'pwh-text-edit',operation:(wasm:any)=>{changes=applyTextEdits(wasm,prepared,replaceTextWithMutationEffects);return textEditCursor(prepared,cursor);}},()=>d.getCanvasView().refreshDocumentAgentMutation());
     textPlans.clear();
+    const positions=prepared.groups.flatMap((group:any)=>group.parts.map((part:any)=>{const source=part.source,cell=source.cellPath?.[0];return textEditCursor(prepared,{sectionIndex:source.section,paragraphIndex:source.paragraph,charOffset:part.start,...(cell?{parentParaIndex:source.paragraph,controlIndex:cell.controlIndex,cellIndex:cell.cellIndex,cellParaIndex:cell.cellParaIndex,cellPath:source.cellPath}:{})});}));
+    try{agentReveal.show(positions);}catch(error){console.warn("[pwh agent reveal]",error);}
    }finally{applying=false;}
    return {ok:true,changes,context:read(),undoSteps:1};
   },
@@ -207,7 +211,7 @@ export function installInlineEditor(d:any) {
      if(actual!==part.text)throw Error('선택 범위 수정 결과가 요청 내용과 다릅니다.');
     }
     const userCursor=input.getCursorPosition();if(command.expected.target&&userCursor.parentParaIndex==null&&!parts.some((part:any)=>part.p.sectionIndex===userCursor.sectionIndex&&part.p.paragraphIndex===userCursor.paragraphIndex))return userCursor;const last=parts.at(-1)!;return {...end,charOffset:last.p.charOffset+Array.from(last.text).length};
-   }},()=>d.getCanvasView().refreshDocumentAgentMutation());}finally{applying=false;}
+   }},()=>d.getCanvasView().refreshDocumentAgentMutation());try{agentReveal.show(parts.map((part:any)=>part.p));}catch(error){console.warn('[pwh agent reveal]',error);}}finally{applying=false;}
    return {ok:true,context:read(),undoSteps:1};
   }
  };

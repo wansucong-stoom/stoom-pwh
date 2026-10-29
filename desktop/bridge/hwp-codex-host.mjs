@@ -261,14 +261,14 @@ export function createHwpHandler({ runtime, connectionOptions = {}, discover, te
       const executable = await (discover || runtime.discoverCodex)();
       checkAbort();
       if (!executable) {
-        if (request.action === 'status') return { ready: false, accountId: '', models: [], message: '설치된 Codex CLI를 찾지 못했습니다. Codex 앱/CLI 설치와 ChatGPT 로그인을 확인하세요.' };
+        if (request.action === 'status') return { ready: false, installed: false, accountId: '', models: [], message: '설치된 Codex CLI를 찾지 못했습니다. Codex 앱/CLI 설치와 ChatGPT 로그인을 확인하세요.' };
         throw fault('Codex CLI를 찾지 못했습니다.');
       }
       client = new HwpConnection(executable, { ...connectionOptions, signal: controller.signal });
       await client.initialize();
       const account = identity(await client.request('account/read', { refreshToken: false }));
       if (!account.ready) {
-        if (request.action === 'status') return { ...account, models: [] };
+        if (request.action === 'status') return { ...account, installed: true, models: [] };
         throw fault(account.message);
       }
       if (request.action === 'generate' && request.accountId !== account.accountId) throw fault('Codex 계정이 변경되었습니다. 연결 상태를 다시 확인하세요.');
@@ -277,7 +277,7 @@ export function createHwpHandler({ runtime, connectionOptions = {}, discover, te
         let rateLimits;
         try { rateLimits = limits(await client.request('account/rateLimits/read', {})); } catch { checkAbort(); }
         checkAbort();
-        return { ...account, models: available, ...(rateLimits ? { limits: rateLimits } : {}) };
+        return { ...account, installed: true, models: available, ...(rateLimits ? { limits: rateLimits } : {}) };
       }
       if (!available.length) throw fault('사용 가능한 Codex 모델이 없습니다.');
       const selection = request.model || 'auto';

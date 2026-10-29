@@ -13524,7 +13524,7 @@ function de(e) {
 	return D.filter((e) => oe(e.name) === t).map((e) => e.ruleId);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/font-loader.ts
+//#region ../pwh-build/rhwp-studio/src/core/font-loader.ts
 var fe = D, pe = new Set(fe.map((e) => e.name)), me = /* @__PURE__ */ new Set(["함초롬바탕", "함초롬돋움"]), he = [], ge = /* @__PURE__ */ new Set(), _e = /* @__PURE__ */ new Set(), ve = /* @__PURE__ */ new Set();
 function ye(e) {
 	return /^https?:\/\//i.test(e);
@@ -13673,7 +13673,7 @@ async function Fe(e, t, n) {
 	console.log(`[FontLoader] 폰트 로드 완료: ${d}개 성공, ${f}개 실패 (총 ${_e.size}개 파일 요청)`);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/canvas-font-raw.ts
+//#region ../pwh-build/rhwp-studio/src/core/canvas-font-raw.ts
 var Ie = null;
 function Le(e) {
 	let t = Object.getPrototypeOf(e);
@@ -13699,7 +13699,7 @@ function ze(e, t) {
 	e.font = t;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/local-fonts.ts
+//#region ../pwh-build/rhwp-studio/src/core/local-fonts.ts
 var Be = "rhwp-local-fonts", Ve = 72, He = .1, Ue = [
 	"monospace",
 	"serif",
@@ -14319,7 +14319,7 @@ async function xn(e) {
 	} : null;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/host-font-requests.ts
+//#region ../pwh-build/rhwp-studio/src/core/host-font-requests.ts
 function Sn(e) {
 	return {
 		weight: e?.bold ? 700 : 400,
@@ -14346,7 +14346,7 @@ function wn(e) {
 	return [...t.values()];
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/pwh-selection-layout.mjs
+//#region ../pwh-build/rhwp-studio/src/core/pwh-selection-layout.mjs
 var Tn = (e) => typeof e == "string" ? JSON.parse(e) : e, En = (e) => e.every(Number.isFinite);
 function Dn({ maxPages: e = 32 } = {}) {
 	if (!Number.isSafeInteger(e) || e < 1 || e > 1e3) throw RangeError("Selection layout cache maxPages must be between 1 and 1000");
@@ -14459,7 +14459,7 @@ function An(e, t, n, r, i, a, o, s = null) {
 	}
 }
 //#endregion
-//#region pwh-build/pkg/rhwp.js
+//#region ../pwh-build/pkg/rhwp.js
 var jn = /* @__PURE__ */ t({
 	DocumentExport: () => Mn,
 	HwpDocument: () => Nn,
@@ -19473,7 +19473,7 @@ async function dr(e) {
 	return cr(n, r);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/supplemental-text-metrics.ts
+//#region ../pwh-build/rhwp-studio/src/core/supplemental-text-metrics.ts
 var fr = 4096, pr = 4194304, mr = new TextEncoder();
 function hr(e) {
 	if (![e.document, e.fonts].every((e) => Number.isSafeInteger(e) && e >= 0)) throw Error("Invalid supplemental metric generation");
@@ -19599,7 +19599,7 @@ function xr(e, t) {
 	}
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/pwh-local-font-face.mjs
+//#region ../pwh-build/rhwp-studio/src/core/pwh-local-font-face.mjs
 var Sr = 1e3;
 function Cr(e) {
 	let t = "";
@@ -19635,7 +19635,7 @@ async function wr(e, t, n = globalThis.FontFace) {
 	}
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/font-substitution.ts
+//#region ../pwh-build/rhwp-studio/src/core/font-substitution.ts
 var Tr = b.map((e) => {
 	let t = /* @__PURE__ */ new Map();
 	for (let [n, r, i, a, o] of e) {
@@ -19892,7 +19892,7 @@ function Zr(e, t = 0, n = 0, r = {}) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/sfnt-face.ts
+//#region ../pwh-build/rhwp-studio/src/core/sfnt-face.ts
 var Qr = 1953784678, $r = 65536, ei = 131072, ti = 4096, ni = 4096, ri = 67108864, ii = 1751474532, ai = 2981146554;
 function oi(e, t) {
 	if (!Number.isInteger(t) || t < 0 || t > 4294967295) return null;
@@ -19940,7 +19940,7 @@ function oi(e, t) {
 	return p.buffer;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/host-canvas-fonts.ts
+//#region ../pwh-build/rhwp-studio/src/core/host-canvas-fonts.ts
 var si = 0, ci = null;
 function li(e, t) {
 	let n = ci;
@@ -20062,7 +20062,7 @@ function mi(e) {
 	return e instanceof fi || e instanceof pi;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/char-shape-runs.ts
+//#region ../pwh-build/rhwp-studio/src/core/char-shape-runs.ts
 function hi(e) {
 	if (e == null) throw new fi("문서가 로드되지 않았습니다. 문서를 먼저 열어 주세요.");
 	if (!e || [
@@ -20087,14 +20087,14 @@ function _i(e, t, n) {
 	return e;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/node_modules/@noble/hashes/_u64.js
+//#region ../pwh-build/rhwp-studio/node_modules/@noble/hashes/_u64.js
 var vi = (e) => e / 2 ** 32 | 0, yi = (e) => e >>> 0;
 function bi(e, t, n, r) {
 	let i = vi(n), a = yi(n);
 	e.setUint32(t, r ? a : i, r), e.setUint32(t + 4, r ? i : a, r);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/node_modules/@noble/hashes/utils.js
+//#region ../pwh-build/rhwp-studio/node_modules/@noble/hashes/utils.js
 function xi(e) {
 	return e instanceof Uint8Array || ArrayBuffer.isView(e) && e.constructor.name === "Uint8Array" && "BYTES_PER_ELEMENT" in e && e.BYTES_PER_ELEMENT === 1;
 }
@@ -20184,7 +20184,7 @@ var Gi = (e) => ({ oid: Uint8Array.from([
 	e
 ]) });
 //#endregion
-//#region pwh-build/rhwp-studio/node_modules/@noble/hashes/_md.js
+//#region ../pwh-build/rhwp-studio/node_modules/@noble/hashes/_md.js
 function Ki(e, t, n) {
 	return e & t ^ ~e & n;
 }
@@ -20253,7 +20253,7 @@ var Ji = class {
 	1541459225
 ]);
 //#endregion
-//#region pwh-build/rhwp-studio/node_modules/@noble/hashes/_blake.js
+//#region ../pwh-build/rhwp-studio/node_modules/@noble/hashes/_blake.js
 function Xi(e, t, n, r, i) {
 	return e = e + t + i | 0, r = Pi(r ^ e, 16), n = n + r | 0, t = Pi(t ^ n, 12), {
 		a: e,
@@ -20271,7 +20271,7 @@ function Zi(e, t, n, r, i) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/node_modules/@noble/hashes/blake2.js
+//#region ../pwh-build/rhwp-studio/node_modules/@noble/hashes/blake2.js
 var Qi = class {
 	buffer;
 	buffer32;
@@ -20350,7 +20350,7 @@ function $i(e, t, n, r, i, a, o, s, c, l, u, d, f, p, m, h, g, _, v, y) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/node_modules/@noble/hashes/blake3.js
+//#region ../pwh-build/rhwp-studio/node_modules/@noble/hashes/blake3.js
 var ea = {
 	CHUNK_START: 1,
 	CHUNK_END: 2,
@@ -20543,7 +20543,7 @@ function fa(e, t) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/hml-save-capability.ts
+//#region ../pwh-build/rhwp-studio/src/core/hml-save-capability.ts
 function pa(e) {
 	if (!e || typeof e != "object") return !1;
 	let t = e;
@@ -20604,7 +20604,7 @@ function va(e, t) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/selection-page-hints.ts
+//#region ../pwh-build/rhwp-studio/src/core/selection-page-hints.ts
 function ya(e) {
 	return Number.isInteger(e) && Number(e) >= 0;
 }
@@ -20625,7 +20625,7 @@ function xa(e, t, n) {
 	return JSON.parse(r);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/local-text-replace-result.ts
+//#region ../pwh-build/rhwp-studio/src/core/local-text-replace-result.ts
 function Sa(e) {
 	if (!e || typeof e != "object") return;
 	let t = e, n = [
@@ -20733,7 +20733,7 @@ function Ia(e, t, n, r) {
 	t(), n(), Pa(e, r);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/wasm-bridge.ts
+//#region ../pwh-build/rhwp-studio/src/core/wasm-bridge.ts
 function La(e) {
 	return e && JSON.stringify(e);
 }
@@ -22728,7 +22728,7 @@ var Wa = class {
 	}
 };
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/document-title.ts
+//#region ../pwh-build/rhwp-studio/src/ui/document-title.ts
 function Ga(e) {
 	let t = window.matchMedia("(display-mode: standalone), (display-mode: minimal-ui), (display-mode: window-controls-overlay)"), n = () => {
 		document.title = e.hasLoadedDocument() ? t.matches ? e.fileName : `${e.fileName} - rhwp-studio` : "rhwp-studio";
@@ -22736,7 +22736,7 @@ function Ga(e) {
 	e.onFileNameChanged = n, t.addEventListener("change", n), n();
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/event-bus.ts
+//#region ../pwh-build/rhwp-studio/src/core/event-bus.ts
 var Ka = class {
 	handlers = /* @__PURE__ */ new Map();
 	on(e, t) {
@@ -22858,7 +22858,7 @@ function no(e, t) {
 	if (n !== "hwp" && n !== "zip" && n !== "hml") throw Error(n === "html" ? "실제 HWP/HWPX/HML 파일이 아닙니다. 파일 미리보기/오류 페이지가 반환되었습니다." : n === "xml" ? "HML 문서가 아닌 일반 XML 파일입니다." : "실제 HWP/HWPX/HML 파일이 아닙니다. 파일 시그니처를 확인할 수 없습니다.");
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/canvas-metric-recovery.ts
+//#region ../pwh-build/rhwp-studio/src/core/canvas-metric-recovery.ts
 var ro = "Canvas metric descriptor changed; prepare font metrics again";
 function io(e) {
 	let t = e instanceof Error ? e.message : e;
@@ -22903,7 +22903,7 @@ function fo(e, t = 10) {
 	return Math.max(6, (Number.isFinite(t) ? Math.max(0, t) : 10) * n);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/virtual-scroll.ts
+//#region ../pwh-build/rhwp-studio/src/view/virtual-scroll.ts
 var po = 8, mo = .25, ho = 80, go = 240;
 function _o({ pageCount: e, viewportWidth: t, displayedPageWidth: n, pageGap: r, committedColumns: i, hysteresisPx: a = po }) {
 	let o = Number.isFinite(e) ? Math.max(1, Math.floor(e)) : 1, s = Number.isFinite(t) && t > 0 ? t : 0, c = Number.isFinite(n) && n > 0 ? n : 0, l = Number.isFinite(r) && r >= 0 ? r : 0;
@@ -23257,7 +23257,7 @@ var vo = class {
 	}
 };
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/canvaskit/replay-plane.ts
+//#region ../pwh-build/rhwp-studio/src/view/canvaskit/replay-plane.ts
 function bo(e, t) {
 	return e !== "background" && t?.masterPage === !0 ? "behindText" : e;
 }
@@ -23272,12 +23272,12 @@ function So(e, t) {
 	return e.type === "image" && (e.wrap === "behindText" ? n = "behindText" : e.wrap === "inFrontOfText" && (n = "inFrontOfText")), bo(n, t);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/render-document-identity.ts
+//#region ../pwh-build/rhwp-studio/src/view/render-document-identity.ts
 function Co(e, t) {
 	return e === null || t === null || e.digest === null || t.digest === null ? !1 : e.digest === t.digest && e.generation === t.generation;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/image-prefetch-signature.ts
+//#region ../pwh-build/rhwp-studio/src/view/image-prefetch-signature.ts
 function wo(e, t) {
 	if (!e || typeof e != "object") return;
 	if (Array.isArray(e)) {
@@ -23316,7 +23316,7 @@ async function Do(e, t, n) {
 	return !r.every(Boolean) || !t() ? !1 : (n(), !0);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/raw-svg-prefetch.ts
+//#region ../pwh-build/rhwp-studio/src/view/raw-svg-prefetch.ts
 function Oo(e) {
 	let t = new TextEncoder().encode(e), n = "", r = 32768;
 	for (let e = 0; e < t.length; e += r) n += String.fromCharCode(...t.subarray(e, e + r));
@@ -23337,7 +23337,7 @@ function Ao(e, t) {
 	else e && typeof e == "object" && Ao(e, t);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/flow-image-clip.ts
+//#region ../pwh-build/rhwp-studio/src/view/flow-image-clip.ts
 function jo(e) {
 	if (e.bakedWatermark === !0) return null;
 	let t = [], n = typeof e.effect == "string" ? e.effect : "realPic";
@@ -23435,7 +23435,7 @@ function Vo(e, t) {
 	return i;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/flow-image-url-cache.ts
+//#region ../pwh-build/rhwp-studio/src/view/flow-image-url-cache.ts
 var Ho = class {
 	urls = /* @__PURE__ */ new Map();
 	identity = null;
@@ -23521,7 +23521,7 @@ function Jo(e, t, n, r) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/page-margin-guides.ts
+//#region ../pwh-build/rhwp-studio/src/view/page-margin-guides.ts
 var Yo = "#C0C0C0", Xo = .8, Zo = 1.5;
 function Qo(e) {
 	let t = Number.isFinite(e) && e > 0 ? e : 1;
@@ -23544,7 +23544,7 @@ function es(e, t, n, r, i = "both", a = 1) {
 	}, t, n, i, r, a);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/page-renderer.ts
+//#region ../pwh-build/rhwp-studio/src/view/page-renderer.ts
 var ts = 1500, ns = [
 	0,
 	32,
@@ -24109,7 +24109,7 @@ function us(e, t, n, r = t.bbox.width, i = t.bbox.height) {
 	e.style.left = `${-a.x * o}px`, e.style.top = `${-a.y * s}px`, e.style.width = `${e.naturalWidth * o}px`, e.style.height = `${e.naturalHeight * s}px`;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/zoom-anchor.ts
+//#region ../pwh-build/rhwp-studio/src/view/zoom-anchor.ts
 var ds = Object.freeze({
 	x: .5,
 	y: .5
@@ -24131,7 +24131,7 @@ function ms(e, t, n, r, i = n) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/page-movement.ts
+//#region ../pwh-build/rhwp-studio/src/view/page-movement.ts
 var hs = {
 	direction: "vertical",
 	wheelHorizontal: !0
@@ -24462,7 +24462,7 @@ function Fs(e, t, n) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/render-backend.ts
+//#region ../pwh-build/rhwp-studio/src/view/render-backend.ts
 var Is = "rhwp.canvaskitMode", Ls = "rhwp.renderProfile";
 function Rs(e) {
 	try {
@@ -24549,7 +24549,7 @@ function Ws(e, t) {
 	return e.width * n * e.height * n <= r ? n : Math.max(1, Math.sqrt(r / (e.width * e.height)));
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/grid-overlay.ts
+//#region ../pwh-build/rhwp-studio/src/view/grid-overlay.ts
 var Gs = 96 / 25.4, Ks = 10;
 function qs(e, t, n, r) {
 	let i = document.createElement("div");
@@ -24615,7 +24615,7 @@ function nc(e, t, n, r, i, a) {
 	o.style.position = "absolute", o.style.left = `${c ? t : t - r}px`, o.style.top = `${n}px`, o.style.width = `${r}px`, o.style.height = "1px", o.style.background = a, s.style.position = "absolute", s.style.left = `${t}px`, s.style.top = `${l ? n : n - r}px`, s.style.width = "1px", s.style.height = `${r}px`, s.style.background = a, e.append(o, s);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/grid-settings.ts
+//#region ../pwh-build/rhwp-studio/src/view/grid-settings.ts
 var rc = {
 	visible: !1,
 	pattern: "dots",
@@ -24672,7 +24672,7 @@ function fc(e) {
 	return Math.round(e * 100) / 100;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/zoom-fit.ts
+//#region ../pwh-build/rhwp-studio/src/view/zoom-fit.ts
 var pc = 40, mc = 20, hc = 10;
 function gc(e) {
 	return Math.max(so, Math.min(5, e));
@@ -24728,7 +24728,7 @@ function Cc(e, t) {
 	}
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/user-settings.ts
+//#region ../pwh-build/rhwp-studio/src/core/user-settings.ts
 var wc = [
 	"default",
 	"flat",
@@ -25003,7 +25003,7 @@ var F = new class {
 	}
 }();
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/page-view-settings-change.ts
+//#region ../pwh-build/rhwp-studio/src/view/page-view-settings-change.ts
 function Fc(e) {
 	let t = e && typeof e == "object" ? e : {}, n = _s(t.arrangement, t.pageMovement), r = t.zoom, i = r && typeof r == "object" && typeof r.value == "number" && Number.isFinite(r.value) ? {
 		value: r.value,
@@ -25017,7 +25017,7 @@ function Fc(e) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/active-page.ts
+//#region ../pwh-build/rhwp-studio/src/view/active-page.ts
 function Ic(e, t) {
 	return e !== null && Number.isInteger(e) && e >= 0 && e < t;
 }
@@ -25045,7 +25045,7 @@ function zc(e, t) {
 	return Number.isInteger(e) && e >= 0 && e === t;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/i18n/locales/ko.ts
+//#region ../pwh-build/rhwp-studio/src/i18n/locales/ko.ts
 var Bc = {
 	"command.edit.compareDocuments.label": "문서 비교",
 	"command.edit.compareDocuments.splitLabel": "문서 비교 ",
@@ -28983,7 +28983,7 @@ function Qc() {
 	return e && Object.keys(e).length > 0 ? Wc : "ko";
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/i18n/dom.ts
+//#region ../pwh-build/rhwp-studio/src/i18n/dom.ts
 var $c = "data-i18n", el = "data-i18n-lines", tl = [
 	"title",
 	"placeholder",
@@ -29044,7 +29044,7 @@ function ul() {
 	typeof document < "u" && (document.documentElement.lang = Qc());
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/i18n/resolve.ts
+//#region ../pwh-build/rhwp-studio/src/i18n/resolve.ts
 var dl = "rhwp-locale", fl = "lang";
 function pl(e) {
 	let t = qc(ml(e.search));
@@ -29084,7 +29084,7 @@ function _l() {
 	return rl(), Jc();
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/header-footer-mode.ts
+//#region ../pwh-build/rhwp-studio/src/engine/header-footer-mode.ts
 function vl(e) {
 	return I(e === 1 ? "ui.hfApplyTo.even" : e === 2 ? "ui.hfApplyTo.odd" : "ui.hfApplyTo.both");
 }
@@ -29112,7 +29112,7 @@ function xl(e) {
 	return t.mode !== "header" && t.mode !== "footer" || !Number.isSafeInteger(t.sectionIdx) || !Number.isSafeInteger(t.applyTo) || !Number.isSafeInteger(t.previewPage) ? "none" : t;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/header-footer-edit-overlay.ts
+//#region ../pwh-build/rhwp-studio/src/view/header-footer-edit-overlay.ts
 var Sl = 10, Cl = 4, wl = 2;
 function Tl(e) {
 	let t = Math.min(wl, Math.max(1, Math.sqrt(Number.isFinite(e) && e > 0 ? e : 1)));
@@ -29141,7 +29141,7 @@ function Dl(e, t, n) {
 	return `inset(${Math.max(0, t.y * n)}px ${Math.max(0, (e.width - t.x - t.width) * n)}px ${Math.max(0, (e.height - t.y - t.height) * n)}px ${Math.max(0, t.x * n)}px)`;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/render-surface-budget.ts
+//#region ../pwh-build/rhwp-studio/src/view/render-surface-budget.ts
 var Ol = 32e6, kl = 4e7, Al = .88, jl = .001, Ml = [
 	2,
 	1.5,
@@ -29236,7 +29236,7 @@ function Ul(e) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/page-surface-lru.ts
+//#region ../pwh-build/rhwp-studio/src/view/page-surface-lru.ts
 function Wl(e) {
 	return !Number.isFinite(e) || e <= 0 ? 0 : Math.ceil(e);
 }
@@ -29526,7 +29526,7 @@ function eu(e) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/canvas-view.ts
+//#region ../pwh-build/rhwp-studio/src/view/canvas-view.ts
 var tu = {
 	width: 794,
 	height: 1123
@@ -30529,7 +30529,7 @@ var tu = {
 	}
 };
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/picture-hit-policy.ts
+//#region ../pwh-build/rhwp-studio/src/engine/picture-hit-policy.ts
 function au(e) {
 	return e.plane === 1 && !e.headerFooter;
 }
@@ -30653,7 +30653,7 @@ function fu(e, t, n) {
 	return !1;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/hyperlink.ts
+//#region ../pwh-build/rhwp-studio/src/core/hyperlink.ts
 function pu(e) {
 	let t = e.cellPath?.map((e) => [
 		e.controlIndex,
@@ -30724,7 +30724,7 @@ function _u(e) {
 	}
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/input-edit-invalidation.ts
+//#region ../pwh-build/rhwp-studio/src/engine/input-edit-invalidation.ts
 var vu = /* @__PURE__ */ new Set(["insertText", "deleteText"]);
 function yu(e, t) {
 	let n = e ?? [], r = t ?? [];
@@ -30744,7 +30744,7 @@ function bu(e, t, n, r = {}) {
 	return i !== (n.parentParaIndex !== void 0) || t.sectionIndex !== n.sectionIndex ? !1 : i ? t.parentParaIndex !== n.parentParaIndex || t.controlIndex !== n.controlIndex || t.cellIndex !== n.cellIndex || t.cellParaIndex !== n.cellParaIndex ? !1 : yu(t.cellPath, n.cellPath) : t.paragraphIndex === n.paragraphIndex;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/object-props.ts
+//#region ../pwh-build/rhwp-studio/src/engine/object-props.ts
 function xu(e, t) {
 	return t.type === "shape" ? t.cellPath && t.cellPath.length > 0 ? e.getCellShapePropertiesByPath(t.sec, t.ppi, t.cellPath, t.ci) : e.getShapeProperties(t.sec, t.ppi, t.ci) : t.headerFooter ? e.getHeaderFooterPictureProperties(t.sec, t.headerFooter.outerParaIdx, t.headerFooter.outerControlIdx, t.ppi, t.ci) : t.cellPath && t.cellPath.length > 0 ? e.getCellPicturePropertiesByPath(t.sec, t.ppi, t.cellPath, t.ci) : e.getPictureProperties(t.sec, t.ppi, t.ci);
 }
@@ -30752,7 +30752,7 @@ function Su(e, t, n) {
 	return t.type === "shape" ? t.cellPath && t.cellPath.length > 0 ? e.setCellShapePropertiesByPath(t.sec, t.ppi, t.cellPath, t.ci, n) : e.setShapeProperties(t.sec, t.ppi, t.ci, n) : t.headerFooter ? e.setHeaderFooterPictureProperties(t.sec, t.headerFooter.outerParaIdx, t.headerFooter.outerControlIdx, t.ppi, t.ci, n) : t.cellPath && t.cellPath.length > 0 ? e.setCellPicturePropertiesByPath(t.sec, t.ppi, t.cellPath, t.ci, n) : e.setPictureProperties(t.sec, t.ppi, t.ci, n);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/command.ts
+//#region ../pwh-build/rhwp-studio/src/engine/command.ts
 var L = Object.freeze({
 	documentPaginationPending: !1,
 	flowChanged: !1,
@@ -32380,7 +32380,7 @@ var kd = class e {
 	}
 };
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/cell-block-format.ts
+//#region ../pwh-build/rhwp-studio/src/engine/cell-block-format.ts
 function Hd(e, t, n = 0) {
 	let r = e[e.length - 1];
 	return [...e.slice(0, -1), {
@@ -32416,7 +32416,7 @@ function Gd(e, t) {
 	return n;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/cursor.ts
+//#region ../pwh-build/rhwp-studio/src/engine/cursor.ts
 var Kd = class e {
 	wasm;
 	position = {
@@ -33894,7 +33894,7 @@ function ef(e, t) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/caret-renderer.ts
+//#region ../pwh-build/rhwp-studio/src/engine/caret-renderer.ts
 var tf = class {
 	container;
 	virtualScroll;
@@ -33984,7 +33984,7 @@ var tf = class {
 	}
 };
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/line-start-affinity.ts
+//#region ../pwh-build/rhwp-studio/src/engine/line-start-affinity.ts
 function nf(e, t, n) {
 	let r = n.lineInfoAt(e);
 	if (!r || r.lineIndex <= 0 || e !== r.charStart) return t;
@@ -34005,7 +34005,7 @@ function rf(e, t) {
 	return e.pageIndex === t.pageIndex && e.x <= t.x;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/field-marker-renderer.ts
+//#region ../pwh-build/rhwp-studio/src/engine/field-marker-renderer.ts
 var af = class {
 	container;
 	virtualScroll;
@@ -34102,7 +34102,7 @@ var af = class {
 	}
 };
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/history.ts
+//#region ../pwh-build/rhwp-studio/src/engine/history.ts
 function sf(e, t) {
 	for (let n of e) n.discard?.(t);
 }
@@ -34214,7 +34214,7 @@ var df = class {
 	}
 };
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/chart-data-target.ts
+//#region ../pwh-build/rhwp-studio/src/core/chart-data-target.ts
 function ff(e) {
 	if (e.type !== "ole" || e.noteRef) return null;
 	let t = e.cellPath ?? (e.cellIdx !== void 0 && e.cellParaIdx !== void 0 && e.outerTableControlIdx !== void 0 ? [{
@@ -34314,7 +34314,7 @@ function Sf(e, t) {
 	return n.length === 0 && e.paragraph === t.ppi && e.control === t.ci;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/dialog-drag.ts
+//#region ../pwh-build/rhwp-studio/src/ui/dialog-drag.ts
 function Cf(e, t, n = {}) {
 	let r = n.ignoreSelector ?? ".dialog-close", i = 0, a = 0, o = !1, s = () => {
 		o = !1, document.removeEventListener("mousemove", c), document.removeEventListener("mouseup", s);
@@ -34330,7 +34330,7 @@ function Cf(e, t, n = {}) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/dialog.ts
 var wf = "rhwp-modal-dialog-closed", z = class {
 	afterClose;
 	overlay;
@@ -34409,7 +34409,7 @@ function Ef(e, t) {
 	return new Tf(e, t).showAsync();
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/toast.ts
+//#region ../pwh-build/rhwp-studio/src/ui/toast.ts
 var Df = "rhwp-toast-container", Of = 8e3, kf = 200, Af = 350;
 function jf() {
 	let e = document.getElementById(Df);
@@ -34444,7 +34444,7 @@ function B(e) {
 	n > 0 && (o = setTimeout(s, n));
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/input-handler-hyperlink.ts
+//#region ../pwh-build/rhwp-studio/src/engine/input-handler-hyperlink.ts
 function Mf(e, t) {
 	if (!e.wasm?.getHyperlinkContext || !e.canEditHyperlink?.() || e.connectorDrawingMode || e.polygonDrawingMode || e.imagePlacementMode || e.textboxPlacementMode) return null;
 	let n = e.container.querySelector("#scroll-content");
@@ -34517,7 +34517,7 @@ function Ff(e, t) {
 	}
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/input-handler-connector.ts
+//#region ../pwh-build/rhwp-studio/src/engine/input-handler-connector.ts
 function If(e, t, n, r = 10, i) {
 	try {
 		let a = { controls: this.wasm.getPageControlLayout(e).controls.filter(ou) }, o = null, s = r;
@@ -34657,7 +34657,7 @@ function Hf() {
 	this.connectorDrawingMode = !1, this.connectorStartRef = null, Bf.call(this), Rf.call(this), this.container.style.cursor = "";
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/object-drag-record.ts
+//#region ../pwh-build/rhwp-studio/src/engine/object-drag-record.ts
 function Uf(e, t) {
 	return !Number.isFinite(e) || !Number.isFinite(t) || e === t ? null : {
 		before: { rotationAngle: e },
@@ -34677,7 +34677,7 @@ function Kf(e, t) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/table-bbox-cache.ts
+//#region ../pwh-build/rhwp-studio/src/engine/table-bbox-cache.ts
 function qf(e) {
 	let t = `${e.sec}:${e.ppi}:${e.ci}`, n = e.path;
 	return !n || n.length <= 1 ? t : `${t}|${n.map((e, t) => t === n.length - 1 ? `${e.controlIndex}` : `${e.controlIndex}.${e.cellIndex}.${e.cellParaIndex}`).join("/")}`;
@@ -34719,7 +34719,7 @@ function Qf(e, t, n) {
 	return e.tableBboxFetchFailures.add(i), null;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/table-resize-updates.ts
+//#region ../pwh-build/rhwp-studio/src/engine/table-resize-updates.ts
 function $f(e, t) {
 	return e === 0 && !t;
 }
@@ -34782,7 +34782,7 @@ function lp(e, t, n) {
 	return a;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/input-handler-mouse.ts
+//#region ../pwh-build/rhwp-studio/src/engine/input-handler-mouse.ts
 function up(e) {
 	return !e || e.isTextBox || e.parentParaIndex === void 0 || e.controlIndex === void 0 || e.cellIndex === void 0 || (e.cellPath?.length ?? 0) > 1 ? null : `${e.sectionIndex}:${e.parentParaIndex}:${e.controlIndex}:${e.cellIndex}`;
 }
@@ -35923,7 +35923,7 @@ function Mp(e, t) {
 	}[n[(r + Math.round(i / 45)) % 8]] ?? "";
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/picture-resize-journal.ts
+//#region ../pwh-build/rhwp-studio/src/engine/picture-resize-journal.ts
 var Np = class extends jd {
 	allTargets;
 	ids;
@@ -36025,7 +36025,7 @@ function Ip(e, t, n, r) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/object-selection-page.ts
+//#region ../pwh-build/rhwp-studio/src/engine/object-selection-page.ts
 function Lp(e) {
 	if (e.length === 0) return null;
 	let t = Infinity, n = Infinity, r = -Infinity, i = -Infinity;
@@ -36051,7 +36051,7 @@ function zp(e, t, n, r) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/input-handler-picture.ts
+//#region ../pwh-build/rhwp-studio/src/engine/input-handler-picture.ts
 function Bp(e) {
 	return Array.isArray(e?.cellPath) && e.cellPath.length > 0;
 }
@@ -36732,7 +36732,7 @@ function Sm(e) {
 	this.isPictureRotateDragging = !1, this.pictureRotateState = null, this.container.style.cursor = "", this.dragRafId &&= (cancelAnimationFrame(this.dragRafId), 0), this.renderPictureObjectSelection();
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/input-handler-table.ts
+//#region ../pwh-build/rhwp-studio/src/engine/input-handler-table.ts
 var Cm = 200;
 function wm(e, t, n) {
 	try {
@@ -37184,7 +37184,7 @@ function Gm(e) {
 	}
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/pwh-cell-delete-selection.mjs
+//#region ../pwh-build/rhwp-studio/src/pwh-cell-delete-selection.mjs
 function Km({ rowCount: e, colCount: t, cells: n, selected: r }) {
 	if (!Number.isInteger(e) || !Number.isInteger(t) || e < 1 || t < 1) return { kind: "partial" };
 	let i = new Set(r), a = Array.from({ length: e }, () => Array(t).fill(!1));
@@ -37203,7 +37203,7 @@ function Km({ rowCount: e, colCount: t, cells: n, selected: r }) {
 	} : c === e * t ? { kind: "table" } : { kind: "partial" };
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/pwh-cell-delete-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/pwh-cell-delete-dialog.ts
 function qm(e) {
 	let t = e.getSelectedCellBlock();
 	if (!t || !t.cellIndices.length) return;
@@ -37264,7 +37264,7 @@ function qm(e) {
 	new s().show();
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/pwh-clipboard-structure.mjs
+//#region ../pwh-build/rhwp-studio/src/engine/pwh-clipboard-structure.mjs
 function Jm({ inCell: e, internalControl: t = !1, hasTables: n = !1, hasObjects: r = !1 }) {
 	return !!(e && (t || n || r));
 }
@@ -37294,7 +37294,7 @@ function Xm(e, t, n = !1) {
 	}) ? "현재 셀 붙여넣기 경로는 표·객체 구조를 보존하지 못할 수 있어 중단했습니다. 기존 내용은 유지했습니다. 텍스트만 붙이려면 일반 텍스트로 붙여넣기를 사용하세요." : null;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/navigation-keymap.ts
+//#region ../pwh-build/rhwp-studio/src/engine/navigation-keymap.ts
 function Zm(e) {
 	return e.key !== "ArrowUp" && e.key !== "ArrowDown" && e.key !== "ArrowLeft" && e.key !== "ArrowRight" ? null : e.ctrlKey || e.metaKey ? "resize" : "navigate";
 }
@@ -37342,7 +37342,7 @@ function rh(e, t = $m()) {
 	return t === "mac" ? e.replace(/\bCtrl\+/g, "⌘").replace(/\bAlt\+/g, "⌥").replace(/\bShift\+/g, "⇧") : e;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/command/shortcut-map.ts
+//#region ../pwh-build/rhwp-studio/src/command/shortcut-map.ts
 var ih = [
 	[{
 		key: "z",
@@ -37683,7 +37683,7 @@ function ah(e, t, n = $m()) {
 	return null;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/command/contextual-shortcut.ts
+//#region ../pwh-build/rhwp-studio/src/command/contextual-shortcut.ts
 var oh = class {
 	state = "idle";
 	ghostText = "";
@@ -37720,7 +37720,7 @@ function ch(e, t) {
 	} : null;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/office-clipboard-images.ts
+//#region ../pwh-build/rhwp-studio/src/engine/office-clipboard-images.ts
 var lh = 80, uh = 81, dh = 14;
 function fh(e) {
 	let t = e.length >> 1, n = new Uint8Array(t);
@@ -37901,7 +37901,7 @@ function xh(e, t) {
 	return !e || !t || !/\\pict/.test(t) ? !1 : /<img\b[^>]*src\s*=\s*["'](?!data:)/i.test(e);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/office-html-sanitize.ts
+//#region ../pwh-build/rhwp-studio/src/engine/office-html-sanitize.ts
 var Sh = [
 	"script",
 	"style",
@@ -37953,7 +37953,7 @@ function Eh(e) {
 	return n;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/input-handler-keyboard.ts
+//#region ../pwh-build/rhwp-studio/src/engine/input-handler-keyboard.ts
 var Dh = /<!--\s*rhwp-studio-clipboard:([A-Za-z0-9._:-]+)\s*-->/, Oh = /* @__PURE__ */ new Set([
 	"ArrowLeft",
 	"ArrowRight",
@@ -39247,7 +39247,7 @@ function Dg() {
 	}
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/hyperlink-delete-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/hyperlink-delete-dialog.ts
 var Og = class extends z {
 	remove;
 	cancel;
@@ -39273,7 +39273,7 @@ function kg(e, t) {
 	new Og(e, t).show();
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/input-handler-hyperlink-delete.ts
+//#region ../pwh-build/rhwp-studio/src/engine/input-handler-hyperlink-delete.ts
 var Ag = /* @__PURE__ */ new WeakSet();
 function jg(e, t, n = "forward") {
 	if (Ag.has(e)) return !0;
@@ -39322,7 +39322,7 @@ function jg(e, t, n = "forward") {
 	}, d), !0;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/input-handler-text.ts
+//#region ../pwh-build/rhwp-studio/src/engine/input-handler-text.ts
 function Mg(e) {
 	return [...e].length;
 }
@@ -39856,18 +39856,18 @@ function Zg(e, t) {
 	return this.cursor.isInFootnote() ? (this.wasm.deleteTextInFootnote(this.cursor.fnSectionIdx, this.cursor.fnParaIdx, this.cursor.fnControlIdx, this.cursor.fnInnerParaIdx, e.charOffset, t), L) : Wu(this.wasm, e, t);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/hanging-indent.ts
+//#region ../pwh-build/rhwp-studio/src/engine/hanging-indent.ts
 function Qg(e, t) {
 	return !Number.isFinite(e) || !Number.isFinite(t) ? 0 : Math.max(0, e - t);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/table-border-hit.ts
+//#region ../pwh-build/rhwp-studio/src/engine/table-border-hit.ts
 function $g(e, t, n, r = 5) {
 	let i = Math.abs(e - n.x) <= r, a = Math.abs(e - (n.x + n.width)) <= r, o = Math.abs(t - n.y) <= r, s = Math.abs(t - (n.y + n.height)) <= r, c = t >= n.y - r && t <= n.y + n.height + r, l = e >= n.x - r && e <= n.x + n.width + r;
 	return i && c || a && c || o && l || s && l;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/deferred-pagination-runner.ts
+//#region ../pwh-build/rhwp-studio/src/engine/deferred-pagination-runner.ts
 var e_ = class {
 	client;
 	onComplete;
@@ -39951,7 +39951,7 @@ var e_ = class {
 	}
 };
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/table-object-clipboard-target.ts
+//#region ../pwh-build/rhwp-studio/src/engine/table-object-clipboard-target.ts
 function t_(e) {
 	let t = e.cellPath ?? [];
 	return t.length > 1 ? {
@@ -39963,7 +39963,7 @@ function t_(e) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/initial-caret-focus.ts
+//#region ../pwh-build/rhwp-studio/src/engine/initial-caret-focus.ts
 function n_(e, t, n, r) {
 	return e ? (n.show(e, t), r.emit("cursor-rect-updated", {
 		pageIndex: e.pageIndex,
@@ -39972,7 +39972,7 @@ function n_(e, t, n, r) {
 	}), !0) : !1;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/caret-layout-reveal.ts
+//#region ../pwh-build/rhwp-studio/src/engine/caret-layout-reveal.ts
 var r_ = /* @__PURE__ */ new Set([
 	"pageBreak",
 	"columnBreak",
@@ -43864,7 +43864,7 @@ function z_(e, t, n) {
 	i < 0 || r.length === 0 || r[(i + n + r.length) % r.length]?.focus({ preventScroll: !0 });
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/icon-toolbar-scroller.ts
+//#region ../pwh-build/rhwp-studio/src/ui/icon-toolbar-scroller.ts
 var B_ = 1, V_ = 240, H_ = "tb-scroll-nav-transitioning-out", U_ = ":scope > .tb-sep";
 function W_(e, t) {
 	return e - t > B_;
@@ -44110,7 +44110,7 @@ function rv(e) {
 	return !t || !n || !r || !i ? null : new nv(e, t, n, r, i);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/menu-shortcut-labels.ts
+//#region ../pwh-build/rhwp-studio/src/ui/menu-shortcut-labels.ts
 function iv(e, t) {
 	let n = e.querySelectorAll(".md-item[data-cmd]");
 	for (let e of n) {
@@ -44123,7 +44123,7 @@ function iv(e, t) {
 	}
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/menu-bar.ts
+//#region ../pwh-build/rhwp-studio/src/ui/menu-bar.ts
 var av = class {
 	container;
 	eventBus;
@@ -44214,7 +44214,7 @@ var av = class {
 	}
 };
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/extension-settings.ts
+//#region ../pwh-build/rhwp-studio/src/core/extension-settings.ts
 function ov() {
 	return !0;
 }
@@ -44272,7 +44272,7 @@ async function _v() {
 	return await gv(e?.sync, "chrome-callback") ?? await gv(t?.sync, "promise") ?? await gv(t?.local, "promise") ?? await gv(e?.local, "chrome-callback") ?? sv();
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/command/registry.ts
+//#region ../pwh-build/rhwp-studio/src/command/registry.ts
 var vv = class {
 	commands = /* @__PURE__ */ new Map();
 	register(e) {
@@ -44353,14 +44353,14 @@ function jv(e, t) {
 	e.querySelectorAll(`${Sv}[data-cmd="${t}"]`).forEach((e) => e.remove());
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/automation/types.ts
+//#region ../pwh-build/rhwp-studio/src/automation/types.ts
 var Mv = "ext:", Nv = {
 	menu: "rhwp-chrome-no-menu",
 	toolbar: "rhwp-chrome-no-toolbar",
 	statusbar: "rhwp-chrome-no-status"
 };
 //#endregion
-//#region pwh-build/rhwp-studio/src/automation/host.ts
+//#region ../pwh-build/rhwp-studio/src/automation/host.ts
 function Pv(e) {
 	if (!e.startsWith("ext:")) {
 		let t = /* @__PURE__ */ Error(`확장 커맨드 ID 는 "${Mv}" 접두사가 필요합니다: ${e}`);
@@ -44454,7 +44454,7 @@ function zv(e) {
 	return Rv();
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/plugin/host.ts
+//#region ../pwh-build/rhwp-studio/src/plugin/host.ts
 function Bv(e, t) {
 	let n = Error(t);
 	return n.code = e, n;
@@ -44714,7 +44714,7 @@ var Yv = class {
 	}
 };
 //#endregion
-//#region pwh-build/rhwp-studio/src/command/document-shortcut-guard.ts
+//#region ../pwh-build/rhwp-studio/src/command/document-shortcut-guard.ts
 function Xv(e) {
 	let t = e;
 	for (; t;) {
@@ -44736,7 +44736,7 @@ function Qv(e, t, n, r) {
 	return t?.isConnected || Zv(e.target) ? !1 : (e.preventDefault(), n(), r(), !0);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/command/export-html.ts
+//#region ../pwh-build/rhwp-studio/src/command/export-html.ts
 var $v = {
 	html: {
 		extension: "html",
@@ -44807,7 +44807,7 @@ function oy(e, t, n) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/dom-utils.ts
+//#region ../pwh-build/rhwp-studio/src/ui/dom-utils.ts
 var sy = "svg";
 function cy(e, t) {
 	let n = new DOMParser().parseFromString(t, "image/svg+xml");
@@ -44820,7 +44820,7 @@ function ly(e, t) {
 	return n.value = e, n.textContent = t, n;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/dialog-apply.ts
+//#region ../pwh-build/rhwp-studio/src/ui/dialog-apply.ts
 function uy(e) {
 	let { services: t, label: n, command: r, fallback: i } = e;
 	try {
@@ -44865,7 +44865,7 @@ function hy(e) {
 	return n.width < t ? `좌우 여백이 너무 커서 본문이 남지 않습니다 (본문 너비 ${r(n.width)}mm, 최소 10mm). 왼쪽·오른쪽·제본 여백을 줄여주세요.` : n.height < t ? `위아래 여백이 너무 커서 본문이 남지 않습니다 (본문 높이 ${r(n.height)}mm, 최소 10mm). 위쪽·아래쪽·머리말·꼬리말 여백을 줄여주세요.` : null;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/page-setup-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/page-setup-dialog.ts
 var gy = 7200 / 25.4, _y = 3;
 function vy(e) {
 	return Math.round(e * 25.4 / 7200 * 10) / 10;
@@ -45243,7 +45243,7 @@ function Fy(e, t, n) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/save-as-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/save-as-dialog.ts
 var Iy = class extends z {
 	format;
 	allowPassword;
@@ -45314,7 +45314,7 @@ function Ly(e, t = "hwp", n = {}) {
 	return new Iy(e, t, n.allowPassword === !0, n.inheritPassword === !0).showAsync();
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/hwp-password-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/hwp-password-dialog.ts
 var Ry = class extends z {
 	fileName;
 	errorMessage;
@@ -45407,7 +45407,7 @@ function Vy(e) {
 	return new By(e).showAsync();
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/unsaved-changes-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/unsaved-changes-dialog.ts
 var Hy = class extends z {
 	options;
 	resolve;
@@ -45448,7 +45448,7 @@ function Uy(e) {
 	return new Hy(e).showAsync();
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/hml-save-format-message.ts
+//#region ../pwh-build/rhwp-studio/src/ui/hml-save-format-message.ts
 var Wy = 3;
 function Gy(e, t) {
 	let n = va(e, t);
@@ -45458,7 +45458,7 @@ function Gy(e, t) {
 	return i.length > Wy && r.push(`그 외 ${i.length - Wy}건`), r.join("\n");
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/hml-save-format-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/hml-save-format-dialog.ts
 var Ky = class extends z {
 	resolve;
 	hmlEnabled;
@@ -45500,7 +45500,7 @@ function qy(e = null, t = !1) {
 	return new Ky(e, t).showAsync();
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/command/save-document-format.ts
+//#region ../pwh-build/rhwp-studio/src/command/save-document-format.ts
 function Jy(e, t) {
 	return t === "hml" ? {
 		bytes: e.exportHml(),
@@ -45511,7 +45511,7 @@ function Yy(e, t, n) {
 	return t === "hwpx" ? e.exportHwpxWithPasswordAndReport(n) : e.exportHwpWithPasswordAndReport(n);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/command/print-pages.ts
+//#region ../pwh-build/rhwp-studio/src/command/print-pages.ts
 var Xy = "브라우저 인쇄 창에서 ‘대상 → PDF로 저장’을 선택합니다.";
 function Zy(e) {
 	return e.trim().replace(/\.(hwp|hwpx|hml)$/i, "").trim() || "문서";
@@ -45648,7 +45648,7 @@ function db(e, t, n) {
 	cb(i.documentElement, n.pageName), r.appendChild(e.importNode(i.documentElement, !0)), t.appendChild(r);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/command/print-surface.ts
+//#region ../pwh-build/rhwp-studio/src/command/print-surface.ts
 var fb = "print.html", pb = 1e4, mb = "rhwp-print-surface", hb = class extends Error {
 	constructor() {
 		super("인쇄 미리보기 팝업이 차단되었습니다."), this.name = "PrintPreviewBlockedError";
@@ -45799,7 +45799,7 @@ async function jb(e) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/command/file-open-picker.ts
+//#region ../pwh-build/rhwp-studio/src/command/file-open-picker.ts
 async function Mb(e) {
 	if (!await e.canReplace()) return;
 	let t = Tb(e.windowLike), n = null;
@@ -45828,7 +45828,7 @@ async function Mb(e) {
 	}
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/pdf-print-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/pdf-print-dialog.ts
 var Nb = class extends z {
 	pageCount;
 	showGuidance;
@@ -46000,7 +46000,7 @@ async function Zb() {
 	}), async () => {});
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/recent/recent-open.ts
+//#region ../pwh-build/rhwp-studio/src/recent/recent-open.ts
 async function Qb(e, t) {
 	if (!e.handle) return t.toast(`"${e.fileName}"은(는) 핸들 없이 열려 자동 재열기가 불가합니다. 파일을 다시 선택하세요.`, 4e3), t.requestReopen?.(), "needs-pick";
 	let n = e.handle, r = !1;
@@ -46022,7 +46022,7 @@ async function Qb(e, t) {
 	}
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/command/commands/file.ts
+//#region ../pwh-build/rhwp-studio/src/command/commands/file.ts
 async function $b(e) {
 	await Mb({
 		canReplace: () => bx(e),
@@ -46548,7 +46548,7 @@ var jx = [
 	}
 };
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/find-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/find-dialog.ts
 function Px(e, t) {
 	if (!e || !t.found) return;
 	let n = t.cellContext, r = n ? {
@@ -46889,7 +46889,7 @@ var Fx = class e {
 	}
 };
 //#endregion
-//#region pwh-build/rhwp-studio/src/compare/diff-location-label.ts
+//#region ../pwh-build/rhwp-studio/src/compare/diff-location-label.ts
 function Lx(e) {
 	let t = (e ?? "").trim();
 	return t === "" || t === "(없음)";
@@ -46914,7 +46914,7 @@ function zx(e) {
 	return !t && !n ? null : t && n ? `좌 ${t}, 우 ${n}` : t ?? n;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/compare/compare-debug.ts
+//#region ../pwh-build/rhwp-studio/src/compare/compare-debug.ts
 function Bx() {
 	try {
 		if (typeof globalThis < "u" && globalThis.__RHWP_COMPARE_DEBUG__ || typeof window < "u" && (new URLSearchParams(window.location.search).get("compareDebug") === "1" || window.localStorage?.getItem("rhwp:compareDebug") === "1")) return !0;
@@ -46925,7 +46925,7 @@ function Vx(...e) {
 	Bx() && console.log("[rhwp:compare]", ...e);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/compare/diff-engine.ts
+//#region ../pwh-build/rhwp-studio/src/compare/diff-engine.ts
 var Hx = 32, Ux = 20, Wx = 5, Gx = 10, Kx = 4, qx = 3, Jx = .86, Yx = .7, Xx = 4, Zx = .4, Qx = .12, $x = .4, eS = 1.5, tS = .35, nS = .28, rS = 12, iS = 24, aS = 28e4, oS = 96e3, sS = 14e6, cS = .62, lS = 6, uS = 1.9, dS = 18e4, fS = 2600, pS = 96, mS = 45e4, hS = 48, gS = 2.35, _S = 4.38, vS = 4.25, yS = .74, bS = .36, xS = null, SS = null;
 function CS(e, t) {
 	let n = SS;
@@ -48525,7 +48525,7 @@ async function ew(e, t, n, r, i) {
 	return $C(await rC(e, t, i), await rC(n, r, i), i);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/history/idb-store.ts
+//#region ../pwh-build/rhwp-studio/src/history/idb-store.ts
 var tw = "rhwpStudioDocHistory", nw = 1, rw = "historyMeta", iw = "historyBlobs", aw = 24, ow = /* @__PURE__ */ new Map();
 function sw() {
 	return typeof indexedDB < "u";
@@ -48657,7 +48657,7 @@ async function _w() {
 	}), async () => {});
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/history-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/history-dialog.ts
 var vw = {
 	caseSensitive: !0,
 	ignoreWhitespace: !0,
@@ -49609,12 +49609,12 @@ var vw = {
 	}
 };
 //#endregion
-//#region pwh-build/rhwp-studio/src/command/format-paste-availability.ts
+//#region ../pwh-build/rhwp-studio/src/command/format-paste-availability.ts
 function ww(e) {
 	return e.hasDocument && e.hasCopiedFormat && !e.isFormMode && (e.hasSelection || e.inCellSelectionMode);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/command/commands/edit.ts
+//#region ../pwh-build/rhwp-studio/src/command/commands/edit.ts
 var Tw = null, Ew = null, Dw = null, Ow = null, kw = [
 	{
 		id: "edit:undo",
@@ -49889,7 +49889,7 @@ function Ww(e) {
 	return typeof n.addEventListener == "function" ? (n.addEventListener("change", r), () => n.removeEventListener("change", r)) : (n.addListener(r), () => n.removeListener(r));
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/grid-settings-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/grid-settings-dialog.ts
 var Gw = class extends z {
 	visibleInput;
 	horizontalInput;
@@ -50025,7 +50025,7 @@ function Yw(e, t) {
 	}
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/zoom-dialog-state.ts
+//#region ../pwh-build/rhwp-studio/src/view/zoom-dialog-state.ts
 var Xw = [
 	100,
 	125,
@@ -50099,7 +50099,7 @@ function aT(e) {
 	}
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/zoom-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/zoom-dialog.ts
 var oT = "zoom-dialog-custom-error", sT = class extends z {
 	initialChoice;
 	initialArrangement;
@@ -51207,7 +51207,7 @@ var OT = class {
 	}
 };
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/para-shape-helpers.ts
+//#region ../pwh-build/rhwp-studio/src/ui/para-shape-helpers.ts
 function kT(e) {
 	let t = document.createElement("fieldset");
 	t.className = "cs-fieldset";
@@ -51231,7 +51231,7 @@ function NT(e) {
 	return t.className = "dialog-unit", t.textContent = e, t;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/para-shape-tab-builders.ts
+//#region ../pwh-build/rhwp-studio/src/ui/para-shape-tab-builders.ts
 function PT(e, t) {
 	let n = document.createElement("tr");
 	t.forEach((e) => {
@@ -51676,7 +51676,7 @@ function LT(e, t) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/para-shape-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/para-shape-dialog.ts
 var RT = [
 	{
 		value: "justify",
@@ -52208,7 +52208,7 @@ var qT = class {
 	}
 };
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/numbering-defaults.ts
+//#region ../pwh-build/rhwp-studio/src/core/numbering-defaults.ts
 function V(e) {
 	return e.split("[::]").filter((e, t, n) => t < n.length - 1);
 }
@@ -53176,7 +53176,7 @@ function PE(e, t) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/picture-props-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/picture-props-dialog.ts
 var FE = 7200 / 25.4;
 function K(e) {
 	return e / FE;
@@ -55540,7 +55540,7 @@ function XE(e) {
 	return parseInt(t.substring(4, 6), 16) << 16 | r << 8 | n;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/equation-props-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/equation-props-dialog.ts
 var ZE = [
 	"basic",
 	"margin",
@@ -57161,7 +57161,7 @@ function gD(e, t) {
 	new hD(e, t).show();
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/command/commands/hyperlink.ts
+//#region ../pwh-build/rhwp-studio/src/command/commands/hyperlink.ts
 var _D = {
 	id: "insert:hyperlink",
 	label: I("command.insert.hyperlink.label"),
@@ -57445,7 +57445,7 @@ function LD(e) {
 	return e.series.map((e) => e.name);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/chart-data-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/chart-data-dialog.ts
 var RD = "원본이 빈 값(결측)이라 이 자리는 고칠 수 없습니다 — 행을 새로 넣으면 값을 쓸 수 있습니다.", zD = "원본에 이 계열의 값이 없던 자리입니다.", BD = "이 계열은 이름 칸(c:tx)이 없어 이름을 넣을 자리가 없습니다.", VD = "셀을 우클릭하면 행·계열을 넣거나 지울 수 있습니다.", HD = "원형 차트는 첫 계열만 그리므로, 추가한 계열은 화면에 나타나지 않습니다.", UD = "주식형 캔들은 첫·끝 계열을 몸통으로 삼습니다 — 양끝을 바꾸면 그림이 깨집니다.";
 function WD(e, t) {
 	let n = e.container ?? [], r = t.container ?? [];
@@ -57635,12 +57635,12 @@ var GD = class extends z {
 	}
 };
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/unicode-block.ts
+//#region ../pwh-build/rhwp-studio/src/ui/unicode-block.ts
 function KD(e, t) {
 	return e >= t.start && e <= t.end;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/symbols-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/symbols-dialog.ts
 var qD = [
 	{
 		name: I("dialog.symbols.label"),
@@ -58846,7 +58846,7 @@ function mO(e, t) {
 	}, 0);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/command/commands/insert.ts
+//#region ../pwh-build/rhwp-studio/src/command/commands/insert.ts
 function hO(e, t, n, r) {
 	return {
 		id: e,
@@ -59367,7 +59367,7 @@ function FO(e, t) {
 	NO(e, n, r, "flipObject", { [t]: a }, { [t]: !a });
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/table-create-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/table-create-dialog.ts
 var IO = 8, LO = 10, RO = 16;
 function zO(e) {
 	return Math.round(e * Kw);
@@ -59529,7 +59529,7 @@ function GO(e) {
 	return t.className = "dialog-unit", t.textContent = e, t;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/cell-split-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/cell-split-dialog.ts
 var KO = class {
 	onApply = null;
 	overlay = null;
@@ -60585,7 +60585,7 @@ var ek = class extends z {
 	}
 };
 //#endregion
-//#region pwh-build/rhwp-studio/src/command/block-calculation-plan.ts
+//#region ../pwh-build/rhwp-studio/src/command/block-calculation-plan.ts
 function ak(e) {
 	if (!Number.isInteger(e) || e < 0) return null;
 	let t = e + 1, n = "";
@@ -60645,7 +60645,7 @@ function lk(e, t) {
 	}
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/table-row-column-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/table-row-column-dialog.ts
 var uk = 63;
 function dk(e) {
 	let t = Number.parseInt(e, 10);
@@ -61932,7 +61932,7 @@ function Bk(e) {
 	}
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/section-settings-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/section-settings-dialog.ts
 var Vk = 100;
 function Hk(e) {
 	return Math.round(e / Vk * 10) / 10;
@@ -62213,7 +62213,7 @@ var Yk = "80px", Xk = class extends z {
 	}
 };
 //#endregion
-//#region pwh-build/rhwp-studio/src/command/commands/page.ts
+//#region ../pwh-build/rhwp-studio/src/command/commands/page.ts
 function Qk(e, t, n, r, i) {
 	let { sectionIndex: a, applyTo: o } = r;
 	JSON.parse(e.wasm.getHeaderFooter(a, i, o)).exists || t.executeOperation({
@@ -62668,7 +62668,7 @@ var rA = [
 	}
 ];
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/font-set-edit-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/font-set-edit-dialog.ts
 function iA() {
 	let e = /* @__PURE__ */ new Set();
 	for (let t of pe) e.add(t);
@@ -62842,7 +62842,7 @@ function sA(e, t) {
 	][t] ?? "korean"];
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/options-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/options-dialog.ts
 var cA = class extends z {
 	eventBus;
 	showRecentCheck;
@@ -63017,7 +63017,7 @@ function pA(e) {
 	return t === "NotAllowedError" || n.includes("permission") || n.includes("denied") ? "로컬 글꼴 접근 권한이 허용되지 않았습니다. 브라우저 권한 설정에서 허용한 뒤 다시 시도해 주세요." : "글꼴 감지에 실패했습니다. 웹 대체 글꼴로 계속 사용할 수 있습니다.";
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/command/commands/tool.ts
+//#region ../pwh-build/rhwp-studio/src/command/commands/tool.ts
 var mA = [{
 	id: "tool:options",
 	opensDialog: !0,
@@ -63027,7 +63027,7 @@ var mA = [{
 	}
 }];
 //#endregion
-//#region pwh-build/rhwp-studio/src/command/pwa-file-handling.ts
+//#region ../pwh-build/rhwp-studio/src/command/pwa-file-handling.ts
 async function hA(e) {
 	let t = await e.getFile();
 	return {
@@ -63066,7 +63066,7 @@ function _A(e, t) {
 	}), !0) : !1;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/context-menu.ts
+//#region ../pwh-build/rhwp-studio/src/ui/context-menu.ts
 var vA = class {
 	dispatcher;
 	registry;
@@ -63239,7 +63239,7 @@ function xA(e) {
 	return e.warnings.length > bA && n.push(`그 외 ${e.warnings.length - bA}건`), n.join("\n");
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/hml-import-warning.ts
+//#region ../pwh-build/rhwp-studio/src/ui/hml-import-warning.ts
 function SA(e) {
 	B({
 		message: xA(e),
@@ -63248,7 +63248,7 @@ function SA(e) {
 	});
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/drop-confirm-dialog.ts
+//#region ../pwh-build/rhwp-studio/src/ui/drop-confirm-dialog.ts
 var CA = class extends z {
 	fileName;
 	resolve;
@@ -63280,7 +63280,7 @@ function wA(e) {
 	return new CA(e).showAsync();
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/ui/chrome-mode.ts
+//#region ../pwh-build/rhwp-studio/src/ui/chrome-mode.ts
 var TA = [
 	"file:new-doc",
 	"file:open",
@@ -63321,7 +63321,7 @@ function OA(e = "") {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/document-dirty-state.ts
+//#region ../pwh-build/rhwp-studio/src/core/document-dirty-state.ts
 var kA = class {
 	dirty = !1;
 	beforeUnloadWindow = null;
@@ -63431,7 +63431,7 @@ function NA(e, t = {}) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/recovery/autosave-store.ts
+//#region ../pwh-build/rhwp-studio/src/recovery/autosave-store.ts
 var PA = "rhwpStudioAutosave", FA = 1, IA = "drafts", LA = 12, RA = /* @__PURE__ */ new Map();
 function zA() {
 	return typeof indexedDB < "u";
@@ -63536,7 +63536,7 @@ async function $A() {
 	}), async () => {});
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/recovery/autosave-manager.ts
+//#region ../pwh-build/rhwp-studio/src/recovery/autosave-manager.ts
 var ej = 1e4, tj = 6e5;
 function nj(e, t) {
 	return typeof e == "string" && e.length > 0 ? e : t;
@@ -63700,7 +63700,7 @@ function aj(e, t, n) {
 	return Number.isFinite(r) ? Math.max(n, Math.round(r)) : t;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/recovery/recovery-format.ts
+//#region ../pwh-build/rhwp-studio/src/recovery/recovery-format.ts
 function oj(e) {
 	let t = e.trim() || "문서.hwp", n = t.lastIndexOf(".");
 	if (n <= 0) return t;
@@ -63724,7 +63724,7 @@ function uj(e) {
 	return `${cj(e.savedAt)} · ${lj(e.byteLength)} · ${t}${n}`;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/recovery/recovery-ui.ts
+//#region ../pwh-build/rhwp-studio/src/recovery/recovery-ui.ts
 var dj = class extends z {
 	drafts;
 	resolve;
@@ -63791,7 +63791,7 @@ function fj(e) {
 	return new dj(e).showAsync();
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/cell-selection-renderer.ts
+//#region ../pwh-build/rhwp-studio/src/engine/cell-selection-renderer.ts
 var pj = class {
 	container;
 	virtualScroll;
@@ -63838,7 +63838,7 @@ var pj = class {
 	}
 };
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/cell-selection-phase.ts
+//#region ../pwh-build/rhwp-studio/src/engine/cell-selection-phase.ts
 function mj(e) {
 	switch (e) {
 		case 1: return "셀 선택 · 방향키로 이동";
@@ -63847,7 +63847,7 @@ function mj(e) {
 	}
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/table-object-renderer.ts
+//#region ../pwh-build/rhwp-studio/src/engine/table-object-renderer.ts
 var hj = "http://www.w3.org/2000/svg";
 function gj(e, t, n, r) {
 	let i = r ? Math.max(n, 10) : n, a = i / 2, o = document.createElement("div");
@@ -64169,7 +64169,7 @@ function Cj(e, t, n, r) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/engine/table-resize-renderer.ts
+//#region ../pwh-build/rhwp-studio/src/engine/table-resize-renderer.ts
 var wj = class e {
 	container;
 	virtualScroll;
@@ -64302,7 +64302,7 @@ var wj = class e {
 	}
 };
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/ruler-pin-geometry.ts
+//#region ../pwh-build/rhwp-studio/src/view/ruler-pin-geometry.ts
 function Tj(e) {
 	return Math.round(e * 7200 / 96);
 }
@@ -64331,7 +64331,7 @@ function kj(e, t, n) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/ruler-scale.ts
+//#region ../pwh-build/rhwp-studio/src/view/ruler-scale.ts
 var Aj = 96 / 25.4, jj = 30, Mj = 3.5, Nj = 10;
 function Pj(e) {
 	let t = Number.isFinite(e) && e > 0 ? e : 1, n = 10 ** Math.floor(Math.log10(t)), r = t / n;
@@ -64345,7 +64345,7 @@ function Fj(e) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/ruler-label-geometry.ts
+//#region ../pwh-build/rhwp-studio/src/view/ruler-label-geometry.ts
 function Ij(e, t, n, r) {
 	if (![
 		e,
@@ -64357,7 +64357,7 @@ function Ij(e, t, n, r) {
 	return e - i >= n && e + i <= a;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/ruler.ts
+//#region ../pwh-build/rhwp-studio/src/view/ruler.ts
 var Lj = 96 / 25.4, Rj = 20, zj = 6, Bj = 8;
 function Vj(e, t) {
 	return getComputedStyle(document.documentElement).getPropertyValue(e).trim() || t;
@@ -64791,7 +64791,7 @@ function Yj(e, t, n) {
 	return `${I(`ui.zoom.${e}`)} (${r})`;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/renderer-session.ts
+//#region ../pwh-build/rhwp-studio/src/view/renderer-session.ts
 function Xj(e) {
 	return e instanceof Error ? e.message : String(e);
 }
@@ -64984,7 +64984,7 @@ async function nM(e, t) {
 	}
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/view/page-indicator.ts
+//#region ../pwh-build/rhwp-studio/src/view/page-indicator.ts
 function rM(e) {
 	return typeof e == "number" && Number.isFinite(e) && e >= 1;
 }
@@ -65038,7 +65038,7 @@ function fM(e) {
 	}
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/document-agent/types.ts
+//#region ../pwh-build/rhwp-studio/src/document-agent/types.ts
 var pM = [
 	"CAPABILITY_UNSUPPORTED",
 	"INVALID_COMMAND",
@@ -65067,7 +65067,7 @@ function mM(e) {
 	return e instanceof Error && pM.includes(e.code);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/document-agent/contract.ts
+//#region ../pwh-build/rhwp-studio/src/document-agent/contract.ts
 var hM = /^[0-9a-f]{64}$/;
 function gM(e, t) {
 	if (typeof e != "object" || !e || Array.isArray(e)) throw new q("INVALID_COMMAND", `${t}은 객체여야 합니다.`);
@@ -65141,7 +65141,7 @@ function TM(e, t, n) {
 	return _M(e, [t], n), e[t];
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/embed/rpc-router.ts
+//#region ../pwh-build/rhwp-studio/src/embed/rpc-router.ts
 function EM(e) {
 	return typeof e == "object" && e ? e : {};
 }
@@ -65207,7 +65207,7 @@ async function AM(e, t, n, r = !1) {
 	}
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/embed/runtime.ts
+//#region ../pwh-build/rhwp-studio/src/embed/runtime.ts
 function jM(e) {
 	return e instanceof Error ? e.message : String(e);
 }
@@ -65360,7 +65360,7 @@ function RM(e) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/node_modules/@noble/hashes/sha2.js
+//#region ../pwh-build/rhwp-studio/node_modules/@noble/hashes/sha2.js
 var zM = /* @__PURE__ */ Uint32Array.from([
 	1116352408,
 	1899447441,
@@ -65482,7 +65482,7 @@ var zM = /* @__PURE__ */ Uint32Array.from([
 	}
 }, UM = /* @__PURE__ */ Wi(() => new HM(), /* @__PURE__ */ Gi(1));
 //#endregion
-//#region pwh-build/rhwp-studio/src/core/font-decision-trace.ts
+//#region ../pwh-build/rhwp-studio/src/core/font-decision-trace.ts
 function WM(e) {
 	return [...new Set(e.filter(Boolean))];
 }
@@ -65610,7 +65610,7 @@ function ZM(e, t = {}) {
 	}, r;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/document-agent/pwh-document-state-cache.mjs
+//#region ../pwh-build/rhwp-studio/src/document-agent/pwh-document-state-cache.mjs
 function QM() {
 	let e = null, t = 0;
 	function n(e) {
@@ -65646,7 +65646,7 @@ function QM() {
 	});
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/document-agent/controller.ts
+//#region ../pwh-build/rhwp-studio/src/document-agent/controller.ts
 var $M = 4e3, eN = 3e3, tN = new TextEncoder();
 function nN(e) {
 	return Hi(UM(e));
@@ -66500,7 +66500,7 @@ async function PN(e, t, n, r, i) {
 	});
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/pwh-collaboration-target.ts
+//#region ../pwh-build/rhwp-studio/src/pwh-collaboration-target.ts
 function FN(e, t, n) {
 	if (!n) throw Error("요청 대상 식별 정보가 없습니다.");
 	let r = -1, i = e.getParagraphCount(t);
@@ -66676,7 +66676,7 @@ async function RN(e, t, n) {
 	throw Error("지원되지 않는 요청 대상입니다.");
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/pwh-picture-replace.ts
+//#region ../pwh-build/rhwp-studio/src/pwh-picture-replace.ts
 function zN(e) {
 	if (e?.kind !== "object" || e.objects?.length !== 1) throw Error("교체할 그림 하나를 선택하세요.");
 	let t = e.objects[0].source;
@@ -66715,7 +66715,7 @@ function BN(e, t, n, r) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/pwh-page-layout.ts
+//#region ../pwh-build/rhwp-studio/src/pwh-page-layout.ts
 var VN = {
 	A4: [59528, 84188],
 	A3: [84188, 119055],
@@ -66773,7 +66773,7 @@ function GN(e, t, n) {
 	return r;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/pwh-blank-compose.ts
+//#region ../pwh-build/rhwp-studio/src/pwh-blank-compose.ts
 function KN(e) {
 	try {
 		if (e.getSectionCount() !== 1) return !1;
@@ -66818,7 +66818,7 @@ function JN(e, t) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/pwh-request-state.mjs
+//#region ../pwh-build/rhwp-studio/src/pwh-request-state.mjs
 function YN(e, t, n = 0) {
 	if (e === t) return !0;
 	if (n > 32 || e === null || t === null || typeof e != "object" || typeof t != "object" || Array.isArray(e) !== Array.isArray(t)) return !1;
@@ -66835,7 +66835,7 @@ function ZN(e, t) {
 	return YN(XN(e), XN(t));
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/pwh-table-content.mjs
+//#region ../pwh-build/rhwp-studio/src/pwh-table-content.mjs
 var QN = (e) => typeof e == "string" ? JSON.parse(e) : e, $N = (e) => {
 	let t = QN(e);
 	if (t?.ok !== !0) throw Error("Table operation failed");
@@ -67017,7 +67017,7 @@ function sP(e, t, n) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/pwh-text-edit.mjs
+//#region ../pwh-build/rhwp-studio/src/pwh-text-edit.mjs
 var cP = (e) => typeof e == "string" ? JSON.parse(e) : e, lP = (e) => Array.from(e), uP = [
 	"documentEpoch",
 	"changeSeq",
@@ -67208,7 +67208,7 @@ function wP(e, t) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/pwh-nested-table-paste.mjs
+//#region ../pwh-build/rhwp-studio/src/pwh-nested-table-paste.mjs
 var TP = (e) => typeof e == "string" ? JSON.parse(e) : e, EP = (e) => {
 	let t = TP(e);
 	if (!t?.ok) throw Error("중첩 표 처리에 실패했습니다.");
@@ -67335,7 +67335,7 @@ function FP(e, t, n, r) {
 	return NP(e, t, n, "html", r);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/pwh-table-clipboard.mjs
+//#region ../pwh-build/rhwp-studio/src/pwh-table-clipboard.mjs
 var IP = (e) => String(e ?? "").replace(/[&<>"']/g, (e) => ({
 	"&": "&amp;",
 	"<": "&lt;",
@@ -67796,8 +67796,93 @@ function GP({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/pwh-table-paste-dialog.ts
-function KP(e = {}) {
+//#region ../pwh-build/rhwp-studio/src/pwh-agent-reveal.mjs
+function KP({ wasm: e, getCanvasView: t, document: n, window: r }) {
+	let i = 0, a = null, o = null, s = () => {
+		i++, o && r.clearTimeout(o), o = null, a?.remove(), a = null;
+	}, c = n.getElementById("scroll-container");
+	for (let e of [
+		"pointerdown",
+		"wheel",
+		"touchstart",
+		"keydown"
+	]) c?.addEventListener(e, s, { passive: !0 });
+	function l(l) {
+		s();
+		let u = i, d = n.getElementById("scroll-content"), f = t?.(), p = f?.getVirtualScroll?.(), m = f?.getViewportManager?.();
+		if (!c || !d || !p || !m || !Array.isArray(l) || !l.length) return;
+		let h = l.slice(0, 6), g = 0;
+		function _() {
+			if (u !== i || g >= h.length) return;
+			let t = h[g++], s;
+			try {
+				s = t.cellPath?.length ? e.getCursorRectByPath(t.sectionIndex, t.parentParaIndex, JSON.stringify(t.cellPath), t.charOffset) : e.getCursorRect(t.sectionIndex, t.paragraphIndex, t.charOffset);
+			} catch {
+				_();
+				return;
+			}
+			if (!s || s.cellOverflowed || !Number.isInteger(s.pageIndex) || ![
+				s.x,
+				s.y,
+				s.height
+			].every(Number.isFinite)) {
+				_();
+				return;
+			}
+			let l = m.getZoom(), f = p.getPageLeftResolved(s.pageIndex, d.clientWidth) + s.x * l, v = p.getPageOffset(s.pageIndex) + s.y * l;
+			if (![
+				l,
+				f,
+				v
+			].every(Number.isFinite) || l <= 0) {
+				_();
+				return;
+			}
+			a?.remove(), a = n.createElement("div"), a.className = "pwh-agent-change-marker", a.setAttribute("aria-hidden", "true"), Object.assign(a.style, {
+				position: "absolute",
+				left: `${Math.max(0, f - 7)}px`,
+				top: `${Math.max(0, v - 3)}px`,
+				width: "14px",
+				height: `${Math.max(20, s.height * l + 6)}px`,
+				borderRadius: "7px",
+				border: "2px solid #327f9c",
+				background: "rgba(75,159,187,.24)",
+				boxShadow: "0 0 0 5px rgba(75,159,187,.12)",
+				pointerEvents: "none",
+				zIndex: "90"
+			}), d.append(a), c.scrollTo({
+				top: Math.max(0, v - c.clientHeight * .38),
+				behavior: r.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
+			}), r.matchMedia?.("(prefers-reduced-motion: reduce)").matches || a.animate?.([
+				{
+					opacity: .25,
+					transform: "scale(1.45)"
+				},
+				{
+					opacity: 1,
+					transform: "scale(1)"
+				},
+				{
+					opacity: .35,
+					transform: "scale(1.15)"
+				}
+			], {
+				duration: 1150,
+				iterations: 1
+			}), o = r.setTimeout(() => {
+				a?.remove(), a = null, _();
+			}, 1400);
+		}
+		_();
+	}
+	return {
+		show: l,
+		clear: s
+	};
+}
+//#endregion
+//#region ../pwh-build/rhwp-studio/src/pwh-table-paste-dialog.ts
+function qP(e = {}) {
 	return new Promise((t) => {
 		class n extends z {
 			choice = null;
@@ -67829,12 +67914,12 @@ function KP(e = {}) {
 	});
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/collaboration-selection.ts
-var qP = 6e3, JP = 24, YP = 256, XP = 256, ZP = 96;
-function QP(e, t = 0) {
-	return e == null ? null : typeof e == "string" ? e.slice(0, qP) : typeof e == "number" ? Number.isFinite(e) ? e : null : typeof e == "boolean" ? e : t > 7 || typeof e != "object" || ArrayBuffer.isView(e) ? null : Array.isArray(e) ? e.slice(0, ZP).map((e) => QP(e, t + 1)) : Object.fromEntries(Object.entries(e).slice(0, 80).filter(([, e]) => typeof e != "function").map(([e, n]) => [e, QP(n, t + 1)]));
+//#region ../pwh-build/rhwp-studio/src/collaboration-selection.ts
+var JP = 6e3, YP = 24, XP = 256, ZP = 256, QP = 96;
+function $P(e, t = 0) {
+	return e == null ? null : typeof e == "string" ? e.slice(0, JP) : typeof e == "number" ? Number.isFinite(e) ? e : null : typeof e == "boolean" ? e : t > 7 || typeof e != "object" || ArrayBuffer.isView(e) ? null : Array.isArray(e) ? e.slice(0, QP).map((e) => $P(e, t + 1)) : Object.fromEntries(Object.entries(e).slice(0, 80).filter(([, e]) => typeof e != "function").map(([e, n]) => [e, $P(n, t + 1)]));
 }
-function $P(e, t, n) {
+function eF(e, t, n) {
 	let r = (e?.cellPath || []).map((e) => ({
 		controlIndex: e.controlIndex ?? e.controlIdx,
 		cellIndex: e.cellIndex ?? e.cellIdx,
@@ -67842,20 +67927,20 @@ function $P(e, t, n) {
 	}));
 	return r.length && (t !== void 0 && (r[r.length - 1].cellParaIndex = t), n !== void 0 && (r[r.length - 1].cellIndex = n)), r;
 }
-function eF(e) {
-	return $P(e).at(-1)?.cellParaIndex ?? e.cellParaIndex ?? e.paragraphIndex;
+function tF(e) {
+	return eF(e).at(-1)?.cellParaIndex ?? e.cellParaIndex ?? e.paragraphIndex;
 }
-function tF(e, t) {
+function nF(e, t) {
 	if (!e || !t || e.sectionIndex !== t.sectionIndex) return !1;
 	if (e.parentParaIndex === void 0 || t.parentParaIndex === void 0) return e.parentParaIndex === void 0 && t.parentParaIndex === void 0;
 	if (e.parentParaIndex !== t.parentParaIndex) return !1;
-	let n = $P(e), r = $P(t);
+	let n = eF(e), r = eF(t);
 	return n.length || r.length ? JSON.stringify(n.map(({ controlIndex: e, cellIndex: t }) => [e, t])) === JSON.stringify(r.map(({ controlIndex: e, cellIndex: t }) => [e, t])) : e.controlIndex === t.controlIndex && e.cellIndex === t.cellIndex;
 }
-function nF(e) {
+function rF(e) {
 	let t = window;
 	function n(t = {}) {
-		let n = e.getInputHandler(), r = [], i = qP, a = (e, t, n, ...i) => {
+		let n = e.getInputHandler(), r = [], i = JP, a = (e, t, n, ...i) => {
 			if (typeof t?.[n] != "function") return r.push(`${e}: unavailable`), null;
 			try {
 				return t[n](...i);
@@ -67887,7 +67972,7 @@ function nF(e) {
 		let c = a("text selection", n, "getSelection"), l = a("cell selection mode", n, "isInCellSelectionMode") === !0, u = a("table object selection", n, "isInTableObjectSelection") === !0, d = a("picture object selection", n, "isInPictureObjectSelection") === !0, f = s.parentParaIndex !== void 0, p = !l && !u && !d && a("text submode coverage", n, "canEditHyperlink") === !0, m = d ? "object" : u ? "table_object" : l ? "cell_block" : p ? f ? s.isTextBox ? "textbox_text" : "cell_text" : "body_text" : "unsupported_submode";
 		m === "unsupported_submode" && r.push("Header/footer/footnote coordinates are not exposed by this bridge.");
 		function h(t, n, r, s) {
-			let c = t.parentParaIndex !== void 0, l = $P(t, n), u = c ? l.length ? a("cell paragraph length", e.wasm, "getCellParagraphLengthByPath", t.sectionIndex, t.parentParaIndex, JSON.stringify(l)) : a("cell paragraph length", e.wasm, "getCellParagraphLength", t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, n) : a("paragraph length", e.wasm, "getParagraphLength", t.sectionIndex, n);
+			let c = t.parentParaIndex !== void 0, l = eF(t, n), u = c ? l.length ? a("cell paragraph length", e.wasm, "getCellParagraphLengthByPath", t.sectionIndex, t.parentParaIndex, JSON.stringify(l)) : a("cell paragraph length", e.wasm, "getCellParagraphLength", t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, n) : a("paragraph length", e.wasm, "getParagraphLength", t.sectionIndex, n);
 			if (!Number.isInteger(u) || u < 0) return {
 				text: null,
 				length: null,
@@ -67905,9 +67990,9 @@ function nF(e) {
 			truncated: !1,
 			known: !1
 		}, _ = [];
-		if (p && c?.start && c?.end && tF(c.start, c.end)) {
-			let { start: t, end: n } = c, o = f ? eF(t) : t.paragraphIndex, s = f ? eF(n) : n.paragraphIndex, l = [], u = !1, d = !0;
-			for (let e = o; e <= Math.min(s, o + JP - 1); e++) {
+		if (p && c?.start && c?.end && nF(c.start, c.end)) {
+			let { start: t, end: n } = c, o = f ? tF(t) : t.paragraphIndex, s = f ? tF(n) : n.paragraphIndex, l = [], u = !1, d = !0;
+			for (let e = o; e <= Math.min(s, o + YP - 1); e++) {
 				let r = e === o ? t.charOffset : 0, a = e === s ? Math.max(0, n.charOffset - r) : 2 ** 53 - 1, c = h(t, e, r, a);
 				if (c.text === null ? d = !1 : l.push(c.text), u ||= c.truncated, !i && e < s) {
 					u = !0;
@@ -67917,21 +68002,21 @@ function nF(e) {
 			g = {
 				text: d ? l.join("\n") : null,
 				known: d,
-				truncated: u || s - o + 1 > JP
+				truncated: u || s - o + 1 > YP
 			};
-			let p = $P(t), m = f ? p.length > 1 ? a("selection rectangles", e.wasm, "getSelectionRectsInCellByPath", t.sectionIndex, t.parentParaIndex, JSON.stringify(p), o, t.charOffset, s, n.charOffset) : a("selection rectangles", e.wasm, "getSelectionRectsInCell", t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, o, t.charOffset, s, n.charOffset) : a("selection rectangles", e.wasm, "getSelectionRects", t.sectionIndex, t.paragraphIndex, t.charOffset, n.paragraphIndex, n.charOffset);
-			_ = Array.isArray(m) ? m.slice(0, ZP) : [], Array.isArray(m) && m.length > ZP && r.push("Selection rectangle list truncated.");
+			let p = eF(t), m = f ? p.length > 1 ? a("selection rectangles", e.wasm, "getSelectionRectsInCellByPath", t.sectionIndex, t.parentParaIndex, JSON.stringify(p), o, t.charOffset, s, n.charOffset) : a("selection rectangles", e.wasm, "getSelectionRectsInCell", t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, o, t.charOffset, s, n.charOffset) : a("selection rectangles", e.wasm, "getSelectionRects", t.sectionIndex, t.paragraphIndex, t.charOffset, n.paragraphIndex, n.charOffset);
+			_ = Array.isArray(m) ? m.slice(0, QP) : [], Array.isArray(m) && m.length > QP && r.push("Selection rectangle list truncated.");
 		} else p && !c ? g = {
 			text: "",
 			known: !0,
 			truncated: !1
-		} : c && !tF(c.start, c.end) && r.push("Selected text spans unsupported source containers.");
+		} : c && !nF(c.start, c.end) && r.push("Selected text spans unsupported source containers.");
 		let v = p ? {
 			position: {
 				...s,
 				charOffset: 0
 			},
-			...h(s, f ? eF(s) : s.paragraphIndex, 0, 2 ** 53 - 1)
+			...h(s, f ? tF(s) : s.paragraphIndex, 0, 2 ** 53 - 1)
 		} : null, y = {
 			character: a("current character properties", n, "getCharProperties"),
 			paragraph: a("current paragraph properties", n, "getParaProperties")
@@ -67942,16 +68027,16 @@ function nF(e) {
 			cellPath: s.cellPath
 		} : null, x = null;
 		if (b) {
-			let t = $P(b), i = t.length > 1, o = l ? a("selected cell range", n, "getSelectedCellRange") : null, s = l && a("excluded cells", n, "hasExcludedCellSelection") === !0, c = i ? a("table dimensions", e.wasm, "getTableDimensionsByPath", b.sec, b.ppi, JSON.stringify(t)) : a("table dimensions", e.wasm, "getTableDimensions", b.sec, b.ppi, b.ci), u = i ? a("cell rectangles", e.wasm, "getTableCellBboxesByPath", b.sec, b.ppi, JSON.stringify(t)) : a("cell rectangles", e.wasm, "getTableCellBboxes", b.sec, b.ppi, b.ci), d = [], f = 0;
+			let t = eF(b), i = t.length > 1, o = l ? a("selected cell range", n, "getSelectedCellRange") : null, s = l && a("excluded cells", n, "hasExcludedCellSelection") === !0, c = i ? a("table dimensions", e.wasm, "getTableDimensionsByPath", b.sec, b.ppi, JSON.stringify(t)) : a("table dimensions", e.wasm, "getTableDimensions", b.sec, b.ppi, b.ci), u = i ? a("cell rectangles", e.wasm, "getTableCellBboxesByPath", b.sec, b.ppi, JSON.stringify(t)) : a("cell rectangles", e.wasm, "getTableCellBboxes", b.sec, b.ppi, b.ci), d = [], f = 0;
 			if (s) r.push("Nonrectangular cell exclusions are not public; selectedCells is unknown.");
-			else if (o && Number.isInteger(c?.cellCount)) for (let n = 0; n < Math.min(c.cellCount, XP); n++) {
+			else if (o && Number.isInteger(c?.cellCount)) for (let n = 0; n < Math.min(c.cellCount, ZP); n++) {
 				f++;
 				let r = {
 					...b,
 					cellPath: t
-				}, s = i ? a("cell information", e.wasm, "getCellInfoByPath", b.sec, b.ppi, JSON.stringify($P(r, 0, n))) : a("cell information", e.wasm, "getCellInfo", b.sec, b.ppi, b.ci, n);
+				}, s = i ? a("cell information", e.wasm, "getCellInfoByPath", b.sec, b.ppi, JSON.stringify(eF(r, 0, n))) : a("cell information", e.wasm, "getCellInfo", b.sec, b.ppi, b.ci, n);
 				if (s && !(s.row > o.endRow || s.col > o.endCol || s.row + s.rowSpan <= o.startRow || s.col + s.colSpan <= o.startCol)) {
-					if (d.length >= YP) break;
+					if (d.length >= XP) break;
 					d.push({
 						cellIndex: n,
 						...s,
@@ -67959,7 +68044,7 @@ function nF(e) {
 							sec: b.sec,
 							ppi: b.ppi,
 							ci: b.ci,
-							...t.length ? { cellPath: $P(r, 0, n) } : {}
+							...t.length ? { cellPath: eF(r, 0, n) } : {}
 						}
 					});
 				}
@@ -67972,8 +68057,8 @@ function nF(e) {
 				selectedCellsComplete: !s && (!o || f >= (c?.cellCount ?? Infinity)),
 				scannedCellCount: f,
 				properties: i ? null : a("table properties", e.wasm, "getTableProperties", b.sec, b.ppi, b.ci),
-				rectangles: Array.isArray(u) ? u.slice(0, ZP) : [],
-				rectanglesTruncated: Array.isArray(u) && u.length > ZP
+				rectangles: Array.isArray(u) ? u.slice(0, QP) : [],
+				rectanglesTruncated: Array.isArray(u) && u.length > QP
 			};
 		}
 		let S = d ? a("selected objects", n, "getSelectedPictureRefs") : [], C = d ? a("selected object", n, "getSelectedPictureRef") : null, w = (Array.isArray(S) && S.length ? S : C ? [C] : []).slice(0, 16).map((t) => {
@@ -68012,7 +68097,7 @@ function nF(e) {
 				} : null
 			};
 		}), T = e.getDocumentAgent?.(), E = t.fresh === !1 && typeof T?.getPresentationDocumentState == "function" ? "getPresentationDocumentState" : "getDocumentState";
-		return QP({
+		return $P({
 			schemaVersion: 1,
 			ready: !0,
 			kind: m,
@@ -68027,11 +68112,11 @@ function nF(e) {
 			selectionRects: _,
 			coordinateSystem: "Source indices are zero-based; rectangles use unzoomed page CSS pixels.",
 			limits: {
-				maxTextCodePoints: qP,
-				maxParagraphs: JP,
-				maxCells: YP,
-				maxScannedCells: XP,
-				maxRectangles: ZP
+				maxTextCodePoints: JP,
+				maxParagraphs: YP,
+				maxCells: XP,
+				maxScannedCells: ZP,
+				maxRectangles: QP
 			},
 			unknown: [...new Set(r)].slice(0, 24)
 		});
@@ -68052,7 +68137,7 @@ function nF(e) {
 		try {
 			o = (e.wasm.getPageControlLayout(n)?.controls || []).filter((e) => r >= e.x && i >= e.y && r <= e.x + e.w && i <= e.y + e.h).slice(0, 16);
 		} catch {}
-		return QP({
+		return $P({
 			schemaVersion: 1,
 			ready: !0,
 			pageIndex: n,
@@ -68071,9 +68156,14 @@ function nF(e) {
 	return t.rhwpStudio ||= {}, t.rhwpStudio.collaboration = i, i;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/pwh-inline-adapter.ts
-function rF(e) {
-	let t = nF(e), n = /* @__PURE__ */ new Map(), r = /* @__PURE__ */ new Map(), i = (n = !0) => {
+//#region ../pwh-build/rhwp-studio/src/pwh-inline-adapter.ts
+function iF(e) {
+	let t = rF(e), n = KP({
+		wasm: e.wasm,
+		getCanvasView: () => e.getCanvasView(),
+		document,
+		window
+	}), r = /* @__PURE__ */ new Map(), i = /* @__PURE__ */ new Map(), a = (n = !0) => {
 		let r = t.getSelectionContext({ fresh: n });
 		return {
 			...r,
@@ -68084,36 +68174,36 @@ function rF(e) {
 				...e.wasm.getPageDef(n)
 			})) : []
 		};
-	}, a = () => {
+	}, o = () => {
 		let t = e.getInputHandler();
 		return {
 			ready: !!t && e.wasm.pageCount > 0,
 			requestScope: t?.isInPictureObjectSelection() ? "object" : t?.getSelection() || t?.isInCellSelectionMode() ? "selection" : "document"
 		};
-	}, o = (e) => !!e?.ready, s = async () => {
-		let t = structuredClone(i());
-		if (o(t)) {
+	}, s = (e) => !!e?.ready, c = async () => {
+		let t = structuredClone(a());
+		if (s(t)) {
 			try {
 				t.target = t.kind === "cell_block" ? await wN(e.wasm, t) : await LN(e.wasm, t);
 			} catch {
 				t.target = null;
 			}
-			i().documentState.documentEpoch === t.documentState.documentEpoch && window.dispatchEvent(new CustomEvent("pwh-ai-request", { detail: t }));
+			a().documentState.documentEpoch === t.documentState.documentEpoch && window.dispatchEvent(new CustomEvent("pwh-ai-request", { detail: t }));
 		}
 	};
 	e.registry.register({
 		id: "pwh:ai-rewrite-request",
 		label: "AI 수정 요청",
 		opensDialog: !0,
-		canExecute: () => o(a()),
-		execute: s
+		canExecute: () => s(o()),
+		execute: c
 	});
-	let c = !1;
+	let l = !1;
 	e.ready.then(() => GP({
 		wasm: e.wasm,
-		read: () => i(),
+		read: () => a(),
 		getInput: () => e.getInputHandler(),
-		chooseTablePaste: KP,
+		chooseTablePaste: qP,
 		enableNestedClipping: () => {
 			F.getViewSettings().clipView && document.querySelector("[data-cmd=\"view:toggle-clip\"]")?.click();
 		},
@@ -68129,52 +68219,52 @@ function rF(e) {
 			return e();
 		},
 		mutate: async (t, n) => {
-			if (c) throw Error("Another edit is being applied");
-			c = !0;
+			if (l) throw Error("Another edit is being applied");
+			l = !0;
 			try {
-				if (!ZN(i(), t)) throw Error("붙여넣는 동안 문서 또는 커서가 바뀌었습니다. 다시 붙여넣으세요.");
-				let r = e.getInputHandler(), a = r.getCursorPosition();
+				if (!ZN(a(), t)) throw Error("붙여넣는 동안 문서 또는 커서가 바뀌었습니다. 다시 붙여넣으세요.");
+				let r = e.getInputHandler(), i = r.getCursorPosition();
 				await r.executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-table-clipboard",
-					operation: (e) => (n(e), a)
+					operation: (e) => (n(e), i)
 				}, () => e.getCanvasView().refreshDocumentAgentMutation());
 			} finally {
-				c = !1;
+				l = !1;
 			}
 		}
 	}));
-	let l = !1, u = 0;
+	let u = !1, d = 0;
 	window.addEventListener("pointerdown", () => {
-		l = !0;
+		u = !0;
 	}, { capture: !0 });
 	for (let e of [
 		"pointerup",
 		"pointercancel",
 		"blur"
 	]) window.addEventListener(e, () => {
-		l = !1, u = performance.now();
+		u = !1, d = performance.now();
 	}, { capture: !0 });
 	for (let e of [
 		"keydown",
 		"beforeinput",
 		"wheel"
 	]) window.addEventListener(e, () => {
-		u = performance.now();
+		d = performance.now();
 	}, {
 		capture: !0,
 		passive: !0
 	});
-	let d = document.getElementById("editor-area");
-	if (d) {
-		d.style.position = "relative";
+	let f = document.getElementById("editor-area");
+	if (f) {
+		f.style.position = "relative";
 		let e = document.createElement("style");
 		e.textContent = "#pwh-ai-floating{position:absolute;left:26px;top:44px;z-index:35;display:flex;align-items:center;gap:7px;padding:10px 12px;border:1px solid #c4d4eb;border-radius:24px;background:var(--ui-surface,#fff);color:var(--ui-text,#222);box-shadow:0 3px 12px #0002;font:600 12px system-ui;cursor:pointer;white-space:nowrap}#pwh-ai-floating:disabled{opacity:.55;cursor:default}#pwh-ai-floating:focus-visible{outline:3px solid #4c8ee8;outline-offset:3px}#pwh-ai-floating:not(:disabled):hover{background:var(--ui-surface-muted,#edf3fc)}@media(max-width:980px){#pwh-ai-floating{left:24px;padding:10px;border-radius:50%}#pwh-ai-floating .pwh-ai-label{display:none}}", document.head.appendChild(e);
 		let t = document.createElement("button");
-		t.id = "pwh-ai-floating", t.type = "button", t.disabled = !0, t.setAttribute("aria-label", "AI 수정 요청"), t.title = "수정할 글을 드래그한 뒤 AI 수정을 요청하세요", t.innerHTML = "<span aria-hidden=\"true\">✦</span><span class=\"pwh-ai-label\">AI 수정 요청</span>", t.addEventListener("pointerdown", (e) => e.preventDefault()), t.addEventListener("mousedown", (e) => e.preventDefault()), t.addEventListener("click", s), d.appendChild(t);
+		t.id = "pwh-ai-floating", t.type = "button", t.disabled = !0, t.setAttribute("aria-label", "AI 수정 요청"), t.title = "수정할 글을 드래그한 뒤 AI 수정을 요청하세요", t.innerHTML = "<span aria-hidden=\"true\">✦</span><span class=\"pwh-ai-label\">AI 수정 요청</span>", t.addEventListener("pointerdown", (e) => e.preventDefault()), t.addEventListener("mousedown", (e) => e.preventDefault()), t.addEventListener("click", c), f.appendChild(t);
 		let n = () => {
-			let e = a();
-			t.disabled = c || !o(e), t.title = t.disabled ? "편집기 준비 중입니다" : e.requestScope === "document" ? "빈 문서 작성 또는 문서 전체 수정을 요청합니다" : "선택한 글 또는 객체에 AI 수정을 요청합니다";
+			let e = o();
+			t.disabled = l || !s(e), t.title = t.disabled ? "편집기 준비 중입니다" : e.requestScope === "document" ? "빈 문서 작성 또는 문서 전체 수정을 요청합니다" : "선택한 글 또는 객체에 AI 수정을 요청합니다";
 		};
 		document.addEventListener("pointerup", () => setTimeout(n, 0)), document.addEventListener("keyup", n);
 		let r = setInterval(() => {
@@ -68191,38 +68281,38 @@ function rF(e) {
 		"pointerdown",
 		"mousedown"
 	]) window.addEventListener(e, (e) => {
-		c && (e.preventDefault(), e.stopImmediatePropagation());
+		l && (e.preventDefault(), e.stopImmediatePropagation());
 	}, { capture: !0 });
 	window.pwhEditor = {
 		ready: () => e.ready,
 		async load(t, n) {
 			await e.ready, await e.load(t, n);
 		},
-		async openClean(t, r, a, o) {
-			let s = i().documentState;
-			if (c || s.dirty || JSON.stringify(s) !== JSON.stringify(a)) throw Error("Current document changed; opening cancelled");
-			let l = e.wasm.exportHwpxWithReport();
-			if (l.contentLoss.count) throw Error("Cannot preserve current document safely");
+		async openClean(t, n, i, o) {
+			let s = a().documentState;
+			if (l || s.dirty || JSON.stringify(s) !== JSON.stringify(i)) throw Error("Current document changed; opening cancelled");
+			let c = e.wasm.exportHwpxWithReport();
+			if (c.contentLoss.count) throw Error("Cannot preserve current document safely");
 			let u = o || "이전 문서.hwpx";
-			c = !0;
+			l = !0;
 			try {
-				await e.load(t, r), n.clear();
+				await e.load(t, n), r.clear();
 			} catch (t) {
 				try {
-					await e.load(l.bytes, u);
+					await e.load(c.bytes, u);
 				} catch {
 					throw Error("Document loading failed and the previous view could not be restored; reopen its saved file");
 				}
 				throw t;
 			} finally {
-				c = !1;
+				l = !1;
 			}
 			return { ok: !0 };
 		},
-		context: () => i(!1),
-		interacting: () => l || performance.now() - u < 1200,
+		context: () => a(!1),
+		interacting: () => u || performance.now() - d < 1200,
 		capture: async () => {
-			let t = structuredClone(i());
+			let t = structuredClone(a());
 			return t.target = await LN(e.wasm, t), t;
 		},
 		export: () => e.wasm.exportHwpxWithReport(),
@@ -68230,13 +68320,13 @@ function rF(e) {
 		recovered: () => e.recovered(),
 		legacyDrafts: () => e.legacyDrafts(),
 		async replacePicture(t, n) {
-			let r = i(), a = t.expected.target ? await RN(e.wasm, t.expected, r) : r;
-			if (!t.expected.target && JSON.stringify(a) !== JSON.stringify(t.expected)) throw Error("문서·선택 상태가 바뀌었습니다. 다시 요청하세요.");
-			if (c) throw Error("이전 수정 적용 중입니다.");
-			c = !0;
-			let o = e.getInputHandler(), s = o.getCursorPosition(), l;
+			let r = a(), i = t.expected.target ? await RN(e.wasm, t.expected, r) : r;
+			if (!t.expected.target && JSON.stringify(i) !== JSON.stringify(t.expected)) throw Error("문서·선택 상태가 바뀌었습니다. 다시 요청하세요.");
+			if (l) throw Error("이전 수정 적용 중입니다.");
+			l = !0;
+			let o = e.getInputHandler(), s = o.getCursorPosition(), c;
 			try {
-				let { ref: r, pathJson: c } = zN(a), u = e.wasm.getControlImageData(r.sec, r.ppi, r.ci, c), d = await createImageBitmap(new Blob([u])), f = await createImageBitmap(new Blob([n], { type: t.image.mediaType })), p = n, m = t.image, h = !1;
+				let { ref: r, pathJson: l } = zN(i), u = e.wasm.getControlImageData(r.sec, r.ppi, r.ci, l), d = await createImageBitmap(new Blob([u])), f = await createImageBitmap(new Blob([n], { type: t.image.mediaType })), p = n, m = t.image, h = !1;
 				try {
 					if (d.width * d.height > 16777216) throw Error("기존 이미지가 비율 보존 처리 한도를 초과합니다.");
 					if (d.width * f.height !== d.height * f.width) {
@@ -68259,37 +68349,37 @@ function rF(e) {
 				} finally {
 					d.close(), f.close();
 				}
-				if (t.expected.target) await RN(e.wasm, t.expected, i());
-				else if (JSON.stringify(i()) !== JSON.stringify(t.expected)) throw Error("이미지 준비 중 문서·선택이 바뀌었습니다.");
+				if (t.expected.target) await RN(e.wasm, t.expected, a());
+				else if (JSON.stringify(a()) !== JSON.stringify(t.expected)) throw Error("이미지 준비 중 문서·선택이 바뀌었습니다.");
 				await o.executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-picture-replace",
-					operation: (e) => (l = {
-						...BN(e, a, p, m),
+					operation: (e) => (c = {
+						...BN(e, i, p, m),
 						fit: "contain",
 						transparentPadding: h
 					}, s)
 				}, () => e.getCanvasView().refreshDocumentAgentMutation());
 			} finally {
-				c = !1;
+				l = !1;
 			}
 			return {
 				ok: !0,
-				context: i(),
-				replacement: l,
+				context: a(),
+				replacement: c,
 				undoSteps: 1
 			};
 		},
 		async tables(t) {
-			let r = i();
-			if (r.documentState.documentEpoch !== t.expected.documentState?.documentEpoch) throw Error("Table request expired");
-			let a = await kN(e.wasm, r), o = crypto.randomUUID();
-			return n.set(o, a), n.size > 8 && n.delete(n.keys().next().value), {
+			let n = a();
+			if (n.documentState.documentEpoch !== t.expected.documentState?.documentEpoch) throw Error("Table request expired");
+			let i = await kN(e.wasm, n), o = crypto.randomUUID();
+			return r.set(o, i), r.size > 8 && r.delete(r.keys().next().value), {
 				ok: !0,
 				tablePlan: {
 					planId: o,
-					unsupportedTables: a.unsupported,
-					tables: a.refs.map((e, t) => ({
+					unsupportedTables: i.unsupported,
+					tables: i.refs.map((e, t) => ({
 						index: t,
 						source: {
 							sec: e.sec,
@@ -68310,75 +68400,95 @@ function rF(e) {
 			};
 		},
 		async textSearch(t) {
-			let n = i();
+			let n = a();
 			if (!n.ready || n.documentState.documentEpoch !== t.expected.documentState?.documentEpoch) throw Error("텍스트 검색 요청이 만료되었습니다.");
-			let a = bP(e.wasm, n, t.query, {
+			let r = bP(e.wasm, n, t.query, {
 				cursor: t.cursor,
 				limit: t.limit
 			}), o = crypto.randomUUID();
-			return r.set(o, a), r.size > 24 && r.delete(r.keys().next().value), {
+			return i.set(o, r), i.size > 24 && i.delete(i.keys().next().value), {
 				ok: !0,
 				textSearch: {
 					searchId: o,
-					...a.result,
+					...r.result,
 					documentState: n.documentState
 				}
 			};
 		},
 		async textEdit(t) {
-			if (c) throw Error("이전 수정 적용 중입니다.");
-			c = !0;
-			let n = e.getInputHandler(), a = n.getCursorPosition(), o;
+			if (l) throw Error("이전 수정 적용 중입니다.");
+			l = !0;
+			let r = e.getInputHandler(), o = r.getCursorPosition(), s;
 			try {
-				let s = SP(e.wasm, r, t.edits, i());
-				await n.executeDocumentAgentOperation({
+				let c = SP(e.wasm, i, t.edits, a());
+				await r.executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-text-edit",
-					operation: (e) => (o = CP(e, s, Vu), wP(s, a))
-				}, () => e.getCanvasView().refreshDocumentAgentMutation()), r.clear();
+					operation: (e) => (s = CP(e, c, Vu), wP(c, o))
+				}, () => e.getCanvasView().refreshDocumentAgentMutation()), i.clear();
+				let l = c.groups.flatMap((e) => e.parts.map((e) => {
+					let t = e.source, n = t.cellPath?.[0];
+					return wP(c, {
+						sectionIndex: t.section,
+						paragraphIndex: t.paragraph,
+						charOffset: e.start,
+						...n ? {
+							parentParaIndex: t.paragraph,
+							controlIndex: n.controlIndex,
+							cellIndex: n.cellIndex,
+							cellParaIndex: n.cellParaIndex,
+							cellPath: t.cellPath
+						} : {}
+					});
+				}));
+				try {
+					n.show(l);
+				} catch (e) {
+					console.warn("[pwh agent reveal]", e);
+				}
 			} finally {
-				c = !1;
+				l = !1;
 			}
 			return {
 				ok: !0,
-				changes: o,
-				context: i(),
+				changes: s,
+				context: a(),
 				undoSteps: 1
 			};
 		},
 		async tableFill(t) {
-			if (c) throw Error("Another edit is being applied");
-			c = !0;
-			let r = e.getInputHandler(), a = r.getCursorPosition(), o;
+			if (l) throw Error("Another edit is being applied");
+			l = !0;
+			let n = e.getInputHandler(), i = n.getCursorPosition(), o;
 			try {
-				let s = i(), c, l;
+				let s = a(), c, l;
 				if (t.expected.target?.kind === "table_cells") c = await TN(e.wasm, t.expected.target, s), l = t.expected.target.cells;
 				else {
-					let r = n.get(t.planId);
-					if (!r) throw Error("Inspect the table again");
-					[c] = await PN(e.wasm, r, s, "table", t.tableIndex);
+					let n = r.get(t.planId);
+					if (!n) throw Error("Inspect the table again");
+					[c] = await PN(e.wasm, n, s, "table", t.tableIndex);
 				}
-				rP(e.wasm, c, t.edits, l), await r.executeDocumentAgentOperation({
+				rP(e.wasm, c, t.edits, l), await n.executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-table-fill",
-					operation: (e) => (o = iP(e, c, t.edits, l), a)
+					operation: (e) => (o = iP(e, c, t.edits, l), i)
 				}, () => e.getCanvasView().refreshDocumentAgentMutation());
 			} finally {
-				c = !1;
+				l = !1;
 			}
 			return {
 				ok: !0,
 				changes: o,
 				undoSteps: 1,
-				context: i()
+				context: a()
 			};
 		},
 		async tableInsert(t) {
-			if (c) throw Error("Another edit is being applied");
-			c = !0;
+			if (l) throw Error("Another edit is being applied");
+			l = !0;
 			let n;
 			try {
-				let r = i();
+				let r = a();
 				if (!ZN(r, t.expected) || r.kind !== "body_text" || r.selection) throw Error("Insertion cursor or document changed");
 				await e.getInputHandler().executeDocumentAgentOperation({
 					kind: "snapshot",
@@ -68386,68 +68496,68 @@ function rF(e) {
 					operation: (e) => (n = sP(e, r.cursor, t.table), r.cursor)
 				}, () => e.getCanvasView().refreshDocumentAgentMutation());
 			} finally {
-				c = !1;
+				l = !1;
 			}
 			return {
 				ok: !0,
 				changes: n,
 				undoSteps: 1,
-				context: i()
+				context: a()
 			};
 		},
 		async tableTitle(t) {
-			if (c) throw Error("Another edit is being applied");
-			c = !0;
-			let r;
+			if (l) throw Error("Another edit is being applied");
+			l = !0;
+			let n;
 			try {
-				let a = i(), o;
-				if (t.expected.target?.kind === "table_cells") o = await TN(e.wasm, t.expected.target, a);
+				let i = a(), o;
+				if (t.expected.target?.kind === "table_cells") o = await TN(e.wasm, t.expected.target, i);
 				else {
-					let r = n.get(t.planId);
-					if (!r) throw Error("표를 다시 분석하세요.");
-					[o] = await PN(e.wasm, r, a, "table", t.tableIndex);
+					let n = r.get(t.planId);
+					if (!n) throw Error("표를 다시 분석하세요.");
+					[o] = await PN(e.wasm, n, i, "table", t.tableIndex);
 				}
 				let s = e.getInputHandler(), c = s.getCursorPosition();
 				await s.executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-table-title",
-					operation: (e) => (r = aP(e, o, t.title, t.borders), c)
+					operation: (e) => (n = aP(e, o, t.title, t.borders), c)
 				}, () => e.getCanvasView().refreshDocumentAgentMutation());
 			} finally {
-				c = !1;
+				l = !1;
 			}
 			return {
 				ok: !0,
-				changes: r,
+				changes: n,
 				undoSteps: 1,
-				context: i()
+				context: a()
 			};
 		},
 		async tableStyle(t) {
-			let r = i(), a = e.getInputHandler(), o = a.getCursorPosition(), s, l, u = [];
+			let n = a(), i = e.getInputHandler(), o = i.getCursorPosition(), s, c, u = [];
 			if (t.styles) {
 				let i;
-				if (t.expected.target?.kind === "table_cells") i = await TN(e.wasm, t.expected.target, r);
+				if (t.expected.target?.kind === "table_cells") i = await TN(e.wasm, t.expected.target, n);
 				else {
-					let a = n.get(t.planId);
+					let a = r.get(t.planId);
 					if (!a) throw Error("Inspect the table again");
-					[i] = await PN(e.wasm, a, r, "table", t.tableIndex);
+					[i] = await PN(e.wasm, a, n, "table", t.tableIndex);
 				}
-				s = [i], l = [t.styles];
+				s = [i], c = [t.styles];
 			} else {
-				let i = n.get(t.planId);
+				let i = r.get(t.planId);
 				if (!i) throw Error("Table plan expired; inspect tables again");
-				s = await PN(e.wasm, i, r, t.scope, t.tableIndex), l = s.map((e, n) => NN(e, t.theme, t.headerRowsByTable?.[t.scope === "document" ? n : t.tableIndex] ?? t.theme.headerRows));
+				s = await PN(e.wasm, i, n, t.scope, t.tableIndex), c = s.map((e, n) => NN(e, t.theme, t.headerRowsByTable?.[t.scope === "document" ? n : t.tableIndex] ?? t.theme.headerRows));
 			}
-			if (c) throw Error("Another edit is being applied");
-			c = !0;
+			if (l) throw Error("Another edit is being applied");
+			l = !0;
 			try {
-				await a.executeDocumentAgentOperation({
+				await i.executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-table-style",
 					operation: (e) => {
 						for (let t = 0; t < s.length; t++) u.push({
-							...ON(e, s[t], l[t]),
+							...ON(e, s[t], c[t]),
 							section: s[t].sec,
 							paragraph: s[t].ppi
 						});
@@ -68455,19 +68565,19 @@ function rF(e) {
 					}
 				}, () => e.getCanvasView().refreshDocumentAgentMutation());
 			} finally {
-				c = !1;
+				l = !1;
 			}
 			return {
 				ok: !0,
 				changes: u,
 				undoSteps: 1,
-				context: i()
+				context: a()
 			};
 		},
 		async layout(t) {
-			let n = i(), r = t.expected;
+			let n = a(), r = t.expected;
 			if (n.documentState.documentEpoch !== r.documentState.documentEpoch) throw Error("문서를 다시 열어 요청이 만료됐습니다.");
-			let a = t.sectionIndex === void 0 ? n.pageSettings : n.pageSettings.filter((e) => e.sectionIndex === t.sectionIndex), o = [
+			let i = t.sectionIndex === void 0 ? n.pageSettings : n.pageSettings.filter((e) => e.sectionIndex === t.sectionIndex), o = [
 				...t.patch.paper ? ["width", "height"] : [],
 				...t.patch.orientation ? ["landscape"] : [],
 				...Object.keys(t.patch.marginsMm || {}).map((e) => ({
@@ -68480,34 +68590,34 @@ function rF(e) {
 					gutter: "marginGutter"
 				})[e])
 			];
-			if (n.pageSettings.length !== r.pageSettings?.length || a.some((e) => {
+			if (n.pageSettings.length !== r.pageSettings?.length || i.some((e) => {
 				let t = r.pageSettings.find((t) => t.sectionIndex === e.sectionIndex);
 				return !t || o.some((n) => e[n] !== t[n]);
 			})) throw Error("변경할 용지·여백 설정이 이미 수정되어 충돌했습니다.");
-			if (c) throw Error("이전 수정 적용 중입니다.");
-			c = !0;
-			let s = e.getInputHandler(), l = s.getCursorPosition(), u;
+			if (l) throw Error("이전 수정 적용 중입니다.");
+			l = !0;
+			let s = e.getInputHandler(), c = s.getCursorPosition(), u;
 			try {
 				await s.executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-page-layout",
-					operation: (e) => (u = GN(e, t.patch, t.sectionIndex), l)
+					operation: (e) => (u = GN(e, t.patch, t.sectionIndex), c)
 				}, () => e.getCanvasView().refreshDocumentAgentMutation());
 			} finally {
-				c = !1;
+				l = !1;
 			}
 			return {
 				ok: !0,
-				context: i(),
+				context: a(),
 				changes: u,
 				undoSteps: 1
 			};
 		},
 		async compose(t) {
-			let n = i();
+			let n = a();
 			if (!n.blankDocument || JSON.stringify(n) !== JSON.stringify(t.expected)) throw Error("문서 상태가 바뀌었거나 빈 문서가 아닙니다. 다시 요청하세요.");
-			if (c) throw Error("이전 수정 적용 중입니다.");
-			c = !0;
+			if (l) throw Error("이전 수정 적용 중입니다.");
+			l = !0;
 			try {
 				await e.getInputHandler().executeDocumentAgentOperation({
 					kind: "snapshot",
@@ -68515,147 +68625,152 @@ function rF(e) {
 					operation: (e) => JN(e, t.paragraphs)
 				}, () => e.getCanvasView().refreshDocumentAgentMutation());
 			} finally {
-				c = !1;
+				l = !1;
 			}
 			return {
 				ok: !0,
-				context: i(),
+				context: a(),
 				undoSteps: 1
 			};
 		},
 		async rewrite(t) {
-			let n = i(), r = t.expected.target ? await RN(e.wasm, t.expected, n) : n, a = e.getInputHandler();
-			if (!r.ready || !r.selection || !r.selectedText?.known || r.selectedText.truncated || ![
+			let r = a(), i = t.expected.target ? await RN(e.wasm, t.expected, r) : r, o = e.getInputHandler();
+			if (!i.ready || !i.selection || !i.selectedText?.known || i.selectedText.truncated || ![
 				"body_text",
 				"cell_text",
 				"textbox_text"
-			].includes(r.kind)) throw Error("본문 또는 같은 셀 안의 텍스트를 선택하세요.");
-			let o = t.expected;
+			].includes(i.kind)) throw Error("본문 또는 같은 셀 안의 텍스트를 선택하세요.");
+			let s = t.expected;
 			for (let e of t.expected.target ? ["documentEpoch"] : [
 				"documentEpoch",
 				"changeSeq",
 				"documentSha256"
-			]) if (r.documentState[e] !== o.documentState[e]) throw Error("문서가 변경되어 적용하지 않았습니다. 다시 선택해 주세요.");
-			if (!t.expected.target && (JSON.stringify(r.selection) !== JSON.stringify(o.selection) || r.selectedText.text !== o.selectedText.text)) throw Error("선택 영역이 변경되어 적용하지 않았습니다.");
-			let s = t.replacement;
-			if (typeof s != "string" || s.length > 12e3 || s.includes("\r")) throw Error("다시 쓸 내용이 올바르지 않습니다.");
-			let l = s.split("\n"), u = r.selectedText.text.split("\n");
-			if (l.length !== u.length) throw Error("기존 문단 서식을 유지하려면 선택한 문단 수와 같은 수의 문단으로 작성해야 합니다.");
-			let { start: d, end: f } = r.selection, p = d.parentParaIndex != null, m = p ? d.cellPath?.at(-1)?.cellParaIndex ?? d.cellParaIndex : d.paragraphIndex, h = u.map((t, n) => {
+			]) if (i.documentState[e] !== s.documentState[e]) throw Error("문서가 변경되어 적용하지 않았습니다. 다시 선택해 주세요.");
+			if (!t.expected.target && (JSON.stringify(i.selection) !== JSON.stringify(s.selection) || i.selectedText.text !== s.selectedText.text)) throw Error("선택 영역이 변경되어 적용하지 않았습니다.");
+			let c = t.replacement;
+			if (typeof c != "string" || c.length > 12e3 || c.includes("\r")) throw Error("다시 쓸 내용이 올바르지 않습니다.");
+			let u = c.split("\n"), d = i.selectedText.text.split("\n");
+			if (u.length !== d.length) throw Error("기존 문단 서식을 유지하려면 선택한 문단 수와 같은 수의 문단으로 작성해야 합니다.");
+			let { start: f, end: p } = i.selection, m = f.parentParaIndex != null, h = m ? f.cellPath?.at(-1)?.cellParaIndex ?? f.cellParaIndex : f.paragraphIndex, g = d.map((t, n) => {
 				let r = {
-					...d,
-					paragraphIndex: m + n,
-					cellParaIndex: m + n,
-					charOffset: n === 0 ? d.charOffset : 0,
-					...d.cellPath?.length ? { cellPath: d.cellPath.map((e, t) => t === d.cellPath.length - 1 ? {
+					...f,
+					paragraphIndex: h + n,
+					cellParaIndex: h + n,
+					charOffset: n === 0 ? f.charOffset : 0,
+					...f.cellPath?.length ? { cellPath: f.cellPath.map((e, t) => t === f.cellPath.length - 1 ? {
 						...e,
-						cellParaIndex: m + n
+						cellParaIndex: h + n
 					} : e) } : {}
-				}, i = (t) => p ? e.wasm.getCellCharPropertiesAtByPath(r.sectionIndex, r.parentParaIndex, JSON.stringify(r.cellPath?.length ? r.cellPath : [{
+				}, i = (t) => m ? e.wasm.getCellCharPropertiesAtByPath(r.sectionIndex, r.parentParaIndex, JSON.stringify(r.cellPath?.length ? r.cellPath : [{
 					controlIndex: r.controlIndex,
 					cellIndex: r.cellIndex,
 					cellParaIndex: r.cellParaIndex
-				}]), t) : e.wasm.getCharPropertiesAt(r.sectionIndex, r.paragraphIndex, t), a = i(r.charOffset), o = Array.from(t).length, s = p ? e.wasm.getCellParagraphLengthByPath(r.sectionIndex, r.parentParaIndex, JSON.stringify(r.cellPath?.length ? r.cellPath : [{
+				}]), t) : e.wasm.getCharPropertiesAt(r.sectionIndex, r.paragraphIndex, t), a = i(r.charOffset), o = Array.from(t).length, s = m ? e.wasm.getCellParagraphLengthByPath(r.sectionIndex, r.parentParaIndex, JSON.stringify(r.cellPath?.length ? r.cellPath : [{
 					controlIndex: r.controlIndex,
 					cellIndex: r.cellIndex,
 					cellParaIndex: r.cellParaIndex
 				}])) : e.wasm.getParagraphLength(r.sectionIndex, r.paragraphIndex);
-				if (o !== (n === u.length - 1 ? f.charOffset : s) - r.charOffset) throw Error("선택에 비텍스트 개체나 해석할 수 없는 오프셋이 포함되어 있습니다.");
+				if (o !== (n === d.length - 1 ? p.charOffset : s) - r.charOffset) throw Error("선택에 비텍스트 개체나 해석할 수 없는 오프셋이 포함되어 있습니다.");
 				for (let e = 0; e < o; e++) if (JSON.stringify(i(r.charOffset + e)) !== JSON.stringify(a)) throw Error("선택에 서로 다른 글자 서식이 섞여 있습니다. 같은 서식의 범위를 선택해 주세요.");
 				if (/[\u0000-\u0008\ufffc]/.test(t)) throw Error("선택에 문서 개체가 포함되어 있습니다. 텍스트만 선택해 주세요.");
 				return {
 					p: r,
 					length: o,
 					format: a,
-					text: l[n]
+					text: u[n]
 				};
 			});
-			if (c) throw Error("이전 수정 적용이 끝날 때까지 기다려 주세요.");
-			c = !0;
+			if (l) throw Error("이전 수정 적용이 끝날 때까지 기다려 주세요.");
+			l = !0;
 			try {
-				await a.executeDocumentAgentOperation({
+				await o.executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-selection-rewrite",
 					operation: (e) => {
-						for (let t of [...h].reverse()) if (Vu(e, t.p, t.length, t.text), t.text) {
+						for (let t of [...g].reverse()) if (Vu(e, t.p, t.length, t.text), t.text) {
 							let n = t.p.charOffset + Array.from(t.text).length;
-							p ? e.setCharShapeIdInCellByPath(t.p.sectionIndex, t.p.parentParaIndex, JSON.stringify(t.p.cellPath?.length ? t.p.cellPath : [{
+							m ? e.setCharShapeIdInCellByPath(t.p.sectionIndex, t.p.parentParaIndex, JSON.stringify(t.p.cellPath?.length ? t.p.cellPath : [{
 								controlIndex: t.p.controlIndex,
 								cellIndex: t.p.cellIndex,
 								cellParaIndex: t.p.cellParaIndex
 							}]), t.p.charOffset, n, t.format.charShapeId) : e.setCharShapeId(t.p.sectionIndex, t.p.paragraphIndex, t.p.charOffset, n, t.format.charShapeId);
 						}
 						e.flushDeferredPagination();
-						for (let t of h) {
+						for (let t of g) {
 							let n = Array.from(t.text).length;
-							if ((p ? e.getTextInCellByPath(t.p.sectionIndex, t.p.parentParaIndex, JSON.stringify(t.p.cellPath?.length ? t.p.cellPath : [{
+							if ((m ? e.getTextInCellByPath(t.p.sectionIndex, t.p.parentParaIndex, JSON.stringify(t.p.cellPath?.length ? t.p.cellPath : [{
 								controlIndex: t.p.controlIndex,
 								cellIndex: t.p.cellIndex,
 								cellParaIndex: t.p.cellParaIndex
 							}]), t.p.charOffset, n) : e.getTextRange(t.p.sectionIndex, t.p.paragraphIndex, t.p.charOffset, n)) !== t.text) throw Error("선택 범위 수정 결과가 요청 내용과 다릅니다.");
 						}
-						let n = a.getCursorPosition();
-						if (t.expected.target && n.parentParaIndex == null && !h.some((e) => e.p.sectionIndex === n.sectionIndex && e.p.paragraphIndex === n.paragraphIndex)) return n;
-						let r = h.at(-1);
+						let n = o.getCursorPosition();
+						if (t.expected.target && n.parentParaIndex == null && !g.some((e) => e.p.sectionIndex === n.sectionIndex && e.p.paragraphIndex === n.paragraphIndex)) return n;
+						let r = g.at(-1);
 						return {
-							...f,
+							...p,
 							charOffset: r.p.charOffset + Array.from(r.text).length
 						};
 					}
 				}, () => e.getCanvasView().refreshDocumentAgentMutation());
+				try {
+					n.show(g.map((e) => e.p));
+				} catch (e) {
+					console.warn("[pwh agent reveal]", e);
+				}
 			} finally {
-				c = !1;
+				l = !1;
 			}
 			return {
 				ok: !0,
-				context: i(),
+				context: a(),
 				undoSteps: 1
 			};
 		}
 	}, window.dispatchEvent(new Event("pwh-editor-installed"));
 }
 //#endregion
-//#region pwh-build/rhwp-studio/src/main.ts
+//#region ../pwh-build/rhwp-studio/src/main.ts
 _l();
 var J = new Wa();
 Ga(J);
-var Y = new Ka(), iF = new kA(Y);
-iF.installBeforeUnload(window);
-var aF = new rj({
+var Y = new Ka(), aF = new kA(Y);
+aF.installBeforeUnload(window);
+var oF = new rj({
 	exportBytes: () => J.exportHwp(),
 	isRecoveryBlocked: () => J.requiresPasswordForSave,
-	schedule: FF(),
-	onStatus: IF
+	schedule: IF(),
+	onStatus: LF
 });
-aF.connect(Y), Ww((e, t) => {
+oF.connect(Y), Ww((e, t) => {
 	Y.emit("theme-changed", {
 		mode: t,
 		effective: e
 	}), Y.emit("command-state-changed");
 }), _T();
-var oF = Y_(document.getElementById("icon-toolbar"));
+var sF = Y_(document.getElementById("icon-toolbar"));
 rv(document.getElementById("style-bar"));
-async function sF(e) {
-	let t = iF.isDirty();
-	return e && (J.fileName = e), iF.markClean("host-save"), await aF.discardCurrentDraft("host-save"), {
+async function cF(e) {
+	let t = aF.isDirty();
+	return e && (J.fileName = e), aF.markClean("host-save"), await oF.discardCurrentDraft("host-save"), {
 		ok: !0,
 		wasDirty: t
 	};
 }
 window.rhwpStudio = {
-	notifySaved: (e) => sF(e),
+	notifySaved: (e) => cF(e),
 	fonts: {
 		setProvider: mn,
 		getState: vn
 	}
 };
-var X = null, Z = null, cF = null, lF = null, uF = null, dF = null, fF = "normal", pF = null, mF = null, hF = null, gF = !1, _F = { disableExternalWebFonts: !1 };
-async function vF() {}
-var yF = OA("?chrome=embed"), bF = yF.mode;
-yF.unsupportedReason && console.warn(`[main] 지원하지 않는 chrome 값입니다: ${yF.requested}; full 프로파일을 사용합니다.`);
-var xF = new vv();
-function SF() {
-	let e = J.pageCount > 0, t = Z?.canEditCurrentFormField() ?? !1, n = fF === "form";
+var X = null, Z = null, lF = null, uF = null, dF = null, fF = null, pF = "normal", mF = null, hF = null, gF = null, _F = !1, vF = { disableExternalWebFonts: !1 };
+async function yF() {}
+var bF = OA("?chrome=embed"), xF = bF.mode;
+bF.unsupportedReason && console.warn(`[main] 지원하지 않는 chrome 값입니다: ${bF.requested}; full 프로파일을 사용합니다.`);
+var SF = new vv();
+function CF() {
+	let e = J.pageCount > 0, t = Z?.canEditCurrentFormField() ?? !1, n = pF === "form";
 	return {
 		hasDocument: e,
 		hasSelection: Z?.hasSelection() ?? !1,
@@ -68668,7 +68783,7 @@ function SF() {
 		inPictureObjectSelection: Z?.isInPictureObjectSelection() ?? !1,
 		inField: Z?.isInField() ?? !1,
 		isEditable: !n || t,
-		editMode: fF,
+		editMode: pF,
 		isFormMode: n,
 		canEditFormField: t,
 		canUndo: Z?.canUndo() ?? !1,
@@ -68676,53 +68791,53 @@ function SF() {
 		zoom: X?.getViewportManager().getZoom() ?? 1,
 		showControlCodes: J.getShowControlCodes(),
 		showParagraphMarks: J.getShowParagraphMarks(),
-		isDirty: iF.isDirty(),
+		isDirty: aF.isDirty(),
 		sourceFormat: e ? J.getSourceFormat() : void 0
 	};
 }
-function CF(e) {
-	fF = e, Z?.setEditMode(e), document.documentElement.dataset.editMode = e, document.querySelectorAll("[data-cmd=\"view:form-mode\"]").forEach((t) => {
+function wF(e) {
+	pF = e, Z?.setEditMode(e), document.documentElement.dataset.editMode = e, document.querySelectorAll("[data-cmd=\"view:form-mode\"]").forEach((t) => {
 		t.classList.toggle("active", e === "form");
-	}), kF().textContent = I(e === "form" ? "ui.sbMessage.formMode" : "ui.sbMessage.editMode"), Y.emit("edit-mode-changed", e), Y.emit("command-state-changed");
+	}), AF().textContent = I(e === "form" ? "ui.sbMessage.formMode" : "ui.sbMessage.editMode"), Y.emit("edit-mode-changed", e), Y.emit("command-state-changed");
 }
-var wF = {
+var TF = {
 	eventBus: Y,
 	wasm: J,
-	documentState: iF,
-	getContext: SF,
+	documentState: aF,
+	getContext: CF,
 	getInputHandler: () => Z,
 	getViewportManager: () => X?.getViewportManager() ?? null,
 	gotoPage: (e) => X?.gotoPage(e) ?? !1,
 	refreshDocumentStatus: () => {
-		kF().textContent = I("ui.sbMessage.filePages", {
+		AF().textContent = I("ui.sbMessage.filePages", {
 			p1: J.fileName,
 			p2: J.pageCount
 		});
 	},
-	setEditMode: CF
-}, Q = new Yv(xF, wF, Y), TF = new Fv({
-	registry: xF,
+	setEditMode: wF
+}, Q = new Yv(SF, TF, Y), EF = new Fv({
+	registry: SF,
 	dispatcher: Q,
-	getContext: SF,
+	getContext: CF,
 	getMenuContainer: () => document.getElementById("menu-bar")
 });
-window.rhwpStudio.automation = TF;
-async function EF(e) {
+window.rhwpStudio.automation = EF;
+async function DF(e) {
 	throw Error(`허용되지 않은 플러그인: ${e}`);
 }
-var DF = new Gv({
+var OF = new Gv({
 	wasm: J,
-	automation: TF,
+	automation: EF,
 	eventBus: Y,
 	getInputHandler: () => Z,
-	loadDocument: (e, t) => hI(e, t ?? "document.hwp", null),
+	loadDocument: (e, t) => gI(e, t ?? "document.hwp", null),
 	createBlankDocument: () => {
-		SI();
+		CI();
 	},
-	resolve: EF
+	resolve: DF
 });
-window.rhwpStudio.plugins = DF, xF.registerAll(bF === "embed" ? jx.filter((e) => !TA.includes(e.id)) : jx), xF.registerAll(bF === "embed" ? kw.filter((e) => !EA.includes(e.id)) : kw), xF.registerAll(CT), xF.registerAll(pD), xF.registerAll(EO), xF.registerAll(jk), xF.registerAll(rA), xF.registerAll(mA);
-function OF() {
+window.rhwpStudio.plugins = OF, SF.registerAll(xF === "embed" ? jx.filter((e) => !TA.includes(e.id)) : jx), SF.registerAll(xF === "embed" ? kw.filter((e) => !EA.includes(e.id)) : kw), SF.registerAll(CT), SF.registerAll(pD), SF.registerAll(EO), SF.registerAll(jk), SF.registerAll(rA), SF.registerAll(mA);
+function kF() {
 	for (let e of [...TA, ...EA]) document.querySelectorAll(`[data-cmd="${e}"]`).forEach((e) => e.remove());
 	let e = document.querySelector(".menu-item[data-menu=\"file\"] .menu-dropdown");
 	if (!e) return;
@@ -68733,11 +68848,11 @@ function OF() {
 	let t = e.lastElementChild;
 	t?.classList.contains("md-sep") && t.remove();
 }
-bF === "embed" && OF(), bF === "embed" && document.addEventListener("keydown", (e) => {
+xF === "embed" && kF(), xF === "embed" && document.addEventListener("keydown", (e) => {
 	DA(e) && e.preventDefault();
 }, !0);
-var kF = () => document.getElementById("sb-message"), AF = () => document.getElementById("sb-page"), jF = () => document.getElementById("sb-section"), MF = () => document.getElementById("sb-zoom-val"), NF = null, PF = null;
-function FF() {
+var AF = () => document.getElementById("sb-message"), jF = () => document.getElementById("sb-page"), MF = () => document.getElementById("sb-section"), NF = () => document.getElementById("sb-zoom-val"), PF = null, FF = null;
+function IF() {
 	let e = F.getAutosaveSettings();
 	return {
 		recoveryEnabled: e.recoveryEnabled,
@@ -68746,26 +68861,26 @@ function FF() {
 		idleDelayMs: e.idleDelaySeconds * 1e3
 	};
 }
-function IF(e) {
+function LF(e) {
 	let t = document.getElementById("sb-message");
 	if (!t) return;
-	if (NF &&= (clearTimeout(NF), null), e.state === "saving") {
-		PF === null && (PF = t.textContent ?? ""), t.textContent = "복구용 자동 저장 중...";
+	if (PF &&= (clearTimeout(PF), null), e.state === "saving") {
+		FF === null && (FF = t.textContent ?? ""), t.textContent = "복구용 자동 저장 중...";
 		return;
 	}
-	let n = PF ?? (e.state === "blocked" ? t.textContent ?? "" : null);
-	PF = null;
+	let n = FF ?? (e.state === "blocked" ? t.textContent ?? "" : null);
+	FF = null;
 	let r;
-	r = e.state === "saved" ? `복구용 자동 저장 완료 (${LF(e.byteLength)})` : e.state === "blocked" ? "보호 문서는 복구용 자동 저장을 하지 않습니다" : "복구용 자동 저장 실패", t.textContent = r, n !== null && n !== r && (NF = setTimeout(() => {
-		t.textContent === r && (t.textContent = n), NF = null;
+	r = e.state === "saved" ? `복구용 자동 저장 완료 (${RF(e.byteLength)})` : e.state === "blocked" ? "보호 문서는 복구용 자동 저장을 하지 않습니다" : "복구용 자동 저장 실패", t.textContent = r, n !== null && n !== r && (PF = setTimeout(() => {
+		t.textContent === r && (t.textContent = n), PF = null;
 	}, e.state === "saved" ? 1600 : 4e3));
 }
-function LF(e) {
+function RF(e) {
 	if (e < 1024) return `${e} B`;
 	let t = e / 1024;
 	return t < 1024 ? `${t.toFixed(1)} KiB` : `${(t / 1024).toFixed(1)} MiB`;
 }
-function RF() {
+function zF() {
 	return new Promise((e) => {
 		let t = !1, n = () => {
 			t || (t = !0, e());
@@ -68773,28 +68888,28 @@ function RF() {
 		window.setTimeout(n, 50), requestAnimationFrame(() => requestAnimationFrame(n));
 	});
 }
-async function zF(e, t) {
+async function BF(e, t) {
 	let n = Math.max(0, Math.min(100, Math.round(e)));
-	kF().textContent = `파일 로딩 ${n}% - ${t}`, await RF();
+	AF().textContent = `파일 로딩 ${n}% - ${t}`, await zF();
 }
-function BF(e) {
-	let t = X?.getRenderBackend() === "canvaskit" ? dF?.getCanvasKitRenderer() ?? null : null;
+function VF(e) {
+	let t = X?.getRenderBackend() === "canvaskit" ? fF?.getCanvasKitRenderer() ?? null : null;
 	if (!t || !e?.length) return;
 	let n = [...e];
 	(async () => {
-		await Yt(), await t.prepareLocalFonts(n), t === dF?.getCanvasKitRenderer() && X?.getRenderBackend() === "canvaskit" && Y.emit("document-view-changed");
+		await Yt(), await t.prepareLocalFonts(n), t === fF?.getCanvasKitRenderer() && X?.getRenderBackend() === "canvaskit" && Y.emit("document-view-changed");
 	})().catch((e) => {
 		console.warn("[CanvasKit] 로컬 Typeface 준비 실패, 기본 fallback으로 계속 표시합니다:", e);
 	});
 }
-async function VF() {
-	let e = kF();
+async function HF() {
+	let e = AF();
 	try {
-		_F = await _v(), _F.disableExternalWebFonts && console.info("[main] 외부 웹폰트 사용 안 함 옵션이 켜져 있습니다."), e.textContent = _F.disableExternalWebFonts ? "로컬 폰트 준비 중..." : "웹폰트 로딩 중...", await Fe([], void 0, _F), e.textContent = "WASM 로딩 중...", await J.initialize();
+		vF = await _v(), vF.disableExternalWebFonts && console.info("[main] 외부 웹폰트 사용 안 함 옵션이 켜져 있습니다."), e.textContent = vF.disableExternalWebFonts ? "로컬 폰트 준비 중..." : "웹폰트 로딩 중...", await Fe([], void 0, vF), e.textContent = "WASM 로딩 중...", await J.initialize();
 		let t = Bs(window.location.search), n = Vs(window.location.search);
 		n.mode;
 		let r = Hs(window.location.search), i = Us(window.location.search);
-		pF = {
+		mF = {
 			backend: t.backend === "auto" ? {
 				...t,
 				backend: "canvas2d"
@@ -68805,11 +68920,11 @@ async function VF() {
 			canvaskitMode: n,
 			canvaskitSurface: r,
 			renderProfile: i
-		}, t.unsupportedReason && console.warn(`[main] 지원하지 않는 renderer 값입니다: ${t.requested}; Canvas2D를 사용합니다.`), n.unsupportedReason && console.warn(`[main] 지원하지 않는 CanvasKit mode입니다: ${n.requested}; default를 사용합니다.`), mF = t.unsupportedReason ?? null, dF = new Zj(t, n, r, i, async (n, r) => (e.textContent = "CanvasKit 로딩 중...", { create() {
+		}, t.unsupportedReason && console.warn(`[main] 지원하지 않는 renderer 값입니다: ${t.requested}; Canvas2D를 사용합니다.`), n.unsupportedReason && console.warn(`[main] 지원하지 않는 CanvasKit mode입니다: ${n.requested}; default를 사용합니다.`), hF = t.unsupportedReason ?? null, fF = new Zj(t, n, r, i, async (n, r) => (e.textContent = "CanvasKit 로딩 중...", { create() {
 			throw Error("This client uses the Canvas2D editor backend");
 		} }.create(n, r, { requirePreparedFontFamilies: t.backend === "auto" })), {
 			transformCanvasKitPreflight(e) {
-				return fa(e, Se(e.requiredFontFamilies, _F).unavailableFonts.map((e) => `fontUnavailable:${e}`));
+				return fa(e, Se(e.requiredFontFamilies, vF).unavailableFonts.map((e) => `fontUnavailable:${e}`));
 			},
 			async prepareCanvasKitDocument(e, t) {
 				if (gn()) {
@@ -68820,7 +68935,7 @@ async function VF() {
 					await e.prepareHostFonts([...r.values()]);
 				}
 				if (!t) return;
-				let n = Se(t.requiredFontFamilies, _F);
+				let n = Se(t.requiredFontFamilies, vF);
 				if (n.unavailableFonts.length > 0) throw Error(`CanvasKit font family가 준비되지 않았습니다: ${n.unavailableFonts.join(", ")}`);
 				try {
 					await Yt(), await e.prepareLocalFonts(t.requiredFontFamilies);
@@ -68831,15 +68946,15 @@ async function VF() {
 			}
 		}), e.textContent = "HWP 파일을 선택해주세요.";
 		let a = document.getElementById("scroll-container");
-		X = new iu(a, J, Y, dF), await vF(), J.onExternalImagesInjected = () => {
+		X = new iu(a, J, Y, fF), await yF(), J.onExternalImagesInjected = () => {
 			X?.loadDocument();
-		}, uF = new Hj(document.getElementById("h-ruler"), document.getElementById("v-ruler"), a, Y, J, X.getVirtualScroll(), X.getViewportManager()), Z = new j_(a, J, Y, X.getVirtualScroll(), X.getViewportManager()), Z.setEditMode(fF), cF?.dispose(), cF = new vN({
+		}, dF = new Hj(document.getElementById("h-ruler"), document.getElementById("v-ruler"), a, Y, J, X.getVirtualScroll(), X.getViewportManager()), Z = new j_(a, J, Y, X.getVirtualScroll(), X.getViewportManager()), Z.setEditMode(pF), lF?.dispose(), lF = new vN({
 			wasm: J,
 			input: Z,
 			eventBus: Y,
-			isDirty: () => iF.isDirty(),
+			isDirty: () => aF.isDirty(),
 			render: () => X.refreshDocumentAgentMutation()
-		}), uF.onCommitPin = (e) => {
+		}), dF.onCommitPin = (e) => {
 			if (Z) {
 				if (e.kind === "paraProps") {
 					Z.applyParaPropsAtCursor(e.props);
@@ -68854,8 +68969,8 @@ async function VF() {
 		}, J.onBeforeExport = () => {
 			let e = Z?.getCursorPosition();
 			e && J.setCaretPosition(e.sectionIndex, e.parentParaIndex ?? e.paragraphIndex, e.parentParaIndex === void 0 ? e.charOffset : 0);
-		}, lF = new P_(document.getElementById("style-bar"), J, Y, Q), lF.setEnabled(!1), Z.setDispatcher(Q), Z.setContextMenu(new vA(Q, xF)), Z.setCommandPalette(new yA(xF, Q)), Z.setCellSelectionRenderer(new pj(a, X.getVirtualScroll(), (e) => Y.emit("cell-selection-phase-changed", e))), Z.setTableObjectRenderer(new yj(a, X.getVirtualScroll())), Z.setTableResizeRenderer(new wj(a, X.getVirtualScroll())), Z.setPictureObjectRenderer(new yj(a, X.getVirtualScroll(), !0)), new av(document.getElementById("menu-bar"), Y, Q, xF, { onMenuOpen: (e) => {
-			e === "file" && vI();
+		}, uF = new P_(document.getElementById("style-bar"), J, Y, Q), uF.setEnabled(!1), Z.setDispatcher(Q), Z.setContextMenu(new vA(Q, SF)), Z.setCommandPalette(new yA(SF, Q)), Z.setCellSelectionRenderer(new pj(a, X.getVirtualScroll(), (e) => Y.emit("cell-selection-phase-changed", e))), Z.setTableObjectRenderer(new yj(a, X.getVirtualScroll())), Z.setTableResizeRenderer(new wj(a, X.getVirtualScroll())), Z.setPictureObjectRenderer(new yj(a, X.getVirtualScroll(), !0)), new av(document.getElementById("menu-bar"), Y, Q, SF, { onMenuOpen: (e) => {
+			e === "file" && yI();
 		} }), document.querySelectorAll(".tb-btn[data-cmd]").forEach((e) => {
 			e.addEventListener("mousedown", (t) => {
 				t.preventDefault();
@@ -68901,46 +69016,46 @@ async function VF() {
 				e.target.tagName !== "INPUT" && e.target.tagName !== "SELECT" && e.preventDefault();
 			});
 		}
-		KF(), qF(), ZF(), HF(), GF(), (async () => {
-			await TI(), bF !== "embed" && await bI(), await CI();
-		})(), bF !== "embed" && _A(window, {
+		qF(), JF(), QF(), UF(), KF(), (async () => {
+			await EI(), xF !== "embed" && await xI(), await wI();
+		})(), xF !== "embed" && _A(window, {
 			openDocumentBytes(e) {
 				Y.emit("open-document-bytes", e);
 			},
 			notifyUnsupportedFile(e) {
-				OI(/* @__PURE__ */ Error(`지원하지 않는 파일 형식입니다: ${e}. HWP/HWPX/HML 파일만 지원합니다.`));
+				kI(/* @__PURE__ */ Error(`지원하지 않는 파일 형식입니다: ${e}. HWP/HWPX/HML 파일만 지원합니다.`));
 			},
 			notifyError(e) {
-				fI(e);
+				pI(e);
 			},
 			notifyMultipleFiles(e) {
 				console.warn(`[pwa-file-handling] 여러 파일(${e}개)이 전달되어 첫 번째 파일만 엽니다.`);
 			}
-		}), gF = !0;
+		}), _F = !0;
 	} catch (t) {
-		hF = t instanceof Error ? t.message : String(t), e.textContent = `WASM 초기화 실패: ${t}`, console.error("[main] WASM 초기화 실패:", t);
+		gF = t instanceof Error ? t.message : String(t), e.textContent = `WASM 초기화 실패: ${t}`, console.error("[main] WASM 초기화 실패:", t);
 	}
 }
-function HF() {
+function UF() {
 	document.addEventListener(wf, () => {
 		Z?.isActive() && Z.focus();
 	});
 }
-var UF = /* @__PURE__ */ new Set([
+var WF = /* @__PURE__ */ new Set([
 	"PageUp",
 	"PageDown",
 	"Home",
 	"End"
-]), WF = /* @__PURE__ */ new Set([
+]), GF = /* @__PURE__ */ new Set([
 	"view:zoom-in",
 	"view:zoom-out",
 	"view:zoom-100",
 	"view:toolbox-basic"
 ]);
-function GF() {
+function KF() {
 	document.addEventListener("keydown", (e) => {
 		if (Xv(e.target)) return;
-		if (UF.has(e.key) && !e.altKey) {
+		if (WF.has(e.key) && !e.altKey) {
 			if (Z?.isActive()) {
 				Z.handleDocumentNavigationKey(e);
 				return;
@@ -68951,7 +69066,7 @@ function GF() {
 			}
 		}
 		let t = ah(e, ih);
-		if (t && WF.has(t)) {
+		if (t && GF.has(t)) {
 			e.preventDefault(), Q.dispatch(t);
 			return;
 		}
@@ -68978,7 +69093,7 @@ function GF() {
 		}
 	}, !1);
 }
-function KF() {
+function qF() {
 	let e = document.getElementById("file-input");
 	e.addEventListener("change", async (t) => {
 		let n = t.target, r = n.dataset.skipUnsavedGuard === "true";
@@ -68989,7 +69104,7 @@ function KF() {
 				alert("HWP/HWPX/HML 파일만 지원합니다."), e.value = "";
 				return;
 			}
-			await pI(i, { skipUnsavedGuard: r }), e.value = "";
+			await mI(i, { skipUnsavedGuard: r }), e.value = "";
 		}
 	}), document.addEventListener("dragover", (e) => e.preventDefault()), document.addEventListener("drop", (e) => e.preventDefault());
 	let t = document.getElementById("scroll-container");
@@ -69009,7 +69124,7 @@ function KF() {
 			".bmp",
 			".webp"
 		].some((e) => r.endsWith(e)), a = wb(r);
-		if (!(bF === "embed" && a)) {
+		if (!(xF === "embed" && a)) {
 			if (!i && !a) {
 				alert("HWP/HWPX/HML 파일 또는 이미지 파일만 지원합니다.");
 				return;
@@ -69034,11 +69149,11 @@ function KF() {
 				}
 				return;
 			}
-			await pI(n);
+			await mI(n);
 		}
 	});
 }
-function qF() {
+function JF() {
 	if (!X) return;
 	let e = X.getViewportManager(), t = document.getElementById("sb-zoom-in"), n = document.getElementById("sb-zoom-out"), r = document.getElementById("sb-zoom-range"), i = $m();
 	t.title = Yj("zoomIn", "Ctrl++", i), n.title = Yj("zoomOut", "Ctrl+-", i), t.addEventListener("click", () => {
@@ -69082,28 +69197,28 @@ function qF() {
 		Q.dispatch("view:zoom-dialog");
 	});
 }
-var JF = 1, YF = [], XF = null;
-function ZF() {
-	AF().addEventListener("click", () => {
+var YF = 1, XF = [], ZF = null;
+function QF() {
+	jF().addEventListener("click", () => {
 		Q.dispatch("edit:goto");
 	}), Y.on("current-page-changed", (e, t) => {
 		let n = e, r = null;
 		if (J.pageCount > 0) try {
 			r = J.getPageInfo(n);
 		} catch {}
-		AF().textContent = aM({
+		jF().textContent = aM({
 			pageIndex: n,
 			totalPages: t,
 			documentPageNumber: r?.pageNumber
-		}), r && (jF().textContent = I("ui.sbSection.text", {
+		}), r && (MF().textContent = I("ui.sbSection.text", {
 			p1: r.sectionIndex + 1,
-			p2: JF
+			p2: YF
 		}));
 	}), Y.on("zoom-fit-mode-changed", (e) => {
 		F.setZoomFitMode(Sc(e));
 	}), Y.on("zoom-level-display", (e) => {
 		let t = Math.round(e * 100);
-		MF().textContent = `${t}%`;
+		NF().textContent = `${t}%`;
 		let n = document.getElementById("sb-zoom-range");
 		n && (n.value = String(qj(t)), n.setAttribute("aria-valuetext", `${t}%`));
 	}), Y.on("insert-mode-changed", (e) => {
@@ -69114,11 +69229,11 @@ function ZF() {
 		let r = n === null ? "" : mj(n);
 		t.textContent !== r && (t.textContent = r);
 	}), Y.on("document-mutated", (e) => {
-		iF.markDirty(typeof e == "string" ? e : "document-mutated");
+		aF.markDirty(typeof e == "string" ? e : "document-mutated");
 	}), Y.on("document-changed", (e) => {
-		iF.markDirty(typeof e == "string" ? e : "document-changed");
+		aF.markDirty(typeof e == "string" ? e : "document-changed");
 	}), Y.on("renderer-selection-changed", (e) => {
-		mF = e.fallbackReason;
+		hF = e.fallbackReason;
 	}), hn(() => {
 		X && J.pageCount !== 0 && (J.invalidateCanvasMetricFonts(), X.refreshFontResources().catch((e) => {
 			console.warn("[HostFonts] View refresh failed:", e);
@@ -69126,9 +69241,9 @@ function ZF() {
 	}), Y.on("local-fonts-changed", () => {
 		if (!X || J.pageCount === 0) return;
 		let e = cn(), t = `${e.detectedAt ?? "none"}:${e.source ?? "none"}:${e.count}`;
-		if (t !== XF) {
-			if (XF = t, J.invalidateCanvasMetricFonts(), X.getRenderBackend() === "canvaskit") {
-				BF(YF);
+		if (t !== ZF) {
+			if (ZF = t, J.invalidateCanvasMetricFonts(), X.getRenderBackend() === "canvaskit") {
+				VF(XF);
 				return;
 			}
 			Y.emit("document-view-changed");
@@ -69138,7 +69253,7 @@ function ZF() {
 	}), Y.on("document-dirty-changed", () => {
 		Y.emit("command-state-changed");
 	}), Y.on("autosave-settings-changed", () => {
-		aF.updateSchedule(FF());
+		oF.updateSchedule(IF());
 	});
 	let e = document.getElementById("sb-field");
 	Y.on("field-info-changed", (t) => {
@@ -69160,7 +69275,7 @@ function ZF() {
 	let d = document.getElementById("hf-edit-status-live");
 	Y.on("headerFooterModeChanged", (e) => {
 		let t = xl(e), n = t !== "none";
-		if (r = n, oF?.resetToStart(), o && (o.hidden = !n), s) {
+		if (r = n, sF?.resetToStart(), o && (o.hidden = !n), s) {
 			let e = t === "none" ? "" : t.mode === "header" ? I("ui.tbHfLabel.header") : I("ui.tbHfLabel.footer"), n = t === "none" ? "" : vl(t.applyTo);
 			s.textContent = t === "none" ? "" : I("ui.tbHfLabel.editing", {
 				p1: e,
@@ -69176,12 +69291,12 @@ function ZF() {
 		}), a(), u && (n ? u.classList.add("hf-editing") : u.classList.remove("hf-editing"));
 	}), Y.on("footnoteModeChanged", (e) => {
 		let t = e;
-		n = t, oF?.resetToStart(), c && (c.hidden = !t), l.forEach((e) => {
+		n = t, sF?.resetToStart(), c && (c.hidden = !t), l.forEach((e) => {
 			e.hidden = t;
 		}), a();
 	});
 }
-function QF(e) {
+function $F(e) {
 	if (e === "none") return;
 	let t = X?.getViewportManager(), n = document.getElementById("scroll-container");
 	if (t && n && J.pageCount !== 0) try {
@@ -69197,24 +69312,24 @@ function QF(e) {
 		console.warn("[main] 저장된 맞춤 배율 복원 실패:", e);
 	}
 }
-function $F() {
+function eI() {
 	let e = F.getViewSettings();
 	J.setShowControlCodes(e.showControlCodes), J.setShowParagraphMarks(e.showParagraphMarks), mT(e.showControlCodes, e.showParagraphMarks);
 	let t = !e.clipView;
 	J.setClipEnabled(t), gT(t);
 }
-async function eI(e, t, n = {}) {
-	let r = kF();
+async function tI(e, t, n = {}) {
+	let r = AF();
 	try {
-		Mr(e.fontSubstitutions), YF = [...e.fontsUsed ?? []], XF = null, console.log("[initDoc] 1. 폰트 로딩 시작"), await zF(55, "폰트 준비 중..."), e.fontsUsed?.length && await Fe(e.fontsUsed, (e, t) => {
+		Mr(e.fontSubstitutions), XF = [...e.fontsUsed ?? []], ZF = null, console.log("[initDoc] 1. 폰트 로딩 시작"), await BF(55, "폰트 준비 중..."), e.fontsUsed?.length && await Fe(e.fontsUsed, (e, t) => {
 			let n = t > 0 ? 55 + Math.round(e / t * 20) : 65;
 			r.textContent = `파일 로딩 ${n}% - 폰트 로딩 중... (${e}/${t})`;
-		}, _F), console.log("[initDoc] 2. 폰트 로딩 완료"), await Yt(), await zF(75, "문서 상태 적용 중..."), JF = e.sectionCount ?? 1, jF().textContent = I("ui.sbSection.text", {
+		}, vF), console.log("[initDoc] 2. 폰트 로딩 완료"), await Yt(), await BF(75, "문서 상태 적용 중..."), YF = e.sectionCount ?? 1, MF().textContent = I("ui.sbSection.text", {
 			p1: 1,
-			p2: JF
-		}), $F(), console.log("[initDoc] 3. inputHandler deactivate"), Z?.deactivate(), console.log("[initDoc] 4. canvasView loadDocument"), await zF(82, "페이지 렌더 준비 중...");
+			p2: YF
+		}), eI(), console.log("[initDoc] 3. inputHandler deactivate"), Z?.deactivate(), console.log("[initDoc] 4. canvasView loadDocument"), await BF(82, "페이지 렌더 준비 중...");
 		let i = F.getViewSettings().zoomFitMode;
-		await X?.loadDocument(), QF(i), BF(e.fontsUsed), console.log("[initDoc] 5. toolbar setEnabled"), await zF(90, "도구 모음 준비 중..."), lF?.setEnabled(!0), console.log("[initDoc] 6. toolbar initFontDropdown + initStyleDropdown"), lF?.initFontDropdown(e.fontsUsed), lF?.initStyleDropdown(), console.log("[initDoc] 7. 사전 검증 및 로컬 글꼴 확인"), await zF(94, "문서 검증 및 글꼴 확인 중...");
+		await X?.loadDocument(), $F(i), VF(e.fontsUsed), console.log("[initDoc] 5. toolbar setEnabled"), await BF(90, "도구 모음 준비 중..."), uF?.setEnabled(!0), console.log("[initDoc] 6. toolbar initFontDropdown + initStyleDropdown"), uF?.initFontDropdown(e.fontsUsed), uF?.initStyleDropdown(), console.log("[initDoc] 7. 사전 검증 및 로컬 글꼴 확인"), await BF(94, "문서 검증 및 글꼴 확인 중...");
 		try {
 			if (J.getSourceFormat() === "hwpx") {
 				let e = J.getValidationWarnings();
@@ -69226,13 +69341,13 @@ async function eI(e, t, n = {}) {
 		} catch (e) {
 			console.warn("[validation] 감지 실패 (치명적이지 않음):", e);
 		}
-		n.suppressDialogs || await tI(e, t), console.log("[initDoc] 8. inputHandler activateWithCaretPosition"), await zF(96, "편집 상태 초기화 중..."), Z?.activateWithCaretPosition(), r.textContent = t, console.log("[initDoc] 9. 완료"), iF.markClean("document-initialized");
+		n.suppressDialogs || await nI(e, t), console.log("[initDoc] 8. inputHandler activateWithCaretPosition"), await BF(96, "편집 상태 초기화 중..."), Z?.activateWithCaretPosition(), r.textContent = t, console.log("[initDoc] 9. 완료"), aF.markClean("document-initialized");
 	} catch (e) {
 		if (console.error("[initDoc] 오류:", e), n.suppressDialogs) throw e;
 		window.innerWidth < 768 && alert(`초기화 오류: ${e}`);
 	}
 }
-async function tI(e, t) {
+async function nI(e, t) {
 	if (e.fontsUsed?.length) try {
 		cn().loaded || await Yt();
 		let n = NA(e.fontsUsed);
@@ -69242,100 +69357,100 @@ async function tI(e, t) {
 		console.warn("[local-fonts] 저장된 감지 결과 로드 실패 (치명적이지 않음):", e);
 	}
 }
-var nI = class extends Error {
+var rI = class extends Error {
 	constructor() {
 		super("문서 열기가 취소되었습니다."), this.name = "DocumentOpenCancelledError";
 	}
-}, rI = "비밀번호가 필요한 암호 문서", iI = "비밀번호가 일치하지 않거나 암호화 데이터가 손상되었습니다";
-function aI(e) {
-	return e instanceof nI;
-}
+}, iI = "비밀번호가 필요한 암호 문서", aI = "비밀번호가 일치하지 않거나 암호화 데이터가 손상되었습니다";
 function oI(e) {
-	return String(e).includes(rI);
+	return e instanceof rI;
 }
 function sI(e) {
 	return String(e).includes(iI);
 }
 function cI(e) {
+	return String(e).includes(aI);
+}
+function lI(e) {
 	let t = String(e);
 	return t.includes("지원하지 않는 암호화 방식") ? /* @__PURE__ */ Error("지원하지 않는 암호화 방식의 문서입니다. 지원되는 HWP3/HWP5 암호 문서만 열 수 있습니다.") : t.includes("DRM") ? /* @__PURE__ */ Error("DRM으로 보호된 문서는 지원하지 않습니다.") : /* @__PURE__ */ Error("암호화된 문서를 열 수 없습니다. 문서가 손상되었는지 확인하세요.");
 }
-async function lI(e, t) {
+async function uI(e, t) {
 	let n;
 	for (;;) {
 		let r = await zy(t, n);
-		if (r === null) throw new nI();
+		if (r === null) throw new rI();
 		try {
 			J.loadDocumentWithPassword(e, r, t);
 			return;
 		} catch (e) {
-			if (sI(e)) {
+			if (cI(e)) {
 				n = "암호가 일치하지 않거나 문서가 손상되었습니다. 다시 입력하세요.";
 				continue;
 			}
-			throw cI(e);
+			throw lI(e);
 		} finally {
 			r = "";
 		}
 	}
 }
-async function uI(e, t) {
+async function dI(e, t) {
 	try {
 		return J.loadDocument(e, t);
 	} catch (n) {
-		if (!oI(n)) throw n;
-		return await lI(e, t), J.getDocumentInfo();
+		if (!sI(n)) throw n;
+		return await uI(e, t), J.getDocumentInfo();
 	}
 }
-function dI() {
+function fI() {
 	X && J.pageCount !== 0 && X.loadDocument().catch((e) => {
 		console.warn("[main] 열기 실패 후 이전 문서 뷰 복구 실패:", e);
 	});
 }
-function fI(e) {
-	if (aI(e)) {
-		kF().textContent = "문서 열기를 취소했습니다.", dI();
+function pI(e) {
+	if (oI(e)) {
+		AF().textContent = "문서 열기를 취소했습니다.", fI();
 		return;
 	}
-	OI(e);
+	kI(e);
 }
-async function pI(e, t = {}) {
+async function mI(e, t = {}) {
 	try {
-		return await wI(t.skipUnsavedGuard) ? await nM(document.documentElement, async () => {
+		return await TI(t.skipUnsavedGuard) ? await nM(document.documentElement, async () => {
 			let n = performance.now();
-			await zF(0, "파일 읽는 중...");
+			await BF(0, "파일 읽는 중...");
 			let r = new Uint8Array(await e.arrayBuffer());
-			return await zF(15, "파일 읽기 완료"), await hI(r, e.name, t.fileHandle ?? null, n, { dataReadProgressShown: !0 }), !0;
+			return await BF(15, "파일 읽기 완료"), await gI(r, e.name, t.fileHandle ?? null, n, { dataReadProgressShown: !0 }), !0;
 		}) : !1;
 	} catch (e) {
-		return fI(e), !1;
+		return pI(e), !1;
 	}
 }
-function mI() {
+function hI() {
 	X?.prepareDocumentLoad();
 }
-async function hI(e, t, n, r = performance.now(), i = {}) {
+async function gI(e, t, n, r = performance.now(), i = {}) {
 	await nM(document.documentElement, async () => {
-		X?.showBlankPage(), i.dataReadProgressShown || await zF(0, "문서 데이터 준비 중..."), await zF(25, "문서 파싱 및 쪽 계산 중...");
-		let a = await uI(e, t);
-		mI(), DF.notifyDocumentSwap(), Y.emit("document-swapped"), await zF(45, "자동 저장 준비 중..."), jy(n), J.currentFileHandle = n, i.skipRecent || (_I = !1, Jb({
+		X?.showBlankPage(), i.dataReadProgressShown || await BF(0, "문서 데이터 준비 중..."), await BF(25, "문서 파싱 및 쪽 계산 중...");
+		let a = await dI(e, t);
+		hI(), OF.notifyDocumentSwap(), Y.emit("document-swapped"), await BF(45, "자동 저장 준비 중..."), jy(n), J.currentFileHandle = n, i.skipRecent || (vI = !1, Jb({
 			fileName: J.fileName,
 			sourceFormat: J.getSourceFormat(),
 			handle: n
-		}).catch((e) => console.warn("[recent] 최근 문서 기록 실패:", e))), await aF.beginDocument({
+		}).catch((e) => console.warn("[recent] 최근 문서 기록 실패:", e))), await oF.beginDocument({
 			fileName: J.fileName,
 			sourceFormat: J.getSourceFormat()
-		}, { discardPreviousDraft: !0 }), await zF(50, "문서 초기화 중...");
+		}, { discardPreviousDraft: !0 }), await BF(50, "문서 초기화 중...");
 		let o = performance.now() - r;
-		await eI(a, I("ui.sbMessage.filePagesTimed", {
+		await tI(a, I("ui.sbMessage.filePagesTimed", {
 			p1: t,
 			p2: a.pageCount,
 			p3: o.toFixed(1)
 		}), { suppressDialogs: i.suppressDialogs });
 	});
 }
-var gI = 8, _I = !1;
-async function vI() {
+var _I = 8, vI = !1;
+async function yI() {
 	let e = document.getElementById("recent-docs-panel");
 	if (!e) return;
 	let t;
@@ -69364,7 +69479,7 @@ async function vI() {
 		disabled: !0
 	}));
 	else {
-		let e = _I ? t : t.slice(0, gI);
+		let e = vI ? t : t.slice(0, _I);
 		for (let t of e) r.append(n({
 			label: t.fileName,
 			cmd: "file:open-recent",
@@ -69372,10 +69487,10 @@ async function vI() {
 			right: t.sourceFormat.toUpperCase(),
 			title: t.fileName
 		}));
-		!_I && t.length > gI && r.append(n({
-			label: `최근 문서 더보기 (${t.length - gI}개)`,
+		!vI && t.length > _I && r.append(n({
+			label: `최근 문서 더보기 (${t.length - _I}개)`,
 			onClick: () => {
-				_I = !0, vI();
+				vI = !0, yI();
 			}
 		}));
 		let i = document.createElement("div");
@@ -69386,13 +69501,13 @@ async function vI() {
 	}
 	e.replaceChildren(r), e.closest(".md-sub")?.classList.toggle("disabled", t.length === 0);
 }
-function yI() {
+function bI() {
 	return new URLSearchParams(window.location.search).has("url");
 }
-async function bI() {
-	if (!yI()) try {
+async function xI() {
+	if (!bI()) try {
 		let e = (await ZA()).filter((e) => e.data.byteLength > 0);
-		if (e.length === 0 || J.pageCount > 0 || iF.isDirty()) return;
+		if (e.length === 0 || J.pageCount > 0 || aF.isDirty()) return;
 		let t = await fj(e);
 		if (t.action === "later") return;
 		if (t.action === "delete-all") {
@@ -69405,45 +69520,45 @@ async function bI() {
 		let n = e.find((e) => e.id === t.draftId);
 		if (!n) return;
 		try {
-			await xI(n);
+			await SI(n);
 		} catch (e) {
-			fI(e);
+			pI(e);
 		}
 	} catch (e) {
 		console.warn("[autosave] 복구 후보 확인 실패:", e);
 	}
 }
-async function xI(e) {
+async function SI(e) {
 	let t = sj(e.fileName);
-	await hI(new Uint8Array(e.data), t, null, performance.now(), { skipRecent: !0 }), await QA(e.id), iF.markDirty("autosave-recovered"), B({
+	await gI(new Uint8Array(e.data), t, null, performance.now(), { skipRecent: !0 }), await QA(e.id), aF.markDirty("autosave-recovered"), B({
 		message: `"${t}" 복구본을 열었습니다.\n원본 파일은 자동으로 덮어쓰지 않습니다.`,
 		durationMs: 5e3
 	});
 }
-async function SI() {
-	let e = kF();
+async function CI() {
+	let e = AF();
 	try {
 		await nM(document.documentElement, async () => {
 			e.textContent = "새 문서 생성 중...";
 			let t = J.createNewDocument();
-			mI(), DF.notifyDocumentSwap(), await aF.beginDocument({
+			hI(), OF.notifyDocumentSwap(), await oF.beginDocument({
 				fileName: J.fileName,
 				sourceFormat: J.getSourceFormat()
-			}, { discardPreviousDraft: !0 }), await eI(t, I("ui.sbMessage.newDocPages", { p1: t.pageCount }));
+			}, { discardPreviousDraft: !0 }), await tI(t, I("ui.sbMessage.newDocPages", { p1: t.pageCount }));
 		});
 	} catch (t) {
 		e.textContent = `새 문서 생성 실패: ${t}`, console.error("[main] 새 문서 생성 실패:", t);
 	}
 }
-async function CI() {
-	bF !== "embed" && (J.pageCount > 0 || iF.isDirty() || await SI());
+async function wI() {
+	xF !== "embed" && (J.pageCount > 0 || aF.isDirty() || await CI());
 }
-async function wI(e) {
-	return e === !0 || await bx(wF, { allowLocalSave: bF !== "embed" });
+async function TI(e) {
+	return e === !0 || await bx(TF, { allowLocalSave: xF !== "embed" });
 }
 Y.on("create-new-document", (e) => {
 	(async () => {
-		await wI(e?.skipUnsavedGuard) && await SI();
+		await TI(e?.skipUnsavedGuard) && await CI();
 	})();
 }), Y.on("open-document-bytes", async (e) => {
 	let t = e, n = (e, n) => {
@@ -69454,23 +69569,23 @@ Y.on("create-new-document", (e) => {
 		});
 	};
 	try {
-		if (!await wI(t.skipUnsavedGuard)) {
+		if (!await TI(t.skipUnsavedGuard)) {
 			n(!1, "문서 열기가 취소되었습니다.");
 			return;
 		}
-		await hI(t.bytes, t.fileName, t.fileHandle), n(!0);
+		await gI(t.bytes, t.fileName, t.fileHandle), n(!0);
 	} catch (e) {
-		fI(e), n(!1, aI(e) ? "문서 열기가 취소되었습니다." : e instanceof Error ? e.message : String(e));
+		pI(e), n(!1, oI(e) ? "문서 열기가 취소되었습니다." : e instanceof Error ? e.message : String(e));
 	}
 }), Y.on("equation-edit-request", () => {
 	Q.dispatch("insert:equation-edit");
 }), Y.on("chart-data-edit-request", () => {
 	Q.dispatch("insert:chart-data-edit");
 });
-async function TI() {
+async function EI() {
 	let e = new URLSearchParams(window.location.search), t = e.get("url");
 	if (!t) return;
-	let n = e.get("filename") || t.split("/").pop()?.split("?")[0] || "document.hwp", r = kF();
+	let n = e.get("filename") || t.split("/").pop()?.split("?")[0] || "document.hwp", r = AF();
 	try {
 		r.textContent = "파일 로딩 중...", console.log(`[loadFromUrlParam] ${t}`);
 		let e;
@@ -69483,26 +69598,26 @@ async function TI() {
 			});
 			if (e.error) throw Error(e.error);
 			let r = new Uint8Array(e.data);
-			no(r), await hI(r, n, null);
+			no(r), await gI(r, n, null);
 			return;
 		}
 		else e = await fetch(t);
 		if (!e.ok) throw Error(`HTTP ${e.status}: ${e.statusText}`);
 		let i = e.headers.get("content-type"), a = await e.arrayBuffer(), o = new Uint8Array(a);
-		no(o, i), await hI(o, n, null);
+		no(o, i), await gI(o, n, null);
 	} catch (e) {
-		if (aI(e)) {
-			fI(e);
+		if (oI(e)) {
+			pI(e);
 			return;
 		}
-		if (t.startsWith("file:") && typeof chrome < "u" && await EI() === !1) {
-			DI();
+		if (t.startsWith("file:") && typeof chrome < "u" && await DI() === !1) {
+			OI();
 			return;
 		}
-		fI(e);
+		pI(e);
 	}
 }
-async function EI() {
+async function DI() {
 	let e = typeof chrome < "u" ? chrome.extension : void 0;
 	if (!e?.isAllowedFileSchemeAccess) return null;
 	try {
@@ -69511,8 +69626,8 @@ async function EI() {
 		return null;
 	}
 }
-function DI() {
-	let e = kF();
+function OI() {
+	let e = AF();
 	e && (e.textContent = "파일 로드 실패: 파일 URL 액세스 권한이 필요합니다."), console.error("[main] file:// 로드 실패 — 파일 URL 액세스 미허용 (#1131)"), B({
 		message: "로컬 파일을 열려면 확장 프로그램의 \"파일 URL에 대한 액세스 허용\"을 켜야 합니다.\n설정에서 권한을 허용한 뒤 파일을 다시 열어 주세요.",
 		durationMs: 0,
@@ -69525,15 +69640,15 @@ function DI() {
 		}
 	});
 }
-function OI(e) {
-	let t = `파일 로드 실패: ${String(e).replace(/^Error:\s*/, "")}`, n = kF();
-	n && (n.textContent = t), console.error("[main] 파일 로드 실패:", e), dI(), B({
+function kI(e) {
+	let t = `파일 로드 실패: ${String(e).replace(/^Error:\s*/, "")}`, n = AF();
+	n && (n.textContent = t), console.error("[main] 파일 로드 실패:", e), fI(), B({
 		message: t,
 		durationMs: 0,
 		confirmLabel: "확인"
 	});
 }
-var $ = VF();
+var $ = HF();
 $.then(() => {}), RM({
 	hostWindow: window,
 	parentWindow: window.parent,
@@ -69543,8 +69658,8 @@ $.then(() => {}), RM({
 			return await $, !0;
 		},
 		async loadFile(e, t, n, r) {
-			if (await $, !await wI(n)) throw Error("문서 열기가 취소되었습니다.");
-			return await hI(e, t, null, void 0, { suppressDialogs: r }), { pageCount: J.pageCount };
+			if (await $, !await TI(n)) throw Error("문서 열기가 취소되었습니다.");
+			return await gI(e, t, null, void 0, { suppressDialogs: r }), { pageCount: J.pageCount };
 		},
 		async pageCount() {
 			return await $, J.pageCount;
@@ -69554,11 +69669,11 @@ $.then(() => {}), RM({
 			let t = X?.getRendererSessionDiagnostics() ?? null;
 			return {
 				schemaVersion: 1,
-				request: pF,
-				initialized: gF,
-				initializationError: hF,
+				request: mF,
+				initialized: _F,
+				initializationError: gF,
 				effectiveBackend: t?.effectiveBackend ?? null,
-				backendFallbackReason: t?.fallbackReason ?? mF,
+				backendFallbackReason: t?.fallbackReason ?? hF,
 				selection: t,
 				page: {
 					index: e,
@@ -69588,54 +69703,54 @@ $.then(() => {}), RM({
 			return await $, JSON.parse(J.exportHwpVerify());
 		},
 		async notifySaved(e) {
-			return await $, sF(e);
+			return await $, cF(e);
 		},
 		async getDocumentState() {
-			if (await $, !cF) throw Error("Document agent is not initialized");
-			return cF.getDocumentState();
+			if (await $, !lF) throw Error("Document agent is not initialized");
+			return lF.getDocumentState();
 		},
 		async getSelectionContext() {
-			if (await $, !cF) throw Error("Document agent is not initialized");
-			return cF.getSelectionContext();
+			if (await $, !lF) throw Error("Document agent is not initialized");
+			return lF.getSelectionContext();
 		},
 		async applyTextCommand(e) {
-			if (await $, !cF) throw Error("Document agent is not initialized");
-			return cF.applyTextCommand(e);
+			if (await $, !lF) throw Error("Document agent is not initialized");
+			return lF.applyTextCommand(e);
 		},
 		async revertTextCommand(e) {
-			if (await $, !cF) throw Error("Document agent is not initialized");
-			return cF.revertTextCommand(e);
+			if (await $, !lF) throw Error("Document agent is not initialized");
+			return lF.revertTextCommand(e);
 		},
 		async focusTarget(e) {
-			if (await $, !cF) throw Error("Document agent is not initialized");
-			return cF.focusTarget(e);
+			if (await $, !lF) throw Error("Document agent is not initialized");
+			return lF.focusTarget(e);
 		},
 		async automationList() {
-			return await $, TF.listCommands();
+			return await $, EF.listCommands();
 		},
 		async automationMenuModel() {
-			return await $, TF.getMenuModel();
+			return await $, EF.getMenuModel();
 		},
 		async automationIsEnabled(e) {
-			return await $, TF.isEnabled(e);
+			return await $, EF.isEnabled(e);
 		},
 		async automationExecute(e, t, n) {
-			return await $, TF.execute(e, t, n);
+			return await $, EF.execute(e, t, n);
 		},
 		async automationContext() {
-			return await $, TF.getContext();
+			return await $, EF.getContext();
 		},
 		async pluginList() {
-			return await $, DF.list();
+			return await $, OF.list();
 		},
 		async pluginLoad(e) {
-			return await $, DF.load(e);
+			return await $, OF.load(e);
 		},
 		async pluginUnload(e) {
-			return await $, await DF.unload(e), { ok: !0 };
+			return await $, await OF.unload(e), { ok: !0 };
 		},
 		async pluginInvoke(e, t, n) {
-			return await $, DF.invoke(e, t, n);
+			return await $, OF.invoke(e, t, n);
 		},
 		async chromeGet() {
 			return Rv();
@@ -69644,16 +69759,16 @@ $.then(() => {}), RM({
 			return zv(e);
 		}
 	}
-}), rF({
-	registry: xF,
+}), iF({
+	registry: SF,
 	ready: $,
 	getInputHandler: () => Z,
 	wasm: J,
-	getDocumentAgent: () => cF,
+	getDocumentAgent: () => lF,
 	getCanvasView: () => X,
-	load: (e, t) => hI(e, t, null, void 0, { suppressDialogs: !0 }),
-	saved: sF,
-	recovered: () => iF.markDirty("pwh-recovered"),
+	load: (e, t) => gI(e, t, null, void 0, { suppressDialogs: !0 }),
+	saved: cF,
+	recovered: () => aF.markDirty("pwh-recovered"),
 	legacyDrafts: ZA
 });
 for (let e of [
