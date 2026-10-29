@@ -16,6 +16,7 @@ test('full editor imports and fills a merged table through MCP queue, renders, a
  const {chromium}=await import(process.env.PWH_PLAYWRIGHT_MODULE||'playwright');
  const {default:init,HwpDocument}=await import(pathToFileURL(process.env.PWH_CORE_JS));await init({module_or_path:await fs.readFile(process.env.PWH_CORE_WASM)});
  const temp=await fs.mkdtemp(path.join(os.tmpdir(),'pwh-table-browser-')),filename=path.join(temp,'synthetic.hwpx');
+ process.env.PWH_COLOR_PREFERENCES_DIR=path.join(temp,'preferences');
  const doc=HwpDocument.createEmpty();doc.createBlankDocument();await fs.writeFile(filename,doc.exportHwpx());doc.free();
  const registered=await registerClientDocument(filename),html=await clientViewerHtml();
  let sessionId,nativeReads=0,nativeFixture=null;
@@ -48,6 +49,11 @@ test('full editor imports and fills a merged table through MCP queue, renders, a
   const wait=async(ticket)=>{for(let i=0;i<400;i++){const r=editorResult(ticket);if(r.status!=='pending'){assert.equal(r.status,'applied',JSON.stringify(r));return r;}await pause(100);}throw Error('Editor receipt timed out');};
   for(let i=0;i<400&&!sessionId;i++)await pause(100);assert.ok(sessionId,'Editor loaded and polled');
   let current=editorState({sessionId});assert.equal(current.context.blankDocument,true);assert.equal(current.capabilities.tableContent,true);
+  // Only the editor-side chord is verified here. Native hosts may reserve Ctrl+N
+  // before an embedded page receives the event.
+  await frame.evaluate(()=>{const input=document.querySelector('[aria-label="문서 편집 입력"]');input.focus();input.dispatchEvent(new KeyboardEvent('keydown',{key:'n',code:'KeyN',ctrlKey:true,bubbles:true,cancelable:true}));input.dispatchEvent(new KeyboardEvent('keydown',{key:'t',code:'KeyT',bubbles:true,cancelable:true}));});
+  const createDialog=frame.getByRole('dialog',{name:'표 만들기'});await createDialog.waitFor({state:'visible',timeout:5000});
+  await createDialog.getByRole('button',{name:'취소'}).click();
   if(process.env.PWH_HANCOM_SAMPLE){
    const sample=await fs.readFile(process.env.PWH_HANCOM_SAMPLE,'utf8');
    await frame.evaluate(html=>{const input=document.querySelector('[aria-label="문서 편집 입력"]');input.focus();const data=new DataTransfer();data.setData('text/html',html);input.dispatchEvent(new ClipboardEvent('paste',{clipboardData:data,bubbles:true,cancelable:true}));},sample);
@@ -112,8 +118,77 @@ test('full editor imports and fills a merged table through MCP queue, renders, a
    for(let y=220;y<700;y+=7)for(let x=180;x<900;x+=13){const hit=window.rhwpStudio.collaboration.hitTest({clientX:x,clientY:y});if(hit.position?.cellIndex===1)return{x:x+3,y:y+3};}
    return null;
   });assert.ok(point,'Rendered body cell found');
-  const box=await page.locator('iframe').boundingBox();await page.mouse.click(box.x+point.x,box.y+point.y);await page.keyboard.press('F5');
+  const box=await page.locator('iframe').boundingBox();
+  const second=await frame.evaluate(()=>{for(let y=220;y<700;y+=7)for(let x=180;x<900;x+=13){const hit=window.rhwpStudio.collaboration.hitTest({clientX:x,clientY:y});if(hit.position?.cellIndex===2)return{x:x+3,y:y+3};}return null;});
+  assert.ok(second,'Adjacent rendered cell found');
+  await page.mouse.move(box.x+point.x,box.y+point.y);await page.mouse.down();await page.mouse.move(box.x+second.x,box.y+second.y,{steps:12});await page.mouse.up();
   assert.equal((await frame.evaluate(()=>window.pwhEditor.context())).kind,'cell_block');
+  assert.equal((await frame.evaluate(()=>window.pwhEditor.context())).table.selectedCells.length,2,'Mouse drag selects both cells');
+  // The physical keys belong to the selected cells, including in Korean IME
+  // mode; opening the dialogs must not insert characters in the document.
+  const beforeShortcuts=await frame.evaluate(()=>Array.from(window.pwhEditor.export().bytes));
+  await page.keyboard.press('l');
+  const borderDialog=frame.locator('.tcp-border-bg-dialog');
+  await borderDialog.waitFor({state:'visible',timeout:5000});
+  assert.equal(await borderDialog.locator('svg.pwh-border-preview line').count(),6);
+  await frame.waitForFunction(()=>document.querySelector('.tcp-border-bg-dialog select[aria-label="선 종류"] option[value="6"]')?.textContent.includes('━━'));
+  assert.match(await borderDialog.getByLabel('선 종류').locator('option[value="6"]').textContent(),/긴 파선.*━/);
+  await borderDialog.getByLabel('선 종류').selectOption('6');
+  await borderDialog.getByRole('button',{name:'안쪽',exact:true}).click();
+  await borderDialog.getByLabel('선 색').click();const palette=frame.getByRole('dialog',{name:'색상 선택'});await palette.waitFor({state:'visible'});
+  await palette.locator('.pwh-color-standards button[data-color="#ff0000"]').click();
+  assert.equal(await borderDialog.locator('line[data-edge="insideVertical"]').getAttribute('stroke'),'#ff0000','Inside line preview follows selected color');
+  assert.equal(await borderDialog.locator('line[data-edge="insideVertical"]').getAttribute('stroke-dasharray'),'12 4','Long dash preview matches the selected line');
+  await borderDialog.locator('.dialog-tab[data-tab="background"]').click();
+  await borderDialog.locator('.dialog-tab-panel[data-tab="background"] input[type="color"]').first().click();await palette.waitFor({state:'visible'});
+  await palette.locator('.pwh-color-recents button[data-color="#ff0000"]').waitFor({state:'visible'});await page.keyboard.press('Escape');
+  assert.equal(await palette.count(),0,'Escape closes the color menu without closing the parent dialog');
+  await borderDialog.locator('.dialog-tab[data-tab="border"]').click();
+  await borderDialog.locator('.dialog-footer button').filter({hasText:'설정'}).click();
+  const borderApplied=new HwpDocument(Uint8Array.from(await frame.evaluate(()=>Array.from(window.pwhEditor.export().bytes))));
+  try{const ref=plan.tables[0].source;const border=JSON.parse(borderApplied.getCellOwnProperties(ref.sec,ref.ppi,ref.ci,1)).borderRight;assert.equal(border.color.toLowerCase(),'#ff0000');assert.equal(border.type,6);}finally{borderApplied.free();}
+  await frame.getByRole('textbox',{name:'문서 편집 입력'}).focus();await page.keyboard.press('Control+z');await pause(300);
+  await page.mouse.move(box.x+point.x,box.y+point.y);await page.mouse.down();await page.mouse.move(box.x+second.x,box.y+second.y,{steps:12});await page.mouse.up();
+  await page.keyboard.press('l');await borderDialog.waitFor({state:'visible'});await borderDialog.locator('.dialog-tab[data-tab="background"]').click();
+  const bgPanel=borderDialog.locator('.dialog-tab-panel[data-tab="background"]');await bgPanel.locator('input[type="color"]').first().click();
+  await palette.getByLabel('색상 코드').fill('#ABCDEF');await palette.getByRole('button',{name:'적용',exact:true}).click();
+  await bgPanel.locator('input[type="color"]').nth(1).click();await palette.locator('.pwh-color-recents button[data-color="#ff0000"]').click();await bgPanel.locator('select').selectOption('1');
+  await borderDialog.locator('.dialog-footer button').filter({hasText:'설정'}).click();
+  const filled=new HwpDocument(Uint8Array.from(await frame.evaluate(()=>Array.from(window.pwhEditor.export().bytes))));
+  try{const ref=plan.tables[0].source;for(const index of [1,2]){const p=JSON.parse(filled.getCellOwnProperties(ref.sec,ref.ppi,ref.ci,index));assert.equal(p.fillColor.toLowerCase(),'#abcdef');assert.equal(p.patternColor.toLowerCase(),'#ff0000');assert.equal(p.patternType,1);}}finally{filled.free();}
+  await frame.getByRole('textbox',{name:'문서 편집 입력'}).focus();await page.keyboard.press('Control+z');await pause(300);
+  await page.mouse.move(box.x+point.x,box.y+point.y);await page.mouse.down();await page.mouse.move(box.x+second.x,box.y+second.y,{steps:12});await page.mouse.up();
+  await page.keyboard.press('l');await borderDialog.waitFor({state:'visible'});await borderDialog.locator('.dialog-tab[data-tab="diagonal"]').click();
+  assert.equal(await borderDialog.locator('.tcp-diag-btn[data-kind="slash"]').count(),2,'Only clear and supported one-line diagonal are offered');
+  assert.equal(await borderDialog.locator('.tcp-diag-btn[data-kind="backSlash"]').count(),2);
+  await borderDialog.locator('.tcp-diag-btn[data-kind="slash"][data-bits="2"]').click();assert.equal(await borderDialog.locator('.tcp-diag-preview-svg line').count(),1);
+  await borderDialog.locator('.dialog-footer button').filter({hasText:'설정'}).click();
+  const diagonal=new HwpDocument(Uint8Array.from(await frame.evaluate(()=>Array.from(window.pwhEditor.export().bytes))));
+  try{const ref=plan.tables[0].source;for(const index of [1,2]){const p=JSON.parse(diagonal.getCellOwnProperties(ref.sec,ref.ppi,ref.ci,index));assert.equal(p.diagonalSlash,2);assert.equal(p.diagonalLine,1);}}finally{diagonal.free();}
+  await frame.getByRole('textbox',{name:'문서 편집 입력'}).focus();await page.keyboard.press('Control+z');await pause(300);
+  await page.mouse.move(box.x+point.x,box.y+point.y);await page.mouse.down();await page.mouse.move(box.x+second.x,box.y+second.y,{steps:12});await page.mouse.up();
+  assert.equal((await frame.evaluate(()=>window.pwhEditor.context())).kind,'cell_block');
+  await page.keyboard.press('c');
+  const cellDialog=frame.locator('.modal-overlay .tcp-dialog');await cellDialog.waitFor({state:'visible',timeout:5000});
+  await cellDialog.locator('.dialog-tab-panel.active').getByRole('button',{name:'아래쪽',exact:true}).click();
+  await cellDialog.locator('.dialog-btn-primary').click();
+  const cellApplied=new HwpDocument(Uint8Array.from(await frame.evaluate(()=>Array.from(window.pwhEditor.export().bytes))));
+  try{const ref=plan.tables[0].source;for(const index of [1,2])assert.equal(JSON.parse(cellApplied.getCellProperties(ref.sec,ref.ppi,ref.ci,index)).verticalAlign,2,'Cell properties apply to each selected cell');}finally{cellApplied.free();}
+  await frame.getByRole('textbox',{name:'문서 편집 입력'}).focus();await page.keyboard.press('Control+z');await pause(300);
+  assert.deepEqual(await frame.evaluate(()=>Array.from(window.pwhEditor.export().bytes)),beforeShortcuts);
+  await page.mouse.move(box.x+point.x,box.y+point.y);await page.mouse.down();await page.mouse.move(box.x+second.x,box.y+second.y,{steps:12});await page.mouse.up();
+  const consumed=await frame.evaluate(()=>{const input=document.querySelector('[aria-label="문서 편집 입력"]');const e=new KeyboardEvent('keydown',{key:'Process',code:'KeyL',keyCode:229,isComposing:true,bubbles:true,cancelable:true});return !input.dispatchEvent(e);});
+  assert.ok(consumed,'Korean IME physical L is consumed');await borderDialog.waitFor({state:'visible'});
+  await frame.evaluate(()=>{const input=document.querySelector('[aria-label="문서 편집 입력"]');input.dispatchEvent(new CompositionEvent('compositionstart',{bubbles:true,data:''}));input.dispatchEvent(new InputEvent('input',{bubbles:true,data:'ㅣ',inputType:'insertCompositionText',isComposing:true}));input.dispatchEvent(new CompositionEvent('compositionend',{bubbles:true,data:'ㅣ'}));});
+  await borderDialog.locator('.dialog-footer button').filter({hasText:'취소'}).click();
+  assert.deepEqual(await frame.evaluate(()=>Array.from(window.pwhEditor.export().bytes)),beforeShortcuts,'IME follow-up must not type into the document');
+  await page.mouse.move(box.x+point.x,box.y+point.y);await page.mouse.down();await page.mouse.move(box.x+second.x,box.y+second.y,{steps:12});await page.mouse.up();
+  await page.mouse.click(box.x+second.x,box.y+second.y,{button:'right'});
+  const contextMenu=frame.locator('.context-menu');await contextMenu.waitFor({state:'visible'});
+  const menuText=await contextMenu.innerText();assert.ok(menuText.indexOf('셀 속성')<menuText.indexOf('셀 테두리/배경(L)'),menuText);
+  await contextMenu.getByText('셀 테두리/배경(L)...',{exact:true}).click();
+  await borderDialog.waitFor({state:'visible'});await borderDialog.locator('.dialog-footer button').filter({hasText:'취소'}).click();
+  await page.mouse.click(box.x+point.x,box.y+point.y);await page.keyboard.press('F5');
   await page.keyboard.press('F5');await page.keyboard.press('ArrowRight');await page.keyboard.press('ArrowRight');
   assert.equal((await frame.evaluate(()=>window.pwhEditor.context())).table.selectedCells.length,3,'whole row selected');
   await page.keyboard.press('Delete');

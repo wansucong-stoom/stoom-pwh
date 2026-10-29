@@ -192,7 +192,7 @@ export async function exportPdf(input, output) {
 
 export function standaloneHtml(document) {
   const data = JSON.stringify(document).replaceAll('<', '\\u003c');
-  return `<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>pwh 미리보기</title>
+  return `<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pwh 미리보기</title>
 <style>*{box-sizing:border-box}body{margin:0;background:#e8ebef;color:#17212b;font:14px system-ui,sans-serif}header{position:sticky;top:0;z-index:1;padding:12px 20px;background:#fff;display:flex;gap:12px;align-items:center;border-bottom:1px solid #d7dde3}h1{font-size:15px;line-height:1.5;margin:0;flex:1;min-width:0;overflow-wrap:anywhere}select{font:inherit;padding:6px 10px;border:1px solid #c2cad2;border-radius:5px;background:#fff;color:inherit}main{padding:24px;overflow:auto}#paper{margin:0 auto;width:100%;max-width:1280px;box-shadow:0 3px 24px #15233322;background:white;line-height:0}img{width:100%;height:auto;display:block}@media(max-width:640px){header{padding:10px 12px;gap:8px;flex-wrap:wrap}h1{flex-basis:100%;font-size:14px}main{padding:12px}}</style>
 <header><h1 id="title"></h1><select id="page" aria-label="쪽 선택"></select><select id="zoom" aria-label="확대"><option value="fit">너비 맞춤</option><option value="100">100%</option><option value="125">125%</option><option value="150">150%</option></select></header>
 <main><div id="paper"><img id="image" alt="조판된 문서 페이지" draggable="false"></div></main>

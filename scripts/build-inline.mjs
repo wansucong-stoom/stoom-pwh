@@ -3,6 +3,128 @@ import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 const root=path.resolve(process.argv[2]);
 const studio=path.join(root,'rhwp-studio');
+// Keep Hancom-style commands in the shared editor rather than in either host.
+await fs.copyFile(new URL('../src/table-create-shortcut.mjs',import.meta.url),path.join(studio,'src/engine/pwh-table-create-shortcut.mjs'));
+await fs.copyFile(new URL('../src/cell-border-grid.mjs',import.meta.url),path.join(studio,'src/ui/pwh-cell-border-grid.mjs'));
+await fs.copyFile(new URL('../src/pwh-cell-border-dialog.ts',import.meta.url),path.join(studio,'src/ui/pwh-cell-border-dialog.ts'));
+await fs.copyFile(new URL('../src/pwh-cell-border-dialog.css',import.meta.url),path.join(studio,'src/ui/pwh-cell-border-dialog.css'));
+await fs.copyFile(new URL('../src/pwh-color-palette.ts',import.meta.url),path.join(studio,'src/ui/pwh-color-palette.ts'));
+await fs.copyFile(new URL('../src/pwh-color-palette.css',import.meta.url),path.join(studio,'src/ui/pwh-color-palette.css'));
+const paletteMainPath=path.join(studio,'src/main.ts');let paletteMain=await fs.readFile(paletteMainPath,'utf8');
+if(!paletteMain.includes('pwh common color palette')){paletteMain="// pwh common color palette\nimport {installPwhColorPalette} from './ui/pwh-color-palette';\ninstallPwhColorPalette();\n"+paletteMain;await fs.writeFile(paletteMainPath,paletteMain);}
+const modalPath=path.join(studio,'src/ui/dialog.ts');let modal=await fs.readFile(modalPath,'utf8');
+if(!modal.includes('pwh palette keyboard')){const anchor='      const target = e.target as HTMLElement | null;';if(!modal.includes(anchor))throw Error('Unsupported modal keyboard handling');modal=modal.replace(anchor,anchor+"\n      if (target?.closest('.pwh-color-popover')) return; // pwh palette keyboard");await fs.writeFile(modalPath,modal);}
+const toolbarPath=path.join(studio,'src/ui/toolbar.ts');let toolbar=await fs.readFile(toolbarPath,'utf8');
+if(!toolbar.includes('pwh common highlight palette')){const anchor="      this.highlightDropdown.classList.toggle('open');";if(!toolbar.includes(anchor))throw Error('Unsupported highlight palette');toolbar="// pwh common highlight palette\nimport {openPwhColorPalette} from './pwh-color-palette';\n"+toolbar.replace(anchor,"      this.highlightDropdown.classList.remove('open');\n      openPwhColorPalette(hiddenPicker,this.btnHighlight,{allowNone:true});");await fs.writeFile(toolbarPath,toolbar);}
+const endnotePath=path.join(studio,'src/ui/endnote-shape-dialog.ts');let endnote=await fs.readFile(endnotePath,'utf8');
+if(!endnote.includes('pwh common endnote colors')){const anchor='      this.toggleMenu(this.lineColorMenu);';if(!endnote.includes(anchor))throw Error('Unsupported endnote color menu');endnote=endnote.replace(anchor,"      this.closePopupMenus();\n      this.lineColorInput.click(); // pwh common endnote colors");await fs.writeFile(endnotePath,endnote);}
+const borderDialogPath=path.join(studio,'src/ui/cell-border-bg-dialog.ts');
+let borderDialog=await fs.readFile(borderDialogPath,'utf8');
+if(!borderDialog.includes('pwh Hancom-style border dialog')){
+ borderDialog="// pwh Hancom-style border dialog\nimport {createPwhBorderTab,installPwhBorderDialog,applyPwhBorderDialog} from './pwh-cell-border-dialog';\n"+borderDialog;
+ borderDialog=borderDialog.replace("    super(i18nText('dialog.cellBorderBg.diagonalPreviewWidthPx.title'), 460);", "    super(i18nText('dialog.cellBorderBg.diagonalPreviewWidthPx.title'), 640);");
+ borderDialog=borderDialog.replace('    this.populateFields();\n  }','    this.populateFields();\n    installPwhBorderDialog(this);\n  }');
+ const start=borderDialog.indexOf('  private buildBorderTab(): HTMLElement {'),end=borderDialog.indexOf('  private applyBorderDir(',start);
+ if(start<0||end<0)throw Error('Unsupported cell border dialog');
+ borderDialog=borderDialog.slice(0,start)+"  private buildBorderTab(): HTMLElement { return createPwhBorderTab(this); }\n\n"+borderDialog.slice(end);
+ const begin=borderDialog.indexOf('  protected onConfirm(): void {'),finish=borderDialog.indexOf('  // ─── DOM 헬퍼',begin);
+ if(begin<0||finish<0)throw Error('Unsupported cell border apply');
+ borderDialog=borderDialog.slice(0,begin)+"  protected onConfirm(): boolean { return applyPwhBorderDialog(this); }\n\n"+borderDialog.slice(finish);
+ await fs.writeFile(borderDialogPath,borderDialog);
+}
+if(!borderDialog.includes('pwh supported diagonals')){
+ const prior="      ['CENTER', 0b010, '단순 역대각선'],\n      ['CENTER_BELOW', 0b011, '아래쪽 분기 역대각선'],\n      ['ALL', 0b111, '전체 분기 역대각선'],";
+ const prior2="      ['CENTER', 0b010, '단순 대각선'],\n      ['CENTER_BELOW', 0b011, '아래쪽 분기 대각선'],\n      ['ALL', 0b111, '전체 분기 대각선'],";
+ if(!borderDialog.includes(prior)||!borderDialog.includes(prior2))throw Error('Unsupported diagonal controls');
+ borderDialog=borderDialog.replace(prior,"      ['CENTER', 0b010, '단순 역대각선'], // pwh supported diagonals").replace(prior2,"      ['CENTER', 0b010, '단순 대각선'],");
+ borderDialog=borderDialog.replace("    previewSection.appendChild(this.diagPreviewSvg);","    previewSection.appendChild(this.diagPreviewSvg);\n    const unsupported=document.createElement('p');unsupported.className='pwh-diag-unsupported';unsupported.hidden=true;unsupported.textContent='기존 문서의 분기 대각선은 보존되지만 한 줄로 표시됩니다.';previewSection.appendChild(unsupported);");
+ borderDialog=borderDialog.replace('    const diagonalSelected = this.hasDiagonalSelection();',"    const diagonalSelected = this.hasDiagonalSelection();\n    const unsupported=this.dialog.querySelector('.pwh-diag-unsupported') as HTMLElement|null;if(unsupported)unsupported.hidden=![0,2].includes(this.diagSlashBits)||![0,2].includes(this.diagBackSlashBits);");
+ // Correct the inverse above: the warning is visible only for multi-branch data.
+ borderDialog=borderDialog.replace("unsupported.hidden=![0,2].includes(this.diagSlashBits)||![0,2].includes(this.diagBackSlashBits)","unsupported.hidden=[0,2].includes(this.diagSlashBits)&&[0,2].includes(this.diagBackSlashBits)");
+ borderDialog=borderDialog.replace("        if (this.hasDiagonalSelection()) this.diagCenterLine = 'NONE';","        if (this.hasDiagonalSelection()) { this.diagCenterLine = 'NONE'; if (this.diagLineTypeSelect.value === '0') this.diagLineTypeSelect.value = '1'; }");
+ borderDialog=borderDialog.replace("        if (this.hasCenterLineSelection()) {\n          this.diagSlashBits = 0;", "        if (this.hasCenterLineSelection()) {\n          if (this.diagLineTypeSelect.value === '0') this.diagLineTypeSelect.value = '1';\n          this.diagSlashBits = 0;");
+ await fs.writeFile(borderDialogPath,borderDialog);
+}
+const contextShortcutPath=path.join(studio,'src/command/contextual-shortcut.ts');
+let contextShortcut=await fs.readFile(contextShortcutPath,'utf8');
+if(!contextShortcut.includes('pwh cell C and L shortcuts')){
+ const signature="  | { kind: 'dispatch'; commandId: 'table:cell-split' | 'table:cell-merge' }";
+ const ime="      || event.key === 'ㅡ'\n";
+ const before="  return null;\n}\n";
+ if(!contextShortcut.includes(signature)||!contextShortcut.includes(ime))throw Error('Unsupported cell shortcut resolver');
+ contextShortcut=contextShortcut.replace(signature,"  | { kind: 'dispatch'; commandId: 'table:cell-split' | 'table:cell-merge' | 'table:cell-props' | 'table:border-each' }");
+ contextShortcut=contextShortcut.replace(ime,ime+"      || event.key === 'ㅣ' || event.key === 'ㅊ' || event.key === 'ㅅ'\n");
+ const at=contextShortcut.lastIndexOf(before);if(at<0)throw Error('Unsupported cell shortcut resolver tail');
+ contextShortcut=contextShortcut.slice(0,at)+"  // pwh cell C and L shortcuts\n  if (key === 'c' || event.key === 'ㅊ' || code === 'keyc') return { kind: 'dispatch', commandId: 'table:cell-props' };\n  if (key === 'l' || event.key === 'ㅣ' || code === 'keyl') return { kind: 'dispatch', commandId: 'table:border-each' };\n"+contextShortcut.slice(at);
+ await fs.writeFile(contextShortcutPath,contextShortcut);
+}
+const tableCommandPath=path.join(studio,'src/command/commands/table.ts');
+let tableCommand=await fs.readFile(tableCommandPath,'utf8');
+if(!tableCommand.includes('pwh detailed table creation')){
+ const anchor='      dialog.show(params?.anchorEl as HTMLElement | undefined);';
+ if(!tableCommand.includes(anchor))throw Error('Unsupported table creation command');
+ tableCommand=tableCommand.replace(anchor,"      // pwh detailed table creation\n      dialog.onClose = () => restoreEditorFocus(ih);\n      if (params?.pwhDetailed) dialog.showInputDialog();\n      else dialog.show(params?.anchorEl as HTMLElement | undefined);");
+ tableCommand=tableCommand.replace("    id: 'table:border-each',\n    opensDialog: true,\n    label: t('command.table.borderEach.registryLabel'),\n    canExecute: inTable,", "    id: 'table:border-each',\n    opensDialog: true,\n    label: '셀 테두리/배경',\n    canExecute: inTableOrCellSelection,");
+ await fs.writeFile(tableCommandPath,tableCommand);
+}
+const tableDialogPath=path.join(studio,'src/ui/table-create-dialog.ts');
+let tableDialog=await fs.readFile(tableDialogPath,'utf8');
+if(!tableDialog.includes('pwh direct detail dialog')){
+ if(!tableDialog.includes('  private showInputDialog(): void {'))throw Error('Unsupported table creation dialog');
+ tableDialog=tableDialog.replace('  private showInputDialog(): void {','  // pwh direct detail dialog\n  onClose: (() => void) | null = null;\n  showInputDialog(): void {');
+ tableDialog=tableDialog.replace("    dlg.className = 'dialog-wrap';\n    dlg.style.width = '420px';", "    dlg.className = 'dialog-wrap';\n    dlg.setAttribute('role', 'dialog');\n    dlg.setAttribute('aria-label', '표 만들기');\n    dlg.style.width = '420px';");
+ tableDialog=tableDialog.replace('function close() { overlay.remove(); }','function close() { overlay.remove(); self.onClose?.(); }');
+ tableDialog=tableDialog.replace("const rowInput = createSpinnerRow(sec1, i18nText('dialog.tableCreate.createSpinnerRow.label'), 4, 1, 256);", "const rowInput = createSpinnerRow(sec1, i18nText('dialog.tableCreate.createSpinnerRow.label'), 5, 1, 256);");
+ tableDialog=tableDialog.replace("  row.appendChild(makeLabel(labelText));\n  const input = document.createElement('input');", "  const label = makeLabel(labelText);\n  row.appendChild(label);\n  const input = document.createElement('input');\n  input.id = `pwh-table-count-${Math.random().toString(36).slice(2)}`;\n  label.htmlFor = input.id;");
+ await fs.writeFile(tableDialogPath,tableDialog);
+}
+const tableInputPath=path.join(studio,'src/engine/input-handler.ts');
+let tableInput=await fs.readFile(tableInputPath,'utf8');
+if(!tableInput.includes("label: '셀 테두리/배경(L)...'")){
+ const anchor="      { type: 'command', commandId: 'table:cell-props', label: '셀 속성...' },";
+ if(!tableInput.includes(anchor))throw Error('Unsupported cell context menu');
+ tableInput=tableInput.replace(anchor,anchor+"\n      { type: 'command', commandId: 'table:border-each', label: '셀 테두리/배경(L)...' },");
+ tableInput=tableInput.replace("      { type: 'command', commandId: 'table:border-each', label: '셀 테두리/배경 - 각 셀마다 적용(E)...' },\n",'');
+ await fs.writeFile(tableInputPath,tableInput);
+}
+// Cell properties opened from a block must apply to the selected cells, while
+// leaving values that the user did not edit alone.
+const cellPropsPath=path.join(studio,'src/ui/table-cell-props-dialog.ts');
+let cellProps=await fs.readFile(cellPropsPath,'utf8');
+if(!cellProps.includes('pwh selected cell properties')){
+ const start=cellProps.indexOf('    // 셀 속성 수정\n    const newCellProps: Record<string, unknown> = {};');
+ const end=cellProps.indexOf('    // 셀 테두리/배경 (cell 모드',start);
+ if(start<0||end<0)throw Error('Unsupported cell properties dialog');
+ const fields=cellProps.slice(start,end);
+ cellProps=cellProps.slice(0,start)+'    const newCellProps = this.pwhCurrentCellProps();\n\n'+cellProps.slice(end);
+ const method='  private pwhCurrentCellProps(): Record<string, unknown> {\n'+fields+'    return newCellProps;\n  }\n\n';
+ cellProps=cellProps.replace('  protected onConfirm(): void {',method+'  protected onConfirm(): boolean | void {');
+ cellProps=cellProps.replace('  private mode: \'table\' | \'cell\';',"  private mode: 'table' | 'cell';\n  private pwhInitialCellProps: Record<string, unknown> = {};");
+ cellProps=cellProps.replace('    this.populateFields();\n  }','    this.populateFields();\n    this.pwhInitialCellProps = this.pwhCurrentCellProps();\n  }');
+ const anchor='    // 표 속성 수정\n';
+ if(!cellProps.includes(anchor))throw Error('Unsupported cell properties apply');
+ cellProps=cellProps.replace(anchor,`    // pwh selected cell properties
+    const blockHandler = this.services?.getInputHandler() as any;
+    if (this.mode === 'cell' && blockHandler?.isInCellSelectionMode?.()) {
+      const block = blockHandler.getSelectedCellBlock?.();
+      if (!block || !block.cellIndices?.length || block.cellPath) {
+        showToast({message:'이 셀 선택의 속성은 아직 변경할 수 없습니다.',durationMs:7000});
+        return false;
+      }
+      const changed = Object.fromEntries(Object.entries(newCellProps).filter(([key,value]) => JSON.stringify(value) !== JSON.stringify(this.pwhInitialCellProps[key])));
+      if (!Object.keys(changed).length) return true;
+      const cursor = blockHandler.getCursorPosition();
+      blockHandler.executeOperation({kind:'snapshot',operationType:'objectProps',operation:(wasm: WasmBridge)=>{
+        wasm.runInBatch(()=>{for(const index of block.cellIndices){const result=wasm.setCellProperties(block.sec,block.ppi,block.ci,index,changed as Partial<CellProperties>);if(!result?.ok)throw Error('셀 속성을 적용하지 못했습니다.');}});
+        return cursor;
+      }});
+      return true;
+    }
+
+`+anchor);
+ cellProps="// pwh selected cell properties\nimport {showToast} from './toast';\n"+cellProps;
+ await fs.writeFile(cellPropsPath,cellProps);
+}
 await fs.copyFile(new URL('../src/document-state-cache.mjs',import.meta.url),path.join(studio,'src/document-agent/pwh-document-state-cache.mjs'));
 const agentPath=path.join(studio,'src/document-agent/controller.ts');
 let agentSource=await fs.readFile(agentPath,'utf8');
@@ -62,6 +184,12 @@ if(hostCanvas.includes('pwh exact local face first')&&!hostCanvas.includes('cons
 await fs.copyFile(new URL('../src/clipboard-structure.mjs',import.meta.url),path.join(studio,'src/engine/pwh-clipboard-structure.mjs'));
 const keyboardPath=path.join(studio,'src/engine/input-handler-keyboard.ts');
 let keyboard=await fs.readFile(keyboardPath,'utf8');
+if(!keyboard.includes('pwh table create chord')){
+ const anchor='  if (!this.active) return;';
+ if(!keyboard.includes(anchor))throw Error('Unsupported editor keyboard handler');
+ keyboard='// pwh table create chord\nimport {handleTableCreateChord} from '+JSON.stringify('./pwh-table-create-shortcut.mjs')+';\n'+keyboard.replace(anchor,anchor+"\n  if (handleTableCreateChord(this, e)) return;");
+ await fs.writeFile(keyboardPath,keyboard);
+}
 await fs.copyFile(new URL('../src/cell-delete-selection.mjs',import.meta.url),path.join(studio,'src/pwh-cell-delete-selection.mjs'));
 await fs.copyFile(new URL('../src/cell-delete-dialog.ts',import.meta.url),path.join(studio,'src/pwh-cell-delete-dialog.ts'));
 if(!keyboard.includes('pwh cell delete confirmation')){

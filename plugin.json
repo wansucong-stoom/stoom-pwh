@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "pwh",
-  "version": "0.6.29",
+  "version": "0.6.30",
   "description": "AI에게 한글 문서 초안 작성과 기존 문서 수정을 요청하고, Codex 편집기에서 같은 문서를 함께 보며 수정하는 HWPX 협업 플러그인.",
   "author": {
     "name": "Wansucong the STOOM"
@@ -16,7 +16,7 @@
   "extensions": {
     "com.openai": {
       "interface": {
-        "displayName": "pwh",
+        "displayName": "Pwh",
         "shortDescription": "한글 문서를 AI와 함께 작성·편집",
         "longDescription": "AI에게 한글 문서의 초안 작성이나 기존 문서 수정을 요청하세요. Codex 데스크톱의 본문 편집기에서 직접 편집하고, 선택한 글·그림·표의 수정을 AI에게 요청해 같은 문서에 반영할 수 있습니다. 기관 양식을 활용하고 표 디자인을 통일하며, 편집 가능한 HWPX로 저장합니다. 편집·조판 엔진은 rhwp를 사용합니다.",
         "developerName": "Wansucong the STOOM",
@@ -24,7 +24,10 @@
         "capabilities": [
           "Interactive"
         ],
-        "defaultPrompt": "한글 문서의 초안을 작성하거나 기존 문서를 수정하고 우측 편집기에 열어 줘. 내가 선택한 부분에 AI 수정을 요청하면 같은 문서에 반영해 줘."
+        "defaultPrompt": "한글 문서의 초안을 작성하거나 기존 문서를 수정하고 우측 편집기에 열어 줘. 내가 선택한 부분에 AI 수정을 요청하면 같은 문서에 반영해 줘.",
+        "logo": "./assets/stoom.png",
+        "composerIcon": "./assets/stoom.png",
+        "brandColor": "#17394c"
       }
     }
   },

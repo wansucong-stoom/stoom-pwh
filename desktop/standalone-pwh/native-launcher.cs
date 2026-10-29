@@ -21,6 +21,7 @@ internal static class PwhDesktopLauncher
     [DllImport("user32.dll")] private static extern bool IsWindow(IntPtr window);
     [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr window, out uint process);
     [DllImport("user32.dll", SetLastError = true)] private static extern IntPtr SendMessageTimeout(IntPtr window, uint message, IntPtr wparam, IntPtr lparam, uint flags, uint timeout, out IntPtr result);
+    [DllImport("user32.dll", SetLastError = true)] private static extern bool PostMessage(IntPtr window, uint message, IntPtr wparam, IntPtr lparam);
     [DllImport("user32.dll")] private static extern bool DestroyIcon(IntPtr icon);
     [DllImport("shell32.dll", CharSet = CharSet.Unicode)] private static extern uint ExtractIconEx(string file, int index, IntPtr[] large, IntPtr[] small, uint count);
     [DllImport("shell32.dll", CharSet = CharSet.Unicode)] private static extern int SetCurrentProcessExplicitAppUserModelID(string applicationId);
@@ -126,7 +127,7 @@ internal static class PwhDesktopLauncher
             Console.WriteLine("PWH_WINDOW_BRANDED " + target.ToInt64());
             Console.Out.Flush();
             ManualResetEvent brandingWanted = new ManualResetEvent(true);
-            Thread closeReader = new Thread(delegate() { try { string command; while ((command = Console.In.ReadLine()) != null) { if(command == "closing") brandingWanted.Reset(); else if(command == "ready") brandingWanted.Set(); } } catch { } });
+            Thread closeReader = new Thread(delegate() { try { string command; while ((command = Console.In.ReadLine()) != null) { if(command == "closing") brandingWanted.Reset(); else if(command == "ready") brandingWanted.Set(); else if(command == "update-close") { uint currentProcess; GetWindowThreadProcessId(target, out currentProcess); if(IsWindow(target) && currentProcess == process) PostMessage(target, 0x0010, IntPtr.Zero, IntPtr.Zero); } } } catch { } });
             closeReader.IsBackground = true;
             closeReader.Start();
             bool propertiesCleared = false;

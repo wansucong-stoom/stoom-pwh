@@ -1,6 +1,6 @@
-# pwh 기능 범위와 제한
+# Pwh 기능 범위와 제한
 
-이 문서는 pwh가 편집기와 AI 연결에 추가한 주요 제한을 정리한다. 제한은 기능의 성격별로 묶은 것이며, rhwp 전체 기능에 대한 완전한 감사 결과는 아니다. 수동 편집과 AI 도구의 지원 범위는 다르다.
+이 문서는 Pwh가 편집기와 AI 연결에 추가한 주요 제한을 정리한다. 제한은 기능의 성격별로 묶은 것이며, rhwp 전체 기능에 대한 완전한 감사 결과는 아니다. 수동 편집과 AI 도구의 지원 범위는 다르다.
 
 ## 편집기 복사·붙여넣기
 
@@ -18,7 +18,7 @@
 
 ## 화면 표시
 
-- pwh의 내장 편집기는 현재 Canvas2D 조판 경로를 사용하며, rhwp Studio의 CanvasKit 전환은 번들에서 비활성화한다. 이는 문서의 표 구조를 지우는 제한과는 다르다.
+- Pwh의 내장 편집기는 현재 Canvas2D 조판 경로를 사용하며, rhwp Studio의 CanvasKit 전환은 번들에서 비활성화한다. 이는 문서의 표 구조를 지우는 제한과는 다르다.
 - 중첩 표를 넣으면 셀 경계 밖으로 넘친 내용이 이웃 셀에 겹치지 않도록 잘림 표시를 적용한다. 가려진 표의 열과 내용은 문서에 남는다. 보기 메뉴의 잘림 보기로 표시 방식을 변경할 수 있다.
 
 관련 구현은 `src/clipboard-structure.mjs`, `src/table-clipboard.mjs`, `src/nested-table-paste.mjs`, `src/table-content.mjs`, `src/table-style.mjs`, `src/studio-inline-adapter.ts`, `scripts/build-inline.mjs`를 참조한다.

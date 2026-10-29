@@ -365,7 +365,7 @@ function requestAiEdit() {
     } catch (error) { $('request-status').textContent = safeError(error); }
     return;
   }
-  const text = `pwh 문서에서 선택한 내용의 수정 요청입니다. 원본을 보존하고 현재 공유 세션에서 내용을 확인한 뒤 수정해 주세요.\n세션: ${state.sessionId}\n요청 ID: ${record.requestId}\n요청: ${record.comment || '선택한 내용을 수정해 주세요.'}`;
+  const text = `Pwh 문서에서 선택한 내용의 수정 요청입니다. 원본을 보존하고 현재 공유 세션에서 내용을 확인한 뒤 수정해 주세요.\n세션: ${state.sessionId}\n요청 ID: ${record.requestId}\n요청: ${record.comment || '선택한 내용을 수정해 주세요.'}`;
   const copied = navigator.clipboard?.writeText?.(text);
   if (copied && typeof copied.then === 'function') copied.then(() => { $('request-status').textContent = '요청을 복사했습니다. Codex 채팅에 붙여넣고 보내 주세요.'; }).catch(() => { $('request-manual').textContent = text; $('request-manual').hidden = false; $('request-status').textContent = '아래 요청을 복사해 Codex 채팅으로 보내 주세요.'; });
   else { $('request-manual').textContent = text; $('request-manual').hidden = false; $('request-status').textContent = '아래 요청을 복사해 Codex 채팅으로 보내 주세요.'; }

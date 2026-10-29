@@ -25,7 +25,7 @@ const appRoot=path.dirname(fileURLToPath(import.meta.url));
 const appData=process.env.PWH_STANDALONE_DATA||path.join(os.homedir(),'.stoom-pwh-standalone');
 const settingsPath=path.join(appData,'settings.json');
 const maxDocument=64*1024*1024;
-const toolAllowlist=new Set(['pwh_client_asset','pwh_client_fonts','pwh_client_font_asset','pwh_client_clipboard','pwh_client_image_asset','pwh_client_save_dialog','pwh_client_save_begin','pwh_client_save_chunk','pwh_client_save_commit','pwh_client_save_abort','pwh_editor_poll','pwh_editor_capture']);
+const toolAllowlist=new Set(['pwh_client_recent_colors','pwh_client_asset','pwh_client_fonts','pwh_client_font_asset','pwh_client_clipboard','pwh_client_image_asset','pwh_client_save_dialog','pwh_client_save_begin','pwh_client_save_chunk','pwh_client_save_commit','pwh_client_save_abort','pwh_editor_poll','pwh_editor_capture']);
 const agentTools=new Set(['pwh_editor_text_search','pwh_editor_text_edit','pwh_editor_state','pwh_editor_request','pwh_editor_result','pwh_editor_rewrite','pwh_editor_tables','pwh_editor_table_title','pwh_editor_table_style','pwh_editor_table_fill','pwh_editor_table_insert','pwh_editor_compose','pwh_editor_layout']);
 const parse=async(req,limit)=>{const parts=[];let n=0;for await(const part of req){n+=part.length;if(n>limit)throw Error('요청 크기가 허용 범위를 넘습니다.');parts.push(part);}return Buffer.concat(parts);};
 const json=(res,value,status=200)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(value));};

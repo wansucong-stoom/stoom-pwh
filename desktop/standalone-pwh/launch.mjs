@@ -27,12 +27,15 @@ if(!edge){server.close();throw Error('Microsoft Edge가 필요합니다.');}
 await fs.mkdir(dataRoot,{recursive:true});
 const child=spawn(edge,[`--app=${url}`,`--user-data-dir=${path.join(dataRoot,'browser-profile')}`,'--no-first-run'],{windowsHide:false,stdio:'ignore'});
 child.once('error',()=>server.close());child.once('exit',code=>{if(code)server.close();});
+server.once('close',()=>child.unref());
 if(nativeBranding){
  const brand=spawn(nativeLauncher,['--brand-window',nativeBranding.token],{windowsHide:true,stdio:['pipe','pipe','ignore']});
+ nativeBranding.helperPid=brand.pid;
  let output='';brand.stdout.on('data',chunk=>{output=(output+chunk).slice(-1024);if(/PWH_WINDOW_BRANDED \d+/.test(output))nativeBranding.complete=true;});
  brand.once('error',()=>nativeBranding.failed=true);brand.once('exit',()=>{if(!nativeBranding.complete)nativeBranding.failed=true;});
  nativeBranding.closing=()=>{if(!brand.stdin.destroyed)brand.stdin.write('closing\n');};
  nativeBranding.ready=()=>{if(!brand.stdin.destroyed)brand.stdin.write('ready\n');};
+ nativeBranding.requestClose=()=>{if(!brand.stdin.destroyed)brand.stdin.write('update-close\n');};
  brand.stdin.on('error',()=>{});
  server.once('close',()=>{nativeBranding.closing();brand.stdin.end();});
 }
