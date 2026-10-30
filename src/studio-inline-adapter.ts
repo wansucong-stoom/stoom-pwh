@@ -37,7 +37,7 @@ export function installInlineEditor(d:any) {
  const area=document.getElementById('editor-area');
  if(area){
   area.style.position='relative';
-  const style=document.createElement('style');style.textContent=`#pwh-ai-floating{position:absolute;left:26px;top:44px;z-index:35;display:flex;align-items:center;gap:7px;padding:10px 12px;border:1px solid #c4d4eb;border-radius:24px;background:var(--ui-surface,#fff);color:var(--ui-text,#222);box-shadow:0 3px 12px #0002;font:600 12px system-ui;cursor:pointer;white-space:nowrap}#pwh-ai-floating:disabled{opacity:.55;cursor:default}#pwh-ai-floating:focus-visible{outline:3px solid #4c8ee8;outline-offset:3px}#pwh-ai-floating:not(:disabled):hover{background:var(--ui-surface-muted,#edf3fc)}@media(max-width:980px){#pwh-ai-floating{left:24px;padding:10px;border-radius:50%}#pwh-ai-floating .pwh-ai-label{display:none}}`;document.head.appendChild(style);
+  const style=document.createElement('style');style.textContent=`#pwh-ai-floating{position:absolute;left:26px;top:44px;z-index:35;display:flex;align-items:center;gap:7px;padding:10px 12px;border:1px solid #c4d4eb;border-radius:24px;background:var(--ui-surface,#fff);color:var(--ui-text,#222);box-shadow:0 3px 12px #0002;font:600 12px system-ui;cursor:pointer;white-space:nowrap}#pwh-ai-floating:disabled{opacity:.55;cursor:default}#pwh-ai-floating:focus-visible{outline:3px solid #4c8ee8;outline-offset:3px}#pwh-ai-floating:not(:disabled):hover{background:var(--ui-surface-muted,#edf3fc)}@media(max-width:980px){#pwh-ai-floating{box-sizing:border-box;left:24px;width:38px;height:38px;justify-content:center;padding:0;border-radius:50%}#pwh-ai-floating .pwh-ai-label{display:none}}`;document.head.appendChild(style);
   const button=document.createElement('button');button.id='pwh-ai-floating';button.type='button';button.disabled=true;button.setAttribute('aria-label','AI 수정 요청');button.title='수정할 글을 드래그한 뒤 AI 수정을 요청하세요';
   button.innerHTML='<span aria-hidden="true">✦</span><span class="pwh-ai-label">AI 수정 요청</span>';
   button.addEventListener('pointerdown',event=>event.preventDefault());button.addEventListener('mousedown',event=>event.preventDefault());button.addEventListener('click',requestAI);area.appendChild(button);
@@ -58,6 +58,30 @@ export function installInlineEditor(d:any) {
    return {ok:true};
   },
   context:()=>read(false),
+  outputInfo:()=>{
+   const context:any=read(false),input=d.getInputHandler();
+   if(!context.ready||!context.documentState)throw Error('문서를 준비한 뒤 출력해 주세요.');
+   const count=d.wasm.pageCount,rect=input?.cursor?.getRect?.();
+   const current=Number.isInteger(rect?.pageIndex)?rect.pageIndex:0;
+   const selected=Array.from(new Set((context.selectionRects||[]).map((r:any)=>r.pageIndex).filter((p:any)=>Number.isInteger(p)&&p>=0&&p<count)));
+   return {documentState:context.documentState,pageCount:count,currentPage:current,selectedPages:selected,
+    pages:Array.from({length:count},(_,i)=>{const p=d.wasm.getPageInfo(i);return {pageIndex:i,pageNumber:p.pageNumber??i+1,sectionIndex:p.sectionIndex,width:p.width,height:p.height};})};
+  },
+  async renderOutputPng(index:number,dpi:number,expected:any){
+   const state=read(false).documentState;
+   if(!state||state.documentEpoch!==expected?.documentEpoch||state.changeSeq!==expected?.changeSeq)throw Error('출력 중 문서가 변경되었습니다. 다시 시도해 주세요.');
+   if(!Number.isInteger(index)||index<0||index>=d.wasm.pageCount||![96,150,200,300].includes(dpi))throw Error('출력할 쪽이나 해상도가 올바르지 않습니다.');
+   const page=d.wasm.getPageInfo(index),scale=dpi/96,w=Math.ceil(page.width*scale),h=Math.ceil(page.height*scale);
+   if(w<1||h<1||w*h>64*1024*1024)throw Error('선택한 해상도로 출력하기에는 쪽이 너무 큽니다.');
+   const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+   const context=canvas.getContext('2d');if(!context)throw Error('그림을 렌더링하지 못했습니다.');
+   context.fillStyle='#fff';context.fillRect(0,0,w,h);
+   d.wasm.renderPageToCanvasFiltered(index,canvas,scale,'all','print');
+   const blob:Blob|null=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+   if(!blob)throw Error('쪽을 그림으로 만들지 못했습니다.');
+   const after=read(false).documentState;if(after.documentEpoch!==state.documentEpoch||after.changeSeq!==state.changeSeq)throw Error('출력 중 문서가 변경되었습니다. 다시 시도해 주세요.');
+   return blob;
+  },
   interacting:()=>pointerActive||performance.now()-lastInputAt<1200,
   capture:async()=>{const c:any=structuredClone(read());c.target=await captureTarget(d.wasm,c);return c;},
   export:()=>d.wasm.exportHwpxWithReport(),

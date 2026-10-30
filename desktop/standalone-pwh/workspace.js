@@ -1,10 +1,10 @@
 (()=>{
  const $=id=>document.getElementById(id),tabs=new Map(),pending=new Map();
- let active=null,starting=false,closingTabs=0,updateLocked=false,closeLocked=false,closingWindow=false,allowUnload=false;
+ let active=null,starting=false,closingTabs=0,updateLocked=false,closeLocked=false,closingWindow=false,allowUnload=false,aiOpen=null,aiUserChoice=false;
  window.__pwhWorkspaceCloseProtocol=true;
  window.__pwhDropFiles=new Map();
  function publishWorkspace(){
-  const view={type:'pwh-workspace-view',tabs:[...tabs.values()].map(t=>({id:t.id,name:t.title||'새 문서',dirty:t.dirty,active:t.id===active})),locked:updateLocked||closeLocked||starting,status:$('workspace-status').textContent,update:{hidden:$('workspace-update').hidden,disabled:$('workspace-update').disabled,text:$('workspace-update').textContent},codex:{hidden:$('codex-plugin-retry').hidden,disabled:$('codex-plugin-retry').disabled}};
+  const view={type:'pwh-workspace-view',tabs:[...tabs.values()].map(t=>({id:t.id,name:t.title||'새 문서',dirty:t.dirty,active:t.id===active})),aiOpen,aiUserChoice,locked:updateLocked||closeLocked||starting,status:$('workspace-status').textContent,update:{hidden:$('workspace-update').hidden,disabled:$('workspace-update').disabled,text:$('workspace-update').textContent},codex:{hidden:$('codex-plugin-retry').hidden,disabled:$('codex-plugin-retry').disabled}};
   for(const tab of tabs.values())tab.frame.contentWindow?.postMessage(view,tab.origin);
  }
 
@@ -136,7 +136,9 @@
   if(state.type==='pwh-workspace-drop'){void openDroppedFiles(state.files);return;}
   if(state.type==='pwh-workspace-tabs-ready'){tab.tabsReady=true;if(active===tab.id)document.body.classList.add('integrated-tabs');publishWorkspace();return;}
   if(state.type==='pwh-workspace-ui'){
-   if(state.action==='activate'&&typeof state.id==='string')activate(state.id);
+   if(state.action==='ai-open'||state.action==='ai-close'){aiOpen=state.action==='ai-open';aiUserChoice=true;publishWorkspace();}
+   else if(state.action==='ai-default-closed'&&!aiUserChoice){aiOpen=false;publishWorkspace();}
+   else if(state.action==='activate'&&typeof state.id==='string')activate(state.id);
    else if(state.action==='close'&&typeof state.id==='string')void closeTab(state.id);
    else if(state.action==='new')$('new-tab').click();
    else if(state.action==='home')showHome({focus:true});

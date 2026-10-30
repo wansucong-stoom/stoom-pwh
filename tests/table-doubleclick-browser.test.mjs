@@ -1,0 +1,25 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs/promises';import os from 'node:os';import path from 'node:path';import {pathToFileURL} from 'node:url';import {createServer} from 'node:http';
+import {clientViewerHtml,registerClientDocument} from '../src/client-assets.mjs';import {handleRequest} from '../src/server.mjs';
+
+test('double-clicking a selected table opens table properties',{
+ skip:process.env.PWH_BROWSER_TESTS!=='1'?'Set browser and WASM paths':false,timeout:120000,
+},async()=>{
+ const {chromium}=await import(process.env.PWH_PLAYWRIGHT_MODULE||'playwright');const {default:init,HwpDocument}=await import(pathToFileURL(process.env.PWH_CORE_JS));await init({module_or_path:await fs.readFile(process.env.PWH_CORE_WASM)});
+ const dir=await fs.mkdtemp(path.join(os.tmpdir(),'pwh-table-dbl-')),file=path.join(dir,'table.hwpx'),doc=HwpDocument.createEmpty();doc.createBlankDocument();
+ const table=JSON.parse(doc.createTable(0,0,0,2,2));assert.equal(table.ok,true);assert.equal(JSON.parse(doc.insertTextInCell(0,table.paraIdx,table.controlIdx,0,0,0,'First word')).ok,true);await fs.writeFile(file,doc.exportHwpx());doc.free();
+ const registered=await registerClientDocument(file),html=await clientViewerHtml();const server=createServer(async(req,res)=>{try{
+  if(req.url==='/editor'){res.setHeader('content-type','text/html');return res.end(html);}if(req.url==='/rpc'){let body='';for await(const c of req)body+=c;res.setHeader('content-type','application/json');return res.end(JSON.stringify(await handleRequest(JSON.parse(body))));}
+  res.setHeader('content-type','text/html');res.end(`<style>html,body,iframe{width:100%;height:100%;margin:0;border:0}</style><iframe src="/editor"></iframe><script>addEventListener('message',async e=>{const m=e.data;if(m?.jsonrpc!=='2.0')return;if(m.method==='ui/notifications/initialized'){e.source.postMessage({jsonrpc:'2.0',method:'ui/notifications/tool-result',params:{structuredContent:${JSON.stringify(registered)}}},location.origin);return;}if(m.id===undefined)return;const r=m.method==='ui/initialize'?{jsonrpc:'2.0',id:m.id,result:{hostCapabilities:{}}}:await(await fetch('/rpc',{method:'POST',body:JSON.stringify(m)})).json();e.source.postMessage(r,location.origin);});</script>`);
+ }catch(error){res.statusCode=500;res.end(String(error.stack));}});await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ const browser=await chromium.launch({headless:true,executablePath:process.env.PWH_BROWSER_EXECUTABLE});
+ try{
+  const page=await browser.newPage({viewport:{width:1150,height:900}});await page.goto(`http://127.0.0.1:${server.address().port}`);const frame=page.frames().find(f=>f.url().endsWith('/editor'));await frame.waitForFunction(()=>window.pwhRecoveryReady?.()===true,null,{timeout:60000});
+  const outer=await page.locator('iframe').boundingBox();const geometry=await frame.evaluate(()=>{let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity,word=null;for(let y=130;y<850;y+=3)for(let x=80;x<1080;x+=3){if(!document.elementFromPoint(x,y)?.closest('#scroll-content'))continue;const h=window.rhwpStudio.collaboration.hitTest({clientX:x,clientY:y}),p=h.position;if(p?.parentParaIndex===undefined)continue;minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);const r=p.cursorRect;if(!word&&p.cellIndex===0&&p.charOffset===2&&r&&h.y>=r.y&&h.y<r.y+r.height)word={x,y};}return {minX,maxX,minY,maxY,word};});
+  if(process.env.PWH_TABLE_DEBUG){console.log('geometry',JSON.stringify(geometry));console.log('hit',JSON.stringify(await frame.evaluate(p=>window.rhwpStudio.collaboration.hitTest({clientX:p.x,clientY:p.y}),geometry.word)));await page.screenshot({path:process.env.PWH_TABLE_DEBUG});}
+  assert.ok(geometry.word);await page.mouse.click(outer.x+geometry.word.x,outer.y+geometry.word.y);assert.equal(await frame.locator('.modal-overlay').count(),0);
+  const bbox=await frame.evaluate(p=>{const h=window.rhwpStudio.collaboration.hitTest({clientX:p.x,clientY:p.y}),t=h.objectCandidates.find(v=>v.type==='table');return {left:p.x-h.x+t.x,top:p.y-h.y+t.y,width:t.w,height:t.h};},geometry.word);
+  let border=null;for(const x of [bbox.left-6,bbox.left-4,bbox.left-2,bbox.left,bbox.left+2,bbox.left+bbox.width+2]){for(const y of [bbox.top+4,bbox.top+bbox.height/2,bbox.top+bbox.height-3]){await page.mouse.click(outer.x+x,outer.y+y);const kind=(await frame.evaluate(()=>window.pwhEditor.context())).kind;if(process.env.PWH_TABLE_DEBUG)console.log('click',x,y,kind);if(kind==='table_object'){border={x,y};break;}}if(border)break;}
+  assert.ok(border,'outer border selects the table object');await page.mouse.dblclick(outer.x+border.x,outer.y+border.y);
+  await frame.locator('.modal-overlay .dialog-wrap').waitFor({state:'visible',timeout:5000});const title=await frame.locator('.modal-overlay .dialog-title').last().innerText();assert.match(title,/표|셀|속성/);
+ }finally{await browser.close();await new Promise(resolve=>server.close(resolve));await fs.rm(dir,{recursive:true,force:true});}
+});

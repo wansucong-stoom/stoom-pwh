@@ -13,6 +13,30 @@ if(!mouse.includes('pwh word and paragraph multiclick')){
  mouse="// pwh word and paragraph multiclick\n"+generatedImport+mouse.replace(anchor,"    this.cursor.moveToHit(hit);\n    this.cursor.resetPreferredX();\n    if (e.button === 0 && !e.ctrlKey && !e.altKey && !e.metaKey && selectMulticlick(this.cursor,this.wasm,e.detail)) {\n      this.active = true; this.cellSelectionDragCandidate = null; this.updateCaret(true); this.textarea.focus(); e.preventDefault(); return;\n    }\n    this.prepareClickHerePointerEntry?.(pageX);");
  await fs.writeFile(mousePath,mouse);
 }
+// Reuse the editor's object-properties command, including the complete nested
+// cell or header/footer reference, rather than constructing a second dialog.
+if(!mouse.includes('pwh image double-click properties')){
+ const anchor="  // 머리말/꼬리말 영역 더블클릭 → 편집 모드 진입";
+ if(!mouse.includes(anchor))throw Error('Unsupported picture double-click handler');
+ mouse=mouse.replace(anchor,"  // pwh image double-click properties\n  const selectedPicture = this.cursor.isInPictureObjectSelection() ? this.cursor.getSelectedPictureRef() : null;\n  if (selectedPicture?.type === 'image' && !selectedPicture.missing) {\n    e.preventDefault();\n    this.eventBus.emit('pwh-picture-properties-request');\n    return;\n  }\n\n"+anchor);
+ await fs.writeFile(mousePath,mouse);
+}
+// Double-clicking the selected table object opens table properties; a double
+// click inside editable cell text still belongs to word selection.
+if(!mouse.includes('pwh table double-click properties')){
+ const anchor='  // 머리말/꼬리말 영역 더블클릭 → 편집 모드 진입';
+ if(!mouse.includes(anchor))throw Error('Unsupported table double-click handler');
+ mouse=mouse.replace(anchor,`  // pwh table double-click properties
+  const selectedTable = this.cursor.isInTableObjectSelection() ? this.cursor.getSelectedTableRef() : null;
+  if (selectedTable && !selectedTable.cellPath?.length) {
+    e.preventDefault();
+    this.eventBus.emit('pwh-table-properties-request');
+    return;
+  }
+
+`+anchor);
+ await fs.writeFile(mousePath,mouse);
+}
 // Keep Hancom-style commands in the shared editor rather than in either host.
 await fs.copyFile(new URL('../src/table-create-shortcut.mjs',import.meta.url),path.join(studio,'src/engine/pwh-table-create-shortcut.mjs'));
 await fs.copyFile(new URL('../src/cell-border-grid.mjs',import.meta.url),path.join(studio,'src/ui/pwh-cell-border-grid.mjs'));
@@ -90,6 +114,18 @@ if(!tableDialog.includes('pwh direct detail dialog')){
 }
 const tableInputPath=path.join(studio,'src/engine/input-handler.ts');
 let tableInput=await fs.readFile(tableInputPath,'utf8');
+if(!tableInput.includes('pwh release deferred deletion resources')){
+ const before=`      const newPos = cmd.execute(this.wasm);
+      this.cursor.moveTo(newPos);`;
+ const after=`      // pwh release deferred deletion resources: the outer snapshot owns undo.
+      let newPos: DocumentPosition;
+      try { newPos = cmd.execute(this.wasm); } finally { cmd.discard(this.wasm); }
+      this.cursor.moveTo(newPos);`;
+ const section=tableInput.indexOf('  private deleteSelection('),end=tableInput.indexOf('  /** Undo 처리 */',section);
+ if(section<0||end<0||!tableInput.slice(section,end).includes(before))throw Error('Unsupported deferred deletion path');
+ tableInput=tableInput.slice(0,section)+tableInput.slice(section,end).replace(before,after)+tableInput.slice(end);
+ await fs.writeFile(tableInputPath,tableInput);
+}
 if(!tableInput.includes("label: '셀 테두리/배경(L)...'")){
  const anchor="      { type: 'command', commandId: 'table:cell-props', label: '셀 속성...' },";
  if(!tableInput.includes(anchor))throw Error('Unsupported cell context menu');
@@ -194,6 +230,112 @@ if(hostCanvas.includes('pwh exact local face first')&&!hostCanvas.includes('cons
 await fs.copyFile(new URL('../src/clipboard-structure.mjs',import.meta.url),path.join(studio,'src/engine/pwh-clipboard-structure.mjs'));
 const keyboardPath=path.join(studio,'src/engine/input-handler-keyboard.ts');
 let keyboard=await fs.readFile(keyboardPath,'utf8');
+// A failed or empty clipboard read must never delete the selected source text.
+if(!keyboard.includes('pwh reject empty plain paste before deletion')){
+ const before=`function pastePlainText(this: any, text: string, hasSelection: boolean): void {
+  if (hasSelection) {
+    this.deleteSelection({ deferRecord: true });
+  }
+  if (!text) return;`;
+ const after=`function pastePlainText(this: any, text: string, hasSelection: boolean): void {
+  // pwh reject empty plain paste before deletion
+  if (!text) return;
+  if (hasSelection) {
+    this.deleteSelection({ deferRecord: true });
+  }`;
+ if(!keyboard.includes(before))throw Error('Unsupported Studio plain-text paste guard');
+ keyboard=keyboard.replace(before,after);
+ await fs.writeFile(keyboardPath,keyboard);
+}
+// A selected range and its replacement form one undoable edit. Preserve the
+// selected first character's format even if the whole paragraph is replaced.
+if(!keyboard.includes('pwh atomic all plain paste')){
+ const start=keyboard.indexOf('function pastePlainText(this: any, text: string, hasSelection: boolean): void {');
+ const end=keyboard.indexOf('\n\nexport function prepareRhwpInternalClipboardHtml',start);
+ if(start<0||end<0)throw Error('Unsupported Studio plain paste function');
+ const replacement=String.raw`function pastePlainText(this: any, text: string, hasSelection: boolean): void {
+  // pwh reject empty plain paste before deletion
+  if (!text) return;
+  const lines = text.split(/\r?\n/);
+  // pwh atomic all plain paste
+  const selected = hasSelection ? this.cursor.getSelectionOrdered() : null;
+  if (hasSelection && !selected) return;
+  let inherited: any;
+  try { inherited = {...this.getCharPropertiesAtCursor(), ...(!hasSelection ? this.getPendingCharShape?.() : undefined)}; }
+  catch { return; }
+  const originalSelection = this.cursor.getSelection();
+  const originalPosition = this.cursor.getPosition();
+  const blockPhase = this.cursor.blockSelectionPhase();
+  const selectionBefore = selected && selected.start.parentParaIndex === undefined
+    ? {start: selected.start, end: selected.end, blockPhase} : null;
+  try {
+    this.executeOperation({kind: 'snapshot', operationType: 'pastePlainText', selectionBefore, operation: (wasm: WasmBridge) => {
+      if (hasSelection) this.deleteSelection({deferRecord: true});
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i]) {
+          const before = this.cursor.getPosition();
+          const command = new InsertTextCommand(before, lines[i], undefined, inherited);
+          const after = command.execute(wasm);
+          this.cursor.moveTo(after);
+          if (!hasSelection) this.advancePendingCharShapeAnchor?.(before, after);
+        }
+        if (i < lines.length - 1) {
+          const position = this.cursor.getPosition();
+          const command = this.cursor.isInCell() ? new SplitParagraphInCellCommand(position) : new SplitParagraphCommand(position);
+          this.cursor.moveTo(command.execute(wasm));
+        }
+      }
+      return this.cursor.getPosition();
+    }});
+  } catch (error) {
+    if (originalSelection) pwhRestorePasteSelection(this, originalSelection, blockPhase);
+    else this.cursor.moveTo(originalPosition);
+    console.warn('[paste] 선택 영역 교체 실패:', error);
+  }
+}`;
+ keyboard=keyboard.slice(0,start)+replacement+keyboard.slice(end);
+ await fs.writeFile(keyboardPath,keyboard);
+}
+// A rejected rich paste must roll back its snapshot before falling back to
+// plain text; a rejected HTML payload with no text must retain the source.
+if(!keyboard.includes('pwh restore selection after rolled-back paste')){
+ const anchor='function pastePlainText(this: any, text: string, hasSelection: boolean): void {';
+ if(!keyboard.includes(anchor))throw Error('Unsupported selection restore insertion point');
+ keyboard=keyboard.replace(anchor,`// pwh restore selection after rolled-back paste
+function pwhRestorePasteSelection(input: any, selection: any, blockPhase: number | null): void {
+  if (!selection) return;
+  input.cursor.clearSelection();
+  if (selection.anchor.parentParaIndex === undefined) input.cursor.selectRange(selection.anchor, selection.focus, blockPhase);
+  else { input.cursor.moveTo(selection.anchor); input.cursor.setAnchor(); input.cursor.moveTo(selection.focus); }
+  input.updateSelection();
+}
+`+anchor);
+ // Older in-progress overlay revisions restored only body selections.
+ keyboard=keyboard.replace('if (originalSelection && selected.start.parentParaIndex === undefined) this.cursor.selectRange(originalSelection.anchor, originalSelection.focus, blockPhase);','pwhRestorePasteSelection(this, originalSelection, blockPhase);');
+ await fs.writeFile(keyboardPath,keyboard);
+}
+if(!keyboard.includes('pwh rollback rejected rich paste')){
+ const from=keyboard.indexOf('function pasteHwpJsonModel('),to=keyboard.indexOf('/** 클립보드의 이미지 파일',from);
+ if(from<0||to<0)throw Error('Unsupported Studio rich-paste handlers');
+ let part=keyboard.slice(from,to);
+ const modelStart='function pasteHwpJsonModel(this: any, model: string, hasSelection: boolean): boolean {\n  let ok = false;';
+ const modelCell='if (p.parentParaIndex !== undefined) return undefined;';
+ const modelReject='if (!parsed.ok) return undefined;';
+ const modelCatch="    console.warn('[paste] 문서모델 붙여넣기 실패 — HTML 경로로 되돌아감:', error);";
+ const htmlStart='function pasteExternalHtml(this: any, html: string, text: string, hasSelection: boolean): void {';
+ const htmlReject="      console.warn('[paste] HTML 가져오기 거절(ok=false) — 텍스트로 폴백:', parsed.error ?? parsed);\n      return p;";
+ const htmlCatch="    console.warn('[paste] HTML 붙여넣기 실패 — 텍스트로 폴백:', error);";
+ if(![modelStart,modelCell,modelReject,modelCatch,htmlStart,htmlReject,htmlCatch].every(s=>part.includes(s)))throw Error('Unsupported Studio rich-paste failure paths');
+ part=part.replace(modelStart,modelStart+`\n  // pwh rollback rejected rich paste\n  const originalSelection = this.cursor.getSelection();\n  const blockPhase = this.cursor.blockSelectionPhase();`)
+  .replace(modelCell,'if (p.parentParaIndex !== undefined) return null;')
+  .replace(modelReject,"if (!parsed.ok) throw new Error('Document model was rejected');")
+  .replace(modelCatch,`    pwhRestorePasteSelection(this, originalSelection, blockPhase);\n`+modelCatch)
+  .replace(htmlStart,htmlStart+`\n  const originalSelection = this.cursor.getSelection();\n  const blockPhase = this.cursor.blockSelectionPhase();`)
+  .replace(htmlReject,"      throw new Error('HTML paste was rejected');")
+  .replace(htmlCatch,`    if (selectionConsumed) { pwhRestorePasteSelection(this, originalSelection, blockPhase); selectionConsumed = false; }\n`+htmlCatch);
+ keyboard=keyboard.slice(0,from)+part+keyboard.slice(to);
+ await fs.writeFile(keyboardPath,keyboard);
+}
 if(!keyboard.includes('pwh table create chord')){
  const anchor='  if (!this.active) return;';
  if(!keyboard.includes(anchor))throw Error('Unsupported editor keyboard handler');
@@ -256,6 +398,45 @@ if(keyboard.includes(oldImageGate)){
  keyboard=keyboard.replace(oldImageGate,'if (items && !preferStructuredClipboardHtml(html) && !extractHwpJsonModel(html)) {');
  await fs.writeFile(keyboardPath,keyboard);
 }
+// Image decoding and RTF image inlining yield to the event loop. Capture the
+// document revision, selection and DOM focus before yielding; never apply a
+// delayed paste to a different document or selection.
+if(!keyboard.includes('pwh guard asynchronous clipboard operations')){
+ const anchor='export function onPaste(this: any, e: ClipboardEvent): void {';
+ const helper=`// pwh guard asynchronous clipboard operations
+function pwhCapturePasteContext(input: any): any {
+  const state = (window as any).pwhEditor?.context?.();
+  return {state: state ? JSON.stringify([state.documentState, state.cursor, state.selection]) : null,
+    target: input.textarea, wasm: input.wasm};
+}
+function pwhPasteContextUnchanged(input: any, expected: any): boolean {
+  const state = (window as any).pwhEditor?.context?.();
+  return !!expected.state && !!state && input.wasm === expected.wasm && input.active &&
+    JSON.stringify([state.documentState, state.cursor, state.selection]) === expected.state &&
+    expected.target?.isConnected && expected.target.ownerDocument.activeElement === expected.target &&
+    expected.target.ownerDocument.hasFocus();
+}
+`;
+ const rtfStart=`    if (needsRtfImageInlining(html, rtf)) {
+      void (async () => {`;
+ const rtfEnd=`        pasteExternalHtml.call(this, merged, text, hasSelection);`;
+ const imageStart=`async function pasteImageFile(this: any, file: File, hasSelection: boolean): Promise<void> {
+  try {`;
+ const imageReady=`    const imageWidth=img.width,imageHeight=img.height;img.close();`;
+ if(!keyboard.includes(anchor)||!keyboard.includes(rtfStart)||!keyboard.includes(rtfEnd)||!keyboard.includes(imageStart)||!keyboard.includes(imageReady))throw Error('Unsupported Studio async clipboard path');
+ keyboard=keyboard.replace(anchor,helper+anchor)
+  .replace(rtfStart,`    if (needsRtfImageInlining(html, rtf)) {
+      const pasteContext = pwhCapturePasteContext(this);
+      void (async () => {`)
+  .replace(rtfEnd,`        if (!pwhPasteContextUnchanged(this, pasteContext)) return;
+        pasteExternalHtml.call(this, merged, text, hasSelection);`)
+  .replace(imageStart,`async function pasteImageFile(this: any, file: File, hasSelection: boolean): Promise<void> {
+  const pasteContext = pwhCapturePasteContext(this);
+  try {`)
+  .replace(imageReady,`${imageReady}
+    if (!pwhPasteContextUnchanged(this, pasteContext)) return;`);
+ await fs.writeFile(keyboardPath,keyboard);
+}
 await fs.copyFile(new URL('../src/table-style.mjs',import.meta.url),path.join(studio,'src/pwh-table-style.mjs'));
 await fs.copyFile(new URL('../src/table-content.mjs',import.meta.url),path.join(studio,'src/pwh-table-content.mjs'));
 await fs.copyFile(new URL('../src/text-edit.mjs',import.meta.url),path.join(studio,'src/pwh-text-edit.mjs'));
@@ -284,6 +465,146 @@ await fs.copyFile(new URL('../src/studio-selection.ts',import.meta.url),path.joi
 await fs.copyFile(new URL('../src/studio-inline-adapter.ts',import.meta.url),path.join(studio,'src/pwh-inline-adapter.ts'));
 let main=await fs.readFile(path.join(studio,'src/main.ts'),'utf8');
 if(!main.includes("import './style.css'"))main="import './style.css';\n"+main;
+if(!main.includes('pwh image double-click dispatch')){
+ const anchor="// 수식 더블클릭 → 수식 편집 대화상자";
+ if(!main.includes(anchor))throw Error('Unsupported picture command dispatch');
+ main=main.replace(anchor,"// pwh image double-click dispatch\neventBus.on('pwh-picture-properties-request', () => dispatcher.dispatch('insert:picture-props'));\n\n"+anchor);
+}
+if(!main.includes('pwh table double-click dispatch')){
+ const anchor="// 수식 더블클릭 → 수식 편집 대화상자";
+ if(!main.includes(anchor))throw Error('Unsupported table command dispatch');
+ main=main.replace(anchor,"// pwh table double-click dispatch\neventBus.on('pwh-table-properties-request', () => dispatcher.dispatch('table:cell-props'));\n\n"+anchor);
+}
+if(!main.includes('pwh desktop print command')){
+ const filter="? fileCommands.filter((cmd) => !EMBED_HIDDEN_FILE_COMMAND_IDS.includes(cmd.id))";
+ const prune='  for (const id of [...EMBED_HIDDEN_FILE_COMMAND_IDS, ...EMBED_HIDDEN_EDIT_COMMAND_IDS]) {';
+ if(!main.includes(filter)||!main.includes(prune))throw Error('Unsupported embedded print commands');
+ main=main.replace(filter,"? fileCommands.filter((cmd) => !EMBED_HIDDEN_FILE_COMMAND_IDS.includes(cmd.id) || ((window as any).__PWH_DESKTOP__ === true && cmd.id === 'file:print')) /* pwh desktop print command */");
+ main=main.replace(prune,prune+"\n    if ((window as any).__PWH_DESKTOP__ === true && id === 'file:print') continue;");
+ main+="\n// pwh desktop print dispatch\n(window as any).pwhDesktopPrint = (pages?: number[]) => dispatcher.dispatch('file:print', { pwhPages: pages });\n";
+}
+main=main.replace("(window as any).pwhDesktopPrint = () => dispatcher.dispatch('file:print');","(window as any).pwhDesktopPrint = (pages?: number[]) => dispatcher.dispatch('file:print', { pwhPages: pages });");
+const printDispatch="(window as any).pwhDesktopPrint = (pages?: number[]) => dispatcher.dispatch('file:print', { pwhPages: pages });";
+const directPrintDispatch="(window as any).pwhDesktopPrint = (pages?: number[], direct = false) => dispatcher.dispatch('file:print', { pwhPages: pages, pwhDirectPrint: direct });";
+if(main.includes(printDispatch))main=main.replace(printDispatch,directPrintDispatch);
+const nativePrintDispatch="(window as any).pwhDesktopPrint = (pages?: number[], direct = false, options?: any) => dispatcher.dispatch('file:print', { pwhPages: pages, pwhDirectPrint: direct, pwhPrintOptions: options });";
+main=main.replace("options?: {printer: string, copies: number}","options?: any");
+main=main.replace(directPrintDispatch,nativePrintDispatch);
+if(!main.includes(nativePrintDispatch))throw Error('Unsupported desktop print dispatch');
+const printCommandPath=path.join(studio,'src/command/commands/file.ts');
+let printCommand=await fs.readFile(printCommandPath,'utf8');
+if(!printCommand.includes('pwh selected print pages')){
+ const signature="  onProgress: (currentPage: number, pageCount: number) => void,\n): Promise<PrintPage[]> {";
+ const pages="  const pages = wasm.withPortableMetrics(() => Array.from({ length: wasm.pageCount }, (_, i) => ({";
+ const preview='async function runPrintPreview(services: CommandServices): Promise<void> {';
+ const invoke="    const printPages = await preparePrintPages(services, 'print', (current, total) => {";
+ const tail="      if (surface) setPrintPreviewLoading(surface, progressText);\n    });";
+ const command="    async execute(services) {\n      await runPrintPreview(services);\n    },";
+ if(![signature,pages,preview,invoke,tail,command].every(x=>printCommand.includes(x)))throw Error('Unsupported print rendering');
+ printCommand=printCommand.replace(signature,"  onProgress: (currentPage: number, pageCount: number) => void,\n  selectedPages?: number[], // pwh selected print pages\n): Promise<PrintPage[]> {");
+ printCommand=printCommand.replace(pages,"  const indexes = selectedPages ?? Array.from({ length: wasm.pageCount }, (_, i) => i);\n  if (!indexes.length || indexes.some(i => !Number.isInteger(i) || i < 0 || i >= wasm.pageCount)) throw new Error('인쇄할 쪽 범위를 확인해 주세요.');\n  const pages = wasm.withPortableMetrics(() => indexes.map((i) => ({");
+ printCommand=printCommand.replace(preview,"async function runPrintPreview(services: CommandServices, selectedPages?: number[]): Promise<void> {");
+ printCommand=printCommand.replace(tail,"      if (surface) setPrintPreviewLoading(surface, progressText);\n    }, selectedPages);");
+ printCommand=printCommand.replace(command,"    async execute(services, params) {\n      await runPrintPreview(services, params?.pwhPages as number[] | undefined);\n    },");
+ await fs.writeFile(printCommandPath,printCommand);
+}
+if(!printCommand.includes('pwh direct print')&&!printCommand.includes('pwh native print')){
+ const signature='async function runPrintPreview(services: CommandServices, selectedPages?: number[]): Promise<void> {';
+ const command='await runPrintPreview(services, params?.pwhPages as number[] | undefined);';
+ const ready='    keepPreviewOpen = true;\n\n    console.info(';
+ if(![signature,command,ready].every(x=>printCommand.includes(x)))throw Error('Unsupported direct print rendering');
+ printCommand=printCommand.replace(signature,'async function runPrintPreview(services: CommandServices, selectedPages?: number[], direct = false): Promise<void> {');
+ printCommand=printCommand.replace(command,'await runPrintPreview(services, params?.pwhPages as number[] | undefined, params?.pwhDirectPrint === true);');
+ printCommand=printCommand.replace(ready,`    keepPreviewOpen = true;
+    if (direct) { // pwh direct print
+      const readySurface = surface;
+      readySurface.window.addEventListener('afterprint', () => readySurface.close(), { once: true });
+      readySurface.window.focus();
+      readySurface.window.print();
+    }
+
+    console.info(`);
+ await fs.writeFile(printCommandPath,printCommand);
+}
+if(!printCommand.includes('pwh native print')){
+ const signature='async function runPrintPreview(services: CommandServices, selectedPages?: number[], direct = false): Promise<void> {';
+ const command='await runPrintPreview(services, params?.pwhPages as number[] | undefined, params?.pwhDirectPrint === true);';
+ const surface='const surfacePromise = createPrintPreviewSurface();';
+ const directBlock=`    if (direct) { // pwh direct print
+      const readySurface = surface;
+      readySurface.window.addEventListener('afterprint', () => readySurface.close(), { once: true });
+      readySurface.window.focus();
+      readySurface.window.print();
+    }`;
+ const errorLine="    const msg = err instanceof Error ? err.message : String(err);\n    console.error('[file:print]', msg);";
+ if(![signature,command,surface,directBlock,errorLine].every(x=>printCommand.includes(x)))throw Error('Unsupported native print rendering');
+ printCommand=printCommand.replace(signature,'async function runPrintPreview(services: CommandServices, selectedPages?: number[], direct = false, options?: {printer: string, copies: number}): Promise<void> {');
+ printCommand=printCommand.replace(command,'await runPrintPreview(services, params?.pwhPages as number[] | undefined, params?.pwhDirectPrint === true, params?.pwhPrintOptions as {printer: string, copies: number} | undefined);');
+ printCommand=printCommand.replace(surface,"const surfacePromise = createPrintPreviewSurface(direct ? { surfacePath: 'print.html?pwhDirect=1' } : undefined);");
+ printCommand=printCommand.replace(directBlock,`    if (direct) { // pwh native print
+      const readySurface = surface;
+      const native = (readySurface.window as any).pwhNative;
+      if (native) {
+        if (!options) throw new Error('프린터와 인쇄 매수를 확인하세요.');
+        try {
+          const result = await native.printDocument(options);
+          if (!result?.ok) throw new Error(result?.error || '인쇄를 시작하지 못했습니다.');
+          window.dispatchEvent(new CustomEvent('pwh-print-result', { detail: { ok: true } }));
+          readySurface.close();
+        } catch (error) { keepPreviewOpen = false; throw error; }
+      } else {
+        readySurface.window.addEventListener('afterprint', () => readySurface.close(), { once: true });
+        readySurface.window.focus();
+        readySurface.window.print();
+      }
+    } else {
+      const button = surface.document.getElementById('print-btn');
+      if (button) button.hidden = true;
+    }`);
+ printCommand=printCommand.replace(errorLine,"    const msg = err instanceof Error ? err.message : String(err);\n    if (direct) window.dispatchEvent(new CustomEvent('pwh-print-result', { detail: { ok: false, message: msg } }));\n    console.error('[file:print]', msg);");
+ await fs.writeFile(printCommandPath,printCommand);
+}
+// The native dialog owns printer, copies, range and per-job driver settings.
+// Do not put a second Pwh print-configuration dialog in front of it.
+printCommand=printCommand.replace("        if (!options) throw new Error('프린터와 인쇄 매수를 확인하세요.');\n",'');
+printCommand=printCommand.replace('const result = await native.printDocument(options);','const result = await native.printDocument();');
+if(!printCommand.includes('pwh native print cancellation')&&!printCommand.includes('pwh native print with integrated preview')){
+ const result="          if (!result?.ok) throw new Error(result?.error || '인쇄를 시작하지 못했습니다.');";
+ if(!printCommand.includes(result))throw Error('Unsupported native print result');
+ printCommand=printCommand.replace(result,`          if (result?.cancelled) { // pwh native print cancellation
+            window.dispatchEvent(new CustomEvent('pwh-print-result', { detail: { ok: false, cancelled: true } }));
+            readySurface.close();
+            return;
+          }
+${result}`);
+}
+printCommand=printCommand.replace('if (button) button.hidden = true;',"if (button) button.style.display = 'none';");
+// Pwh owns one combined preview/settings window. Its Print button submits the
+// already-previewed SVG sheets directly, without a second settings dialog.
+await fs.copyFile(new URL('../src/print-plan.mjs',import.meta.url),path.join(studio,'src/print-plan.mjs'));
+await fs.copyFile(new URL('../src/desktop-print-preview.mjs',import.meta.url),path.join(studio,'src/pwh-desktop-print-preview.mjs'));
+if(!printCommand.includes("import {showPwhPrintPreview}"))printCommand="import {showPwhPrintPreview} from '@/pwh-desktop-print-preview.mjs';\n"+printCommand;
+printCommand=printCommand.replaceAll('options?: {printer: string, copies: number}','options?: any').replaceAll('params?.pwhPrintOptions as {printer: string, copies: number} | undefined','params?.pwhPrintOptions as any');
+const previewFunction=printCommand.indexOf('async function runPrintPreview('),previewBody=printCommand.indexOf('    if (direct) { // pwh ',previewFunction),previewTail=printCommand.indexOf('\n    console.info(',previewBody);
+if(previewFunction<0||previewBody<0||previewTail<0)throw Error('Unsupported Pwh print preview boundary');
+printCommand=printCommand.slice(0,previewBody)+`    if (direct) { // pwh native print with integrated preview
+      const readySurface = surface;
+      const native = (readySurface.window as any).pwhNative;
+      if (native?.getPrinters) {
+        const result = await showPwhPrintPreview(readySurface.window, { ...options, printPages: printPages.map(page => ({ widthMm: page.widthMm, heightMm: page.heightMm })) });
+        window.dispatchEvent(new CustomEvent('pwh-print-result', { detail: result }));
+        readySurface.close();
+      } else {
+        readySurface.window.addEventListener('afterprint', () => readySurface.close(), { once: true });
+        readySurface.window.focus();
+        readySurface.window.print();
+      }
+    } else {
+      const button = surface.document.getElementById('print-btn');
+      if (button) button.style.display = 'none';
+    }
+`+printCommand.slice(previewTail);
+await fs.writeFile(printCommandPath,printCommand);
 if(!main.includes('pwh selection layout invalidation'))main+=`\n// pwh selection layout invalidation\nfor(const event of ['document-mutated','document-changed','document-page-invalidated','document-view-changed','local-fonts-changed'])eventBus.on(event,()=>wasm.invalidatePwhSelectionLayout());\n`;
 main=main.replace("'document-changed','page-invalidated','document-view-changed'","'document-changed','document-page-invalidated','document-view-changed'");
 if(!main.includes('pwh propagate host document initialization failure'))main=main.replace("console.error('[initDoc] 오류:', error);","console.error('[initDoc] 오류:', error);\n    // pwh propagate host document initialization failure\n    if(options.suppressDialogs)throw error;");

@@ -132,11 +132,13 @@ def main():
     for name in ('base-lock', 'base-archive', 'candidate-core', 'client-root', 'client-build-root', 'regression-evidence', 'output-dir'):
         parser.add_argument('--'+name, type=Path, required=True)
     parser.add_argument('--revision', type=int, required=True)
+    parser.add_argument('--release-tag', help='Product release tag containing the runtime assets, such as v0.6.34')
     parser.add_argument('--verify-only', action='store_true', help='Verify all inputs without creating output')
     parser.add_argument('--studio-replacement', type=Path, help='Verified complete Studio runtime tree; requires --studio-verification')
     parser.add_argument('--studio-verification', type=Path, help='JSON evidence for complete Studio replacement; includes treeSha256 and smokePassed=true')
     args = parser.parse_args(); project = Path(__file__).resolve().parents[1]
     if args.revision < 1: raise ValueError('Invalid revision')
+    if args.release_tag and not re.fullmatch(r'v\d+\.\d+\.\d+', args.release_tag): raise ValueError('Invalid product release tag')
     if args.output_dir.exists(): raise ValueError('Output directory already exists; choose a new path')
     lock = json.loads(regular(args.base_lock))
     if lock['schemaVersion'] != 1 or lock['platform'] != 'win32-x64' or not re.fullmatch(r'rhwp-0\.8\.7-pwh-r\d+', lock['id']): raise ValueError('Invalid base lock')
@@ -231,7 +233,8 @@ def main():
       'files':[{'path':name,'size':len(data),'sha256':sha(data)} for name,data in sorted(files.items())]}
     files['runtime-manifest.json'] = js(new_manifest)
     runtime = zip_new(args.output_dir/f'pwh-runtime-{identity}-windows-x64.zip', files)
-    tag = 'engine-'+identity; base_url = f'https://github.com/wansucong-stoom/stoom-pwh/releases/download/{tag}/'
+    tag = args.release_tag or 'engine-'+identity
+    base_url = f'https://github.com/wansucong-stoom/stoom-pwh/releases/download/{tag}/'
     runtime['url'] = base_url+runtime['file']
     verification = {'schemaVersion':1,'id':identity,'baseRuntimeArchiveVerified':True,'baseManifestFilesVerified':True,
       'coreBuildRecordVerified':True,'corePatchInputsVerified':True,'inlineClientFilesVerified':True,

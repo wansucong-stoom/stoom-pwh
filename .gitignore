@@ -15,6 +15,7 @@ dist/
 *.pdf
 *.zip
 *.ttf
+!desktop/standalone-pwh/Inter-variable.ttf
 *.ttc
 *.otf
 *.woff

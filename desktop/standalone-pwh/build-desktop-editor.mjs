@@ -2,7 +2,7 @@ import {promises as fs} from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {randomUUID,createHash} from 'node:crypto';
-const app=path.dirname(fileURLToPath(import.meta.url)),root=path.dirname(app),source=path.join(root,'pwh-build','rhwp-studio');
+const app=path.dirname(fileURLToPath(import.meta.url)),root=process.env.PWH_SOURCE_WORKSPACE?path.resolve(process.env.PWH_SOURCE_WORKSPACE):path.dirname(app),source=path.join(root,'pwh-build','rhwp-studio');
 const pwh=path.join(root,'release-source'),pwhPackage=JSON.parse(await fs.readFile(path.join(pwh,'package.json'),'utf8')),baseMarker=JSON.parse(await fs.readFile(path.join(pwh,'client','.pwh-install.json'),'utf8'));
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 if(baseMarker.kind!=='studio-inline'||baseMarker.version!==pwhPackage.version||sha(await fs.readFile(path.join(pwh,'client','editor.js')))!==baseMarker.files?.['editor.js'])throw Error('Pwh 원본 버전과 편집기 파일이 일치하지 않습니다.');

@@ -1,5 +1,6 @@
 import {promises as fs} from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import {spawn} from 'node:child_process';
 import {randomUUID,createHash} from 'node:crypto';
 import {fileURLToPath,pathToFileURL} from 'node:url';
@@ -68,10 +69,38 @@ async function preservePluginRuntime(installRoot,dataRoot){
  }finally{await fs.rm(stage,{recursive:true,force:true});}
 }
 
+// Git-installed Pwh reads its own configuration rather than the Desktop-owned
+// marketplace. Point an existing managed runtime at the same immutable engine,
+// without replacing any files in the previous runtime or moving documents.
+async function syncGitRuntime({installRoot,dataRoot,home,env}){
+ if(env.PWH_CONFIG||env.PWH_RUNTIME_ROOT)throw Error('Codex Pwh에 별도 엔진 설정이 있어 자동으로 변경하지 않았습니다.');
+ const base=path.join(home,'.stoom-pwh'),configPath=path.join(base,'config.json');
+ try{const stat=await fs.lstat(base);if(!stat.isDirectory()||stat.isSymbolicLink())throw Error('Codex Pwh 설정 폴더를 확인하지 못했습니다.');}catch(error){if(error.code!=='ENOENT')throw error;}
+ let original=null,config={schemaVersion:1};
+ try{const stat=await fs.lstat(configPath);if(!stat.isFile()||stat.isSymbolicLink())throw Error('Codex Pwh 설정 파일의 위치를 확인하지 못했습니다.');original=await fs.readFile(configPath,'utf8');config=JSON.parse(original.replace(/^\uFEFF/,''));if(!config||Array.isArray(config)||typeof config!=='object'||(config.schemaVersion!==undefined&&config.schemaVersion!==1))throw Error('Codex Pwh 설정 형식이 달라 변경하지 않았습니다.');}catch(error){if(error.code!=='ENOENT')throw error;}
+ const previous=typeof config.runtimeRoot==='string'?config.runtimeRoot:path.join(base);
+ if(previous.includes('${')||(!path.isAbsolute(previous)&&!/^~[\\/]/.test(previous)))throw Error('사용자 지정 엔진 설정은 자동으로 변경하지 않았습니다.');
+ const previousRoot=previous.startsWith('~')?path.resolve(home,previous.slice(2)):path.resolve(previous);
+ const within=(root,child)=>{const rel=path.relative(path.resolve(root),path.resolve(child));return rel===''||(!rel.startsWith('..'+path.sep)&&rel!=='..'&&!path.isAbsolute(rel));};
+ if(!within(base,previousRoot)&&!within(path.join(dataRoot,'codex-runtimes'),previousRoot))throw Error('사용자 지정 엔진 위치는 자동으로 변경하지 않았습니다.');
+ try{const stat=await fs.lstat(previousRoot);if(stat.isSymbolicLink()||!stat.isDirectory())throw Error('기존 엔진 위치를 확인하지 못했습니다.');const marker=JSON.parse(await fs.readFile(path.join(previousRoot,'core','.pwh-install.json'),'utf8'));if(marker.kind!=='core')throw Error('기존 엔진의 출처를 확인하지 못했습니다.');}catch(error){if(error.code!=='ENOENT'||original!==null)throw error;}
+ const {runtime}=await preservePluginRuntime(installRoot,dataRoot);
+ if(path.resolve(previousRoot)===path.resolve(runtime))return;
+ const next={...config,runtimeRoot:runtime,outputRoot:config.outputRoot||path.join(previousRoot,'documents'),fontRoot:config.fontRoot||path.join(previousRoot,'fonts')};
+ await fs.mkdir(base,{recursive:true});const temporary=path.join(base,`.pwh-config-${randomUUID()}.json`),backup=path.join(base,`.pwh-config-backup-${randomUUID()}.json`);let moved=false;
+ try{
+  await fs.writeFile(temporary,JSON.stringify(next,null,2)+'\n',{flag:'wx'});
+  if(original!==null){const stat=await fs.lstat(configPath);if(stat.isSymbolicLink()||!stat.isFile()||await fs.readFile(configPath,'utf8')!==original)throw Error('Codex Pwh 설정이 변경되어 자동 갱신을 중단했습니다.');await fs.rename(configPath,backup);moved=true;}
+  else{try{await fs.lstat(configPath);throw Error('Codex Pwh 설정이 변경되어 자동 갱신을 중단했습니다.');}catch(error){if(error.code!=='ENOENT')throw error;}}
+  try{await fs.rename(temporary,configPath);}catch(error){if(moved)await fs.rename(backup,configPath);throw error;}
+  // Keep the previous configuration as a recoverable local backup.
+ }finally{await fs.rm(temporary,{force:true});}
+}
+
 // Never remove or replace an existing marketplace. Git installations keep their
 // original source; new offline installations use a Desktop-owned local source.
-export async function setupCodexPlugin({installRoot=path.dirname(app),dataRoot=path.join(process.env.LOCALAPPDATA||process.env.HOME||app,'PwhDesktop'),executable,run=runCommand,env=process.env}={}){
- executable??=await discoverCodex({env});
+export async function setupCodexPlugin({installRoot=path.dirname(app),dataRoot=path.join(process.env.LOCALAPPDATA||process.env.HOME||app,'PwhDesktop'),home=os.homedir(),executable,run=runCommand,env=process.env}={}){
+ executable??=await discoverCodex({env,home});
  if(!executable)return {status:'not-installed',message:'Codex가 설치되면 Pwh 연결을 다시 시도할 수 있습니다.'};
  const target=JSON.parse(await fs.readFile(path.join(installRoot,'release-source','package.json'),'utf8')).version;
  if(!safeVersion(target))throw Error('설치된 Pwh 버전을 확인하지 못했습니다.');
@@ -79,7 +108,10 @@ export async function setupCodexPlugin({installRoot=path.dirname(app),dataRoot=p
  const call=args=>run(executable,[...args,'--json'],{cwd:dataRoot,env});
  const current=await call(['plugin','list']);
  const installed=(current.installed||[]).find(x=>x.pluginId==='pwh@pwh');
- if(installed&&safeVersion(installed.version)&&compare(installed.version,target)>=0)return {status:'ready',version:installed.version,message:compare(installed.version,target)>0?'Codex에 더 새로운 Pwh가 있어 그대로 유지했습니다.':'Codex Pwh가 이미 같은 버전입니다.'};
+ if(installed&&safeVersion(installed.version)&&compare(installed.version,target)>=0){
+  if(compare(installed.version,target)===0&&installed.marketplaceSource?.sourceType==='git'&&isOfficialGit(installed.marketplaceSource.source))await syncGitRuntime({installRoot,dataRoot,home,env});
+  return {status:'ready',version:installed.version,message:compare(installed.version,target)>0?'Codex에 더 새로운 Pwh가 있어 그대로 유지했습니다.':'Codex Pwh가 이미 같은 버전입니다.'};
+ }
  const source=installed?.marketplaceSource;
  if(source?.sourceType==='git'&&isOfficialGit(source.source)){
   await call(['plugin','marketplace','upgrade','pwh']);
@@ -95,6 +127,7 @@ export async function setupCodexPlugin({installRoot=path.dirname(app),dataRoot=p
  const result=await call(['plugin','list']);
  const verified=(result.installed||[]).find(x=>x.pluginId==='pwh@pwh');
  if(!verified||verified.version!==target)throw Error(`Codex Pwh ${target} 설치를 확인하지 못했습니다. 인터넷 연결과 릴리스를 확인한 후 다시 시도해 주세요.`);
+ if(source?.sourceType==='git'&&isOfficialGit(source.source))await syncGitRuntime({installRoot,dataRoot,home,env});
  return {status:'ready',version:target,message:'Codex Pwh와 스킬을 같은 버전으로 연결했습니다. 새 대화에서 사용해 주세요.'};
 }
 

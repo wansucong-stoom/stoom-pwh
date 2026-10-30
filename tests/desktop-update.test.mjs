@@ -9,7 +9,8 @@ const release={tag_name:'v0.6.31',draft:false,prerelease:false,assets:[asset('0.
 test('only a newer versioned installer from the expected GitHub release with a digest is offered',async()=>{
  assert.equal(compareVersions('0.1.10','0.1.9'),1);assert.equal(compareVersions('0.2.0','0.1.99'),1);assert.throws(()=>compareVersions('1.2','1.2.0'));
  assert.equal(releaseInstaller(release,'0.1.9').version,'0.1.10');assert.equal(releaseInstaller({...release,prerelease:true},'0.1.9'),null);
- for(const bad of [{...asset(),digest:null},{...asset(),browser_download_url:'https://example.com/PwhDesktop-0.1.10.msi'},{...asset(),size:300*1024*1024}])assert.equal(releaseInstaller({...release,assets:[bad]},'0.1.9'),null);
+ assert.equal(releaseInstaller({...release,assets:[{...asset(),size:300*1024*1024}]},'0.1.9').size,300*1024*1024,'The bundled app runtime remains eligible for a verified update');
+ for(const bad of [{...asset(),digest:null},{...asset(),browser_download_url:'https://example.com/PwhDesktop-0.1.10.msi'},{...asset(),size:513*1024*1024}])assert.equal(releaseInstaller({...release,assets:[bad]},'0.1.9'),null);
  let calls=0;const result=await checkForDesktopUpdate('0.1.9',{fetchImpl:async(url,options)=>{calls++;assert.match(url,/\/releases\/latest$/);assert.equal(options.redirect,'error');return new Response(JSON.stringify(release));}});assert.equal(calls,1);assert.equal(result.version,'0.1.10');
 });
 test('download follows only approved HTTPS hosts and verifies size and SHA before returning a file',async()=>{

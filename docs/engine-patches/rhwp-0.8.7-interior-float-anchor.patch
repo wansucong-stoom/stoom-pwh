@@ -1,0 +1,147 @@
+--- a/src/renderer/float_placement.rs
++++ b/src/renderer/float_placement.rs
+@@ -2309,6 +2309,21 @@
+         .then_some(position)
+     }
+ 
++    /// A floating table can be anchored between two runs on the same line.
++    /// Only accept an explicit scalar mapping and visible text on both sides;
++    /// line geometry is checked by the common stored/computed host path.
++    fn text_interior_control_position(para: &Paragraph, control_index: usize) -> Option<usize> {
++        let text_len = para.text.chars().count();
++        if text_len < 2 || para.char_offsets.len() != text_len || para.text.contains('\n') {
++            return None;
++        }
++        let position = *para.control_text_positions().get(control_index)?;
++        if position == 0 || position >= text_len { return None; }
++        let visible = |ch: char| !ch.is_whitespace() && !ch.is_control() && ch != '\u{fffc}';
++        (para.text.chars().take(position).any(visible)
++            && para.text.chars().skip(position).any(visible)).then_some(position)
++    }
++
+     /// Preserve the same formatted before/body/after box in whole fit and paint.
+     /// No text line is inferred from an empty control-only host.
+     #[allow(clippy::too_many_arguments)]
+@@ -2386,6 +2401,20 @@
+         Self::from_computed_host_at(char_pos, para, table, text_origin, lines, table_height, dpi)
+     }
+ 
++    pub fn from_computed_interior_host(
++        para: &Paragraph,
++        table: &Table,
++        control_index: usize,
++        text_origin: f64,
++        lines: &[ParagraphHostLine],
++        table_height: f64,
++        dpi: f64,
++    ) -> Option<Self> {
++        if lines.len() != 1 { return None; }
++        let char_pos = Self::text_interior_control_position(para, control_index)?;
++        Self::from_computed_host_at(char_pos, para, table, text_origin, lines, table_height, dpi)
++    }
++
+     fn from_computed_host_at(
+         char_pos: usize,
+         para: &Paragraph,
+@@ -2498,6 +2527,20 @@
+         Self::from_stored_host_at(para, table, control_index, text_origin, table_height, dpi)
+     }
+ 
++    pub fn from_stored_interior_host(
++        para: &Paragraph,
++        table: &Table,
++        control_index: usize,
++        text_origin: f64,
++        table_height: f64,
++        dpi: f64,
++    ) -> Option<Self> {
++        if para.line_segs.len() != 1 { return None; }
++        Self::text_interior_control_position(para, control_index)?;
++        Self::from_stored_host_at(para, table, control_index, text_origin, table_height, dpi)
++    }
++
++
+     /// 저장 글 앞 제어문자와 선행 호스트 줄이 동일한 앵커 계약에 속하는지 확인한다.
+     pub(crate) fn stored_head_host_lines_are_valid(
+         para: &Paragraph,
+@@ -2561,6 +2604,50 @@
+                 pair[1].vertical_pos >= pair[0].vertical_pos
+                     && pair[1].text_start >= pair[0].text_start
+             })
++    }
++}
++
++#[cfg(test)]
++mod pwh_interior_float_tests {
++    use super::*;
++    use crate::model::paragraph::LineSeg;
++
++    fn fixture() -> (Paragraph, Table) {
++        let table = Table { common: CommonObjAttr {
++            treat_as_char: false, text_wrap: TextWrap::TopAndBottom,
++            vert_rel_to: VertRelTo::Para, vert_align: VertAlign::Top,
++            vertical_offset: 1800, ..Default::default()
++        }, ..Default::default() };
++        let para = Paragraph {
++            text: "abcXYZ".into(), char_offsets: vec![0, 1, 2, 11, 12, 13],
++            line_segs: vec![LineSeg { vertical_pos: 1000, line_height: 1000, ..Default::default() }],
++            controls: vec![Control::Table(Box::new(table.clone()))], ..Default::default()
++        };
++        (para, table)
++    }
++
++    #[test]
++    fn single_line_interior_control_uses_paragraph_anchor_and_offset() {
++        let (para, table) = fixture();
++        assert_eq!(ParagraphFloatPlacement::text_interior_control_position(&para, 0), Some(3));
++        let stored = ParagraphFloatPlacement::from_stored_interior_host(&para, &table, 0, 100.0, 50.0, 96.0).unwrap();
++        assert!((stored.table_top - 124.0).abs() < 0.001);
++        let lines = [ParagraphHostLine { char_start: 0, top: 0.0, height: 1000.0 * 96.0 / 7200.0 }];
++        let computed = ParagraphFloatPlacement::from_computed_interior_host(&para, &table, 0, 100.0, &lines, 50.0, 96.0).unwrap();
++        assert!((computed.table_top - 124.0).abs() < 0.001);
++    }
++
++    #[test]
++    fn interior_rule_rejects_unproven_mapping_multiline_and_overlap() {
++        let (para, table) = fixture();
++        let mut missing = para.clone(); missing.char_offsets.clear();
++        assert!(ParagraphFloatPlacement::text_interior_control_position(&missing, 0).is_none());
++        let mut multi = para.clone(); multi.line_segs.push(LineSeg {vertical_pos: 2600, line_height: 1000, ..Default::default()});
++        assert!(ParagraphFloatPlacement::from_stored_interior_host(&multi, &table, 0, 100.0, 50.0, 96.0).is_none());
++        let mut short_offset = table.clone(); short_offset.common.vertical_offset = 400;
++        assert!(ParagraphFloatPlacement::from_stored_interior_host(&para, &short_offset, 0, 100.0, 50.0, 96.0).is_none());
++        let lines = [ParagraphHostLine {char_start: 0, top: 0.0, height: 13.3}, ParagraphHostLine {char_start: 3, top: 16.0, height: 13.3}];
++        assert!(ParagraphFloatPlacement::from_computed_interior_host(&para, &table, 0, 100.0, &lines, 50.0, 96.0).is_none());
+     }
+ }
+ 
+--- a/src/renderer/typeset/table/block/entry.rs
++++ b/src/renderer/typeset/table/block/entry.rs
+@@ -1611,6 +1611,11 @@
+                         self.dpi,
+                     )
+                     })
++                    .or_else(|| {
++                        crate::renderer::float_placement::ParagraphFloatPlacement::from_computed_interior_host(
++                            para, table, ctrl_idx, text_origin, lines, whole_placement_height, self.dpi,
++                        )
++                    })
+                 } else {
+                     crate::renderer::float_placement::ParagraphFloatPlacement::from_stored_host(
+                         para,
+@@ -1630,6 +1635,15 @@
+                             }),
+                             whole_placement_height,
+                             self.dpi,
++                        )
++                    })
++                    .or_else(|| {
++                        crate::renderer::float_placement::ParagraphFloatPlacement::from_stored_interior_host(
++                            para, table, ctrl_idx,
++                            source_text_origin.map_or(placement_para_start_height, |origin| {
++                                origin - if placement_para_start_height > 0.0 { fmt.spacing_before } else { 0.0 }
++                            }),
++                            whole_placement_height, self.dpi,
+                         )
+                     })
+                     .map(|mut placement| {

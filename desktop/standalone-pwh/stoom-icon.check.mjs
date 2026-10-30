@@ -1,25 +1,31 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
+import {createHash} from 'node:crypto';
 
-test('STOOM ICO has complete transparent native DIB frames with safe canvas margins',async()=>{
- const ico=await fs.readFile(new URL('./stoom.ico',import.meta.url)),svg=await fs.readFile(new URL('./stoom-mark.svg',import.meta.url),'utf8');
- const colors=new Set([...svg.matchAll(/stroke="(#[\da-f]{6})"/gi)].map(match=>match[1].toLowerCase()));assert.equal(colors.size,1);
- const color=[...colors][0].slice(1),expected=[0,2,4].map(offset=>parseInt(color.slice(offset,offset+2),16)),sizes=[16,24,32,48,64,128,256];
+const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
+test('Pwh icons use the approved STOOM product identity at every native size',async()=>{
+ const ico=await fs.readFile(new URL('./stoom.ico',import.meta.url));
+ const original=await fs.readFile(new URL('./stoom-mark-original.css',import.meta.url),'utf8');
+ const product=await fs.readFile(new URL('./stoom-product-marks.css',import.meta.url),'utf8');
+ assert.match(original,/border:\s*2px solid #e3faff/i);
+ assert.match(original,/box-shadow:\s*0 0 18px rgb\(103 216 255 \/ 38%\)/i);
+ assert.match(original,/transform:\s*rotate\(-35deg\)/i);
+ assert.match(product,/font-size:10\.5px/);assert.match(product,/font-weight:850/);
+ const sizes=[16,20,24,32,40,48,64,96,128,256];
+ assert.equal(hash(ico),'dbf6747c80fb86da182e67ab81e7bfdcfe21fc68dc4855dd8902b87030d51f6e');
  assert.equal(ico.readUInt16LE(0),0);assert.equal(ico.readUInt16LE(2),1);assert.equal(ico.readUInt16LE(4),sizes.length);
- let previousEnd=6+16*sizes.length;
- for(const [index,size]of sizes.entries()){
-  const entry=6+16*index,width=ico[entry]||256,height=ico[entry+1]||256,bytes=ico.readUInt32LE(entry+8),offset=ico.readUInt32LE(entry+12),maskStride=Math.ceil(size/32)*4;
-  assert.equal(width,size);assert.equal(height,size);assert.equal(ico.readUInt16LE(entry+4),1);assert.equal(ico.readUInt16LE(entry+6),32);assert.equal(offset,previousEnd);assert.equal(bytes,40+size*size*4+maskStride*size);assert.ok(offset+bytes<=ico.length);previousEnd=offset+bytes;
-  const dib=ico.subarray(offset,offset+bytes);assert.equal(dib.readUInt32LE(0),40);assert.equal(dib.readInt32LE(4),size);assert.equal(dib.readInt32LE(8),size*2);assert.equal(dib.readUInt16LE(12),1);assert.equal(dib.readUInt16LE(14),32);assert.equal(dib.readUInt32LE(16),0);
-  let minX=size,minY=size,maxX=-1,maxY=-1,inkPixels=0;
-  for(let y=0;y<size;y++)for(let x=0;x<size;x++){
-   const p=40+((size-1-y)*size+x)*4,alpha=dib[p+3],masked=Boolean(dib[40+size*size*4+(size-1-y)*maskStride+(x>>3)]&(0x80>>(x&7)));
-   assert.equal(masked,alpha===0,`AND mask mismatch at ${size}:${x},${y}`);
-   if(alpha){inkPixels++;minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);}
-   if(alpha>=128){const rgb=[dib[p+2],dib[p+1],dib[p]];for(let c=0;c<3;c++)assert.ok(Math.abs(rgb[c]-expected[c])<=2,`STOOM color changed at ${size}`);}
-  }
-  assert.ok(inkPixels>0);assert.ok(minX>=1&&minY>=1&&maxX<size-1&&maxY<size-1,`Frame ${size} touches an edge`);
+ let offset=6+16*sizes.length;
+ for(const [index,size] of sizes.entries()){
+  const entry=6+16*index,width=ico[entry]||256,height=ico[entry+1]||256,length=ico.readUInt32LE(entry+8);
+  assert.equal(width,size);assert.equal(height,size);assert.equal(ico.readUInt16LE(entry+4),1);assert.equal(ico.readUInt16LE(entry+6),32);assert.equal(ico.readUInt32LE(entry+12),offset);
+  const frame=await fs.readFile(new URL(`../../assets/branding/pwh/icon-${size}.png`,import.meta.url));
+  assert.deepEqual(ico.subarray(offset,offset+length),frame,`Icon ${size}px diverged from the approved frame`);offset+=length;
  }
- assert.equal(previousEnd,ico.length);
+ assert.equal(offset,ico.length);
+ const listing=await fs.readFile(new URL('../../assets/stoom.png',import.meta.url));
+ const largest=await fs.readFile(new URL('../../assets/branding/pwh/icon-256.png',import.meta.url));
+ assert.deepEqual(listing,largest);
+ const app=await fs.readFile(new URL('./app.html',import.meta.url),'utf8');assert.match(app,/>Pwh<\/span>/);
+ const workspace=await fs.readFile(new URL('./workspace.html',import.meta.url),'utf8');assert.match(workspace,/href="stoom.ico"/);assert.doesNotMatch(workspace,/<button[^>]*id="workspace-home"[^>]*>[\s\S]*?class="stoom-badge"[\s\S]*?<\/button>/);
 });

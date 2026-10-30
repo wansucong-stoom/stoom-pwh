@@ -9,7 +9,7 @@ version. Node itself is a prerequisite, not bundled.
 For an offline initial installation:
 
 ```powershell
-node scripts/setup.mjs --runtime-root C:\pwh-runtime-r6 --runtime-archive C:\backups\pwh-runtime-rhwp-0.8.7-pwh-r6-windows-x64.zip --skip-download
+node scripts/setup.mjs --runtime-root C:\pwh-runtime-r7 --runtime-archive C:\backups\pwh-runtime-rhwp-0.8.7-pwh-r7-windows-x64.zip --skip-download
 ```
 
 The ZIP hash, identity, file names, expanded sizes, component licenses and every

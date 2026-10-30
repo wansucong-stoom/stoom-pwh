@@ -159,7 +159,8 @@ async function cachedDownload(root, pin, options, localFile) {
 }
 
 /** Bounded ZIP reader for the verified release and font archives; no external unzip is needed. */
-export function zipEntries(bytes) {
+export function zipEntries(bytes, {maxMember = MAX_MEMBER} = {}) {
+  if (!Number.isSafeInteger(maxMember) || maxMember < 1 || maxMember > 300 * 1024 * 1024) throw new Error('Invalid ZIP member limit.');
   let end = -1;
   for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 65_557); i--) {
     if (bytes.readUInt32LE(i) === 0x06054b50 && i + 22 + bytes.readUInt16LE(i + 20) === bytes.length) { end = i; break; }
@@ -176,7 +177,7 @@ export function zipEntries(bytes) {
     const compressed = bytes.readUInt32LE(cursor + 20), size = bytes.readUInt32LE(cursor + 24);
     const nameLength = bytes.readUInt16LE(cursor + 28), extraLength = bytes.readUInt16LE(cursor + 30), commentLength = bytes.readUInt16LE(cursor + 32);
     const offset = bytes.readUInt32LE(cursor + 42), next = cursor + 46 + nameLength + extraLength + commentLength;
-    if (next > centralEnd || flags & 1 || ![0, 8].includes(method) || size > MAX_MEMBER) throw new Error('Unsupported ZIP member encoding or size.');
+    if (next > centralEnd || flags & 1 || ![0, 8].includes(method) || size > maxMember) throw new Error('Unsupported ZIP member encoding or size.');
     const name = bytes.subarray(cursor + 46, cursor + 46 + nameLength).toString(flags & 0x800 ? 'utf8' : 'latin1');
     const unixMode = bytes.readUInt32LE(cursor + 38) >>> 16;
     if ((unixMode & 0xf000) === 0xa000) throw new Error('Archive symlinks are not allowed.');
@@ -185,7 +186,7 @@ export function zipEntries(bytes) {
       const start = offset + 30 + bytes.readUInt16LE(offset + 26) + bytes.readUInt16LE(offset + 28);
       if (start + compressed > bytes.length) throw new Error('Truncated ZIP member.');
       const data = bytes.subarray(start, start + compressed);
-      const decoded = method === 0 ? Buffer.from(data) : inflateRawSync(data, { maxOutputLength: MAX_MEMBER });
+      const decoded = method === 0 ? Buffer.from(data) : inflateRawSync(data, { maxOutputLength: maxMember });
       if (decoded.length !== size) throw new Error('ZIP member size mismatch.');
       return decoded;
     } });

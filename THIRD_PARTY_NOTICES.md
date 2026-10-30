@@ -50,6 +50,14 @@ the runtime mirror.
 
 Pwh Desktop은 ChatGPT 연결에 OpenAI가 공개한 Codex app-server `rust-v0.165.0`의 Windows x64 배포본을 사용합니다. Codex는 Apache License 2.0이며, 원본 [LICENSE](https://github.com/wansucong-stoom/stoom-pwh/blob/main/desktop/standalone-pwh/CODEX-APACHE-LICENSE.txt)와 [NOTICE](https://github.com/wansucong-stoom/stoom-pwh/blob/main/desktop/standalone-pwh/CODEX-NOTICE.txt)를 설치 파일에 포함합니다. 이 배포본에 포함된 ripgrep 15.2.0 및 PCRE2 10.45, 원본 NOTICE에 명시된 Ratatui의 라이선스도 `desktop/standalone-pwh/CODEX-*.txt`에 보존합니다. 바이너리는 공개 저장소에 커밋하지 않습니다.
 
+## Inter (STOOM product mark)
+
+Pwh Desktop의 제품 표시에 Inter 가변 글꼴을 사용합니다. 원본 글꼴의 출처와 SHA256은 `desktop/standalone-pwh/font-provenance.json`에, SIL Open Font License 1.1 전문은 `desktop/standalone-pwh/OFL-Inter.txt`에 포함합니다. 글꼴 파일은 수정하지 않았습니다.
+
+## Electron and Chromium (Pwh Desktop)
+
+Pwh Desktop 0.1.15는 [Electron 45.1.0](https://github.com/electron/electron/releases/tag/v45.1.0)의 공식 Windows x64 실행 환경을 포함합니다. Electron은 MIT 라이선스이며 원본 `electron/LICENSE`를 설치기에 보존합니다. Chromium과 포함된 구성요소의 고지는 같은 폴더의 `LICENSES.chromium.html`에 있습니다. 실행 파일에는 Pwh 제품명과 승인된 아이콘을 적용하며, 런타임 바이너리를 공개 소스 저장소에 커밋하지 않습니다. Electron의 [rcedit 2.0.0](https://github.com/electron/rcedit/releases/tag/v2.0.0)은 빌드에만 사용하며 사용자 설치기에는 포함하지 않습니다.
+
 ## HOP
 
 - Project: <https://github.com/golbin/hop>.

@@ -190,6 +190,10 @@ export function installTableClipboard({wasm,read,getInput,mutate,notice,nativeRe
   if(bypass)return;if(Date.now()<plainPasteUntil){plainPasteUntil=0;return;}
   const expected=structuredClone(read()),data=event.clipboardData;
   if(!expected.ready||!data)return;
+  if(event.isTrusted&&nativeRead&&!(data.types?.length||data.items?.length)){
+   notice('붙여넣을 내용을 확인하지 못했습니다. 한글 표나 셀은 ‘한글 표·셀 가져오기’를 이용해 주세요.',true);
+   return;
+  }
   let html=data.getData('text/html'),text=data.getData('text/plain');let spec,parseError;
   const inCell=expected.cursor?.parentParaIndex!=null;
   const token=html.match(/<!--pwh-rich-table:([0-9a-f-]+)-->/i)?.[1];
@@ -198,21 +202,39 @@ export function installTableClipboard({wasm,read,getInput,mutate,notice,nativeRe
   if(!inCell&&hasHancomModel(html))return;
   let model=inCell?extractHancomTableModel(html):null;
   try{if(!model&&!internalTable)spec=tableFromClipboardHtml(html)||tableFromClipboardText(text);}catch(error){parseError=error;}
-  const hasImageFile=Array.from(data.items||[]).some(item=>item.kind==='file'&&item.type.startsWith('image/'));
   const ownCopy=html.includes('<!--pwh-table-copy-->');
-  const needNative=event.isTrusted&&nativeRead&&(!inCell||!ownCopy&&(!!model||!!spec||/<table\b/i.test(html)||(!html&&!text)));
+  // Ordinary text, rich text, RTF and image paste belongs to this event and
+  // must be handled synchronously by the editor. A later OS clipboard read
+  // is useful only to enrich an external table with Hancom's document model.
+  const needNative=!!(event.isTrusted&&nativeRead&&!ownCopy&&!model&&!internalTable&&text&&/<table\b/i.test(html));
   if(parseError&&!needNative){event.preventDefault();event.stopImmediatePropagation();notice(parseError.message,true);return;}
   if(!spec&&!model&&!internalTable&&!needNative)return;
+  // ClipboardEvent data is only guaranteed to be readable during dispatch.
+  // Keep string MIME data and File objects, never the original DataTransfer.
+  const target=event.target,replayData=new DataTransfer();
+  for(const type of Array.from(data.types||[]))if(type!=='Files')replayData.setData(type,data.getData(type));
+  for(const item of Array.from(data.items||[]))if(item.kind==='file'){const file=item.getAsFile();if(file)replayData.items.add(file);}
+  const ensureContext=()=>{
+   const current=read();
+   if(JSON.stringify(current.documentState)!==JSON.stringify(expected.documentState)||JSON.stringify(current.cursor)!==JSON.stringify(expected.cursor)||JSON.stringify(current.selection)!==JSON.stringify(expected.selection))throw Error('문서나 선택 위치가 변경되어 붙여넣기를 취소했습니다.');
+   const doc=target?.ownerDocument;
+   if(!target?.isConnected||doc?.activeElement!==target||!doc?.hasFocus())throw Error('입력 포커스가 변경되어 붙여넣기를 취소했습니다.');
+  };
+  const replay=transfer=>{bypass=true;try{target.dispatchEvent(new ClipboardEvent('paste',{clipboardData:transfer,bubbles:true,cancelable:true}));}finally{bypass=false;}};
   event.preventDefault();event.stopImmediatePropagation();
   void(async()=>{
    try{
-    if(needNative){let native;try{native=await nativeRead();}catch(error){if(!spec&&!hasImageFile&&!html&&!text)throw error;}
-     if(native){
-     if(expected.cursor?.parentParaIndex==null&&hasHancomModel(native.html)){const current=read();if(JSON.stringify(current.documentState)!==JSON.stringify(expected.documentState)||JSON.stringify(current.cursor)!==JSON.stringify(expected.cursor))throw Error('문서나 커서가 변경되어 붙여넣기를 취소했습니다.');const transfer=new DataTransfer();transfer.setData('text/html',native.html);transfer.setData('text/plain',native.text);bypass=true;try{event.target.dispatchEvent(new ClipboardEvent('paste',{clipboardData:transfer,bubbles:true,cancelable:true}));}finally{bypass=false;}return;}
-     if(inCell){html=native.html||html;text=native.text||text;model=extractHancomTableModel(html);}
-     if(!model){spec=tableFromClipboardHtml(native.html)||tableFromClipboardText(native.text)||spec;parseError=null;}
-     if(!spec&&!model&&!hasImageFile&&native.png){const current=read();if(JSON.stringify(current.documentState)!==JSON.stringify(expected.documentState)||JSON.stringify(current.cursor)!==JSON.stringify(expected.cursor))throw Error('문서나 커서가 변경되어 그림 붙여넣기를 취소했습니다.');const bytes=Uint8Array.from(atob(native.png),c=>c.charCodeAt(0)),transfer=new DataTransfer();transfer.items.add(new File([bytes],'clipboard.png',{type:'image/png'}));bypass=true;try{event.target.dispatchEvent(new ClipboardEvent('paste',{clipboardData:transfer,bubbles:true,cancelable:true}));}finally{bypass=false;}return;}
-     if(!spec&&!model&&native.formats?.some(f=>/hwp|hancom|hanword/i.test(f)))throw Error('한글 전용 클립보드만 있고 표 HTML이 없습니다. 원본 HWPX 파일을 열어 가져와 주세요.');}}
+    if(needNative){
+     let native;try{native=await nativeRead();}catch{/* Use the original event data. */}
+     ensureContext();
+     // Never substitute data from a different clipboard transaction. Native
+     // picture-only data cannot be tied to the original event and is ignored.
+     const normalized=value=>String(value||'').replace(/\r\n?/g,'\n').replace(/\0+$/,'');
+     if(native&&normalized(text)&&normalized(native.text)===normalized(text)){
+      if(!inCell&&hasHancomModel(native.html)){const transfer=new DataTransfer();transfer.setData('text/html',native.html);transfer.setData('text/plain',text);replay(transfer);return;}
+      if(inCell&&hasHancomModel(native.html)){html=native.html;model=extractHancomTableModel(html);}
+     }
+    }
     if((model||internalTable||spec)&&inCell){
      const choice=await chooseTablePaste({htmlOnly:!model&&!internalTable});if(!choice)return;
      if(choice==='nested'){const tableHtml=!model&&!internalTable?safeTableHtml(html,spec):null;await mutate(expected,w=>model?pasteHancomTableInCell(w,expected,model):internalTable?pasteInternalTableInCell(w,expected):pasteHtmlTableInCell(w,expected,tableHtml,spec));enableNestedClipping?.();notice('셀 안에 표를 넣었습니다. 실행 취소 한 번으로 되돌릴 수 있습니다.');return;}
@@ -220,7 +242,7 @@ export function installTableClipboard({wasm,read,getInput,mutate,notice,nativeRe
     }
     if(parseError&&!spec)throw parseError;
     if(spec){await apply(spec,expected);notice('표·셀 붙여넣기를 완료했습니다. 실행 취소 한 번으로 되돌릴 수 있습니다.');}
-    else{bypass=true;try{event.target.dispatchEvent(new ClipboardEvent('paste',{clipboardData:data,bubbles:true,cancelable:true}));}finally{bypass=false;}}
+    else{ensureContext();replay(replayData);}
    }catch(error){notice('표·셀 붙여넣기: '+error.message,true);}
   })();
  },true);

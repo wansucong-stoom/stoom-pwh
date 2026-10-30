@@ -18,7 +18,8 @@ import {createCodexSession} from './codex-session.mjs';
 import {createChatgptAuth} from './chatgpt-auth.mjs';
 import {directConnection,directModels,initializeDirect} from './official-codex-runtime.mjs';
 import {loadStoomRuntime} from '../bridge/hwp-codex-host.mjs';
-import {createDesktopFileManager} from './desktop-files.mjs';
+import {createDesktopFileManager,chooseDesktopFile} from './desktop-files.mjs';
+import {createImageExportManager} from './image-export.mjs';
 import {createRecentDocuments} from './recent-documents.mjs';
 import {runEngine} from '../release-source/src/engine.mjs';
 import {sameRequestContext} from '../release-source/src/request-state.mjs';
@@ -66,7 +67,7 @@ async function desktopEditorHtml(){
  html=html.replace("status('본문에서 직접 편집하세요. 다시 쓸 부분을 드래그하고 채팅으로 요청할 수 있습니다.')","status('')");
  const dispatch="command.type==='openDocument'?await openDocument(command):";if(!html.includes(dispatch))throw Error('편집기 문서 서식 연결을 확인하지 못했습니다.');html=html.replace(dispatch,"command.type==='desktopBodyStyle'?window.pwhEditor.desktopBodyStyle(command):command.type==='desktopColumns'?window.pwhEditor.desktopColumns(command):command.type==='desktopImage'?window.pwhEditor.desktopInsertImage(command,await replacementBytes(command.image)):"+dispatch);
  html=html.replace(anchor,` window.pwhDesktopAcceptSave=async(d,seq)=>{const oldKey=recoveryKey();if(window.pwhEditor.context().documentState.changeSeq===seq&&state.protectedRecoveryKey!==oldKey)await recoveryStore('delete',oldKey).catch(()=>{});state.documentId=d.documentId;state.source=d.source;state.displayName=d.name;state.sourceSha256=d.sourceSha256;state.checkpointSha=null;state.recoveryEligible=true;document.getElementById('pwh-title').textContent=d.name;document.getElementById('pwh-title').title=d.source;if(window.pwhEditor.context().documentState.changeSeq===seq)await window.pwhEditor.saved(d.name);const current=window.pwhEditor.context().documentState,same=current.changeSeq===seq;if(!same&&!current.dirty)window.pwhEditor.recovered();status(same?'저장했습니다.':'저장 후 추가 변경은 아직 미저장 상태입니다.');return same;};\n`+anchor);
- html=html.replace('</head>',`<style>#pwh-task{display:none!important}#pwh-status:empty{display:none}#pwh-import-table,#pwh-save{display:none!important}[data-menu="file"] [data-cmd="file:new-doc"],[data-menu="file"] [data-cmd="file:open"],[data-menu="file"] [data-cmd="file:save"],[data-menu="file"] [data-cmd="file:save-as"]{opacity:1!important;pointer-events:auto!important}</style></head>`);
+ html=html.replace('</head>',`<script>window.__PWH_DESKTOP__=true;</script><style>#pwh-task{display:none!important}#pwh-status:empty{display:none}#pwh-import-table,#pwh-save{display:none!important}[data-menu="file"] [data-cmd="file:new-doc"],[data-menu="file"] [data-cmd="file:open"],[data-menu="file"] [data-cmd="file:save"],[data-menu="file"] [data-cmd="file:save-as"]{opacity:1!important;pointer-events:auto!important}</style></head>`);
  const dir=path.join(appRoot,'client');let manifest;
  try{manifest=JSON.parse(await fs.readFile(path.join(dir,'manifest.json'),'utf8'));}catch(error){if(error.code==='ENOENT')return html;throw error;}
  const bytes=await fs.readFile(path.join(dir,'editor.js')),pkg=JSON.parse(await fs.readFile(path.join(config.pluginRoot,'package.json'),'utf8')),base=JSON.parse(await fs.readFile(path.join(config.pluginRoot,'client','.pwh-install.json'),'utf8'));if(manifest.baseVersion!==pkg.version||base.version!==pkg.version||manifest.baseEditorSha256!==base.files?.['editor.js']||manifest.upstreamCommit!==base.upstreamCommit||createHash('sha256').update(bytes).digest('hex')!==manifest.sha256)throw Error('Pwh와 Desktop 편집기 버전이 일치하지 않습니다. 함께 업데이트해 주세요.');
@@ -85,6 +86,7 @@ export async function createAppServer({initialBytes,initialPath,imported=false,c
  const imageAssets=new Map();let imageController=null;
  const desktopCommands=[],desktopTickets=new Map();
  const files=createDesktopFileManager({...(chooseFile?{choose:chooseFile}:{}),verify:async file=>(await runEngine(['info',file,'--json'])).data,register:registerClientDocument});
+ const imageExports=createImageExportManager({choose:chooseFile||chooseDesktopFile});
  const recent=createRecentDocuments(appData),remember=async file=>{try{if(typeof file==='string')await recent.record(path.resolve(file));}catch{}};
  if(initialPath&&!imported)await remember(initialPath);
  if(initialPath&&!imported&&path.extname(initialPath).toLowerCase()==='.hwpx')files.setTarget(current.source,current.sourceSha256);
@@ -97,7 +99,7 @@ export async function createAppServer({initialBytes,initialPath,imported=false,c
  // tab signs out or selects a different account, including while a turn runs.
  const accountWatcher=setInterval(async()=>{if(!codexSession||!codexSessionAccount||checkingCredential)return;checkingCredential=true;const session=codexSession,accountId=codexSessionAccount;try{const stamp=await currentCredentialStamp();if(stamp!==credentialStamp){const state=await chatgptAuth.status();if(session!==codexSession)return;if(state.active!==accountId||!state.accounts.some(account=>account.id===accountId&&account.connected)){cancelRequested=true;closeCodexSession();}else credentialStamp=stamp;}}catch{if(session===codexSession){cancelRequested=true;closeCodexSession();}}finally{checkingCredential=false;}},1500);accountWatcher.unref();
  let lastActivity=Date.now();
- const assets={'/':'app.html','/app.js':'app.js','/app.css':'app.css','/stoom-mark.svg':'stoom-mark.svg','/stoom.ico':'stoom.ico'};
+ const assets={'/':'app.html','/app.js':'app.js','/app.css':'app.css','/stoom-mark-original.css':'stoom-mark-original.css','/stoom-product-marks.css':'stoom-product-marks.css','/Inter-variable.ttf':'Inter-variable.ttf','/stoom-mark.svg':'stoom-mark.svg','/stoom.ico':'stoom.ico'};
  const server=createServer(async(req,res)=>{
   try{
    const address=server.address(),origin=`http://127.0.0.1:${address.port}`;
@@ -114,11 +116,14 @@ export async function createAppServer({initialBytes,initialPath,imported=false,c
     if(req.headers.origin!==origin)return json(res,{error:'허용되지 않은 연결입니다.'},403);
     if(url.searchParams.get('instance')===String(nativePageGeneration))nativeBranding?.closing?.();return json(res,{ok:true});
    }
+   if(req.method==='GET'&&route==='/print.html'){
+    res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'});res.end('<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>인쇄 미리보기</title></head><body></body></html>');return;
+   }
    if(req.method==='GET'&&route==='/editor'){
     const html=await editorHtml();res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'});res.end(html);return;
    }
    if(req.method==='GET'&&assets[route]){
-    const type=route==='/'?'text/html':route.endsWith('.css')?'text/css':route.endsWith('.svg')?'image/svg+xml':route.endsWith('.ico')?'image/x-icon':'text/javascript';
+    const type=route==='/'?'text/html':route.endsWith('.css')?'text/css':route.endsWith('.ttf')?'font/ttf':route.endsWith('.svg')?'image/svg+xml':route.endsWith('.ico')?'image/x-icon':'text/javascript';
     let content=await fs.readFile(path.join(appRoot,assets[route]));
     if(route==='/'&&nativeBranding){
      const title=`Pwh Desktop [${nativeBranding.token}]`;
@@ -199,6 +204,10 @@ export async function createAppServer({initialBytes,initialPath,imported=false,c
    if(route==='/file/open'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 문서를 바꿔 주세요.');const picked=await files.open();if(!picked)return json(res,{cancelled:true});const doc=path.extname(picked.file).toLowerCase()==='.hwp'?await stageDocument(await fs.readFile(picked.file),{sourceName:picked.file}):await registerClientDocument(picked.file);if(path.extname(picked.file).toLowerCase()==='.hwpx'&&doc.sourceSha256!==picked.digest)throw Error('선택한 파일이 변경되었습니다. 다시 열어 주세요.');current=doc;files.clear();if(!doc.convertedFromHwp)files.setTarget(doc.source,doc.sourceSha256);documentSnapshot=null;closeCodexSession();await remember(picked.file);return json(res,{document:doc});}
    if(route==='/file/prepare'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 저장해 주세요.');const input=JSON.parse((await parse(req,8192)).toString());if(input.documentId!==current.documentId)throw Error('문서가 변경되었습니다. 다시 저장해 주세요.');return json(res,await files.prepare({mode:input.mode,documentId:current.documentId,suggestedName:current.convertedFromHwp?path.parse(current.name).name+'.hwpx':current.name}));}
    if(route==='/file/write'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 저장해 주세요.');const bytes=await parse(req,maxDocument),ticket=req.headers['x-pwh-ticket'],documentId=req.headers['x-pwh-document'];if(documentId!==current.documentId)throw Error('문서가 변경되었습니다. 다시 저장해 주세요.');const document=await files.write({ticket,documentId,bytes});current=document;await remember(document.source);return json(res,{document});}
+   if(route==='/image-export/start'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 그림으로 저장해 주세요.');const input=JSON.parse((await parse(req,8192)).toString());if(input.documentId!==current.documentId)throw Error('문서가 변경되었습니다. 다시 시도해 주세요.');return json(res,await imageExports.start({documentId:current.documentId,pages:input.pages,suggestedName:current.name}));}
+   if(route==='/image-export/page'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 그림으로 저장해 주세요.');const documentId=req.headers['x-pwh-document'];if(documentId!==current.documentId)throw Error('문서가 변경되었습니다. 다시 시도해 주세요.');return json(res,await imageExports.add({ticket:req.headers['x-pwh-ticket'],documentId,page:Number(req.headers['x-pwh-page']),bytes:await parse(req,32*1024*1024)}));}
+   if(route==='/image-export/finish'){const input=JSON.parse((await parse(req,8192)).toString());if(input.documentId!==current.documentId)throw Error('문서가 변경되었습니다. 다시 시도해 주세요.');return json(res,await imageExports.finish(input));}
+   if(route==='/image-export/cancel'){const input=JSON.parse((await parse(req,8192)).toString());return json(res,await imageExports.cancel(input));}
    if(route==='/document/snapshot'){
     const sessionId=req.headers['x-pwh-session'],epoch=Number(req.headers['x-pwh-epoch']),seq=Number(req.headers['x-pwh-seq']);if(typeof sessionId!=='string'||!sessionId||!Number.isSafeInteger(epoch)||!Number.isSafeInteger(seq))throw Error('문서 상태를 확인하지 못했습니다.');
     const bytes=await parse(req,maxDocument),js=path.join(config.runtimeRoot,'core','rhwp.js'),wasm=path.join(config.runtimeRoot,'core','rhwp_bg.wasm');const core=await import(pathToFileURL(js).href);await core.default({module_or_path:await fs.readFile(wasm)});const doc=new core.HwpDocument(bytes);const paragraphs=[];let total=0,truncated=false;
@@ -270,7 +279,7 @@ export async function createAppServer({initialBytes,initialPath,imported=false,c
    return json(res,{error:'찾을 수 없는 요청입니다.'},404);
   }catch(error){json(res,{error:error.message||'요청 처리에 실패했습니다.',...(error.code==='usage_limit'?{code:'usage_limit'}:{})},400);}
  });
- const idleTimer=setInterval(()=>{if(!agentBusy&&Date.now()-lastActivity>idleTimeoutMs)server.close();},15000);idleTimer.unref();server.once('close',()=>{clearInterval(idleTimer);clearInterval(accountWatcher);closeCodexSession();chatgptAuth.close();});
+ const idleTimer=setInterval(()=>{if(!agentBusy&&Date.now()-lastActivity>idleTimeoutMs)server.close();},15000);idleTimer.unref();server.once('close',()=>{clearInterval(idleTimer);clearInterval(accountWatcher);closeCodexSession();chatgptAuth.close();void imageExports.dispose();});
  await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(port,'127.0.0.1',resolve);});
  return {server,url:`http://127.0.0.1:${server.address().port}/${launchToken}/`};
 }

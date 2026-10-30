@@ -77,6 +77,14 @@ const patches = [
       {path: 'src/renderer/typeset/table/host_spacing.rs', originalSha256: 'cd6908b0f9c258db1898418124c17d23e8e9ad3124176e4b1afa5663047ad4ef', patchedSha256: 'e355cff05386365f4637dee606251d4edbdd4ca6921410b24d70a44fe2ab195c'},
     ],
   },
+  {
+    file: 'rhwp-0.8.7-interior-float-anchor.patch',
+    sha256: '1d3499dc7a5154c5b04467b4197a3a793e47d56f702dc6853a7bbae090bc8a4b',
+    sources: [
+      {path: 'src/renderer/float_placement.rs', originalSha256: '505a0bd578cc15d33a8bc84a2057250d5cbdf6227c0683e609aece799e6db013', patchedSha256: 'fcfab96c017a160429fa9873371ea59dd6564480daaaa08ec90d87aea7e6bad3'},
+      {path: 'src/renderer/typeset/table/block/entry.rs', originalSha256: '90389834b32c48190b4ebab7b1261385dc56953823f5616ced89aecbdd3e4cbc', patchedSha256: '2a2be46cfc35b58ff08664a47598ee0b51997afe51cb51232654ff0c92432a3a'},
+    ],
+  },
 ];
 const help = `Usage: node scripts/build-patched-core.mjs
   --source-archive <fixed upstream source ZIP>

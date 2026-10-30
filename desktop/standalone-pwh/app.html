@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="ko">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Pwh Desktop</title><link rel="icon" href="stoom.ico"><link rel="stylesheet" href="app.css"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Pwh Desktop</title><link rel="icon" href="stoom.ico"><link rel="stylesheet" href="stoom-mark-original.css"><link rel="stylesheet" href="stoom-product-marks.css"><link rel="stylesheet" href="app.css"></head>
 <body>
 <header class="app-header">
-  <div class="app-brand" aria-label="STOOM Pwh Desktop"><img src="stoom-mark.svg" alt="" width="36" height="28"><strong>Pwh Desktop</strong></div>
+  <div class="app-brand" aria-label="STOOM Pwh Desktop"><strong>Pwh Desktop</strong></div>
   <button id="open-ai" class="header-settings" type="button" aria-controls="ai-pane" aria-expanded="false" title="AI 대화 열기" hidden>AI 대화 열기</button>
   <button id="new" hidden>새 문서</button><input id="file" type="file" accept=".hwp,.hwpx" hidden>
   <span id="status" role="status">준비 중</span>
@@ -14,7 +14,7 @@
 <main>
   <aside id="ai-pane">
     <div class="side-title"><strong>AI 대화</strong><span id="provider-label"></span><button id="close-ai" class="icon-button" type="button" aria-controls="ai-pane" aria-label="AI 대화 닫기" title="AI 대화 닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 8 12l7 7"/></svg></button></div>
-    <div id="conversation" aria-live="polite"><div id="conversation-empty" class="conversation-empty"><img src="stoom-mark.svg" alt="" width="44" height="35"><h1>문서와 함께 작업하세요</h1><p>내용을 선택해 다듬거나,<br>문서에 관해 이야기해 보세요.</p></div></div>
+    <div id="conversation" aria-live="polite"><div id="conversation-empty" class="conversation-empty"><span class="stoom-badge stoom-badge-large" aria-hidden="true"><span class="stoom-mark stoom-product-mark"><span class="stoom-product-code">Pwh</span></span></span><h1>문서와 함께 작업하세요</h1><p>내용을 선택해 다듬거나,<br>문서에 관해 이야기해 보세요.</p></div></div>
     <a id="download-codex" href="https://chatgpt.com/download/" target="_blank" rel="noopener noreferrer" hidden>ChatGPT 데스크톱 설치 안내 열기</a>
     <div class="composer">
       <label class="sr-only" for="prompt">요청 내용</label><textarea id="prompt" placeholder="문서에 요청할 내용을 입력하세요"></textarea>
@@ -33,19 +33,36 @@
   <div id="splitter" role="separator" aria-label="AI 대화창 너비 조절" aria-orientation="vertical" tabindex="0"></div>
   <iframe id="editor" title="pwh 한글 조판기"></iframe>
 </main>
+<dialog id="output-dialog" aria-labelledby="output-title">
+  <div class="output-content">
+    <div class="output-heading"><div><h2 id="output-title">그림으로 저장</h2><p>그림으로 저장할 쪽을 선택하세요.</p></div><button id="output-close" type="button" aria-label="닫기">×</button></div>
+    <fieldset class="output-range"><legend>쪽 범위</legend>
+      <label><input type="radio" name="output-range" value="all" checked> 모두</label>
+      <label><input type="radio" name="output-range" value="current"> 현재 쪽</label>
+      <label><input type="radio" name="output-range" value="section"> 현재 구역</label>
+      <label><input type="radio" name="output-range" value="through"> 현재까지</label>
+      <label><input type="radio" name="output-range" value="from"> 현재부터</label>
+      <label><input id="output-selection" type="radio" name="output-range" value="selected"> 선택한 쪽</label>
+      <label class="output-custom"><input type="radio" name="output-range" value="custom"> 일부 <input id="output-pages" type="text" placeholder="예: 1, 3, 5-7" aria-label="쪽 범위"></label>
+    </fieldset>
+    <div class="output-image-settings"><label for="output-dpi">그림 해상도</label><select id="output-dpi"><option value="150">150 dpi</option><option value="200" selected>200 dpi</option><option value="300">300 dpi</option><option value="96">96 dpi</option></select><small>그림 형식과 파일 이름은 다음 저장 창에서 선택합니다.</small></div>
+    <p id="output-status" role="status" aria-live="polite"></p>
+    <div class="output-actions"><button id="output-cancel" type="button">취소</button><button id="output-image" class="primary-button" type="button">저장</button></div>
+  </div>
+</dialog>
 <dialog id="settings-dialog" aria-labelledby="settings-title">
   <form method="dialog" class="settings-layout">
-    <div class="settings-rail"><img src="stoom-mark.svg" alt="STOOM" width="27" height="27"><span class="rail-current" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h6m4 0h6M4 17h10m4 0h2"/><circle cx="12" cy="7" r="2"/><circle cx="16" cy="17" r="2"/></svg></span><button id="settings-back" class="icon-button" type="button" aria-label="설정을 닫고 문서로 돌아가기" title="문서로 돌아가기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg></button></div>
+    <div class="settings-rail"><span class="stoom-badge" role="img" aria-label="STOOM"><span class="stoom-mark stoom-product-mark"><span class="stoom-product-code">Pwh</span></span></span><span class="rail-current" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h6m4 0h6M4 17h10m4 0h2"/><circle cx="12" cy="7" r="2"/><circle cx="16" cy="17" r="2"/></svg></span><button id="settings-back" class="icon-button" type="button" aria-label="설정을 닫고 문서로 돌아가기" title="문서로 돌아가기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg></button></div>
     <nav class="settings-nav" aria-label="AI 설정 섹션"><h2>설정</h2><div role="tablist" aria-label="설정 항목" aria-orientation="vertical"><button id="tab-connection" type="button" role="tab" aria-controls="panel-connection" aria-selected="true" data-settings-section="connection">AI 연결</button><button id="tab-chatgpt" type="button" role="tab" aria-controls="panel-chatgpt" aria-selected="false" tabindex="-1" data-settings-section="chatgpt">ChatGPT 계정</button><button id="tab-codex" type="button" role="tab" aria-controls="panel-codex" aria-selected="false" tabindex="-1" data-settings-section="codex">모델과 추론 강도</button><button id="tab-local" type="button" role="tab" aria-controls="panel-local" aria-selected="false" tabindex="-1" data-settings-section="local">로컬 AI</button></div><p>Pwh Desktop</p></nav>
     <div class="settings-content">
       <div class="settings-heading"><h2 id="settings-title">AI 연결</h2><button id="settings-close" class="icon-button" type="button" aria-label="설정 닫기" title="닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
       <div class="settings-scroll">
         <section id="panel-connection" class="settings-panel" role="tabpanel" aria-labelledby="tab-connection">
           <div class="connection-intro"><h3>문서와 함께 사용할 AI</h3><p>원하는 연결을 선택하고 설정을 저장하세요. 연결 상태는 각 항목에서 확인할 수 있습니다.</p></div>
-          <select id="provider" aria-hidden="true" tabindex="-1" hidden><option value="chatgpt">ChatGPT 계정으로 연결</option><option value="codex">설치된 Codex</option><option value="local">로컬 AI (Ollama 등)</option></select>
+          <select id="provider" aria-hidden="true" tabindex="-1" hidden><option value="chatgpt">ChatGPT 계정으로 연결</option><option value="codex">설치된 Codex(비공식 실험 환경)</option><option value="local">로컬 AI (Ollama 등)</option></select>
           <div class="provider-cards" role="radiogroup" aria-label="AI 연결 방법">
             <article class="provider-card" data-provider-card="chatgpt"><div class="provider-card-head"><label class="provider-choice"><input type="radio" name="provider-choice" value="chatgpt"><span>ChatGPT</span></label><span id="chatgpt-card-status" class="provider-state">확인 중</span></div><p>OpenAI 계정으로 로그인해 ChatGPT 요금제를 사용합니다. 별도의 Codex 설치는 필요하지 않습니다.</p><div class="provider-actions"><button id="connection-chatgpt-login" type="button" class="primary-button">ChatGPT로 계속</button><button id="connection-chatgpt-manage" type="button">계정 관리</button><button id="connection-chatgpt-disconnect" type="button" hidden>연결 해제</button></div></article>
-            <article class="provider-card" data-provider-card="codex"><div class="provider-card-head"><label class="provider-choice"><input type="radio" name="provider-choice" value="codex"><span>설치된 Codex</span></label><span id="codex-card-status" class="provider-state">확인 중</span></div><p>이 PC에 설치된 Codex의 로그인 계정과 모델을 사용합니다.</p><div class="provider-actions"><button id="connection-codex-check" type="button">연결 확인</button><button id="connection-codex-disconnect" type="button" hidden>연결 해제</button><button id="connection-codex-model" type="button" class="text-button">모델 설정 <span aria-hidden="true">→</span></button></div></article>
+            <article class="provider-card" data-provider-card="codex"><div class="provider-card-head"><label class="provider-choice"><input type="radio" name="provider-choice" value="codex"><span>설치된 Codex(비공식 실험 환경)</span></label><span id="codex-card-status" class="provider-state">확인 중</span></div><p>이 PC에 설치된 Codex의 로그인 계정과 모델을 사용합니다.</p><div class="provider-actions"><button id="connection-codex-check" type="button">연결 확인</button><button id="connection-codex-disconnect" type="button" hidden>연결 해제</button><button id="connection-codex-model" type="button" class="text-button">모델 설정 <span aria-hidden="true">→</span></button></div></article>
             <article class="provider-card" data-provider-card="local"><div class="provider-card-head"><label class="provider-choice"><input type="radio" name="provider-choice" value="local"><span>로컬 AI</span></label><span id="local-card-status" class="provider-state">확인 중</span></div><p>Ollama 등 이 PC의 OpenAI 호환 서버에 연결합니다.</p><div class="provider-actions"><button id="connection-local-settings" type="button">로컬 AI 설정</button></div></article>
           </div>
         </section>

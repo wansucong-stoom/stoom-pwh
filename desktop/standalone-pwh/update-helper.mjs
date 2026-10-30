@@ -12,7 +12,7 @@ export async function verifyInstaller(installer,digest,size){
  if(bytes!==size||hash.digest('hex')!==digest)throw Error('설치 파일의 무결성을 확인하지 못했습니다.');
 }
 export async function runUpdate({installer,digest,size,appExe,resultFile,pids},{platform=process.platform,spawnImpl=spawn,isAlive=alive,sleep=pause,now=Date.now,timeoutMs=90000,env=process.env}={}){
- if(platform!=='win32'||!path.isAbsolute(installer)||path.extname(installer).toLowerCase()!=='.msi'||!path.isAbsolute(appExe)||path.basename(appExe).toLowerCase()!=='pwhdesktop.exe'||!path.isAbsolute(resultFile)||!/^[0-9a-f]{64}$/.test(digest)||!Number.isSafeInteger(size)||size<1||size>256*1024*1024||!pids.length||pids.some(pid=>!Number.isSafeInteger(pid)||pid<=0))throw Error('업데이트 실행 정보를 확인하지 못했습니다.');
+ if(platform!=='win32'||!path.isAbsolute(installer)||path.extname(installer).toLowerCase()!=='.msi'||!path.isAbsolute(appExe)||path.basename(appExe).toLowerCase()!=='pwhdesktop.exe'||!path.isAbsolute(resultFile)||!/^[0-9a-f]{64}$/.test(digest)||!Number.isSafeInteger(size)||size<1||size>512*1024*1024||!pids.length||pids.some(pid=>!Number.isSafeInteger(pid)||pid<=0))throw Error('업데이트 실행 정보를 확인하지 못했습니다.');
  const result=async(status,message)=>{await fs.mkdir(path.dirname(resultFile),{recursive:true});await fs.writeFile(resultFile,JSON.stringify({status,message})+'\n');};
  const relaunch=()=>{const child=spawnImpl(appExe,[],{detached:true,windowsHide:false,stdio:'ignore'});child.on('error',()=>{});child.unref();};
  const deadline=now()+timeoutMs;while(pids.some(isAlive)&&now()<deadline)await sleep(500);

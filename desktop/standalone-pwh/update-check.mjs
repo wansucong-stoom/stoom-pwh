@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 
 const latest='https://api.github.com/repos/wansucong-stoom/stoom-pwh/releases/latest';
 const allowedHosts=new Set(['github.com','release-assets.githubusercontent.com','objects.githubusercontent.com']);
-const maxBytes=256*1024*1024;
+const maxBytes=512*1024*1024;
 export function compareVersions(a,b){
  const parse=v=>{if(typeof v!=='string'||!/^\d{1,3}\.\d{1,3}\.\d{1,5}$/.test(v))throw Error('버전 번호가 올바르지 않습니다.');return v.split('.').map(Number);};
  const left=parse(a),right=parse(b);for(let i=0;i<3;i++)if(left[i]!==right[i])return left[i]>right[i]?1:-1;return 0;

@@ -1,10 +1,18 @@
-﻿param([ValidateSet('Open','Save')][string]$Mode,[string]$SuggestedName = '문서.hwpx')
+﻿param([ValidateSet('Open','Save','Image')][string]$Mode,[string]$SuggestedName = '문서.hwpx')
 Add-Type -AssemblyName System.Windows.Forms
 [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 if ($Mode -eq 'Open') {
   $dialog = [System.Windows.Forms.OpenFileDialog]::new()
   $dialog.Filter = '한글 문서 (*.hwp;*.hwpx)|*.hwp;*.hwpx'
   $dialog.CheckFileExists = $true
+} elseif ($Mode -eq 'Image') {
+  $dialog = [System.Windows.Forms.SaveFileDialog]::new()
+  $dialog.Title = '그림으로 저장하기'
+  $dialog.Filter = 'PNG 그림 (*.png)|*.png|JPEG 그림 (*.jpg)|*.jpg|BMP 그림 (*.bmp)|*.bmp|TIFF 그림 (*.tif)|*.tif|GIF 그림 (*.gif)|*.gif'
+  $dialog.DefaultExt = 'png'
+  $dialog.AddExtension = $true
+  $dialog.OverwritePrompt = $false
+  $dialog.FileName = $SuggestedName
 } else {
   $dialog = [System.Windows.Forms.SaveFileDialog]::new()
   $dialog.Filter = '한글 문서 (*.hwpx)|*.hwpx'

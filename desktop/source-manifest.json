@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pluginVersion": "0.6.33",
+  "pluginVersion": "0.6.34",
   "copyPolicy": "Original bytes; .test.mjs filenames renamed to .check.mjs for staged-only discovery.",
   "files": [
     {
@@ -36,32 +36,32 @@
     {
       "path": "standalone-pwh/app.css",
       "source": "standalone-pwh/app.css",
-      "size": 15222,
-      "sha256": "f72be398721f5dbb7e15833f92814c4db2602c61ab7f46a826793016d991efc0"
+      "size": 19013,
+      "sha256": "d6997958d03f3a53a5610bed97e7ecac71827805eac201872149ffb33938cdcb"
     },
     {
       "path": "standalone-pwh/app.html",
       "source": "standalone-pwh/app.html",
-      "size": 13089,
-      "sha256": "b65e9791396e6b40620aec86547d7ab4744e689b246c3a69b538ffa22fb033d1"
+      "size": 15168,
+      "sha256": "f70b7e21f1eeb4a68c8658365b88ac10efba7050489002d23ee2e5008a7394a0"
     },
     {
       "path": "standalone-pwh/app.js",
       "source": "standalone-pwh/app.js",
-      "size": 39345,
-      "sha256": "ec09b5b260a7d0d45ddba701b8f27abac3b34fa164371838ee6fdaada141e12e"
+      "size": 49592,
+      "sha256": "41320213e5203bccbf3703405a045aa5a4312c4ef2a045a30098c527492c7995"
     },
     {
       "path": "standalone-pwh/build-desktop-editor.mjs",
       "source": "standalone-pwh/build-desktop-editor.mjs",
-      "size": 4861,
-      "sha256": "87699f77ccf0e83ed045cf2d3412b2eaa335e9419aeaab7661423d5742f56c8e"
+      "size": 4941,
+      "sha256": "aca692262f97513681cb88ebb3bb0a978df9c1e9160452fd49f4cbb84fd43192"
     },
     {
       "path": "standalone-pwh/build-msi.mjs",
       "source": "standalone-pwh/build-msi.mjs",
-      "size": 15384,
-      "sha256": "ab63d5328ae0c4508449ef6087768dcc06f3480d81de6c4808576e3646e67060"
+      "size": 16391,
+      "sha256": "de32c33028c5a5894f6f5af5f36c2ced7f607638d77083e94692e07916d6a8d0"
     },
     {
       "path": "standalone-pwh/build-native-launcher.mjs",
@@ -72,14 +72,14 @@
     {
       "path": "standalone-pwh/build-offline.mjs",
       "source": "standalone-pwh/build-offline.mjs",
-      "size": 7290,
-      "sha256": "847677def81aa2e5829963be0eff790be787b14df5f1cd5e13989b1f56b16425"
+      "size": 8191,
+      "sha256": "db472f2788cc8057f116b9a7acab9919859e2ec6c16c3e535db9ffc8e35d72fa"
     },
     {
       "path": "standalone-pwh/build-stoom-icon.mjs",
       "source": "standalone-pwh/build-stoom-icon.mjs",
-      "size": 3972,
-      "sha256": "b7fa8c0a0df7e190060516d5c187acab6757a5b5b47b76c3a65dcc271badfa01"
+      "size": 1709,
+      "sha256": "a3fa0033cd7866648499bc8ae59249e9a40fa20bd0f3aadff96c9f44e690745d"
     },
     {
       "path": "standalone-pwh/chatgpt-auth.mjs",
@@ -102,14 +102,14 @@
     {
       "path": "standalone-pwh/client/editor.js",
       "source": "standalone-pwh/client/editor.js",
-      "size": 2673812,
-      "sha256": "8801021c91a57b222aa3b2b45b55e3ca477cafdf0fddfb02a07a6aa1240466df"
+      "size": 2691864,
+      "sha256": "5c12829f09e10d33d8a0d9a60e374c7872ca4b104e7264513e9644e600fc4161"
     },
     {
       "path": "standalone-pwh/client/manifest.json",
       "source": "standalone-pwh/client/manifest.json",
       "size": 264,
-      "sha256": "0ee354cedcc6df59ca5bb700170249cbca50262268dc6ac9ed7f4dad8f0499e2"
+      "sha256": "244bfd5bc6a763caf5a92f95ba2c3b5b8b844bd8fbc038b81b83a5b70554229e"
     },
     {
       "path": "standalone-pwh/codex-agent.mjs",
@@ -144,8 +144,8 @@
     {
       "path": "standalone-pwh/codex-plugin-setup.mjs",
       "source": "standalone-pwh/codex-plugin-setup.mjs",
-      "size": 9951,
-      "sha256": "12a86aa7ec2fbd14df10f19e00911019299a39e2eacf991d7060751b6c5b9451"
+      "size": 14049,
+      "sha256": "55b728633e5a24fdde02866122efd448c973586a1160411e8c11a5cac0a9bca4"
     },
     {
       "path": "standalone-pwh/CODEX-RATATUI-MIT.txt",
@@ -232,10 +232,34 @@
       "sha256": "a4ebba28009f5fee67ebbcdf181e2fe54da0489d0151cc3ddb9fac1f795a77e6"
     },
     {
+      "path": "standalone-pwh/electron-controller.mjs",
+      "source": "standalone-pwh/electron-controller.mjs",
+      "size": 2880,
+      "sha256": "5ea86fe5c6ed4bbc0596e2d5728a8e0759f1cba11cfe303292353ea86163492c"
+    },
+    {
+      "path": "standalone-pwh/electron-preload.cjs",
+      "source": "standalone-pwh/electron-preload.cjs",
+      "size": 495,
+      "sha256": "93bdbcfd287a2e17f6cfbd867f5cbd3adbc00139f54af3341a83f1af8b108f03"
+    },
+    {
+      "path": "standalone-pwh/electron-shell.cjs",
+      "source": "standalone-pwh/electron-shell.cjs",
+      "size": 8310,
+      "sha256": "01c78d291963ab751cb1c35349852431671853db5e2378c33ff90cc2befa36b8"
+    },
+    {
       "path": "standalone-pwh/file-dialog.ps1",
       "source": "standalone-pwh/file-dialog.ps1",
-      "size": 1372,
-      "sha256": "fb4001d575d6e7e28cf4f458f32be7fc4b49c4e9ad857b922fb83185db2bd970"
+      "size": 1793,
+      "sha256": "4345d8a9765b2b087fd98c23630296841c8b74e4d44a2b5a2a4c61fab53ae720"
+    },
+    {
+      "path": "standalone-pwh/font-provenance.json",
+      "source": "standalone-pwh/font-provenance.json",
+      "size": 2168,
+      "sha256": "21542aab1f06ff79b080f575d45482024efb38b37fb597dd738a60c52d7a3ecb"
     },
     {
       "path": "standalone-pwh/generated-image.mjs",
@@ -246,8 +270,20 @@
     {
       "path": "standalone-pwh/host.mjs",
       "source": "standalone-pwh/host.mjs",
-      "size": 45638,
-      "sha256": "acf9027d550715b552c6a5dc81e88f616e7b01c318f2ab423d2f7c6894468214"
+      "size": 47625,
+      "sha256": "70f2b860f90e5411ac4b658cb9c3a59dc869f1dd17e24b4cc4e23b060e3abcc1"
+    },
+    {
+      "path": "standalone-pwh/image-convert.ps1",
+      "source": "standalone-pwh/image-convert.ps1",
+      "size": 797,
+      "sha256": "94cb9eeee4a834d5a7de89cf1d102905c18d4ffa990f071a18626f16309cc2bc"
+    },
+    {
+      "path": "standalone-pwh/image-export.mjs",
+      "source": "standalone-pwh/image-export.mjs",
+      "size": 5913,
+      "sha256": "2668ef3da9ba5a940bbb16fb33d1326ab9cc79e2955c47e406d3f19acc475c56"
     },
     {
       "path": "standalone-pwh/install.cmd",
@@ -262,10 +298,16 @@
       "sha256": "b49bc388ae706cec71c2032cb8ad444d78656e49a3bc469078ebc93fcb1bc1db"
     },
     {
+      "path": "standalone-pwh/Inter-variable.ttf",
+      "source": "standalone-pwh/Inter-variable.ttf",
+      "size": 876576,
+      "sha256": "29160a80ff49ddcab2c97711247e08b1fab27a484a329ce8b813d820dc559031"
+    },
+    {
       "path": "standalone-pwh/launch.mjs",
       "source": "standalone-pwh/launch.mjs",
-      "size": 3688,
-      "sha256": "e3f6a6689429169652b3ce3d205ee40263c9138d827325c1a7a918cc8c0c031e"
+      "size": 2922,
+      "sha256": "8fdd080fe7bcfa5d058059a07ac645bde664d41e857a22c22d42c6024b539ccc"
     },
     {
       "path": "standalone-pwh/launch.vbs",
@@ -310,6 +352,12 @@
       "sha256": "2b835f36f833ac85b1cf16b3b4e458e588a851e41640e18691611fe830b5ad15"
     },
     {
+      "path": "standalone-pwh/OFL-Inter.txt",
+      "source": "standalone-pwh/OFL-Inter.txt",
+      "size": 4377,
+      "sha256": "5b9321a4298cfeb6b34354164a1c3afc3db114569984c502b9b35d988fd58c57"
+    },
+    {
       "path": "standalone-pwh/preview-core.check.mjs",
       "source": "standalone-pwh/preview-core.test.mjs",
       "size": 3819,
@@ -320,6 +368,12 @@
       "source": "standalone-pwh/preview-core.mjs",
       "size": 4965,
       "sha256": "ace9947c5d0bfcadf247f242aeb66a84f492ec4ff5d64d51f3c05f47498f64aa"
+    },
+    {
+      "path": "standalone-pwh/print-options.cjs",
+      "source": "standalone-pwh/print-options.cjs",
+      "size": 1404,
+      "sha256": "070a3709d79adc00e5f01b3f280f4e7038e482663ce17a032afe427f8a483ba7"
     },
     {
       "path": "standalone-pwh/recent-documents.mjs",
@@ -366,8 +420,14 @@
     {
       "path": "standalone-pwh/stoom-icon.check.mjs",
       "source": "standalone-pwh/stoom-icon.test.mjs",
-      "size": 2293,
-      "sha256": "0f8a0ca74953b16f5166fab14af8db555b0dfda7ab8a3106e2e135bbf651b3d6"
+      "size": 2321,
+      "sha256": "e9de699c521f5ee0a7a269736c10e3fe5ca067b77648ab3d17a8b5700e88c198"
+    },
+    {
+      "path": "standalone-pwh/stoom-mark-original.css",
+      "source": "standalone-pwh/stoom-mark-original.css",
+      "size": 450,
+      "sha256": "bf79fb030a017effc8f53675b576431a23e2b939edccf25cfea937ed0cd1dccf"
     },
     {
       "path": "standalone-pwh/stoom-mark.svg",
@@ -376,10 +436,16 @@
       "sha256": "967e51c3565ded7f1d7cac477158d659639046dc0791463f24b197ac72bb3f7b"
     },
     {
+      "path": "standalone-pwh/stoom-product-marks.css",
+      "source": "standalone-pwh/stoom-product-marks.css",
+      "size": 992,
+      "sha256": "fbf5f3f286087229ae0584ee1f27adb4d2a9c9a617bffa9aa1618167e46952a5"
+    },
+    {
       "path": "standalone-pwh/stoom.ico",
       "source": "standalone-pwh/stoom.ico",
-      "size": 372526,
-      "sha256": "8453ec999ca0bcf7ffd86a82760ed7616fc71c2b15b1b49d4f73f6b4e36ba44b"
+      "size": 56672,
+      "sha256": "dbf6747c80fb86da182e67ab81e7bfdcfe21fc68dc4855dd8902b87030d51f6e"
     },
     {
       "path": "standalone-pwh/table-plan-repro.check.mjs",
@@ -403,19 +469,19 @@
       "path": "standalone-pwh/update-check.mjs",
       "source": "standalone-pwh/update-check.mjs",
       "size": 5852,
-      "sha256": "48d3f4f4a0e44817ee66b2c86b4df5632ae3647e031c05fdcd98085caa3d3d9a"
+      "sha256": "1850acc8479f29a09b514a72ad711361b5e5d1e0795fc0d2b4d207a66f9fe12b"
     },
     {
       "path": "standalone-pwh/update-helper.mjs",
       "source": "standalone-pwh/update-helper.mjs",
       "size": 3430,
-      "sha256": "293027dc8233e80a91cbe7be32421615cbe3756194744433f38e049c6ebf4d03"
+      "sha256": "8ac44cf00742b68e3d38cf339db82bd1c0b8526b31841f85ee7f8b0a065c6b92"
     },
     {
       "path": "standalone-pwh/verify-stoom-icon.ps1",
       "source": "standalone-pwh/verify-stoom-icon.ps1",
-      "size": 2509,
-      "sha256": "bf2977e281cd1974041251f798c968c0bdbe2a59f4f80cc2c96f502a4316e3a8"
+      "size": 2811,
+      "sha256": "1e90de965ca5005c95ab3137fa8e4aac6c34ea1e0b503a689c2a973118c8d6ad"
     },
     {
       "path": "standalone-pwh/version-info.check.mjs",
@@ -433,7 +499,7 @@
       "path": "standalone-pwh/version.json",
       "source": "standalone-pwh/version.json",
       "size": 21,
-      "sha256": "d840da41e566b3f19d4f11a11d5235fb5ea030df0dc9a6acbfeee306a632ec64"
+      "sha256": "886118ec59e9a35aea8171274d2fb760766e45aa4715949993055ec1a10ab38c"
     },
     {
       "path": "standalone-pwh/window-close-controller.mjs",
@@ -456,26 +522,26 @@
     {
       "path": "standalone-pwh/workspace-shell.mjs",
       "source": "standalone-pwh/workspace-shell.mjs",
-      "size": 13409,
-      "sha256": "bbc9d5cc602cb1fb8afa1ae68f3af378752259c7a4707249a47d77eb5bfbf1ad"
+      "size": 13516,
+      "sha256": "5b227d975810eb827b6e76a4aced95d0f89d5c1ca7aba49a3439dd0b3b012800"
     },
     {
       "path": "standalone-pwh/workspace.css",
       "source": "standalone-pwh/workspace.css",
-      "size": 7079,
-      "sha256": "866269578ec10f7ccbbf7ea74bcdc2283a7fae2345544ebc1b57c8fbab8b4da2"
+      "size": 7439,
+      "sha256": "9feadc5bd7c3dac8a2c3de11edf848be2718969f08ade60a0fed026a0ed62559"
     },
     {
       "path": "standalone-pwh/workspace.html",
       "source": "standalone-pwh/workspace.html",
-      "size": 2874,
-      "sha256": "b57a7084c75a9948e0894b9c32219802b96c724b6a3bf693bf1bdad76f8ef62c"
+      "size": 2953,
+      "sha256": "4bd7f5a2daaf5058402e6fba7681bb8fa9d0145dc2debe19bfc0ace023aa67fb"
     },
     {
       "path": "standalone-pwh/workspace.js",
       "source": "standalone-pwh/workspace.js",
-      "size": 18669,
-      "sha256": "fe23c74973957318c122573c990eb0ce99177eb84cc628eb1367a46522fa725b"
+      "size": 18951,
+      "sha256": "37ab2800c115cbf245db654d64a43a3519a0929837926f5e255bdf3c668d7aa1"
     }
   ]
 }
