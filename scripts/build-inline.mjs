@@ -1,6 +1,7 @@
 import {promises as fs} from 'node:fs';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
+import {patchBodyCursorContract} from './patch-body-cursor-contract.mjs';
 const root=path.resolve(process.argv[2]);
 const studio=path.join(root,'rhwp-studio');
 // Apply the same text selection behavior in both Pwh hosts.
@@ -729,6 +730,7 @@ if(!wasm.includes('pwh scratch paragraph operations')){
 
 wasm=wasm.replace('await init() as',"await init({module_or_path:await (window as any).pwhWasmBytes}) as");
 await fs.writeFile(wasmPath,wasm);
+await patchBodyCursorContract(studio);
 const glue=path.join(root,'pkg/rhwp.js');
 await fs.writeFile(glue,(await fs.readFile(glue,'utf8')).replace("new URL('rhwp_bg.wasm', import.meta.url)","(()=>{throw new Error('Host WASM bytes required')})()"));
 const {build}=await import(pathToFileURL(path.join(studio,'node_modules/vite/dist/node/index.js')));

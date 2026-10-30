@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 
-test('clicking after a visible note deletes the note, with cancel and undo, without deleting body text',{
+test('note cursor keeps text input, arrow movement, cancel, deletion and undo in the correct source position',{
  skip:process.env.PWH_BROWSER_TESTS!=='1'||!process.env.PWH_DESKTOP_SOURCE_ROOT?'Set Desktop, browser and core paths':false,timeout:180000,
 },async()=>{
  const {chromium}=await import(process.env.PWH_PLAYWRIGHT_MODULE||'playwright');const {default:init,HwpDocument}=await import(pathToFileURL(process.env.PWH_CORE_JS));await init({module_or_path:await fs.readFile(process.env.PWH_CORE_WASM)});
@@ -20,8 +20,22 @@ test('clicking after a visible note deletes the note, with cancel and undo, with
   const box=await page.locator('#editor').boundingBox();
   for(const target of targets){
    const before=await editor.evaluate(t=>{const w=window.rhwpStudio.plugins.deps.wasm;return w.getCharShapeRuns(0,t.para,0,4);},target);
-   const point=await editor.evaluate(t=>{const ih=window.rhwpStudio.plugins.deps.getInputHandler(),w=ih.wasm,r=w.getCursorRect(0,t.para,t.at+1),zoom=ih.viewportManager.getZoom(),sc=ih.container.querySelector('#scroll-content'),b=sc.getBoundingClientRect();return{x:b.x+ih.virtualScroll.getPageLeftResolved(r.pageIndex,sc.clientWidth)+(r.x-.1)*zoom,y:b.y+ih.virtualScroll.getPageOffset(r.pageIndex)+(r.y+Math.min(6,r.height/2))*zoom};},target);
-   await page.mouse.click(box.x+point.x,box.y+point.y);let c=await editor.evaluate(()=>window.pwhEditor.context());assert.equal(c.cursor.paragraphIndex,target.para);assert.equal(c.cursor.charOffset,target.at+1);
+   const point=await editor.evaluate(t=>{const ih=window.rhwpStudio.plugins.deps.getInputHandler(),w=ih.wasm,r=w.getBodyCursorRect({sectionIndex:0,paragraphIndex:t.para,charOffset:t.at,bodyCursor:{sectionIndex:0,paragraphIndex:t.para,textOffset:t.at,logicalOffset:t.at+1}}),zoom=ih.viewportManager.getZoom(),sc=ih.container.querySelector('#scroll-content'),b=sc.getBoundingClientRect();return{x:b.x+ih.virtualScroll.getPageLeftResolved(r.pageIndex,sc.clientWidth)+(r.x-.1)*zoom,y:b.y+ih.virtualScroll.getPageOffset(r.pageIndex)+(r.y+Math.min(6,r.height/2))*zoom};},target);
+   await page.mouse.click(box.x+point.x,box.y+point.y);let c=await editor.evaluate(()=>window.pwhEditor.context());assert.equal(c.cursor.paragraphIndex,target.para);assert.equal(c.cursor.charOffset,target.at);
+   await page.keyboard.type('X');assert.equal(await editor.evaluate(t=>window.rhwpStudio.plugins.deps.wasm.getTextRange(0,t.para,0,5),target),'ABCD'.slice(0,target.at)+'X'+'ABCD'.slice(target.at),'typing after a note uses the text coordinate');
+   await page.keyboard.press('Control+z');
+   await page.keyboard.press('ArrowLeft');c=await editor.evaluate(()=>window.pwhEditor.context());assert.equal(c.cursor.charOffset,target.at);assert.equal(c.cursor.bodyCursor.logicalOffset,target.at,'left moves before the same note');
+   await page.keyboard.press('Delete');let forwardConfirm=editor.locator('.modal-overlay .dialog-wrap').last();await forwardConfirm.waitFor({state:'visible'});await forwardConfirm.getByRole('button',{name:'취소',exact:true}).click();
+   await page.keyboard.press('ArrowRight');c=await editor.evaluate(()=>window.pwhEditor.context());assert.equal(c.cursor.charOffset,target.at);assert.equal(c.cursor.bodyCursor.logicalOffset,target.at+1,'right moves after the same note');
+   if(target.at<4){
+    await page.keyboard.press('ArrowRight');await page.keyboard.press('Backspace');
+    assert.equal(await editor.evaluate(t=>window.rhwpStudio.plugins.deps.wasm.getTextRange(0,t.para,0,4),target),'ABCD'.slice(0,target.at)+'ABCD'.slice(target.at+1));
+    await page.keyboard.type('Y');assert.equal(await editor.evaluate(t=>window.rhwpStudio.plugins.deps.wasm.getTextRange(0,t.para,0,4),target),'ABCD'.slice(0,target.at)+'Y'+'ABCD'.slice(target.at+1),'editing adjacent text preserves the note side');
+    await page.keyboard.press('Control+z');await page.keyboard.press('Control+z');
+    assert.equal(await editor.evaluate(t=>window.rhwpStudio.plugins.deps.wasm.getTextRange(0,t.para,0,4),target),'ABCD');
+    c=await editor.evaluate(()=>window.pwhEditor.context());assert.equal(c.cursor.charOffset,target.at+1);
+    await page.keyboard.press('ArrowLeft');c=await editor.evaluate(()=>window.pwhEditor.context());assert.equal(c.cursor.charOffset,target.at);assert.equal(c.cursor.bodyCursor.logicalOffset,target.at+1,'undoing text retains the source note boundary');
+   }
    await page.keyboard.press('Backspace');const confirm=editor.locator('.modal-overlay .dialog-wrap').last();await confirm.waitFor({state:'visible'});assert.match(await confirm.innerText(),/각주·미주/);await confirm.getByRole('button',{name:'취소',exact:true}).click();
    assert.equal(await editor.evaluate(t=>window.rhwpStudio.plugins.deps.wasm.getFootnoteAtCursor(0,t.para,t.at+1,'backward').hit,target),true);
    await page.keyboard.press('Backspace');await confirm.waitFor({state:'visible'});await confirm.locator('.dialog-btn-primary').click();await confirm.waitFor({state:'detached'});

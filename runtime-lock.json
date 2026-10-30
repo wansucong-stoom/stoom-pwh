@@ -7,8 +7,8 @@
   "releaseTag": "v0.6.35",
   "runtime": {
     "file": "pwh-runtime-rhwp-0.8.7-pwh-r8-windows-x64.zip",
-    "size": 40920847,
-    "sha256": "a158ddb0234b7260d9665525352d49143006e8ce444f9041c8105adeac329331",
+    "size": 40921705,
+    "sha256": "8c08e4b5bcee09b1b63b369c52eb122441870eea9f96e50ca797d55215a10d3d",
     "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/v0.6.35/pwh-runtime-rhwp-0.8.7-pwh-r8-windows-x64.zip"
   },
   "preservationAssets": [
@@ -152,20 +152,20 @@
     },
     {
       "file": "pwh-core-patches-rhwp-0.8.7-pwh-r8.zip",
-      "size": 95457,
-      "sha256": "23999c3a885cc7639a47d6a4c9200f7193d596e762a95aa2048acd553406daeb",
+      "size": 95633,
+      "sha256": "1eaa8ec1bacb8987798a4181f2ad8062f6768a932c7e6ef712f660560761c64a",
       "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/v0.6.35/pwh-core-patches-rhwp-0.8.7-pwh-r8.zip"
     },
     {
       "file": "pwh-inline-build-inputs-rhwp-0.8.7-pwh-r8.zip",
-      "size": 1988457,
-      "sha256": "1b191fd4f4e0d2ca9fef75bf732ed58d33e888aaa9614400c28b5fd71831d9f7",
+      "size": 1993285,
+      "sha256": "13a8b3d151abd9c5d00ebef33f3b1f91d1d47669b0c9db90fb2a4637df1295b6",
       "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/v0.6.35/pwh-inline-build-inputs-rhwp-0.8.7-pwh-r8.zip"
     },
     {
       "file": "VERIFICATION.json",
       "size": 2467,
-      "sha256": "380742b023cced1c5e773a1c2978182cdc901f5ce951f7923aa4ebe28cd7cc16",
+      "sha256": "5ddb3d90cec23df0e75133c0ac83438129bff43f9e329a35493a908e9a305eb3",
       "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/v0.6.35/VERIFICATION.json"
     }
   ]
