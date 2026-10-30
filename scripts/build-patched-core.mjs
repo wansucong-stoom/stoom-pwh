@@ -10,7 +10,7 @@ const pinned = {
   upstreamCommit: '1a76570e833917d15817415a53c09ad61ab3203f',
   sourceArchiveSha256: '067feefc25d36921ee41fea5df6fead00255ffa86441891fbaa202f96de202a2',
   blankTemplateSha256: '43f472751fafefb8c66b0f831660ebed51e443a46bebe44c75bba918154ce4c9',
-  unchangedGlueSha256: '70cde06a369fa7fd4fc8bc8f3d6acaee158596ba1a116a2c72159002b0b5654e',
+  expectedGlueSha256: 'e4b17c467ec6e5955393f7b9b162150ea0f16271085dcec7955bcd87c0014d47',
 };
 const patches = [
   {
@@ -116,6 +116,106 @@ const patches = [
       }
     ]
   },
+{
+  "file": "rhwp-0.8.7-closed-float-successor-frame.patch",
+  "sha256": "dd454d191de066be2fbbb659f9e63681b011ec2067f9280355743a05f50294cf",
+  "sources": [
+    {
+      "path": "src/renderer/typeset/controls/empty_float.rs",
+      "originalSha256": "ee4305f04e2869e2bb2ac16b7d85b91264c80ae929ae54516f2a721debfbb645",
+      "patchedSha256": "60f45e29d40a79386f6811c5cfcd85084a210227a4f56b8360e350c508a202e3"
+    }
+  ]
+},
+
+{
+  "file": "rhwp-0.8.7-implicit-bullet-marker.patch",
+  "sha256": "466a63e2d72191e209c8992d6263a612bc0bccc45a6228b381510ab4ae6924d8",
+  "sources": [
+    {
+      "path": "src/renderer/layout/paragraph_layout.rs",
+      "originalSha256": "d792ae300068a718003ab67ab12dde113ed34a7fb1e0f9546d570ba710565186",
+      "patchedSha256": "2aa9dca69eb9805a4484a088f611b6efc9037295b24224e317cea6d977bb250b"
+    }
+  ]
+},
+
+{
+  "file": "rhwp-0.8.7-shape-fill-transparency.patch",
+  "sha256": "0844a2a531175115f41cd9590f1c3337cf6ea10971c90cdfa88ba4d9275edfbb",
+  "sources": [
+    {
+      "path": "src/model/style.rs",
+      "originalSha256": "470787a168f4c2c7c69ece3d155bc4b3fe25a26b02c43dbc16b0f839c6a2844e",
+      "patchedSha256": "1bddd1429e47a67557d32cacc3cfa71def112e56935e159435661cd18b6c3e0d"
+    },
+    {
+      "path": "src/parser/hwpx/header.rs",
+      "originalSha256": "4f6cd8163f9c4664ba0360e52a1b2027a59bcebd0d5f4291a16586c5d55e838b",
+      "patchedSha256": "2bff680af2a0cad5d4cd279007046e7854d683a19e0d6765ab5abaae87f0b369"
+    },
+    {
+      "path": "src/parser/hwpx/section.rs",
+      "originalSha256": "7d5d38bb8060bbbd454029f7bbab3cf90af589262ab432b7e95a03034be056b7",
+      "patchedSha256": "fbb0c39bb12d2cde98ac2c4ce1e26c824a5a4d6fd6769f5e9b0cd811cf9a1839"
+    },
+    {
+      "path": "src/serializer/hwpx/shape.rs",
+      "originalSha256": "dacb18a59d24230ecb7ac23a51e7b6876d9482b8d1fbc68a3589818669950ff2",
+      "patchedSha256": "09118dcceb27c20076a816a4cd88520bbc8a92b428e9047f231c26f0e1e5c2e4"
+    },
+    {
+      "path": "src/renderer/mod.rs",
+      "originalSha256": "c9191193db4a0b14a936887fac5ffd99f47d77311f60dc58b961574048c3271a",
+      "patchedSha256": "cd792f72450f912486acc319ad0c78fa0a36a465562246a653a1fb26f4f8d063"
+    },
+    {
+      "path": "src/renderer/layout/utils.rs",
+      "originalSha256": "e760b4117b7846d8b697891434c1cc9b2e04fde2d4f3e7ba6db84cd56e0e9564",
+      "patchedSha256": "029011793cf3b968db2f4bc15ba789ffe21c7621259553a6d80a6e2594ffa66e"
+    },
+    {
+      "path": "src/renderer/layout/shape_layout.rs",
+      "originalSha256": "90d78f9bfd3b2f4765b71d9cd1bb8b35c5c4a5a8c5faf6e02361d4ec4998476c",
+      "patchedSha256": "e2867b5ad92b002b83c30f2fc0ae7b34bcaaf86aa44935900be54b43ab986f4c"
+    },
+    {
+      "path": "src/renderer/layout/picture_footnote.rs",
+      "originalSha256": "1fc5b0eeed40194b052f6d2b617f56153a38834674931139e66173dcde3d8307",
+      "patchedSha256": "17a454e04115e73dc8fb8fa3deca9acfd5f25db36d3ac4cb43dc0b4d13b95b55"
+    },
+    {
+      "path": "src/renderer/svg.rs",
+      "originalSha256": "a5f10616101d31582185eaba2283aa5d44a8529d23a681096d512a1341244829",
+      "patchedSha256": "bb938cb2547addd9550ed716ea2c2b682c0cda4e3817222f4390bc202cb9cabd"
+    },
+    {
+      "path": "src/renderer/web_canvas.rs",
+      "originalSha256": "f5b7188590116134e35fd6a6a3c6e615485ed6bc6615d243d7b26becce28d015",
+      "patchedSha256": "17427634c6f27fc02cf4f0c3472a49f431ac421f3e5b5ea3fa3420e3a512043e"
+    },
+    {
+      "path": "src/renderer/skia/renderer.rs",
+      "originalSha256": "7966150a7905d81089bbff77a9129bce2afe490ebb7fda1628f27a91da547d66",
+      "patchedSha256": "229251985833374a9c400031765b528e3a593b5ea4430343fb1cd1c2123373a0"
+    },
+    {
+      "path": "src/renderer/pdf.rs",
+      "originalSha256": "6ec2b549e020e9d3e582076beba9e571a94672635c2fc0cc1c428efa751c5ebb",
+      "patchedSha256": "d676ab27503e4630644aea7365ff20532a8a1d82522da484c00a8e9c3db62504"
+    },
+    {
+      "path": "src/paint/json.rs",
+      "originalSha256": "b48086acd0590d6bc3d81cc9e182bcb5440eadf3102cdbacc003d039a9ce7ff8",
+      "patchedSha256": "f98509439b6bbfc0fe8ff2dff1e0b6cd3288e774f68a864d074fd54f3385bc2b"
+    },
+    {
+      "path": "src/paint/replay_order.rs",
+      "originalSha256": "039c08946c0988302e3d8765db96f0e984207ba767eb540d28594524a9c83b01",
+      "patchedSha256": "571b72bc5dd43651dfbb5207c057dcb61cc1ddf04670191949363a8d02bcf473"
+    }
+  ]
+},
 ];
 const help = `Usage: node scripts/build-patched-core.mjs
   --source-archive <fixed upstream source ZIP>
@@ -276,7 +376,7 @@ print(json.dumps({'originalPackageCount':len(before),'retainedPackageCount':len(
 const lockAudit = JSON.parse(await run(python, ['-c', auditLock, archive, sourceRoot], {capture: true}));
 await run(bindgen, ['--target', 'web', '--out-name', 'rhwp', '--out-dir', outputRoot,
   path.join(targetDir, 'wasm32-unknown-unknown/release/rhwp.wasm')]);
-await assertHash(path.join(outputRoot, 'rhwp.js'), pinned.unchangedGlueSha256);
+await assertHash(path.join(outputRoot, 'rhwp.js'), pinned.expectedGlueSha256);
 const files = {};
 for (const name of ['rhwp.js','rhwp.d.ts','rhwp_bg.wasm','rhwp_bg.wasm.d.ts']) {
   const bytes = await fs.readFile(path.join(outputRoot, name));

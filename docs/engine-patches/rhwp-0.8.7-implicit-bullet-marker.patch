@@ -1,0 +1,19 @@
+diff --git a/src/renderer/layout/paragraph_layout.rs b/src/renderer/layout/paragraph_layout.rs
+--- a/src/renderer/layout/paragraph_layout.rs
++++ b/src/renderer/layout/paragraph_layout.rs
+@@ -585,7 +585,14 @@
+     // Bullet: numbering_id(1-based)로 Bullet 참조
+     let bullet_id = para_style.numbering_id;
+     if bullet_id == 0 {
+-        return None;
++        // Zero is the built-in disc, not a reference to the first definition.
++        // Keep undefined nonzero references absent and inherit the body style.
++        return Some(("\u{25CF}".to_string(), MarkerHead {
++            attr: 0,
++            width_adjust: 0,
++            text_distance: 50,
++            char_shape_id: u32::MAX,
++        }));
+     }
+     let bullet = styles.bullets.get((bullet_id - 1) as usize)?;
+     // U+FFFF는 이미지 글머리표 표시자 — 문자 렌더링 불가, 건너뜀

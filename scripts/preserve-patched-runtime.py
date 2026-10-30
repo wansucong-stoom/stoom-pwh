@@ -106,7 +106,7 @@ def verify_core(root, project, lock):
         data = regular(root / name); item = record['files'][name]
         if len(data) != item['size'] or sha(data) != item['sha256']: raise ValueError('Core output digest mismatch')
         files[name] = data
-    if sha(files['rhwp.js']) != record['unchangedGlueSha256']: raise ValueError('Core glue differs from verified ABI')
+    if sha(files['rhwp.js']) != record.get('expectedGlueSha256', record.get('unchangedGlueSha256')): raise ValueError('Core glue differs from verified ABI')
     return record, raw, files, patches
 
 def verify_regression(file, record, record_raw):
@@ -161,7 +161,8 @@ def main():
     host_resolver = "(()=>{throw new Error('Host WASM bytes required')})()"
     if glue.count(host_resolver) != 1: raise ValueError('Unknown inline WASM resolver')
     normalized = glue.replace(host_resolver, "new URL('rhwp_bg.wasm', import.meta.url)").encode('utf-8')
-    if sha(normalized) != record['unchangedGlueSha256']: raise ValueError('Inline build glue ABI differs from core')
+    if sha(normalized) != record.get('expectedGlueSha256', record.get('unchangedGlueSha256')): raise ValueError('Inline build glue ABI differs from core')
+    core_glue_changed = sha(files['core/rhwp.js']) != sha(core['rhwp.js'])
     for name, data in core.items(): files['core/'+name] = data
     files['core/BUILD-RECORD.json'] = record_raw
     files['core/REGRESSION-VERIFICATION.json'] = regression_raw
@@ -212,6 +213,14 @@ def main():
     for name in ('scripts/setup.mjs','scripts/preserved-runtime.mjs','src/nested-table-paste.mjs','src/request-state.mjs','package.json'):
         core_inputs[name] = regular(project/name)
     core_inputs.update(tree(project/'tests/engine-source-ownership', 'tests/engine-source-ownership/', frozenset({'__pycache__'})))
+    fidelity_tests = ('tests/stored-float-frame.test.mjs', 'tests/shape-fill-transparency.test.mjs',
+                      'tests/compare-pages.test.py', 'tests/fixtures/rowbreak-table/synthetic-rowbreak-single-line-control.hwpx')
+    for name in fidelity_tests:
+        core_inputs[name] = regular(project/name)
+        build_inputs['pwh/'+name] = regular(project/name)
+    core_inputs['scripts/compare-pages.py'] = regular(project/'scripts/compare-pages.py')
+    core_inputs['requirements-render-compare.txt'] = regular(project/'requirements-render-compare.txt')
+    build_inputs['pwh/requirements-render-compare.txt'] = regular(project/'requirements-render-compare.txt')
     core_inputs['BUILD-RECORD.json'] = record_raw
     core_inputs['REGRESSION-VERIFICATION.json'] = regression_raw
     core_inputs['LICENSE-PWH.txt'] = regular(project/'LICENSE')
@@ -222,7 +231,7 @@ def main():
       'upstreamVersion': '0.8.7', 'upstreamCommit': lock['upstreamCommit'],
       'baseRuntime': {'id':lock['id'], **lock['runtime'], 'manifestSha256':manifest_sha},
       'baseProvenance': manifest['provenance'], 'nativeCliChanges': False, 'wasmCoreChanges': True,
-      'runtimeCoreJsGlueChanged': False, 'coreBuildRecord': {'path':'core/BUILD-RECORD.json','sha256':sha(record_raw)},
+      'runtimeCoreJsGlueChanged': core_glue_changed, 'coreBuildRecord': {'path':'core/BUILD-RECORD.json','sha256':sha(record_raw)},
       'regressionVerification':{'path':'core/REGRESSION-VERIFICATION.json','size':len(regression_raw),'sha256':sha(regression_raw)},
       'wasmCorePatches':record['patches'], 'inlineClientVersion':client_marker['version'],
       'inlineClientGlueMatchesCore':True,'inlineBuildInputs':client_asset,'corePatchInputs':patch_asset,

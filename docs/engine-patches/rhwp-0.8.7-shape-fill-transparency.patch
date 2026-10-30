@@ -1,0 +1,338 @@
+diff --git a/src/model/style.rs b/src/model/style.rs
+--- a/src/model/style.rs
++++ b/src/model/style.rs
+@@ -740,7 +740,7 @@
+     pub gradient: Option<GradientFill>,
+     /// 이미지 채우기
+     pub image: Option<ImageFill>,
+-    /// 채우기 불투명도 (0=완전투명/미설정, 255=불투명)
++    /// 채우기 투명도 (0=불투명, 255=완전투명)
+     pub alpha: u8,
+ }
+ 
+diff --git a/src/parser/hwpx/header.rs b/src/parser/hwpx/header.rs
+--- a/src/parser/hwpx/header.rs
++++ b/src/parser/hwpx/header.rs
+@@ -1697,10 +1697,10 @@
+                                         }
+                                     }
+                                     b"alpha" => {
+-                                        // HWPX alpha: 0.0=완전투명 ~ 1.0=불투명 (float string)
++                                        // HWPX fill alpha is the stored transparency byte (0 opaque, 255 transparent).
+                                         let val = attr_str(&attr);
+                                         if let Ok(f) = val.parse::<f64>() {
+-                                            bf.fill.alpha = (f.clamp(0.0, 1.0) * 255.0) as u8;
++                                            bf.fill.alpha = f.clamp(0.0, 255.0).round() as u8;
+                                         }
+                                     }
+                                     _ => {}
+@@ -1734,7 +1734,7 @@
+                                     b"alpha" => {
+                                         let val = attr_str(&attr);
+                                         if let Ok(f) = val.parse::<f64>() {
+-                                            bf.fill.alpha = (f.clamp(0.0, 1.0) * 255.0) as u8;
++                                            bf.fill.alpha = f.clamp(0.0, 255.0).round() as u8;
+                                         }
+                                     }
+                                     _ => {}
+diff --git a/src/parser/hwpx/section.rs b/src/parser/hwpx/section.rs
+--- a/src/parser/hwpx/section.rs
++++ b/src/parser/hwpx/section.rs
+@@ -4275,7 +4275,7 @@
+                                 b"alpha" => {
+                                     let val = attr_str(&attr);
+                                     if let Ok(f) = val.parse::<f64>() {
+-                                        fill.alpha = (f.clamp(0.0, 1.0) * 255.0) as u8;
++                                        fill.alpha = f.clamp(0.0, 255.0).round() as u8;
+                                     }
+                                 }
+                                 _ => {}
+@@ -4299,7 +4299,7 @@
+                                 b"alpha" => {
+                                     let val = attr_str(&attr);
+                                     if let Ok(f) = val.parse::<f64>() {
+-                                        fill.alpha = (f.clamp(0.0, 1.0) * 255.0) as u8;
++                                        fill.alpha = f.clamp(0.0, 255.0).round() as u8;
+                                     }
+                                 }
+                                 _ => {}
+diff --git a/src/serializer/hwpx/shape.rs b/src/serializer/hwpx/shape.rs
+--- a/src/serializer/hwpx/shape.rs
++++ b/src/serializer/hwpx/shape.rs
+@@ -1044,13 +1044,9 @@
+     }
+ }
+ 
+-/// winBrush/gradation alpha — 파서가 `f.clamp(0,1)*255` 로 적재하므로 0~1 분수로 방출.
++/// winBrush/gradation alpha is a transparency byte, shared with HWP5 Fill.
+ fn fill_alpha_str(alpha: u8) -> String {
+-    if alpha == 0 {
+-        "0".to_string()
+-    } else {
+-        format!("{}", alpha as f64 / 255.0)
+-    }
++    alpha.to_string()
+ }
+ 
+ /// `hatch_style` (1~6) → OWPML hatchStyle. `parse_hatch_style` 의 역매핑.
+diff --git a/src/renderer/mod.rs b/src/renderer/mod.rs
+--- a/src/renderer/mod.rs
++++ b/src/renderer/mod.rs
+@@ -647,6 +647,9 @@
+     pub stroke_dash: StrokeDash,
+     /// 투명도 (0.0=완전투명, 1.0=불투명)
+     pub opacity: f64,
++    /// Optional fill-only opacity; the outline retains the overall opacity.
++    #[serde(skip_serializing_if = "Option::is_none")]
++    pub fill_opacity: Option<f64>,
+     /// 그림자 (None이면 그림자 없음)
+     pub shadow: Option<ShadowStyle>,
+ }
+@@ -675,6 +678,7 @@
+             stroke_width: 0.0,
+             stroke_dash: StrokeDash::default(),
+             opacity: 1.0,
++            fill_opacity: None,
+             shadow: None,
+         }
+     }
+diff --git a/src/renderer/layout/utils.rs b/src/renderer/layout/utils.rs
+--- a/src/renderer/layout/utils.rs
++++ b/src/renderer/layout/utils.rs
+@@ -447,7 +447,8 @@
+         stroke_color,
+         stroke_width,
+         stroke_dash,
+-        opacity,
++        opacity: 1.0,
++        fill_opacity: Some(opacity),
+         shadow,
+     };
+     (style, gradient)
+diff --git a/src/renderer/layout/shape_layout.rs b/src/renderer/layout/shape_layout.rs
+--- a/src/renderer/layout/shape_layout.rs
++++ b/src/renderer/layout/shape_layout.rs
+@@ -1473,7 +1473,8 @@
+                     style.stroke_width = 0.0;
+                 }
+                 let round_px = if rect.round_rate > 0 {
+-                    (rect.round_rate as f64 / 100.0) * render_w.min(render_h) / 2.0
++                    ((rect.round_rate as f64 / 100.0) * render_w.min(render_h))
++                        .min(render_w.min(render_h) / 2.0)
+                 } else {
+                     0.0
+                 };
+diff --git a/src/renderer/layout/picture_footnote.rs b/src/renderer/layout/picture_footnote.rs
+--- a/src/renderer/layout/picture_footnote.rs
++++ b/src/renderer/layout/picture_footnote.rs
+@@ -2112,6 +2112,7 @@
+             stroke_width: border_w,
+             stroke_dash,
+             opacity: 1.0,
++            fill_opacity: None,
+             shadow: None,
+         };
+         let border_id = tree.next_id();
+diff --git a/src/renderer/svg.rs b/src/renderer/svg.rs
+--- a/src/renderer/svg.rs
++++ b/src/renderer/svg.rs
+@@ -1412,7 +1412,7 @@
+         gradient: Option<&GradientFillInfo>,
+         bbox: (f64, f64, f64, f64),
+     ) -> String {
+-        if let Some(grad) = gradient {
++        let mut attrs = if let Some(grad) = gradient {
+             let grad_id = self.create_gradient_def(grad, bbox);
+             format!(" fill=\"url(#{})\"", grad_id)
+         } else if let Some(ref pat) = style.pattern {
+@@ -1422,7 +1422,11 @@
+             format!(" fill=\"{}\"", color_to_svg(fill))
+         } else {
+             " fill=\"none\"".to_string()
+-        }
++        };
++        if let Some(opacity) = style.fill_opacity {
++            if opacity < 1.0 { attrs.push_str(&format!(" fill-opacity=\"{:.3}\"", opacity)); }
++        }
++        attrs
+     }
+ 
+     /// 화살표 마커 SVG 정의 생성 (중복 시 기존 ID 반환)
+diff --git a/src/renderer/web_canvas.rs b/src/renderer/web_canvas.rs
+--- a/src/renderer/web_canvas.rs
++++ b/src/renderer/web_canvas.rs
+@@ -1745,11 +1745,9 @@
+         style: &ShapeStyle,
+         gradient: Option<&GradientFillInfo>,
+     ) {
+-        let need_opacity = style.opacity < 1.0;
+-        if need_opacity {
+-            self.ctx.save();
+-            self.ctx.set_global_alpha(style.opacity);
+-        }
++        let original_alpha = self.ctx.global_alpha();
++        self.ctx.save();
++        self.ctx.set_global_alpha(original_alpha * style.opacity * style.fill_opacity.unwrap_or(1.0));
+         // 그림자는 fill에만 적용 (stroke 전에 해제)
+         self.apply_shadow(style);
+ 
+@@ -1789,6 +1787,7 @@
+                 self.ctx.fill();
+             }
+             self.clear_shadow(style); // stroke 전에 그림자 해제
++            self.ctx.set_global_alpha(original_alpha * style.opacity);
+             if let Some(stroke) = style.stroke_color {
+                 self.ctx.set_stroke_style_str(&color_to_css(stroke));
+                 self.ctx.set_line_width(style.stroke_width.max(0.5));
+@@ -1814,6 +1813,7 @@
+                 self.ctx.fill_rect(x, y, w, h);
+             }
+             self.clear_shadow(style); // stroke 전에 그림자 해제
++            self.ctx.set_global_alpha(original_alpha * style.opacity);
+             if let Some(stroke) = style.stroke_color {
+                 self.ctx.set_stroke_style_str(&color_to_css(stroke));
+                 self.ctx.set_line_width(style.stroke_width.max(0.5));
+@@ -1823,9 +1823,7 @@
+             }
+         }
+ 
+-        if need_opacity {
+-            self.ctx.restore();
+-        }
++        self.ctx.restore();
+     }
+ 
+     /// 그라데이션을 포함한 타원 그리기
+@@ -1838,6 +1836,9 @@
+         style: &ShapeStyle,
+         gradient: Option<&GradientFillInfo>,
+     ) {
++        let original_alpha = self.ctx.global_alpha();
++        self.ctx.save();
++        self.ctx.set_global_alpha(original_alpha * style.opacity * style.fill_opacity.unwrap_or(1.0));
+         self.apply_shadow(style);
+         self.ctx.begin_path();
+         let _ = self
+@@ -1865,6 +1866,8 @@
+             self.ctx.fill();
+         }
+ 
++        self.ctx.set_global_alpha(original_alpha * style.opacity);
++        self.clear_shadow(style);
+         if let Some(stroke) = style.stroke_color {
+             self.ctx.set_stroke_style_str(&color_to_css(stroke));
+             self.ctx.set_line_width(style.stroke_width.max(0.5));
+@@ -1873,6 +1876,7 @@
+             let _ = self.ctx.set_line_dash(&js_sys::Array::new());
+         }
+         self.clear_shadow(style);
++        self.ctx.restore();
+     }
+ 
+     /// 그라데이션을 포함한 패스 그리기
+@@ -1882,6 +1886,9 @@
+         style: &ShapeStyle,
+         gradient: Option<&GradientFillInfo>,
+     ) {
++        let original_alpha = self.ctx.global_alpha();
++        self.ctx.save();
++        self.ctx.set_global_alpha(original_alpha * style.opacity * style.fill_opacity.unwrap_or(1.0));
+         self.apply_shadow(style);
+         self.ctx.begin_path();
+         let mut min_x = f64::MAX;
+@@ -1986,6 +1993,8 @@
+             self.ctx.fill();
+         }
+ 
++        self.ctx.set_global_alpha(original_alpha * style.opacity);
++        self.clear_shadow(style);
+         if let Some(stroke) = style.stroke_color {
+             self.ctx.set_stroke_style_str(&color_to_css(stroke));
+             self.ctx.set_line_width(style.stroke_width.max(0.5));
+@@ -2001,6 +2010,7 @@
+             self.ctx.set_shadow_offset_y(0.0);
+             self.ctx.set_shadow_blur(0.0);
+         }
++        self.ctx.restore();
+     }
+ 
+     /// 도형 그림자 적용
+diff --git a/src/renderer/skia/renderer.rs b/src/renderer/skia/renderer.rs
+--- a/src/renderer/skia/renderer.rs
++++ b/src/renderer/skia/renderer.rs
+@@ -714,7 +714,7 @@
+             let mut paint = Paint::default();
+             paint.set_anti_alias(true);
+             paint.set_style(paint::Style::Fill);
+-            paint.set_color(colorref_to_skia(color, style.opacity as f32));
++            paint.set_color(colorref_to_skia(color, (style.opacity * style.fill_opacity.unwrap_or(1.0)) as f32));
+             Some(paint)
+         };
+         let make_stroke_paint = |style: &ShapeStyle| -> Option<Paint> {
+@@ -1235,7 +1235,7 @@
+                                     paint.set_style(paint::Style::Fill);
+                                     paint.set_color(colorref_to_skia(
+                                         color,
+-                                        rect.style.opacity as f32,
++                                        (rect.style.opacity * rect.style.fill_opacity.unwrap_or(1.0)) as f32,
+                                     ));
+                                     paint
+                                 })
+@@ -1288,7 +1288,7 @@
+                                     paint.set_style(paint::Style::Fill);
+                                     paint.set_color(colorref_to_skia(
+                                         color,
+-                                        ellipse.style.opacity as f32,
++                                        (ellipse.style.opacity * ellipse.style.fill_opacity.unwrap_or(1.0)) as f32,
+                                     ));
+                                     paint
+                                 })
+@@ -1368,7 +1368,7 @@
+                                     paint.set_style(paint::Style::Fill);
+                                     paint.set_color(colorref_to_skia(
+                                         color,
+-                                        path.style.opacity as f32,
++                                        (path.style.opacity * path.style.fill_opacity.unwrap_or(1.0)) as f32,
+                                     ));
+                                     paint
+                                 })
+diff --git a/src/renderer/pdf.rs b/src/renderer/pdf.rs
+--- a/src/renderer/pdf.rs
++++ b/src/renderer/pdf.rs
+@@ -155,6 +155,11 @@
+                 page_index + 1,
+                 style.stroke_width
+             ));
++        }
++        if let Some(opacity) = style.fill_opacity {
++            if !is_valid_skia_scalar(opacity) || !(0.0..=1.0).contains(&opacity) {
++                return Err(format!("direct PDF page {} has invalid {op} fill opacity: {}", page_index + 1, opacity));
++            }
+         }
+         Ok(())
+     }
+diff --git a/src/paint/json.rs b/src/paint/json.rs
+--- a/src/paint/json.rs
++++ b/src/paint/json.rs
+@@ -2734,6 +2734,9 @@
+         json_escape(stroke_dash_str(style.stroke_dash)),
+         style.opacity,
+     );
++    if let Some(opacity) = style.fill_opacity {
++        let _ = write!(buf, ",\"fillOpacity\":{:.3}", opacity);
++    }
+     if let Some(shadow) = &style.shadow {
+         buf.push_str(",\"shadow\":");
+         write_shadow_style(buf, shadow);
+diff --git a/src/paint/replay_order.rs b/src/paint/replay_order.rs
+--- a/src/paint/replay_order.rs
++++ b/src/paint/replay_order.rs
+@@ -164,7 +164,7 @@
+         PaintOp::Path { bbox, path } => (bbox, &path.style, path.gradient.is_some()),
+         _ => return None,
+     };
+-    if style.opacity < 1.0 {
++    if style.opacity * style.fill_opacity.unwrap_or(1.0) < 1.0 {
+         return None;
+     }
+     if style.fill_color.is_some() || style.pattern.is_some() || has_gradient {

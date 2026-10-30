@@ -1,0 +1,41 @@
+diff --git a/src/renderer/typeset/controls/empty_float.rs b/src/renderer/typeset/controls/empty_float.rs
+--- a/src/renderer/typeset/controls/empty_float.rs
++++ b/src/renderer/typeset/controls/empty_float.rs
+@@ -140,6 +140,37 @@
+     }
+ 
+     let available = available_height();
++
++    // A saved host and successor can independently close the complete object
++    // box. Prefer that shared frame before the lane-only path discards its
++    // successor origin and charges the next paragraph's leading band twice.
++    let closed_frame = (!page.profile.session_edited()
++        && (page.profile.hwpx_stored_layout() || page.profile.hwp5_stored_pagination_layout())
++        && page.layout.column_areas.len() == 1
++        && (column_area.y - page.layout.body_area.y).abs() <= 0.5
++        && !table_reflowed
++        && is_topbottom_para_float
++        && topbottom_float_count == 1)
++        .then(|| next_para.and_then(|next| {
++            crate::renderer::float_placement::stored_empty_control_table_frame(
++                para, next, table, ft.effective_height, ft.host_spacing.before, 0, dpi,
++            )
++        }))
++        .flatten()
++        .filter(|frame| {
++            frame.anchor_y + 0.5 >= page.current_height
++                && frame.occupied_bottom <= available + 0.5
++                && (lanes.pushed_top(x_start, x_end, frame.anchor_y) - frame.anchor_y).abs() <= 0.5
++        });
++    if let Some(frame) = closed_frame {
++        return Some(EmptyFloatPlacement {
++            x_start,
++            x_end,
++            raw_top: frame.anchor_y,
++            reserved_height: frame.occupied_bottom - frame.anchor_y,
++            resolved: Some(frame),
++        });
++    }
+ 
+     let v_offset_px = hwpunit_to_px(signed_hwpunit(table.common.vertical_offset), dpi);
+     // Square sibling 표는 HWP 페이지 좌표계의 저장 vpos를 공유한다. 이 값을 현재

@@ -61,6 +61,15 @@ class PreservationTests(unittest.TestCase):
     def test_verified_core_is_accepted(self):
         core,project,record,lock=self.core();actual,_,files,_=m.verify_core(core,project,lock)
         self.assertEqual(actual,record);self.assertEqual(set(files),set(m.CORE_FILES))
+    def test_explicit_generated_glue_pin_is_verified(self):
+        core,project,record,lock=self.core()
+        record['expectedGlueSha256']=record.pop('unchangedGlueSha256')
+        (core/'BUILD-RECORD.json').write_bytes(m.js(record))
+        m.verify_core(core,project,lock)
+        record['expectedGlueSha256']='0'*64
+        (core/'BUILD-RECORD.json').write_bytes(m.js(record))
+        with self.assertRaisesRegex(ValueError,'glue'):
+            m.verify_core(core,project,lock)
     def test_dependency_drift_is_rejected(self):
         core,project,record,lock=self.core();record['lockAudit']['changedRetainedPackages']=1;(core/'BUILD-RECORD.json').write_bytes(m.js(record))
         with self.assertRaisesRegex(ValueError,'drift'):m.verify_core(core,project,lock)

@@ -9,7 +9,7 @@ import {deflateRawSync} from 'node:zlib';
 const PROJECT_ROOT = fileURLToPath(new URL('../', import.meta.url));
 const FILES = Object.freeze([
   'plugin.json', 'mcp.json', '.mcp.json', '.codex-plugin/plugin.json', 'package.json', 'assets/stoom.png',
-  'engine.config.json', 'engine.config.example.json', 'runtime-lock.json', 'README.md', 'LICENSE',
+  'engine.config.json', 'engine.config.example.json', 'runtime-lock.json', 'README.md', 'LICENSE', 'requirements-render-compare.txt',
   'THIRD_PARTY_NOTICES.md', 'CONTRIBUTING.md', 'scripts/setup.mjs', 'scripts/stage-electron.mjs', 'scripts/brand-electron.mjs',
   'scripts/inspect_template.py', 'scripts/fill_form.py', 'scripts/replace_image.py', 'scripts/inspect_image.py', 'scripts/compare-pages.py', 'scripts/build-studio.ps1',
   'scripts/package.mjs', 'scripts/build-inline.mjs', 'scripts/patch-body-cursor-contract.mjs', 'scripts/bundle-client.mjs', 'scripts/read-clipboard.ps1', 'scripts/save-dialog.ps1', 'scripts/launch.mjs', 'scripts/preserved-runtime.mjs', 'scripts/preserve-engine.py', 'scripts/preserve-patched-runtime.py', 'scripts/build-patched-core.mjs',
