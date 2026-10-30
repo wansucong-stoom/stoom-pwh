@@ -25,3 +25,10 @@ test('body paragraph selection does not cross into another paragraph',()=>{
  const wasm={getParagraphLength:(s,p)=>{assert.equal(p,4);return 5;},getTextRange:()=> 'hello'};
  assert.equal(selectMulticlick(cursor,wasm,3),true);assert.equal(anchor.paragraphIndex,4);assert.equal(position.paragraphIndex,4);assert.equal(anchor.charOffset,0);assert.equal(position.charOffset,5);
 });
+
+test('word endpoints retain freshly measured page hints rather than the clicked offset rectangle',()=>{
+ let position={sectionIndex:0,paragraphIndex:2,charOffset:3,parentParaIndex:2,controlIndex:0,cellIndex:0,cellParaIndex:0,cursorRect:{pageIndex:7,x:999}},anchor,rect;
+ const cursor={getPosition:()=>position,isInHeaderFooter:()=>false,isInFootnote:()=>false,isInTextBox:()=>false,isInCellSelectionMode:()=>false,clearSelection(){},moveTo(p){position=p;rect={pageIndex:7,x:20+p.charOffset*5,y:100,height:12};},getRect:()=>rect,moveToHit:p=>{position=p;},setAnchor(){anchor={...position};}};
+ const wasm={getCellParagraphLength:()=>5,getTextInCell:()=> 'hello'};
+ assert.equal(selectMulticlick(cursor,wasm,2),true);assert.equal(anchor.cursorRect.x,20);assert.equal(position.cursorRect.x,45);assert.equal(anchor.cursorRect.pageIndex,7);assert.equal(position.cursorRect.pageIndex,7);
+});

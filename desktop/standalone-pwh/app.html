@@ -2,20 +2,20 @@
 <html lang="ko">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Pwh Desktop</title><link rel="icon" href="stoom.ico"><link rel="stylesheet" href="stoom-mark-original.css"><link rel="stylesheet" href="stoom-product-marks.css"><link rel="stylesheet" href="app.css"></head>
 <body>
-<header class="app-header">
-  <div class="app-brand" aria-label="STOOM Pwh Desktop"><strong>Pwh Desktop</strong></div>
+<div id="desktop-host-controls" hidden>
   <button id="open-ai" class="header-settings" type="button" aria-controls="ai-pane" aria-expanded="false" title="AI 대화 열기" hidden>AI 대화 열기</button>
   <button id="new" hidden>새 문서</button><input id="file" type="file" accept=".hwp,.hwpx" hidden>
   <span id="status" role="status">준비 중</span>
   <span id="document-notice" role="status" hidden></span>
   <span id="desktop-workspace-status" role="status" hidden></span><button id="desktop-codex-retry" class="header-settings" type="button" hidden>Codex 연결 다시 시도</button><button id="desktop-update" class="header-settings" type="button" hidden></button>
   <button id="settings" hidden class="header-settings" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9.4 3-.6 2.1-1.8 1-2.1-.5-1.7 2.8 1.5 1.6v2L3.2 14l1.7 2.8 2.1-.5 1.8 1 .6 2.1h3.2l.6-2.1 1.8-1 2.1.5 1.7-2.8-1.5-1.6v-2l1.5-1.6-1.7-2.8-2.1.5-1.8-1-.6-2.1Z" transform="translate(1 1)"/><circle cx="12" cy="12" r="3"/></svg><span>AI 설정</span></button>
-</header>
+</div>
 <main>
   <aside id="ai-pane">
     <div class="side-title"><strong>AI 대화</strong><span id="provider-label"></span><button id="close-ai" class="icon-button" type="button" aria-controls="ai-pane" aria-label="AI 대화 닫기" title="AI 대화 닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5 8 12l7 7"/></svg></button></div>
     <div id="conversation" aria-live="polite"><div id="conversation-empty" class="conversation-empty"><span class="stoom-badge stoom-badge-large" aria-hidden="true"><span class="stoom-mark stoom-product-mark"><span class="stoom-product-code">Pwh</span></span></span><h1>문서와 함께 작업하세요</h1><p>내용을 선택해 다듬거나,<br>문서에 관해 이야기해 보세요.</p></div></div>
     <a id="download-codex" href="https://chatgpt.com/download/" target="_blank" rel="noopener noreferrer" hidden>ChatGPT 데스크톱 설치 안내 열기</a>
+    <p id="conversation-status" role="status" hidden></p>
     <div class="composer">
       <label class="sr-only" for="prompt">요청 내용</label><textarea id="prompt" placeholder="문서에 요청할 내용을 입력하세요"></textarea>
       <div id="attached-image" hidden><span id="attached-image-name"></span><button id="remove-image" type="button" aria-label="첨부 그림 제거">×</button></div>

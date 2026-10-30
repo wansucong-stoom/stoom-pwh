@@ -5,6 +5,8 @@ const root=path.resolve(process.argv[2]);
 const studio=path.join(root,'rhwp-studio');
 // Apply the same text selection behavior in both Pwh hosts.
 await fs.copyFile(new URL('../src/multiclick-selection.mjs',import.meta.url),path.join(studio,'src/engine/pwh-multiclick-selection.mjs'));
+await fs.copyFile(new URL('../src/selection-page-context.mjs',import.meta.url),path.join(studio,'src/selection-page-context.mjs'));
+await fs.copyFile(new URL('../src/document-font-requests.mjs',import.meta.url),path.join(studio,'src/core/pwh-document-font-requests.mjs'));
 const mousePath=path.join(studio,'src/engine/input-handler-mouse.ts');let mouse=await fs.readFile(mousePath,'utf8');
 if(!mouse.includes('pwh word and paragraph multiclick')){
  const anchor='    this.cursor.moveToHit(hit);\n    this.cursor.resetPreferredX();\n    this.prepareClickHerePointerEntry?.(pageX);';
@@ -114,6 +116,33 @@ if(!tableDialog.includes('pwh direct detail dialog')){
 }
 const tableInputPath=path.join(studio,'src/engine/input-handler.ts');
 let tableInput=await fs.readFile(tableInputPath,'utf8');
+if(!tableInput.includes('pwh caret char shape dialog')){
+ const anchor='  /** 지정된 선택 범위에 글자 서식을 적용한다 (커맨드 시스템용) */';
+ if(!tableInput.includes(anchor))throw Error('Unsupported character shape command API');
+ tableInput=tableInput.replace(anchor,`  // pwh caret char shape dialog: use the same pending/cell-block/submode path as the toolbar.
+  applyCharPropsAtCursor(props: Partial<CharProperties>): void { this.applyCharFormat(props); }
+
+`+anchor);
+ await fs.writeFile(tableInputPath,tableInput);
+}
+if(!tableInput.includes('pwh pending char shape in dialog')){
+ const anchor='    return this.getCharPropertiesAtCursor();\n  }\n\n  /** 문단 모양 대화상자용';
+ if(!tableInput.includes(anchor))throw Error('Unsupported character shape read');
+ tableInput=tableInput.replace(anchor,'    return {...this.getCharPropertiesAtCursor(),...this.getPendingCharShape()}; // pwh pending char shape in dialog\n  }\n\n  /** 문단 모양 대화상자용');await fs.writeFile(tableInputPath,tableInput);
+}
+const formatPath=path.join(studio,'src/command/commands/format.ts');let format=await fs.readFile(formatPath,'utf8');
+if(!format.includes('pwh caret char shape dialog')){
+ const start=format.indexOf("    id: 'format:char-shape',"),end=format.indexOf("    id: 'format:para-shape',",start);
+ if(start<0||end<0||!format.slice(start,end).includes('      if (!savedSel) return;'))throw Error('Unsupported character shape dialog command');
+ const block=format.slice(start,end).replace('      if (!savedSel) return;','      // pwh caret char shape dialog: a caret is a valid formatting target.').replace('        ih.applyCharPropsToRange(savedSel.start, savedSel.end, mods);',`        const nonempty = savedSel && (savedSel.start.charOffset !== savedSel.end.charOffset || savedSel.start.paragraphIndex !== savedSel.end.paragraphIndex || savedSel.start.cellParaIndex !== savedSel.end.cellParaIndex);
+        if (nonempty && !ih.isInCellSelectionMode()) ih.applyCharPropsToRange(savedSel.start, savedSel.end, mods);
+        else ih.applyCharPropsAtCursor(mods);`);
+ format=format.slice(0,start)+block+format.slice(end);
+ await fs.writeFile(formatPath,format);
+}
+if(format.includes('const nonempty = savedSel && (savedSel.start.charOffset')){
+ format=format.replace('const nonempty = savedSel && (savedSel.start.charOffset','const nonempty = savedSel && (savedSel.start.sectionIndex !== savedSel.end.sectionIndex || savedSel.start.charOffset');await fs.writeFile(formatPath,format);
+}
 if(!tableInput.includes('pwh release deferred deletion resources')){
  const before=`      const newPos = cmd.execute(this.wasm);
       this.cursor.moveTo(newPos);`;
@@ -229,6 +258,30 @@ if(hostCanvas.includes('pwh exact local face first')&&!hostCanvas.includes('cons
 }
 await fs.copyFile(new URL('../src/clipboard-structure.mjs',import.meta.url),path.join(studio,'src/engine/pwh-clipboard-structure.mjs'));
 const keyboardPath=path.join(studio,'src/engine/input-handler-keyboard.ts');
+const noteTextPath=path.join(studio,'src/engine/input-handler-text.ts');let noteText=await fs.readFile(noteTextPath,'utf8');
+if(!noteText.includes('pwh note deletion target guard')){
+ const begin=noteText.indexOf('function tryDeleteBodyFootnoteAtCursor('),end=noteText.indexOf('export function handleBackspace(',begin);
+ if(begin<0||end<0)throw Error('Unsupported note deletion command');
+ let block=noteText.slice(begin,end);
+ block=block.replace('    void showConfirm(FOOTNOTE_DELETE_TITLE, FOOTNOTE_DELETE_MESSAGE)',`    // pwh note deletion target guard: a modal must not delete a different note.
+    const generation=this.wasm.documentGeneration;
+    const undoTop=this.history.peekUndoTop();
+    const state=()=>JSON.stringify([this.cursor.getPosition(),this.cursor.getSelectionOrdered()],(key,value)=>key==='cursorRect'?undefined:value);
+    const targetState=state();
+    const current=()=>this.wasm.documentGeneration===generation && this.history.peekUndoTop()===undoTop && state()===targetState;
+    void showConfirm(FOOTNOTE_DELETE_TITLE, FOOTNOTE_DELETE_MESSAGE)`);
+ block=block.replace('        if (!ok) {',`        if (!current()) return;
+        if (!ok) {`);
+ block=block.replace('        this.executeOperation({',`        const fresh=this.wasm.getFootnoteAtCursor(pos.sectionIndex,pos.paragraphIndex,pos.charOffset,direction);
+        if (!fresh.hit || fresh.controlIndex!==controlIndex) return;
+        this.executeOperation({`);
+ noteText=noteText.slice(0,begin)+block+noteText.slice(end);
+ noteText=noteText.replace("const FOOTNOTE_DELETE_TITLE = '각주 삭제';","const FOOTNOTE_DELETE_TITLE = '각주·미주 삭제';").replace("const FOOTNOTE_DELETE_MESSAGE = '각주를 삭제하시겠습니까?';","const FOOTNOTE_DELETE_MESSAGE = '이 각주·미주와 연결된 주석 내용을 삭제할까요?';");
+ await fs.writeFile(noteTextPath,noteText);
+}
+if(noteText.includes('const targetState=JSON.stringify([this.cursor.getPosition(),this.cursor.getSelectionOrdered()]);')){
+ noteText=noteText.replace('const targetState=JSON.stringify([this.cursor.getPosition(),this.cursor.getSelectionOrdered()]);',"const state=()=>JSON.stringify([this.cursor.getPosition(),this.cursor.getSelectionOrdered()],(key,value)=>key==='cursorRect'?undefined:value);\n    const targetState=state();").replace('JSON.stringify([this.cursor.getPosition(),this.cursor.getSelectionOrdered()])===targetState','state()===targetState');await fs.writeFile(noteTextPath,noteText);
+}
 let keyboard=await fs.readFile(keyboardPath,'utf8');
 // A failed or empty clipboard read must never delete the selected source text.
 if(!keyboard.includes('pwh reject empty plain paste before deletion')){
@@ -629,6 +682,23 @@ if(!localFonts.includes('pwh host fonts in menu'))localFonts=localFonts.replace(
 await fs.writeFile(localFontsPath,localFonts);
 const wasmPath=path.join(studio,'src/core/wasm-bridge.ts');
 let wasm=await fs.readFile(wasmPath,'utf8');
+if(!wasm.includes('pwh source font preparation')){
+ const start='      const records = this.withPortableMetrics(() => {',end='      await this.hostCanvasFonts.prepare(records);';
+ const first=wasm.indexOf(start),last=wasm.indexOf(end,first);
+ if(first<0||last<0)throw Error('Unsupported host font preparation');
+ const original=wasm.slice(first,last).replace('      const records = ','');
+ wasm=wasm.slice(0,first)+`      // pwh source font preparation: no page render scan on ordinary edits.
+      const records = documentFontRequests(this.getDocumentInfo(), resolveRendererLocalFont, localFontFaceKey) ?? ${original.trimEnd().replace(/;$/,'')};
+`+wasm.slice(last);
+ wasm='import {documentFontRequests} from '+JSON.stringify('./pwh-document-font-requests.mjs')+';\n'+wasm;
+ // resolveRendererLocalFont is the same family/weight/slant resolver used by
+ // collectHostFontRequests; use the normal import rather than another font map.
+ if(!/import\s*\{[^}]*\bresolveRendererLocalFont\b[^}]*\}\s*from\s*['\"]\.\/local-fonts/.test(wasm)){
+  const imported=wasm.match(/import\s*\{[^}]*\blocalFontFaceKey\b[^}]*\}\s*from\s*['\"]\.\/local-fonts[^\r\n]*/);
+  if(!imported)throw Error('Unsupported host font resolver import');
+  wasm=wasm.replace(imported[0],imported[0].replace('{','{ resolveRendererLocalFont,'));
+ }
+}
 if(!/import\s*\{[^}]*\brenderedBodySelectionRects\b/.test(wasm))wasm='import {renderedBodySelectionRects} from '+JSON.stringify('./pwh-selection-layout.mjs')+';\n'+wasm;
 if(wasm.includes('import {renderedBodySelectionRects,createBodySelectionLayoutCache}'))wasm=wasm.replace(/^import\s+\{renderedBodySelectionRects\}\s+from[^\r\n]+\r?\n/gm,'');
 wasm=wasm.replace('return JSON.parse(this.doc.getSelectionRects(sec, startPara, startOffset, endPara, endOffset));','return renderedBodySelectionRects(this.doc,sec,startPara,startOffset,endPara,endOffset,JSON.parse(this.doc.getSelectionRects(sec,startPara,startOffset,endPara,endOffset)));');

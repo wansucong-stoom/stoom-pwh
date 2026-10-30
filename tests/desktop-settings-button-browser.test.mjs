@@ -15,6 +15,10 @@ test('AI settings is reachable at the top right when the chat is closed',{
   const page=await browser.newPage({viewport:{width:900,height:800}});await page.goto(app.url);await page.getByRole('button',{name:'새 문서 빈 문서에서 시작하기'}).click();
   const child=page.frameLocator('#documents iframe').first(),editor=child.frameLocator('#editor');
   await editor.locator('textarea[aria-label="문서 편집 입력"]').waitFor({state:'attached',timeout:60000});
+  const beforeNotice=await editor.locator('#pwh-header').boundingBox();
+  await editor.locator('body').evaluate(()=>window.dispatchEvent(new CustomEvent('pwh-print-result',{detail:{cancelled:true}})));
+  assert.equal(await child.locator('.document-notification').last().textContent(),'인쇄를 취소했습니다.');
+  const afterNotice=await editor.locator('#pwh-header').boundingBox();assert.equal(beforeNotice.y,afterNotice.y,'print results never add a document header row');assert.equal(await child.locator('.app-header').count(),0);
   await child.locator('#close-ai').click();await child.locator('main.ai-closed').waitFor({state:'attached'});
   const edit=await editor.getByRole('button',{name:'AI 수정 요청'}).boundingBox(),open=await editor.getByRole('button',{name:'AI 대화 열기'}).boundingBox();
   assert.ok(edit&&open);assert.equal(edit.width,open.width);assert.equal(edit.height,open.height);assert.equal(edit.x,open.x);

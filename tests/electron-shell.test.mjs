@@ -60,7 +60,7 @@ test('bundled desktop shell opens, previews, and protects unsaved documents with
   await print.getByRole('button',{name:'인쇄',exact:true}).click();await print.getByRole('alert').filter({hasText:'인쇄를 취소했습니다.'}).waitFor();
   const jobs=await running.evaluate(()=>globalThis.__pwhPrintJobs);assert.equal(jobs.length,1);assert.equal(jobs[0].options.silent,true);assert.equal(jobs[0].options.copies,2);assert.equal(jobs[0].options.landscape,true);assert.deepEqual(jobs[0].options.pageSize,{width:210000,height:297000});assert.equal(jobs[0].pages,1);assert.equal(jobs[0].title,'document.hwpx');
   assert.equal(await child.locator('#output-dialog[open]').count(),0,'Alt+P uses only the combined preview window');
-  await print.getByRole('button',{name:'취소',exact:true}).click();await child.locator('#status').filter({hasText:'인쇄를 취소했습니다.'}).waitFor({timeout:30000});
+  await print.getByRole('button',{name:'취소',exact:true}).click();await child.locator('.document-notification').filter({hasText:'인쇄를 취소했습니다.'}).waitFor({state:'attached',timeout:30000});
   await editor.locator('[data-menu="file"] .menu-title').click();
   const popup=running.waitForEvent('window');await editor.locator('[data-pwh-file="print-preview"]').click();const preview=await popup;
   await preview.locator('.page svg').first().waitFor({state:'attached',timeout:60000});await preview.locator('#print-btn').waitFor({state:'hidden'});await preview.close();

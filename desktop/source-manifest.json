@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pluginVersion": "0.6.34",
+  "pluginVersion": "0.6.35",
   "copyPolicy": "Original bytes; .test.mjs filenames renamed to .check.mjs for staged-only discovery.",
   "files": [
     {
@@ -36,20 +36,20 @@
     {
       "path": "standalone-pwh/app.css",
       "source": "standalone-pwh/app.css",
-      "size": 19013,
-      "sha256": "d6997958d03f3a53a5610bed97e7ecac71827805eac201872149ffb33938cdcb"
+      "size": 19412,
+      "sha256": "83397d3f814aeac77ec6b07afc6495228b04f5de10ab8f85d8b95a14977fd919"
     },
     {
       "path": "standalone-pwh/app.html",
       "source": "standalone-pwh/app.html",
-      "size": 15168,
-      "sha256": "f70b7e21f1eeb4a68c8658365b88ac10efba7050489002d23ee2e5008a7394a0"
+      "size": 15144,
+      "sha256": "59b7f80695f0f4508eb0b4ea828cd517e7e66a1919e7b7095b39cc4e2f2afc9b"
     },
     {
       "path": "standalone-pwh/app.js",
       "source": "standalone-pwh/app.js",
-      "size": 49592,
-      "sha256": "41320213e5203bccbf3703405a045aa5a4312c4ef2a045a30098c527492c7995"
+      "size": 50869,
+      "sha256": "823b3b9663c69f9c5cf82e878a52ccdd365eb4d0e7497c2cfd79d32ef09f656a"
     },
     {
       "path": "standalone-pwh/build-desktop-editor.mjs",
@@ -61,7 +61,7 @@
       "path": "standalone-pwh/build-msi.mjs",
       "source": "standalone-pwh/build-msi.mjs",
       "size": 16391,
-      "sha256": "de32c33028c5a5894f6f5af5f36c2ced7f607638d77083e94692e07916d6a8d0"
+      "sha256": "35ec42d96aa9d0d60dc47ea0cd59f07f543df29f82235e9ca0bf2e8663a55ab0"
     },
     {
       "path": "standalone-pwh/build-native-launcher.mjs",
@@ -73,7 +73,7 @@
       "path": "standalone-pwh/build-offline.mjs",
       "source": "standalone-pwh/build-offline.mjs",
       "size": 8191,
-      "sha256": "db472f2788cc8057f116b9a7acab9919859e2ec6c16c3e535db9ffc8e35d72fa"
+      "sha256": "236481e561dd52ae6d6a82a305fb62ba4c7eea7e0d27e83eb72aa12e3a128d01"
     },
     {
       "path": "standalone-pwh/build-stoom-icon.mjs",
@@ -102,14 +102,14 @@
     {
       "path": "standalone-pwh/client/editor.js",
       "source": "standalone-pwh/client/editor.js",
-      "size": 2691864,
-      "sha256": "5c12829f09e10d33d8a0d9a60e374c7872ca4b104e7264513e9644e600fc4161"
+      "size": 2694141,
+      "sha256": "9dab88ec466c11f1f31044c470d8641becb05f4e34c6bf6261333b81cbca9044"
     },
     {
       "path": "standalone-pwh/client/manifest.json",
       "source": "standalone-pwh/client/manifest.json",
       "size": 264,
-      "sha256": "244bfd5bc6a763caf5a92f95ba2c3b5b8b844bd8fbc038b81b83a5b70554229e"
+      "sha256": "93f3bbaf654ea97b98c2c236eda6f37ec03c3ea9be311a81f9549569108bdd29"
     },
     {
       "path": "standalone-pwh/codex-agent.mjs",
@@ -499,7 +499,7 @@
       "path": "standalone-pwh/version.json",
       "source": "standalone-pwh/version.json",
       "size": 21,
-      "sha256": "886118ec59e9a35aea8171274d2fb760766e45aa4715949993055ec1a10ab38c"
+      "sha256": "42a7805a13f4ce476990a05f8b4f3db53abcfcb9bbb4757aefbbcf1d87b7c29d"
     },
     {
       "path": "standalone-pwh/window-close-controller.mjs",

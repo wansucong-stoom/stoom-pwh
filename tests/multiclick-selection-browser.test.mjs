@@ -23,5 +23,19 @@ test('actual mouse clicks select words and the clicked paragraph, including nest
   const find=async(type)=>frame.evaluate(type=>{for(let y=170;y<850;y+=3)for(let x=130;x<1050;x+=3){if(!document.elementFromPoint(x,y)?.closest('#scroll-content'))continue;const hit=window.rhwpStudio.collaboration.hitTest({clientX:x,clientY:y}),p=hit.position;if(!p)continue;const r=p.cursorRect;if(type!=='body'&&(!r||hit.y<r.y+3||hit.y>r.y+r.height-3))continue;const depth=p.cellPath?.length||0;if(type==='body'&&p.parentParaIndex===undefined&&p.paragraphIndex===0&&p.charOffset===1)return{x,y};if(type==='outer'&&p.parentParaIndex!==undefined&&depth<=1&&p.cellIndex===1&&p.charOffset===1)return{x,y};if(type==='inner'&&depth>1&&p.cellPath.at(-1).cellIndex===0&&p.charOffset===1)return{x,y};}return null;},type);
   const check=async(type,word,paragraph)=>{const point=await find(type);assert.ok(point,`${type} text is visible`);await page.mouse.click(box.x+point.x,box.y+point.y);await page.mouse.dblclick(box.x+point.x,box.y+point.y);let context=await frame.evaluate(()=>window.pwhEditor.context());if(process.env.PWH_MULTICLICK_DEBUG)console.log(type,point,JSON.stringify(context));assert.equal(context.selectedText.text,word,`${type}: double click`);await page.mouse.click(box.x+point.x,box.y+point.y,{clickCount:3});context=await frame.evaluate(()=>window.pwhEditor.context());assert.equal(context.selectedText.text,paragraph,`${type}: triple click`);assert.deepEqual(context.selection.start.cellPath,context.selection.end.cellPath);assert.equal(context.selection.start.cellParaIndex,context.selection.end.cellParaIndex);return context;};
   await check('body','본문','본문 단어 테스트');await check('outer','다른','다른 셀');const nested=await check('inner','안쪽','안쪽 문단 테스트');assert.ok(nested.selection.start.cellPath.length>1,'nested paragraph retains full cell path');
+  for(const type of ['body','outer','inner']){
+   const point=await find(type);assert.ok(point);await page.mouse.dblclick(box.x+point.x,box.y+point.y);
+   let selected=await frame.evaluate(()=>window.pwhEditor.context());
+   if(type!=='body'){assert.ok(Number.isInteger(selected.selection.start.cursorRect?.pageIndex));assert.ok(Number.isInteger(selected.selection.end.cursorRect?.pageIndex));}
+   await frame.locator('#tb-char-format').click();const dialog=frame.locator('.cs-dialog');await dialog.waitFor({state:'visible'});
+   await dialog.locator('input[type=number]').first().fill('15');await dialog.locator('.dialog-btn-primary').click();
+   assert.equal(await frame.evaluate(()=>window.rhwpStudio.plugins.deps.getInputHandler().getCharProperties().fontSize),1500,`${type}: selected text receives dialog formatting`);
+   await page.keyboard.press('Control+z');
+   // A caret, without a selection, must also open the dialog and style new text.
+   await page.mouse.click(box.x+point.x,box.y+point.y);await page.keyboard.press('ArrowRight');
+   await frame.locator('#tb-char-format').click();await dialog.waitFor({state:'visible'});await dialog.locator('input[type=number]').first().fill('17');await dialog.locator('.dialog-btn-primary').click();
+   await frame.locator('#tb-char-format').click();await dialog.waitFor({state:'visible'});assert.equal(Number(await dialog.locator('input[type=number]').first().inputValue()),17,`${type}: reopening retains pending formatting`);await dialog.getByRole('button',{name:'취소',exact:true}).click();
+   await page.keyboard.type('Z');assert.equal(await frame.evaluate(()=>window.rhwpStudio.plugins.deps.getInputHandler().getCharProperties().fontSize),1700,`${type}: next typed text receives caret formatting`);await page.keyboard.press('Control+z');
+  }
  }finally{await browser.close();await new Promise(r=>server.close(r));await fs.rm(dir,{recursive:true,force:true});}
 });

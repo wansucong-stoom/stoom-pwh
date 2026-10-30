@@ -1,0 +1,527 @@
+diff --git a/src/document_core/queries/cursor_rect.rs b/src/document_core/queries/cursor_rect.rs
+--- a/src/document_core/queries/cursor_rect.rs
++++ b/src/document_core/queries/cursor_rect.rs
+@@ -30,6 +30,111 @@
+         return crate::renderer::composer::char_overlap_advance_units(&chars);
+     }
+     text_run.text.chars().count()
++}
++
++/// A body note owns one logical slot, regardless of the number of displayed
++/// digits or the width of its editor-only control-code label. This metadata is
++/// taken from typed render markers and the source control, never visible text.
++#[derive(Clone, Copy)]
++struct BodyNoteSpan {
++    sec: usize,
++    para: usize,
++    ci: usize,
++    pos: usize,
++    x: f64,
++    y: f64,
++    w: f64,
++    h: f64,
++}
++
++fn body_note_spans(
++    core: &DocumentCore,
++    root: &crate::renderer::render_tree::RenderNode,
++) -> Vec<BodyNoteSpan> {
++    use crate::renderer::render_tree::{FieldMarkerType, RenderNode, RenderNodeType};
++    fn walk(
++        core: &DocumentCore,
++        node: &RenderNode,
++        out: &mut std::collections::BTreeMap<(usize, usize, usize), BodyNoteSpan>,
++    ) {
++        // These descendants have a different source address space.
++        if matches!(
++            node.node_type,
++            RenderNodeType::Table(_)
++                | RenderNodeType::TextBox
++                | RenderNodeType::Header
++                | RenderNodeType::Footer
++                | RenderNodeType::FootnoteArea
++        ) {
++            return;
++        }
++        let source = match &node.node_type {
++            RenderNodeType::FootnoteMarker(m) => {
++                Some((m.section_index, m.para_index, Some(m.control_index), None))
++            }
++            RenderNodeType::TextRun(tr) if tr.cell_context.is_none() => match tr.field_marker {
++                FieldMarkerType::NoteMarker {
++                    control_index,
++                    logical_offset,
++                } => tr
++                    .section_index
++                    .zip(tr.para_index)
++                    .map(|(s, p)| (s, p, Some(control_index), Some(logical_offset))),
++                _ => None,
++            },
++            _ => None,
++        };
++        if let Some((sec, pi, control, position)) = source {
++            if let Some(para) = core
++                .document
++                .sections
++                .get(sec)
++                .and_then(|s| s.paragraphs.get(pi))
++            {
++                let positions = find_logical_control_positions(para);
++                for (ci, c) in para.controls.iter().enumerate() {
++                    if !matches!(c, Control::Footnote(_) | Control::Endnote(_)) {
++                        continue;
++                    }
++                    let Some(pos) = positions.get(ci).copied() else {
++                        continue;
++                    };
++                    if control.is_some_and(|wanted| wanted != ci)
++                        || position.is_some_and(|wanted| wanted != pos)
++                    {
++                        continue;
++                    }
++                    let b = &node.bbox;
++                    let value = BodyNoteSpan {
++                        sec,
++                        para: pi,
++                        ci,
++                        pos,
++                        x: b.x,
++                        y: b.y,
++                        w: b.width,
++                        h: b.height,
++                    };
++                    out.entry((sec, pi, ci))
++                        .and_modify(|old| {
++                            let right = (old.x + old.w).max(b.x + b.width);
++                            let bottom = (old.y + old.h).max(b.y + b.height);
++                            old.x = old.x.min(b.x);
++                            old.y = old.y.min(b.y);
++                            old.w = right - old.x;
++                            old.h = bottom - old.y;
++                        })
++                        .or_insert(value);
++                }
++            }
++        }
++        for child in &node.children {
++            walk(core, child, out);
++        }
++    }
++    let mut out = std::collections::BTreeMap::new();
++    walk(core, root, &mut out);
++    out.into_values().collect()
+ }
+ 
+ /// 표 셀 안 편집 캐럿과 IME 조합창이 공유하는 가시 경계다.
+@@ -424,6 +529,7 @@
+ 
+         fn is_inline_cursor_control(ctrl: &Control) -> bool {
+             is_treat_as_char_object_control(ctrl)
++                || matches!(ctrl, Control::Footnote(_) | Control::Endnote(_))
+         }
+ 
+         fn text_offset_after_same_pos_inline_controls(
+@@ -555,6 +661,19 @@
+                     && text_run.cell_context.is_none()
+                     && text_run.char_start.is_some()
+                 {
++                    // A later page may start midway through this paragraph.
++                    if para
++                        .controls
++                        .iter()
++                        .any(|c| matches!(c, Control::Footnote(_) | Control::Endnote(_)))
++                        && para
++                            .controls
++                            .iter()
++                            .filter(|c| c.is_logical_inline())
++                            .all(|c| matches!(c, Control::Footnote(_) | Control::Endnote(_)))
++                    {
++                        *raw_text_index = text_run.char_start.unwrap_or(*raw_text_index);
++                    }
+                     let para_chars: Vec<char> = para.text.chars().collect();
+                     let run_chars: Vec<char> = text_run.text.chars().collect();
+                     let positions = text_run.replay_positions_for(&text_run.text).into_owned();
+@@ -625,6 +744,7 @@
+         }
+ 
+         fn find_inline_flow_cursor_hit(
++            core: &DocumentCore,
+             tree: &crate::renderer::render_tree::PageRenderTree,
+             sec: usize,
+             para_idx: usize,
+@@ -650,6 +770,11 @@
+ 
+             let mut control_bboxes = std::collections::HashMap::new();
+             collect_inline_control_bboxes(&tree.root, sec, para_idx, &mut control_bboxes);
++            for note in body_note_spans(core, &tree.root) {
++                if note.sec == sec && note.para == para_idx {
++                    control_bboxes.insert(note.ci, (note.x, note.y, note.w, note.h));
++                }
++            }
+             let ctrl_positions = find_logical_control_positions(para);
+             let raw_ctrl_positions = para.control_text_positions();
+             let mut inline_controls = Vec::new();
+@@ -695,6 +820,17 @@
+                         height: line_metrics.1,
+                     },
+                 );
++                if matches!(ctrl, Control::Footnote(_) | Control::Endnote(_)) {
++                    stops.insert(
++                        pos + 1,
++                        CursorHit {
++                            page_index,
++                            x: x + w,
++                            y: line_metrics.0,
++                            height: line_metrics.1,
++                        },
++                    );
++                }
+                 stops.entry(pos + 1).or_insert(CursorHit {
+                     page_index,
+                     x: x + w,
+@@ -1055,9 +1191,10 @@
+         if para_page_scan_can_hit {
+             for &page_num in &pages {
+                 let tree = self.build_page_tree_cached(page_num)?;
+-                if !self.show_control_codes {
++                if !self.show_control_codes || !footnote_marker_positions.is_empty() {
+                     if let Ok(para) = self.get_render_paragraph_ref(section_idx, para_idx) {
+                         if let Some(hit) = find_inline_flow_cursor_hit(
++                            self,
+                             &tree,
+                             section_idx,
+                             para_idx,
+@@ -1548,6 +1685,12 @@
+         use crate::renderer::render_tree::{RenderNode, RenderNodeType};
+ 
+         let tree = self.build_page_tree_cached(page_num)?;
++        for note in body_note_spans(self, &tree.root) {
++            if x >= note.x && x <= note.x + note.w && y >= note.y && y <= note.y + note.h {
++                let after = x > note.x + note.w / 2.0;
++                return Ok(format!("{{\"sectionIndex\":{},\"paragraphIndex\":{},\"charOffset\":{},\"cursorRect\":{{\"pageIndex\":{},\"x\":{:.1},\"y\":{:.1},\"height\":{:.1}}}}}",note.sec,note.para,note.pos+usize::from(after),page_num,if after {note.x+note.w} else {note.x},note.y,note.h.max(10.0)));
++            }
++        }
+ 
+         // 문자 위치를 미리 계산한 TextRun 정보
+         struct RunInfo {
+@@ -2080,6 +2223,36 @@
+             None,
+             None,
+         );
++
++        // Render text offsets exclude note slots. Mouse hits must use the same
++        // logical offsets as keyboard navigation, note deletion and caret queries.
++        for run in &mut runs {
++            if run.cell_context.is_some() {
++                continue;
++            }
++            let Some(para) = self
++                .document
++                .sections
++                .get(run.section_index)
++                .and_then(|s| s.paragraphs.get(run.paragraph_index))
++            else {
++                continue;
++            };
++            let positions = find_logical_control_positions(para);
++            let mut note_positions = para
++                .controls
++                .iter()
++                .enumerate()
++                .filter(|(_, c)| matches!(c, Control::Footnote(_) | Control::Endnote(_)))
++                .filter_map(|(ci, _)| positions.get(ci).copied())
++                .collect::<Vec<_>>();
++            note_positions.sort_unstable();
++            for pos in note_positions {
++                if pos <= run.char_start {
++                    run.char_start += 1;
++                }
++            }
++        }
+ 
+         // cell_bboxes의 section_index/parent_para_index/control_index/cellPath를 runs로 보완.
+         // Table 노드에서 이미 채워진 최외곽 메타는 유지하되, 중첩 표의 Table 노드에는
+diff --git a/src/document_core/commands/footnote_ops.rs b/src/document_core/commands/footnote_ops.rs
+--- a/src/document_core/commands/footnote_ops.rs
++++ b/src/document_core/commands/footnote_ops.rs
+@@ -99,7 +99,7 @@
+             .get(para_idx)
+             .ok_or_else(|| HwpError::RenderError(format!("문단 인덱스 {} 범위 초과", para_idx)))?;
+ 
+-        let positions = crate::document_core::helpers::find_control_text_positions(para);
++        let positions = crate::document_core::helpers::find_logical_control_positions(para);
+         for (control_idx, ctrl) in para.controls.iter().enumerate() {
+             let number = match ctrl {
+                 Control::Footnote(footnote) => footnote.number,
+@@ -138,7 +138,7 @@
+         para_idx: usize,
+         control_idx: usize,
+     ) -> Result<String, HwpError> {
+-        let (marker_pos, deleted_number) = {
++        let (marker_pos, cursor_pos, deleted_number) = {
+             let section = self.document.sections.get(section_idx).ok_or_else(|| {
+                 HwpError::RenderError(format!("구역 인덱스 {} 범위 초과", section_idx))
+             })?;
+@@ -165,14 +165,24 @@
+                     control_idx
+                 ))
+             })?;
+-            (marker_pos, number)
++            let cursor_pos = crate::document_core::helpers::find_logical_control_positions(para)
++                .get(control_idx)
++                .copied()
++                .unwrap_or(marker_pos);
++            (marker_pos, cursor_pos, number)
+         };
+ 
+         {
+             let section = &mut self.document.sections[section_idx];
+             let para = &mut section.paragraphs[para_idx];
+ 
+-            let marker_utf16_pos = para.char_offsets.get(marker_pos).copied().unwrap_or(0);
++            let marker_utf16_pos = para
++                .control_utf16_positions()
++                .get(control_idx)
++                .copied()
++                .ok_or_else(|| {
++                    HwpError::RenderError("각주·미주의 원본 스트림 위치를 찾지 못했습니다".into())
++                })?;
+             for offset in para.char_offsets.iter_mut().skip(marker_pos) {
+                 if *offset >= 8 {
+                     *offset -= 8;
+@@ -231,7 +241,7 @@
+             section_idx,
+             para_idx,
+             control_idx,
+-            marker_pos,
++            cursor_pos,
+             deleted_number,
+         ))
+     }
+diff --git a/src/renderer/layout/paragraph_layout.rs b/src/renderer/layout/paragraph_layout.rs
+--- a/src/renderer/layout/paragraph_layout.rs
++++ b/src/renderer/layout/paragraph_layout.rs
+@@ -2515,6 +2515,59 @@
+ }
+ 
+ /// [Task #2067] 조판부호 모드의 인라인 컨트롤 마커 라벨 수집 — (논리 위치, 라벨).
++/// Editor-only note label with a source address; it is never ordinary body text.
++fn note_control_code_node(
++    tree: &mut PageLayoutContext,
++    para: &Paragraph,
++    sec: usize,
++    pi: usize,
++    ci: usize,
++    x: f64,
++    y: f64,
++    h: f64,
++    baseline: f64,
++    base: &TextStyle,
++) -> Option<(RenderNode, f64)> {
++    let text = match para.controls.get(ci)? {
++        Control::Footnote(_) => "[각주]",
++        Control::Endnote(_) => "[미주]",
++        _ => return None,
++    };
++    let pos = para.logical_control_positions().get(ci).copied()?;
++    let mut style = base.clone();
++    style.color = 0x0000FF;
++    style.font_size *= 0.55;
++    let w = estimate_text_width(text, &style);
++    let node = RenderNode::new(
++        tree.next_id(),
++        RenderNodeType::TextRun(TextRunNode {
++            text: text.to_string(),
++            style,
++            char_shape_id: None,
++            para_shape_id: Some(para.para_shape_id),
++            section_index: Some(sec),
++            para_index: Some(pi),
++            char_start: None,
++            cell_context: None,
++            is_para_end: false,
++            is_line_break_end: false,
++            rotation: 0.0,
++            is_vertical: false,
++            char_overlap: None,
++            border_fill_id: 0,
++            baseline,
++            field_marker: FieldMarkerType::NoteMarker {
++                control_index: ci,
++                logical_offset: pos,
++            },
++            layout_positions: None,
++            display_text: None,
++        }),
++        BoundingBox::new(x, y, w, h),
++    );
++    Some((node, w))
++}
++
+ fn collect_shape_marker_labels(show_ctrl: bool, para: Option<&Paragraph>) -> Vec<(usize, String)> {
+     if show_ctrl {
+         if let Some(ref pa) = para {
+@@ -2548,8 +2601,8 @@
+                             };
+                             Some((pos, format!("[꼬리말({})]", apply)))
+                         }
+-                        Control::Footnote(_) => Some((pos, "[각주]".to_string())),
+-                        Control::Endnote(_) => Some((pos, "[미주]".to_string())),
++                        // Note labels are emitted beside their typed marker, including within a run.
++                        Control::Footnote(_) | Control::Endnote(_) => None,
+                         Control::NewNumber(_) => Some((pos, "[새 번호]".to_string())),
+                         Control::Bookmark(bm) => Some((pos, format!("[책갈피:{}]", bm.name))),
+                         _ => None,
+@@ -3494,6 +3547,23 @@
+                             );
+                             col_node.children.push(marker_node);
+                             inline_x += sup_w;
++                            if self.show_control_codes.get() {
++                                if let Some((label, w)) = note_control_code_node(
++                                    tree,
++                                    para,
++                                    section_index,
++                                    para_index,
++                                    fn_ctrl_idx,
++                                    inline_x,
++                                    current_y,
++                                    run_bbox_h,
++                                    run_bbox_h,
++                                    &base_ts,
++                                ) {
++                                    col_node.children.push(label);
++                                    inline_x += w;
++                                }
++                            }
+                             line_run_x = inline_x;
+                         }
+ 
+@@ -5018,7 +5088,7 @@
+                                 para_shape_id: Some(composed.para_style_id),
+                                 section_index: Some(section_index),
+                                 para_index: Some(para_index),
+-                                char_start: Some(0),
++                                char_start: None, // Displayed note number is not body text.
+                                 cell_context: None,
+                                 is_para_end: false,
+                                 is_line_break_end: false,
+@@ -5034,7 +5104,14 @@
+                                         .unwrap_or(0),
+                                     self.dpi,
+                                 ),
+-                                field_marker: FieldMarkerType::None,
++                                field_marker: FieldMarkerType::NoteMarker {
++                                    control_index: ctrl_idx,
++                                    logical_offset: p
++                                        .logical_control_positions()
++                                        .get(ctrl_idx)
++                                        .copied()
++                                        .unwrap_or(marker_pos),
++                                },
+                                 layout_positions: None,
+                                 display_text: None,
+                             }),
+@@ -5050,6 +5127,33 @@
+                         );
+                         col_node.children.push(marker_node);
+                         endnote_marker_x_advance += marker_w;
++                        if self.show_control_codes.get() {
++                            if let Some((label, w)) = note_control_code_node(
++                                tree,
++                                p,
++                                section_index,
++                                para_index,
++                                ctrl_idx,
++                                marker_x + marker_w,
++                                y + spacing_before,
++                                hwpunit_to_px(
++                                    composed.lines.first().map(|l| l.line_height).unwrap_or(0),
++                                    self.dpi,
++                                ),
++                                hwpunit_to_px(
++                                    composed
++                                        .lines
++                                        .first()
++                                        .map(|l| l.baseline_distance)
++                                        .unwrap_or(0),
++                                    self.dpi,
++                                ),
++                                &resolved_to_text_style(styles, first_cs_id as u32, 0),
++                            ) {
++                                col_node.children.push(label);
++                                endnote_marker_x_advance += w;
++                            }
++                        }
+                     }
+                 }
+             }
+@@ -8175,6 +8279,26 @@
+                             line_node.children.push(fn_node);
+                             sub_x += sup_w;
+                             fn_split_extra += sup_w;
++                            if self.show_control_codes.get() && cell_ctx.is_none() {
++                                if let Some(p) = para {
++                                    if let Some((label, w)) = note_control_code_node(
++                                        tree,
++                                        p,
++                                        section_index,
++                                        para_index,
++                                        ctrl_idx,
++                                        sub_x,
++                                        y,
++                                        line_height,
++                                        baseline,
++                                        base_ts,
++                                    ) {
++                                        line_node.children.push(label);
++                                        sub_x += w;
++                                        fn_split_extra += w;
++                                    }
++                                }
++                            }
+                             seg_start = rel_pos;
+                         }
+                         // 마지막 세그먼트 (각주 뒤 나머지 텍스트)
+diff --git a/src/renderer/render_tree.rs b/src/renderer/render_tree.rs
+--- a/src/renderer/render_tree.rs
++++ b/src/renderer/render_tree.rs
+@@ -1092,6 +1092,11 @@
+     FieldBeginEnd,
+     /// 도형 조판부호 마커 — 인라인 컨트롤의 텍스트 위치
+     ShapeMarker(usize),
++    /// Typed source reference for a displayed note marker or control-code label.
++    NoteMarker {
++        control_index: usize,
++        logical_offset: usize,
++    },
+ }
+ 
+ /// 표 노드
+diff --git a/src/paint/json.rs b/src/paint/json.rs
+--- a/src/paint/json.rs
++++ b/src/paint/json.rs
+@@ -1825,6 +1825,15 @@
+         FieldMarkerType::FieldBegin => buf.push_str("{\"kind\":\"fieldBegin\"}"),
+         FieldMarkerType::FieldEnd => buf.push_str("{\"kind\":\"fieldEnd\"}"),
+         FieldMarkerType::FieldBeginEnd => buf.push_str("{\"kind\":\"fieldBeginEnd\"}"),
++        FieldMarkerType::NoteMarker {
++            control_index,
++            logical_offset,
++        } => {
++            buf.push_str(&format!(
++                "{{\"kind\":\"shapeMarker\",\"controlIndex\":{},\"noteControlIndex\":{}}}",
++                logical_offset, control_index
++            ));
++        }
+         FieldMarkerType::ShapeMarker(index) => {
+             let _ = write!(
+                 buf,
+@@ -1841,7 +1850,7 @@
+         FieldMarkerType::FieldBegin => "fieldBegin",
+         FieldMarkerType::FieldEnd => "fieldEnd",
+         FieldMarkerType::FieldBeginEnd => "fieldBeginEnd",
+-        FieldMarkerType::ShapeMarker(_) => "shapeMarker",
++        FieldMarkerType::ShapeMarker(_) | FieldMarkerType::NoteMarker { .. } => "shapeMarker",
+     }
+ }
+ 

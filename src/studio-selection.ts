@@ -1,6 +1,7 @@
 /** Read-only semantic context for the local rhwp Studio 0.8.7 build.
  * Uses public InputHandler/WasmBridge methods; never borrows a mutable document.
  */
+import {selectionPageHints} from './selection-page-context.mjs';
 type BridgeDependencies = {
   getInputHandler: () => any;
   wasm: any;
@@ -126,11 +127,12 @@ export function installSelectionBridge(deps: BridgeDependencies) {
       }
       selectedText = { text: known ? pieces.join('\n') : null, known, truncated: truncated || last - first + 1 > MAX_PARAGRAPHS };
       const path = cellPath(start);
+      const pageHints = selectionPageHints(start,end);
       const rects = !inCell
         ? read('selection rectangles', deps.wasm, 'getSelectionRects', start.sectionIndex, start.paragraphIndex, start.charOffset, end.paragraphIndex, end.charOffset)
         : path.length > 1
-          ? read('selection rectangles', deps.wasm, 'getSelectionRectsInCellByPath', start.sectionIndex, start.parentParaIndex, JSON.stringify(path), first, start.charOffset, last, end.charOffset)
-          : read('selection rectangles', deps.wasm, 'getSelectionRectsInCell', start.sectionIndex, start.parentParaIndex, start.controlIndex, start.cellIndex, first, start.charOffset, last, end.charOffset);
+          ? read('selection rectangles', deps.wasm, 'getSelectionRectsInCellByPath', start.sectionIndex, start.parentParaIndex, JSON.stringify(path), first, start.charOffset, last, end.charOffset, pageHints)
+          : read('selection rectangles', deps.wasm, 'getSelectionRectsInCell', start.sectionIndex, start.parentParaIndex, start.controlIndex, start.cellIndex, first, start.charOffset, last, end.charOffset, pageHints);
       selectionRects = Array.isArray(rects) ? rects.slice(0, MAX_RECTS) : [];
       if (Array.isArray(rects) && rects.length > MAX_RECTS) unknown.push('Selection rectangle list truncated.');
     } else if (normalTextContext && !selection) selectedText = { text: '', known: true, truncated: false };

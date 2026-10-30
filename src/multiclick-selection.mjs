@@ -32,6 +32,15 @@ export function selectMulticlick(cursor,wasm,count){
   if(!Number.isInteger(len)||len<1||Array.from(text).length!==len)return false;
   const range=count===3?{start:0,end:len}:wordRange(text,pos.charOffset);if(!range||range.end<=range.start)return false;
   // A hit-test rectangle belongs to the clicked offset, not to either endpoint.
-  const {cursorRect,...base}=pos;cursor.clearSelection();cursor.moveTo({...base,charOffset:range.start});cursor.setAnchor();cursor.moveTo({...base,charOffset:range.end});return true;
+  const {cursorRect,...base}=pos;
+  const move=offset=>{
+   const point={...base,charOffset:offset};cursor.moveTo(point);
+   // Reattach freshly computed endpoint geometry. The original hit rectangle
+   // belongs to a different offset and must never be reused here. Both correct
+   // page hints let the engine limit a cell selection to its actual pages.
+   const rect=cursor.getRect?.();
+   if(rect&&Number.isInteger(rect.pageIndex)&&rect.pageIndex>=0&&typeof cursor.moveToHit==='function')cursor.moveToHit({...point,cursorRect:{...rect}});
+  };
+  cursor.clearSelection();move(range.start);cursor.setAnchor();move(range.end);return true;
  }catch(error){console.warn('[Pwh] 클릭 선택 실패:',error);return false;}
 }

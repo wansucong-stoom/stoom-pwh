@@ -85,6 +85,37 @@ const patches = [
       {path: 'src/renderer/typeset/table/block/entry.rs', originalSha256: '90389834b32c48190b4ebab7b1261385dc56953823f5616ced89aecbdd3e4cbc', patchedSha256: '2a2be46cfc35b58ff08664a47598ee0b51997afe51cb51232654ff0c92432a3a'},
     ],
   },
+  {
+    "file": "rhwp-0.8.7-note-cursor-source-offsets.patch",
+    "sha256": "909e7741914ed83f695b904cccb5400c5501c19271f6eb77641d7a761f988d50",
+    "sources": [
+      {
+        "path": "src/document_core/queries/cursor_rect.rs",
+        "originalSha256": "b8f9b7913e68f1e72919c6487d6c0cedfe1175338ba644e1a49428fd521cb069",
+        "patchedSha256": "c7dd6bedf24033a2e221bc7f64f7ac69592307c48821128021353696cdb80906"
+      },
+      {
+        "path": "src/document_core/commands/footnote_ops.rs",
+        "originalSha256": "cb3ddbd3977d106072695e2223ab0206a9816cc156cc742c2983d4c9b9a0009a",
+        "patchedSha256": "32f00884b41a1e7dc8455a0c7bb299cab688abceb869419b8314bce5576f21af"
+      },
+      {
+        "path": "src/renderer/layout/paragraph_layout.rs",
+        "originalSha256": "cb2deb845baa718284658576a44ae2db3cfb20f3eea4f83ee5714bce9295d91f",
+        "patchedSha256": "d792ae300068a718003ab67ab12dde113ed34a7fb1e0f9546d570ba710565186"
+      },
+      {
+        "path": "src/renderer/render_tree.rs",
+        "originalSha256": "7b0a9e3920ebaa24f9a645b3a1a3f5aecf2a82bcc85bf6c2aaf3e2f0971b5d60",
+        "patchedSha256": "c5c70b4de04ac0a4a1d9993963293bb14b818a0dda79a71e97871cd2c3b9445c"
+      },
+      {
+        "path": "src/paint/json.rs",
+        "originalSha256": "c40bf373d6b1fd102b100b20f3721413672150a7506162ba011bbe09753ca089",
+        "patchedSha256": "b48086acd0590d6bc3d81cc9e182bcb5440eadf3102cdbacc003d039a9ce7ff8"
+      }
+    ]
+  },
 ];
 const help = `Usage: node scripts/build-patched-core.mjs
   --source-archive <fixed upstream source ZIP>
