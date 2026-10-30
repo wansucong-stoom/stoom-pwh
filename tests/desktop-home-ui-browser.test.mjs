@@ -4,6 +4,7 @@ import {promises as fs} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
+import {waitForInlineEditor} from './helpers/editor-ready.mjs';
 
 test('Desktop home preserves unsaved tabs and reopens real recent documents', {
   skip:process.env.PWH_BROWSER_TESTS!=='1'||!process.env.PWH_DESKTOP_SOURCE_ROOT||!process.env.PWH_CORE_JS||!process.env.PWH_CORE_WASM,
@@ -31,7 +32,7 @@ test('Desktop home preserves unsaved tabs and reopens real recent documents', {
     await page.setViewportSize({width:1280,height:900});
     await page.getByRole('button',{name:'새 문서 빈 문서에서 시작하기'}).click();
     const child=page.frameLocator('#documents iframe').first(),editor=child.frameLocator('#editor');
-    await editor.locator('#pwh-desktop-tabbar').waitFor({timeout:60000});await child.locator('#status').waitFor({state:'hidden',timeout:60000});
+    await editor.locator('#pwh-desktop-tabbar').waitFor({timeout:60000});await waitForInlineEditor(editor);
     await editor.getByRole('textbox',{name:'문서 편집 입력'}).focus();await page.keyboard.type('unsaved');
     await editor.getByRole('button',{name:'시작 화면'}).click();await page.getByRole('heading',{name:'어떤 문서를 작업할까요?'}).waitFor();
     assert.equal(await page.locator('#documents iframe').count(),1,'returning home keeps the open document');

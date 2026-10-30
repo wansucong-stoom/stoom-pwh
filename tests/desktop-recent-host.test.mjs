@@ -26,7 +26,8 @@ test('Desktop records the original opened document and the final save-as destina
     const prepared=await call('file/prepare',JSON.stringify({mode:'save-as',documentId:current.documentId}),{'content-type':'application/json'});
     await call('file/write',bytes,{'x-pwh-ticket':prepared.ticket,'x-pwh-document':current.documentId});
     const entries=await createRecentDocuments(process.env.PWH_STANDALONE_DATA).list();
-    assert.deepEqual(new Set(entries.map(item=>item.path)),new Set([original,copy]));
+    // Windows can return a long canonical path after a native save dialog.
+    assert.deepEqual(new Set(await Promise.all(entries.map(item=>fs.realpath(item.path)))),new Set(await Promise.all([original,copy].map(item=>fs.realpath(item)))));
     assert.deepEqual(await fs.readFile(original),bytes);
     assert.deepEqual(await fs.readFile(copy),bytes);
   } finally {

@@ -5,14 +5,14 @@ Pwh는 [rhwp](https://github.com/edwardkim/rhwp)와 rhwp Studio를 기반으로 
 ## 비교 기준
 
 - **기준 원본:** rhwp 0.8.7, 커밋 [`1a76570e833917d15817415a53c09ad61ab3203f`](https://github.com/edwardkim/rhwp/commit/1a76570e833917d15817415a53c09ad61ab3203f).
-- **기본 런타임:** `rhwp-0.8.7-pwh-r9`, Windows x64. 설치 자산과 해시는 [runtime-lock.json](../runtime-lock.json)에 기록합니다.
+- **기본 런타임:** `rhwp-0.8.7-pwh-r10`, Windows x64. 설치 자산과 해시는 [runtime-lock.json](../runtime-lock.json)에 기록합니다.
 - **비교 범위:** 위 고정 버전 대비 Pwh에서 보존한 코어 패치와 Studio 빌드 변경, 그리고 별도의 pwh 연결 기능입니다. 현재 최신 rhwp와의 비교는 아닙니다.
 - **배포 방식:** 고정 소스와 패치·빌드 입력을 보존해 재빌드하는 방식입니다. 전체 upstream 저장소의 Git 포크나 모든 원본 파일을 그대로 포함한 저장소라는 뜻은 아닙니다.
 - **반영 상태:** 아래는 pwh 쪽 변경입니다. rhwp 원본에 병합되었다고 주장하지 않습니다.
 
 ## 1. rhwp 조판 코어 변경
 
-pwh-r9의 **편집기 WASM 코어**에는 다음 열 패치를 적용합니다.
+pwh-r9에서 적용한 다음 열 패치는 pwh-r10의 **동일한 편집기 WASM 코어**에도 유지됩니다. r10은 편집기 빌드·배포 검증을 갱신하며 조판 알고리즘을 추가 변경하지 않습니다.
 
 | 변경 | 원본 대비 보완 | 적용 범위 |
 | --- | --- | --- |

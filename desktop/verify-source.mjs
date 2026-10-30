@@ -5,6 +5,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
+import {assertEditorBuildInputs,assertPortableEditorBundle} from '../scripts/editor-build-contract.mjs';
 
 const root=path.dirname(fileURLToPath(import.meta.url)),args=process.argv.slice(2);
 if(args.length&&!(args.length===2&&args[0]==='--source-root'))throw Error('Usage: node desktop/verify-source.mjs [--source-root <original-workspace>]');
@@ -48,4 +49,6 @@ for(const rel of files){
 }
 const editor=await fs.readFile(path.join(root,'standalone-pwh','client','editor.js')),client=JSON.parse(await fs.readFile(path.join(root,'standalone-pwh','client','manifest.json'),'utf8'));
 assert.equal(hash(editor),client.sha256,'Desktop client bundle differs from its own manifest');
+await assertEditorBuildInputs(path.join(root,'..'),client.buildInputs,'desktop');
+assertPortableEditorBundle(editor.toString('utf8'));
 console.log(JSON.stringify({ok:true,copiedFiles:listed.size,totalFiles:files.length,renamedChecks:[...listed.keys()].filter(name=>name.endsWith('.check.mjs')).length,originalComparisons,embeddedUserPaths:0,nestedRepositories:0,clientVersion:client.baseVersion,desktopClientSha256:client.sha256}));

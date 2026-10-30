@@ -1,0 +1,26 @@
+root = true
+
+[*]
+charset = utf-8
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+[*.{mjs,js,ts,json,md,yml,css,html}]
+end_of_line = lf
+
+[*.py]
+indent_size = 4
+end_of_line = lf
+
+[*.ps1]
+end_of_line = crlf
+
+# Preserve patch context and the byte-hashed Desktop source mirror.
+[*.patch]
+trim_trailing_whitespace = false
+
+[desktop/**]
+end_of_line = unset
+trim_trailing_whitespace = false

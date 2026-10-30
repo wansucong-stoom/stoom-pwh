@@ -19,6 +19,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: node --test
+      - run: node scripts/verify-editor-build.mjs --check-inputs
       - run: node desktop/verify-source.mjs
   wasm-table-regressions:
     runs-on: windows-latest
@@ -30,9 +31,43 @@ jobs:
       - run: node scripts/setup.mjs --runtime-root "$env:RUNNER_TEMP/pwh-wasm-regression-runtime"
       - shell: pwsh
         run: |
-          $env:PWH_CORE_JS = Join-Path $env:RUNNER_TEMP 'pwh-wasm-regression-runtime/core/rhwp.js'
-          $env:PWH_CORE_WASM = Join-Path $env:RUNNER_TEMP 'pwh-wasm-regression-runtime/core/rhwp_bg.wasm'
-          node --test tests/rowbreak-table-height.test.mjs tests/tac-table-line-spacing.test.mjs tests/stored-grown-table-pagination.test.mjs tests/note-cursor.test.mjs tests/table-content.test.mjs tests/text-edit.test.mjs tests/stored-float-frame.test.mjs tests/shape-fill-transparency.test.mjs
+          $env:PWH_RUNTIME_ROOT = Join-Path $env:RUNNER_TEMP 'pwh-wasm-regression-runtime'
+          node scripts/run-ci-tests.mjs core
+  browser-regressions:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: node scripts/setup.mjs --runtime-root "$env:RUNNER_TEMP/pwh-browser-runtime"
+      - shell: pwsh
+        run: |
+          $toolsRoot = Join-Path $env:RUNNER_TEMP 'pwh-browser-tools'
+          npm install --prefix $toolsRoot --no-save --package-lock=false --ignore-scripts playwright@1.62.1
+          if ($LASTEXITCODE -ne 0) { throw 'Playwright installation failed' }
+          node (Join-Path $toolsRoot 'node_modules/playwright/cli.js') install chromium
+          if ($LASTEXITCODE -ne 0) { throw 'Chromium installation failed' }
+          $env:PWH_PLAYWRIGHT_MODULE = ([Uri](Join-Path $toolsRoot 'node_modules/playwright/index.mjs')).AbsoluteUri
+          $env:PWH_RUNTIME_ROOT = Join-Path $env:RUNNER_TEMP 'pwh-browser-runtime'
+          node scripts/run-ci-tests.mjs browser
+  reproducible-editors:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/pwh-build-downloads
+          key: pwh-build-inputs-${{ hashFiles('runtime-lock.json') }}
+      - run: node scripts/verify-editor-build.mjs --cache-dir "$env:RUNNER_TEMP/pwh-build-downloads"
   render-comparison-tests:
     runs-on: ubuntu-latest
     steps:

@@ -254,7 +254,7 @@ function v() {
 	}, !0);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/host-font-provider.ts
+//#region @rhwp/studio/src/core/host-font-provider.ts
 var y = 25e3, b = 67108864;
 function x(e, t = !1) {
 	return typeof e == "string" && e.length <= 1024 && (t || e.trim().length > 0);
@@ -13773,7 +13773,7 @@ function we(e) {
 	return de.filter((e) => ye(e.name) === t).map((e) => e.ruleId);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/font-loader.ts
+//#region @rhwp/studio/src/core/font-loader.ts
 var Te = de, Ee = new Set(Te.map((e) => e.name)), De = /* @__PURE__ */ new Set(["함초롬바탕", "함초롬돋움"]), Oe = [], ke = /* @__PURE__ */ new Set(), Ae = /* @__PURE__ */ new Set(), je = /* @__PURE__ */ new Set();
 function Me(e) {
 	return /^https?:\/\//i.test(e);
@@ -13922,7 +13922,7 @@ async function Je(e, t, n) {
 	console.log(`[FontLoader] 폰트 로드 완료: ${d}개 성공, ${f}개 실패 (총 ${Ae.size}개 파일 요청)`);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/canvas-font-raw.ts
+//#region @rhwp/studio/src/core/canvas-font-raw.ts
 var Ye = null;
 function Xe(e) {
 	let t = Object.getPrototypeOf(e);
@@ -13948,7 +13948,7 @@ function Qe(e, t) {
 	e.font = t;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/local-fonts.ts
+//#region @rhwp/studio/src/core/local-fonts.ts
 var $e = "rhwp-local-fonts", et = 72, tt = .1, nt = [
 	"monospace",
 	"serif",
@@ -14568,7 +14568,7 @@ async function Pn(e) {
 	} : null;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/host-font-requests.ts
+//#region @rhwp/studio/src/core/host-font-requests.ts
 function Fn(e) {
 	return {
 		weight: e?.bold ? 700 : 400,
@@ -14595,7 +14595,7 @@ function Ln(e) {
 	return [...t.values()];
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/pwh-body-cursor-position.mjs
+//#region @rhwp/studio/src/core/pwh-body-cursor-position.mjs
 function Rn(e) {
 	return e?.parentParaIndex === void 0 && !e?.cellPath?.length && !e?.isTextBox;
 }
@@ -14633,7 +14633,7 @@ function Un(e, t) {
 	}) : t;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/pwh-document-font-requests.mjs
+//#region @rhwp/studio/src/core/pwh-document-font-requests.mjs
 function Wn(e, t, n) {
 	if (!e || !Array.isArray(e.fontsUsed) || e.fontsUsed.some((e) => typeof e != "string") || !Array.isArray(e.fontSubstitutions || [])) return null;
 	let r = new Set(e.fontsUsed);
@@ -14653,7 +14653,7 @@ function Wn(e, t, n) {
 	return [...i.values()];
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/pwh-selection-layout.mjs
+//#region @rhwp/studio/src/core/pwh-selection-layout.mjs
 var Gn = (e) => typeof e == "string" ? JSON.parse(e) : e, Kn = (e) => e.every(Number.isFinite);
 function qn({ maxPages: e = 32 } = {}) {
 	if (!Number.isSafeInteger(e) || e < 1 || e > 1e3) throw RangeError("Selection layout cache maxPages must be between 1 and 1000");
@@ -14766,7 +14766,7 @@ function Xn(e, t, n, r, i, a, o, s = null) {
 	}
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-build/pkg/rhwp.js
+//#region @rhwp/core/rhwp.js
 var Zn = /* @__PURE__ */ t({
 	DocumentExport: () => Qn,
 	HwpDocument: () => $n,
@@ -19783,7 +19783,7 @@ async function jr(e) {
 	return Or(n, r);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/supplemental-text-metrics.ts
+//#region @rhwp/studio/src/core/supplemental-text-metrics.ts
 var Mr = 4096, Nr = 4194304, Pr = new TextEncoder();
 function Fr(e) {
 	if (![e.document, e.fonts].every((e) => Number.isSafeInteger(e) && e >= 0)) throw Error("Invalid supplemental metric generation");
@@ -19909,7 +19909,7 @@ function Vr(e, t) {
 	}
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/pwh-local-font-face.mjs
+//#region @rhwp/studio/src/core/pwh-local-font-face.mjs
 var Hr = 1e3;
 function Ur(e) {
 	let t = "";
@@ -19945,7 +19945,7 @@ async function Wr(e, t, n = globalThis.FontFace) {
 	}
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/font-substitution.ts
+//#region @rhwp/studio/src/core/font-substitution.ts
 var Gr = ie.map((e) => {
 	let t = /* @__PURE__ */ new Map();
 	for (let [n, r, i, a, o] of e) {
@@ -20202,7 +20202,7 @@ function _i(e, t = 0, n = 0, r = {}) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/sfnt-face.ts
+//#region @rhwp/studio/src/core/sfnt-face.ts
 var vi = 1953784678, yi = 65536, bi = 131072, xi = 4096, Si = 4096, Ci = 67108864, wi = 1751474532, Ti = 2981146554;
 function Ei(e, t) {
 	if (!Number.isInteger(t) || t < 0 || t > 4294967295) return null;
@@ -20250,7 +20250,7 @@ function Ei(e, t) {
 	return p.buffer;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/host-canvas-fonts.ts
+//#region @rhwp/studio/src/core/host-canvas-fonts.ts
 var Di = 0, Oi = null;
 function ki(e, t) {
 	let n = Oi;
@@ -20372,7 +20372,7 @@ function Pi(e) {
 	return e instanceof Mi || e instanceof Ni;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/char-shape-runs.ts
+//#region @rhwp/studio/src/core/char-shape-runs.ts
 function Fi(e) {
 	if (e == null) throw new Mi("문서가 로드되지 않았습니다. 문서를 먼저 열어 주세요.");
 	if (!e || [
@@ -20397,14 +20397,14 @@ function Li(e, t, n) {
 	return e;
 }
 //#endregion
-//#region pwh-build/rhwp-studio/node_modules/@noble/hashes/_u64.js
+//#region @rhwp/studio/node_modules/@noble/hashes/_u64.js
 var Ri = (e) => e / 2 ** 32 | 0, zi = (e) => e >>> 0;
 function Bi(e, t, n, r) {
 	let i = Ri(n), a = zi(n);
 	e.setUint32(t, r ? a : i, r), e.setUint32(t + 4, r ? i : a, r);
 }
 //#endregion
-//#region pwh-build/rhwp-studio/node_modules/@noble/hashes/utils.js
+//#region @rhwp/studio/node_modules/@noble/hashes/utils.js
 function Vi(e) {
 	return e instanceof Uint8Array || ArrayBuffer.isView(e) && e.constructor.name === "Uint8Array" && "BYTES_PER_ELEMENT" in e && e.BYTES_PER_ELEMENT === 1;
 }
@@ -20494,7 +20494,7 @@ var da = (e) => ({ oid: Uint8Array.from([
 	e
 ]) });
 //#endregion
-//#region pwh-build/rhwp-studio/node_modules/@noble/hashes/_md.js
+//#region @rhwp/studio/node_modules/@noble/hashes/_md.js
 function fa(e, t, n) {
 	return e & t ^ ~e & n;
 }
@@ -20563,7 +20563,7 @@ var ma = class {
 	1541459225
 ]);
 //#endregion
-//#region pwh-build/rhwp-studio/node_modules/@noble/hashes/_blake.js
+//#region @rhwp/studio/node_modules/@noble/hashes/_blake.js
 function ga(e, t, n, r, i) {
 	return e = e + t + i | 0, r = ea(r ^ e, 16), n = n + r | 0, t = ea(t ^ n, 12), {
 		a: e,
@@ -20581,7 +20581,7 @@ function _a(e, t, n, r, i) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/node_modules/@noble/hashes/blake2.js
+//#region @rhwp/studio/node_modules/@noble/hashes/blake2.js
 var va = class {
 	buffer;
 	buffer32;
@@ -20660,7 +20660,7 @@ function ya(e, t, n, r, i, a, o, s, c, l, u, d, f, p, m, h, g, _, v, y) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/node_modules/@noble/hashes/blake3.js
+//#region @rhwp/studio/node_modules/@noble/hashes/blake3.js
 var ba = {
 	CHUNK_START: 1,
 	CHUNK_END: 2,
@@ -20853,7 +20853,7 @@ function Ma(e, t) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/hml-save-capability.ts
+//#region @rhwp/studio/src/core/hml-save-capability.ts
 function Na(e) {
 	if (!e || typeof e != "object") return !1;
 	let t = e;
@@ -20914,7 +20914,7 @@ function Ra(e, t) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/selection-page-hints.ts
+//#region @rhwp/studio/src/core/selection-page-hints.ts
 function za(e) {
 	return Number.isInteger(e) && Number(e) >= 0;
 }
@@ -20935,7 +20935,7 @@ function Va(e, t, n) {
 	return JSON.parse(r);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/local-text-replace-result.ts
+//#region @rhwp/studio/src/core/local-text-replace-result.ts
 function Ha(e) {
 	if (!e || typeof e != "object") return;
 	let t = e, n = [
@@ -21043,7 +21043,7 @@ function no(e, t, n, r) {
 	t(), n(), eo(e, r);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/wasm-bridge.ts
+//#region @rhwp/studio/src/core/wasm-bridge.ts
 function ro(e) {
 	return e && JSON.stringify(e);
 }
@@ -23079,7 +23079,7 @@ var uo = class {
 	}
 };
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/document-title.ts
+//#region @rhwp/studio/src/ui/document-title.ts
 function fo(e) {
 	let t = window.matchMedia("(display-mode: standalone), (display-mode: minimal-ui), (display-mode: window-controls-overlay)"), n = () => {
 		document.title = e.hasLoadedDocument() ? t.matches ? e.fileName : `${e.fileName} - rhwp-studio` : "rhwp-studio";
@@ -23087,7 +23087,7 @@ function fo(e) {
 	e.onFileNameChanged = n, t.addEventListener("change", n), n();
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/event-bus.ts
+//#region @rhwp/studio/src/core/event-bus.ts
 var po = class {
 	handlers = /* @__PURE__ */ new Map();
 	on(e, t) {
@@ -23209,7 +23209,7 @@ function Co(e, t) {
 	if (n !== "hwp" && n !== "zip" && n !== "hml") throw Error(n === "html" ? "실제 HWP/HWPX/HML 파일이 아닙니다. 파일 미리보기/오류 페이지가 반환되었습니다." : n === "xml" ? "HML 문서가 아닌 일반 XML 파일입니다." : "실제 HWP/HWPX/HML 파일이 아닙니다. 파일 시그니처를 확인할 수 없습니다.");
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/canvas-metric-recovery.ts
+//#region @rhwp/studio/src/core/canvas-metric-recovery.ts
 var wo = "Canvas metric descriptor changed; prepare font metrics again";
 function To(e) {
 	let t = e instanceof Error ? e.message : e;
@@ -23254,7 +23254,7 @@ function Mo(e, t = 10) {
 	return Math.max(6, (Number.isFinite(t) ? Math.max(0, t) : 10) * n);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/virtual-scroll.ts
+//#region @rhwp/studio/src/view/virtual-scroll.ts
 var No = 8, Po = .25, Fo = 80, Io = 240;
 function Lo({ pageCount: e, viewportWidth: t, displayedPageWidth: n, pageGap: r, committedColumns: i, hysteresisPx: a = No }) {
 	let o = Number.isFinite(e) ? Math.max(1, Math.floor(e)) : 1, s = Number.isFinite(t) && t > 0 ? t : 0, c = Number.isFinite(n) && n > 0 ? n : 0, l = Number.isFinite(r) && r >= 0 ? r : 0;
@@ -23608,7 +23608,7 @@ var Ro = class {
 	}
 };
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/canvaskit/replay-plane.ts
+//#region @rhwp/studio/src/view/canvaskit/replay-plane.ts
 function Bo(e, t) {
 	return e !== "background" && t?.masterPage === !0 ? "behindText" : e;
 }
@@ -23623,12 +23623,12 @@ function Ho(e, t) {
 	return e.type === "image" && (e.wrap === "behindText" ? n = "behindText" : e.wrap === "inFrontOfText" && (n = "inFrontOfText")), Bo(n, t);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/render-document-identity.ts
+//#region @rhwp/studio/src/view/render-document-identity.ts
 function Uo(e, t) {
 	return e === null || t === null || e.digest === null || t.digest === null ? !1 : e.digest === t.digest && e.generation === t.generation;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/image-prefetch-signature.ts
+//#region @rhwp/studio/src/view/image-prefetch-signature.ts
 function Wo(e, t) {
 	if (!e || typeof e != "object") return;
 	if (Array.isArray(e)) {
@@ -23667,7 +23667,7 @@ async function qo(e, t, n) {
 	return !r.every(Boolean) || !t() ? !1 : (n(), !0);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/raw-svg-prefetch.ts
+//#region @rhwp/studio/src/view/raw-svg-prefetch.ts
 function Jo(e) {
 	let t = new TextEncoder().encode(e), n = "", r = 32768;
 	for (let e = 0; e < t.length; e += r) n += String.fromCharCode(...t.subarray(e, e + r));
@@ -23688,7 +23688,7 @@ function Xo(e, t) {
 	else e && typeof e == "object" && Xo(e, t);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/flow-image-clip.ts
+//#region @rhwp/studio/src/view/flow-image-clip.ts
 function Zo(e) {
 	if (e.bakedWatermark === !0) return null;
 	let t = [], n = typeof e.effect == "string" ? e.effect : "realPic";
@@ -23786,7 +23786,7 @@ function ss(e, t) {
 	return i;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/flow-image-url-cache.ts
+//#region @rhwp/studio/src/view/flow-image-url-cache.ts
 var cs = class {
 	urls = /* @__PURE__ */ new Map();
 	identity = null;
@@ -23872,7 +23872,7 @@ function ms(e, t, n, r) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/page-margin-guides.ts
+//#region @rhwp/studio/src/view/page-margin-guides.ts
 var hs = "#C0C0C0", gs = .8, _s = 1.5;
 function vs(e) {
 	let t = Number.isFinite(e) && e > 0 ? e : 1;
@@ -23895,7 +23895,7 @@ function bs(e, t, n, r, i = "both", a = 1) {
 	}, t, n, i, r, a);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/page-renderer.ts
+//#region @rhwp/studio/src/view/page-renderer.ts
 var xs = 1500, Ss = [
 	0,
 	32,
@@ -24460,7 +24460,7 @@ function As(e, t, n, r = t.bbox.width, i = t.bbox.height) {
 	e.style.left = `${-a.x * o}px`, e.style.top = `${-a.y * s}px`, e.style.width = `${e.naturalWidth * o}px`, e.style.height = `${e.naturalHeight * s}px`;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/zoom-anchor.ts
+//#region @rhwp/studio/src/view/zoom-anchor.ts
 var js = Object.freeze({
 	x: .5,
 	y: .5
@@ -24482,7 +24482,7 @@ function Ps(e, t, n, r, i = n) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/page-movement.ts
+//#region @rhwp/studio/src/view/page-movement.ts
 var Fs = {
 	direction: "vertical",
 	wheelHorizontal: !0
@@ -24813,7 +24813,7 @@ function tc(e, t, n) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/render-backend.ts
+//#region @rhwp/studio/src/view/render-backend.ts
 var nc = "rhwp.canvaskitMode", rc = "rhwp.renderProfile";
 function ic(e) {
 	try {
@@ -24900,7 +24900,7 @@ function uc(e, t) {
 	return e.width * n * e.height * n <= r ? n : Math.max(1, Math.sqrt(r / (e.width * e.height)));
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/grid-overlay.ts
+//#region @rhwp/studio/src/view/grid-overlay.ts
 var dc = 96 / 25.4, fc = 10;
 function pc(e, t, n, r) {
 	let i = document.createElement("div");
@@ -24966,7 +24966,7 @@ function Sc(e, t, n, r, i, a) {
 	o.style.position = "absolute", o.style.left = `${c ? t : t - r}px`, o.style.top = `${n}px`, o.style.width = `${r}px`, o.style.height = "1px", o.style.background = a, s.style.position = "absolute", s.style.left = `${t}px`, s.style.top = `${l ? n : n - r}px`, s.style.width = "1px", s.style.height = `${r}px`, s.style.background = a, e.append(o, s);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/grid-settings.ts
+//#region @rhwp/studio/src/view/grid-settings.ts
 var Cc = {
 	visible: !1,
 	pattern: "dots",
@@ -25023,7 +25023,7 @@ function Mc(e) {
 	return Math.round(e * 100) / 100;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/zoom-fit.ts
+//#region @rhwp/studio/src/view/zoom-fit.ts
 var Nc = 40, Pc = 20, Fc = 10;
 function Ic(e) {
 	return Math.max(Oo, Math.min(5, e));
@@ -25079,7 +25079,7 @@ function Uc(e, t) {
 	}
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/user-settings.ts
+//#region @rhwp/studio/src/core/user-settings.ts
 var Wc = [
 	"default",
 	"flat",
@@ -25354,7 +25354,7 @@ var z = new class {
 	}
 }();
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/page-view-settings-change.ts
+//#region @rhwp/studio/src/view/page-view-settings-change.ts
 function tl(e) {
 	let t = e && typeof e == "object" ? e : {}, n = Ls(t.arrangement, t.pageMovement), r = t.zoom, i = r && typeof r == "object" && typeof r.value == "number" && Number.isFinite(r.value) ? {
 		value: r.value,
@@ -25368,7 +25368,7 @@ function tl(e) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/active-page.ts
+//#region @rhwp/studio/src/view/active-page.ts
 function nl(e, t) {
 	return e !== null && Number.isInteger(e) && e >= 0 && e < t;
 }
@@ -25396,7 +25396,7 @@ function al(e, t) {
 	return Number.isInteger(e) && e >= 0 && e === t;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/i18n/locales/ko.ts
+//#region @rhwp/studio/src/i18n/locales/ko.ts
 var ol = {
 	"command.edit.compareDocuments.label": "문서 비교",
 	"command.edit.compareDocuments.splitLabel": "문서 비교 ",
@@ -29334,7 +29334,7 @@ function vl() {
 	return e && Object.keys(e).length > 0 ? ul : "ko";
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/i18n/dom.ts
+//#region @rhwp/studio/src/i18n/dom.ts
 var yl = "data-i18n", bl = "data-i18n-lines", xl = [
 	"title",
 	"placeholder",
@@ -29395,7 +29395,7 @@ function Al() {
 	typeof document < "u" && (document.documentElement.lang = vl());
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/i18n/resolve.ts
+//#region @rhwp/studio/src/i18n/resolve.ts
 var jl = "rhwp-locale", Ml = "lang";
 function Nl(e) {
 	let t = pl(Pl(e.search));
@@ -29435,7 +29435,7 @@ function Ll() {
 	return Cl(), ml();
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/header-footer-mode.ts
+//#region @rhwp/studio/src/engine/header-footer-mode.ts
 function Rl(e) {
 	return B(e === 1 ? "ui.hfApplyTo.even" : e === 2 ? "ui.hfApplyTo.odd" : "ui.hfApplyTo.both");
 }
@@ -29463,7 +29463,7 @@ function Vl(e) {
 	return t.mode !== "header" && t.mode !== "footer" || !Number.isSafeInteger(t.sectionIdx) || !Number.isSafeInteger(t.applyTo) || !Number.isSafeInteger(t.previewPage) ? "none" : t;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/header-footer-edit-overlay.ts
+//#region @rhwp/studio/src/view/header-footer-edit-overlay.ts
 var Hl = 10, Ul = 4, Wl = 2;
 function Gl(e) {
 	let t = Math.min(Wl, Math.max(1, Math.sqrt(Number.isFinite(e) && e > 0 ? e : 1)));
@@ -29492,7 +29492,7 @@ function ql(e, t, n) {
 	return `inset(${Math.max(0, t.y * n)}px ${Math.max(0, (e.width - t.x - t.width) * n)}px ${Math.max(0, (e.height - t.y - t.height) * n)}px ${Math.max(0, t.x * n)}px)`;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/render-surface-budget.ts
+//#region @rhwp/studio/src/view/render-surface-budget.ts
 var Jl = 32e6, Yl = 4e7, Xl = .88, Zl = .001, Ql = [
 	2,
 	1.5,
@@ -29587,7 +29587,7 @@ function lu(e) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/page-surface-lru.ts
+//#region @rhwp/studio/src/view/page-surface-lru.ts
 function uu(e) {
 	return !Number.isFinite(e) || e <= 0 ? 0 : Math.ceil(e);
 }
@@ -29877,7 +29877,7 @@ function bu(e) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/canvas-view.ts
+//#region @rhwp/studio/src/view/canvas-view.ts
 var xu = {
 	width: 794,
 	height: 1123
@@ -30880,7 +30880,7 @@ var xu = {
 	}
 };
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/picture-hit-policy.ts
+//#region @rhwp/studio/src/engine/picture-hit-policy.ts
 function Tu(e) {
 	return e.plane === 1 && !e.headerFooter;
 }
@@ -31004,7 +31004,7 @@ function Mu(e, t, n) {
 	return !1;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/hyperlink.ts
+//#region @rhwp/studio/src/core/hyperlink.ts
 function Nu(e) {
 	let t = e.cellPath?.map((e) => [
 		e.controlIndex,
@@ -31075,7 +31075,7 @@ function Lu(e) {
 	}
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/input-edit-invalidation.ts
+//#region @rhwp/studio/src/engine/input-edit-invalidation.ts
 var Ru = /* @__PURE__ */ new Set(["insertText", "deleteText"]);
 function zu(e, t) {
 	let n = e ?? [], r = t ?? [];
@@ -31095,7 +31095,7 @@ function Bu(e, t, n, r = {}) {
 	return i !== (n.parentParaIndex !== void 0) || t.sectionIndex !== n.sectionIndex ? !1 : i ? t.parentParaIndex !== n.parentParaIndex || t.controlIndex !== n.controlIndex || t.cellIndex !== n.cellIndex || t.cellParaIndex !== n.cellParaIndex ? !1 : zu(t.cellPath, n.cellPath) : t.paragraphIndex === n.paragraphIndex;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/object-props.ts
+//#region @rhwp/studio/src/engine/object-props.ts
 function Vu(e, t) {
 	return t.type === "shape" ? t.cellPath && t.cellPath.length > 0 ? e.getCellShapePropertiesByPath(t.sec, t.ppi, t.cellPath, t.ci) : e.getShapeProperties(t.sec, t.ppi, t.ci) : t.headerFooter ? e.getHeaderFooterPictureProperties(t.sec, t.headerFooter.outerParaIdx, t.headerFooter.outerControlIdx, t.ppi, t.ci) : t.cellPath && t.cellPath.length > 0 ? e.getCellPicturePropertiesByPath(t.sec, t.ppi, t.cellPath, t.ci) : e.getPictureProperties(t.sec, t.ppi, t.ci);
 }
@@ -31103,7 +31103,7 @@ function Hu(e, t, n) {
 	return t.type === "shape" ? t.cellPath && t.cellPath.length > 0 ? e.setCellShapePropertiesByPath(t.sec, t.ppi, t.cellPath, t.ci, n) : e.setShapeProperties(t.sec, t.ppi, t.ci, n) : t.headerFooter ? e.setHeaderFooterPictureProperties(t.sec, t.headerFooter.outerParaIdx, t.headerFooter.outerControlIdx, t.ppi, t.ci, n) : t.cellPath && t.cellPath.length > 0 ? e.setCellPicturePropertiesByPath(t.sec, t.ppi, t.cellPath, t.ci, n) : e.setPictureProperties(t.sec, t.ppi, t.ci, n);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/command.ts
+//#region @rhwp/studio/src/engine/command.ts
 var V = Object.freeze({
 	documentPaginationPending: !1,
 	flowChanged: !1,
@@ -32629,7 +32629,7 @@ var Xd = class e {
 	}
 };
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/cell-block-format.ts
+//#region @rhwp/studio/src/engine/cell-block-format.ts
 function lf(e, t, n = 0) {
 	let r = e[e.length - 1];
 	return [...e.slice(0, -1), {
@@ -32665,7 +32665,7 @@ function ff(e, t) {
 	return n;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/cursor.ts
+//#region @rhwp/studio/src/engine/cursor.ts
 var pf = class e {
 	wasm;
 	position = {
@@ -34144,7 +34144,7 @@ function xf(e, t) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/caret-renderer.ts
+//#region @rhwp/studio/src/engine/caret-renderer.ts
 var Sf = class {
 	container;
 	virtualScroll;
@@ -34234,7 +34234,7 @@ var Sf = class {
 	}
 };
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/line-start-affinity.ts
+//#region @rhwp/studio/src/engine/line-start-affinity.ts
 function Cf(e, t, n) {
 	let r = n.lineInfoAt(e);
 	if (!r || r.lineIndex <= 0 || e !== r.charStart) return t;
@@ -34255,7 +34255,7 @@ function wf(e, t) {
 	return e.pageIndex === t.pageIndex && e.x <= t.x;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/field-marker-renderer.ts
+//#region @rhwp/studio/src/engine/field-marker-renderer.ts
 var Tf = class {
 	container;
 	virtualScroll;
@@ -34352,7 +34352,7 @@ var Tf = class {
 	}
 };
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/history.ts
+//#region @rhwp/studio/src/engine/history.ts
 function Df(e, t) {
 	for (let n of e) n.discard?.(t);
 }
@@ -34464,7 +34464,7 @@ var jf = class {
 	}
 };
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/chart-data-target.ts
+//#region @rhwp/studio/src/core/chart-data-target.ts
 function Mf(e) {
 	if (e.type !== "ole" || e.noteRef) return null;
 	let t = e.cellPath ?? (e.cellIdx !== void 0 && e.cellParaIdx !== void 0 && e.outerTableControlIdx !== void 0 ? [{
@@ -34564,7 +34564,7 @@ function Hf(e, t) {
 	return n.length === 0 && e.paragraph === t.ppi && e.control === t.ci;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/dialog-drag.ts
+//#region @rhwp/studio/src/ui/dialog-drag.ts
 function Uf(e, t, n = {}) {
 	let r = n.ignoreSelector ?? ".dialog-close", i = 0, a = 0, o = !1, s = () => {
 		o = !1, document.removeEventListener("mousemove", c), document.removeEventListener("mouseup", s);
@@ -34580,7 +34580,7 @@ function Uf(e, t, n = {}) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/dialog.ts
+//#region @rhwp/studio/src/ui/dialog.ts
 var Wf = "rhwp-modal-dialog-closed", H = class {
 	afterClose;
 	overlay;
@@ -34661,7 +34661,7 @@ function Kf(e, t) {
 	return new Gf(e, t).showAsync();
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/pwh-multiclick-selection.mjs
+//#region @rhwp/studio/src/engine/pwh-multiclick-selection.mjs
 function qf(e, t) {
 	let n = Array.from(e);
 	if (!n.length) return null;
@@ -34722,7 +34722,7 @@ function Jf(e, t, n) {
 	}
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/toast.ts
+//#region @rhwp/studio/src/ui/toast.ts
 var Yf = "rhwp-toast-container", Xf = 8e3, Zf = 200, Qf = 350;
 function $f() {
 	let e = document.getElementById(Yf);
@@ -34757,7 +34757,7 @@ function U(e) {
 	n > 0 && (o = setTimeout(s, n));
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/input-handler-hyperlink.ts
+//#region @rhwp/studio/src/engine/input-handler-hyperlink.ts
 function ep(e, t) {
 	if (!e.wasm?.getHyperlinkContext || !e.canEditHyperlink?.() || e.connectorDrawingMode || e.polygonDrawingMode || e.imagePlacementMode || e.textboxPlacementMode) return null;
 	let n = e.container.querySelector("#scroll-content");
@@ -34830,7 +34830,7 @@ function rp(e, t) {
 	}
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/input-handler-connector.ts
+//#region @rhwp/studio/src/engine/input-handler-connector.ts
 function ip(e, t, n, r = 10, i) {
 	try {
 		let a = { controls: this.wasm.getPageControlLayout(e).controls.filter(Eu) }, o = null, s = r;
@@ -34970,7 +34970,7 @@ function up() {
 	this.connectorDrawingMode = !1, this.connectorStartRef = null, cp.call(this), op.call(this), this.container.style.cursor = "";
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/object-drag-record.ts
+//#region @rhwp/studio/src/engine/object-drag-record.ts
 function dp(e, t) {
 	return !Number.isFinite(e) || !Number.isFinite(t) || e === t ? null : {
 		before: { rotationAngle: e },
@@ -34990,7 +34990,7 @@ function mp(e, t) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/table-bbox-cache.ts
+//#region @rhwp/studio/src/engine/table-bbox-cache.ts
 function hp(e) {
 	let t = `${e.sec}:${e.ppi}:${e.ci}`, n = e.path;
 	return !n || n.length <= 1 ? t : `${t}|${n.map((e, t) => t === n.length - 1 ? `${e.controlIndex}` : `${e.controlIndex}.${e.cellIndex}.${e.cellParaIndex}`).join("/")}`;
@@ -35032,7 +35032,7 @@ function bp(e, t, n) {
 	return e.tableBboxFetchFailures.add(i), null;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/table-resize-updates.ts
+//#region @rhwp/studio/src/engine/table-resize-updates.ts
 function xp(e, t) {
 	return e === 0 && !t;
 }
@@ -35095,7 +35095,7 @@ function jp(e, t, n) {
 	return a;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/input-handler-mouse.ts
+//#region @rhwp/studio/src/engine/input-handler-mouse.ts
 function Mp(e) {
 	return !e || e.isTextBox || e.parentParaIndex === void 0 || e.controlIndex === void 0 || e.cellIndex === void 0 || (e.cellPath?.length ?? 0) > 1 ? null : `${e.sectionIndex}:${e.parentParaIndex}:${e.controlIndex}:${e.cellIndex}`;
 }
@@ -36249,7 +36249,7 @@ function em(e, t) {
 	}[n[(r + Math.round(i / 45)) % 8]] ?? "";
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/picture-resize-journal.ts
+//#region @rhwp/studio/src/engine/picture-resize-journal.ts
 var tm = class extends Qd {
 	allTargets;
 	ids;
@@ -36351,7 +36351,7 @@ function im(e, t, n, r) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/object-selection-page.ts
+//#region @rhwp/studio/src/engine/object-selection-page.ts
 function am(e) {
 	if (e.length === 0) return null;
 	let t = Infinity, n = Infinity, r = -Infinity, i = -Infinity;
@@ -36377,7 +36377,7 @@ function sm(e, t, n, r) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/input-handler-picture.ts
+//#region @rhwp/studio/src/engine/input-handler-picture.ts
 function cm(e) {
 	return Array.isArray(e?.cellPath) && e.cellPath.length > 0;
 }
@@ -37058,7 +37058,7 @@ function Wm(e) {
 	this.isPictureRotateDragging = !1, this.pictureRotateState = null, this.container.style.cursor = "", this.dragRafId &&= (cancelAnimationFrame(this.dragRafId), 0), this.renderPictureObjectSelection();
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/input-handler-table.ts
+//#region @rhwp/studio/src/engine/input-handler-table.ts
 var Gm = 200;
 function Km(e, t, n) {
 	try {
@@ -37510,7 +37510,7 @@ function ph(e) {
 	}
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/pwh-table-create-shortcut.mjs
+//#region @rhwp/studio/src/engine/pwh-table-create-shortcut.mjs
 var mh = /* @__PURE__ */ new WeakMap();
 function hh(e, t, n = Date.now()) {
 	if (t.ctrlKey && !t.metaKey && !t.altKey && !t.shiftKey && (t.code === "KeyN" || t.key?.toLowerCase() === "n")) return t.preventDefault(), t.repeat || mh.set(e, n + 2500), !0;
@@ -37523,7 +37523,7 @@ function hh(e, t, n = Date.now()) {
 	].includes(t.key) || (mh.delete(e), n > r || t.altKey || t.metaKey || t.shiftKey || t.repeat) || t.code !== "KeyT" && t.key?.toLowerCase() !== "t" && t.key !== "ㅅ" ? !1 : (t.preventDefault(), e._cellBlockLetterImeGuard?.arm(t), e.dispatcher?.dispatch("table:create", { pwhDetailed: !0 }), !0);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/pwh-cell-delete-selection.mjs
+//#region @rhwp/studio/src/pwh-cell-delete-selection.mjs
 function gh({ rowCount: e, colCount: t, cells: n, selected: r }) {
 	if (!Number.isInteger(e) || !Number.isInteger(t) || e < 1 || t < 1) return { kind: "partial" };
 	let i = new Set(r), a = Array.from({ length: e }, () => Array(t).fill(!1));
@@ -37542,7 +37542,7 @@ function gh({ rowCount: e, colCount: t, cells: n, selected: r }) {
 	} : c === e * t ? { kind: "table" } : { kind: "partial" };
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/pwh-cell-delete-dialog.ts
+//#region @rhwp/studio/src/pwh-cell-delete-dialog.ts
 function _h(e) {
 	let t = e.getSelectedCellBlock();
 	if (!t || !t.cellIndices.length) return;
@@ -37603,7 +37603,7 @@ function _h(e) {
 	new s().show();
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/pwh-clipboard-structure.mjs
+//#region @rhwp/studio/src/engine/pwh-clipboard-structure.mjs
 function vh({ inCell: e, internalControl: t = !1, hasTables: n = !1, hasObjects: r = !1 }) {
 	return !!(e && (t || n || r));
 }
@@ -37633,7 +37633,7 @@ function bh(e, t, n = !1) {
 	}) ? "현재 셀 붙여넣기 경로는 표·객체 구조를 보존하지 못할 수 있어 중단했습니다. 기존 내용은 유지했습니다. 텍스트만 붙이려면 일반 텍스트로 붙여넣기를 사용하세요." : null;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/navigation-keymap.ts
+//#region @rhwp/studio/src/engine/navigation-keymap.ts
 function xh(e) {
 	return e.key !== "ArrowUp" && e.key !== "ArrowDown" && e.key !== "ArrowLeft" && e.key !== "ArrowRight" ? null : e.ctrlKey || e.metaKey ? "resize" : "navigate";
 }
@@ -37681,7 +37681,7 @@ function Dh(e, t = Ch()) {
 	return t === "mac" ? e.replace(/\bCtrl\+/g, "⌘").replace(/\bAlt\+/g, "⌥").replace(/\bShift\+/g, "⇧") : e;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/command/shortcut-map.ts
+//#region @rhwp/studio/src/command/shortcut-map.ts
 var Oh = [
 	[{
 		key: "z",
@@ -38022,7 +38022,7 @@ function kh(e, t, n = Ch()) {
 	return null;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/command/contextual-shortcut.ts
+//#region @rhwp/studio/src/command/contextual-shortcut.ts
 var Ah = class {
 	state = "idle";
 	ghostText = "";
@@ -38065,7 +38065,7 @@ function Mh(e, t) {
 	} : null;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/office-clipboard-images.ts
+//#region @rhwp/studio/src/engine/office-clipboard-images.ts
 var Nh = 80, Ph = 81, Fh = 14;
 function Ih(e) {
 	let t = e.length >> 1, n = new Uint8Array(t);
@@ -38246,7 +38246,7 @@ function Gh(e, t) {
 	return !e || !t || !/\\pict/.test(t) ? !1 : /<img\b[^>]*src\s*=\s*["'](?!data:)/i.test(e);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/office-html-sanitize.ts
+//#region @rhwp/studio/src/engine/office-html-sanitize.ts
 var Kh = [
 	"script",
 	"style",
@@ -38298,7 +38298,7 @@ function Xh(e) {
 	return n;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/input-handler-keyboard.ts
+//#region @rhwp/studio/src/engine/input-handler-keyboard.ts
 var Zh = /<!--\s*rhwp-studio-clipboard:([A-Za-z0-9._:-]+)\s*-->/, Qh = /* @__PURE__ */ new Set([
 	"ArrowLeft",
 	"ArrowRight",
@@ -39647,7 +39647,7 @@ function e_() {
 	}
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/hyperlink-delete-dialog.ts
+//#region @rhwp/studio/src/ui/hyperlink-delete-dialog.ts
 var t_ = class extends H {
 	remove;
 	cancel;
@@ -39673,7 +39673,7 @@ function n_(e, t) {
 	new t_(e, t).show();
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/input-handler-hyperlink-delete.ts
+//#region @rhwp/studio/src/engine/input-handler-hyperlink-delete.ts
 var r_ = /* @__PURE__ */ new WeakSet();
 function i_(e, t, n = "forward") {
 	if (r_.has(e)) return !0;
@@ -39722,7 +39722,7 @@ function i_(e, t, n = "forward") {
 	}, d), !0;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/input-handler-text.ts
+//#region @rhwp/studio/src/engine/input-handler-text.ts
 function a_(e) {
 	return [...e].length;
 }
@@ -40258,18 +40258,18 @@ function w_(e, t) {
 	return this.cursor.isInFootnote() ? (this.wasm.deleteTextInFootnote(this.cursor.fnSectionIdx, this.cursor.fnParaIdx, this.cursor.fnControlIdx, this.cursor.fnInnerParaIdx, e.charOffset, t), V) : dd(this.wasm, e, t);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/hanging-indent.ts
+//#region @rhwp/studio/src/engine/hanging-indent.ts
 function T_(e, t) {
 	return !Number.isFinite(e) || !Number.isFinite(t) ? 0 : Math.max(0, e - t);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/table-border-hit.ts
+//#region @rhwp/studio/src/engine/table-border-hit.ts
 function E_(e, t, n, r = 5) {
 	let i = Math.abs(e - n.x) <= r, a = Math.abs(e - (n.x + n.width)) <= r, o = Math.abs(t - n.y) <= r, s = Math.abs(t - (n.y + n.height)) <= r, c = t >= n.y - r && t <= n.y + n.height + r, l = e >= n.x - r && e <= n.x + n.width + r;
 	return i && c || a && c || o && l || s && l;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/deferred-pagination-runner.ts
+//#region @rhwp/studio/src/engine/deferred-pagination-runner.ts
 var D_ = class {
 	client;
 	onComplete;
@@ -40353,7 +40353,7 @@ var D_ = class {
 	}
 };
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/table-object-clipboard-target.ts
+//#region @rhwp/studio/src/engine/table-object-clipboard-target.ts
 function O_(e) {
 	let t = e.cellPath ?? [];
 	return t.length > 1 ? {
@@ -40365,7 +40365,7 @@ function O_(e) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/initial-caret-focus.ts
+//#region @rhwp/studio/src/engine/initial-caret-focus.ts
 function k_(e, t, n, r) {
 	return e ? (n.show(e, t), r.emit("cursor-rect-updated", {
 		pageIndex: e.pageIndex,
@@ -40374,7 +40374,7 @@ function k_(e, t, n, r) {
 	}), !0) : !1;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/caret-layout-reveal.ts
+//#region @rhwp/studio/src/engine/caret-layout-reveal.ts
 var A_ = /* @__PURE__ */ new Set([
 	"pageBreak",
 	"columnBreak",
@@ -44277,7 +44277,7 @@ function fv(e, t, n) {
 	i < 0 || r.length === 0 || r[(i + n + r.length) % r.length]?.focus({ preventScroll: !0 });
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/icon-toolbar-scroller.ts
+//#region @rhwp/studio/src/ui/icon-toolbar-scroller.ts
 var pv = 1, mv = 240, hv = "tb-scroll-nav-transitioning-out", gv = ":scope > .tb-sep";
 function _v(e, t) {
 	return e - t > pv;
@@ -44523,7 +44523,7 @@ function Av(e) {
 	return !t || !n || !r || !i ? null : new kv(e, t, n, r, i);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/menu-shortcut-labels.ts
+//#region @rhwp/studio/src/ui/menu-shortcut-labels.ts
 function jv(e, t) {
 	let n = e.querySelectorAll(".md-item[data-cmd]");
 	for (let e of n) {
@@ -44536,7 +44536,7 @@ function jv(e, t) {
 	}
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/menu-bar.ts
+//#region @rhwp/studio/src/ui/menu-bar.ts
 var Mv = class {
 	container;
 	eventBus;
@@ -44627,7 +44627,7 @@ var Mv = class {
 	}
 };
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/extension-settings.ts
+//#region @rhwp/studio/src/core/extension-settings.ts
 function Nv() {
 	return !0;
 }
@@ -44685,7 +44685,7 @@ async function Wv() {
 	return await Uv(e?.sync, "chrome-callback") ?? await Uv(t?.sync, "promise") ?? await Uv(t?.local, "promise") ?? await Uv(e?.local, "chrome-callback") ?? Pv();
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/command/registry.ts
+//#region @rhwp/studio/src/command/registry.ts
 var Gv = class {
 	commands = /* @__PURE__ */ new Map();
 	register(e) {
@@ -44766,14 +44766,14 @@ function iy(e, t) {
 	e.querySelectorAll(`${Yv}[data-cmd="${t}"]`).forEach((e) => e.remove());
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/automation/types.ts
+//#region @rhwp/studio/src/automation/types.ts
 var ay = "ext:", oy = {
 	menu: "rhwp-chrome-no-menu",
 	toolbar: "rhwp-chrome-no-toolbar",
 	statusbar: "rhwp-chrome-no-status"
 };
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/automation/host.ts
+//#region @rhwp/studio/src/automation/host.ts
 function sy(e) {
 	if (!e.startsWith("ext:")) {
 		let t = /* @__PURE__ */ Error(`확장 커맨드 ID 는 "${ay}" 접두사가 필요합니다: ${e}`);
@@ -44867,7 +44867,7 @@ function fy(e) {
 	return dy();
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/plugin/host.ts
+//#region @rhwp/studio/src/plugin/host.ts
 function py(e, t) {
 	let n = Error(t);
 	return n.code = e, n;
@@ -45127,7 +45127,7 @@ var Sy = class {
 	}
 };
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/command/document-shortcut-guard.ts
+//#region @rhwp/studio/src/command/document-shortcut-guard.ts
 function Cy(e) {
 	let t = e;
 	for (; t;) {
@@ -45149,7 +45149,7 @@ function Ty(e, t, n, r) {
 	return t?.isConnected || wy(e.target) ? !1 : (e.preventDefault(), n(), r(), !0);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/print-plan.mjs
+//#region @rhwp/studio/src/print-plan.mjs
 var Ey = {
 	A3: [297, 420],
 	A4: [210, 297],
@@ -45233,7 +45233,7 @@ function Ay(e, t, { paper: n = "document", orientation: r = "document", fit: i =
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/pwh-desktop-print-preview.mjs
+//#region @rhwp/studio/src/pwh-desktop-print-preview.mjs
 var jy = "\nbody.pwh-print-ui{margin:0;padding:0;display:block;background:#eef1f3;color:#183c4d;font:13px/1.5 \"Malgun Gothic\",\"Segoe UI\",sans-serif}\n.pwh-print-ui *{box-sizing:border-box}\n.pwh-print-ui [hidden]{display:none!important}\n.pwh-print-shell{position:fixed;inset:0;display:grid;grid-template-columns:300px minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;background:#fff}\n.pwh-print-settings{overflow:auto;padding:24px;border-right:1px solid #e0e7eb}\n.pwh-print-settings h1{font-size:21px;line-height:1.4;margin:0 0 6px;font-weight:700}\n.pwh-print-filename{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#6c8390;margin-bottom:22px}\n.pwh-print-field{display:block;margin:0 0 16px;font-weight:600}\n.pwh-print-field>span{display:block;margin-bottom:6px}\n.pwh-print-field select,.pwh-print-field input{width:100%;height:36px;border:1px solid #d5dfe4;background:#fff;color:#183c4d;border-radius:6px;padding:0 9px;font:inherit;font-weight:400}\n.pwh-print-field input[type=checkbox]{width:16px;height:16px;accent-color:#183c4d;vertical-align:middle;margin-right:7px}\n.pwh-print-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}\n.pwh-print-ui button{font:inherit;cursor:pointer;border:1px solid #cad8df;border-radius:6px;background:#fff;color:#183c4d;padding:8px 15px}\n.pwh-print-ui button:disabled{opacity:.45;cursor:default}\n.pwh-print-ui button:focus-visible,.pwh-print-ui input:focus-visible,.pwh-print-ui select:focus-visible{outline:2px solid #5b9caf;outline-offset:2px}\n.pwh-print-details{border-top:1px solid #e4eaed;padding-top:12px;margin-top:6px}\n.pwh-print-details summary{cursor:pointer;margin-bottom:12px;color:#527889}\n.pwh-print-message{min-height:20px;color:#6c8390;overflow-wrap:anywhere;font-size:12px}\n.pwh-print-message[role=alert]{color:#a32d2d}\n.pwh-print-preview{min-width:0;display:flex;flex-direction:column;background:#edf0f2;overflow:hidden}\n.pwh-print-toolbar{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px;min-height:56px;padding:8px 16px;border-bottom:1px solid #dde4e8;background:#f7f9fa}\n.pwh-print-toolbar button{height:32px;padding:3px 10px}\n.pwh-print-toolbar select{font:inherit;color:inherit;background:transparent;border:1px solid #d3dfe5;border-radius:4px;padding:5px}\n.pwh-print-canvas{flex:1;min-height:0;overflow:auto;padding:24px;display:flex;align-items:flex-start;justify-content:center}\n.pwh-print-paper-holder{flex:none;position:relative}\n.pwh-print-sheet{position:relative;overflow:hidden;background:#fff;color:#000;transform-origin:top left;box-shadow:0 1px 8px #17364d24}\nbody.pwh-print-ui .pwh-print-sheet .page{position:absolute!important;break-after:auto!important;page-break-after:auto!important;page:auto!important;box-shadow:none!important;transform-origin:top left;overflow:hidden;margin:0!important;padding:0!important}\n.pwh-print-footer{grid-column:1/-1;display:flex;align-items:center;gap:10px;justify-content:flex-end;padding:14px 24px;border-top:1px solid #e0e7eb;background:#fff}\n.pwh-print-footer .pwh-print-total{flex:1;color:#6c8390;font-size:12px}\n.pwh-print-footer .pwh-print-submit{background:#183c4d;border-color:#183c4d;color:white;min-width:88px}\n#pwh-print-output,#pwh-print-source{display:none}\n@media(max-width:820px){.pwh-print-shell{grid-template-columns:260px minmax(0,1fr)}.pwh-print-settings{padding:18px}.pwh-print-canvas{padding:16px}}\n@media print{\n body.pwh-print-ui{display:block;background:white;margin:0!important;padding:0!important}\n .pwh-print-shell,#pwh-print-source{display:none!important}\n #pwh-print-output{display:block!important}\n .pwh-print-sheet{box-shadow:none!important;transform:none!important;break-after:page;page-break-after:always;break-inside:avoid;page-break-inside:avoid}\n .pwh-print-sheet:last-child{break-after:auto;page-break-after:auto}\n}\n";
 async function My(e, t = {}) {
 	let n = e.document, r = e.pwhNative;
@@ -45386,7 +45386,7 @@ async function My(e, t = {}) {
 	return C;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/command/export-html.ts
+//#region @rhwp/studio/src/command/export-html.ts
 var Ny = {
 	html: {
 		extension: "html",
@@ -45457,7 +45457,7 @@ function By(e, t, n) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/dom-utils.ts
+//#region @rhwp/studio/src/ui/dom-utils.ts
 var Vy = "svg";
 function Hy(e, t) {
 	let n = new DOMParser().parseFromString(t, "image/svg+xml");
@@ -45470,7 +45470,7 @@ function Uy(e, t) {
 	return n.value = e, n.textContent = t, n;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/dialog-apply.ts
+//#region @rhwp/studio/src/ui/dialog-apply.ts
 function Wy(e) {
 	let { services: t, label: n, command: r, fallback: i } = e;
 	try {
@@ -45515,7 +45515,7 @@ function Yy(e) {
 	return n.width < t ? `좌우 여백이 너무 커서 본문이 남지 않습니다 (본문 너비 ${r(n.width)}mm, 최소 10mm). 왼쪽·오른쪽·제본 여백을 줄여주세요.` : n.height < t ? `위아래 여백이 너무 커서 본문이 남지 않습니다 (본문 높이 ${r(n.height)}mm, 최소 10mm). 위쪽·아래쪽·머리말·꼬리말 여백을 줄여주세요.` : null;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/page-setup-dialog.ts
+//#region @rhwp/studio/src/ui/page-setup-dialog.ts
 var Xy = 7200 / 25.4, Zy = 3;
 function Qy(e) {
 	return Math.round(e * 25.4 / 7200 * 10) / 10;
@@ -45893,7 +45893,7 @@ function hb(e, t, n) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/save-as-dialog.ts
+//#region @rhwp/studio/src/ui/save-as-dialog.ts
 var gb = class extends H {
 	format;
 	allowPassword;
@@ -45964,7 +45964,7 @@ function _b(e, t = "hwp", n = {}) {
 	return new gb(e, t, n.allowPassword === !0, n.inheritPassword === !0).showAsync();
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/hwp-password-dialog.ts
+//#region @rhwp/studio/src/ui/hwp-password-dialog.ts
 var vb = class extends H {
 	fileName;
 	errorMessage;
@@ -46057,7 +46057,7 @@ function xb(e) {
 	return new bb(e).showAsync();
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/unsaved-changes-dialog.ts
+//#region @rhwp/studio/src/ui/unsaved-changes-dialog.ts
 var Sb = class extends H {
 	options;
 	resolve;
@@ -46098,7 +46098,7 @@ function Cb(e) {
 	return new Sb(e).showAsync();
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/hml-save-format-message.ts
+//#region @rhwp/studio/src/ui/hml-save-format-message.ts
 var wb = 3;
 function Tb(e, t) {
 	let n = Ra(e, t);
@@ -46108,7 +46108,7 @@ function Tb(e, t) {
 	return i.length > wb && r.push(`그 외 ${i.length - wb}건`), r.join("\n");
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/hml-save-format-dialog.ts
+//#region @rhwp/studio/src/ui/hml-save-format-dialog.ts
 var Eb = class extends H {
 	resolve;
 	hmlEnabled;
@@ -46150,7 +46150,7 @@ function Db(e = null, t = !1) {
 	return new Eb(e, t).showAsync();
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/command/save-document-format.ts
+//#region @rhwp/studio/src/command/save-document-format.ts
 function Ob(e, t) {
 	return t === "hml" ? {
 		bytes: e.exportHml(),
@@ -46161,7 +46161,7 @@ function kb(e, t, n) {
 	return t === "hwpx" ? e.exportHwpxWithPasswordAndReport(n) : e.exportHwpWithPasswordAndReport(n);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/command/print-pages.ts
+//#region @rhwp/studio/src/command/print-pages.ts
 var Ab = "브라우저 인쇄 창에서 ‘대상 → PDF로 저장’을 선택합니다.";
 function jb(e) {
 	return e.trim().replace(/\.(hwp|hwpx|hml)$/i, "").trim() || "문서";
@@ -46298,7 +46298,7 @@ function Gb(e, t, n) {
 	Hb(i.documentElement, n.pageName), r.appendChild(e.importNode(i.documentElement, !0)), t.appendChild(r);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/command/print-surface.ts
+//#region @rhwp/studio/src/command/print-surface.ts
 var Kb = "print.html", qb = 1e4, Jb = "rhwp-print-surface", Yb = class extends Error {
 	constructor() {
 		super("인쇄 미리보기 팝업이 차단되었습니다."), this.name = "PrintPreviewBlockedError";
@@ -46449,7 +46449,7 @@ async function dx(e) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/command/file-open-picker.ts
+//#region @rhwp/studio/src/command/file-open-picker.ts
 async function fx(e) {
 	if (!await e.canReplace()) return;
 	let t = ax(e.windowLike), n = null;
@@ -46478,7 +46478,7 @@ async function fx(e) {
 	}
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/pdf-print-dialog.ts
+//#region @rhwp/studio/src/ui/pdf-print-dialog.ts
 var px = class extends H {
 	pageCount;
 	showGuidance;
@@ -46650,7 +46650,7 @@ async function jx() {
 	}), async () => {});
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/recent/recent-open.ts
+//#region @rhwp/studio/src/recent/recent-open.ts
 async function Mx(e, t) {
 	if (!e.handle) return t.toast(`"${e.fileName}"은(는) 핸들 없이 열려 자동 재열기가 불가합니다. 파일을 다시 선택하세요.`, 4e3), t.requestReopen?.(), "needs-pick";
 	let n = e.handle, r = !1;
@@ -46672,7 +46672,7 @@ async function Mx(e, t) {
 	}
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/command/commands/file.ts
+//#region @rhwp/studio/src/command/commands/file.ts
 async function Nx(e) {
 	await fx({
 		canReplace: () => eS(e),
@@ -47219,7 +47219,7 @@ var dS = [
 	}
 };
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/find-dialog.ts
+//#region @rhwp/studio/src/ui/find-dialog.ts
 function mS(e, t) {
 	if (!e || !t.found) return;
 	let n = t.cellContext, r = n ? {
@@ -47560,7 +47560,7 @@ var hS = class e {
 	}
 };
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/compare/diff-location-label.ts
+//#region @rhwp/studio/src/compare/diff-location-label.ts
 function _S(e) {
 	let t = (e ?? "").trim();
 	return t === "" || t === "(없음)";
@@ -47585,7 +47585,7 @@ function yS(e) {
 	return !t && !n ? null : t && n ? `좌 ${t}, 우 ${n}` : t ?? n;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/compare/compare-debug.ts
+//#region @rhwp/studio/src/compare/compare-debug.ts
 function bS() {
 	try {
 		if (typeof globalThis < "u" && globalThis.__RHWP_COMPARE_DEBUG__ || typeof window < "u" && (new URLSearchParams(window.location.search).get("compareDebug") === "1" || window.localStorage?.getItem("rhwp:compareDebug") === "1")) return !0;
@@ -47596,7 +47596,7 @@ function xS(...e) {
 	bS() && console.log("[rhwp:compare]", ...e);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/compare/diff-engine.ts
+//#region @rhwp/studio/src/compare/diff-engine.ts
 var SS = 32, CS = 20, wS = 5, TS = 10, ES = 4, DS = 3, OS = .86, kS = .7, AS = 4, jS = .4, MS = .12, NS = .4, PS = 1.5, FS = .35, IS = .28, LS = 12, RS = 24, zS = 28e4, BS = 96e3, VS = 14e6, HS = .62, US = 6, WS = 1.9, GS = 18e4, KS = 2600, qS = 96, JS = 45e4, YS = 48, XS = 2.35, ZS = 4.38, QS = 4.25, $S = .74, eC = .36, tC = null, nC = null;
 function rC(e, t) {
 	let n = nC;
@@ -49196,7 +49196,7 @@ async function Pw(e, t, n, r, i) {
 	return Nw(await LC(e, t, i), await LC(n, r, i), i);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/history/idb-store.ts
+//#region @rhwp/studio/src/history/idb-store.ts
 var Fw = "rhwpStudioDocHistory", Iw = 1, Lw = "historyMeta", Rw = "historyBlobs", zw = 24, Bw = /* @__PURE__ */ new Map();
 function Vw() {
 	return typeof indexedDB < "u";
@@ -49328,7 +49328,7 @@ async function Zw() {
 	}), async () => {});
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/history-dialog.ts
+//#region @rhwp/studio/src/ui/history-dialog.ts
 var Qw = {
 	caseSensitive: !0,
 	ignoreWhitespace: !0,
@@ -50280,12 +50280,12 @@ var Qw = {
 	}
 };
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/command/format-paste-availability.ts
+//#region @rhwp/studio/src/command/format-paste-availability.ts
 function iT(e) {
 	return e.hasDocument && e.hasCopiedFormat && !e.isFormMode && (e.hasSelection || e.inCellSelectionMode);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/command/commands/edit.ts
+//#region @rhwp/studio/src/command/commands/edit.ts
 var aT = null, oT = null, sT = null, cT = null, lT = [
 	{
 		id: "edit:undo",
@@ -50560,7 +50560,7 @@ function wT(e) {
 	return typeof n.addEventListener == "function" ? (n.addEventListener("change", r), () => n.removeEventListener("change", r)) : (n.addListener(r), () => n.removeListener(r));
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/grid-settings-dialog.ts
+//#region @rhwp/studio/src/ui/grid-settings-dialog.ts
 var TT = class extends H {
 	visibleInput;
 	horizontalInput;
@@ -50696,7 +50696,7 @@ function kT(e, t) {
 	}
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/zoom-dialog-state.ts
+//#region @rhwp/studio/src/view/zoom-dialog-state.ts
 var AT = [
 	100,
 	125,
@@ -50770,7 +50770,7 @@ function zT(e) {
 	}
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/zoom-dialog.ts
+//#region @rhwp/studio/src/ui/zoom-dialog.ts
 var BT = "zoom-dialog-custom-error", VT = class extends H {
 	initialChoice;
 	initialArrangement;
@@ -51878,7 +51878,7 @@ var cE = class {
 	}
 };
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/para-shape-helpers.ts
+//#region @rhwp/studio/src/ui/para-shape-helpers.ts
 function lE(e) {
 	let t = document.createElement("fieldset");
 	t.className = "cs-fieldset";
@@ -51902,7 +51902,7 @@ function pE(e) {
 	return t.className = "dialog-unit", t.textContent = e, t;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/para-shape-tab-builders.ts
+//#region @rhwp/studio/src/ui/para-shape-tab-builders.ts
 function mE(e, t) {
 	let n = document.createElement("tr");
 	t.forEach((e) => {
@@ -52347,7 +52347,7 @@ function _E(e, t) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/para-shape-dialog.ts
+//#region @rhwp/studio/src/ui/para-shape-dialog.ts
 var vE = [
 	{
 		value: "justify",
@@ -52879,7 +52879,7 @@ var DE = class {
 	}
 };
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/numbering-defaults.ts
+//#region @rhwp/studio/src/core/numbering-defaults.ts
 function OE(e) {
 	return e.split("[::]").filter((e, t, n) => t < n.length - 1);
 }
@@ -53847,7 +53847,7 @@ function _D(e, t) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/picture-props-dialog.ts
+//#region @rhwp/studio/src/ui/picture-props-dialog.ts
 var vD = 7200 / 25.4;
 function K(e) {
 	return e / vD;
@@ -56211,7 +56211,7 @@ function ND(e) {
 	return parseInt(t.substring(4, 6), 16) << 16 | r << 8 | n;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/equation-props-dialog.ts
+//#region @rhwp/studio/src/ui/equation-props-dialog.ts
 var PD = [
 	"basic",
 	"margin",
@@ -57853,7 +57853,7 @@ function $D(e, t) {
 	new QD(e, t).show();
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/command/commands/hyperlink.ts
+//#region @rhwp/studio/src/command/commands/hyperlink.ts
 var eO = {
 	id: "insert:hyperlink",
 	label: B("command.insert.hyperlink.label"),
@@ -58137,7 +58137,7 @@ function bO(e) {
 	return e.series.map((e) => e.name);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/chart-data-dialog.ts
+//#region @rhwp/studio/src/ui/chart-data-dialog.ts
 var xO = "원본이 빈 값(결측)이라 이 자리는 고칠 수 없습니다 — 행을 새로 넣으면 값을 쓸 수 있습니다.", SO = "원본에 이 계열의 값이 없던 자리입니다.", CO = "이 계열은 이름 칸(c:tx)이 없어 이름을 넣을 자리가 없습니다.", wO = "셀을 우클릭하면 행·계열을 넣거나 지울 수 있습니다.", TO = "원형 차트는 첫 계열만 그리므로, 추가한 계열은 화면에 나타나지 않습니다.", EO = "주식형 캔들은 첫·끝 계열을 몸통으로 삼습니다 — 양끝을 바꾸면 그림이 깨집니다.";
 function DO(e, t) {
 	let n = e.container ?? [], r = t.container ?? [];
@@ -58327,12 +58327,12 @@ var OO = class extends H {
 	}
 };
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/unicode-block.ts
+//#region @rhwp/studio/src/ui/unicode-block.ts
 function kO(e, t) {
 	return e >= t.start && e <= t.end;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/symbols-dialog.ts
+//#region @rhwp/studio/src/ui/symbols-dialog.ts
 var AO = [
 	{
 		name: B("dialog.symbols.label"),
@@ -59538,7 +59538,7 @@ function ZO(e, t) {
 	}, 0);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/command/commands/insert.ts
+//#region @rhwp/studio/src/command/commands/insert.ts
 function QO(e, t, n, r) {
 	return {
 		id: e,
@@ -60059,7 +60059,7 @@ function vk(e, t) {
 	gk(e, n, r, "flipObject", { [t]: a }, { [t]: !a });
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/table-create-dialog.ts
+//#region @rhwp/studio/src/ui/table-create-dialog.ts
 var yk = 8, bk = 10, xk = 16;
 function Sk(e) {
 	return Math.round(e * ET);
@@ -60224,7 +60224,7 @@ function Ok(e) {
 	return t.className = "dialog-unit", t.textContent = e, t;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/cell-split-dialog.ts
+//#region @rhwp/studio/src/ui/cell-split-dialog.ts
 var kk = class {
 	onApply = null;
 	overlay = null;
@@ -60393,7 +60393,7 @@ function Ik(e, t, n, r) {
 	});
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/pwh-cell-border-dialog.ts
+//#region @rhwp/studio/src/ui/pwh-cell-border-dialog.ts
 var Lk = [
 	"left",
 	"right",
@@ -60757,7 +60757,7 @@ function Xk(e) {
 	}
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/cell-border-bg-dialog.ts
+//#region @rhwp/studio/src/ui/cell-border-bg-dialog.ts
 var Zk = "var(--doc-paper)", Qk = "var(--ui-border-light)", $k = [
 	["0", B("option.diagonalLineTypeOptions.0")],
 	["1", B("option.diagonalLineTypeOptions.1")],
@@ -61538,7 +61538,7 @@ var rA = class extends H {
 	}
 };
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/command/block-calculation-plan.ts
+//#region @rhwp/studio/src/command/block-calculation-plan.ts
 function cA(e) {
 	if (!Number.isInteger(e) || e < 0) return null;
 	let t = e + 1, n = "";
@@ -61598,7 +61598,7 @@ function fA(e, t) {
 	}
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/table-row-column-dialog.ts
+//#region @rhwp/studio/src/ui/table-row-column-dialog.ts
 var pA = 63;
 function mA(e) {
 	let t = Number.parseInt(e, 10);
@@ -62885,7 +62885,7 @@ function WA(e) {
 	}
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/section-settings-dialog.ts
+//#region @rhwp/studio/src/ui/section-settings-dialog.ts
 var GA = 100;
 function KA(e) {
 	return Math.round(e / GA * 10) / 10;
@@ -63166,7 +63166,7 @@ var $A = "80px", ej = class extends H {
 	}
 };
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/command/commands/page.ts
+//#region @rhwp/studio/src/command/commands/page.ts
 function nj(e, t, n, r, i) {
 	let { sectionIndex: a, applyTo: o } = r;
 	JSON.parse(e.wasm.getHeaderFooter(a, i, o)).exists || t.executeOperation({
@@ -63621,7 +63621,7 @@ var sj = [
 	}
 ];
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/font-set-edit-dialog.ts
+//#region @rhwp/studio/src/ui/font-set-edit-dialog.ts
 function cj() {
 	let e = /* @__PURE__ */ new Set();
 	for (let t of Ee) e.add(t);
@@ -63795,7 +63795,7 @@ function dj(e, t) {
 	][t] ?? "korean"];
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/options-dialog.ts
+//#region @rhwp/studio/src/ui/options-dialog.ts
 var fj = class extends H {
 	eventBus;
 	showRecentCheck;
@@ -63970,7 +63970,7 @@ function _j(e) {
 	return t === "NotAllowedError" || n.includes("permission") || n.includes("denied") ? "로컬 글꼴 접근 권한이 허용되지 않았습니다. 브라우저 권한 설정에서 허용한 뒤 다시 시도해 주세요." : "글꼴 감지에 실패했습니다. 웹 대체 글꼴로 계속 사용할 수 있습니다.";
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/command/commands/tool.ts
+//#region @rhwp/studio/src/command/commands/tool.ts
 var vj = [{
 	id: "tool:options",
 	opensDialog: !0,
@@ -63980,7 +63980,7 @@ var vj = [{
 	}
 }];
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/command/pwa-file-handling.ts
+//#region @rhwp/studio/src/command/pwa-file-handling.ts
 async function yj(e) {
 	let t = await e.getFile();
 	return {
@@ -64019,7 +64019,7 @@ function xj(e, t) {
 	}), !0) : !1;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/context-menu.ts
+//#region @rhwp/studio/src/ui/context-menu.ts
 var Sj = class {
 	dispatcher;
 	registry;
@@ -64192,7 +64192,7 @@ function Tj(e) {
 	return e.warnings.length > wj && n.push(`그 외 ${e.warnings.length - wj}건`), n.join("\n");
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/hml-import-warning.ts
+//#region @rhwp/studio/src/ui/hml-import-warning.ts
 function Ej(e) {
 	U({
 		message: Tj(e),
@@ -64201,7 +64201,7 @@ function Ej(e) {
 	});
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/drop-confirm-dialog.ts
+//#region @rhwp/studio/src/ui/drop-confirm-dialog.ts
 var Dj = class extends H {
 	fileName;
 	resolve;
@@ -64233,7 +64233,7 @@ function Oj(e) {
 	return new Dj(e).showAsync();
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/ui/chrome-mode.ts
+//#region @rhwp/studio/src/ui/chrome-mode.ts
 var kj = [
 	"file:new-doc",
 	"file:open",
@@ -64274,7 +64274,7 @@ function Mj(e = "") {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/document-dirty-state.ts
+//#region @rhwp/studio/src/core/document-dirty-state.ts
 var Nj = class {
 	dirty = !1;
 	beforeUnloadWindow = null;
@@ -64384,7 +64384,7 @@ function Lj(e, t = {}) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/recovery/autosave-store.ts
+//#region @rhwp/studio/src/recovery/autosave-store.ts
 var Rj = "rhwpStudioAutosave", zj = 1, Bj = "drafts", Vj = 12, Hj = /* @__PURE__ */ new Map();
 function Uj() {
 	return typeof indexedDB < "u";
@@ -64489,7 +64489,7 @@ async function rM() {
 	}), async () => {});
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/recovery/autosave-manager.ts
+//#region @rhwp/studio/src/recovery/autosave-manager.ts
 var iM = 1e4, aM = 6e5;
 function oM(e, t) {
 	return typeof e == "string" && e.length > 0 ? e : t;
@@ -64653,7 +64653,7 @@ function lM(e, t, n) {
 	return Number.isFinite(r) ? Math.max(n, Math.round(r)) : t;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/recovery/recovery-format.ts
+//#region @rhwp/studio/src/recovery/recovery-format.ts
 function uM(e) {
 	let t = e.trim() || "문서.hwp", n = t.lastIndexOf(".");
 	if (n <= 0) return t;
@@ -64677,7 +64677,7 @@ function mM(e) {
 	return `${fM(e.savedAt)} · ${pM(e.byteLength)} · ${t}${n}`;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/recovery/recovery-ui.ts
+//#region @rhwp/studio/src/recovery/recovery-ui.ts
 var hM = class extends H {
 	drafts;
 	resolve;
@@ -64744,7 +64744,7 @@ function gM(e) {
 	return new hM(e).showAsync();
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/cell-selection-renderer.ts
+//#region @rhwp/studio/src/engine/cell-selection-renderer.ts
 var _M = class {
 	container;
 	virtualScroll;
@@ -64791,7 +64791,7 @@ var _M = class {
 	}
 };
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/cell-selection-phase.ts
+//#region @rhwp/studio/src/engine/cell-selection-phase.ts
 function vM(e) {
 	switch (e) {
 		case 1: return "셀 선택 · 방향키로 이동";
@@ -64800,7 +64800,7 @@ function vM(e) {
 	}
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/table-object-renderer.ts
+//#region @rhwp/studio/src/engine/table-object-renderer.ts
 var yM = "http://www.w3.org/2000/svg";
 function bM(e, t, n, r) {
 	let i = r ? Math.max(n, 10) : n, a = i / 2, o = document.createElement("div");
@@ -65122,7 +65122,7 @@ function DM(e, t, n, r) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/engine/table-resize-renderer.ts
+//#region @rhwp/studio/src/engine/table-resize-renderer.ts
 var OM = class e {
 	container;
 	virtualScroll;
@@ -65255,7 +65255,7 @@ var OM = class e {
 	}
 };
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/ruler-pin-geometry.ts
+//#region @rhwp/studio/src/view/ruler-pin-geometry.ts
 function kM(e) {
 	return Math.round(e * 7200 / 96);
 }
@@ -65284,7 +65284,7 @@ function NM(e, t, n) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/ruler-scale.ts
+//#region @rhwp/studio/src/view/ruler-scale.ts
 var PM = 96 / 25.4, FM = 30, IM = 3.5, LM = 10;
 function RM(e) {
 	let t = Number.isFinite(e) && e > 0 ? e : 1, n = 10 ** Math.floor(Math.log10(t)), r = t / n;
@@ -65298,7 +65298,7 @@ function zM(e) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/ruler-label-geometry.ts
+//#region @rhwp/studio/src/view/ruler-label-geometry.ts
 function BM(e, t, n, r) {
 	if (![
 		e,
@@ -65310,7 +65310,7 @@ function BM(e, t, n, r) {
 	return e - i >= n && e + i <= a;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/ruler.ts
+//#region @rhwp/studio/src/view/ruler.ts
 var VM = 96 / 25.4, HM = 20, UM = 6, WM = 8;
 function GM(e, t) {
 	return getComputedStyle(document.documentElement).getPropertyValue(e).trim() || t;
@@ -65744,7 +65744,7 @@ function $M(e, t, n) {
 	return `${B(`ui.zoom.${e}`)} (${r})`;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/renderer-session.ts
+//#region @rhwp/studio/src/view/renderer-session.ts
 function eN(e) {
 	return e instanceof Error ? e.message : String(e);
 }
@@ -65937,7 +65937,7 @@ async function oN(e, t) {
 	}
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/view/page-indicator.ts
+//#region @rhwp/studio/src/view/page-indicator.ts
 function sN(e) {
 	return typeof e == "number" && Number.isFinite(e) && e >= 1;
 }
@@ -65991,7 +65991,7 @@ function gN(e) {
 	}
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/document-agent/types.ts
+//#region @rhwp/studio/src/document-agent/types.ts
 var _N = [
 	"CAPABILITY_UNSUPPORTED",
 	"INVALID_COMMAND",
@@ -66020,7 +66020,7 @@ function vN(e) {
 	return e instanceof Error && _N.includes(e.code);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/document-agent/contract.ts
+//#region @rhwp/studio/src/document-agent/contract.ts
 var yN = /^[0-9a-f]{64}$/;
 function bN(e, t) {
 	if (typeof e != "object" || !e || Array.isArray(e)) throw new q("INVALID_COMMAND", `${t}은 객체여야 합니다.`);
@@ -66094,7 +66094,7 @@ function kN(e, t, n) {
 	return xN(e, [t], n), e[t];
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/embed/rpc-router.ts
+//#region @rhwp/studio/src/embed/rpc-router.ts
 function AN(e) {
 	return typeof e == "object" && e ? e : {};
 }
@@ -66160,7 +66160,7 @@ async function PN(e, t, n, r = !1) {
 	}
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/embed/runtime.ts
+//#region @rhwp/studio/src/embed/runtime.ts
 function FN(e) {
 	return e instanceof Error ? e.message : String(e);
 }
@@ -66313,7 +66313,7 @@ function HN(e) {
 	};
 }
 //#endregion
-//#region pwh-build/rhwp-studio/node_modules/@noble/hashes/sha2.js
+//#region @rhwp/studio/node_modules/@noble/hashes/sha2.js
 var UN = /* @__PURE__ */ Uint32Array.from([
 	1116352408,
 	1899447441,
@@ -66435,7 +66435,7 @@ var UN = /* @__PURE__ */ Uint32Array.from([
 	}
 }, qN = /* @__PURE__ */ ua(() => new KN(), /* @__PURE__ */ da(1));
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/core/font-decision-trace.ts
+//#region @rhwp/studio/src/core/font-decision-trace.ts
 function JN(e) {
 	return [...new Set(e.filter(Boolean))];
 }
@@ -66563,7 +66563,7 @@ function tP(e, t = {}) {
 	}, r;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/document-agent/pwh-document-state-cache.mjs
+//#region @rhwp/studio/src/document-agent/pwh-document-state-cache.mjs
 function nP() {
 	let e = null, t = 0;
 	function n(e) {
@@ -66599,7 +66599,7 @@ function nP() {
 	});
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/document-agent/controller.ts
+//#region @rhwp/studio/src/document-agent/controller.ts
 var rP = 4e3, iP = 3e3, aP = new TextEncoder();
 function oP(e) {
 	return ca(qN(e));
@@ -67036,7 +67036,7 @@ var SP = class {
 	}
 };
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/pwh-desktop-body-style.mjs
+//#region @rhwp/studio/src/pwh-desktop-body-style.mjs
 async function CP({ document: e, read: t, command: n }) {
 	let r = t(), i = n.expected;
 	if (!r?.ready || [
@@ -67165,7 +67165,7 @@ async function TP({ document: e, read: t, command: n, bytes: r, sameContext: i }
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/pwh-table-style.mjs
+//#region @rhwp/studio/src/pwh-table-style.mjs
 var EP = (e) => typeof e == "string" ? JSON.parse(e) : e, DP = (e, t) => JSON.stringify(e) === JSON.stringify(t), OP = (e) => typeof e == "string" && /^#[0-9a-f]{6}$/i.test(e);
 async function kP(e) {
 	return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify(e))))).map((e) => e.toString(16).padStart(2, "0")).join("");
@@ -67571,7 +67571,7 @@ function BP(e, t, n = t.headerRows) {
 	});
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/pwh-desktop-table-plan.mjs
+//#region @rhwp/studio/src/pwh-desktop-table-plan.mjs
 async function VP(e, t) {
 	let n = t?.documentState;
 	if (!Number.isSafeInteger(n?.documentEpoch) || !Number.isSafeInteger(n?.changeSeq) || typeof n?.documentSha256 != "string") throw Error("Document revision is required");
@@ -67599,7 +67599,7 @@ async function HP(e, t, n, r, i) {
 	return [s.refs[i]];
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/pwh-collaboration-target.ts
+//#region @rhwp/studio/src/pwh-collaboration-target.ts
 function UP(e, t, n) {
 	if (!n) throw Error("요청 대상 식별 정보가 없습니다.");
 	let r = -1, i = e.getParagraphCount(t);
@@ -67775,7 +67775,7 @@ async function KP(e, t, n) {
 	throw Error("지원되지 않는 요청 대상입니다.");
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/pwh-picture-replace.ts
+//#region @rhwp/studio/src/pwh-picture-replace.ts
 function qP(e) {
 	if (e?.kind !== "object" || e.objects?.length !== 1) throw Error("교체할 그림 하나를 선택하세요.");
 	let t = e.objects[0].source;
@@ -67814,7 +67814,7 @@ function JP(e, t, n, r) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/pwh-page-layout.ts
+//#region @rhwp/studio/src/pwh-page-layout.ts
 var YP = {
 	A4: [59528, 84188],
 	A3: [84188, 119055],
@@ -67872,7 +67872,7 @@ function $P(e, t, n) {
 	return r;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/pwh-blank-compose.ts
+//#region @rhwp/studio/src/pwh-blank-compose.ts
 function eF(e) {
 	try {
 		if (e.getSectionCount() !== 1) return !1;
@@ -67917,7 +67917,7 @@ function nF(e, t) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/pwh-request-state.mjs
+//#region @rhwp/studio/src/pwh-request-state.mjs
 function rF(e, t, n = 0) {
 	if (e === t) return !0;
 	if (n > 32 || e === null || t === null || typeof e != "object" || typeof t != "object" || Array.isArray(e) !== Array.isArray(t)) return !1;
@@ -67934,7 +67934,7 @@ function aF(e, t) {
 	return rF(iF(e), iF(t));
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/pwh-table-content.mjs
+//#region @rhwp/studio/src/pwh-table-content.mjs
 var oF = (e) => typeof e == "string" ? JSON.parse(e) : e, sF = (e) => {
 	let t = oF(e);
 	if (t?.ok !== !0) throw Error("Table operation failed");
@@ -68116,7 +68116,7 @@ function hF(e, t, n) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/pwh-text-edit.mjs
+//#region @rhwp/studio/src/pwh-text-edit.mjs
 var gF = (e) => typeof e == "string" ? JSON.parse(e) : e, _F = (e) => Array.from(e), vF = [
 	"documentEpoch",
 	"changeSeq",
@@ -68307,7 +68307,7 @@ function MF(e, t) {
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/pwh-nested-table-paste.mjs
+//#region @rhwp/studio/src/pwh-nested-table-paste.mjs
 var NF = (e) => typeof e == "string" ? JSON.parse(e) : e, PF = (e) => {
 	let t = NF(e);
 	if (!t?.ok) throw Error("중첩 표 처리에 실패했습니다.");
@@ -68434,7 +68434,7 @@ function UF(e, t, n, r) {
 	return VF(e, t, n, "html", r);
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/pwh-table-clipboard.mjs
+//#region @rhwp/studio/src/pwh-table-clipboard.mjs
 var WF = (e) => String(e ?? "").replace(/[&<>"']/g, (e) => ({
 	"&": "&amp;",
 	"<": "&lt;",
@@ -68884,7 +68884,7 @@ function $F({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 	};
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/pwh-table-paste-dialog.ts
+//#region @rhwp/studio/src/pwh-table-paste-dialog.ts
 function eI(e = {}) {
 	return new Promise((t) => {
 		class n extends H {
@@ -68917,7 +68917,7 @@ function eI(e = {}) {
 	});
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/selection-page-context.mjs
+//#region @rhwp/studio/src/selection-page-context.mjs
 function tI(e, t) {
 	let n = e?.cursorRect?.pageIndex, r = t?.cursorRect?.pageIndex;
 	return Number.isInteger(n) && n >= 0 && Number.isInteger(r) && r >= 0 ? {
@@ -68926,7 +68926,7 @@ function tI(e, t) {
 	} : void 0;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/collaboration-selection.ts
+//#region @rhwp/studio/src/collaboration-selection.ts
 var nI = 6e3, rI = 24, iI = 256, aI = 256, oI = 96;
 function sI(e, t = 0) {
 	return e == null ? null : typeof e == "string" ? e.slice(0, nI) : typeof e == "number" ? Number.isFinite(e) ? e : null : typeof e == "boolean" ? e : t > 7 || typeof e != "object" || ArrayBuffer.isView(e) ? null : Array.isArray(e) ? e.slice(0, oI).map((e) => sI(e, t + 1)) : Object.fromEntries(Object.entries(e).slice(0, 80).filter(([, e]) => typeof e != "function").map(([e, n]) => [e, sI(n, t + 1)]));
@@ -69168,7 +69168,7 @@ function dI(e) {
 	return t.rhwpStudio ||= {}, t.rhwpStudio.collaboration = i, i;
 }
 //#endregion
-//#region pwh-test-temp/rise-build-workspace/pwh-test-temp/desktop-editor-build-19a834e6-274a-4e23-a960-7c656d939498/rhwp-studio/src/pwh-inline-adapter.ts
+//#region @rhwp/studio/src/pwh-inline-adapter.ts
 function fI(e) {
 	let t = dI(e), n = /* @__PURE__ */ new Map(), r = /* @__PURE__ */ new Map(), i = (n = !0) => {
 		let r = t.getSelectionContext({ fresh: n });

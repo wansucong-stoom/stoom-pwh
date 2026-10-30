@@ -1,3 +1,4 @@
+import {waitForInlineEditor} from './helpers/editor-ready.mjs';
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs/promises';import os from 'node:os';import path from 'node:path';import {pathToFileURL} from 'node:url';import {createServer} from 'node:http';
 import {clientViewerHtml,registerClientDocument} from '../src/client-assets.mjs';import {handleRequest} from '../src/server.mjs';
 
@@ -16,7 +17,7 @@ test('shared palette applies text and highlight colors and restores recent color
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const browser=await chromium.launch({headless:true,...(process.env.PWH_BROWSER_EXECUTABLE?{executablePath:process.env.PWH_BROWSER_EXECUTABLE}:{})});
  try{
   const page=await browser.newPage({viewport:{width:1100,height:850}});await page.goto(`http://127.0.0.1:${server.address().port}`);const frame=page.frames().find(f=>f.url().endsWith('/editor'));
-  await frame.locator('#pwh-status').filter({hasText:'본문에서 직접 편집하세요'}).waitFor({timeout:30000});const input=frame.getByRole('textbox',{name:'문서 편집 입력'});await input.focus();await page.keyboard.type('abc');await page.keyboard.press('Shift+Home');
+  await waitForInlineEditor(frame);const input=frame.getByRole('textbox',{name:'문서 편집 입력'});await input.focus();await page.keyboard.type('abc');await page.keyboard.press('Shift+Home');
   await frame.locator('#btn-text-color').click();const palette=frame.getByRole('dialog',{name:'색상 선택'});await palette.waitFor({state:'visible'});
   assert.equal(await palette.locator('.pwh-color-themes button').count(),60);assert.equal(await palette.locator('.pwh-color-themes button').nth(2).getAttribute('data-color'),'#faf3db');assert.equal(await palette.locator('.pwh-color-themes button').nth(45).getAttribute('data-color'),'#eb5800');assert.equal(await palette.locator('.pwh-color-standards button').count(),10);
   if(process.env.PWH_COLOR_SCREENSHOT)await palette.screenshot({path:process.env.PWH_COLOR_SCREENSHOT});await palette.locator('.pwh-color-standards button[data-color="#ff0000"]').click();
@@ -28,6 +29,6 @@ test('shared palette applies text and highlight colors and restores recent color
   await frame.locator('#tb-char-format').click();const charDialog=frame.locator('.modal-overlay .dialog-wrap').last();await charDialog.waitFor({state:'visible'});
   await charDialog.locator('input[type="color"]:visible').first().click();await palette.locator('.pwh-color-recents button[data-color="#1234ab"]').waitFor();
   await page.keyboard.press('Escape');assert.equal(await palette.count(),0);assert.equal(await charDialog.isVisible(),true);await page.keyboard.press('Escape');
-  const secondContext=await browser.newContext({viewport:{width:1100,height:850}});try{const second=await secondContext.newPage();await second.goto(`http://127.0.0.1:${server.address().port}`);const editor=second.frames().find(f=>f.url().endsWith('/editor'));await editor.locator('#pwh-status').filter({hasText:'본문에서 직접 편집하세요'}).waitFor({timeout:30000});await editor.locator('#btn-text-color').click();const colors=editor.getByRole('dialog',{name:'색상 선택'});await colors.locator('.pwh-color-recents button[data-color="#1234ab"]').waitFor({timeout:10000});await second.keyboard.press('Escape');}finally{await secondContext.close();}
+  const secondContext=await browser.newContext({viewport:{width:1100,height:850}});try{const second=await secondContext.newPage();await second.goto(`http://127.0.0.1:${server.address().port}`);const editor=second.frames().find(f=>f.url().endsWith('/editor'));await waitForInlineEditor(editor);await editor.locator('#btn-text-color').click();const colors=editor.getByRole('dialog',{name:'색상 선택'});await colors.locator('.pwh-color-recents button[data-color="#1234ab"]').waitFor({timeout:10000});await second.keyboard.press('Escape');}finally{await secondContext.close();}
  }finally{await browser.close();server.close();await fs.rm(temp,{recursive:true,force:true});}
 });

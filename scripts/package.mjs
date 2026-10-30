@@ -5,11 +5,12 @@ import os from 'node:os';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {createHash, randomUUID} from 'node:crypto';
 import {deflateRawSync} from 'node:zlib';
+import {assertEditorBuildInputs,assertPortableEditorBundle} from './editor-build-contract.mjs';
 
 const PROJECT_ROOT = fileURLToPath(new URL('../', import.meta.url));
 const FILES = Object.freeze([
   'plugin.json', 'mcp.json', '.mcp.json', '.codex-plugin/plugin.json', 'package.json', 'assets/stoom.png',
-  'engine.config.json', 'engine.config.example.json', 'runtime-lock.json', 'README.md', 'LICENSE', 'requirements-render-compare.txt',
+  'engine.config.json', 'engine.config.example.json', 'runtime-lock.json', 'README.md', 'LICENSE', 'SECURITY.md', 'requirements-render-compare.txt', 'scripts/editor-build-contract.mjs', 'scripts/verify-editor-build.mjs', 'scripts/run-ci-tests.mjs',
   'THIRD_PARTY_NOTICES.md', 'CONTRIBUTING.md', 'scripts/setup.mjs', 'scripts/stage-electron.mjs', 'scripts/brand-electron.mjs',
   'scripts/inspect_template.py', 'scripts/fill_form.py', 'scripts/replace_image.py', 'scripts/inspect_image.py', 'scripts/compare-pages.py', 'scripts/build-studio.ps1',
   'scripts/package.mjs', 'scripts/build-inline.mjs', 'scripts/patch-body-cursor-contract.mjs', 'scripts/bundle-client.mjs', 'scripts/read-clipboard.ps1', 'scripts/save-dialog.ps1', 'scripts/launch.mjs', 'scripts/preserved-runtime.mjs', 'scripts/preserve-engine.py', 'scripts/preserve-patched-runtime.py', 'scripts/build-patched-core.mjs',
@@ -177,6 +178,9 @@ function makeZip(entries) {
 
 export async function packagePlugin({output} = {}) {
   const root = await fs.realpath(PROJECT_ROOT);
+  const clientBuild=JSON.parse(await fs.readFile(path.join(root,'client/.pwh-install.json'),'utf8'));
+  await assertEditorBuildInputs(root,clientBuild.buildInputs);
+  assertPortableEditorBundle(await fs.readFile(path.join(root,'client/editor.js'),'utf8'));
   const entries = await collect(root);
   const validated = validate(entries);
   output ??= path.join(os.tmpdir(), `pwh-${validated.version}-${randomUUID()}.zip`);

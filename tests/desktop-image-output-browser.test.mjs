@@ -31,7 +31,8 @@ test('selected pages are saved as numbered image files with page content', {
     await editor.locator('[data-menu="file"] .menu-title').click();await editor.locator('[data-pwh-file="image-export"]').click();
     const dialog=page.getByRole('dialog',{name:'그림으로 저장'});await dialog.waitFor();
     await dialog.getByRole('button',{name:'저장',exact:true}).click();
-    await page.locator('#status').filter({hasText:'2쪽을 그림으로 저장했습니다.'}).waitFor({timeout:60000});
+    if(!await page.locator('#ai-pane').isVisible())await editor.getByRole('button',{name:'AI 대화 열기'}).click();
+    await page.locator('#conversation-status').filter({hasText:'2쪽을 그림으로 저장했습니다.'}).waitFor({timeout:60000});
     const first=await fs.readFile(path.join(dir,'결과-1.png')),second=await fs.readFile(path.join(dir,'결과-2.png'));
     assert.equal(first.subarray(0,8).toString('hex'),'89504e470d0a1a0a');assert.equal(second.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
     const red=await page.evaluate(async data=>{const img=await createImageBitmap(new Blob([Uint8Array.from(data)],{type:'image/png'}));const canvas=document.createElement('canvas');canvas.width=img.width;canvas.height=img.height;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0);const pixels=ctx.getImageData(0,0,canvas.width,canvas.height).data;let count=0;for(let i=0;i<pixels.length;i+=4)if(pixels[i]>190&&pixels[i+1]<70&&pixels[i+2]<70)count++;return count;},Array.from(first));
