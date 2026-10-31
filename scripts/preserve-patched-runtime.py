@@ -213,7 +213,7 @@ def main():
     for name in ('scripts/setup.mjs','scripts/preserved-runtime.mjs','src/nested-table-paste.mjs','src/request-state.mjs','package.json'):
         core_inputs[name] = regular(project/name)
     core_inputs.update(tree(project/'tests/engine-source-ownership', 'tests/engine-source-ownership/', frozenset({'__pycache__'})))
-    fidelity_tests = ('tests/stored-float-frame.test.mjs', 'tests/shape-fill-transparency.test.mjs',
+    fidelity_tests = ('tests/stored-float-frame.test.mjs', 'tests/stored-page-margin.test.mjs', 'tests/stored-nested-block-host.test.mjs', 'tests/shape-fill-transparency.test.mjs',
                       'tests/compare-pages.test.py', 'tests/fixtures/rowbreak-table/synthetic-rowbreak-single-line-control.hwpx')
     for name in fidelity_tests:
         core_inputs[name] = regular(project/name)

@@ -216,6 +216,38 @@ const patches = [
     }
   ]
 },
+{
+  "file": "rhwp-0.8.7-stored-page-leading-margin.patch",
+  "sha256": "d077eb9b187b73ca022a24de81628df4f7af4b342869e2889cd8f68de482ba11",
+  "sources": [
+    {
+      "path": "src/renderer/layout.rs",
+      "originalSha256": "9a331572f891129fb1674d29a1db72e209285f1c6e6904498fda6e81f19c223d",
+      "patchedSha256": "26c03eecc263e6194b342cfa56578933764575e4e250d37a7fa4e2c15d056cec"
+    },
+    {
+      "path": "src/renderer/typeset/table/host_spacing.rs",
+      "originalSha256": "e355cff05386365f4637dee606251d4edbdd4ca6921410b24d70a44fe2ab195c",
+      "patchedSha256": "40db128cb06b48419302a10aa81637d2b0b5604e62dc6f1bd4fc6836f2e1e728"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-stored-nested-block-host.patch",
+  "sha256": "2a0979c9a3859d478ae3c3b63c9e4525d0179d5676eeb3f29d4d0352f44ef8d7",
+  "sources": [
+    {
+      "path": "src/renderer/float_placement.rs",
+      "originalSha256": "fcfab96c017a160429fa9873371ea59dd6564480daaaa08ec90d87aea7e6bad3",
+      "patchedSha256": "4c4fcf3bda4c32659fc701abfb1de15366ac55b789d4212adc71a871cbf28a91"
+    },
+    {
+      "path": "src/renderer/height_measurer.rs",
+      "originalSha256": "15b9761d3a5273238c533af3f6a1ddc95bffa365a03eb0e456c989914c41e3a6",
+      "patchedSha256": "a44687b8bf6f8345eaa10609dfafc49417a24a0e6c9e561b39d30216f8c35f85"
+    }
+  ]
+},
 ];
 const help = `Usage: node scripts/build-patched-core.mjs
   --source-archive <fixed upstream source ZIP>

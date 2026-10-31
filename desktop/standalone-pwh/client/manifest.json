@@ -1,12 +1,12 @@
 {
   "sha256": "087155a77d0236f3f38ad2fd291c7dbee4684dcaa753566d284b676287423bf1",
-  "baseVersion": "0.6.38",
+  "baseVersion": "0.6.39",
   "baseEditorSha256": "416d062e87f33d20f8611fcd2134a7e60447a7591f962cb8d45e07d8ca0331c7",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "desktop",
-    "sha256": "88d34d10dc5d07d9c78a5eabed20ec3c488e9cfde0c6d26bffa03bf0f5b55057",
+    "sha256": "589ffe874aaededb73918f8baac34f6f9fc13c18d2062e5c1b9dfe33c2bdbc99",
     "files": [
       {
         "path": "desktop/standalone-pwh/build-desktop-editor.mjs",
@@ -22,7 +22,7 @@
       },
       {
         "path": "package.json",
-        "sha256": "7a87780f03f8ea77c921e84681d180b846529429ff49f072dedadf179b07d967"
+        "sha256": "a20fbd37dc8cfd63008f5b44b6f04b9412adb7f19ee1ded95ccbd017fea1effc"
       },
       {
         "path": "scripts/build-inline.mjs",
@@ -130,7 +130,7 @@
       },
       {
         "path": "src/inline-host.js",
-        "sha256": "1e0af41438df56a61815cd2ecb9d6d18711b3690d5979746c73cb0488c0d0f08"
+        "sha256": "0b5186317e576904fe184a3ce78590a3f5c841731b9235ffc2722e3f2b18b0e3"
       },
       {
         "path": "src/inline-image-urls.mjs",

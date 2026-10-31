@@ -1,0 +1,45 @@
+diff --git a/src/renderer/float_placement.rs b/src/renderer/float_placement.rs
+--- a/src/renderer/float_placement.rs
++++ b/src/renderer/float_placement.rs
+@@ -107,6 +107,24 @@
+         }
+     }
+     has_table.then_some(line_height.max(table_height))
++}
++
++/// A single stored empty host line at the cell origin anchors one block table.
++/// Its placeholder line and the larger object occupy one box, not two lines.
++pub(crate) fn stored_empty_block_table_host_occupied_height(
++    para: &Paragraph, line_height: f64, table_height: f64,
++) -> Option<f64> {
++    let [line] = para.line_segs.as_slice() else { return None; };
++    let [Control::Table(table)] = para.controls.as_slice() else { return None; };
++    if !para.text.is_empty() || para.stored_text_partition_is_dirty() || para.cell_format_vpos_dirty
++        || line.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0
++        || line.vertical_pos != 0 || line.line_height <= 0
++        || table.common.treat_as_char || !table.common.flow_with_text || table.common.allow_overlap
++        || table.common.text_wrap != TextWrap::TopAndBottom
++        || table.common.vert_rel_to != VertRelTo::Para || table.common.vert_align != VertAlign::Top
++        || signed_hwpunit(table.common.vertical_offset) != 0 || table_height <= line_height
++    { return None; }
++    Some(line_height.max(table_height))
+ }
+ 
+ /// On reflow, an adjustable multi-row table is constrained by its physical
+diff --git a/src/renderer/height_measurer.rs b/src/renderer/height_measurer.rs
+--- a/src/renderer/height_measurer.rs
++++ b/src/renderer/height_measurer.rs
+@@ -3288,7 +3288,12 @@
+                     // outMargin — 이 additive 경로 한정, 한글 검산 160.1)으로 가산.
+                     let nested_sum =
+                         self.unabsorbed_nested_tables_height(&cell.paragraphs, styles, depth);
+-                    text_height + nested_sum
++                    if let [host] = cell.paragraphs.as_slice() {
++                        crate::renderer::float_placement::stored_empty_block_table_host_occupied_height(host, text_height, nested_sum)
++                            .unwrap_or(text_height + nested_sum)
++                    } else {
++                        text_height + nested_sum
++                    }
+                 } else if has_nested_table_in_cell {
+                     // 마지막 문단의 마지막 LINE_SEG의 vpos + line_height
+                     let last_seg_end: i32 = cell
