@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "pwhVersion": "0.6.39",
+  "desktopVersion": "0.1.20",
+  "runtime": "rhwp-0.8.7-pwh-r11",
+  "coreSha256": "55103955c08263c3f70d57f410e610ab746e987a516512e082a10965c88f6559",
+  "method": "Actual Pwh Desktop print-preview SVG/CSS and Electron printToPDF. Both PDFs rasterized by PDFium at the same physical scale and page origin. No fitting, translation or page remapping.",
+  "dpi": 150,
+  "tolerancePixels": 2,
+  "cases": [
+    {
+      "id": "hwp-plan-with-tables",
+      "sourceFormat": "HWP",
+      "pages": {
+        "hancom": 4,
+        "pwh": 4
+      },
+      "referenceType": "Hancom PDF with text and graphics",
+      "normal": {
+        "threshold": 245,
+        "complete": true,
+        "tolerantInkPrecision": 0.990253,
+        "tolerantInkRecall": 0.989114,
+        "tolerantInkF1": 0.989683,
+        "exactInkF1": 0.865941,
+        "referenceInkPixels": 678187,
+        "pwhInkPixels": 675602
+      },
+      "dark": {
+        "threshold": 180,
+        "complete": true,
+        "tolerantInkPrecision": 0.979665,
+        "tolerantInkRecall": 0.977403,
+        "tolerantInkF1": 0.978532,
+        "exactInkF1": 0.707302,
+        "referenceInkPixels": 310654,
+        "pwhInkPixels": 307696
+      },
+      "perPage": [
+        {
+          "page": 1,
+          "f1": 0.97643
+        },
+        {
+          "page": 2,
+          "f1": 0.986322
+        },
+        {
+          "page": 3,
+          "f1": 0.99456
+        },
+        {
+          "page": 4,
+          "f1": 0.997763
+        }
+      ],
+      "sourceUnchanged": true,
+      "referenceUnchanged": true,
+      "roundTripTextPreserved": true,
+      "roundTripPages": 4,
+      "editorDirty": false,
+      "visualReview": "All reference and Pwh pages inspected side by side."
+    },
+    {
+      "id": "hwp-approval-with-fields-and-images",
+      "sourceFormat": "HWP",
+      "pages": {
+        "hancom": 2,
+        "pwh": 2
+      },
+      "referenceType": "Hancom PDF with rasterized page content",
+      "normal": {
+        "threshold": 245,
+        "complete": true,
+        "tolerantInkPrecision": 1,
+        "tolerantInkRecall": 0.999574,
+        "tolerantInkF1": 0.999787,
+        "exactInkF1": 0.888793,
+        "referenceInkPixels": 347287,
+        "pwhInkPixels": 356242
+      },
+      "dark": {
+        "threshold": 180,
+        "complete": true,
+        "tolerantInkPrecision": 1,
+        "tolerantInkRecall": 1,
+        "tolerantInkF1": 1,
+        "exactInkF1": 0.725432,
+        "referenceInkPixels": 144921,
+        "pwhInkPixels": 151060
+      },
+      "perPage": [
+        {
+          "page": 1,
+          "f1": 0.999763
+        },
+        {
+          "page": 2,
+          "f1": 1
+        }
+      ],
+      "sourceUnchanged": true,
+      "referenceUnchanged": true,
+      "roundTripTextPreserved": true,
+      "roundTripPages": 2,
+      "editorDirty": false,
+      "visualReview": "All reference and Pwh pages inspected side by side."
+    }
+  ],
+  "engineChanges": 0,
+  "installedApplicationModified": false,
+  "physicalPrinting": false,
+  "limitations": [
+    "A near-perfect tolerant F1 is not exact pixel equality, text accuracy or proof of compatibility with every document.",
+    "The second Hancom PDF has rasterized page content; its text could not be compared as PDF text objects.",
+    "The private 43-page weekly document has a Pwh export but no completed Hancom reference export in this environment, so no fidelity score is reported for it."
+  ]
+}
