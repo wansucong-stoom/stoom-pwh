@@ -15,7 +15,7 @@ const LINE_SAMPLES:Record<string,string>={'0':'','1':'━━━━━━━━',
 const normalize=(v:string)=>/^#[0-9a-f]{6}$/i.test(v)?v.toLowerCase():null;
 let recent:string[]=[];let active:HTMLElement|null=null;let lastActivator:HTMLElement|null=null;let returnFocus:HTMLElement|null=null;let keyboardInteraction=false;let installed=false;
 
-function readLocal(){try{const data=JSON.parse(localStorage.getItem('pwh.recent-colors')||'[]');return Array.isArray(data)?data.map(normalize).filter(Boolean).slice(0,12):[];}catch{return [];}}
+function readLocal(){try{const data=JSON.parse(localStorage.getItem('pwh.recent-colors')||'[]');return Array.isArray(data)?data.map(normalize).filter(Boolean).slice(0,12) as string[]:[];}catch{return [];}}
 function saveLocal(){try{localStorage.setItem('pwh.recent-colors',JSON.stringify(recent));}catch{}}
 function remember(color:string){
  const value=normalize(color);if(!value)return;

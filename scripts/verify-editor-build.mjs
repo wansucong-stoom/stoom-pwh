@@ -12,10 +12,11 @@ const project=fileURLToPath(new URL('../',import.meta.url));
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const args=process.argv.slice(2),options={};
 for(let i=0;i<args.length;i++){
-  if(['--write','--check-inputs'].includes(args[i]))options[args[i]]=true;
+  if(['--write','--check-inputs','--typecheck'].includes(args[i]))options[args[i]]=true;
   else if(['--cache-dir','--work-root'].includes(args[i])&&args[i+1])options[args[i]]=path.resolve(args[++i]);
-  else throw Error('Use --check-inputs, --write, --cache-dir PATH or --work-root PATH');
+  else throw Error('Use --check-inputs, --write, --typecheck, --cache-dir PATH or --work-root PATH');
 }
+if(options['--check-inputs']&&(options['--write']||options['--typecheck']))throw Error('--check-inputs cannot replace a requested rebuild or type check');
 async function checkInputs(){
   const common=JSON.parse(await fs.readFile(path.join(project,'client/.pwh-install.json'),'utf8'));
   const desktop=JSON.parse(await fs.readFile(path.join(project,'desktop/standalone-pwh/client/manifest.json'),'utf8'));
@@ -29,6 +30,7 @@ async function checkInputs(){
 }
 if(options['--check-inputs']){await checkInputs();console.log('Both editor input records and portable bundles match.');process.exit(0);}
 if(process.platform!=='win32')throw Error('The preserved client dependencies target Windows x64');
+if(options['--typecheck'])await fs.access(path.join(project,'tools/quality/node_modules/typescript/bin/tsc'));
 const lock=JSON.parse(await fs.readFile(path.join(project,'runtime-lock.json'),'utf8'));
 const inputs=[...lock.preservationAssets].reverse().find(pin=>/^pwh-inline-build-inputs-/.test(pin.file));
 const dependencies=lock.preservationAssets.find(pin=>/^pwh-studio-dependencies-/.test(pin.file));
@@ -75,6 +77,7 @@ for(let attempt=1;attempt<=2;attempt++){
   for(const name of ['src','scripts','client','desktop'])await fs.cp(path.join(project,name),path.join(source,name),{recursive:true});
   for(const name of ['package.json','runtime-lock.json'])await fs.copyFile(path.join(project,name),path.join(source,name));
   await run(path.join(source,'scripts/build-inline.mjs'),[build]);
+  if(options['--typecheck'])await run(path.join(project,'tools/quality/run.mjs'),['types','--studio',path.join(build,'rhwp-studio')]);
   await run(path.join(source,'scripts/bundle-client.mjs'),[build]);
   await run(path.join(source,'desktop/standalone-pwh/build-desktop-editor.mjs'),[],{PWH_SOURCE_WORKSPACE:stage});
   const bytes=new Map();for(const name of builtFiles)bytes.set(name,await fs.readFile(path.join(source,name)));
@@ -86,4 +89,4 @@ for(const [name,bytes] of baseline){
   else if(!(await fs.readFile(path.join(project,name))).equals(bytes))throw Error('Stale committed editor; rebuild required: '+name);
 }
 await checkInputs();
-console.log(JSON.stringify({ok:true,independentBuilds:2,filesCompared:builtFiles.length,write:!!options['--write'],inputs:inputs.file,dependencies:dependencies.file}));
+console.log(JSON.stringify({ok:true,independentBuilds:2,filesCompared:builtFiles.length,write:!!options['--write'],typechecked:!!options['--typecheck'],inputs:inputs.file,dependencies:dependencies.file}));

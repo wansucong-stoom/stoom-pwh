@@ -496,6 +496,7 @@ export async function setup(options) {
     if (completed) {
       // Only this invocation's checked, generated child directory may be removed.
       const resolvedStage = path.resolve(stage);
+      // eslint-disable-next-line no-unsafe-finally -- Cleanup must fail closed for an unchecked path.
       if (path.dirname(resolvedStage) !== root || !path.basename(resolvedStage).startsWith('.setup-')) throw new Error('Refusing unsafe staging cleanup.');
       await fs.rm(resolvedStage, { recursive: true, force: true });
     } else console.error(`Incomplete staging was preserved for inspection: ${stage}`);

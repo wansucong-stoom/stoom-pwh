@@ -43,6 +43,7 @@ export async function materializeRelease(source,releaseRoot){
   return await verify();
  }finally{
   const relative=path.relative(releaseRoot,path.resolve(staging));
+  // eslint-disable-next-line no-unsafe-finally -- Cleanup must fail closed for an unchecked path.
   if(!relative||relative==='..'||relative.startsWith('..'+path.sep)||path.isAbsolute(relative))throw Error('Invalid release staging cleanup path');
   await fs.rm(staging,{recursive:true,force:true});
  }

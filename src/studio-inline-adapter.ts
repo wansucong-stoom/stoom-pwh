@@ -88,7 +88,7 @@ export function installInlineEditor(d:any) {
   saved:(name:string)=>d.saved(name),
   recovered:()=>d.recovered(),
   legacyDrafts:()=>d.legacyDrafts(),
-  async replacePicture(command:any,bytes:Uint8Array){
+  async replacePicture(command:any,bytes:Uint8Array<ArrayBuffer>){
    const latest:any=read(),before:any=command.expected.target?await resolveTarget(d.wasm,command.expected,latest):latest;if(!command.expected.target&&JSON.stringify(before)!==JSON.stringify(command.expected))throw Error('문서·선택 상태가 바뀌었습니다. 다시 요청하세요.');
    if(applying)throw Error('이전 수정 적용 중입니다.');applying=true;
    const input=d.getInputHandler(),cursor=input.getCursorPosition();let replacement:any;
@@ -113,14 +113,14 @@ export function installInlineEditor(d:any) {
   async tables(command:any){
    const current:any=read();if(current.documentState.documentEpoch!==command.expected.documentState?.documentEpoch)throw Error('Table request expired');
    const plan=await inspectTablePlan(d.wasm,current),planId=crypto.randomUUID();
-   tablePlans.set(planId,plan);if(tablePlans.size>8)tablePlans.delete(tablePlans.keys().next().value);
+   tablePlans.set(planId,plan);if(tablePlans.size>8)tablePlans.delete(tablePlans.keys().next().value!);
    return {ok:true,tablePlan:{planId,unsupportedTables:plan.unsupported,tables:plan.refs.map((r:any,index:number)=>({index,source:{sec:r.sec,ppi:r.ppi,ci:r.ci},dimensions:r.snapshot.dimensions,cells:r.snapshot.cells.map((c:any,cellIndex:number)=>({cellIndex,...c.geometry,paragraphs:c.paragraphs.map((p:any)=>p.text)})),headerRows:r.snapshot.cells.filter((c:any)=>c.properties.isHeader).map((c:any)=>c.geometry.row),sample:r.snapshot.cells.slice(0,4).map((c:any)=>c.paragraphs.map((p:any)=>p.text).join(' ').slice(0,160)),theme:themeFromTable(r)}))}};
   },
   async textSearch(command:any){
    const current=read();
    if(!current.ready||current.documentState.documentEpoch!==command.expected.documentState?.documentEpoch)throw Error('텍스트 검색 요청이 만료되었습니다.');
    const plan=createTextSearchPlan(d.wasm,current,command.query,{cursor:command.cursor,limit:command.limit}),searchId=crypto.randomUUID();
-   textPlans.set(searchId,plan);if(textPlans.size>24)textPlans.delete(textPlans.keys().next().value);
+   textPlans.set(searchId,plan);if(textPlans.size>24)textPlans.delete(textPlans.keys().next().value!);
    return {ok:true,textSearch:{searchId,...plan.result,documentState:current.documentState}};
   },
   async textEdit(command:any){
@@ -175,7 +175,7 @@ export function installInlineEditor(d:any) {
    const before:any=read(),saved=command.expected;
    if(before.documentState.documentEpoch!==saved.documentState.documentEpoch)throw Error('문서를 다시 열어 요청이 만료됐습니다.');
    const sections=command.sectionIndex===undefined?before.pageSettings:before.pageSettings.filter((p:any)=>p.sectionIndex===command.sectionIndex);
-   const keys=[...(command.patch.paper?['width','height']:[]),...(command.patch.orientation?['landscape']:[]),...Object.keys(command.patch.marginsMm||{}).map(k=>({left:'marginLeft',right:'marginRight',top:'marginTop',bottom:'marginBottom',header:'marginHeader',footer:'marginFooter',gutter:'marginGutter'}[k]))];
+   const keys=[...(command.patch.paper?['width','height']:[]),...(command.patch.orientation?['landscape']:[]),...Object.keys(command.patch.marginsMm||{}).map(k=>({left:'marginLeft',right:'marginRight',top:'marginTop',bottom:'marginBottom',header:'marginHeader',footer:'marginFooter',gutter:'marginGutter'} as Record<string,string>)[k])];
    if(before.pageSettings.length!==saved.pageSettings?.length||sections.some((p:any)=>{const old=saved.pageSettings.find((x:any)=>x.sectionIndex===p.sectionIndex);return !old||keys.some(k=>p[k]!==old[k]);}))throw Error('변경할 용지·여백 설정이 이미 수정되어 충돌했습니다.');
    if(applying)throw Error('이전 수정 적용 중입니다.');applying=true;
    const input=d.getInputHandler(),cursor=input.getCursorPosition();let changes:any;

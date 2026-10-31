@@ -33,6 +33,10 @@ Windows x64의 고정 입력·의존성 ZIP을 해시로 확인하고 서로 다
 
 소스 지문은 `src`의 JavaScript·TypeScript·CSS와 빌드 스크립트를 보수적으로 포함합니다. Desktop은 전용 어댑터와 빌더도 포함합니다. 생성한 `editor.js`나 해시만 손으로 고쳐 검사를 통과시키지 않습니다. `.editorconfig`와 `.gitattributes`를 따르며, 보존 패치와 Desktop 파일의 문맥·바이트를 일괄 포맷하지 않습니다.
 
+### 린트와 타입 검사
+
+Node.js 24 이상에서 `npm ci --prefix tools/quality --ignore-scripts --no-audit --no-fund`로 고정된 개발 도구를 준비하고 `npm run lint`를 실행합니다. `node tools/quality/check-rules.mjs`는 검사기가 실제로 잘못된 전역과 연결 함수 오타를 거부하는지 확인합니다. `node scripts/verify-editor-build.mjs --typecheck`는 보존 입력으로 빌드한 전체 Studio의 엄격한 타입 검사도 수행합니다. 이미 빌드한 소스는 `npm run typecheck -- --studio PATH`로 검사할 수 있습니다. 적용 범위·환경 선언과 남은 `any` 경계는 [정적 검사 안내](docs/STATIC-CHECKS.md)에 있습니다.
+
 기존 네이티브 CLI 통합 시험은 `PWH_ENGINE_TESTS=1`, 승인한 개인 문서 조회는 `PWH_TEMPLATE_TEST_FILE`로 별도 실행합니다. 시험 문서는 Git에 추가하지 않습니다.
 
 ## 변경 기준

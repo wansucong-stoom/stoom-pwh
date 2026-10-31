@@ -12,7 +12,7 @@ export async function visibleSvgText(page,svg){
    for(let ancestor=text;ancestor&&ancestor!==svg;ancestor=ancestor.parentElement){
     if(getComputedStyle(ancestor).display==='none'||getComputedStyle(ancestor).visibility==='hidden'){clip.right=clip.left;break;}
     const value=ancestor.getAttribute('clip-path');if(!value)continue;
-    const id=value.match(/^url\(#([^\)]+)\)$/)?.[1],path=id&&document.getElementById(id);
+    const id=value.match(/^url\(#([^)]+)\)$/)?.[1],path=id&&document.getElementById(id);
     if(!path||path.getAttribute('clipPathUnits')==='objectBoundingBox'||path.children.length!==1||path.children[0].tagName!=='rect'){limits.push('unsupported-clip');continue;}
     const shape=path.children[0];if(path.getAttribute('transform')||shape.getAttribute('transform')){limits.push('transformed-clip');continue;}
     clip=intersect(clip,box(shape,ancestor.getScreenCTM()));

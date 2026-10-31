@@ -38,13 +38,13 @@ test('closing recovery leaves the draft intact even after a new edit',{
   const state=editorState({sessionId}),ticket=await editorTableInsert({sessionId,expected:state.context,table:{rows:1,columns:1,cells:[{row:0,column:0,paragraphs:['new']} ]}});
   let receipt;for(let i=0;i<200;i++){receipt=editorResult(ticket);if(receipt.status!=='pending')break;await pause(100);}assert.equal(receipt.status,'applied');await pause(3000);
   assert.equal((await frame.evaluate(()=>window.pwhEditor.context())).documentState.dirty,true);
-  const stored=await frame.evaluate(async key=>{const draft=await recoveryStore('get',key);return draft&&{sha256:draft.sha256,bytes:Array.from(new Uint8Array(draft.bytes))};},key);
+  const stored=await frame.evaluate(async key=>{const draft=await window.recoveryStore('get',key);return draft&&{sha256:draft.sha256,bytes:Array.from(new Uint8Array(draft.bytes))};},key);
   assert.equal(stored.sha256,draftSha);assert.deepEqual(Buffer.from(stored.bytes),draft,'dismissed draft is not overwritten by a new checkpoint');
-  await frame.evaluate(()=>{window.__recoveryChoice=promptRecovery(true);});
+  await frame.evaluate(()=>{window.__recoveryChoice=window.promptRecovery(true);});
   assert.ok(await dialog.getByText('원본 경로는 확인할 수 없으므로',{exact:false}).isVisible());await page.keyboard.press('Escape');
   assert.equal(await frame.evaluate(()=>window.__recoveryChoice),'dismiss');
-  await frame.evaluate(()=>{window.__recoveryChoice=promptRecovery(false);});await dialog.getByRole('button',{name:'저장본 열기'}).click();assert.equal(await frame.evaluate(()=>window.__recoveryChoice),'source');
-  await frame.evaluate(()=>{window.__recoveryChoice=promptRecovery(false);});await dialog.getByRole('button',{name:'복구하기'}).click();assert.equal(await frame.evaluate(()=>window.__recoveryChoice),'recover');
+  await frame.evaluate(()=>{window.__recoveryChoice=window.promptRecovery(false);});await dialog.getByRole('button',{name:'저장본 열기'}).click();assert.equal(await frame.evaluate(()=>window.__recoveryChoice),'source');
+  await frame.evaluate(()=>{window.__recoveryChoice=window.promptRecovery(false);});await dialog.getByRole('button',{name:'복구하기'}).click();assert.equal(await frame.evaluate(()=>window.__recoveryChoice),'recover');
   await frame.evaluate(()=>window.pwhEditor.saved());await frame.goto(`http://127.0.0.1:${server.address().port}/editor`);
   await waitForInlineEditor(frame);assert.equal(await dialog.count(),0,'a dismissed unchanged recovery does not reappear after reopening');
   await frame.evaluate(()=>{window.__manualRecovery=window.pwhShowRecovery();});await dialog.getByRole('button',{name:'복구하기'}).click({timeout:5000});await frame.evaluate(()=>window.__manualRecovery);

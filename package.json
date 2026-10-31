@@ -1,6 +1,6 @@
 {
   "name": "pwh",
-  "version": "0.6.37",
+  "version": "0.6.38",
   "private": true,
   "type": "module",
   "license": "MIT",
@@ -19,6 +19,8 @@
     "test": "node --test",
     "verify:editors": "node scripts/verify-editor-build.mjs",
     "test:core": "node scripts/run-ci-tests.mjs core",
-    "test:browser": "node scripts/run-ci-tests.mjs browser"
+    "test:browser": "node scripts/run-ci-tests.mjs browser",
+    "lint": "node tools/quality/run.mjs lint",
+    "typecheck": "node tools/quality/run.mjs types"
   }
 }

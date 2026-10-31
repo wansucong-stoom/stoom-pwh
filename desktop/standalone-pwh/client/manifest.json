@@ -1,12 +1,12 @@
 {
   "sha256": "087155a77d0236f3f38ad2fd291c7dbee4684dcaa753566d284b676287423bf1",
-  "baseVersion": "0.6.37",
+  "baseVersion": "0.6.38",
   "baseEditorSha256": "416d062e87f33d20f8611fcd2134a7e60447a7591f962cb8d45e07d8ca0331c7",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "desktop",
-    "sha256": "a807ec8f2e97455cc1f058da62a8a62f2315f99c28d7967d68e67c9dd7c4bc6b",
+    "sha256": "88d34d10dc5d07d9c78a5eabed20ec3c488e9cfde0c6d26bffa03bf0f5b55057",
     "files": [
       {
         "path": "desktop/standalone-pwh/build-desktop-editor.mjs",
@@ -22,11 +22,11 @@
       },
       {
         "path": "package.json",
-        "sha256": "a2447641aba8445e5d13b16671d3b9391dcdc00863fe75dba6735185cbf4b774"
+        "sha256": "7a87780f03f8ea77c921e84681d180b846529429ff49f072dedadf179b07d967"
       },
       {
         "path": "scripts/build-inline.mjs",
-        "sha256": "5ad4b339cd207ed29abfce61ae964c6d809ddb6d05f6d2d887d9b04ddae950f7"
+        "sha256": "db48f113c45fc15806f5285ef484a40a826aa0f395144bbcedc6e1c468cb8fa4"
       },
       {
         "path": "scripts/bundle-client.mjs",
@@ -130,7 +130,7 @@
       },
       {
         "path": "src/inline-host.js",
-        "sha256": "2ff53a0c6daeba63c497a369009e28f92c00bb95d1b54657d58b7b2c44d70727"
+        "sha256": "1e0af41438df56a61815cd2ecb9d6d18711b3690d5979746c73cb0488c0d0f08"
       },
       {
         "path": "src/inline-image-urls.mjs",
@@ -190,7 +190,7 @@
       },
       {
         "path": "src/pwh-color-palette.ts",
-        "sha256": "da2430c58140aaf3206306addd6594d237836639b0f076b80886ff6dd98af467"
+        "sha256": "fe5fc6ff05bd449e059f8202ed30ade3fa58165c6ed63dc260fdd578b8362024"
       },
       {
         "path": "src/render-fonts.mjs",
@@ -206,7 +206,7 @@
       },
       {
         "path": "src/selection-layout.mjs",
-        "sha256": "0b1281030897aa3e0ee8822aa87c02d44fd2c83777fca6c55fa92b800ac754f3"
+        "sha256": "cdc854b45f824aebe3c657216165286adce9fa8b084a34ca9a0f0c477ce673be"
       },
       {
         "path": "src/selection-page-context.mjs",
@@ -218,7 +218,7 @@
       },
       {
         "path": "src/studio-inline-adapter.ts",
-        "sha256": "bbbd8fb6a9e953595001d40f23c6a045a3dc61faa75a63ef1344ce802e1c056c"
+        "sha256": "6222a7a62a15df9097c504cdeec40b9dfb95aaad2e6dfdb711ac42a07cf353ad"
       },
       {
         "path": "src/studio-selection.ts",

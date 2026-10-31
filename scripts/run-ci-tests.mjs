@@ -15,6 +15,9 @@ const env={...process.env,PWH_CORE_JS:path.join(process.env.PWH_RUNTIME_ROOT,'co
 for(const key of ['PWH_CHATGPT_LIVE','PWH_CODEX_LIVE','PWH_HANCOM_CLIPBOARD','PWH_HANCOM_TARGET','PWH_TEST_CHATGPT_DATA','PWH_TEST_CODEX_RUNTIME','PWH_CODEX_TEST_EXE','PWH_NATIVE_TEST_LAUNCHER','PWH_ELECTRON_EXE','PWH_TEST_DESKTOP_PAYLOAD','PWH_ENGINE_TESTS','PWH_TEMPLATE_TEST_FILE'])delete env[key];
 if(mode==='browser'){
   if(!env.PWH_PLAYWRIGHT_MODULE)throw Error('Set PWH_PLAYWRIGHT_MODULE to the pinned Playwright ESM entry');
+  const {chromium}=await import(env.PWH_PLAYWRIGHT_MODULE);
+  const executable=env.PWH_BROWSER_EXECUTABLE||chromium.executablePath();
+  try{await fs.access(executable);}catch{throw Error('BROWSER_EXECUTABLE_NOT_FOUND: set PWH_BROWSER_EXECUTABLE or install the pinned Playwright Chromium before starting browser tests');}
   const desktop=path.join(work,'standalone-pwh');await fs.cp(path.join(project,'desktop/standalone-pwh'),desktop,{recursive:true});
   await fs.cp(path.join(project,'desktop/bridge'),path.join(work,'bridge'),{recursive:true});
   await fs.symlink(project,path.join(work,'release-source'),process.platform==='win32'?'junction':'dir');

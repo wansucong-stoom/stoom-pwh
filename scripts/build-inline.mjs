@@ -662,12 +662,15 @@ await fs.writeFile(printCommandPath,printCommand);
 if(!main.includes('pwh selection layout invalidation'))main+=`\n// pwh selection layout invalidation\nfor(const event of ['document-mutated','document-changed','document-page-invalidated','document-view-changed','local-fonts-changed'])eventBus.on(event,()=>wasm.invalidatePwhSelectionLayout());\n`;
 main=main.replace("'document-changed','page-invalidated','document-view-changed'","'document-changed','document-page-invalidated','document-view-changed'");
 if(!main.includes('pwh propagate host document initialization failure'))main=main.replace("console.error('[initDoc] 오류:', error);","console.error('[initDoc] 오류:', error);\n    // pwh propagate host document initialization failure\n    if(options.suppressDialogs)throw error;");
-main=main.replace("const { CanvasKitLayerRenderer } = await import('@/view/canvaskit-renderer');","const CanvasKitLayerRenderer={create(){throw new Error('This client uses the Canvas2D editor backend')}};");
+main=main.replace("const { CanvasKitLayerRenderer } = await import('@/view/canvaskit-renderer');","const CanvasKitLayerRenderer:Pick<typeof import('@/view/canvaskit-renderer').CanvasKitLayerRenderer,'create'>={create(){throw new Error('This client uses the Canvas2D editor backend')}};");
+// Preserved inputs may already contain the disabled backend placeholder.
+main=main.replace('const CanvasKitLayerRenderer={',"const CanvasKitLayerRenderer:Pick<typeof import('@/view/canvaskit-renderer').CanvasKitLayerRenderer,'create'>={");
 main=main.replace('resolveChromeModeRequest(window.location.search)',"resolveChromeModeRequest('?chrome=embed')");
 main=main.replace('maybeShowSkinOnboarding();','/* host owns startup */');
 if(!main.includes('installInlineEditor'))main+=`\nimport {installInlineEditor} from './pwh-inline-adapter';\ninstallInlineEditor({registry,ready:initPromise, getInputHandler:()=>inputHandler,wasm,getDocumentAgent:()=>documentAgent,getCanvasView:()=>canvasView,load:(bytes,name)=>loadBytes(bytes,name,null,undefined,{suppressDialogs:true}),saved:completeHostSave,recovered:()=>documentState.markDirty('pwh-recovered'),legacyDrafts:listAutosaveDrafts});\n`;
 main=main.replace('saved:completeHostSave});',"saved:completeHostSave,recovered:()=>documentState.markDirty('pwh-recovered'),legacyDrafts:listAutosaveDrafts});");
 main=main.replace('installInlineEditor({ready:initPromise','installInlineEditor({registry,ready:initPromise');
+main=main.replace('load:(bytes,name)=>loadBytes','load:(bytes:Uint8Array,name:string)=>loadBytes');
 await fs.writeFile(path.join(studio,'src/main.ts'),main);
 main=main.replace("recovered:()=>documentState.markDirty('pwh-recovered')});","recovered:()=>documentState.markDirty('pwh-recovered'),legacyDrafts:listAutosaveDrafts});");
 await fs.writeFile(path.join(studio,'src/main.ts'),main);
@@ -694,8 +697,8 @@ if(!wasm.includes('pwh source font preparation')){
  wasm='import {documentFontRequests} from '+JSON.stringify('./pwh-document-font-requests.mjs')+';\n'+wasm;
  // resolveRendererLocalFont is the same family/weight/slant resolver used by
  // collectHostFontRequests; use the normal import rather than another font map.
- if(!/import\s*\{[^}]*\bresolveRendererLocalFont\b[^}]*\}\s*from\s*['\"]\.\/local-fonts/.test(wasm)){
-  const imported=wasm.match(/import\s*\{[^}]*\blocalFontFaceKey\b[^}]*\}\s*from\s*['\"]\.\/local-fonts[^\r\n]*/);
+ if(!/import\s*\{[^}]*\bresolveRendererLocalFont\b[^}]*\}\s*from\s*['"]\.\/local-fonts/.test(wasm)){
+  const imported=wasm.match(/import\s*\{[^}]*\blocalFontFaceKey\b[^}]*\}\s*from\s*['"]\.\/local-fonts[^\r\n]*/);
   if(!imported)throw Error('Unsupported host font resolver import');
   wasm=wasm.replace(imported[0],imported[0].replace('{','{ resolveRendererLocalFont,'));
  }

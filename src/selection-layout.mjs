@@ -47,6 +47,7 @@ export function rectanglesFromRuns(runs,pageIndex,sec,startPara,startOffset,endP
 function covers(intervals,start,end){
  let next=start;for(const [from,to]of intervals.sort((a,b)=>a[0]-b[0])){if(from>next)return false;next=Math.max(next,to);if(next>=end)return true;}return next>=end;
 }
+/** @param {ReturnType<typeof createBodySelectionLayoutCache>|null} [cache] */
 export function renderedBodySelectionRects(doc,sec,startPara,startOffset,endPara,endOffset,fallback,cache=null){
  try{
   if(![sec,startPara,startOffset,endPara,endOffset].every(n=>Number.isSafeInteger(n)&&n>=0)||startPara>endPara||endPara-startPara>4096||typeof doc.getPageTextLayout!=='function')return fallback;

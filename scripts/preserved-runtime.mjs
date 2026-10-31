@@ -60,6 +60,7 @@ export async function installPreservedRuntime(options,lock,helpers){
   completed=true;console.log(JSON.stringify({installed:true,root,...receipt},null,2));
  }finally{
   await lease.close();await fs.unlink(lockPath);
+  // eslint-disable-next-line no-unsafe-finally -- Cleanup must fail closed for an unchecked path.
   const relative=path.relative(root,stage);if(!relative||relative.startsWith('..')||path.isAbsolute(relative))throw Error('Unsafe runtime staging path');
   if(completed)await fs.rm(stage,{recursive:true,force:true});else console.error(`Incomplete staging, if present, was preserved: ${stage}`);
  }
