@@ -113,6 +113,6 @@
   "limitations": [
     "A near-perfect tolerant F1 is not exact pixel equality, text accuracy or proof of compatibility with every document.",
     "The second Hancom PDF has rasterized page content; its text could not be compared as PDF text objects.",
-    "The private 43-page weekly document has a Pwh export but no completed Hancom reference export in this environment, so no fidelity score is reported for it."
+    "At the initial verification, the long nested-table document had a Pwh export but no Hancom reference. The subsequent supplied-reference comparison, including failures, is recorded separately in fidelity-weekly-0.6.39.json."
   ]
 }

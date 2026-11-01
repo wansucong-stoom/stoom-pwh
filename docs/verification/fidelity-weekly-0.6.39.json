@@ -1,0 +1,411 @@
+{
+  "schemaVersion": 1,
+  "verifiedOn": "2026-11-02",
+  "pwhVersion": "0.6.39",
+  "desktopVersion": "0.1.20",
+  "runtime": "rhwp-0.8.7-pwh-r11",
+  "coreSha256": "55103955c08263c3f70d57f410e610ab746e987a516512e082a10965c88f6559",
+  "previousVerification": "fidelity-corpus-0.6.39.json",
+  "method": "Actual Pwh Desktop print-preview SVG/CSS and Electron printToPDF. Both PDFs rasterized with PDFium at the same physical scale and page origin. No fitting, translation or page remapping.",
+  "dpi": 150,
+  "tolerancePixels": 2,
+  "paperRounding": "A paper-size difference under 1 point was padded at the page edge only, without rescaling or moving content.",
+  "cases": [
+    {
+      "id": "hwpx-long-nested-report",
+      "sourceFormat": "HWPX",
+      "status": "pagination-mismatch-and-output-content-loss",
+      "pages": {
+        "hancom": 39,
+        "pwh": 43
+      },
+      "pageCountsMatch": false,
+      "accountedPhysicalPages": 43,
+      "comparedPhysicalPages": 39,
+      "extraPwhPages": [
+        40,
+        41,
+        42,
+        43
+      ],
+      "missingPwhPages": [],
+      "normal": {
+        "threshold": 245,
+        "allPagesAccountedFor": true,
+        "tolerantInkPrecision": 0.543187,
+        "tolerantInkRecall": 0.519685,
+        "tolerantInkF1": 0.531177,
+        "exactInkF1": 0.399217,
+        "referenceInkPixels": 13048007,
+        "pwhInkPixels": 12662360
+      },
+      "dark": {
+        "threshold": 180,
+        "allPagesAccountedFor": true,
+        "tolerantInkPrecision": 0.442613,
+        "tolerantInkRecall": 0.411699,
+        "tolerantInkF1": 0.426597,
+        "exactInkF1": 0.223071,
+        "referenceInkPixels": 5824009,
+        "pwhInkPixels": 5650217
+      },
+      "perPage": [
+        {
+          "page": 1,
+          "status": "compared",
+          "f1": 0.933576,
+          "darkF1": 0.891426
+        },
+        {
+          "page": 2,
+          "status": "compared",
+          "f1": 0.951616,
+          "darkF1": 0.9092
+        },
+        {
+          "page": 3,
+          "status": "compared",
+          "f1": 0.946858,
+          "darkF1": 0.880316
+        },
+        {
+          "page": 4,
+          "status": "compared",
+          "f1": 0.953338,
+          "darkF1": 0.912198
+        },
+        {
+          "page": 5,
+          "status": "compared",
+          "f1": 0.971112,
+          "darkF1": 0.93349
+        },
+        {
+          "page": 6,
+          "status": "compared",
+          "f1": 0.440436,
+          "darkF1": 0.366879
+        },
+        {
+          "page": 7,
+          "status": "compared",
+          "f1": 0.389735,
+          "darkF1": 0.189384
+        },
+        {
+          "page": 8,
+          "status": "compared",
+          "f1": 0.516254,
+          "darkF1": 0.381962
+        },
+        {
+          "page": 9,
+          "status": "compared",
+          "f1": 0.520382,
+          "darkF1": 0.371061
+        },
+        {
+          "page": 10,
+          "status": "compared",
+          "f1": 0.607034,
+          "darkF1": 0.437495
+        },
+        {
+          "page": 11,
+          "status": "compared",
+          "f1": 0.60442,
+          "darkF1": 0.405164
+        },
+        {
+          "page": 12,
+          "status": "compared",
+          "f1": 0.452457,
+          "darkF1": 0.310808
+        },
+        {
+          "page": 13,
+          "status": "compared",
+          "f1": 0.47678,
+          "darkF1": 0.347638
+        },
+        {
+          "page": 14,
+          "status": "compared",
+          "f1": 0.232672,
+          "darkF1": 0.209774
+        },
+        {
+          "page": 15,
+          "status": "compared",
+          "f1": 0.610471,
+          "darkF1": 0.421378
+        },
+        {
+          "page": 16,
+          "status": "compared",
+          "f1": 0.514457,
+          "darkF1": 0.324377
+        },
+        {
+          "page": 17,
+          "status": "compared",
+          "f1": 0.601263,
+          "darkF1": 0.404302
+        },
+        {
+          "page": 18,
+          "status": "compared",
+          "f1": 0.454956,
+          "darkF1": 0.319851
+        },
+        {
+          "page": 19,
+          "status": "compared",
+          "f1": 0.510525,
+          "darkF1": 0.382581
+        },
+        {
+          "page": 20,
+          "status": "compared",
+          "f1": 0.510979,
+          "darkF1": 0.341983
+        },
+        {
+          "page": 21,
+          "status": "compared",
+          "f1": 0.476086,
+          "darkF1": 0.334727
+        },
+        {
+          "page": 22,
+          "status": "compared",
+          "f1": 0.482919,
+          "darkF1": 0.307426
+        },
+        {
+          "page": 23,
+          "status": "compared",
+          "f1": 0.490637,
+          "darkF1": 0.311337
+        },
+        {
+          "page": 24,
+          "status": "compared",
+          "f1": 0.54942,
+          "darkF1": 0.321343
+        },
+        {
+          "page": 25,
+          "status": "compared",
+          "f1": 0.53362,
+          "darkF1": 0.35213
+        },
+        {
+          "page": 26,
+          "status": "compared",
+          "f1": 0.465835,
+          "darkF1": 0.338974
+        },
+        {
+          "page": 27,
+          "status": "compared",
+          "f1": 0.54646,
+          "darkF1": 0.373997
+        },
+        {
+          "page": 28,
+          "status": "compared",
+          "f1": 0.519597,
+          "darkF1": 0.363365
+        },
+        {
+          "page": 29,
+          "status": "compared",
+          "f1": 0.448942,
+          "darkF1": 0.327747
+        },
+        {
+          "page": 30,
+          "status": "compared",
+          "f1": 0.430302,
+          "darkF1": 0.291442
+        },
+        {
+          "page": 31,
+          "status": "compared",
+          "f1": 0.593534,
+          "darkF1": 0.403507
+        },
+        {
+          "page": 32,
+          "status": "compared",
+          "f1": 0.617729,
+          "darkF1": 0.451985
+        },
+        {
+          "page": 33,
+          "status": "compared",
+          "f1": 0.30478,
+          "darkF1": 0.269334
+        },
+        {
+          "page": 34,
+          "status": "compared",
+          "f1": 0.517682,
+          "darkF1": 0.355793
+        },
+        {
+          "page": 35,
+          "status": "compared",
+          "f1": 0.231782,
+          "darkF1": 0.210287
+        },
+        {
+          "page": 36,
+          "status": "compared",
+          "f1": 0.49695,
+          "darkF1": 0.377379
+        },
+        {
+          "page": 37,
+          "status": "compared",
+          "f1": 0.401147,
+          "darkF1": 0.251582
+        },
+        {
+          "page": 38,
+          "status": "compared",
+          "f1": 0.563239,
+          "darkF1": 0.372411
+        },
+        {
+          "page": 39,
+          "status": "compared",
+          "f1": 0.425707,
+          "darkF1": 0.333532
+        },
+        {
+          "page": 40,
+          "status": "extra-pwh-page",
+          "f1": null,
+          "darkF1": null
+        },
+        {
+          "page": 41,
+          "status": "extra-pwh-page",
+          "f1": null,
+          "darkF1": null
+        },
+        {
+          "page": 42,
+          "status": "extra-pwh-page",
+          "f1": null,
+          "darkF1": null
+        },
+        {
+          "page": 43,
+          "status": "extra-pwh-page",
+          "f1": null,
+          "darkF1": null
+        }
+      ],
+      "sourcePreservation": {
+        "sourceUnchanged": true,
+        "originalUnchanged": true,
+        "referenceUnchanged": true,
+        "sourceMatchesOriginal": true,
+        "roundTripTextPreserved": true,
+        "roundTripPages": 43,
+        "scanItems": 3069,
+        "textCharacters": 37498,
+        "sourceXml": {
+          "sections": 1,
+          "paragraphsIncludingCells": 2773,
+          "tables": 80,
+          "nestedTables": 78,
+          "maximumNestedDepth": 3
+        },
+        "roundTripTableCountsPreserved": true,
+        "meaning": "Model and HWPX round-trip preservation do not establish PDF output visibility."
+      },
+      "upstreamBaseline": {
+        "package": "@rhwp/core",
+        "version": "0.8.7",
+        "provenance": "Preserved official npm tarball verified against setup SRI and runtime-lock SHA-256 and size.",
+        "tarballSha256": "30e8a17400583570afec9169baeef3f0785e023e2a51344ed44eb8539a60e6a6",
+        "coreWasmSha256": "54cf95014312e605c51b98eb9021247ea79ef2bbd0a7080e11c011d0246e3989",
+        "pages": 43,
+        "scanItems": 3069,
+        "textCharacters": 37498,
+        "textMatchesPwhModel": true,
+        "diagnosticSvgPlacementsMatchPwh": true,
+        "diagnosticSvgStringsCompared": 6,
+        "diagnosticSvgPage": 28,
+        "diagnosticSvgByteIdenticalToPwh": true,
+        "diagnosticSvgSha256": "056cf95dc65cf2be0c0ba1798d5b9a047bf3054bbd915f7e97737fa530ea96b2",
+        "continuationMissingForDiagnosticStrings": true,
+        "conclusion": "The page-count mismatch and six diagnostic string placements, clipping bounds and missing continuation also reproduce in official upstream 0.8.7. Coordinate equivalence for the entire document was not tested."
+      },
+      "findings": {
+        "firstMajorContentFlowDivergencePage": 6,
+        "summaryTableHeightDifferencesPresent": true,
+        "observedOutputLoss": {
+          "referencePage": 26,
+          "pwhPagesInspected": [
+            28,
+            29
+          ],
+          "sourceAndReferenceUniqueStringsAbsentFromExtractedPwhPdfText": 6,
+          "visualConfirmation": "A nested table extends below the Pwh page and is not continued on the next page.",
+          "rendererLayer": "Official upstream rhwp 0.8.7 and Pwh r11 core SVG both place at least two full text strings below the page viewport, without a continuation owner on later pages.",
+          "coreSvgPage": 28,
+          "coreSvgViewportHeightCssPixels": 793.7067,
+          "fullyClippedStringsConfirmedAtLeast": 2,
+          "upstreamOutputLossCompared": true,
+          "remainingPrintPathDifferences": "Two earlier strings retain substantial raw SVG bounds; their absence as full extracted PDF text was not fully attributed to core versus print-host clipping."
+        },
+        "paginationLayer": "rhwp core, present in official upstream 0.8.7 and Pwh r11",
+        "staticCodeFinding": "The nested CellUnit projection gate can keep a declared-height row containing text and inner tables as a single atom when its host paragraph is empty. No child RowCut is produced for that branch.",
+        "runtimeLedgerTracePerformed": false,
+        "singleFixEliminatesAllExtraPagesVerified": false
+      },
+      "visualReview": {
+        "samePhysicalPagePairs": [
+          1,
+          5,
+          6,
+          10,
+          20,
+          38,
+          39
+        ],
+        "additionalFlowPages": [
+          6,
+          7,
+          8
+        ],
+        "outputLossDiagnostic": "Hancom page 26 and Pwh pages 28 and 29 inspected.",
+        "lastContentDiagnostic": {
+          "hancomPage": 39,
+          "pwhPage": 43,
+          "usedForScoring": false
+        },
+        "allPagesRasterized": true,
+        "everyPageManuallyReviewed": false
+      }
+    }
+  ],
+  "engineChanges": 0,
+  "improvementDelta": null,
+  "installedApplicationModified": false,
+  "physicalPrinting": false,
+  "limitations": [
+    "This records the existing r11 baseline, not an improvement or a newly fixed engine.",
+    "All-pages-accounted-for means the metric includes 39 corresponding and 4 extra pages; it is not a successful fidelity verdict.",
+    "F1 is an ink-overlap metric, not text accuracy or proof of compatibility with all documents.",
+    "Cumulative pagination differences lower same-physical-page scores. Diagnostic text correspondences were not used to remap pages or raise the score.",
+    "Model text and table counts survive HWPX reopening, but some nested-table text is absent from the rendered PDF.",
+    "Static source and XML analysis identifies a restrictive split branch; no dynamic CellUnit ledger trace or corrective engine build was performed.",
+    "Private source documents, PDFs, images, document text and local paths are excluded from this record."
+  ]
+}
