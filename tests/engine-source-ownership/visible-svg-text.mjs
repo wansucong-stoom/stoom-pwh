@@ -1,4 +1,4 @@
-// Pixel-derived oracle for engine-generated SVG. No document text is logged.
+// Bounding-box diagnostic for engine SVG. Font boxes can include non-ink space.
 export async function visibleSvgText(page,svg){
  await page.setContent(svg);
  return page.evaluate(()=>{
