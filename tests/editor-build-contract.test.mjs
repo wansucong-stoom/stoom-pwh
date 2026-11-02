@@ -18,7 +18,7 @@ test('module labels are stable across build directories without changing executa
 test('source changes, new source modules and Desktop-only changes invalidate the correct input record',async t=>{
   const root=await fs.mkdtemp(path.join(os.tmpdir(),'pwh-build-contract-'));t.after(()=>fs.rm(root,{recursive:true,force:true}));
   for(const dir of ['src','scripts','desktop/standalone-pwh'])await fs.mkdir(path.join(root,dir),{recursive:true});
-  for(const name of ['package.json',...['build-inline.mjs','bundle-client.mjs','patch-body-cursor-contract.mjs','editor-build-contract.mjs'].map(n=>'scripts/'+n),...['build-desktop-editor.mjs','table-plan.mjs','desktop-body-style.mjs'].map(n=>'desktop/standalone-pwh/'+n),'src/a.ts'])await fs.writeFile(path.join(root,name),'original\n');
+  for(const name of ['package.json',...['build-inline.mjs','bundle-client.mjs','patch-body-cursor-contract.mjs','patch-object-properties.mjs','editor-build-contract.mjs'].map(n=>'scripts/'+n),...['build-desktop-editor.mjs','table-plan.mjs','desktop-body-style.mjs'].map(n=>'desktop/standalone-pwh/'+n),'src/a.ts'])await fs.writeFile(path.join(root,name),'original\n');
   const common=await editorBuildInputs(root),desktop=await editorBuildInputs(root,'desktop');
   await assertEditorBuildInputs(root,common);await assertEditorBuildInputs(root,desktop,'desktop');
   await fs.writeFile(path.join(root,'desktop/standalone-pwh/table-plan.mjs'),'changed\n');
