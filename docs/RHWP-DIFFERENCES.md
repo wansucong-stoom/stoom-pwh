@@ -5,12 +5,18 @@ Pwh는 [rhwp](https://github.com/edwardkim/rhwp)와 rhwp Studio를 기반으로 
 ## 비교 기준
 
 - **기준 원본:** rhwp 0.8.7, 커밋 [`1a76570e833917d15817415a53c09ad61ab3203f`](https://github.com/edwardkim/rhwp/commit/1a76570e833917d15817415a53c09ad61ab3203f).
-- **기본 런타임:** `rhwp-0.8.7-pwh-r14`, Windows x64. 설치 자산과 해시는 [runtime-lock.json](../runtime-lock.json)에 기록합니다.
+- **기본 런타임:** `rhwp-0.8.7-pwh-r15`, Windows x64. 설치 자산과 해시는 [runtime-lock.json](../runtime-lock.json)에 기록합니다.
 - **비교 범위:** 위 고정 버전 대비 Pwh에서 보존한 코어 패치와 Studio 빌드 변경, 그리고 별도의 pwh 연결 기능입니다. 현재 최신 rhwp와의 비교는 아닙니다.
 - **배포 방식:** 고정 소스와 패치·빌드 입력을 보존해 재빌드하는 방식입니다. 전체 upstream 저장소의 Git 포크나 모든 원본 파일을 그대로 포함한 저장소라는 뜻은 아닙니다.
 - **반영 상태:** 아래는 pwh 쪽 변경입니다. rhwp 원본에 병합되었다고 주장하지 않습니다.
 
 ## 1. rhwp 조판 코어 변경
+
+### r15: 같은 코어의 검증·보존 갱신
+
+Pwh 0.6.42와 Desktop 0.1.23은 r14와 **같은 WASM·JavaScript 연결부와 열여덟 패치**를 사용합니다. 조판 알고리즘은 추가 변경하지 않았습니다. r15는 새 제품 버전과 실제 잉크 검증 소스를 함께 보존한 런타임 개정입니다.
+
+합성 SVG 검증은 글꼴의 전체 상자 대신 실제 PNG 잉크를 검사합니다. 공통 정책의 150 dpi·2픽셀을 유지하고, 원래·대체 글꼴 및 부분·전체 잘림 반례를 확인합니다. 발생 계층은 제품 코드와 구분되는 **검증 도구**입니다. [방법과 한계](INK-VALIDATION.md)
 
 ### r14: 저장 프레임과 중첩 개체 소유권
 
