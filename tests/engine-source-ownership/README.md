@@ -64,6 +64,8 @@ tests below, or set `PWH_ENGINE_SOURCE`. `PWH_RUSTC` selects the Rust executable
 ```powershell
 node tests/engine-source-ownership/run.mjs <engine-source-root>
 node tests/engine-source-ownership/sourceframe.mjs <engine-source-root>
+node tests/engine-source-ownership/parallel-row-source-frame.mjs <engine-source-root>
+node tests/engine-source-ownership/page-number-source-activation.mjs <engine-source-root>
 ```
 
 The harness extracts the actual source functions and records their SHA256 rather
@@ -72,6 +74,16 @@ CellUnits in place of the full composer. It checks completed siblings, mixed and
 recursive owners, synchronized plain-text restarts, stale text/format coordinates,
 invalid cursors, synthetic lines and unsupported spans. These predicate checks
 complement the browser and document roundtrip tests above.
+
+The r14 candidate runners accept the source-root argument or `PWH_ENGINE_SOURCE`.
+The parallel-row suite has 19 cases covering declared minimum-space conservation,
+complete column ownership, original page origins versus paragraph-local resets,
+edited/synthetic input rejection and explicit accepted-frame transport. The
+page-number suite has 22 cases covering source-ordered object fragments,
+preceding-section inheritance, numbering restarts and hide rules. It pins the
+unchanged source resolver/number/hide functions separately. These standalone Rust
+source tests require an engine source tree and a compiler; they are qualification
+commands, not a claim that an environment without those inputs ran them.
 
 
 ## Patched runtime preservation integrity

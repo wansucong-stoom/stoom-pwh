@@ -1,0 +1,172 @@
+diff --git a/src/document_core/queries/rendering.rs b/src/document_core/queries/rendering.rs
+--- a/src/document_core/queries/rendering.rs
++++ b/src/document_core/queries/rendering.rs
+@@ -5425,15 +5425,12 @@
+                 }
+             }
+ 
+-            // 구역 간 page_number_pos 상속: 이 구역에 PageNumberPos가 없으면 이전 구역 값 사용
+-            let section_has_own_pnp = result.pages.iter().any(|p| p.page_number_pos.is_some());
+-            if !section_has_own_pnp {
+-                if let Some(ref prev_pnp) = carry_page_number_pos {
+-                    for page in &mut result.pages {
+-                        page.page_number_pos = Some(prev_pnp.clone());
+-                    }
+-                }
+-            }
++            // 구역 자체 형식이 발화되기 전까지 이전 구역의 쪽번호 위치를 이어 쓴다.
++            crate::renderer::page_number::inherit_number_position_prefix(
++                &mut result.pages,
++                &section.paragraphs,
++                &carry_page_number_pos,
++            );
+ 
+             // 구역 간 쪽번호 연속: NewNumber(Page) 컨트롤이 없으면 이전 구역에서 이어짐
+             if idx > 0 && carry_last_page_number > 0 {
+diff --git a/src/renderer/page_number.rs b/src/renderer/page_number.rs
+--- a/src/renderer/page_number.rs
++++ b/src/renderer/page_number.rs
+@@ -125,6 +125,8 @@
+ pub(crate) struct PageControlEvents {
+     pub new_numbers: Vec<(usize, u16)>,
+     pub hides: Vec<(usize, crate::model::control::PageHide)>,
++    /// Top-level page-number position controls, activated at their source owner.
++    pub number_positions: Vec<(usize, crate::model::control::PageNumberPos)>,
+ }
+ 
+ impl PageControlEvents {
+@@ -148,6 +150,11 @@
+         let mut events = Self::default();
+         for (pi, para) in paragraphs.iter().enumerate() {
+             for (ci, control) in para.controls.iter().enumerate() {
++                if let Control::PageNumberPos(position) = control {
++                    let items = by_paragraph.get(&pi).map(Vec::as_slice).unwrap_or(&[]);
++                    let page = page_number_position_page(para, ci, items).unwrap_or(usize::MAX);
++                    events.number_positions.push((page, position.clone()));
++                }
+                 if matches!(
+                     control,
+                     Control::PageHide(_) | Control::NewNumber(_) | Control::Table(_)
+@@ -160,6 +167,28 @@
+             }
+         }
+         events
++    }
++
++    /// Carry the last source-positioned format only after its owner is reached.
++    pub fn number_position_at(
++        &self,
++        page_index: usize,
++        legacy_fallback: &Option<crate::model::control::PageNumberPos>,
++    ) -> Option<crate::model::control::PageNumberPos> {
++        if self.number_positions.is_empty() {
++            return legacy_fallback.clone();
++        }
++        self.number_positions.iter().rev()
++            .find(|(target, _)| *target <= page_index)
++            .map(|(_, position)| position.clone())
++    }
++
++    /// A preceding section's format survives until this section's own event.
++    /// Do not undo the existing hide-before-first-NewNumber contract.
++    pub fn should_inherit_number_position(&self, page_index: usize) -> bool {
++        !self.number_positions.iter().any(|(target, _)| *target <= page_index)
++            && (self.new_numbers.is_empty()
++                || self.new_numbers.iter().any(|(target, _)| *target <= page_index))
+     }
+ 
+     fn collect_control(&mut self, control: &crate::model::control::Control, page: usize) {
+@@ -182,6 +211,69 @@
+             _ => {}
+         }
+     }
++}
++
++/// Inherit only the prefix before a new section's own positioned format.
++/// PageHide remains a separate rendering flag, and NewNumber visibility remains
++/// authoritative even when the previous section had an active number format.
++pub(crate) fn inherit_number_position_prefix(
++    pages: &mut [PageContent],
++    paragraphs: &[crate::model::paragraph::Paragraph],
++    previous: &Option<crate::model::control::PageNumberPos>,
++) {
++    let Some(previous) = previous else { return; };
++    let events = PageControlEvents::collect(pages, paragraphs);
++    for (page_index, page) in pages.iter_mut().enumerate() {
++        if page.page_number_pos.is_none() && events.should_inherit_number_position(page_index) {
++            page.page_number_pos = Some(previous.clone());
++        }
++    }
++}
++
++/// An empty control-only paragraph can contain several independently paginated
++/// objects on one stored host line. A following format control is not owned by
++/// the first fragment of the preceding object. The source cursor after an object
++/// belongs to its final physical fragment, even when the next object opens a new
++/// page. A leading control with no predecessor uses the next object's first page.
++/// Ordinary text/line ownership retains the existing control_page contract.
++fn page_number_position_page(
++    para: &crate::model::paragraph::Paragraph,
++    control_index: usize,
++    items: &[(usize, &PageItem)],
++) -> Option<usize> {
++    if para.text.is_empty() && para.line_segs.len() == 1 {
++        let object_index = |item: &PageItem| {
++            let index = match item {
++                PageItem::Table { control_index, .. }
++                | PageItem::PartialTable { control_index, .. } => *control_index,
++                _ => return None,
++            };
++            let Some(crate::model::control::Control::Table(table)) = para.controls.get(index)
++                else { return None; };
++            (!table.common.treat_as_char && table.common.flow_with_text
++                && table.common.text_wrap == crate::model::shape::TextWrap::TopAndBottom)
++                .then_some(index)
++        };
++        // A mixed host containing any other object has no proved block-flow
++        // adjacency contract. Preserve its existing source-line interpretation.
++        if items.iter().any(|(_, item)| matches!(item,
++            PageItem::Table { .. } | PageItem::PartialTable { .. } | PageItem::Shape { .. })
++            && object_index(item).is_none())
++        { return control_page(para, control_index, items); }
++        let previous = items.iter().filter_map(|(_, item)| object_index(item))
++            .filter(|index| *index < control_index).max();
++        if let Some(previous) = previous {
++            return items.iter().filter(|(_, item)| object_index(item) == Some(previous))
++                .map(|(page, _)| *page).max();
++        }
++        let next = items.iter().filter_map(|(_, item)| object_index(item))
++            .filter(|index| *index > control_index).min();
++        if let Some(next) = next {
++            return items.iter().filter(|(_, item)| object_index(item) == Some(next))
++                .map(|(page, _)| *page).min();
++        }
++    }
++    control_page(para, control_index, items)
+ }
+ 
+ fn item_starts(item: &PageItem) -> bool {
+diff --git a/src/renderer/pagination/engine.rs b/src/renderer/pagination/engine.rs
+--- a/src/renderer/pagination/engine.rs
++++ b/src/renderer/pagination/engine.rs
+@@ -2970,7 +2970,7 @@
+             page.active_footer = active_footer;
+ 
+             if !assigner.should_hide_page_number() {
+-                page.page_number_pos = page_number_pos.clone();
++                page.page_number_pos = events.number_position_at(i, page_number_pos);
+             }
+             // 한 컨트롤의 감추기는 소스 위치가 매핑된 한 쪽에만 적용한다.
+             if let Some((_, hide)) = events.hides.iter().find(|(target, _)| *target == i) {
+diff --git a/src/renderer/typeset/state/finalize.rs b/src/renderer/typeset/state/finalize.rs
+--- a/src/renderer/typeset/state/finalize.rs
++++ b/src/renderer/typeset/state/finalize.rs
+@@ -114,7 +114,7 @@
+         page.active_header = current_header;
+         page.active_footer = current_footer;
+         if !assigner.should_hide_page_number() {
+-            page.page_number_pos = page_number_pos.clone();
++            page.page_number_pos = events.number_position_at(i, page_number_pos);
+         }
+ 
+         // 한 컨트롤의 감추기는 소스 위치가 매핑된 한 쪽에만 적용한다.

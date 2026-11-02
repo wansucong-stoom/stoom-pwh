@@ -1,0 +1,489 @@
+diff --git a/src/document_core/queries/cursor_rect.rs b/src/document_core/queries/cursor_rect.rs
+--- a/src/document_core/queries/cursor_rect.rs
++++ b/src/document_core/queries/cursor_rect.rs
+@@ -3319,6 +3319,7 @@
+             is_block_split,
+             start_cut_is_block,
+             row_cursor_is_nested,
++            source_parallel_frame,
+             end_row_height_override,
+             start_row_height_override,
+         }) = col.items.first()
+@@ -3582,6 +3583,7 @@
+             *is_block_split,
+             *start_cut_is_block,
+             *row_cursor_is_nested,
++            *source_parallel_frame,
+             *end_row_height_override,
+             *start_row_height_override,
+             pt_margin_left,
+diff --git a/src/renderer/float_placement.rs b/src/renderer/float_placement.rs
+--- a/src/renderer/float_placement.rs
++++ b/src/renderer/float_placement.rs
+@@ -431,6 +431,141 @@
+     (frame_hu - body_hu).abs() <= 2
+ }
+ 
++/// Empty saved hosts may anchor several independent block-table frames.
++/// The trailing source line is not a text band that already owns each table's
++/// outer top margin. Frame settings and page-number markers have no geometry;
++/// other layout-owning controls keep their existing placement contracts.
++pub(crate) fn stored_coanchored_block_table_frame(para: &Paragraph, table: &Table) -> bool {
++    if !para.text.is_empty()
++        || para.stored_text_partition_is_dirty()
++        || para.cell_format_vpos_dirty
++        || !matches!(para.line_segs.as_slice(), [line]
++            if line.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY == 0
++                && line.vertical_pos >= 0
++                && line.line_height > 0
++                && line.segment_width >= 0)
++    {
++        return false;
++    }
++    let mut tables = 0usize;
++    let mut owns_table = false;
++    for control in &para.controls {
++        if let Control::Table(candidate) = control {
++            if candidate.common.treat_as_char
++                || !candidate.common.flow_with_text
++                || candidate.common.text_wrap != TextWrap::TopAndBottom
++                || candidate.common.vert_rel_to != VertRelTo::Para
++                || candidate.common.vert_align != VertAlign::Top
++                || signed_hwpunit(candidate.common.vertical_offset) < 0
++                || signed_hwpunit(candidate.common.width) <= 0
++                || signed_hwpunit(candidate.common.height) <= 0
++                || candidate.caption.is_some()
++                || candidate.cells.iter().any(|cell| cell.paragraphs.iter().any(|paragraph|
++                    paragraph.stored_text_partition_is_dirty() || paragraph.cell_format_vpos_dirty))
++            {
++                return false;
++            }
++            tables += 1;
++            owns_table |= std::ptr::eq(candidate.as_ref(), table);
++        } else if !crate::renderer::composer::control_is_width_neutral_marker(control) {
++            return false;
++        }
++    }
++    tables > 1 && owns_table
++}
++
++/// Independent side-by-side cells may share one saved row minimum. The object
++/// height describes each full physical frame; cell height describes the sum of
++/// its body-row boxes, excluding the repeated header. Require source resets to
++/// authenticate that interpretation before reserving any blank physical band.
++pub(crate) fn stored_coanchored_parallel_row_frame(
++    para: &Paragraph, table: &Table, row: usize, body_height: f64, dpi: f64,
++    stored: bool, edited: bool,
++) -> Option<(f64, f64)> {
++    if !stored || edited || !body_height.is_finite() || body_height <= 0.0
++        || !dpi.is_finite() || dpi <= 0.0
++        || !stored_coanchored_block_table_frame(para, table)
++        || !table.repeat_header || table.page_break != TablePageBreak::RowBreak
++        || table.cell_spacing != 0 || signed_hwpunit(table.common.vertical_offset) != 0
++    { return None; }
++    let headers = table.leading_header_rows();
++    if headers.is_empty() || row != headers.len() || row + 1 != usize::from(table.row_count)
++        || headers.iter().enumerate().any(|(index, &header)| index != header)
++    { return None; }
++    let raw = table.get_raw_row_heights();
++    let header_hu = raw.iter().take(row).map(|&height| i64::from(height)).sum::<i64>();
++    let payload_hu = i64::from(table.common.height) - header_hu;
++    let frame_hu = i64::from(table.common.height)
++        + i64::from(table.outer_margin_top) + i64::from(table.outer_margin_bottom);
++    let body_hu = (body_height * 7200.0 / dpi).round() as i64;
++    if payload_hu <= 0 || frame_hu > body_hu + 2 { return None; }
++    let mut cells: Vec<_> = table.cells.iter().filter(|cell|
++        usize::from(cell.row) <= row && row < usize::from(cell.row) + usize::from(cell.row_span)
++    ).collect();
++    if cells.len() < 2 { return None; }
++    cells.sort_by_key(|cell| cell.col);
++    let minimum_hu = i64::from(cells[0].height);
++    let mut column = 0usize;
++    let mut source_frames = 1usize;
++    for cell in cells {
++        if usize::from(cell.row) != row || cell.row_span != 1 || cell.col_span == 0
++            || usize::from(cell.col) != column || cell.height >= 0x8000_0000
++            || i64::from(cell.height) != minimum_hu || cell.dirty_flag
++            || cell.vertical_align != crate::model::table::VerticalAlign::Top
++            || cell.paragraphs.iter().any(|p| p.stored_text_partition_is_dirty()
++                || p.cell_format_vpos_dirty || p.line_segs.is_empty()
++                || p.line_segs.iter().any(|line|
++                    line.vertical_pos < 0 || line.line_height <= 0
++                    || line.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0))
++        { return None; }
++        column += usize::from(cell.col_span);
++        let lines: Vec<_> = cell.paragraphs.iter().flat_map(|p| p.line_segs.iter()).collect();
++        if lines.first()?.vertical_pos != 0 { return None; }
++        let frames = 1 + lines.windows(2).filter(|pair|
++            stored_parallel_row_page_reset(pair[0], pair[1], payload_hu)).count();
++        source_frames = source_frames.max(frames);
++    }
++    if column != usize::from(table.col_count) || source_frames <= 1
++        || minimum_hu <= payload_hu
++        || (minimum_hu + payload_hu - 1) / payload_hu != source_frames as i64
++    { return None; }
++    Some((hwpunit_to_px(table.common.height as i32, dpi),
++        hwpunit_to_px(minimum_hu as i32, dpi)))
++}
++
++/// A physical saved row restarts at its original nonnegative zero origin only
++/// after the previous line reached the frame's lower half. A paragraph-local
++/// rewind (including a short local ladder restarted at zero) is not page proof.
++pub(crate) fn stored_parallel_row_page_reset(
++    previous: &crate::model::paragraph::LineSeg,
++    current: &crate::model::paragraph::LineSeg,
++    payload_hu: i64,
++) -> bool {
++    payload_hu > 0 && previous.vertical_pos > 0 && current.vertical_pos == 0
++        && previous.line_height > 0 && current.line_height > 0
++        && (previous.tag | current.tag)
++            & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY == 0
++        && i64::from(previous.vertical_pos) + i64::from(previous.line_height)
++            >= (payload_hu + 1) / 2
++}
++
++/// Space belongs to the physical row, while cuts continue to own the content.
++/// Never compress content or enlarge a fragment beyond its accepted budget.
++pub(crate) fn stored_parallel_row_fragment_height(
++    minimum: f64, used: f64, frame: f64, fixed: f64,
++    available: f64, content: f64, terminal: bool,
++) -> Option<f64> {
++    if [minimum, used, frame, fixed, available, content].iter().any(|v| !v.is_finite())
++        || minimum <= 0.0 || used < 0.0 || frame <= fixed || fixed < 0.0
++        || available < fixed || content < 0.0
++    { return None; }
++    let remaining = (minimum - used).max(0.0);
++    let capacity = (frame.min(available) - fixed).max(0.0);
++    let physical = if terminal { remaining.max(content) }
++        else { remaining.min(capacity).max(content) };
++    (physical + fixed <= available + 0.5).then_some(physical)
++}
++
+ /// 바깥 여백은 셀 열 수와 무관하게 개체 프레임에 속한다.
+ /// 이미 결정된 배치 원점과 중첩 프레임은 호출자가 처리한다.
+ pub(crate) fn column_rowbreak_fragment_opens_outer_top(
+@@ -445,7 +580,9 @@
+     // 빈 저장 앵커와 표제 아래에 열리는 표는 같은 개체 프레임이다.
+     // 표제의 쪽나눔 유무는 Para 앵커가 소유하는 바깥 여백을 바꾸지 않는다.
+     // 표제의 글줄 잉크와 표의 바깥 여백은 별도로 소유하며 캡션 간격도 별도로 계산한다.
+-    let native_object_frame = native_host.is_some_and(|para| {
++    let coanchored_object_frame = native_host
++        .is_some_and(|para| stored_coanchored_block_table_frame(para, table));
++    let native_object_frame = coanchored_object_frame || native_host.is_some_and(|para| {
+         if object_only_saved_table_anchor(para, table) {
+             return true;
+         }
+@@ -508,7 +645,7 @@
+     // 앞 조각의 칸 상자가 계속되는 것이라 여백을 다시 열지 않는다 — 한글 2020 PDF 는
+     // 1371000-201200057 8·10·14·15쪽(지역 열 병합 칸 안에서 이어짐)의 조각을 본문 위에
+     // 붙여 그린다.
+-    let para_anchor_below_first_line = native_host.is_some_and(|host| {
++    let para_anchor_below_first_line = coanchored_object_frame || native_host.is_some_and(|host| {
+         object_only_saved_table_anchor(host, table)
+             && host
+                 .line_segs
+@@ -519,7 +656,8 @@
+         && !table.common.treat_as_char
+         && is_para_topbottom_float(&table.common)
+         && (table.common.horz_rel_to == HorzRelTo::Column
+-            || ((hwpx_stored || (is_continuation && !rowspan_straddles_row(table, start_row)))
++            || ((hwpx_stored || coanchored_object_frame
++                    || (is_continuation && !rowspan_straddles_row(table, start_row)))
+                 && table.common.horz_rel_to == HorzRelTo::Para
+                 && table.common.vert_rel_to == VertRelTo::Para
+                 && para_anchor_below_first_line))
+diff --git a/src/renderer/layout/table_partial.rs b/src/renderer/layout/table_partial.rs
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -3858,6 +3858,7 @@
+                                             // 투영)이다. 투명 래퍼 벗기기는 별개 좌표계
+                                             // 판정(#4326)이라 여기서는 항상 false.
+                                             false,
++                                            false,
+                                             None,
+                                             None,
+                                             0.0,
+@@ -4272,6 +4273,7 @@
+         // [#6935] 시작 컷의 인덱스 공간 — 끝 컷과 다를 수 있다.
+         start_cut_is_block: bool,
+         row_cursor_is_nested: bool,
++        source_parallel_frame: bool,
+         end_row_height_override: Option<f64>,
+         start_row_height_override: Option<f64>,
+         host_margin_left: f64,
+@@ -4348,6 +4350,7 @@
+             is_block_split,
+             start_cut_is_block,
+             row_cursor_is_nested,
++            source_parallel_frame,
+             end_row_height_override,
+             start_row_height_override,
+             host_margin_left,
+@@ -4386,6 +4389,7 @@
+         // [#6935] 시작 컷의 인덱스 공간 — 끝 컷과 다를 수 있다.
+         start_cut_is_block: bool,
+         row_cursor_is_nested: bool,
++        source_parallel_frame: bool,
+         end_row_height_override: Option<f64>,
+         start_row_height_override: Option<f64>,
+         host_margin_left: f64,
+@@ -5564,6 +5568,9 @@
+                     })
+                 })
+         });
++        // Pagination accepted this exact physical box. Other overrides, reflow,
++        // notes and nested/block cursors retain the legacy folding contract.
++        let fold_last_row = fold_last_row.filter(|_| !source_parallel_frame);
+         let mut fold_slack = f64::INFINITY;
+         self.layout_partial_table_cells(
+             tree,
+diff --git a/src/renderer/layout.rs b/src/renderer/layout.rs
+--- a/src/renderer/layout.rs
++++ b/src/renderer/layout.rs
+@@ -10107,6 +10107,7 @@
+                     false,
+                     false,
+                     false,
++                    false,
+                     None,
+                     None,
+                     &overlay_ctx,
+@@ -11264,6 +11265,7 @@
+                 is_block_split,
+                 start_cut_is_block,
+                 row_cursor_is_nested,
++                source_parallel_frame,
+                 end_row_height_override,
+                 start_row_height_override,
+             } => {
+@@ -11281,6 +11283,7 @@
+                     *is_block_split,
+                     *start_cut_is_block,
+                     *row_cursor_is_nested,
++                    *source_parallel_frame,
+                     *end_row_height_override,
+                     *start_row_height_override,
+                     &ctx,
+@@ -14422,6 +14425,7 @@
+         // [#6935] 시작 컷의 인덱스 공간 — 끝 컷과 다를 수 있다.
+         start_cut_is_block: bool,
+         row_cursor_is_nested: bool,
++        source_parallel_frame: bool,
+         end_row_height_override: Option<f64>,
+         start_row_height_override: Option<f64>,
+         ctx: &ColumnItemCtx,
+@@ -14642,6 +14646,7 @@
+             is_block_split,
+             start_cut_is_block,
+             row_cursor_is_nested,
++            source_parallel_frame,
+             end_row_height_override,
+             start_row_height_override,
+             pt_margin_left,
+diff --git a/src/renderer/page_number.rs b/src/renderer/page_number.rs
+--- a/src/renderer/page_number.rs
++++ b/src/renderer/page_number.rs
+@@ -417,6 +417,7 @@
+             is_block_split: false,
+             start_cut_is_block: false,
+             row_cursor_is_nested: false,
++            source_parallel_frame: false,
+             end_row_height_override: None,
+             start_row_height_override: None,
+         }]);
+@@ -434,6 +435,7 @@
+             is_block_split: false,
+             start_cut_is_block: false,
+             row_cursor_is_nested: false,
++            source_parallel_frame: false,
+             end_row_height_override: None,
+             start_row_height_override: None,
+         }]);
+diff --git a/src/renderer/pagination/engine.rs b/src/renderer/pagination/engine.rs
+--- a/src/renderer/pagination/engine.rs
++++ b/src/renderer/pagination/engine.rs
+@@ -2857,6 +2857,7 @@
+                         is_block_split: false,
+                         start_cut_is_block: false,
+                         row_cursor_is_nested,
++                        source_parallel_frame: false,
+                         end_row_height_override: None,
+                         start_row_height_override: None,
+                     });
+@@ -2880,6 +2881,7 @@
+                 is_block_split: false,
+                 start_cut_is_block: false,
+                 row_cursor_is_nested,
++                source_parallel_frame: false,
+                 end_row_height_override: None,
+                 start_row_height_override: None,
+             });
+diff --git a/src/renderer/pagination.rs b/src/renderer/pagination.rs
+--- a/src/renderer/pagination.rs
++++ b/src/renderer/pagination.rs
+@@ -628,6 +628,9 @@
+         /// 표 자신의 행 도메인 기준이다. 렌더러가 값(`end_row <= table.row_count`)으로
+         /// 되추론하던 것을 페이지네이션 결정 시점에 데이터로 고정한다.
+         row_cursor_is_nested: bool,
++        /// True only when pagination accepted a saved parallel-row physical
++        /// frame. Renderers must consume this decision rather than infer it.
++        source_parallel_frame: bool,
+         /// RowBreak 표에서 이전 rowspan이 닿는 마지막 행을 현재 조각의 남은
+         /// 물리 높이에 맞춰 배치해야 할 때의 마지막 행 높이 상한(px).
+         ///
+@@ -837,6 +840,7 @@
+                 is_block_split,
+                 start_cut_is_block,
+                 row_cursor_is_nested,
++                source_parallel_frame,
+                 end_row_height_override,
+                 start_row_height_override,
+             } => PageItem::PartialTable {
+@@ -850,6 +854,7 @@
+                 is_block_split: *is_block_split,
+                 start_cut_is_block: *start_cut_is_block,
+                 row_cursor_is_nested: *row_cursor_is_nested,
++                source_parallel_frame: *source_parallel_frame,
+                 end_row_height_override: *end_row_height_override,
+                 start_row_height_override: *start_row_height_override,
+             },
+@@ -914,6 +919,7 @@
+                     control_index: c1,
+                     start_row: sr1,
+                     end_row: er1,
++                    source_parallel_frame: frame1,
+                     ..
+                 },
+                 PageItem::PartialTable {
+@@ -921,9 +927,10 @@
+                     control_index: c2,
+                     start_row: sr2,
+                     end_row: er2,
++                    source_parallel_frame: frame2,
+                     ..
+                 },
+-            ) => *a == adj(*b) && c1 == c2 && sr1 == sr2 && er1 == er2,
++            ) => *a == adj(*b) && c1 == c2 && sr1 == sr2 && er1 == er2 && frame1 == frame2,
+             (
+                 PageItem::Shape {
+                     para_index: a,
+diff --git a/src/renderer/typeset/notes/endnotes/measure.rs b/src/renderer/typeset/notes/endnotes/measure.rs
+--- a/src/renderer/typeset/notes/endnotes/measure.rs
++++ b/src/renderer/typeset/notes/endnotes/measure.rs
+@@ -109,6 +109,7 @@
+                         is_block_split,
+                         start_cut_is_block,
+                         row_cursor_is_nested,
++                        source_parallel_frame,
+                         end_row_height_override,
+                         start_row_height_override,
+                     } => lookup_local(*para_index).map(|l| PageItem::PartialTable {
+@@ -122,6 +123,7 @@
+                         is_block_split: *is_block_split,
+                         start_cut_is_block: *start_cut_is_block,
+                         row_cursor_is_nested: *row_cursor_is_nested,
++                        source_parallel_frame: *source_parallel_frame,
+                         end_row_height_override: *end_row_height_override,
+                         start_row_height_override: *start_row_height_override,
+                     }),
+diff --git a/src/renderer/typeset/table/continuation/fragment/emit.rs b/src/renderer/typeset/table/continuation/fragment/emit.rs
+--- a/src/renderer/typeset/table/continuation/fragment/emit.rs
++++ b/src/renderer/typeset/table/continuation/fragment/emit.rs
+@@ -569,6 +569,33 @@
+                     });
+             }
+         }
++        // Parallel source owners share blank minimum space, not a content cut.
++        // The cursor records actual accepted body-row boxes so the terminal frame
++        // receives precisely the unspent minimum instead of repeating a full box.
++        let parallel_row_frame = end_row.checked_sub(1).and_then(|row| {
++            if split_block_start.is_some() || !std::ptr::eq(table, row_geometry_table)
++                || !table_footnotes.is_empty() || st.current_footnote_height > 0.0
++                || self.render_normalization.table_text_reflowed(table)
++            { return None; }
++            let (frame, minimum) = crate::renderer::float_placement::stored_coanchored_parallel_row_frame(
++                input.source.paragraph, table, row, st.layout.body_area.height, self.dpi,
++                st.profile.hwpx_stored_layout() || st.profile.hwp5_stored_pagination_layout(),
++                st.profile.session_edited(),
++            )?;
++            let fixed = header_overhead + cut_row_h[cursor_row..row].iter().sum::<f64>();
++            let content = (partial_height - fixed).max(0.0);
++            let used = continuation.stored_row_box_sum.filter(|(owner, _)| *owner == row)
++                .map_or(0.0, |(_, height)| height);
++            let terminal = split_end_limit == 0.0 && split_end_cut.is_empty();
++            let height = crate::renderer::float_placement::stored_parallel_row_fragment_height(
++                minimum, used, frame, fixed, avail_for_rows + header_overhead, content, terminal,
++            )?;
++            Some((row, used, height, fixed))
++        });
++        if let Some((_, _, height, fixed)) = parallel_row_frame {
++            end_row_height_override = Some(height);
++            partial_height = fixed + height;
++        }
+         let commit_fragment = |st: &mut TypesetState, owner_height: f64, terminal: bool| {
+             if let Some(mut placement) = fragment_placement {
+                 // 실제 조각의 컷/쪽 소유로 바뀌었으므로 전체 프레임의 후속 원점은 재사용하지 않는다.
+@@ -619,7 +646,7 @@
+         }
+ 
+         if end_row >= row_count && split_end_limit == 0.0 {
+-            let skip_terminal_empty_sliver = is_continuation
++            let skip_terminal_empty_sliver = parallel_row_frame.is_none() && is_continuation
+                 // A reflowed declared tail owns real physical space even after its
+                 // final content unit. Do not erase that frame as an empty sliver.
+                 && !(start_row_height_override.is_some()
+@@ -726,6 +753,7 @@
+                     is_block_split: start_cut_is_block,
+                     start_cut_is_block,
+                     row_cursor_is_nested,
++                    source_parallel_frame: parallel_row_frame.is_some(),
+                     end_row_height_override,
+                     start_row_height_override,
+                 });
+@@ -864,6 +892,7 @@
+             is_block_split: split_block_start.is_some(),
+             start_cut_is_block,
+             row_cursor_is_nested,
++            source_parallel_frame: parallel_row_frame.is_some(),
+             end_row_height_override,
+             start_row_height_override,
+         });
+@@ -919,7 +948,9 @@
+         if let Some(box_height) = single_cell_box_height {
+             continuation.single_cell_box_sum_px += box_height;
+         }
+-        if let Some((row, used, height)) = stored_row_frame {
++        if let Some((row, used, height)) = parallel_row_frame
++            .map(|(row, used, height, _)| (row, used, height)).or(stored_row_frame)
++        {
+             continuation.stored_row_box_sum = Some((row, used + height));
+         }
+         // [#2238] 중간 fragment 가시높이 부기 — used_height(flush 시 current_height)
+@@ -1096,7 +1127,7 @@
+                 })
+             })
+             .or_else(|| end_row_height_override
+-            .filter(|_| !first_fragment_blank_band && !source_frame_trailing_trim_applied && stored_row_frame.is_none()
++            .filter(|_| parallel_row_frame.is_none() && !first_fragment_blank_band && !source_frame_trailing_trim_applied && stored_row_frame.is_none()
+                 && !layout_engine.row_uses_reflow_physical_frame(table, end_row.saturating_sub(1)))
+             .and_then(|limit| {
+             let full = cut_row_h.get(end_row.saturating_sub(1)).copied()?;
+diff --git a/src/renderer/typeset.rs b/src/renderer/typeset.rs
+--- a/src/renderer/typeset.rs
++++ b/src/renderer/typeset.rs
+@@ -7022,6 +7022,7 @@
+                 is_block_split: false,
+                 start_cut_is_block: false,
+                 row_cursor_is_nested: false,
++                source_parallel_frame: false,
+                 end_row_height_override: None,
+                 start_row_height_override: None,
+             }]),
+@@ -7036,6 +7037,7 @@
+                 is_block_split: false,
+                 start_cut_is_block: false,
+                 row_cursor_is_nested: false,
++                source_parallel_frame: false,
+                 end_row_height_override: None,
+                 start_row_height_override: None,
+             }]),
