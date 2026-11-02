@@ -382,6 +382,52 @@ const patches = [
     }
   ]
 },
+{
+  "file": "rhwp-0.8.7-stored-nested-tail-owner.patch",
+  "sha256": "18d2ca25031520b2740f66c9cbac8eb571c2eabd3b91c8f42e72d953630900d4",
+  "sources": [
+    {
+      "path": "src/document_core/commands/object_ops/picture.rs",
+      "originalSha256": "d5d3f7ea45606c98ab2f0a4325aacac6a3ed9b8d3d2cb09532d1c2c04063150f",
+      "patchedSha256": "659722459d2bceefd2331d9fe4fe9d8acff0e2b738d59c5178f8c238a9551b2a"
+    },
+    {
+      "path": "src/document_core/commands/object_ops/table.rs",
+      "originalSha256": "8629dbb139574d96bdd6287c7781f9d01cf3ff962c1fc42656e75aa2550dfc12",
+      "patchedSha256": "a51bcb772d1d33afad1cbed097c2024094e763017c9b1bfd99e37708d7892772"
+    },
+    {
+      "path": "src/document_core/queries/rendering.rs",
+      "originalSha256": "4ef70108d1d4e6d78ae48c4fe4cb390828ee031d8faabf68ba7e8089e0fda9c9",
+      "patchedSha256": "e0b3ae18e8a30e6650f791c5c42b7bfb2d42666f0b8372431e9150e27a15b645"
+    },
+    {
+      "path": "src/renderer/layout.rs",
+      "originalSha256": "0f1196586d011502245c146900c2f56b250adc3cddeea41c371e068ee8017bfb",
+      "patchedSha256": "d730cfbd7b5e0c45f65c76b1652dad477e767d104e7c382952377ffd7b5202e2"
+    },
+    {
+      "path": "src/renderer/render_normalization.rs",
+      "originalSha256": "50f636d7949631898cdbe33b894acdd1090edf85fddfb3665bc450b90b9a5e9f",
+      "patchedSha256": "f60b849cb6d6c9b95a84dbec5b36eab2c29581b964fb3f442eda17b72499a4aa"
+    },
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "00479e71cdcf77616cb0093ced9e12e0970877024fcd0f127e079607b77bfa0f",
+      "patchedSha256": "58b077be613178a52be82f384a5d164bdf5a2c10636592fb25e141ef456995cc"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "899e431e7d658764c93f906c0518e8f9e4b3fa38429808893c1b7478b9dfea8a",
+      "patchedSha256": "1947802fa680e582f1d8c3306d08d8876926faa4ca3859d83b609bd701f0bd5b"
+    },
+    {
+      "path": "src/renderer/typeset/table/scan/source_frame.rs",
+      "originalSha256": "7dd183ea3b131f1be5e6c5bbc78688c51f92eb79821efc2c1ba026df15ef5ed3",
+      "patchedSha256": "88a2b0afe7527179ca4b65bcbbe39ad77085c9e1bbb86e8f8bd55ee9de2e612e"
+    }
+  ]
+},
 ];
 const help = `Usage: node scripts/build-patched-core.mjs
   --source-archive <fixed upstream source ZIP>

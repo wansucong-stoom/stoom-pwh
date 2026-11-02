@@ -6,8 +6,7 @@ import {createHash} from 'node:crypto';
 import {floatingHostLineFixture} from './engine-source-ownership/floating-host-line-fixture.mjs';
 import {mapHwpxMember} from './engine-source-ownership/hwpx-fixture-utils.mjs';
 
-const skip=process.env.PWH_CANDIDATE_CORE_TESTS!=='1'?'Set PWH_CANDIDATE_CORE_TESTS=1 to qualify the explicit r14 candidate':
- (!process.env.PWH_CORE_JS||!process.env.PWH_CORE_WASM?'Requires PWH_CORE_JS and PWH_CORE_WASM candidate paths':false);
+const skip=!process.env.PWH_CORE_JS||!process.env.PWH_CORE_WASM?'Requires PWH_CORE_JS and PWH_CORE_WASM paths':false;
 const fallbackSkip=skip||(!process.env.PWH_FLOAT_FRAME_BASE_JS||!process.env.PWH_FLOAT_FRAME_BASE_WASM?'Requires an explicit prior-core fallback baseline':false);
 let candidatePromise,baselinePromise;
 async function load(js,wasm){const core=await import(pathToFileURL(js));await core.default({module_or_path:await fs.readFile(wasm)});return core;}

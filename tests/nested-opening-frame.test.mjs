@@ -5,9 +5,7 @@ import {loadCore, inspectVariants, verifyFrameAndMargins, verifyIndependentReflo
   from './engine-source-ownership/nested-opening-frame-regression.mjs';
 
 const hasCore = Boolean(process.env.PWH_CORE_JS && process.env.PWH_CORE_WASM);
-const candidateSkip = process.env.PWH_CANDIDATE_CORE_TESTS !== '1'
-  ? 'Set PWH_CANDIDATE_CORE_TESTS=1 to qualify the explicit r14 candidate' : false;
-const coreSkip = candidateSkip || (!hasCore ? 'Requires PWH_CORE_JS and PWH_CORE_WASM candidate paths' : false);
+const coreSkip = !hasCore ? 'Requires PWH_CORE_JS and PWH_CORE_WASM paths' : false;
 let candidate;
 async function candidateRecords() {
   if (!candidate) {
@@ -29,7 +27,7 @@ test('nested opening frame: deep edits and ineligible source shapes use an indep
   });
 
 test('nested opening frame: extracted source rejects unowned or recomposed hosts (18 Rust cases)',
-  {skip: candidateSkip || !process.env.PWH_ENGINE_SOURCE}, () => {
+  {skip: !process.env.PWH_ENGINE_SOURCE}, () => {
     execFileSync(process.execPath, [fileURLToPath(new URL('./engine-source-ownership/nested-opening-frame-source.mjs', import.meta.url))],
       {stdio: 'inherit', windowsHide: true, env: process.env});
   });

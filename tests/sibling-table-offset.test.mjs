@@ -5,8 +5,7 @@ import {pathToFileURL} from 'node:url';
 import {siblingTableHostFixture} from './engine-source-ownership/sibling-table-fixture.mjs';
 import {mapHwpxMember} from './engine-source-ownership/hwpx-fixture-utils.mjs';
 
-const skip=process.env.PWH_CANDIDATE_CORE_TESTS!=='1'?'Set PWH_CANDIDATE_CORE_TESTS=1 to qualify the explicit r14 candidate':
- (!process.env.PWH_CORE_JS||!process.env.PWH_CORE_WASM?'Requires PWH_CORE_JS and PWH_CORE_WASM candidate paths':false);
+const skip=!process.env.PWH_CORE_JS||!process.env.PWH_CORE_WASM?'Requires PWH_CORE_JS and PWH_CORE_WASM paths':false;
 let promise;
 async function load(){return promise??=(async()=>{const core=await import(pathToFileURL(process.env.PWH_CORE_JS));await core.default({module_or_path:await fs.readFile(process.env.PWH_CORE_WASM)});return core;})();}
 function changeTable(xml,id,transform){const start=xml.indexOf(`<hp:tbl id="${id}"`),end=xml.indexOf('</hp:tbl>',start)+9;assert.ok(start>=0&&end>start);return xml.slice(0,start)+transform(xml.slice(start,end))+xml.slice(end);}

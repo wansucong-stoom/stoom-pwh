@@ -21,18 +21,27 @@ test('closing recovery leaves the draft intact even after a new edit',{
  const doc=HwpDocument.createEmpty();doc.createBlankDocument();await fs.writeFile(filename,doc.exportHwpx());doc.insertText(0,0,0,'임시 복구 내용');const draft=Buffer.from(doc.exportHwpx());doc.free();
  const registered=await registerClientDocument(filename),html=await clientViewerHtml(),draftSha=createHash('sha256').update(draft).digest('hex'),key=registered.source+'|'+registered.sourceSha256;let sessionId;
  const server=createServer(async(req,res)=>{try{
-  if(req.url==='/editor'){res.setHeader('Content-Type','text/html');res.end(html);return;}
+  if(req.url==='/editor'){res.setHeader('Content-Type','text/html; charset=utf-8');res.end(html);return;}
   if(req.url==='/rpc'){let body='';for await(const part of req)body+=part;const request=JSON.parse(body);if(request.params?.name==='pwh_editor_poll')sessionId=request.params.arguments.sessionId;res.setHeader('Content-Type','application/json');res.end(JSON.stringify(await handleRequest(request)));return;}
-  res.setHeader('Content-Type','text/html');res.end(`<style>html,body,iframe{width:100%;height:100%;margin:0;border:0}</style><iframe id="editor"></iframe><script>
+  res.setHeader('Content-Type','text/html; charset=utf-8');res.end(`<style>html,body,iframe{width:100%;height:100%;margin:0;border:0}</style><iframe id="editor"></iframe><script>
    addEventListener('message',async e=>{const m=e.data;if(m?.jsonrpc!=='2.0')return;if(m.method==='ui/notifications/initialized'){e.source.postMessage({jsonrpc:'2.0',method:'ui/notifications/tool-result',params:{structuredContent:${JSON.stringify(registered)}}},location.origin);return;}if(m.id===undefined)return;const r=m.method==='ui/initialize'?{jsonrpc:'2.0',id:m.id,result:{hostCapabilities:{}}}:await(await fetch('/rpc',{method:'POST',body:JSON.stringify(m)})).json();e.source.postMessage(r,location.origin);});
    const request=indexedDB.open('pwh-inline-recovery',1);request.onupgradeneeded=()=>request.result.createObjectStore('drafts',{keyPath:'key'});request.onsuccess=()=>{const db=request.result,tx=db.transaction('drafts','readwrite');const bytes=Uint8Array.from(atob(${JSON.stringify(draft.toString('base64'))}),c=>c.charCodeAt(0));tx.objectStore('drafts').put({key:${JSON.stringify(key)},bytes:bytes.buffer,sha256:${JSON.stringify(draftSha)},savedAt:Date.now(),source:${JSON.stringify(registered.source)}});tx.oncomplete=()=>{db.close();document.getElementById('editor').src='/editor';};};</script>`);
  }catch(error){res.statusCode=500;res.end(String(error.stack));}});
  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));const browser=await chromium.launch({headless:true,...(process.env.PWH_BROWSER_EXECUTABLE?{executablePath:process.env.PWH_BROWSER_EXECUTABLE}:{})});
  try{
-  const page=await browser.newPage({viewport:{width:900,height:750}});await page.goto(`http://127.0.0.1:${server.address().port}`);
+  const page=await browser.newPage({viewport:{width:900,height:750}}),diagnostics=[];
+  page.on('pageerror',error=>diagnostics.push(error.message));
+  page.on('console',message=>{if(['error','warning'].includes(message.type()))diagnostics.push(message.text());});
+  await page.goto(`http://127.0.0.1:${server.address().port}`);
   for(let i=0;i<100&&!page.frames().some(f=>f.url().endsWith('/editor'));i++)await pause(100);
   const frame=page.frames().find(f=>f.url().endsWith('/editor'));assert.ok(frame);
-  const dialog=frame.getByRole('dialog',{name:'미저장 편집 내용 복구'});await dialog.getByRole('button',{name:'닫기'}).click({timeout:15000});
+  const dialog=frame.getByRole('dialog',{name:'미저장 편집 내용 복구'});
+  try{await dialog.getByRole('button',{name:'닫기'}).click({timeout:15000});}
+  catch(error){
+   const state=await frame.evaluate(()=>({status:document.getElementById('pwh-status')?.textContent,
+    ready:window.pwhRecoveryReady?.(),editorInstalled:!!window.pwhEditor,characterSet:document.characterSet}));
+   throw new Error('Recovery prompt unavailable: '+JSON.stringify({state,diagnostics}),{cause:error});
+  }
   for(let i=0;i<200&&!sessionId;i++)await pause(100);assert.ok(sessionId,'editor loads after close');
   assert.equal((await frame.evaluate(()=>window.pwhEditor.context())).blankDocument,true,'saved source stays open');
   const state=editorState({sessionId}),ticket=await editorTableInsert({sessionId,expected:state.context,table:{rows:1,columns:1,cells:[{row:0,column:0,paragraphs:['new']} ]}});

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "reference": {
+    "id": "rhwp-0.8.7-pwh-r13",
+    "file": "pwh-runtime-rhwp-0.8.7-pwh-r13-windows-x64.zip",
+    "size": 40968601,
+    "sha256": "7aab3ca922e12c40e748641b1391dffc06616585d923eaa9f8dc35be1ec97e0e",
+    "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/v0.6.40/pwh-runtime-rhwp-0.8.7-pwh-r13-windows-x64.zip"
+  },
+  "blank": {
+    "file": "blank2010-1a76570e8339.hwp",
+    "sha256": "43f472751fafefb8c66b0f831660ebed51e443a46bebe44c75bba918154ce4c9",
+    "url": "https://raw.githubusercontent.com/edwardkim/rhwp/1a76570e833917d15817415a53c09ad61ab3203f/saved/blank2010.hwp"
+  }
+}

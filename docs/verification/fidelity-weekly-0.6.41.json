@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "verifiedOn": "2026-11-02",
+  "pwhVersion": "0.6.41",
+  "desktopVersion": "0.1.22",
+  "runtime": "rhwp-0.8.7-pwh-r14",
+  "wasmSha256": "3f3f7470817561a5ca5c0560c6af301f06f66b186f96a1a7b57d50657f6d1f8d",
+  "buildRecordSha256": "dd8956114c1d9fc69e16ca2f05d11f62e28ca79a82f73f0b2c0c834214834b93",
+  "previousVerification": "fidelity-weekly-0.6.40.json",
+  "checks": [
+    {
+      "name": "Pinned source and eighteen ordered patches match the formal build",
+      "status": "passed",
+      "sourceFilesCompared": 1312
+    },
+    {
+      "name": "Recorded core files and unchanged JavaScript glue ABI",
+      "status": "passed",
+      "glueSha256": "e4b17c467ec6e5955393f7b9b162150ea0f16271085dcec7955bcd87c0014d47"
+    },
+    {
+      "name": "Formal and final candidate native print outputs match for all 39 physical pages",
+      "status": "passed",
+      "svgFiles": 39,
+      "textLayoutFiles": 39,
+      "scope": "Output equivalence, not whole-document quality approval"
+    },
+    {
+      "name": "Other three source documents retain print SVG, text and reopen page counts",
+      "status": "passed",
+      "pageCounts": [
+        65,
+        4,
+        2
+      ],
+      "svgFiles": 71
+    },
+    {
+      "name": "Actual whole-document Desktop PDF observes the formal WASM",
+      "status": "passed",
+      "pages": 39,
+      "documentDirty": false,
+      "sourceUnchanged": true
+    },
+    {
+      "name": "Fixed sequential PDF quality gate and separate content/geometry audits",
+      "status": "passed",
+      "acceptedThrough": 7,
+      "nextPage": 8,
+      "previousPrefixPreserved": true
+    },
+    {
+      "name": "Actual-core regression suite with independent r13 reference",
+      "status": "passed",
+      "tests": 389,
+      "passed": 330,
+      "failed": 0,
+      "skipped": 59,
+      "skipScope": "Environment-specific prerequisites; not counted as passed"
+    }
+  ],
+  "policy": {
+    "id": "pwh-physical-page-quality-v1",
+    "normalMinF1": 0.95,
+    "darkMinF1": 0.9,
+    "dpi": 150,
+    "tolerancePixels": 2,
+    "normalThreshold": 245,
+    "darkThreshold": 180,
+    "alignment": "Same page origin and physical scale; no fitting, translation or page remapping."
+  },
+  "pageCounts": {
+    "hancom": 39,
+    "pwh": 39
+  },
+  "acceptedThrough": 7,
+  "nextPage": 8,
+  "pages": [
+    {
+      "page": 1,
+      "normalF1": 0.972127,
+      "darkF1": 0.957435,
+      "contentVerified": true,
+      "geometryVerified": true
+    },
+    {
+      "page": 2,
+      "normalF1": 0.99226,
+      "darkF1": 0.985106,
+      "contentVerified": true,
+      "geometryVerified": true
+    },
+    {
+      "page": 3,
+      "normalF1": 0.986816,
+      "darkF1": 0.967184,
+      "contentVerified": true,
+      "geometryVerified": true
+    },
+    {
+      "page": 4,
+      "normalF1": 0.995212,
+      "darkF1": 0.990202,
+      "contentVerified": true,
+      "geometryVerified": true
+    },
+    {
+      "page": 5,
+      "normalF1": 0.998675,
+      "darkF1": 0.996613,
+      "contentVerified": true,
+      "geometryVerified": true
+    },
+    {
+      "page": 6,
+      "normalF1": 0.976603,
+      "darkF1": 0.944863,
+      "contentVerified": true,
+      "geometryVerified": true
+    },
+    {
+      "page": 7,
+      "normalF1": 0.957781,
+      "darkF1": 0.914565,
+      "contentVerified": true,
+      "geometryVerified": true
+    }
+  ],
+  "page7SourceText": {
+    "referenceCharacters": 445,
+    "outputCharacters": 445,
+    "prematureNextPageCharactersRemoved": 21
+  },
+  "limitations": [
+    "Only physical pages 1 through 7 have passed sequential quality and content/geometry approval; page 8 is the next frontier. All 39 pages were regenerated, not approved.",
+    "At page 7 the lower table boundary is about 2.525 pt shorter than Hancom; text-only ancestor-clip residual affects 61 pixels with maximum edge depth 1.711 pixels, within the fixed 2-pixel tolerance.",
+    "Picture-edit save/reopen tests verify source text and physical ownership, not exact edited PDF pixels. Other legacy text/width reflow serialization cases remain outside this fix.",
+    "The native CLI, editor SDK and historical full Studio remain preserved base components; active Pwh and Desktop inline editors share the formal r14 core.",
+    "No user document was modified. Private documents, original PDF/image data, institution text, local paths and audit records are excluded from public artifacts."
+  ]
+}

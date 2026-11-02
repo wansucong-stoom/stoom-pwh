@@ -210,10 +210,14 @@ def main():
     core_inputs = tree(project/'docs/engine-patches', 'docs/engine-patches/')
     core_inputs['scripts/build-patched-core.mjs'] = regular(project/'scripts/build-patched-core.mjs')
     core_inputs['scripts/preserve-patched-runtime.py'] = regular(project/'scripts/preserve-patched-runtime.py')
+    core_inputs['scripts/prepare-core-regressions.mjs'] = regular(project/'scripts/prepare-core-regressions.mjs')
     for name in ('scripts/setup.mjs','scripts/preserved-runtime.mjs','src/nested-table-paste.mjs','src/request-state.mjs','package.json'):
         core_inputs[name] = regular(project/name)
     core_inputs.update(tree(project/'tests/engine-source-ownership', 'tests/engine-source-ownership/', frozenset({'__pycache__'})))
     fidelity_tests = ('tests/stored-float-frame.test.mjs', 'tests/stored-page-margin.test.mjs', 'tests/stored-nested-block-host.test.mjs', 'tests/shape-fill-transparency.test.mjs', 'tests/nested-declared-row-pagination.test.mjs', 'tests/mixed-block-source-order.test.mjs',
+                      'tests/nested-opening-frame.test.mjs', 'tests/stored-float-source.test.mjs', 'tests/stored-nested-tail.test.mjs',
+                      'tests/nested-opening-frame-browser.test.mjs', 'tests/sibling-table-offset.test.mjs', 'tests/stored-float-host-frame.test.mjs',
+                      'docs/verification/r14-regression-inputs.json', 'docs/verification/fidelity-weekly-0.6.41.json',
                       'tests/compare-pages.test.py', 'tests/fixtures/rowbreak-table/synthetic-rowbreak-single-line-control.hwpx')
     for name in fidelity_tests:
         core_inputs[name] = regular(project/name)

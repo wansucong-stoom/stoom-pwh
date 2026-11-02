@@ -29,9 +29,24 @@ jobs:
         with:
           node-version: '24'
       - run: node scripts/setup.mjs --runtime-root "$env:RUNNER_TEMP/pwh-wasm-regression-runtime"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - shell: pwsh
+        run: |
+          rustup toolchain install 1.93.1 --profile minimal
+          if ($LASTEXITCODE -ne 0) { throw 'Rust source-test compiler installation failed' }
+          node scripts/prepare-core-regressions.mjs --work-root "$env:RUNNER_TEMP/pwh-core-regression-inputs"
+          if ($LASTEXITCODE -ne 0) { throw 'Pinned core regression input preparation failed' }
       - shell: pwsh
         run: |
           $env:PWH_RUNTIME_ROOT = Join-Path $env:RUNNER_TEMP 'pwh-wasm-regression-runtime'
+          $inputs = Get-Content (Join-Path $env:RUNNER_TEMP 'pwh-core-regression-inputs/environment.json') -Raw | ConvertFrom-Json
+          $env:PWH_ENGINE_SOURCE = $inputs.PWH_ENGINE_SOURCE
+          $env:PWH_REFERENCE_CORE_JS = $inputs.PWH_REFERENCE_CORE_JS
+          $env:PWH_REFERENCE_CORE_WASM = $inputs.PWH_REFERENCE_CORE_WASM
+          $env:PWH_RUSTC = (rustup which --toolchain 1.93.1 rustc)
+          $env:RUSTC = $env:PWH_RUSTC
           node scripts/run-ci-tests.mjs core
   browser-regressions:
     runs-on: windows-latest

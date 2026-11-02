@@ -75,7 +75,7 @@ recursive owners, synchronized plain-text restarts, stale text/format coordinate
 invalid cursors, synthetic lines and unsupported spans. These predicate checks
 complement the browser and document roundtrip tests above.
 
-The r14 candidate runners accept the source-root argument or `PWH_ENGINE_SOURCE`.
+The r14 runners accept the source-root argument or `PWH_ENGINE_SOURCE`. CI prepares hash-pinned source and an independent r13 core with `scripts/prepare-core-regressions.mjs`; the published r14 tests no longer require a candidate-only flag.
 The parallel-row suite has 19 cases covering declared minimum-space conservation,
 complete column ownership, original page origins versus paragraph-local resets,
 edited/synthetic input rejection and explicit accepted-frame transport. The
@@ -90,7 +90,7 @@ commands, not a claim that an environment without those inputs ran them.
 
 다음 시험은 같은 합성 HWPX에서 **물리적 첫 프레임**, **소비한 원문 커서**, **개체 자체의 여백**을 구분합니다. 실제 사용자 문서나 로컬 경로를 포함하지 않습니다. 소스 함수 시험과 실제 WASM 시험은 서로 다른 검증이며, 이 결과만으로 한글 기준 PDF와의 일치율을 승인하지 않습니다.
 
-r14는 아직 미배포 후보입니다. Node·브라우저 후보 시험에는 `PWH_CANDIDATE_CORE_TESTS=1`을 명시해야 하며, 기본 CI의 배포 r13에 r14 기대값을 적용하지 않습니다. 아래 standalone 소스 명령은 명시한 원본 소스 루트를 검사합니다.
+r14는 후보 전용 플래그 없이 실제 코어·브라우저 CI에서 검사합니다. 아래 standalone 명령은 명시한 원본 소스 루트를 검사합니다. CI는 `scripts/prepare-core-regressions.mjs`로 같은 패치 소스와 독립 r13 기준 코어를 해시 검증해 준비합니다.
 
 ```powershell
 $env:PWH_ENGINE_SOURCE = '<패치를 적용한 엔진 소스 루트>'
@@ -105,9 +105,8 @@ node tests/engine-source-ownership/nested-opening-frame-source.mjs
 - `nested-opening-frame-source.mjs`: 18개 실제 소스 사례. 승인된 자식 프레임을 소유한 빈 호스트만 여백을 추가하며, 다른 표 포인터·글이 있는 호스트·합성 줄·재조판된 줄·중첩 편집 후의 원본처럼 보이는 줄 등을 거절하는지 확인합니다.
 
 ```powershell
-$env:PWH_CANDIDATE_CORE_TESTS = '1'
-$env:PWH_CORE_JS = '<후보 core의 rhwp.js>'
-$env:PWH_CORE_WASM = '<후보 core의 rhwp_bg.wasm>'
+$env:PWH_CORE_JS = '<r14 core의 rhwp.js>'
+$env:PWH_CORE_WASM = '<r14 core의 rhwp_bg.wasm>'
 node --test tests/stored-float-host-frame.test.mjs tests/nested-opening-frame.test.mjs
 ```
 
