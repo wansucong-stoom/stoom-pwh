@@ -4,6 +4,21 @@ import {pathToFileURL} from 'node:url';
 import {patchBodyCursorContract} from './patch-body-cursor-contract.mjs';
 const root=path.resolve(process.argv[2]);
 const studio=path.join(root,'rhwp-studio');
+await fs.copyFile(new URL('../src/pwh-page-margin-layout.ts',import.meta.url),path.join(studio,'src/ui/pwh-page-margin-layout.ts'));
+await fs.copyFile(new URL('../src/print-preview-view.mjs',import.meta.url),path.join(studio,'src/command/commands/pwh-print-preview-view.mjs'));
+const pageSetupPath=path.join(studio,'src/ui/page-setup-dialog.ts');
+let pageSetup=await fs.readFile(pageSetupPath,'utf8');
+if(!pageSetup.includes('pwh spatial margin controls')){
+ const margin='    marginSection.appendChild(marginGrid);';
+ const populate='    this.populateFields();\n  }';
+ const width="    super(i18nText('dialog.pageSetup.matchesPaperPreset.title'), 440);";
+ if(![margin,populate,width].every(anchor=>pageSetup.includes(anchor)))throw Error('Unsupported page margin layout');
+ pageSetup="// pwh spatial margin controls\nimport {createPwhMarginLayout,refreshPwhMarginLayout} from './pwh-page-margin-layout';\n"+pageSetup;
+ pageSetup=pageSetup.replace(width,width.replace('440','580'));
+ pageSetup=pageSetup.replace(margin,"    marginSection.appendChild(createPwhMarginLayout({inputs:this.marginInputs,width:this.widthInput,height:this.heightInput,paper:this.paperSelect,orientation:this.landscapeRadios,binding:this.bindingRadios}));");
+ pageSetup=pageSetup.replace(populate,'    this.populateFields();\n    refreshPwhMarginLayout(this.dialog);\n  }');
+ await fs.writeFile(pageSetupPath,pageSetup);
+}
 // Apply the same text selection behavior in both Pwh hosts.
 await fs.copyFile(new URL('../src/multiclick-selection.mjs',import.meta.url),path.join(studio,'src/engine/pwh-multiclick-selection.mjs'));
 await fs.copyFile(new URL('../src/selection-page-context.mjs',import.meta.url),path.join(studio,'src/selection-page-context.mjs'));
@@ -616,6 +631,35 @@ if(!printCommand.includes('pwh native print')){
       if (button) button.hidden = true;
     }`);
  printCommand=printCommand.replace(errorLine,"    const msg = err instanceof Error ? err.message : String(err);\n    if (direct) window.dispatchEvent(new CustomEvent('pwh-print-result', { detail: { ok: false, message: msg } }));\n    console.error('[file:print]', msg);");
+ await fs.writeFile(printCommandPath,printCommand);
+}
+if(!printCommand.includes('pwh screen-only preview zoom')){
+ const finish='    appendSvgPage(doc, doc.body, printPage);\n  }\n}';
+ if(!printCommand.includes(finish))throw Error('Unsupported print preview view');
+ printCommand="// pwh screen-only preview zoom\nimport {installPrintPreviewView} from '@/command/commands/pwh-print-preview-view.mjs';\n"+printCommand;
+ printCommand=printCommand.replace(finish,'    appendSvgPage(doc, doc.body, printPage);\n  }\n  if (previewWindow) installPrintPreviewView(previewWindow);\n}');
+ await fs.writeFile(printCommandPath,printCommand);
+}
+if(!printCommand.includes('pwh yield prepared preview pages')){
+ const signature='function setupPrintDocument(';
+ const result='  previewWindow: Window | null = null,\n): void {';
+ const loop='  for (const printPage of printPages) {\n    appendSvgPage(doc, doc.body, printPage);\n  }';
+ const preview='    appendPrintPreviewBar(doc, previewWindow, fileName, printPages.length);';
+ if(![signature,result,loop,preview].every(anchor=>printCommand.includes(anchor)))throw Error('Unsupported progressive print preview');
+ printCommand=printCommand.replace(signature,'async function setupPrintDocument(').replace(result,'  previewWindow: Window | null = null,\n): Promise<void> {');
+ printCommand=printCommand.replace(preview,preview+"\n    const printButton = doc.getElementById('print-btn');\n    if (printButton) printButton.hidden = true;");
+ printCommand=printCommand.replace(loop,`  // pwh yield prepared preview pages: portable SVG capture has already ended.
+  // Yield on the opener's timer so closing the preview cannot strand a promise.
+  for (let index = 0; index < printPages.length; index++) {
+    if (previewWindow?.closed) return;
+    appendSvgPage(doc, doc.body, printPages[index]);
+    if (previewWindow && index === 0) installPrintPreviewView(previewWindow, printPages);
+    if (previewWindow && index % 4 === 0) await new Promise<void>(resolve => setTimeout(resolve, 0));
+  }`);
+ printCommand=printCommand.replaceAll('    setupPrintDocument(surface.document,','    await setupPrintDocument(surface.document,');
+ const ready='    await waitForPrintSurfaceReady(surface);';
+ if(!printCommand.includes(ready))throw Error('Unsupported print surface readiness');
+ printCommand=printCommand.replaceAll(ready,'    if (surface.window.closed) return;\n'+ready);
  await fs.writeFile(printCommandPath,printCommand);
 }
 // The native dialog owns printer, copies, range and per-job driver settings.

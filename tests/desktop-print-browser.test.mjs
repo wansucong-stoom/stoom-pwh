@@ -22,7 +22,19 @@ test('print opens one native workflow while preview and image export stay separa
   await direct(()=>editor.locator('[data-cmd="file:print"]').click());
   for(const key of ['Alt+p','Control+p']){await editor.getByRole('textbox',{name:'문서 편집 입력'}).focus();await direct(()=>page.keyboard.press(key));}
   await editor.locator('[data-menu="file"] .menu-title').click();const next=page.waitForEvent('popup');await editor.locator('[data-pwh-file="print-preview"]').click();const preview=await next;
-  await preview.locator('.page svg').first().waitFor({state:'attached'});await preview.locator('#print-btn').waitFor({state:'hidden'});assert.equal(await preview.evaluate(()=>window.__pwhPrintCalls||0),0);await preview.close();
+  await preview.locator('.page svg').first().waitFor({state:'attached'});await preview.locator('#print-btn').waitFor({state:'hidden'});assert.equal(await preview.evaluate(()=>window.__pwhPrintCalls||0),0);
+  await preview.getByRole('combobox',{name:'미리보기 배율'}).selectOption('200');
+  assert.equal(await preview.getByRole('status',{name:'현재 배율'}).textContent(),'200%');await preview.close();
+  const topMargin=()=>editor.locator('body').evaluate(()=>window.rhwpStudio.plugins.deps.wasm.getPageDef(0).marginTop);
+  const originalTop=await topMargin();
+  await editor.getByRole('textbox',{name:'문서 편집 입력'}).focus();await page.keyboard.press('F7');
+  const setup=editor.locator('.dialog-wrap').filter({hasText:'편집 용지'});await setup.waitFor({state:'visible'});
+  await setup.getByRole('spinbutton',{name:'위쪽 여백(mm)'}).fill('25');
+  assert.equal(await setup.locator('[data-margin=marginTop].active').count(),1);
+  await setup.locator('.dialog-btn-primary').click();
+  assert.equal(await topMargin(),Math.round(25*7200/25.4));
+  await editor.getByRole('textbox',{name:'문서 편집 입력'}).focus();await page.keyboard.press('Control+z');
+  assert.equal(await topMargin(),originalTop,'page-margin apply must use the existing undo route');
   await editor.locator('[data-menu="file"] .menu-title').click();await editor.locator('[data-pwh-file="image-export"]').click();
   const dialog=child.getByRole('dialog',{name:'그림으로 저장'});await dialog.waitFor({state:'visible'});const size=await dialog.evaluate(el=>({dialog:el.getBoundingClientRect().height,content:el.querySelector('.output-content').getBoundingClientRect().height}));assert.ok(size.dialog<=size.content+4);await dialog.getByRole('button',{name:'취소'}).click();
  }finally{await browser.close();await new Promise(r=>app.server.close(r));await fs.rm(dir,{recursive:true,force:true,maxRetries:10,retryDelay:100});}

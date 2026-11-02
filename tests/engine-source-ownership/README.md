@@ -1,6 +1,17 @@
-# Nested table source ownership regression tests
+# 중첩 표의 원문 소유 범위 회귀 검사
 
-These tests create synthetic HWPX documents. No user documents, screenshots, or private anchor specifications are included.
+공개 합성 HWPX로 중첩 표의 쪽 분할·원문 주소·표시 여부를 검사합니다. 사용자 문서·스크린샷·개인 진단 문구는 포함하지 않습니다.
+
+## r12: 선언 높이와 저장된 인라인 개체 줄
+
+`node --test tests/nested-declared-row-pagination.test.mjs`의 새 합성 회귀 4건은 다음을 검사합니다. 코어 환경 변수는 아래 실행 안내와 같습니다.
+
+- 선언 높이가 있는 중첩 행의 일부가 남은 쪽 공간을 사용하며 각 원문 표식이 한 번씩 물리 쪽 안에 놓입니다. 원문 셀 주소·선언 크기, 내보내기·재열기·편집·스냅샷 복원도 확인합니다.
+- 실제 저장 프레임이 없으면 기존 행 전체 경로를 유지합니다.
+- 단일 저장 줄 상자 안에 온전히 들어 있는 인라인 표는 개체 줄 단위로 넘어갑니다.
+- 저장 줄 상자보다 큰 내부 표는 재귀 분할을 유지해 후속 원문을 소비하거나 용지 밖에 놓지 않습니다.
+
+합성 문서의 논리 배치 검사만으로 실제 문서 전체의 글리프 표시를 증명하지 않습니다. SVG 클립 검사와 실제 기준 PDF 비교를 함께 사용합니다.
 
 ## Run
 

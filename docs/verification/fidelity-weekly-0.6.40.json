@@ -1,0 +1,547 @@
+{
+  "schemaVersion": 1,
+  "verifiedOn": "2026-11-02",
+  "pwhVersion": "0.6.40",
+  "desktopVersion": "0.1.21",
+  "runtime": "rhwp-0.8.7-pwh-r12",
+  "coreSha256": "1349c8d702e0c966a47236531fc0129a6c09234975b0bd1d002880d28515bd61",
+  "previousVerification": "fidelity-weekly-0.6.39.json",
+  "method": "Actual Pwh Desktop print-preview SVG/CSS and Electron printToPDF. Both PDFs rasterized with PDFium at the same physical scale and page origin. No fitting, translation or page remapping.",
+  "dpi": 150,
+  "tolerancePixels": 2,
+  "alignment": "Same page origin and physical scale; no fitting, translation or page remapping.",
+  "paperRounding": "A paper-size difference under 1 point was padded at the page edge only, without rescaling or moving content.",
+  "cases": [
+    {
+      "id": "hwpx-long-nested-report",
+      "sourceFormat": "HWPX",
+      "status": "improved-with-remaining-pagination-mismatch",
+      "before": {
+        "runtime": "rhwp-0.8.7-pwh-r11",
+        "pages": {
+          "hancom": 39,
+          "pwh": 43
+        },
+        "normal": {
+          "threshold": 245,
+          "allPagesAccountedFor": true,
+          "tolerantInkPrecision": 0.543187,
+          "tolerantInkRecall": 0.519685,
+          "tolerantInkF1": 0.531177,
+          "exactInkF1": 0.399217,
+          "referenceInkPixels": 13048007,
+          "pwhInkPixels": 12662360
+        },
+        "dark": {
+          "threshold": 180,
+          "allPagesAccountedFor": true,
+          "tolerantInkPrecision": 0.442613,
+          "tolerantInkRecall": 0.411699,
+          "tolerantInkF1": 0.426597,
+          "exactInkF1": 0.223071,
+          "referenceInkPixels": 5824009,
+          "pwhInkPixels": 5650217
+        }
+      },
+      "pages": {
+        "hancom": 39,
+        "pwh": 41
+      },
+      "pageCountsMatch": false,
+      "accountedPhysicalPages": 41,
+      "comparedPhysicalPages": 39,
+      "extraPwhPages": [
+        40,
+        41
+      ],
+      "missingPwhPages": [],
+      "normal": {
+        "threshold": 245,
+        "allPagesAccountedFor": true,
+        "complete": true,
+        "tolerantInkPrecision": 0.622786,
+        "tolerantInkRecall": 0.598024,
+        "tolerantInkF1": 0.610154,
+        "exactInkF1": 0.466582,
+        "referenceInkPixels": 13048007,
+        "pwhInkPixels": 12734475
+      },
+      "dark": {
+        "threshold": 180,
+        "allPagesAccountedFor": true,
+        "complete": true,
+        "tolerantInkPrecision": 0.504819,
+        "tolerantInkRecall": 0.482595,
+        "tolerantInkF1": 0.493457,
+        "exactInkF1": 0.263148,
+        "referenceInkPixels": 5824009,
+        "pwhInkPixels": 5670051
+      },
+      "improvementPercentagePoints": {
+        "normalF1": 7.8977,
+        "darkF1": 6.686,
+        "exactF1": 6.7365
+      },
+      "samePhysicalPageChanges": {
+        "improved": 21,
+        "unchanged": 5,
+        "lower": 13
+      },
+      "perPage": [
+        {
+          "page": 1,
+          "status": "compared",
+          "beforeF1": 0.933576,
+          "f1": 0.933576,
+          "darkF1": 0.891426
+        },
+        {
+          "page": 2,
+          "status": "compared",
+          "beforeF1": 0.951616,
+          "f1": 0.951616,
+          "darkF1": 0.9092
+        },
+        {
+          "page": 3,
+          "status": "compared",
+          "beforeF1": 0.946858,
+          "f1": 0.946858,
+          "darkF1": 0.880316
+        },
+        {
+          "page": 4,
+          "status": "compared",
+          "beforeF1": 0.953338,
+          "f1": 0.953338,
+          "darkF1": 0.912198
+        },
+        {
+          "page": 5,
+          "status": "compared",
+          "beforeF1": 0.971112,
+          "f1": 0.971112,
+          "darkF1": 0.93349
+        },
+        {
+          "page": 6,
+          "status": "compared",
+          "beforeF1": 0.440436,
+          "f1": 0.476467,
+          "darkF1": 0.370687
+        },
+        {
+          "page": 7,
+          "status": "compared",
+          "beforeF1": 0.389735,
+          "f1": 0.872552,
+          "darkF1": 0.800297
+        },
+        {
+          "page": 8,
+          "status": "compared",
+          "beforeF1": 0.516254,
+          "f1": 0.582299,
+          "darkF1": 0.37713
+        },
+        {
+          "page": 9,
+          "status": "compared",
+          "beforeF1": 0.520382,
+          "f1": 0.560718,
+          "darkF1": 0.361278
+        },
+        {
+          "page": 10,
+          "status": "compared",
+          "beforeF1": 0.607034,
+          "f1": 0.526447,
+          "darkF1": 0.385006
+        },
+        {
+          "page": 11,
+          "status": "compared",
+          "beforeF1": 0.60442,
+          "f1": 0.453585,
+          "darkF1": 0.321428
+        },
+        {
+          "page": 12,
+          "status": "compared",
+          "beforeF1": 0.452457,
+          "f1": 0.719992,
+          "darkF1": 0.526888
+        },
+        {
+          "page": 13,
+          "status": "compared",
+          "beforeF1": 0.47678,
+          "f1": 0.643438,
+          "darkF1": 0.453387
+        },
+        {
+          "page": 14,
+          "status": "compared",
+          "beforeF1": 0.232672,
+          "f1": 0.577596,
+          "darkF1": 0.398762
+        },
+        {
+          "page": 15,
+          "status": "compared",
+          "beforeF1": 0.610471,
+          "f1": 0.576982,
+          "darkF1": 0.385844
+        },
+        {
+          "page": 16,
+          "status": "compared",
+          "beforeF1": 0.514457,
+          "f1": 0.707327,
+          "darkF1": 0.488534
+        },
+        {
+          "page": 17,
+          "status": "compared",
+          "beforeF1": 0.601263,
+          "f1": 0.588513,
+          "darkF1": 0.430885
+        },
+        {
+          "page": 18,
+          "status": "compared",
+          "beforeF1": 0.454956,
+          "f1": 0.566445,
+          "darkF1": 0.370678
+        },
+        {
+          "page": 19,
+          "status": "compared",
+          "beforeF1": 0.510525,
+          "f1": 0.499636,
+          "darkF1": 0.310587
+        },
+        {
+          "page": 20,
+          "status": "compared",
+          "beforeF1": 0.510979,
+          "f1": 0.448735,
+          "darkF1": 0.323611
+        },
+        {
+          "page": 21,
+          "status": "compared",
+          "beforeF1": 0.476086,
+          "f1": 0.92012,
+          "darkF1": 0.737567
+        },
+        {
+          "page": 22,
+          "status": "compared",
+          "beforeF1": 0.482919,
+          "f1": 0.756172,
+          "darkF1": 0.573184
+        },
+        {
+          "page": 23,
+          "status": "compared",
+          "beforeF1": 0.490637,
+          "f1": 0.749117,
+          "darkF1": 0.51009
+        },
+        {
+          "page": 24,
+          "status": "compared",
+          "beforeF1": 0.54942,
+          "f1": 0.615832,
+          "darkF1": 0.45143
+        },
+        {
+          "page": 25,
+          "status": "compared",
+          "beforeF1": 0.53362,
+          "f1": 0.520737,
+          "darkF1": 0.395866
+        },
+        {
+          "page": 26,
+          "status": "compared",
+          "beforeF1": 0.465835,
+          "f1": 0.629129,
+          "darkF1": 0.417244
+        },
+        {
+          "page": 27,
+          "status": "compared",
+          "beforeF1": 0.54646,
+          "f1": 0.443,
+          "darkF1": 0.252462
+        },
+        {
+          "page": 28,
+          "status": "compared",
+          "beforeF1": 0.519597,
+          "f1": 0.539063,
+          "darkF1": 0.397052
+        },
+        {
+          "page": 29,
+          "status": "compared",
+          "beforeF1": 0.448942,
+          "f1": 0.358421,
+          "darkF1": 0.267912
+        },
+        {
+          "page": 30,
+          "status": "compared",
+          "beforeF1": 0.430302,
+          "f1": 0.547828,
+          "darkF1": 0.377811
+        },
+        {
+          "page": 31,
+          "status": "compared",
+          "beforeF1": 0.593534,
+          "f1": 0.527831,
+          "darkF1": 0.372199
+        },
+        {
+          "page": 32,
+          "status": "compared",
+          "beforeF1": 0.617729,
+          "f1": 0.579778,
+          "darkF1": 0.425201
+        },
+        {
+          "page": 33,
+          "status": "compared",
+          "beforeF1": 0.30478,
+          "f1": 0.496032,
+          "darkF1": 0.364657
+        },
+        {
+          "page": 34,
+          "status": "compared",
+          "beforeF1": 0.517682,
+          "f1": 0.427524,
+          "darkF1": 0.277274
+        },
+        {
+          "page": 35,
+          "status": "compared",
+          "beforeF1": 0.231782,
+          "f1": 0.276649,
+          "darkF1": 0.223757
+        },
+        {
+          "page": 36,
+          "status": "compared",
+          "beforeF1": 0.49695,
+          "f1": 0.549643,
+          "darkF1": 0.36069
+        },
+        {
+          "page": 37,
+          "status": "compared",
+          "beforeF1": 0.401147,
+          "f1": 0.548228,
+          "darkF1": 0.392211
+        },
+        {
+          "page": 38,
+          "status": "compared",
+          "beforeF1": 0.563239,
+          "f1": 0.501452,
+          "darkF1": 0.351274
+        },
+        {
+          "page": 39,
+          "status": "compared",
+          "beforeF1": 0.425707,
+          "f1": 0.475238,
+          "darkF1": 0.350131
+        },
+        {
+          "page": 40,
+          "status": "extra-pwh-page"
+        },
+        {
+          "page": 41,
+          "status": "extra-pwh-page"
+        }
+      ],
+      "diagnosticVisibility": {
+        "terms": 6,
+        "hancomPhysicalPage": 26,
+        "newVisibleSvgOwners": [
+          {
+            "id": 1,
+            "pages": [
+              26
+            ]
+          },
+          {
+            "id": 2,
+            "pages": [
+              26
+            ]
+          },
+          {
+            "id": 3,
+            "pages": [
+              26
+            ]
+          },
+          {
+            "id": 4,
+            "pages": [
+              26
+            ]
+          },
+          {
+            "id": 5,
+            "pages": [
+              26
+            ]
+          },
+          {
+            "id": 6,
+            "pages": [
+              26
+            ]
+          }
+        ],
+        "newPdfOwners": [
+          {
+            "id": 1,
+            "physicalPages": [
+              26
+            ]
+          },
+          {
+            "id": 2,
+            "physicalPages": [
+              26
+            ]
+          },
+          {
+            "id": 3,
+            "physicalPages": [
+              26
+            ]
+          },
+          {
+            "id": 4,
+            "physicalPages": [
+              26
+            ]
+          },
+          {
+            "id": 5,
+            "physicalPages": [
+              26
+            ]
+          },
+          {
+            "id": 6,
+            "physicalPages": [
+              26
+            ]
+          }
+        ],
+        "oldPdfNormalizedExtraction": [
+          {
+            "id": 1,
+            "physicalPages": [
+              28
+            ]
+          },
+          {
+            "id": 2,
+            "physicalPages": []
+          },
+          {
+            "id": 3,
+            "physicalPages": []
+          },
+          {
+            "id": 4,
+            "physicalPages": [
+              28
+            ]
+          },
+          {
+            "id": 5,
+            "physicalPages": [
+              28
+            ]
+          },
+          {
+            "id": 6,
+            "physicalPages": []
+          }
+        ],
+        "method": "Ancestor-clip/viewport SVG glyph-center visibility and PDFium NFKC whitespace-normalized text. These are distinct checks, not proof that every glyph in the document is visible."
+      },
+      "sourcePreservation": {
+        "sourceSha256": "585b0ba0768483416f8f3138da8733bffde46a1cec2216aad25498559ffc6651",
+        "scanSha256": "192f40f12b18e4700a2b657b28116f7ced24216d0dc7bd0628ee3977eb9adee6",
+        "scanItems": 3069,
+        "pages": 41,
+        "roundTripText": true,
+        "sourceUnchanged": true
+      }
+    }
+  ],
+  "otherCoreCorpus": [
+    {
+      "id": "rise",
+      "pages": 65,
+      "identicalPrintSvgPages": 65,
+      "roundTripText": true,
+      "sourceUnchanged": true
+    },
+    {
+      "id": "plan",
+      "pages": 4,
+      "identicalPrintSvgPages": 4,
+      "roundTripText": true,
+      "sourceUnchanged": true
+    },
+    {
+      "id": "approval",
+      "pages": 2,
+      "identicalPrintSvgPages": 2,
+      "roundTripText": true,
+      "sourceUnchanged": true
+    }
+  ],
+  "checks": {
+    "newSyntheticRegressions": 4,
+    "core": {
+      "tests": 325,
+      "pass": 272,
+      "fail": 0,
+      "skipped": 53
+    },
+    "browser": {
+      "tests": 325,
+      "pass": 311,
+      "fail": 0,
+      "skipped": 14
+    },
+    "sourcePredicates": 40,
+    "python": 24,
+    "independentEditorBuilds": 2,
+    "artifactsCompared": 6,
+    "strictTypes": true
+  },
+  "limitations": [
+    "The reference has 39 pages and the new output has 41. Overall pagination and layout still differ.",
+    "Of the same 39 physical pages, 21 improved, 5 were unchanged and 13 had a lower F1. Pages were never remapped to improve the score.",
+    "Six diagnostic terms are visible at the expected page; this is not a complete output-content-loss audit.",
+    "Other 71 pages were compared as exact core print SVG bytes; earlier PDF fidelity records remain separate.",
+    "Browser/core test sets overlap. Account, OS clipboard and native-window tests require separate environments.",
+    "Private source documents, PDFs, images, source phrases and local paths are excluded."
+  ]
+}

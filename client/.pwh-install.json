@@ -1,25 +1,25 @@
 {
   "kind": "studio-inline",
-  "version": "0.6.39",
+  "version": "0.6.40",
   "upstreamVersion": "0.8.7",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "files": {
-    "editor.js": "416d062e87f33d20f8611fcd2134a7e60447a7591f962cb8d45e07d8ca0331c7",
+    "editor.js": "1c7293a06902f05ea11476052b4763f21d31860ac330cd7914cd75ec1e03f540",
     "rhwp-studio.css": "36fac005da9ae7342d413bbb7822f2a8cdb5527b9111384f6e756b02c8071357",
     "editor-body.html": "afc04317043d01ef99fb91eb9bce88723fac82491bf42473e4b30436e5066ceb"
   },
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "common",
-    "sha256": "695267b89a1203e350879ba27a9fe9e4847791478c38decda6f41b64d34d750b",
+    "sha256": "88563f2d369b39cc8fbf2e7e99fbce6abb99ec281e3b8a75c9e9b719e3bfd4f1",
     "files": [
       {
         "path": "package.json",
-        "sha256": "a20fbd37dc8cfd63008f5b44b6f04b9412adb7f19ee1ded95ccbd017fea1effc"
+        "sha256": "388d8f68d9ede1acb31a4795b61dcacd2b95324beaf48e9ae1b85fb21a3ca5f2"
       },
       {
         "path": "scripts/build-inline.mjs",
-        "sha256": "db48f113c45fc15806f5285ef484a40a826aa0f395144bbcedc6e1c468cb8fa4"
+        "sha256": "f442999b2423658a4a6ab4d3f21dd9229fc5d797c9b38732f308c63cfc4ada22"
       },
       {
         "path": "scripts/bundle-client.mjs",
@@ -123,7 +123,7 @@
       },
       {
         "path": "src/inline-host.js",
-        "sha256": "0b5186317e576904fe184a3ce78590a3f5c841731b9235ffc2722e3f2b18b0e3"
+        "sha256": "3811696d20cf06de56678f4e98abede150827f075a3979b7913fbaf97d5eda17"
       },
       {
         "path": "src/inline-image-urls.mjs",
@@ -170,6 +170,10 @@
         "sha256": "feaffd5980846e5c3442e2a8596818371b67cfc7290c90d6129270e293c3d139"
       },
       {
+        "path": "src/print-preview-view.mjs",
+        "sha256": "f9f782913c56aa646298e133f7500d4634412849da865e043490c538ab11421f"
+      },
+      {
         "path": "src/pwh-cell-border-dialog.css",
         "sha256": "4ecf560a57600faa3241f78a485308573a54a40ee58bcb737eeca0b1a7287613"
       },
@@ -184,6 +188,10 @@
       {
         "path": "src/pwh-color-palette.ts",
         "sha256": "fe5fc6ff05bd449e059f8202ed30ade3fa58165c6ed63dc260fdd578b8362024"
+      },
+      {
+        "path": "src/pwh-page-margin-layout.ts",
+        "sha256": "198bf605b25006a0494b12439fe518eac01e5ab7d34d43aa44f53a5b4b9ea0f4"
       },
       {
         "path": "src/render-fonts.mjs",

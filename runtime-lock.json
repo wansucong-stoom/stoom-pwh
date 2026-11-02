@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
-  "id": "rhwp-0.8.7-pwh-r11",
+  "id": "rhwp-0.8.7-pwh-r12",
   "platform": "win32-x64",
   "upstreamVersion": "0.8.7",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
-  "releaseTag": "v0.6.39",
+  "releaseTag": "v0.6.40",
   "runtime": {
-    "file": "pwh-runtime-rhwp-0.8.7-pwh-r11-windows-x64.zip",
-    "size": 40947981,
-    "sha256": "62ea9a232173a8713962bdd595473f57687c4241c5b54911f7909749ca12af7c",
-    "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/v0.6.39/pwh-runtime-rhwp-0.8.7-pwh-r11-windows-x64.zip"
+    "file": "pwh-runtime-rhwp-0.8.7-pwh-r12-windows-x64.zip",
+    "size": 40955473,
+    "sha256": "4bccb5c4734041140c6dcaab726b7fc9a8627097e08cae7213a7c184749402f5",
+    "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/v0.6.40/pwh-runtime-rhwp-0.8.7-pwh-r12-windows-x64.zip"
   },
   "preservationAssets": [
     {
@@ -199,10 +199,22 @@
       "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/v0.6.39/pwh-inline-build-inputs-rhwp-0.8.7-pwh-r11.zip"
     },
     {
+      "file": "pwh-core-patches-rhwp-0.8.7-pwh-r12.zip",
+      "size": 140757,
+      "sha256": "36cb81fafe45a85c01d8d499ea13a785c95ca6b615a0fd1864eaa5cc4dbe4fee",
+      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/v0.6.40/pwh-core-patches-rhwp-0.8.7-pwh-r12.zip"
+    },
+    {
+      "file": "pwh-inline-build-inputs-rhwp-0.8.7-pwh-r12.zip",
+      "size": 2050589,
+      "sha256": "181dbc66a78111420542ec1522da178b424a13b5c277a2fb14cfa23b065d5ebb",
+      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/v0.6.40/pwh-inline-build-inputs-rhwp-0.8.7-pwh-r12.zip"
+    },
+    {
       "file": "VERIFICATION.json",
-      "size": 14258,
-      "sha256": "dbd429b6690da4968fcd2e45b0cc93edadd326edc62bdd8de6dce9114f95c346",
-      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/v0.6.39/VERIFICATION.json"
+      "size": 13772,
+      "sha256": "21f69da075964c150b02c5db2be2d7119306e198e13ef0d837347759ef0e890e",
+      "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/v0.6.40/VERIFICATION.json"
     }
   ]
 }

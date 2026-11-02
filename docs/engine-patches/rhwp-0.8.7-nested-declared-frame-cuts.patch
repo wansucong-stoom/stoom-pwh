@@ -1,0 +1,80 @@
+diff --git a/src/renderer/layout/table_layout.rs b/src/renderer/layout/table_layout.rs
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -12531,14 +12531,14 @@
+             // unambiguous nested owner. Keep the host's text lines as separate
+             // source atoms in the existing text/table flow order, and project
+             // the nested rows with their exact child cuts.
+-            let projected_mixed_block_table = para_has_visible_text
+-                && p.controls.len() == 1
++            let projected_source_block_table = p.controls.len() == 1
+                 && p.control_text_positions().first() == Some(&0)
+                 && matches!(&p.controls[0], Control::Table(t)
+                     if t.row_count >= 2 && !t.common.treat_as_char
+                     && matches!(t.common.text_wrap, TextWrap::TopAndBottom)
+                     && !self.nested_table_is_overlay(t)
+                     && matches!(t.page_break, TablePageBreak::RowBreak));
++            let projected_mixed_block_table = para_has_visible_text && projected_source_block_table;
+             if has_table_in_para && (p.text.trim().is_empty() || projected_mixed_block_table) {
+                 let nested_tables: Vec<&crate::model::table::Table> = p
+                     .controls
+@@ -12548,7 +12548,20 @@
+                         _ => None,
+                     })
+                     .collect();
++                // A complete stored inline object owns one source line. Its
++                // child rows must not be offered as independent parent cuts;
++                // keep the enclosing object line atomic. Oversized/reflowed
++                // objects without that complete saved box keep recursive cuts.
++                let stored_inline_object = nested_tables.first().is_some_and(|child|
++                    child.common.treat_as_char && child.caption.is_none()
++                    && p.controls.len() == 1 && !para_has_visible_text
++                    && !p.stored_text_partition_is_dirty() && !p.cell_format_vpos_dirty
++                    && p.line_segs.len() == 1
++                    && !line_seg_is_synthetic(&p.line_segs[0])
++                    && hwpunit_to_px(p.line_segs[0].line_height, self.dpi)
++                        + hwpunit_to_px(2, self.dpi) >= self.calc_nested_table_height(child, styles));
+                 if nested_tables.len() == 1
++                    && !stored_inline_object
+                     && nested_tables[0].row_count >= 2
+                     && !matches!(
+                         nested_tables[0].page_break,
+@@ -12699,15 +12712,24 @@
+                                 !units.is_empty()
+                                     && units.iter().all(|unit| unit.nested_row.is_some())
+                             });
++                            // A declared row can still continue across a saved source
++                            // frame. Project its real child cursors for both empty
++                            // and mixed block hosts; never rewrite its stored size.
+                             let driver_has_saved_frame = driver.is_some_and(|driver_index| {
+-                                row_units[driver_index].iter().any(|unit| unit.stored_frame_break_before)
+-                                    || row_cells[driver_index].paragraphs.windows(2).any(|pair| {
++                                let source_cell = row_cells[driver_index];
++                                !source_cell.paragraphs.iter().any(|paragraph|
++                                    paragraph.stored_text_partition_is_dirty() || paragraph.cell_format_vpos_dirty)
++                                && (row_units[driver_index].iter().any(|unit| unit.stored_frame_break_before)
++                                    || source_cell.paragraphs.windows(2).any(|pair| {
+                                         pair[0].line_segs.last().zip(pair[1].line_segs.first())
+-                                            .is_some_and(|(previous, next)| previous.vertical_pos > 0 && next.vertical_pos == 0)
+-                                    })
++                                            .is_some_and(|(previous, next)| !line_seg_is_synthetic(previous)
++                                                && !line_seg_is_synthetic(next)
++                                                && previous.vertical_pos > 0 && next.vertical_pos == 0)
++                                    }))
+                             });
+                             if let Some(driver_index) = driver.filter(|driver_index| {
+-                                (row_is_auto_height || driver_is_nested_table_rows || (projected_mixed_block_table && driver_has_saved_frame))
++                                (row_is_auto_height || driver_is_nested_table_rows
++                                    || (projected_source_block_table && driver_has_saved_frame))
+                                     && !row_has_crossing_span
+                                     && row_units[*driver_index].len() > 1
+                             }) {
+@@ -12772,7 +12794,7 @@
+                                         || (reset_before && !projected_mixed_block_table && ri == 0 && fragment_index == 0);
+                                     let mut stored_frame_break_before =
+                                         driver_unit.stored_frame_break_before;
+-                                    if projected_mixed_block_table
++                                    if projected_source_block_table
+                                         && self.nested_row_cut_plain_source_frame_boundary(nt, ri, &start_cut, styles) == Some(true)
+                                     {
+                                         hard_break_before = true;

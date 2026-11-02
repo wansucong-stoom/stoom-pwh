@@ -248,6 +248,17 @@ const patches = [
     }
   ]
 },
+{
+  "file": "rhwp-0.8.7-nested-declared-frame-cuts.patch",
+  "sha256": "54d274f77865dc18586d6726558394a47b28bbb304d075318d61ea9ea9037d87",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "7f294df11f7dc48611cdcfbf8a7fa813763778dd9c4573cd619c06bc4c26990a",
+      "patchedSha256": "d2c51ac55b1b560f7ab6c965ba0837332c7e72012e42fcaad88eaa0f99128dbf"
+    }
+  ]
+},
 ];
 const help = `Usage: node scripts/build-patched-core.mjs
   --source-archive <fixed upstream source ZIP>
