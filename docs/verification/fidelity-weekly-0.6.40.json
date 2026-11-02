@@ -3,8 +3,8 @@
   "verifiedOn": "2026-11-02",
   "pwhVersion": "0.6.40",
   "desktopVersion": "0.1.21",
-  "runtime": "rhwp-0.8.7-pwh-r12",
-  "coreSha256": "1349c8d702e0c966a47236531fc0129a6c09234975b0bd1d002880d28515bd61",
+  "runtime": "rhwp-0.8.7-pwh-r13",
+  "coreSha256": "339670300495d5f0a264b175ea2ec4fa59b52dda2978dc121ac3f89c28ce84ea",
   "previousVerification": "fidelity-weekly-0.6.39.json",
   "method": "Actual Pwh Desktop print-preview SVG/CSS and Electron printToPDF. Both PDFs rasterized with PDFium at the same physical scale and page origin. No fitting, translation or page remapping.",
   "dpi": 150,
@@ -15,7 +15,7 @@
     {
       "id": "hwpx-long-nested-report",
       "sourceFormat": "HWPX",
-      "status": "improved-with-remaining-pagination-mismatch",
+      "status": "page-counts-match-with-remaining-layout-differences",
       "before": {
         "runtime": "rhwp-0.8.7-pwh-r11",
         "pages": {
@@ -45,47 +45,44 @@
       },
       "pages": {
         "hancom": 39,
-        "pwh": 41
+        "pwh": 39
       },
-      "pageCountsMatch": false,
-      "accountedPhysicalPages": 41,
+      "pageCountsMatch": true,
+      "accountedPhysicalPages": 39,
       "comparedPhysicalPages": 39,
-      "extraPwhPages": [
-        40,
-        41
-      ],
+      "extraPwhPages": [],
       "missingPwhPages": [],
       "normal": {
         "threshold": 245,
         "allPagesAccountedFor": true,
         "complete": true,
-        "tolerantInkPrecision": 0.622786,
-        "tolerantInkRecall": 0.598024,
-        "tolerantInkF1": 0.610154,
-        "exactInkF1": 0.466582,
+        "tolerantInkPrecision": 0.67773,
+        "tolerantInkRecall": 0.659144,
+        "tolerantInkF1": 0.668308,
+        "exactInkF1": 0.510848,
         "referenceInkPixels": 13048007,
-        "pwhInkPixels": 12734475
+        "pwhInkPixels": 12751706
       },
       "dark": {
         "threshold": 180,
         "allPagesAccountedFor": true,
         "complete": true,
-        "tolerantInkPrecision": 0.504819,
-        "tolerantInkRecall": 0.482595,
-        "tolerantInkF1": 0.493457,
-        "exactInkF1": 0.263148,
+        "tolerantInkPrecision": 0.549172,
+        "tolerantInkRecall": 0.524883,
+        "tolerantInkF1": 0.536753,
+        "exactInkF1": 0.280882,
         "referenceInkPixels": 5824009,
-        "pwhInkPixels": 5670051
+        "pwhInkPixels": 5643495
       },
       "improvementPercentagePoints": {
-        "normalF1": 7.8977,
-        "darkF1": 6.686,
-        "exactF1": 6.7365
+        "normalF1": 13.7131,
+        "darkF1": 11.0156,
+        "exactF1": 11.1631
       },
       "samePhysicalPageChanges": {
-        "improved": 21,
+        "improved": 26,
         "unchanged": 5,
-        "lower": 13
+        "lower": 8
       },
       "perPage": [
         {
@@ -127,43 +124,43 @@
           "page": 6,
           "status": "compared",
           "beforeF1": 0.440436,
-          "f1": 0.476467,
-          "darkF1": 0.370687
+          "f1": 0.623523,
+          "darkF1": 0.455519
         },
         {
           "page": 7,
           "status": "compared",
           "beforeF1": 0.389735,
-          "f1": 0.872552,
-          "darkF1": 0.800297
+          "f1": 0.882094,
+          "darkF1": 0.8108
         },
         {
           "page": 8,
           "status": "compared",
           "beforeF1": 0.516254,
-          "f1": 0.582299,
-          "darkF1": 0.37713
+          "f1": 0.591936,
+          "darkF1": 0.402706
         },
         {
           "page": 9,
           "status": "compared",
           "beforeF1": 0.520382,
-          "f1": 0.560718,
-          "darkF1": 0.361278
+          "f1": 0.567801,
+          "darkF1": 0.372803
         },
         {
           "page": 10,
           "status": "compared",
           "beforeF1": 0.607034,
-          "f1": 0.526447,
-          "darkF1": 0.385006
+          "f1": 0.595093,
+          "darkF1": 0.405066
         },
         {
           "page": 11,
           "status": "compared",
           "beforeF1": 0.60442,
-          "f1": 0.453585,
-          "darkF1": 0.321428
+          "f1": 0.433097,
+          "darkF1": 0.288083
         },
         {
           "page": 12,
@@ -176,22 +173,22 @@
           "page": 13,
           "status": "compared",
           "beforeF1": 0.47678,
-          "f1": 0.643438,
-          "darkF1": 0.453387
+          "f1": 0.618817,
+          "darkF1": 0.404434
         },
         {
           "page": 14,
           "status": "compared",
           "beforeF1": 0.232672,
-          "f1": 0.577596,
-          "darkF1": 0.398762
+          "f1": 0.65708,
+          "darkF1": 0.494365
         },
         {
           "page": 15,
           "status": "compared",
           "beforeF1": 0.610471,
-          "f1": 0.576982,
-          "darkF1": 0.385844
+          "f1": 0.628697,
+          "darkF1": 0.482915
         },
         {
           "page": 16,
@@ -218,43 +215,43 @@
           "page": 19,
           "status": "compared",
           "beforeF1": 0.510525,
-          "f1": 0.499636,
-          "darkF1": 0.310587
+          "f1": 0.516274,
+          "darkF1": 0.298354
         },
         {
           "page": 20,
           "status": "compared",
           "beforeF1": 0.510979,
-          "f1": 0.448735,
-          "darkF1": 0.323611
+          "f1": 0.636117,
+          "darkF1": 0.401929
         },
         {
           "page": 21,
           "status": "compared",
           "beforeF1": 0.476086,
-          "f1": 0.92012,
-          "darkF1": 0.737567
+          "f1": 0.403206,
+          "darkF1": 0.305595
         },
         {
           "page": 22,
           "status": "compared",
           "beforeF1": 0.482919,
-          "f1": 0.756172,
-          "darkF1": 0.573184
+          "f1": 0.546395,
+          "darkF1": 0.329207
         },
         {
           "page": 23,
           "status": "compared",
           "beforeF1": 0.490637,
-          "f1": 0.749117,
-          "darkF1": 0.51009
+          "f1": 0.41787,
+          "darkF1": 0.323018
         },
         {
           "page": 24,
           "status": "compared",
           "beforeF1": 0.54942,
-          "f1": 0.615832,
-          "darkF1": 0.45143
+          "f1": 0.613743,
+          "darkF1": 0.449252
         },
         {
           "page": 25,
@@ -267,107 +264,99 @@
           "page": 26,
           "status": "compared",
           "beforeF1": 0.465835,
-          "f1": 0.629129,
-          "darkF1": 0.417244
+          "f1": 0.783104,
+          "darkF1": 0.527447
         },
         {
           "page": 27,
           "status": "compared",
           "beforeF1": 0.54646,
-          "f1": 0.443,
-          "darkF1": 0.252462
+          "f1": 0.45843,
+          "darkF1": 0.31692
         },
         {
           "page": 28,
           "status": "compared",
           "beforeF1": 0.519597,
-          "f1": 0.539063,
-          "darkF1": 0.397052
+          "f1": 0.495118,
+          "darkF1": 0.363143
         },
         {
           "page": 29,
           "status": "compared",
           "beforeF1": 0.448942,
-          "f1": 0.358421,
-          "darkF1": 0.267912
+          "f1": 0.749498,
+          "darkF1": 0.62811
         },
         {
           "page": 30,
           "status": "compared",
           "beforeF1": 0.430302,
-          "f1": 0.547828,
-          "darkF1": 0.377811
+          "f1": 0.610267,
+          "darkF1": 0.414577
         },
         {
           "page": 31,
           "status": "compared",
           "beforeF1": 0.593534,
-          "f1": 0.527831,
-          "darkF1": 0.372199
+          "f1": 0.746517,
+          "darkF1": 0.597281
         },
         {
           "page": 32,
           "status": "compared",
           "beforeF1": 0.617729,
-          "f1": 0.579778,
-          "darkF1": 0.425201
+          "f1": 0.699636,
+          "darkF1": 0.604242
         },
         {
           "page": 33,
           "status": "compared",
           "beforeF1": 0.30478,
-          "f1": 0.496032,
-          "darkF1": 0.364657
+          "f1": 0.547158,
+          "darkF1": 0.445713
         },
         {
           "page": 34,
           "status": "compared",
           "beforeF1": 0.517682,
-          "f1": 0.427524,
-          "darkF1": 0.277274
+          "f1": 0.549569,
+          "darkF1": 0.361613
         },
         {
           "page": 35,
           "status": "compared",
           "beforeF1": 0.231782,
-          "f1": 0.276649,
-          "darkF1": 0.223757
+          "f1": 0.749987,
+          "darkF1": 0.450611
         },
         {
           "page": 36,
           "status": "compared",
           "beforeF1": 0.49695,
-          "f1": 0.549643,
-          "darkF1": 0.36069
+          "f1": 0.521414,
+          "darkF1": 0.373306
         },
         {
           "page": 37,
           "status": "compared",
           "beforeF1": 0.401147,
-          "f1": 0.548228,
-          "darkF1": 0.392211
+          "f1": 0.579805,
+          "darkF1": 0.381248
         },
         {
           "page": 38,
           "status": "compared",
           "beforeF1": 0.563239,
-          "f1": 0.501452,
-          "darkF1": 0.351274
+          "f1": 0.756619,
+          "darkF1": 0.546366
         },
         {
           "page": 39,
           "status": "compared",
           "beforeF1": 0.425707,
-          "f1": 0.475238,
-          "darkF1": 0.350131
-        },
-        {
-          "page": 40,
-          "status": "extra-pwh-page"
-        },
-        {
-          "page": 41,
-          "status": "extra-pwh-page"
+          "f1": 0.765672,
+          "darkF1": 0.518296
         }
       ],
       "diagnosticVisibility": {
@@ -487,7 +476,7 @@
         "sourceSha256": "585b0ba0768483416f8f3138da8733bffde46a1cec2216aad25498559ffc6651",
         "scanSha256": "192f40f12b18e4700a2b657b28116f7ced24216d0dc7bd0628ee3977eb9adee6",
         "scanItems": 3069,
-        "pages": 41,
+        "pages": 39,
         "roundTripText": true,
         "sourceUnchanged": true
       }
@@ -517,16 +506,16 @@
     }
   ],
   "checks": {
-    "newSyntheticRegressions": 4,
+    "newSyntheticRegressions": 10,
     "core": {
-      "tests": 325,
-      "pass": 272,
+      "tests": 331,
+      "pass": 278,
       "fail": 0,
       "skipped": 53
     },
     "browser": {
-      "tests": 325,
-      "pass": 311,
+      "tests": 331,
+      "pass": 317,
       "fail": 0,
       "skipped": 14
     },
@@ -534,12 +523,14 @@
     "python": 24,
     "independentEditorBuilds": 2,
     "artifactsCompared": 6,
-    "strictTypes": true
+    "strictTypes": true,
+    "diagnosticApiExcluded": true
   },
   "limitations": [
-    "The reference has 39 pages and the new output has 41. Overall pagination and layout still differ.",
-    "Of the same 39 physical pages, 21 improved, 5 were unchanged and 13 had a lower F1. Pages were never remapped to improve the score.",
+    "Page counts now agree at 39; this does not establish complete text visibility or layout parity.",
+    "Of the same 39 physical pages, 26 improved, 5 were unchanged and 8 had a lower F1. Pages were never remapped to improve the score.",
     "Six diagnostic terms are visible at the expected page; this is not a complete output-content-loss audit.",
+    "Remaining paragraph/table spacing, line wrapping, physical page boundaries, clipping and font differences require further corpus-based work.",
     "Other 71 pages were compared as exact core print SVG bytes; earlier PDF fidelity records remain separate.",
     "Browser/core test sets overlap. Account, OS clipboard and native-window tests require separate environments.",
     "Private source documents, PDFs, images, source phrases and local paths are excluded."

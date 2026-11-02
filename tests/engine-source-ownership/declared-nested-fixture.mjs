@@ -11,8 +11,8 @@ const table = (id, width, height, columns, rows, pageBreak = 'CELL', inline = fa
 
 // Entirely synthetic: declared-height rows, a stored page rewind, ordinary
 // paragraphs and a third-level table inside one empty table host paragraph.
-export function declaredNestedFixture({savedFrame = true, pageBreak = 'CELL', inner = true, pageHeight = 24000, mixedHost = false, inlineInner = false, objectFirst = false, innerFrame = 6400, innerRows = 4} = {}) {
-  const innerHeight=innerRows*1600,secondHeight=objectFirst?innerHeight+7600:22000;
+export function declaredNestedFixture({savedFrame = true, pageBreak = 'CELL', inner = true, pageHeight = 24000, mixedHost = false, inlineInner = false, objectFirst = false, innerFrame = 6400, innerRows = 4, declaredSecondHeight} = {}) {
+  const innerHeight=innerRows*1600,secondHeight=declaredSecondHeight??(objectFirst?innerHeight+7600:22000);
   const nested = table(30, 18000, innerHeight, 1, Array.from({length:innerRows},(_,row) => cell(row, 0, 18000, 1600, paragraph(`INNER_${row}`, 0))), 'CELL', inlineInner);
   const first = Array.from({length: 7}, (_, i) => paragraph(`FIRST_${i}`, i * 1600)).join('');
   const second = objectFirst ? paragraph('SECOND_0',0) + paragraph('SECOND_1',1600) + paragraph('',0,nested,innerFrame)

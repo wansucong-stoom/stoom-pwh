@@ -1,0 +1,667 @@
+diff --git a/src/renderer/layout/table_layout.rs b/src/renderer/layout/table_layout.rs
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -6047,6 +6047,8 @@
+             };
+ 
+             let has_table_ctrl = para.controls.iter().any(|c| matches!(c, Control::Table(_)));
++            let projected_block_order = self.cell_paragraph_projected_block_order(cell, table, styles, cp_idx);
++            let projected_block_host = projected_block_order.is_some();
+             // [Task #573] inline TAC 표(treat_as_char=true) 와 block 표(treat_as_char=false)
+             // 를 분리. 인라인 TAC 표가 있는 셀 paragraph 의 surrounding text (예: "ㄷ. ",
+             // "이다.") 가 layout_composed_paragraph 호출 미진입으로 미렌더되던 결함 정정.
+@@ -6120,6 +6122,7 @@
+             if use_saved_cell_para_vpos
+                 && (!has_nested_table || trust_stored_cell_flow)
+                 && has_stored_para_anchor
++                && projected_block_order != Some(true)
+             {
+                 if let Some(first_seg) = para.line_segs.first() {
+                     if first_seg.vertical_pos >= 0 {
+@@ -6283,118 +6286,9 @@
+             let stored_square_picture_wrap_anchor =
+                 stored_square_picture_wrap_anchor_for_para(cell, cp_idx);
+ 
+-            if !has_block_table_ctrl {
+-                let is_last_para = cp_idx + 1 == composed_paras.len();
+-                let numbered_comp = if start_line == 0 && end_line > start_line {
+-                    self.apply_paragraph_numbering(
+-                        Some(composed),
+-                        para,
+-                        styles,
+-                        outline_numbering_id,
+-                    )
+-                } else {
+-                    None
+-                };
+-                let composed_for_layout = numbered_comp.as_ref().unwrap_or(composed);
+-                // [#5601] 스냅 선차감 문단은 composed 가 column-top 트림과 무관하게
+-                // spacing_before 를 전량 재가산해야 vpos 와 맞는다(읽는 즉시 clear).
+-                if snap_anchored_with_spacing_before {
+-                    self.reapply_snap_anchored_spacing_before.set(true);
+-                }
+-                let previous_keep_spacing = self.keep_continuation_column_top_spacing_before.get();
+-                let keep_spacing = (cp_idx == 0
+-                    && start_line == 0
+-                    && crate::renderer::para_has_no_stored_line_segs(para))
+-                    || fragment_cut_units.is_some_and(|(start, _)| {
+-                        self.cell_cut_owns_reflow_paragraph_start(
+-                            cell, table, styles, start, cp_idx,
+-                        )
+-                    });
+-                self.keep_continuation_column_top_spacing_before
+-                    .set(keep_spacing);
+-                para_y = self.layout_composed_paragraph(
+-                    tree,
+-                    cell_node,
+-                    composed_for_layout,
+-                    styles,
+-                    &inner_area,
+-                    para_y,
+-                    start_line,
+-                    end_line,
+-                    section_index,
+-                    cp_idx,
+-                    cell_context.clone(),
+-                    !use_top_vpos_anchor && !allow_first_para_lead,
+-                    is_last_para,
+-                    0.0,
+-                    None,
+-                    Some(para),
+-                    Some(bin_data_content),
+-                    stored_square_picture_wrap_anchor.as_ref(),
+-                );
+-                self.keep_continuation_column_top_spacing_before
+-                    .set(previous_keep_spacing);
+-                if self.profile.get().hwp5_stored_pagination_layout()
+-                    && !table.common.treat_as_char
+-                    && matches!(table.page_break, TablePageBreak::RowBreak)
+-                    && start_line == 0
+-                    && end_line > start_line
+-                {
+-                    if let Some(step) =
+-                        stored_square_picture_empty_anchor_advance(cell, cp_idx, styles, self.dpi)
+-                    {
+-                        para_y += hwpunit_to_px(step, self.dpi);
+-                    }
+-                }
+-
+-                // [#6923] 겹침 걸음 사다리의 빈 줄은 측정이 접지 않고 저장 전진량을
+-                // 점유로 쓴다(`cell_units`). 배치도 **같은 결과**를 소비해야 뒤따르는
+-                // 중첩 표·문단이 측정과 같은 자리에 놓인다 — 그러지 않으면 조각 상자는
+-                // 늘고 내용은 제자리라 아래 테두리가 마지막 줄을 가로지른다.
+-                if self.profile.get().hwp5_stored_pagination_layout()
+-                    && crate::renderer::cell_uses_overlapping_line_boxes(&cell.paragraphs)
+-                {
+-                    if let Some(step) =
+-                        crate::renderer::stored_overlap_spacer_advance_hu(&cell.paragraphs, cp_idx)
+-                    {
+-                        para_y = para_y_before_compose + hwpunit_to_px(step, self.dpi);
+-                    }
+-                }
+-
+-                let has_visible_text = composed
+-                    .lines
+-                    .iter()
+-                    .any(|line| line.runs.iter().any(|run| !run.text.trim().is_empty()));
+-                if has_visible_text {
+-                    has_preceding_text = true;
+-                }
+-            } else {
+-                // has_table_ctrl: 표가 포함된 문단
+-                // LINE_SEG vpos가 문단 위치를 정확히 지정하므로,
+-                // 추가 spacing 없이 para_y를 그대로 사용.
+-                // (leading spacing은 LINE_SEG vpos에 이미 반영되어 있음)
+-                //
+-                // [#6697] 다만 그 문단이 **자기 글자**를 갖고 있으면 그 줄은 그려야 한다.
+-                // 블록 표(treat_as_char=false)는 아래 `layout_table` 이 따로 배치하므로
+-                // 흐름(para_y)은 그대로 두되, 호스트 문단의 글자까지 버리면 캡션 한 줄이
+-                // 어느 쪽에도 남지 않는다(80550 `<향후 10년간 … 해체 수익 계산>` 21자).
+-                // Task #573 이 인라인 TAC 표에서 같은 결함을 고쳤고, 블록 표 쪽은 당시
+-                // "텍스트 흐름 외부"라는 이유로 남아 있었다. 글자가 없는 호스트 문단은
+-                // 종전대로 아무것도 하지 않는다(대다수가 이 경우라 결함이 늦게 드러났다).
+-                let host_has_visible_text = composed
+-                    .lines
+-                    .iter()
+-                    .any(|line| line.runs.iter().any(|run| !run.text.trim().is_empty()));
+-                let host_has_border = styles
+-                    .para_styles
+-                    .get(composed.para_style_id as usize)
+-                    .and_then(|style| style.border_fill_id.checked_sub(1))
+-                    .and_then(|index| styles.border_styles.get(index as usize))
+-                    .is_some_and(|border| {
+-                        border.fill_color.is_some()
+-                            || border.borders.iter().any(super::para_border_is_visible)
+-                    });
+-                if host_has_visible_text || host_has_border {
++            let render_host_text = |tree: &mut PageLayoutContext, cell_node: &mut RenderNode,
++                host_y: &mut f64, had_text: &mut bool| {
++                if !has_block_table_ctrl {
+                     let is_last_para = cp_idx + 1 == composed_paras.len();
+                     let numbered_comp = if start_line == 0 && end_line > start_line {
+                         self.apply_paragraph_numbering(
+@@ -6407,21 +6301,35 @@
+                         None
+                     };
+                     let composed_for_layout = numbered_comp.as_ref().unwrap_or(composed);
+-                    // 반환값(다음 문단 y)은 버린다 — 흐름 전진은 저장 vpos 계약 그대로.
+-                    // 이 문단의 블록 표는 아래 `layout_table` 이 저장 좌표로 배치한다.
+-                    let _ = self.layout_composed_paragraph(
++                    // [#5601] 스냅 선차감 문단은 composed 가 column-top 트림과 무관하게
++                    // spacing_before 를 전량 재가산해야 vpos 와 맞는다(읽는 즉시 clear).
++                    if snap_anchored_with_spacing_before {
++                        self.reapply_snap_anchored_spacing_before.set(true);
++                    }
++                    let previous_keep_spacing = self.keep_continuation_column_top_spacing_before.get();
++                    let keep_spacing = (cp_idx == 0
++                        && start_line == 0
++                        && crate::renderer::para_has_no_stored_line_segs(para))
++                        || fragment_cut_units.is_some_and(|(start, _)| {
++                            self.cell_cut_owns_reflow_paragraph_start(
++                                cell, table, styles, start, cp_idx,
++                            )
++                        });
++                    self.keep_continuation_column_top_spacing_before
++                        .set(keep_spacing);
++                    *host_y = self.layout_composed_paragraph(
+                         tree,
+                         cell_node,
+                         composed_for_layout,
+                         styles,
+                         &inner_area,
+-                        para_y,
++                        *host_y,
+                         start_line,
+                         end_line,
+                         section_index,
+                         cp_idx,
+                         cell_context.clone(),
+-                        !use_top_vpos_anchor,
++                        !use_top_vpos_anchor && !allow_first_para_lead,
+                         is_last_para,
+                         0.0,
+                         None,
+@@ -6429,10 +6337,113 @@
+                         Some(bin_data_content),
+                         stored_square_picture_wrap_anchor.as_ref(),
+                     );
+-                    has_preceding_text |= host_has_visible_text;
++                    self.keep_continuation_column_top_spacing_before
++                        .set(previous_keep_spacing);
++                    if self.profile.get().hwp5_stored_pagination_layout()
++                        && !table.common.treat_as_char
++                        && matches!(table.page_break, TablePageBreak::RowBreak)
++                        && start_line == 0
++                        && end_line > start_line
++                    {
++                        if let Some(step) =
++                            stored_square_picture_empty_anchor_advance(cell, cp_idx, styles, self.dpi)
++                        {
++                            *host_y += hwpunit_to_px(step, self.dpi);
++                        }
++                    }
++
++                    // [#6923] 겹침 걸음 사다리의 빈 줄은 측정이 접지 않고 저장 전진량을
++                    // 점유로 쓴다(`cell_units`). 배치도 **같은 결과**를 소비해야 뒤따르는
++                    // 중첩 표·문단이 측정과 같은 자리에 놓인다 — 그러지 않으면 조각 상자는
++                    // 늘고 내용은 제자리라 아래 테두리가 마지막 줄을 가로지른다.
++                    if self.profile.get().hwp5_stored_pagination_layout()
++                        && crate::renderer::cell_uses_overlapping_line_boxes(&cell.paragraphs)
++                    {
++                        if let Some(step) =
++                            crate::renderer::stored_overlap_spacer_advance_hu(&cell.paragraphs, cp_idx)
++                        {
++                            *host_y = para_y_before_compose + hwpunit_to_px(step, self.dpi);
++                        }
++                    }
++
++                    let has_visible_text = composed
++                        .lines
++                        .iter()
++                        .any(|line| line.runs.iter().any(|run| !run.text.trim().is_empty()));
++                    if has_visible_text {
++                        *had_text = true;
++                    }
++                } else {
++                    // has_table_ctrl: 표가 포함된 문단
++                    // LINE_SEG vpos가 문단 위치를 정확히 지정하므로,
++                    // 추가 spacing 없이 para_y를 그대로 사용.
++                    // (leading spacing은 LINE_SEG vpos에 이미 반영되어 있음)
++                    //
++                    // [#6697] 다만 그 문단이 **자기 글자**를 갖고 있으면 그 줄은 그려야 한다.
++                    // 블록 표(treat_as_char=false)는 아래 `layout_table` 이 따로 배치하므로
++                    // 흐름(*host_y)은 그대로 두되, 호스트 문단의 글자까지 버리면 캡션 한 줄이
++                    // 어느 쪽에도 남지 않는다(80550 `<향후 10년간 … 해체 수익 계산>` 21자).
++                    // Task #573 이 인라인 TAC 표에서 같은 결함을 고쳤고, 블록 표 쪽은 당시
++                    // "텍스트 흐름 외부"라는 이유로 남아 있었다. 글자가 없는 호스트 문단은
++                    // 종전대로 아무것도 하지 않는다(대다수가 이 경우라 결함이 늦게 드러났다).
++                    let host_has_visible_text = composed
++                        .lines
++                        .iter()
++                        .any(|line| line.runs.iter().any(|run| !run.text.trim().is_empty()));
++                    let host_has_border = styles
++                        .para_styles
++                        .get(composed.para_style_id as usize)
++                        .and_then(|style| style.border_fill_id.checked_sub(1))
++                        .and_then(|index| styles.border_styles.get(index as usize))
++                        .is_some_and(|border| {
++                            border.fill_color.is_some()
++                                || border.borders.iter().any(super::para_border_is_visible)
++                        });
++                    if host_has_visible_text || host_has_border {
++                        let is_last_para = cp_idx + 1 == composed_paras.len();
++                        let numbered_comp = if start_line == 0 && end_line > start_line {
++                            self.apply_paragraph_numbering(
++                                Some(composed),
++                                para,
++                                styles,
++                                outline_numbering_id,
++                            )
++                        } else {
++                            None
++                        };
++                        let composed_for_layout = numbered_comp.as_ref().unwrap_or(composed);
++                        // Legacy floats keep their stored anchor contract. A typed
++                        // mixed block stream advances by the actual host text line.
++                        let host_bottom = self.layout_composed_paragraph(
++                            tree,
++                            cell_node,
++                            composed_for_layout,
++                            styles,
++                            &inner_area,
++                            *host_y,
++                            start_line,
++                            end_line,
++                            section_index,
++                            cp_idx,
++                            cell_context.clone(),
++                            !use_top_vpos_anchor,
++                            is_last_para,
++                            0.0,
++                            None,
++                            Some(para),
++                            Some(bin_data_content),
++                            stored_square_picture_wrap_anchor.as_ref(),
++                        );
++                        if projected_block_host { *host_y = host_bottom; }
++                        *had_text |= host_has_visible_text;
++                    }
+                 }
+-            }
+-
++
++
++            };
++            if projected_block_order != Some(true) {
++                render_host_text(tree, cell_node, &mut para_y, &mut has_preceding_text);
++            }
+             let para_alignment = styles
+                 .para_styles
+                 .get(para.para_shape_id as usize)
+@@ -7663,7 +7674,7 @@
+                             ctrl_idx,
+                             para_y_before_compose,
+                             styles,
+-                        );
++                        ).filter(|_| !projected_block_host);
+                         let nested_y = if let Some(frame) = stored_float_frame {
+                             frame.table_top
+                                 - hwpunit_to_px(nested_table.outer_margin_top as i32, self.dpi)
+@@ -8368,6 +8379,9 @@
+                 }
+             }
+ 
++            if projected_block_order == Some(true) {
++                render_host_text(tree, cell_node, &mut para_y, &mut has_preceding_text);
++            }
+             if has_table_ctrl {
+                 // LINE_SEG vpos 기반으로 para_y 보정.
+                 // LINE_SEG.line_height에는 중첩 표 높이가 미포함될 수 있으므로
+@@ -12527,12 +12541,14 @@
+             // calc_nested_table_height 와 정확히 일치(드리프트 0):
+             // Σ row_h + cs*(n-1) + om_top + om_bottom + spacing.
+             // 2단계+ 중첩/텍스트 동거 문단은 아래 atom 폴백 유지(범위 외).
+-            // One block table at the paragraph's first source control has an
+-            // unambiguous nested owner. Keep the host's text lines as separate
++            // One block table at either source text boundary has an
++            // unambiguous nested owner. control_text_positions uses character
++            // indexes, not UTF-16 storage offsets. Keep the host's text lines as separate
+             // source atoms in the existing text/table flow order, and project
+             // the nested rows with their exact child cuts.
+             let projected_source_block_table = p.controls.len() == 1
+-                && p.control_text_positions().first() == Some(&0)
++                && p.control_text_positions().first().is_some_and(|position|
++                    *position == 0 || *position == p.text.chars().count())
+                 && matches!(&p.controls[0], Control::Table(t)
+                     if t.row_count >= 2 && !t.common.treat_as_char
+                     && matches!(t.common.text_wrap, TextWrap::TopAndBottom)
+@@ -12610,7 +12626,9 @@
+                             _ => (0.0, 0.0),
+                         }
+                     };
+-                    if projected_mixed_block_table {
++                    let mixed_table_precedes_host_text = projected_mixed_block_table
++                        && p.control_text_positions().first() == Some(&0);
++                    let append_mixed_host_text = |target: &mut Vec<CellUnit>, cumulative: &mut f64| {
+                         for (li, line) in comp.lines.iter().enumerate() {
+                             let include_spacing = !(is_last_para && li + 1 == line_count)
+                                 || (para_count > 1 && table.common.treat_as_char);
+@@ -12624,10 +12642,10 @@
+                                 if let Some(seg) = p.line_segs.get(li).filter(|seg| !line_seg_is_synthetic(seg)) {
+                                     let top = saved_unit_start_px(seg.vertical_pos, pi == 0 && li == 0,
+                                         if li == 0 { spacing_before } else { 0.0 });
+-                                    if top > unit_cum { height += top - unit_cum; vpos_gap_before = true; }
++                                    if top > *cumulative { height += top - *cumulative; vpos_gap_before = true; }
+                                 }
+                             }
+-                            units.push(CellUnit {
++                            target.push(CellUnit {
+                                 height, hard_break_before, stored_frame_break_before: stored_frame_break_before(li),
+                                 page_frame_reset_before: hard_break_before, vpos_gap_before, para_idx: pi,
+                                 vis_start: li, vis_end: li + 1, nested_row: None,
+@@ -12638,8 +12656,11 @@
+                                 recursive_block_prelude_role: RecursiveBlockPreludeRole::None,
+                                 top_and_bottom_flow: false, empty_spacer: false, non_inline_control_range: None,
+                             });
+-                            unit_cum += height;
++                            *cumulative += height;
+                         }
++                    };
++                    if projected_mixed_block_table && !mixed_table_precedes_host_text {
++                        append_mixed_host_text(&mut units, &mut unit_cum);
+                     }
+                     for (ri, rh) in rhs.iter().enumerate() {
+                         // [#4069] CELL 분할 중첩 표는 큰 행을 단일 atom으로 바깥
+@@ -12712,9 +12733,9 @@
+                                 !units.is_empty()
+                                     && units.iter().all(|unit| unit.nested_row.is_some())
+                             });
+-                            // A declared row can still continue across a saved source
+-                            // frame. Project its real child cursors for both empty
+-                            // and mixed block hosts; never rewrite its stored size.
++                            // CELL rows project real child cursors for capacity cuts,
++                            // even without a stored page rewind. Forcing a physical
++                            // source-frame break remains a separate proof below.
+                             let driver_has_saved_frame = driver.is_some_and(|driver_index| {
+                                 let source_cell = row_cells[driver_index];
+                                 !source_cell.paragraphs.iter().any(|paragraph|
+@@ -12729,14 +12750,21 @@
+                             });
+                             if let Some(driver_index) = driver.filter(|driver_index| {
+                                 (row_is_auto_height || driver_is_nested_table_rows
+-                                    || (projected_source_block_table && driver_has_saved_frame))
++                                    || projected_source_block_table)
+                                     && !row_has_crossing_span
+                                     && row_units[*driver_index].len() > 1
+                             }) {
+                                 let driver_units = &row_units[driver_index];
+                                 let driver_total: f64 =
+                                     driver_units.iter().map(|unit| unit.height).sum();
+-                                let row_extra = (*rh - driver_total).max(0.0);
++                                // Saved multi-frame declared height includes page void.
++                                // The child stream already accounts for its occupied frames;
++                                // charging that void again delays following source content.
++                                let row_extra = if projected_source_block_table && driver_has_saved_frame {
++                                    0.0
++                                } else {
++                                    (*rh - driver_total).max(0.0)
++                                };
+                                 let mut driver_before = 0.0;
+ 
+                                 for (fragment_index, driver_unit) in driver_units.iter().enumerate()
+@@ -13070,6 +13098,9 @@
+                             non_inline_control_range: None,
+                         });
+                         unit_cum += uh;
++                    }
++                    if mixed_table_precedes_host_text {
++                        append_mixed_host_text(&mut units, &mut unit_cum);
+                     }
+                     attach_stored_square_picture_owner(&mut units, pi);
+                     let non_inline_range = append_non_inline_units(
+@@ -19039,6 +19070,28 @@
+         ranges
+     }
+ 
++    /// The typed unit stream owns block/text order in a mixed paragraph.
++    /// None keeps legacy float/overlay/multi-control paragraphs unchanged.
++    pub(super) fn cell_paragraph_projected_block_order(
++        &self,
++        cell: &crate::model::table::Cell,
++        table: &crate::model::table::Table,
++        styles: &ResolvedStyleSet,
++        para_idx: usize,
++    ) -> Option<bool> {
++        let para = cell.paragraphs.get(para_idx)?;
++        if para.text.trim().is_empty() {
++            return None;
++        }
++        let units = self.cell_units(cell, table, styles);
++        let first_table = units.iter().position(|unit|
++            unit.para_idx == para_idx && unit.nested_row.is_some())?;
++        let first_text = units.iter().position(|unit|
++            unit.para_idx == para_idx && unit.nested_row.is_none()
++                && unit.vis_start < unit.vis_end)?;
++        Some(first_table < first_text)
++    }
++
+     /// Use the exact nested atoms where one table has an unambiguous owner.
+     /// Multi-control mixed paragraphs keep the legacy path until their atoms
+     /// carry control indexes; paragraph identity alone cannot distinguish them.
+diff --git a/src/renderer/layout/table_partial.rs b/src/renderer/layout/table_partial.rs
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -2284,6 +2284,8 @@
+                     )
+                 });
+                 let has_table_ctrl = para.controls.iter().any(|c| matches!(c, Control::Table(_)));
++                let projected_block_order = self.cell_paragraph_projected_block_order(cell, table, styles, cp_idx);
++                let projected_block_host = projected_block_order.is_some();
+                 // 같은 형상이 **그림**으로도 온다. 셀 문단이 글자 없이 그림만 들고
+                 // 저장 `LINE_SEG` 가 없으면 합성 줄 수가 0 이라 아래 컷 판정이
+                 // "이 쪽 소속 아님"으로 읽는다 — 표 컨트롤만 구제하면 그림은 **어느
+@@ -2316,6 +2318,7 @@
+                 if start_line >= end_line
+                     && mixed_nested_split.is_none()
+                     && nested_cursor_split.is_none()
++                    && nested_cut_rows.is_none()
+                     && !visible_non_inline_controls
+                     && !uncut_control_only_nested_table
+                     && !owns_empty_paragraph(cp_idx)
+@@ -2335,7 +2338,7 @@
+                     &self.single_line_overflow_cache,
+                 );
+ 
+-                if preserve_linear_single_cell_vpos {
++                if preserve_linear_single_cell_vpos && projected_block_order != Some(true) {
+                     let target_seg = para
+                         .line_segs
+                         .get(start_line)
+@@ -2532,85 +2535,92 @@
+                 let para_y_before_lines = para_y;
+                 // 표 컨트롤이 없는 문단: 텍스트 먼저, 컨트롤 나중 (기존 동작)
+                 // 표 컨트롤이 있는 문단: 문단 앞 간격 적용 → 표 먼저 배치 → 텍스트(엔터 등) 나중
+-                if !has_table_ctrl
+-                    || composed
+-                        .lines
+-                        .iter()
+-                        .any(|line| line.runs.iter().any(|run| !run.text.trim().is_empty()))
+-                {
+-                    let is_last_para = cp_idx == last_rendered_para_idx;
+-                    let numbered_comp = if start_line == 0 {
+-                        self.apply_paragraph_numbering(
+-                            Some(composed),
+-                            para,
++                let render_host_text = |tree: &mut PageLayoutContext, cell_node: &mut RenderNode,
++                    host_y: &mut f64, had_text: &mut bool| {
++                    if !has_table_ctrl
++                        || composed
++                            .lines
++                            .iter()
++                            .any(|line| line.runs.iter().any(|run| !run.text.trim().is_empty()))
++                    {
++                        let is_last_para = cp_idx == last_rendered_para_idx;
++                        let numbered_comp = if start_line == 0 {
++                            self.apply_paragraph_numbering(
++                                Some(composed),
++                                para,
++                                styles,
++                                outline_numbering_id,
++                            )
++                        } else {
++                            None
++                        };
++                        let composed_for_layout = numbered_comp.as_ref().unwrap_or(composed);
++                        // [Task #1728 v2] 셀-내 continuation 조각(cut su>0)의 첫 가시 문단
++                        // (아직 텍스트 없음 + 문단 첫 줄부터 시작)은 셀-상단이라 layout_composed_paragraph
++                        // 의 column-top 트림에 걸려 앞 간격이 사라진다. 한컴은 유지하므로 토글 on.
++                        // 1×1 linear 셀(page-spanning 컨테이너, preserve_linear_single_cell_vpos
++                        // 계열)의 continuation 은 자연 흐름으로 이미 정합하며 textbox/shape 를 품을 수
++                        // 있어 spacing 추가 시 프레임 밖으로 밀린다(#issue_rowbreak_chart_overlap p17).
++                        // 저장 프레임 경로의 기존 다행/다열 판정은 유지한다. 재조판 경로는
++                        // 표 차원이 아니라 같은 컷의 첫 source unit이 앞 간격을 소유하는지 읽는다.
++                        let keep_spacing = cut_units.is_some_and(|(su, _)| {
++                            self.cell_cut_owns_reflow_paragraph_start(cell, table, styles, su, cp_idx)
++                                || (su > 0
++                                    && !*had_text
++                                    && start_line == 0
++                                    && !(table.row_count == 1 && table.col_count == 1))
++                        });
++                        let previous_keep_spacing =
++                            self.keep_continuation_column_top_spacing_before.get();
++                        self.keep_continuation_column_top_spacing_before
++                            .set(keep_spacing);
++                        let wrap_anchor = stored_square_picture_wrap_anchor_for_para(cell, cp_idx);
++                        *host_y = self.layout_composed_paragraph(
++                            tree,
++                            cell_node,
++                            composed_for_layout,
+                             styles,
+-                            outline_numbering_id,
+-                        )
++                            &inner_area,
++                            *host_y,
++                            start_line,
++                            end_line,
++                            section_index,
++                            cp_idx,
++                            Some(cell_context.clone()),
++                            !matches!(effective_align, VerticalAlign::Top),
++                            is_last_para,
++                            0.0,
++                            None,
++                            Some(para),
++                            Some(bin_data_content),
++                            wrap_anchor.as_ref(),
++                        );
++                        if collapse_stored_wrap_spacers && start_line == 0 && end_line > start_line {
++                            if let Some(step) = stored_square_picture_empty_anchor_advance(
++                                cell, cp_idx, styles, self.dpi,
++                            ) {
++                                *host_y += hwpunit_to_px(step, self.dpi);
++                            }
++                        }
++                        self.keep_continuation_column_top_spacing_before
++                            .set(previous_keep_spacing);
++
++                        let has_visible_text = composed
++                            .lines
++                            .iter()
++                            .any(|line| line.runs.iter().any(|run| !run.text.trim().is_empty()));
++                        if has_visible_text {
++                            *had_text = true;
++                        }
+                     } else {
+-                        None
+-                    };
+-                    let composed_for_layout = numbered_comp.as_ref().unwrap_or(composed);
+-                    // [Task #1728 v2] 셀-내 continuation 조각(cut su>0)의 첫 가시 문단
+-                    // (아직 텍스트 없음 + 문단 첫 줄부터 시작)은 셀-상단이라 layout_composed_paragraph
+-                    // 의 column-top 트림에 걸려 앞 간격이 사라진다. 한컴은 유지하므로 토글 on.
+-                    // 1×1 linear 셀(page-spanning 컨테이너, preserve_linear_single_cell_vpos
+-                    // 계열)의 continuation 은 자연 흐름으로 이미 정합하며 textbox/shape 를 품을 수
+-                    // 있어 spacing 추가 시 프레임 밖으로 밀린다(#issue_rowbreak_chart_overlap p17).
+-                    // 저장 프레임 경로의 기존 다행/다열 판정은 유지한다. 재조판 경로는
+-                    // 표 차원이 아니라 같은 컷의 첫 source unit이 앞 간격을 소유하는지 읽는다.
+-                    let keep_spacing = cut_units.is_some_and(|(su, _)| {
+-                        self.cell_cut_owns_reflow_paragraph_start(cell, table, styles, su, cp_idx)
+-                            || (su > 0
+-                                && !has_preceding_text
+-                                && start_line == 0
+-                                && !(table.row_count == 1 && table.col_count == 1))
+-                    });
+-                    let previous_keep_spacing =
+-                        self.keep_continuation_column_top_spacing_before.get();
+-                    self.keep_continuation_column_top_spacing_before
+-                        .set(keep_spacing);
+-                    let wrap_anchor = stored_square_picture_wrap_anchor_for_para(cell, cp_idx);
+-                    para_y = self.layout_composed_paragraph(
+-                        tree,
+-                        &mut cell_node,
+-                        composed_for_layout,
+-                        styles,
+-                        &inner_area,
+-                        para_y,
+-                        start_line,
+-                        end_line,
+-                        section_index,
+-                        cp_idx,
+-                        Some(cell_context.clone()),
+-                        !matches!(effective_align, VerticalAlign::Top),
+-                        is_last_para,
+-                        0.0,
+-                        None,
+-                        Some(para),
+-                        Some(bin_data_content),
+-                        wrap_anchor.as_ref(),
+-                    );
+-                    if collapse_stored_wrap_spacers && start_line == 0 && end_line > start_line {
+-                        if let Some(step) = stored_square_picture_empty_anchor_advance(
+-                            cell, cp_idx, styles, self.dpi,
+-                        ) {
+-                            para_y += hwpunit_to_px(step, self.dpi);
+-                        }
++                        // has_table_ctrl: 표가 포함된 문단
++                        // LINE_SEG vpos가 문단 위치를 정확히 지정하므로,
++                        // 추가 spacing 없이 para_y를 그대로 사용.
+                     }
+-                    self.keep_continuation_column_top_spacing_before
+-                        .set(previous_keep_spacing);
+-
+-                    let has_visible_text = composed
+-                        .lines
+-                        .iter()
+-                        .any(|line| line.runs.iter().any(|run| !run.text.trim().is_empty()));
+-                    if has_visible_text {
+-                        has_preceding_text = true;
+-                    }
+-                } else {
+-                    // has_table_ctrl: 표가 포함된 문단
+-                    // LINE_SEG vpos가 문단 위치를 정확히 지정하므로,
+-                    // 추가 spacing 없이 para_y를 그대로 사용.
++
++                };
++                if projected_block_order != Some(true) {
++                    render_host_text(tree, &mut cell_node, &mut para_y, &mut has_preceding_text);
+                 }
+ 
+                 // 이 문단의 컨트롤(이미지/도형/중첩테이블) 배치
+@@ -3508,7 +3518,7 @@
+                                                 styles,
+                                             )
+                                         })
+-                                        .flatten();
++                                        .flatten().filter(|_| !projected_block_host);
+                                     let nested_y = if let Some(frame) = stored_float_frame {
+                                         frame.table_top
+                                     } else if let Some(offset) = stored_square_offset {
+@@ -3964,6 +3974,9 @@
+                     }
+                 }
+ 
++                if projected_block_order == Some(true) {
++                    render_host_text(tree, &mut cell_node, &mut para_y, &mut has_preceding_text);
++                }
+                 let wrap_successor = collapse_stored_wrap_spacers
+                     .then(|| stored_nested_table_wrap_successor(cell, cp_idx))
+                     .flatten()

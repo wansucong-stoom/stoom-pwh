@@ -259,6 +259,22 @@ const patches = [
     }
   ]
 },
+{
+  "file": "rhwp-0.8.7-mixed-block-flow-ledger.patch",
+  "sha256": "fcc108afde80a59fa60b71ca4e8ed34a79f6d29f8b5a9974ec7b018d3ce03fb3",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "d2c51ac55b1b560f7ab6c965ba0837332c7e72012e42fcaad88eaa0f99128dbf",
+      "patchedSha256": "7273df67a4a6a7d29d57abbeae6741ae580d30d1f5a332d8e3e1996c1cedd56a"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "cebac7b673a9c051bf31e64bcc6d2310f669b74a97bfd6351d663a9cc5b452d6",
+      "patchedSha256": "3281736fc957df28d786772131ab979f2d8e2cb170f29cb7d1ee111f0c7296c0"
+    }
+  ]
+},
 ];
 const help = `Usage: node scripts/build-patched-core.mjs
   --source-archive <fixed upstream source ZIP>

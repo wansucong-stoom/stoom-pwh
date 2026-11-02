@@ -44,12 +44,29 @@ test('a declared-height nested row uses remaining space and continues by child s
  }finally{doc.free();}
 });
 
-test('declared rows without a saved continuation frame keep their whole-row path',{skip},async()=>{
+test('a multi-frame declared row does not charge saved page void as content a second time',{skip},async()=>{
+ const core=await loadCore();
+ for(const declaredSecondHeight of [40000,70000]){
+  const bytes=declaredNestedFixture({declaredSecondHeight}),doc=new core.HwpDocument(bytes);
+  try{
+   assert.equal(doc.pageCount(),2,'stored frame void must not create additional pages');
+   const pages=assertOwners(doc);
+   assert.ok(pages[0].some(run=>run.text==='SECOND_0'),'the next row must use available page space');
+   const saved=doc.exportHwpx();assert.deepEqual(cellSizes(saved),cellSizes(bytes));
+   const reopened=new core.HwpDocument(saved);
+   try{assert.equal(reopened.pageCount(),2);assert.deepEqual(scan(reopened),scan(doc));assertOwners(reopened);}finally{reopened.free();}
+  }finally{doc.free();}
+ }
+});
+
+test('CELL rows without a saved page reset still split by remaining capacity',{skip},async()=>{
  const core=await loadCore(),doc=new core.HwpDocument(declaredNestedFixture({savedFrame:false}));
  try{
-  const pages=layouts(doc);assert.equal(pages[0].some(run=>run.text==='SECOND_0'),false);
-  assert.equal(pages.flat().filter(run=>run.text==='TAIL_MARKER').length,1);
+  assert.equal(doc.pageCount(),2);const pages=assertOwners(doc);
+  assert.ok(pages[0].some(run=>run.text==='SECOND_0'),'CELL is splittable without inventing a saved physical frame boundary');
  }finally{doc.free();}
+ const roomy=new core.HwpDocument(declaredNestedFixture({savedFrame:false,pageHeight:64000}));
+ try{assert.equal(roomy.pageCount(),1,'capacity projection must not force a stored page break');assertOwners(roomy,64000/75);}finally{roomy.free();}
 });
 
 test('a complete saved inline table moves as one object line instead of splitting its first rows',{skip},async()=>{
