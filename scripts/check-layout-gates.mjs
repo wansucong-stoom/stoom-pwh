@@ -89,6 +89,7 @@ function validateAudit(audit,binding,count){
    if(typeof group.verified!=='boolean')invalid('Audit verification must be an explicit boolean');
    for(const field of fields)if(group.verified||group[field]!==undefined)integer(group[field],'audit '+name+' '+field);
   }
+  if(record.content.misplaced!==undefined)integer(record.content.misplaced,'audit content misplaced');
   records.set(record.page,record);
  }
  return records;
@@ -108,14 +109,38 @@ function validatePrevious(previous,normal){
   const page=object(previous.pages[i],'previous gate page');
   if(page.page!==i+1||(i<through?page.status!=='accepted':page.status==='accepted'))invalid('Previous gate has a nonsequential accepted prefix');
   if(i<through){
-   if(score(page.normalF1,'previous normal F1')<policy.normalMinF1||score(page.darkF1,'previous dark F1')<policy.darkMinF1||page.contentVerified!==true||page.geometryVerified!==true||page.missingText!==0||page.duplicatedText!==0||page.overflow!==0)invalid('Previous accepted page did not meet the fixed requirements');
+   if(page.misplacedText!==undefined)integer(page.misplacedText,'previous misplaced text');
+   if(score(page.normalF1,'previous normal F1')<policy.normalMinF1||score(page.darkF1,'previous dark F1')<policy.darkMinF1||page.contentVerified!==true||page.geometryVerified!==true||page.missingText!==0||page.duplicatedText!==0||(page.misplacedText??0)!==0||page.overflow!==0)invalid('Previous accepted page did not meet the fixed requirements');
   }
  }
  return through;
 }
 
+function validateEngineExport({engineWasmBytes,exportBytes},binding,previous){
+ const hasEngine=engineWasmBytes!==undefined,hasExport=exportBytes!==undefined;
+ if(hasEngine!==hasExport)invalid('Engine WASM and export receipt must be supplied together');
+ if(!hasEngine){
+  if(previous?.engineBinding)invalid('An engine-bound previous gate requires current engine and export evidence');
+  return undefined;
+ }
+ if(!(engineWasmBytes instanceof Uint8Array))invalid('Engine WASM bytes are required');
+ const bytes=Buffer.from(engineWasmBytes);
+ if(bytes.length<8||!bytes.subarray(0,8).equals(Buffer.from([0,97,115,109,1,0,0,0])))invalid('Engine input is not a WASM module');
+ const wasmSha256=digest(bytes),receipt=parse(exportBytes,'export receipt');
+ if(receipt.sourceHash!==binding.source||receipt.sha256!==binding.pwh)invalid('Export receipt is bound to different source or output bytes');
+ if(receipt.sourceUnchanged!==true||receipt.dirty!==false)invalid('Fidelity export must preserve the original source and clean document state');
+ const code=object(receipt.codeBinding,'export code binding'),expected=object(code.expected,'expected export engine');
+ if(sha(expected['rhwp_bg.wasm'],'expected export WASM')!==wasmSha256)invalid('Export receipt used a different engine');
+ if(code.wasmVerified!==true||!Array.isArray(code.observedWasm)||code.observedWasm.length===0)invalid('Actual renderer WASM input was not verified');
+ for(const observed of code.observedWasm){
+  object(observed,'observed renderer WASM');
+  if(observed.sha256!==wasmSha256||observed.bytes!==bytes.length||observed.error!==null)invalid('Observed renderer WASM does not match the current engine');
+ }
+ return {wasmSha256,wasmBytes:bytes.length,exportReceiptSha256:digest(exportBytes),observed:true};
+}
+
 /** Inputs are raw UTF-8 report/audit bytes so the audit binding cannot drift. */
-export function evaluateLayoutGates({normalBytes,darkBytes,auditBytes,previousBytes}={}){
+export function evaluateLayoutGates({normalBytes,darkBytes,auditBytes,previousBytes,engineWasmBytes,exportBytes}={}){
  const normal=parse(normalBytes,'normal report'),dark=parse(darkBytes,'dark report');
  const count=validateReport(normal,'normal',LAYOUT_GATE_POLICY.normalThreshold);
  validateReport(dark,'dark',LAYOUT_GATE_POLICY.darkThreshold);
@@ -124,6 +149,7 @@ export function evaluateLayoutGates({normalBytes,darkBytes,auditBytes,previousBy
  const binding={normal:digest(normalBytes),dark:digest(darkBytes),...normal.sha256};
  const audits=validateAudit(parse(auditBytes,'audit'),binding,count);
  const previous=previousBytes===undefined?null:parse(previousBytes,'previous gate');
+ const engineBinding=validateEngineExport({engineWasmBytes,exportBytes},binding,previous);
  const previousThrough=validatePrevious(previous,normal),regressions=[];
  let acceptedThrough=0,blocked=false;
  const pages=normal.pages.map((page,i)=>{
@@ -134,38 +160,43 @@ export function evaluateLayoutGates({normalBytes,darkBytes,auditBytes,previousBy
   const contentVerified=audit?.content.verified===true,geometryVerified=audit?.geometry.verified===true;
   if(!contentVerified)reasons.push('content-not-audited');
   else if(audit.content.missing||audit.content.duplicated)reasons.push('text-omission-or-duplication');
+  if(contentVerified&&audit.content.misplaced)reasons.push('text-on-wrong-physical-page');
   if(!geometryVerified)reasons.push('geometry-not-audited');
   else if(audit.geometry.overflow)reasons.push('geometry-overflow');
   const meetsRequirements=reasons.length===0;
   if(page.page<=previousThrough&&!meetsRequirements){regressions.push(page.page);reasons.unshift('previous-prefix-regression');}
   const status=blocked?'not-reached':meetsRequirements?'accepted':'blocked';
   if(!blocked&&meetsRequirements)acceptedThrough=page.page;else if(!meetsRequirements)blocked=true;
-  return {page:page.page,status,meetsRequirements,normalF1:page.status==='compared'?page.tolerantInkF1:null,darkF1:other.status==='compared'?other.tolerantInkF1:null,contentVerified,geometryVerified,missingText:contentVerified?audit.content.missing:null,duplicatedText:contentVerified?audit.content.duplicated:null,overflow:geometryVerified?audit.geometry.overflow:null,reasons};
+  return {page:page.page,status,meetsRequirements,normalF1:page.status==='compared'?page.tolerantInkF1:null,darkF1:other.status==='compared'?other.tolerantInkF1:null,contentVerified,geometryVerified,missingText:contentVerified?audit.content.missing:null,duplicatedText:contentVerified?audit.content.duplicated:null,misplacedText:contentVerified?(audit.content.misplaced??0):null,overflow:geometryVerified?audit.geometry.overflow:null,reasons};
  });
  const currentPage=blocked?acceptedThrough+1:null;
- return {schemaVersion:1,status:blocked?'blocked':'complete',policy:{...LAYOUT_GATE_POLICY},sha256:{...normal.sha256,normalReport:binding.normal,darkReport:binding.dark,auditReport:digest(auditBytes),...(previousBytes===undefined?{}:{previousGate:digest(previousBytes)})},pageCounts:{...normal.pageCounts},acceptedThrough,currentPage,frontier:{acceptedThrough,currentPage,status:blocked?'blocked':'complete'},previousPrefix:{requiredThrough:previousThrough,preserved:regressions.length===0,regressions},pages};
+ return {schemaVersion:1,status:blocked?'blocked':'complete',policy:{...LAYOUT_GATE_POLICY},sha256:{...normal.sha256,normalReport:binding.normal,darkReport:binding.dark,auditReport:digest(auditBytes),...(previousBytes===undefined?{}:{previousGate:digest(previousBytes)})},...(engineBinding?{engineBinding}:{}),pageCounts:{...normal.pageCounts},acceptedThrough,currentPage,frontier:{acceptedThrough,currentPage,status:blocked?'blocked':'complete'},previousPrefix:{requiredThrough:previousThrough,preserved:regressions.length===0,regressions},pages};
 }
 
-const usage=`Usage: node scripts/check-layout-gates.mjs --normal REPORT.json --dark REPORT.json --audit AUDIT.json [--previous GATE.json] [--output NEW.json]
+const usage=`Usage: node scripts/check-layout-gates.mjs --normal REPORT.json --dark REPORT.json --audit AUDIT.json [--previous GATE.json] [--engine-wasm CORE.wasm --export EXPORT.json] [--output NEW.json]
 Fixed gates: physical pages from 1, 150 dpi, 2 px, thresholds 245/180,
 normal F1 >= 0.95, dark F1 >= 0.90, explicit content and geometry audits.
 Audit schema: {schemaVersion:1,reportSha256:{normal,dark},sha256:{source,hancom,pwh},
- pages:[{page:1,content:{verified:true,missing:0,duplicated:0},geometry:{verified:true,overflow:0}}]}
+ pages:[{page:1,content:{verified:true,missing:0,duplicated:0,misplaced:0},geometry:{verified:true,overflow:0}}]}
+Optional content.misplaced counts text assigned to the wrong physical page.
 Report hashes identify exact file bytes. Missing audit pages block advancement.
 The previous accepted prefix must pass again for the new output and audit.
+Engine evidence binds actual observed renderer WASM bytes to the source and PDF.
+Once a previous gate is engine-bound, later gates cannot omit engine evidence.
 Exit: 0 complete, 1 blocked, 2 invalid input. Output files are never overwritten.
 `;
 async function main(args){
  if(args.length===1&&['--help','-h'].includes(args[0])){process.stdout.write(usage);return 0;}
  const options={};
  for(let i=0;i<args.length;i+=2){
-  const key=args[i];if(!['--normal','--dark','--audit','--previous','--output'].includes(key)||options[key]||!args[i+1]||args[i+1].startsWith('--'))invalid('Invalid arguments; use --help');
+  const key=args[i];if(!['--normal','--dark','--audit','--previous','--engine-wasm','--export','--output'].includes(key)||options[key]||!args[i+1]||args[i+1].startsWith('--'))invalid('Invalid arguments; use --help');
   options[key]=path.resolve(args[i+1]);
  }
  for(const key of ['--normal','--dark','--audit'])if(!options[key])invalid('Normal, dark and audit files are required');
+ if(Boolean(options['--engine-wasm'])!==Boolean(options['--export']))invalid('Engine WASM and export receipt must be supplied together');
  if(options['--output']&&Object.entries(options).some(([key,value])=>key!=='--output'&&value===options['--output']))invalid('Output cannot replace an input');
  const read=async key=>{try{return await fs.readFile(options[key]);}catch(error){invalid('Cannot read '+key.slice(2)+' input ('+String(error.code||'READ_ERROR')+')');}};
- const input={normalBytes:await read('--normal'),darkBytes:await read('--dark'),auditBytes:await read('--audit'),...(options['--previous']?{previousBytes:await read('--previous')}:{})};
+ const input={normalBytes:await read('--normal'),darkBytes:await read('--dark'),auditBytes:await read('--audit'),...(options['--previous']?{previousBytes:await read('--previous')}:{ }),...(options['--engine-wasm']?{engineWasmBytes:await read('--engine-wasm'),exportBytes:await read('--export')}:{})};
  const result=evaluateLayoutGates(input),json=JSON.stringify(result,null,2)+'\n';
  if(options['--output']){
   try{await fs.writeFile(options['--output'],json,{flag:'wx'});}catch(error){invalid('Cannot create fresh output ('+String(error.code||'WRITE_ERROR')+')');}

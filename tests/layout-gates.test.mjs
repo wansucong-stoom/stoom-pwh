@@ -25,6 +25,13 @@ function inputs({normal=[0.99,0.99,0.99],dark=[0.96,0.96,0.96],auditPages,normal
  return {normalBytes,darkBytes,auditBytes:json(audit)};
 }
 const replaceAudit=(input,change)=>{const audit=JSON.parse(input.auditBytes);change(audit);return {...input,auditBytes:json(audit)};};
+const wasm=Buffer.from([0,97,115,109,1,0,0,0]);
+function withEngine(input,engineWasmBytes=wasm){
+ const sha256=hash(engineWasmBytes),report=JSON.parse(input.normalBytes);
+ const receipt={sourceHash:report.sha256.source,sha256:report.sha256.pwh,sourceUnchanged:true,dirty:false,
+  codeBinding:{expected:{'rhwp_bg.wasm':sha256},wasmVerified:true,observedWasm:[{sha256,bytes:engineWasmBytes.length,error:null}]}};
+ return {...input,engineWasmBytes,exportBytes:json(receipt)};
+}
 
 test('a complete audited physical prefix passes inclusive fixed thresholds',()=>{
  const result=evaluateLayoutGates(inputs({normal:[.95,.99],dark:[.90,.95]}));
@@ -51,6 +58,7 @@ test('perfect raster overlap cannot substitute for omitted content or missing ge
  for(const change of [
   audit=>{audit.pages[0].content.missing=1;},
   audit=>{audit.pages[0].content.duplicated=1;},
+  audit=>{audit.pages[0].content.misplaced=1;},
   audit=>{audit.pages[0].geometry.overflow=1;},
   audit=>{audit.pages[0].geometry.verified=false;},
   audit=>{audit.pages.splice(0,1);},
@@ -134,10 +142,52 @@ test('a previous weaker policy, different reference or nonsequential acceptance 
   previous=>{previous.sha256.hancom='d'.repeat(64);},
   previous=>{previous.pages[0].status='not-reached';},
   previous=>{previous.acceptedThrough=1;},
+  previous=>{previous.pages[0].misplacedText=1;},
  ]){
   const previous=evaluateLayoutGates(inputs());change(previous);
   assert.throws(()=>evaluateLayoutGates({...inputs(),previousBytes:json(previous)}));
  }
+});
+
+test('engine-bound gates identify actual renderer input and the exact export receipt',()=>{
+ const input=withEngine(inputs()),result=evaluateLayoutGates(input);
+ assert.deepEqual(result.engineBinding,{wasmSha256:hash(wasm),wasmBytes:wasm.length,exportReceiptSha256:hash(input.exportBytes),observed:true});
+ for(const change of [
+  receipt=>{receipt.sourceHash='d'.repeat(64);},
+  receipt=>{receipt.sha256='d'.repeat(64);},
+  receipt=>{receipt.sourceUnchanged=false;},
+  receipt=>{receipt.dirty=true;},
+  receipt=>{receipt.codeBinding.expected['rhwp_bg.wasm']='d'.repeat(64);},
+  receipt=>{receipt.codeBinding.wasmVerified=false;},
+  receipt=>{receipt.codeBinding.observedWasm=[];},
+  receipt=>{receipt.codeBinding.observedWasm[0].sha256='d'.repeat(64);},
+  receipt=>{receipt.codeBinding.observedWasm[0].bytes+=1;},
+  receipt=>{receipt.codeBinding.observedWasm[0].error='compile failed';},
+  receipt=>{receipt.codeBinding.observedWasm.push({sha256:'d'.repeat(64),bytes:wasm.length,error:null});},
+ ]){
+  const receipt=JSON.parse(input.exportBytes);change(receipt);
+  assert.throws(()=>evaluateLayoutGates({...input,exportBytes:json(receipt)}));
+ }
+ assert.throws(()=>evaluateLayoutGates({...input,engineWasmBytes:Buffer.from('not a wasm')}),/not a WASM/);
+ assert.throws(()=>evaluateLayoutGates({...input,engineWasmBytes:undefined}),/supplied together/);
+ assert.throws(()=>evaluateLayoutGates({...input,exportBytes:undefined}),/supplied together/);
+});
+
+test('a cumulative new engine needs a fresh export and reaudits every previously accepted page',()=>{
+ const old=withEngine(inputs()),previous=evaluateLayoutGates(old),previousBytes=json(previous);
+ assert.throws(()=>evaluateLayoutGates({...inputs(),previousBytes}),/requires current engine/);
+ const nextWasm=Buffer.concat([wasm,Buffer.from([0,1,0])]);
+ const a=report([.99,.99,.99],245),b=report([.96,.96,.96],180);
+ a.sha256.pwh='e'.repeat(64);b.sha256.pwh='e'.repeat(64);
+ const fresh=withEngine(inputs({normalReport:a,darkReport:b}),nextWasm);
+ assert.throws(()=>evaluateLayoutGates({...fresh,exportBytes:old.exportBytes,previousBytes}),/different source or output/);
+ const result=evaluateLayoutGates({...fresh,previousBytes});
+ assert.equal(result.status,'complete');assert.equal(result.engineBinding.wasmSha256,hash(nextWasm));
+ assert.equal(result.previousPrefix.requiredThrough,3);assert.equal(result.previousPrefix.preserved,true);
+ const regressed=replaceAudit(fresh,audit=>{audit.pages[1].content.missing=1;});
+ const blocked=evaluateLayoutGates({...regressed,previousBytes});
+ assert.equal(blocked.currentPage,2);assert.equal(blocked.previousPrefix.preserved,false);
+ assert.equal(blocked.pages[2].status,'not-reached');
 });
 
 test('malformed or duplicated audit records cannot silently become approvals',()=>{
@@ -145,9 +195,20 @@ test('malformed or duplicated audit records cannot silently become approvals',()
   audit=>{audit.pages[0].content.verified='true';},
   audit=>{delete audit.pages[0].content.missing;},
   audit=>{audit.pages[0].content.missing=-1;},
+  audit=>{audit.pages[0].content.misplaced=-1;},
   audit=>{audit.pages.push({...audit.pages[0]});},
   audit=>{audit.pages[0].page=99;},
  ])assert.throws(()=>evaluateLayoutGates(replaceAudit(inputs(),change)));
+});
+
+test('unique text emitted on the wrong physical page fails even with perfect scores',()=>{
+ const input=replaceAudit(inputs({normal:[1,1,1],dark:[1,1,1]}),audit=>{audit.pages[1].content.misplaced=21;});
+ const result=evaluateLayoutGates(input);
+ assert.equal(result.acceptedThrough,1);assert.equal(result.currentPage,2);
+ assert.equal(result.pages[1].misplacedText,21);assert.equal(result.pages[1].missingText,0);
+ assert.equal(result.pages[1].duplicatedText,0);assert.equal(result.pages[1].contentVerified,true);
+ assert.deepEqual(result.pages[1].reasons,['text-on-wrong-physical-page']);
+ assert.equal(result.pages[2].status,'not-reached');
 });
 
 test('CLI separates blocked, invalid and complete status and never overwrites inputs or outputs',async()=>{
@@ -165,6 +226,11 @@ test('CLI separates blocked, invalid and complete status and never overwrites in
   assert.equal(run([...args,'--output',out]).status,2);assert.deepEqual(await fs.readFile(out),before);
   const complete=inputs({normal:[.99],dark:[.96]});for(const [key,value]of Object.entries(complete))await fs.writeFile(files[key],value);
   const good=run(args);assert.equal(good.status,0,good.stderr);assert.equal(JSON.parse(good.stdout).status,'complete');
+  const bound=withEngine(complete),engineFile=path.join(root,'core.wasm'),exportFile=path.join(root,'export.json');
+  await fs.writeFile(engineFile,bound.engineWasmBytes);await fs.writeFile(exportFile,bound.exportBytes);
+  assert.equal(run([...args,'--engine-wasm',engineFile]).status,2);
+  const actual=run([...args,'--engine-wasm',engineFile,'--export',exportFile]);
+  assert.equal(actual.status,0,actual.stderr);assert.equal(JSON.parse(actual.stdout).engineBinding.wasmSha256,hash(wasm));
   const help=run(['--help']);assert.equal(help.status,0);assert.match(help.stdout,/normal F1 >= 0.95/);
  }finally{
   assert.equal(path.dirname(path.resolve(root)),path.resolve(os.tmpdir()));assert.ok(path.basename(root).startsWith('pwh-layout-gates-'));

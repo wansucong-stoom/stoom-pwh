@@ -1,0 +1,672 @@
+--- a/src/renderer/float_placement.rs
++++ b/src/renderer/float_placement.rs
+@@ -4552,6 +4552,24 @@
+     let b0 = b_start.min(b_end);
+     let b1 = b_start.max(b_end);
+     a0 < b1 && b0 < a1
++}
++
++/// A paragraph-relative offset was already consumed by an earlier sibling
++/// table when this object's first fragment reaches an otherwise empty page.
++/// Budget and paint must ask the same source-owner predicate; a first table,
++/// continuation or an occupied page retains its existing offset contract.
++pub(crate) fn sibling_table_anchor_offset_already_spent(
++    para: &Paragraph,
++    control_index: usize,
++    is_continuation: bool,
++    current_page_empty: bool,
++    flow_from_body_top: f64,
++) -> bool {
++    !is_continuation
++        && current_page_empty
++        && flow_from_body_top < 1.0
++        && para.controls.iter().take(control_index)
++            .any(|control| matches!(control, Control::Table(_)))
+ }
+ 
+ /// [#6143] 문단 기준 양수 오프셋이 **쪽 경계에서 이미 소진**됐는지 판정한다.
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -183,6 +183,152 @@
+         return 0.0;
+     }
+     hwpunit_to_px(offset, dpi)
++}
++
++/// An untouched successor authenticates this float's physical source frame.
++/// Its visible host line may precede the table inside unused trailing spacing;
++/// line spacing is not an independent object-leading reservation.
++#[derive(Clone, Copy, Debug)]
++struct StoredLeadingHostFloatFrame {
++    table_top_hu: i64,
++    occupied_bottom_hu: i64,
++}
++
++impl StoredLeadingHostFloatFrame {
++    fn resolve(self, origin: f64, dpi: f64)
++        -> Option<crate::renderer::float_placement::ParagraphFloatPlacement>
++    {
++        use crate::renderer::float_placement::{ParagraphFloatFlow, ParagraphFloatPlacement};
++        if !origin.is_finite() || !dpi.is_finite() || dpi <= 0.0 { return None; }
++        Some(ParagraphFloatPlacement {
++            flow: ParagraphFloatFlow::Exclusion,
++            anchor_y: origin,
++            stored_host_origin: None,
++            stored_successor_line_origin: None,
++            table_left: None,
++            table_top: origin + self.table_top_hu as f64 * dpi / 7200.0,
++            occupied_bottom: origin + self.occupied_bottom_hu as f64 * dpi / 7200.0,
++        })
++    }
++}
++
++fn stored_leading_host_float_frame(
++    para: &Paragraph,
++    next: Option<&Paragraph>,
++    table: &crate::model::table::Table,
++    stored: bool,
++    edited: bool,
++    reflowed: bool,
++) -> Option<StoredLeadingHostFloatFrame> {
++    if !stored || edited || reflowed || para.text.trim().is_empty()
++        || para.stored_text_partition_is_dirty() || para.cell_format_vpos_dirty
++        || table.common.treat_as_char || !table.common.flow_with_text
++        || table.common.allow_overlap || table.caption.is_some()
++        || table.common.text_wrap != crate::model::shape::TextWrap::TopAndBottom
++        || table.common.vert_rel_to != crate::model::shape::VertRelTo::Para
++        || table.common.vert_align != crate::model::shape::VertAlign::Top
++        || table.common.height == 0 || table.common.height >= 0x8000_0000
++        || table.cells.iter().any(|cell| cell.dirty_flag || cell.paragraphs.iter().any(|p|
++            p.stored_text_partition_is_dirty() || p.cell_format_vpos_dirty
++            || p.line_segs.iter().any(|line| line.tag
++                & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0)))
++    { return None; }
++    if !matches!(para.controls.as_slice(), [Control::Table(owner)]
++        if std::ptr::eq(owner.as_ref(), table))
++    { return None; }
++    let [line] = para.line_segs.as_slice() else { return None; };
++    let offset = signed_hwpunit(table.common.vertical_offset);
++    if offset <= 0 || line.vertical_pos < 0 || line.line_height <= 0 || line.line_spacing < 0 || line.segment_width <= 0
++        || line.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0
++        || i64::from(offset) + i64::from(table.outer_margin_top) < i64::from(line.line_height)
++    { return None; }
++    let Some(next) = next else { return None; };
++    if next.text.trim().is_empty() || !next.controls.is_empty()
++        || next.stored_text_partition_is_dirty() || next.cell_format_vpos_dirty
++    { return None; }
++    let Some(next_line) = next.line_segs.first() else { return None; };
++    if next_line.vertical_pos < 0 || next_line.line_height <= 0 || next_line.segment_width <= 0
++        || next_line.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0
++    { return None; }
++    let frame_bottom = i64::from(line.vertical_pos) + i64::from(offset)
++        + i64::from(table.outer_margin_top) + i64::from(table.common.height)
++        + i64::from(table.outer_margin_bottom);
++    ((frame_bottom - i64::from(next_line.vertical_pos)).abs() <= 2).then_some(
++        StoredLeadingHostFloatFrame {
++            table_top_hu: i64::from(offset) + i64::from(table.outer_margin_top),
++            occupied_bottom_hu: frame_bottom - i64::from(line.vertical_pos),
++        },
++    )
++}
++
++/// A real saved line is not proof that width-aware composition kept one
++/// visible line. Reservation and paint must authenticate their actual line slice.
++fn stored_float_frame_composed_line_agrees(
++    para: &Paragraph,
++    lines: &[ComposedLine],
++    frame: StoredLeadingHostFloatFrame,
++) -> bool {
++    let ([source], [line]) = (para.line_segs.as_slice(), lines) else { return false; };
++    line.char_start == 0 && line.line_height > 0
++        && line.line_height == source.line_height
++        && line.segment_width == source.segment_width
++        && line.line_spacing == source.line_spacing
++        && i64::from(line.line_height) <= frame.table_top_hu
++        && line.runs.iter().any(|run| !run.text.trim().is_empty())
++}
++
++/// The original local source frame must fit the actual physical page body.
++/// A smaller imported paper can retain authentic but stale line coordinates;
++/// those coordinates must not replace the existing continuation ledger.
++fn stored_float_frame_fits_original_body(
++    para: &Paragraph,
++    frame: StoredLeadingHostFloatFrame,
++    body_height: f64,
++    dpi: f64,
++) -> bool {
++    let [line] = para.line_segs.as_slice() else { return false; };
++    body_height.is_finite() && body_height > 0.0 && dpi.is_finite() && dpi > 0.0
++        && line.vertical_pos >= 0
++        && (i64::from(line.vertical_pos) + frame.occupied_bottom_hu) as f64
++            * dpi / 7200.0 <= body_height
++}
++
++/// Current reflow can preserve an imported line's tag while replacing its
++/// space metrics. That composition provenance cannot authenticate saved geometry,
++/// including when a changed descendant happens to retain the same total height.
++fn stored_float_frame_owner_is_original(para: &Paragraph) -> bool {
++    para.layout_space_metrics.is_empty()
++        && !para.stored_text_partition_is_dirty() && !para.cell_format_vpos_dirty
++        && para.line_segs.iter().all(|line| line.tag
++            & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY == 0)
++        && para.controls.iter().all(|control| match control {
++            Control::Table(table) => table.cells.iter().all(|cell| !cell.dirty_flag
++                && cell.paragraphs.iter().all(stored_float_frame_owner_is_original)),
++            _ => true,
++        })
++}
++
++/// A closed frame is physical only if current measurement still agrees with
++/// the untouched multirow source body. Paragraph margins are not folded into it.
++fn stored_float_frame_geometry_agrees(
++    declared_height: u32,
++    measured_height: f64,
++    dpi: f64,
++    spacing: [f64; 3],
++) -> bool {
++    declared_height > 0 && declared_height <= i32::MAX as u32
++        && measured_height.is_finite() && measured_height > 0.0
++        && dpi.is_finite() && dpi > 0.0
++        && spacing.iter().all(|value| *value == 0.0)
++        && (measured_height - declared_height as f64 * dpi / 7200.0).abs()
++            <= 2.0 * dpi / 7200.0
++}
++
++fn stored_float_anchor_has_leading_host_line(
++    para: &Paragraph, next: Option<&Paragraph>, table: &crate::model::table::Table,
++    stored: bool, edited: bool, reflowed: bool,
++) -> bool {
++    stored_leading_host_float_frame(para, next, table, stored, edited, reflowed).is_some()
+ }
+ 
+ fn reflow_nested_table_has_outer_frame(
+@@ -7670,6 +7816,10 @@
+                         let stored_float_frame = self.stored_nested_float_placement(
+                             table,
+                             para,
++                            cell.paragraphs.get(cp_idx + 1),
++                            &composed.lines,
++                            start_line == 0 && mixed_nested_split.as_ref()
++                                .is_none_or(|split| split.offset_within_start <= 0.5),
+                             nested_table,
+                             ctrl_idx,
+                             para_y_before_compose,
+@@ -12553,7 +12703,14 @@
+                     if t.row_count >= 2 && !t.common.treat_as_char
+                     && matches!(t.common.text_wrap, TextWrap::TopAndBottom)
+                     && !self.nested_table_is_overlay(t)
+-                    && matches!(t.page_break, TablePageBreak::RowBreak));
++                    && matches!(t.page_break, TablePageBreak::RowBreak)
++                    && !stored_float_anchor_has_leading_host_line(
++                        p, cell.paragraphs.get(pi + 1), t,
++                        self.profile.get().hwpx_stored_layout()
++                            || self.profile.get().hwp5_stored_pagination_layout(),
++                        self.profile.get().session_edited(),
++                        self.render_normalization.borrow().table_text_reflowed(t),
++                    ));
+             let projected_mixed_block_table = para_has_visible_text && projected_source_block_table;
+             if has_table_in_para && (p.text.trim().is_empty() || projected_mixed_block_table) {
+                 let nested_tables: Vec<&crate::model::table::Table> = p
+@@ -13326,11 +13483,17 @@
+                     .sum();
+                 if nested_h > 0.0 {
+                     let before_host_units = unit_cum;
++                    let closed_float_frame = p.controls.iter().find_map(|control| {
++                        let Control::Table(child) = control else { return None; };
++                        self.closed_stored_nested_float_frame(
++                            table, p, cell.paragraphs.get(pi + 1), &comp.lines, child, styles,
++                        ).and_then(|frame| frame.resolve(0.0, self.dpi))
++                    });
+                     let stored_float_frame = p.controls.iter().enumerate().find_map(|(ci, c)| {
+                         let Control::Table(child) = c else {
+                             return None;
+                         };
+-                        self.stored_nested_float_placement(table, p, child, ci, 0.0, styles)
++                        self.stored_nested_float_placement(table, p, cell.paragraphs.get(pi + 1), &comp.lines, true, child, ci, 0.0, styles)
+                     });
+                     for (li, line) in comp.lines.iter().enumerate() {
+                         let h = corrected_h(line, li);
+@@ -13345,6 +13508,11 @@
+                         let include_trailing_ls =
+                             !is_cell_last_line || (para_count > 1 && table.common.treat_as_char);
+                         let mut lh = if include_trailing_ls { h + ls } else { h };
++                        if let Some(frame) = closed_float_frame {
++                            // The proof guarantees one visible line ending no lower
++                            // than table_top. Only unused trailing spacing can overlap.
++                            lh = frame.table_top;
++                        }
+                         if li == 0 {
+                             lh += spacing_before;
+                         }
+@@ -13418,7 +13586,11 @@
+                         .line_segs
+                         .windows(2)
+                         .any(|pair| pair[1].vertical_pos < pair[0].vertical_pos);
+-                    let target_h = if let Some(frame) = stored_float_frame {
++                    let target_h = if let Some(frame) = closed_float_frame {
++                        // The host atom ends exactly at this same resolved table top.
++                        // Keep the child's complete content and bottom outer margin.
++                        frame.occupied_bottom - frame.table_top
++                    } else if let Some(frame) = stored_float_frame {
+                         // 위에서 이미 계상한 호스트 줄과 float의 겹치는 예약을 뺀다.
+                         // 이 원장과 paint가 동일한 앵커 줄 및 바깥 여백을 소비한다.
+                         frame.occupied_bottom - (unit_cum - before_host_units)
+@@ -15814,6 +15986,144 @@
+                 continuation_height,
+             },
+         )
++    }
++
++    /// An original object-only host opens and closes the accepted first
++    /// nested physical frame's own outer margins. Do not generalize this to
++    /// ordinary stored anchors, mixed text, captions, or later source cuts.
++    pub(crate) fn saved_nested_opening_outer_frame_height(
++        &self,
++        host: &Paragraph,
++        table: &crate::model::table::Table,
++        start_row: usize,
++        end_row: usize,
++        start_cut: &[usize],
++        end_cut: &[usize],
++        styles: &ResolvedStyleSet,
++    ) -> Option<f64> {
++        if !host.text.trim().is_empty() || host.stored_text_partition_is_dirty()
++            || !host.layout_space_metrics.is_empty()
++            || host.cell_format_vpos_dirty || table.caption.is_some()
++            || !table.common.flow_with_text || table.common.allow_overlap
++            || table.common.vert_align != crate::model::shape::VertAlign::Top
++            || !matches!(host.controls.as_slice(), [Control::Table(owner)]
++                if std::ptr::eq(owner.as_ref(), table))
++        { return None; }
++        let [line] = host.line_segs.as_slice() else { return None; };
++        if line.vertical_pos < 0 || line.line_height <= 0 || line.segment_width != 0
++            || line.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0
++        { return None; }
++        self.saved_nested_inline_owner_opening_frame_height(
++            table, start_row, end_row, start_cut, end_cut, styles,
++        )
++    }
++
++    /// An immutable nested table can store an opening physical frame whose
++    /// last row continues with an inline-table owner on the next source frame.
++    /// The source cursor remains authoritative: this is a physical band only,
++    /// never a cell-height remainder or an instruction to consume later content.
++    pub(crate) fn saved_nested_inline_owner_opening_frame_height(
++        &self,
++        table: &crate::model::table::Table,
++        start_row: usize,
++        end_row: usize,
++        start_cut: &[usize],
++        end_cut: &[usize],
++        styles: &ResolvedStyleSet,
++    ) -> Option<f64> {
++        let profile = self.profile.get();
++        if !(profile.hwpx_stored_layout() || profile.hwp5_stored_pagination_layout())
++            || profile.session_edited()
++            || self.render_normalization.borrow().table_text_reflowed(table)
++            || table.common.treat_as_char
++            || table.common.text_wrap != crate::model::shape::TextWrap::TopAndBottom
++            || table.common.vert_rel_to != crate::model::shape::VertRelTo::Para
++            || table.common.vertical_offset as i32 != 0
++            || table.page_break != TablePageBreak::RowBreak
++            || table.common.height == 0 || table.common.height > i32::MAX as u32
++            || start_row != 0 || !start_cut.is_empty() || end_cut.is_empty()
++            || end_row <= 1 || end_row > usize::from(table.row_count)
++            || table.cells.iter().any(|cell| cell.dirty_flag || cell.paragraphs.iter().any(|p|
++                p.stored_text_partition_is_dirty() || p.cell_format_vpos_dirty
++                    // Reflow deliberately republishes clean text partitions and
++                    // retains the original LineSeg tag. Its published space
++                    // metrics, unlike file rows, retain that composition provenance.
++                    || !p.layout_space_metrics.is_empty()
++                    || p.line_segs.iter().any(|line| line.tag
++                        & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0)))
++        { return None; }
++        let last_row = end_row - 1;
++        let raw = table.get_raw_row_heights();
++        let before_hu = raw.iter().take(last_row).map(|&h| i64::from(h)).sum::<i64>()
++            + i64::from(table.cell_spacing) * last_row as i64;
++        let frame_hu = i64::from(table.common.height);
++        let row_hu = i64::from(*raw.get(last_row)?);
++        // This table's declaration crosses a real row, rather than describing
++        // the complete table or a fabricated over-sized page-filling band.
++        if before_hu >= frame_hu || frame_hu >= before_hu + row_hu
++            || table.cells.iter().any(|cell| cell.row_span != 1 || cell.col_span != 1)
++        { return None; }
++        let cells: Vec<_> = Self::row_cut_cell_order(table, last_row).into_iter()
++            .filter_map(|index| table.cells.get(index)).collect();
++        if cells.len() != end_cut.len() || cells.len() != usize::from(table.col_count) {
++            return None;
++        }
++        let authentic = |p: &Paragraph| !p.stored_text_partition_is_dirty()
++            && !p.cell_format_vpos_dirty && p.layout_space_metrics.is_empty()
++            && !p.line_segs.is_empty()
++            && p.line_segs.iter().all(|line|
++                line.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY == 0);
++        let mut active_owners = 0usize;
++        for (cell, &cursor) in cells.iter().zip(end_cut) {
++            let units = self.cell_units(cell, table, styles);
++            if cursor > units.len() { return None; }
++            if cursor == units.len() { continue; }
++            let current = units.get(cursor)?;
++            let previous = cursor.checked_sub(1).and_then(|index| units.get(index))?;
++            if !current.hard_break_before || !current.page_frame_reset_before
++                || current.vis_start != 0 || previous.para_idx + 1 != current.para_idx
++                || previous.vis_start >= previous.vis_end
++                || current.nested_row.is_some() || current.nested_table_fragment.is_some()
++                || current.mixed_nested_fragment || current.non_inline_control_range.is_some()
++            { return None; }
++            let previous_para = cell.paragraphs.get(previous.para_idx)?;
++            let owner = cell.paragraphs.get(current.para_idx)?;
++            let following = cell.paragraphs.get(current.para_idx + 1)?;
++            if !authentic(previous_para) || !authentic(owner) || !authentic(following)
++                || previous_para.text.trim().is_empty() || !previous_para.controls.is_empty()
++                || !owner.text.trim().is_empty() || owner.controls.len() != 1
++                || owner.line_segs.len() != 1 || following.line_segs.len() != 1
++                || following.text.trim().is_empty() || !following.controls.is_empty()
++                || previous.vis_end != previous_para.line_segs.len()
++            { return None; }
++            let Control::Table(inline) = &owner.controls[0] else { return None; };
++            let before = previous_para.line_segs.last()?;
++            let reset = owner.line_segs.first()?;
++            let successor = following.line_segs.first()?;
++            let band_hu = i64::from(inline.common.height)
++                + i64::from(inline.outer_margin_top) + i64::from(inline.outer_margin_bottom);
++            // The next content owner's real line is exactly its inline object
++            // plus margins. Its successor independently closes that same band.
++            if !inline.common.treat_as_char || inline.common.height == 0 || inline.caption.is_some()
++                || inline.common.height > i32::MAX as u32
++                || before.vertical_pos <= 0 || reset.vertical_pos != 0
++                || reset.line_height <= 0 || reset.line_spacing < 0
++                || band_hu != i64::from(reset.line_height)
++                || successor.line_height <= 0 || successor.vertical_pos < 0
++                || i64::from(successor.vertical_pos) != band_hu + i64::from(reset.line_spacing)
++                // A small inline owner fitting the whole opening row band is
++                // not independent proof of a page frame; it may be local vpos.
++                || band_hu <= frame_hu - before_hu
++            { return None; }
++            active_owners += 1;
++        }
++        if active_owners == 0 { return None; }
++        let frame = hwpunit_to_px(table.common.height as i32, self.dpi);
++        let body_height = self.current_body_area.get().3;
++        let cut_content = self.row_cut_content_height(table, last_row, &[], end_cut, styles);
++        let row_band = hwpunit_to_px((frame_hu - before_hu) as i32, self.dpi);
++        (body_height > 0.0 && frame <= body_height + 0.5 && cut_content <= row_band + 0.5)
++            .then_some(frame)
+     }
+ 
+     /// 저장된 다행 시작 프레임은 일반 문단 재시작에서 소비한 텍스트 유닛과
+@@ -18116,15 +18426,64 @@
+ 
+     /// 저장 호스트 줄과 float가 공유하는 중첩 표 원점 및 점유 끝점.
+     /// 줄 배치 뒤 커서에 offset을 더하지 않고 제어 문자가 속한 줄을 기준으로 삼는다.
++    fn closed_stored_nested_float_frame(
++        &self,
++        parent: &crate::model::table::Table,
++        para: &Paragraph,
++        next: Option<&Paragraph>,
++        lines: &[ComposedLine],
++        child: &crate::model::table::Table,
++        styles: &ResolvedStyleSet,
++    ) -> Option<StoredLeadingHostFloatFrame> {
++        // Most nested objects have no visible leading host. Reject their source
++        // shape before resolving child row heights or consulting the parent plan.
++        if child.row_count < 2 { return None; }
++        let next = next?;
++        let frame = stored_leading_host_float_frame(
++            para, Some(next), child,
++            self.profile.get().hwpx_stored_layout()
++                || self.profile.get().hwp5_stored_pagination_layout(),
++            self.profile.get().session_edited(),
++            self.render_normalization.borrow().table_text_reflowed(child),
++        )?;
++        if !stored_float_frame_owner_is_original(para)
++            || !stored_float_frame_owner_is_original(next)
++            || !stored_float_frame_composed_line_agrees(para, lines, frame)
++            || !stored_float_frame_fits_original_body(
++                para, frame, self.current_body_area.get().3, self.dpi,
++            )
++        { return None; }
++        // Formatted margins and current measurement still have to agree with
++        // that same source witness; changing evaluation order adds no new owner.
++        let host_style = styles.para_styles.get(para.para_shape_id as usize)?;
++        let successor_style = styles.para_styles.get(next.para_shape_id as usize)?;
++        if self.render_normalization.borrow().table_text_reflowed(parent)
++            || !stored_float_frame_geometry_agrees(
++                child.common.height, self.nested_table_body_height(child, styles), self.dpi,
++                [host_style.spacing_before, host_style.spacing_after,
++                    successor_style.spacing_before],
++            )
++        { return None; }
++        Some(frame)
++    }
++
+     pub(super) fn stored_nested_float_placement(
+         &self,
+         parent: &crate::model::table::Table,
+         para: &Paragraph,
++        next: Option<&Paragraph>,
++        lines: &[ComposedLine],
++        owns_closed_host_start: bool,
+         child: &crate::model::table::Table,
+         control: usize,
+         origin: f64,
+         styles: &ResolvedStyleSet,
+     ) -> Option<crate::renderer::float_placement::ParagraphFloatPlacement> {
++        if let Some(frame) = owns_closed_host_start.then(|| self.closed_stored_nested_float_frame(
++            parent, para, next, lines, child, styles,
++        )).flatten().and_then(|frame| frame.resolve(origin, self.dpi)) {
++            return Some(frame);
++        }
+         if !self.profile.get().hwp5_stored_pagination_layout()
+             || self.profile.get().session_edited()
+             || self
+@@ -20130,8 +20489,20 @@
+                 physical += hwpunit_to_px(child.cell_spacing as i32, self.dpi);
+             }
+         }
++        // A nested opening source frame owns physical space in addition to
++        // the selected content. The child painter consumes this exact predicate.
++        if start == run_start {
++            if let Some(frame) = self.saved_nested_inline_owner_opening_frame_height(
++                child, cut.start_row, cut.end_row, &cut.start_cut, &cut.end_cut, styles,
++            ) {
++                physical = physical.max(frame);
++            }
++        }
+         let style = styles.para_styles.get(para.para_shape_id as usize);
+-        let reopens_outer_frame = reflow_nested_table_has_outer_frame(para, child);
++        let reopens_outer_frame = reflow_nested_table_has_outer_frame(para, child)
++            || self.saved_nested_opening_outer_frame_height(
++                para, child, cut.start_row, cut.end_row, &cut.start_cut, &cut.end_cut, styles,
++            ).is_some();
+         if start == run_start || reopens_outer_frame {
+             physical += hwpunit_to_px(child.outer_margin_top as i32, self.dpi);
+         }
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -1110,6 +1110,7 @@
+         center_pinned_single_cell: bool,
+         center_saved_spanning_cell: Option<usize>,
+         align_saved_opening_frame: bool,
++        align_nested_opening_frame: bool,
+         // [#6976] 접기 대상 행(모델 행 인덱스)과 그 행이 남긴 여분의 최솟값 수집기.
+         fold_last_row: Option<usize>,
+         fold_slack: &mut f64,
+@@ -1818,7 +1819,7 @@
+                 VerticalAlign::Center
+             } else if align_saved_opening_frame
+                 && cell_row + 1 == end_row
+-                && !cell_content_cut_by_slice
++                && (align_nested_opening_frame || !cell_content_cut_by_slice)
+             {
+                 // 이 유한한 저장 프레임은 선택한 앞 조각만 소유한다.
+                 // 원래 정렬은 남은 꼬리가 아니라 line_ranges를 사용한다.
+@@ -3512,6 +3513,10 @@
+                                             self.stored_nested_float_placement(
+                                                 table,
+                                                 para,
++                                                cell.paragraphs.get(cp_idx + 1),
++                                                &composed.lines,
++                                                mixed_nested_split.as_ref()
++                                                    .is_none_or(|split| split.offset_within_start <= 0.5),
+                                                 nested_table,
+                                                 ctrl_idx,
+                                                 para_y_before_lines,
+@@ -3766,6 +3771,29 @@
+                                     } else {
+                                         None
+                                     };
++                                    // The source cut already owns this opening physical
++                                    // child frame. Its original object-only host owns both
++                                    // outer margins, independently of the later source units.
++                                    let opening_outer_frame = nested_cursor_split.as_ref()
++                                        .filter(|_| mixed_nested_split.is_none())
++                                        .and_then(|split| split.recursive_cut.as_ref())
++                                        .and_then(|cut| self.saved_nested_opening_outer_frame_height(
++                                            para, nested_table, cut.start_row, cut.end_row,
++                                            &cut.start_cut, &cut.end_cut, styles,
++                                        ));
++                                    let opening_outer_top = opening_outer_frame
++                                        .filter(|_| stored_float_frame.is_none())
++                                        .map(|_| hwpunit_to_px(nested_table.outer_margin_top as i32, self.dpi))
++                                        .unwrap_or(0.0);
++                                    let opening_outer_bottom = opening_outer_frame
++                                        .map(|_| hwpunit_to_px(nested_table.outer_margin_bottom as i32, self.dpi))
++                                        .unwrap_or(0.0);
++                                    let source_nested_y = nested_y + opening_outer_top;
++                                    let source_ctrl_area = LayoutRect {
++                                        y: ctrl_area.y + opening_outer_top,
++                                        height: (ctrl_area.height - opening_outer_top - opening_outer_bottom).max(0.0),
++                                        ..ctrl_area
++                                    };
+                                     let split_ref = split_info.as_ref().filter(|s| {
+                                         s.start_row > 0
+                                             || s.end_row < nested_table.row_count as usize
+@@ -3825,8 +3853,9 @@
+                                                 pre_emitted_host_height: 0.0,
+                                                 pre_emitted_host_content_height: 0.0,
+                                                 host_line_spacing: 0.0,
+-                                                resolved_table_top: stored_float_frame
+-                                                    .map(|f| f.table_top)
++                                                resolved_table_top: opening_outer_frame
++                                                    .map(|_| source_nested_y)
++                                                    .or_else(|| stored_float_frame.map(|f| f.table_top))
+                                                     .or_else(|| {
+                                                         self.reflow_nested_table_origin(
+                                                             para,
+@@ -3842,8 +3871,8 @@
+                                             section_index,
+                                             styles,
+                                             outline_numbering_id,
+-                                            &ctrl_area,
+-                                            nested_y,
++                                            &source_ctrl_area,
++                                            source_nested_y,
+                                             bin_data_content,
+                                             recursive_cut.start_row,
+                                             recursive_cut.end_row,
+@@ -3878,7 +3907,7 @@
+                                             &mut cell_node,
+                                             first_new_child,
+                                         );
+-                                        rendered_bottom - nested_y
++                                        rendered_bottom - source_nested_y
+                                     } else {
+                                         self.layout_table(
+                                             tree,
+@@ -3933,7 +3962,7 @@
+                                     // must not add those margins again at table_top.
+                                     para_y = stored_float_frame
+                                         .filter(|_| split_info.is_none())
+-                                        .map_or(nested_y + visible_table_h, |frame| {
++                                        .map_or(source_nested_y + visible_table_h + opening_outer_bottom, |frame| {
+                                             frame.occupied_bottom
+                                         });
+                                     has_preceding_text = true;
+@@ -4492,8 +4521,17 @@
+                     self.dpi,
+                 )
+             });
++        // The budget already consumes a preceding sibling's paragraph anchor
++        // when a later table opens a fresh page. Paint shares that exact owner.
++        let anchor_offset_already_spent = paragraphs.get(para_index).is_some_and(|anchor| {
++            crate::renderer::float_placement::sibling_table_anchor_offset_already_spent(
++                anchor, control_index, is_continuation,
++                col_node.children.is_empty(), y_start - col_area.y,
++            )
++        });
+         let effective_vertical_offset = if !is_continuation
+             && !para_offset_consumed_by_page_break
++            && !anchor_offset_already_spent
+             && !table.common.treat_as_char
+             && matches!(
+                 table.common.vert_rel_to,
+@@ -5107,6 +5145,19 @@
+                 row_heights[last] = limit.max(0.0);
+             }
+         }
++        // Nested physical frames use the same immutable source/cursor witness
++        // as parent reservation. No future inline-table unit is consumed here.
++        let nested_opening_frame = enclosing_cell_ctx.and_then(|_| {
++            self.saved_nested_inline_owner_opening_frame_height(
++                table, start_row, end_row, start_cut, end_cut, styles,
++            )
++        });
++        if let Some(frame) = nested_opening_frame {
++            let before = row_heights.iter().take(end_row - 1).sum::<f64>()
++                + cell_spacing * (end_row - 1) as f64;
++            let last = end_row - 1;
++            row_heights[last] = row_heights[last].max((frame - before).max(0.0));
++        }
+         // 반복 제목행 바로 뒤의 가운데 정렬 rowspan 셀이 두 물리 쪽을 소유하면
+         // 컷 유닛 높이의 합보다 저장 셀 높이가 클 수 있다. 첫 조각 상자는 쪽
+         // 하단까지, 마지막 조각은 선언 셀 높이의 잔여분까지 연다. 그래야 두
+@@ -5526,11 +5577,14 @@
+                     )
+                 })
+             });
+-        let align_saved_opening_frame = !is_continuation
++        let align_nested_opening_frame = !is_continuation && !is_block_split
++            && nested_opening_frame
++                .is_some_and(|frame_height| (partial_table_height - frame_height).abs() <= 0.5);
++        let align_saved_opening_frame = align_nested_opening_frame || (!is_continuation
+             && !is_block_split
+             && enclosing_cell_ctx.is_none()
+             && saved_opening_alignment_height
+-                .is_some_and(|frame_height| (partial_table_height - frame_height).abs() <= 0.5);
++                .is_some_and(|frame_height| (partial_table_height - frame_height).abs() <= 0.5));
+ 
+         // ── 6. 셀 렌더링 (render_rows 범위 내 셀만) ──
+         // [#6976] 쪽을 끝내는 조각의 마지막 행 상자를 **배치 뒤에** 접는다.
+@@ -5614,6 +5668,7 @@
+             center_pinned_single_cell,
+             center_saved_spanning_cell,
+             align_saved_opening_frame,
++            align_nested_opening_frame,
+             fold_last_row,
+             &mut fold_slack,
+         );
+--- a/src/renderer/typeset/table/continuation/fragment/budget.rs
++++ b/src/renderer/typeset/table/continuation/fragment/budget.rs
+@@ -309,15 +309,11 @@
+         //
+         // 좁힘: **앞선 형제 표가 있는 경우만**. 표 하나짜리 문단(`issue_2287` 핀)은
+         // 종전 계약을 그대로 둔다 — 넓히면 그 문서에 조각 공백화(sliver)가 생긴다.
+-        let has_earlier_sibling_table = para
+-            .controls
+-            .iter()
+-            .take(ctrl_idx)
+-            .any(|c| matches!(c, Control::Table(_)));
+-        let anchor_offset_already_spent = !is_continuation
+-            && st.current_items.is_empty()
+-            && st.current_height < 1.0
+-            && has_earlier_sibling_table;
++        let anchor_offset_already_spent =
++            crate::renderer::float_placement::sibling_table_anchor_offset_already_spent(
++                para, ctrl_idx, is_continuation,
++                st.current_items.is_empty(), st.current_height,
++            );
+         let deferred_anchor_consumed = prepared.first_anchor_offset_consumed
+             && !is_continuation
+             && cursor_row == 0

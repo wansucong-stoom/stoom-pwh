@@ -1,0 +1,11 @@
+import fs from 'node:fs/promises';
+import {mapHwpxMember} from './hwpx-fixture-utils.mjs';
+const seed=await fs.readFile(new URL('../fixtures/rowbreak-table/synthetic-rowbreak-single-line-control.hwpx',import.meta.url));
+const paragraph=(text,extra='',height=1100)=>`<hp:p id="0" paraPrIDRef="0" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0"><hp:run charPrIDRef="0">${extra}<hp:t>${text}</hp:t></hp:run><hp:linesegarray><hp:lineseg textpos="0" vertpos="0" vertsize="${height}" textheight="${height}" baseline="935" spacing="500" horzpos="0" horzsize="20000" flags="393216"/></hp:linesegarray></hp:p>`;
+const table=(id,prefix)=>`<hp:tbl id="${id}" zOrder="0" numberingType="TABLE" textWrap="TOP_AND_BOTTOM" textFlow="BOTH_SIDES" pageBreak="CELL" repeatHeader="0" noAdjust="1" rowCnt="6" colCnt="1" cellSpacing="0" borderFillIDRef="1"><hp:sz width="20000" height="10800" widthRelTo="ABSOLUTE" heightRelTo="ABSOLUTE"/><hp:pos treatAsChar="0" affectLSpacing="0" flowWithText="1" allowOverlap="0" vertRelTo="PARA" horzRelTo="COLUMN" vertAlign="TOP" horzAlign="LEFT" vertOffset="0" horzOffset="0"/><hp:outMargin left="0" right="0" top="0" bottom="0"/><hp:inMargin left="0" right="0" top="0" bottom="0"/>${Array.from({length:6},(_,row)=>`<hp:tr><hp:tc hasMargin="1" borderFillIDRef="1"><hp:subList textDirection="HORIZONTAL" lineWrap="BREAK" vertAlign="TOP">${paragraph(prefix+'_'+row)}</hp:subList><hp:cellAddr colAddr="0" rowAddr="${row}"/><hp:cellSpan colSpan="1" rowSpan="1"/><hp:cellSz width="20000" height="1800"/><hp:cellMargin left="0" right="0" top="0" bottom="0"/></hp:tc></hp:tr>`).join('')}</hp:tbl>`;
+export function siblingTableHostFixture({placement='between'}={}){
+ const a=table(10,'FIRST'),b=table(20,'SECOND'),number='<hp:ctrl><hp:pageNum pos="BOTTOM_CENTER" formatType="DIGIT" sideChar="-"/></hp:ctrl>';
+ const contents=placement==='before'?number+a+b:placement==='after'?a+b+number:a+number+b;
+ const section='<hp:secPr id="0"><hp:pagePr width="30000" height="9000" landscape="WIDELY"><hp:margin left="0" right="0" top="0" bottom="0" header="0" footer="1000" gutter="0"/></hp:pagePr></hp:secPr>';
+ return mapHwpxMember(seed,'Contents/section0.xml',xml=>xml.replace(/(<hs:sec\b[^>]*>)[\s\S]*<\/hs:sec>/,'$1'+paragraph('',section+contents,1100)+'</hs:sec>'));
+}

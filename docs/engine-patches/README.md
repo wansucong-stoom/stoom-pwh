@@ -3,19 +3,22 @@
 
 이 디렉터리는 rhwp 0.8.7에 적용한 변경을 검토할 수 있도록 보존합니다. Pwh의 Studio·클라이언트 패치와 구분되는 **조판 코어 변경**입니다. 문서 원문의 텍스트, XML에 저장된 셀 높이, 글꼴이나 여백이 아니라 계산된 배치를 변경합니다. 넘친 글자를 잘라 가리거나 줄 간격을 압축하지 않으며, 문서 전체에 `reflowLinesegs` 복구를 호출하지 않습니다.
 
+개별 패치를 설계·검증할 때 따르는 [공통 조판 소유권 규칙](LAYOUT-OWNERSHIP-RULES.md)을 별도로 관리합니다. 원문 앵커와 표시 순서, 물리 프레임과 내용 커서, 여백·편집 상태의 기준을 설명하며, 각 규칙의 실제 적용 범위와 배포 상태는 아래 패치별 기록을 따릅니다.
+
 <a id="cause-and-scope"></a>
 ## 원인과 적용 범위
 
-### r14: 미배포 검증 후보 — 저장 프레임과 쪽 번호 소유권
+### r14: 미배포 검증 후보 — 저장 프레임과 중첩 개체 소유권
 
-현재 배포 런타임은 r13입니다. `scripts/build-patched-core.mjs`는 r13의 열네 패치 뒤에 다음 두 패치를 순서대로 적용하는 **미배포 r14 후보**를 준비·빌드합니다. 제품 버전과 운영 `runtime-lock.json`은 변경하지 않습니다.
+현재 배포는 r13입니다. `scripts/build-patched-core.mjs`는 기존 열네 패치 뒤에 다음 세 패치를 순서대로 적용하는 **미배포 r14 후보**를 준비·빌드합니다. 제품 버전과 운영 `runtime-lock.json`은 유지합니다.
 
-1. [`rhwp-0.8.7-stored-parallel-frame-minimum.patch`](rhwp-0.8.7-stored-parallel-frame-minimum.patch)는 빈 저장 호스트의 표 바깥 여백과 나란한 셀의 공통 선언 최소 높이를 실제 조각 상자에 보존합니다. 원문 쪽 원점·열 소유 범위로 입증한 경우만 승인하며, `source_parallel_frame`을 쪽 나눔에서 그리기·커서에 전달합니다. 임의의 높이 재지정으로 기존 그리기를 바꾸지 않습니다.
-2. [`rhwp-0.8.7-page-number-source-activation.patch`](rhwp-0.8.7-page-number-source-activation.patch)는 쪽 번호 위치 설정이 실제 소유 조각의 원문 순서에서 시작하도록 합니다. 이전 구역의 형식 상속과 자기 구역의 시작을 구분하며, 기존 번호 재시작·감추기·본문 글줄 판정은 유지합니다.
+1. [`rhwp-0.8.7-stored-parallel-frame-minimum.patch`](rhwp-0.8.7-stored-parallel-frame-minimum.patch)는 빈 저장 호스트의 표 바깥 여백과 나란한 셀의 공통 선언 최소 높이를 실제 조각 상자에 보존합니다. 승인된 `source_parallel_frame`만 그리기·커서에 전달합니다.
+2. [`rhwp-0.8.7-page-number-source-activation.patch`](rhwp-0.8.7-page-number-source-activation.patch)는 쪽 번호 설정이 실제 소유 조각의 원문 순서에서 시작하도록 합니다. 기존 번호 재시작·감추기·일반 글줄 판정은 유지합니다.
+3. [`rhwp-0.8.7-stored-nested-float-frames.patch`](rhwp-0.8.7-stored-nested-float-frames.patch)는 중첩 개체의 첫 물리 프레임·자기 바깥 여백과 이미 소비한 형제 표 앵커를 측정·그리기에 일치시킵니다. 가시 호스트 줄 아래 float는 실제 한 줄·다음 원본 줄이 닫는 프레임·본문 용량을 함께 확인합니다. 현재 재조판의 공간 측정값은 원본 증거로 인정하지 않습니다.
 
-발생 계층은 두 패치 모두 **rhwp 원천 코어**입니다. Pwh·Desktop의 공통 WASM 후보이며 Studio 메뉴나 Desktop 호스트에서 위치를 보정하지 않습니다. 각 단계의 적용 전후 해시와 패치 해시는 빌드 스크립트에 고정합니다. 원본 ZIP에 열여섯 패치를 연쇄 적용한 소스는 검증 후보와 같고, JavaScript 연결부의 ABI도 유지합니다. 세부 조건과 제외 범위는 [프레임 소유권 안내](STORED-FRAME-OWNERSHIP.md)에 정리합니다.
+발생 위치는 **rhwp 조판 코어**입니다. 일부 float 표시 순서 문제는 Pwh r13 코어 패치의 회귀이며 수정 전 upstream 전체의 결함으로 설명하지 않습니다. Pwh·Desktop이 공유하는 WASM 후보로, Studio 메뉴나 Desktop 호스트에서 문서별 좌표를 보정하지 않습니다. 패치·단계별 소스 해시는 빌드 스크립트에 고정하며 원본 ZIP에 열일곱 패치를 적용해 재현합니다. [프레임 소유권](STORED-FRAME-OWNERSHIP.md), [중첩 개체의 조건·반례](NESTED-FLOAT-FRAMES.md)를 참고하세요.
 
-소스 함수 시험은 `parallel-row-source-frame.mjs` 19건과 `page-number-source-activation.mjs` 22건으로 분리합니다. 실제 PDF의 1~5쪽은 고정 기준과 별도 내용·기하 감사를 순차 통과했으나 6쪽은 배치 차이로 실패했습니다. [쪽별 점수·한계](../LAYOUT-FIDELITY.md#r14-source-frame-candidate)를 참고하세요. 컴파일·소스 시험·앞쪽 통과만으로 문서 전체나 운영 배포를 승인하지 않습니다.
+소스 함수 시험은 원본 프레임 19건, 쪽 번호 22건, 닫힌 float 33건, 형제 오프셋 9건, 중첩 개체 프레임 18건으로 구분합니다. 합성 시험은 원문 소유 범위·여백·편집·실행 취소·실제 SVG 클립을 확인하며 기관 문서를 포함하지 않습니다. 실제 PDF의 **1~6쪽**은 고정 기준과 별도 감사를 순차 통과했으나 다음 7쪽은 내용 차이로 승인하지 않았습니다. [쪽별 점수와 한계](../LAYOUT-FIDELITY.md#r14-source-frame-candidate)를 함께 확인하세요.
 
 ### r13: 혼합 문단의 표·본문 순서와 프레임 점유
 

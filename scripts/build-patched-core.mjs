@@ -356,6 +356,32 @@ const patches = [
     }
   ]
 },
+{
+  "file": "rhwp-0.8.7-stored-nested-float-frames.patch",
+  "sha256": "14fc7771b6a7ffd862d3853ce44b5d427019cc445d87eb6c175077f90a4ffb9e",
+  "sources": [
+    {
+      "path": "src/renderer/float_placement.rs",
+      "originalSha256": "6497388714cc9d6dd5120201bd98d78e25e3d7f4221a97ac324848d16275e7f6",
+      "patchedSha256": "557e4097cf3fcfda6ba7c83b0c396f68e4a7ec7c7c9a6ad40e1a323113a7f37e"
+    },
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "7273df67a4a6a7d29d57abbeae6741ae580d30d1f5a332d8e3e1996c1cedd56a",
+      "patchedSha256": "00479e71cdcf77616cb0093ced9e12e0970877024fcd0f127e079607b77bfa0f"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "15100f30c58776a312aaeec3502dbf708f6be0673ea9471dad315d0c7fd15dd6",
+      "patchedSha256": "899e431e7d658764c93f906c0518e8f9e4b3fa38429808893c1b7478b9dfea8a"
+    },
+    {
+      "path": "src/renderer/typeset/table/continuation/fragment/budget.rs",
+      "originalSha256": "6ce6b23311868330901388a1c70d8828ea7af563b5516b72db43ac16fba1b878",
+      "patchedSha256": "5df5675ab7aca00bdb85e08f32f16745115f70c2a2ab6fdd1c49cae1677bba82"
+    }
+  ]
+},
 ];
 const help = `Usage: node scripts/build-patched-core.mjs
   --source-archive <fixed upstream source ZIP>
