@@ -1,25 +1,25 @@
 {
   "kind": "studio-inline",
-  "version": "0.6.43",
+  "version": "0.6.44",
   "upstreamVersion": "0.8.7",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "files": {
-    "editor.js": "4322f6e8cad5b2ca44714e3d15cea5817d1bafc71786a68ae08188542ad3a014",
+    "editor.js": "5bd8705dedd912e1b4fc25247d0c0d38c63da12c80143b9f961e1adceb5cecf3",
     "rhwp-studio.css": "36fac005da9ae7342d413bbb7822f2a8cdb5527b9111384f6e756b02c8071357",
     "editor-body.html": "afc04317043d01ef99fb91eb9bce88723fac82491bf42473e4b30436e5066ceb"
   },
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "common",
-    "sha256": "6f4ec439a7c8870d5dc5558a55e8f536703e18a9949038dc962da6ddd65ebcbd",
+    "sha256": "1213372d44cd3f3390d6a018e3d90339a04d8f6b1e7c9f162603fe65e38d88bf",
     "files": [
       {
         "path": "package.json",
-        "sha256": "ee698d7939ba96b14cc5cb4ed3866df4c783983545a8436d53c56aa8032925cf"
+        "sha256": "221b965b467f0d76f45c9a07c64a886b3d9aea60528eb0a575cd72929c5c9de7"
       },
       {
         "path": "scripts/build-inline.mjs",
-        "sha256": "4bdfc98834a121990e4aed3737ad4a66409d6ff1b787aeacae2c3ded042d8afd"
+        "sha256": "15436ccc90d2e60abc68566363c1b37c7216ca98825f206d17cf3d7d14be94d0"
       },
       {
         "path": "scripts/bundle-client.mjs",
@@ -27,7 +27,7 @@
       },
       {
         "path": "scripts/editor-build-contract.mjs",
-        "sha256": "15ba8ae300db745b2c877811df778604c376f4587f2f0dfc68feacaf30f3641a"
+        "sha256": "5c41772433bf416e781fefc5a7d04706469466b428055d1ea577949f7262d3b6"
       },
       {
         "path": "scripts/patch-body-cursor-contract.mjs",
@@ -36,6 +36,10 @@
       {
         "path": "scripts/patch-object-properties.mjs",
         "sha256": "621161e9d22410176230cd4081aff7632e250dc4e2cd369c45ee5eb3d42fa356"
+      },
+      {
+        "path": "scripts/patch-pointer-hit-geometry.mjs",
+        "sha256": "19f3118df9de43b23af6fb21c782d3d42a31528cf21b171193b45eb5b4aea5b2"
       },
       {
         "path": "src/blank-compose.ts",

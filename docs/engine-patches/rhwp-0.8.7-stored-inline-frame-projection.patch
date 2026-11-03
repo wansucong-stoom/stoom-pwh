@@ -1,0 +1,119 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -13069,7 +13069,9 @@
+                             });
+                             if let Some(driver_index) = driver.filter(|driver_index| {
+                                 (row_is_auto_height || driver_is_nested_table_rows
+-                                    || projected_source_block_table)
++                                    || projected_source_block_table
++                                    || row_units[*driver_index].iter().any(|unit|
++                                        self.cell_unit_starts_closed_inline_frame(nt, row_cells[*driver_index], unit, styles)))
+                                     && !row_has_crossing_span
+                                     && row_units[*driver_index].len() > 1
+                             }) {
+@@ -13141,8 +13143,9 @@
+                                         || (reset_before && !projected_mixed_block_table && ri == 0 && fragment_index == 0);
+                                     let mut stored_frame_break_before =
+                                         driver_unit.stored_frame_break_before;
+-                                    if projected_source_block_table
+-                                        && self.nested_row_cut_source_frame_boundary(nt, ri, &start_cut, styles) == Some(true)
++                                    if (projected_source_block_table
++                                        && self.nested_row_cut_source_frame_boundary(nt, ri, &start_cut, styles) == Some(true))
++                                        || self.nested_row_cut_closed_inline_frame_boundary(nt, ri, &start_cut, styles) == Some(true)
+                                     {
+                                         hard_break_before = true;
+                                         stored_frame_break_before = true;
+@@ -17311,6 +17314,75 @@
+         (owners > 0).then_some(true)
+     }
+ 
++    /// A saved inline object starts a new physical frame only when its
++    /// exact source control line owns the complete, still-original object box.
++    /// A raw vpos reset alone can also be a writer-local coordinate system.
++    fn cell_unit_starts_closed_inline_frame(
++        &self, table: &crate::model::table::Table,
++        cell: &crate::model::table::Cell, unit: &CellUnit,
++        styles: &ResolvedStyleSet,
++    ) -> bool {
++        if !(self.profile.get().hwpx_stored_layout()
++            || self.profile.get().hwp5_stored_pagination_layout())
++            || self.profile.get().session_edited()
++            || table.common.treat_as_char || table.page_break != TablePageBreak::RowBreak
++            || table.caption.is_some()
++            || self.render_normalization.borrow().table_text_reflowed(table)
++            || cell.row_span != 1 || !unit.hard_break_before
++            || unit.mixed_nested_fragment || unit.non_inline_control_range.is_some()
++        { return false; }
++        let Some(host) = cell.paragraphs.get(unit.para_idx) else { return false; };
++        if !stored_nested_tail_cell_prefix_is_original(cell, host) { return false; }
++        let [Control::Table(child)] = host.controls.as_slice() else { return false; };
++        if let (Some(row), Some(fragment)) = (unit.nested_row, unit.nested_table_fragment.as_ref()) {
++            return self.nested_row_cut_closed_inline_frame_boundary(
++                child, row, &fragment.start_cut, styles,
++            ) == Some(true);
++        }
++        if unit.nested_row.is_some() || unit.vis_start == 0
++            || unit.vis_end != unit.vis_start + 1 || !child.common.treat_as_char
++            || child.caption.is_some() || child.common.height == 0
++            || !stored_nested_tail_table_is_original(child)
++            || crate::renderer::layout::control_line_seg_index(host, 0) != Some(unit.vis_start)
++        { return false; }
++        let Some(previous) = host.line_segs.get(unit.vis_start - 1) else { return false; };
++        let Some(line) = host.line_segs.get(unit.vis_start) else { return false; };
++        let closed_h = i64::from(child.common.height)
++            + i64::from(child.outer_margin_top) + i64::from(child.outer_margin_bottom);
++        previous.vertical_pos > 0 && line.vertical_pos == 0
++            && previous.text_start < line.text_start && line.line_height > 0
++            && (i64::from(line.line_height) - closed_h).abs() <= 2
++            && (hwpunit_to_px(line.line_height, self.dpi)
++                - self.calc_nested_table_height(child, styles)).abs() <= hwpunit_to_px(2, self.dpi)
++    }
++
++    fn nested_row_cut_closed_inline_frame_boundary(
++        &self, table: &crate::model::table::Table, row: usize,
++        cut: &[usize], styles: &ResolvedStyleSet,
++    ) -> Option<bool> {
++        let cells: Vec<_> = Self::row_cut_cell_order(table, row).into_iter()
++            .filter_map(|index| table.cells.get(index)).collect();
++        if cells.is_empty() || cut.len() != cells.len()
++            || cells.iter().any(|cell| cell.row_span != 1)
++            || Self::row_has_prior_rowspan_cover(table, row)
++        { return None; }
++        let mut owners = 0;
++        for (cell, &cursor) in cells.iter().zip(cut) {
++            let units = self.cell_units(cell, table, styles);
++            if cursor > units.len() { return None; }
++            let Some(offset) = units[cursor..].iter().position(|unit|
++                !unit.empty_spacer && Self::cell_unit_has_visible_content(cell, unit)
++            ) else { continue; };
++            if units[cursor..cursor+offset].iter().any(|unit|
++                unit.hard_break_before || unit.page_frame_reset_before || unit.stored_frame_break_before)
++            { return None; }
++            owners += 1;
++            if !self.cell_unit_starts_closed_inline_frame(table, cell, &units[cursor+offset], styles)
++            { return Some(false); }
++        }
++        (owners > 0).then_some(true)
++    }
++
+     fn nested_row_cut_source_frame_boundary(
+         &self,
+         table: &crate::model::table::Table,
+@@ -17320,6 +17392,9 @@
+     ) -> Option<bool> {
+         let plain = self.nested_row_cut_plain_source_frame_boundary(table, row, start_cut, styles);
+         if plain == Some(true) { return plain; }
++        if self.nested_row_cut_closed_inline_frame_boundary(table, row, start_cut, styles) == Some(true) {
++            return Some(true);
++        }
+         match self.nested_row_cut_owned_tail_frame_boundary(table, row, start_cut, styles) {
+             Some(true) => Some(true),
+             _ => plain,
+@@ -17350,6 +17425,7 @@
+             let cursor = start_cut.get(index).copied().unwrap_or(0);
+             units.iter().skip(cursor.saturating_add(1)).any(|unit| {
+                 self.cell_unit_starts_owned_nested_tail_frame(table, cell, unit, styles)
++                    || self.cell_unit_starts_closed_inline_frame(table, cell, unit, styles)
+             })
+         })
+     }

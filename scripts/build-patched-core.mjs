@@ -552,6 +552,52 @@ const patches = [
     }
   ]
 },
+{
+  "file": "rhwp-0.8.7-glyph-caret-metrics.patch",
+  "sha256": "b58a6e2a78e9a4d19ef9ba5ab2c90c6fbea4d5000735fec79c1906ca31051655",
+  "sources": [
+    {
+      "path": "src/document_core/queries/cursor_rect.rs",
+      "originalSha256": "9b27bebb475069f6eba68babc6b5b28d547d22d35079077f2789c059d156e661",
+      "patchedSha256": "f352654d9627509e4d01d0266ae9c74dcae42628b7cd244ef4e8accc2ea3f58a"
+    },
+    {
+      "path": "src/document_core/queries/cursor_nav.rs",
+      "originalSha256": "e13fa4105788aefa8a0f85f3bfd041ed8648517d7207bca128637dbadb71f46f",
+      "patchedSha256": "ee5523fc4bb6faea89f50a0fd17c7a791747a481d5f21d548a39d9dc651bfdc8"
+    }
+  ]
+},{
+  "file": "rhwp-0.8.7-stored-inline-frame-projection.patch",
+  "sha256": "1abf21092c32d790eed46d7c9995203646bf75b7735818ce3364e24d75cc1ba8",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "ac249c0b3d003e3b9b420a951ebd3c0c435febe0924bcd8db9940ae62e873c43",
+      "patchedSha256": "94f932122b935f14f91f24c91b0c2466667539e84652f82b988d4527d8af35c7"
+    }
+  ]
+},{
+  "file": "rhwp-0.8.7-nested-repeated-header-reservation.patch",
+  "sha256": "fb2d28bbf748a56fd744813e9110bfe45a63304a199806d89dbc313151779625",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "94f932122b935f14f91f24c91b0c2466667539e84652f82b988d4527d8af35c7",
+      "patchedSha256": "1ba23fed53ee4fecf5f19e31d580e2c711646283e0288f3852fbf6518776f1f7"
+    }
+  ]
+},{
+  "file": "rhwp-0.8.7-anchored-block-source-order.patch",
+  "sha256": "df71650567c8ca764fcf243ce4f6031b306d6ef160543f70da38f910b88e112a",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "1ba23fed53ee4fecf5f19e31d580e2c711646283e0288f3852fbf6518776f1f7",
+      "patchedSha256": "418dbde796b3129bf1c8a90b4c76c1435d8ac7f1ea096446862ad441907baa1c"
+    }
+  ]
+},
 ];
 const help = `Usage: node scripts/build-patched-core.mjs
   --source-archive <fixed upstream source ZIP>

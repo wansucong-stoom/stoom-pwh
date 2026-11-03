@@ -1,0 +1,22 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -21042,6 +21042,19 @@
+             return None;
+         };
+         let mut physical = 0.0;
++        // Continuation headers are physical fragment content, not additional
++        // source units. Reserve the same leading rows that table_partial paints
++        // before the resumed child cursor, including the header/body spacing.
++        // Adding them to the parent ledger prevents a following paragraph or
++        // sibling row from sharing the repeated header's occupied space.
++        if child.repeat_header && cut.start_row > 0 {
++            for row in child.leading_header_rows() {
++                if row < cut.start_row && row < usize::from(child.row_count) {
++                    physical += self.row_cut_content_height(child, row, &[], &[], styles)
++                        + hwpunit_to_px(child.cell_spacing as i32, self.dpi);
++                }
++            }
++        }
+         for row in cut.start_row..cut.end_row {
+             let start_cut = if row == cut.start_row {
+                 cut.start_cut.as_slice()

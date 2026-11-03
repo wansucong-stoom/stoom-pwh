@@ -1,0 +1,172 @@
+--- a/src/document_core/queries/cursor_rect.rs
++++ b/src/document_core/queries/cursor_rect.rs
+@@ -30,6 +30,24 @@
+         return crate::renderer::composer::char_overlap_advance_units(&chars);
+     }
+     text_run.text.chars().count()
++}
++
++/// A text insertion caret follows the glyph baseline and font em height, not
++/// the enclosing line box. Inline objects and mixed-size text can make that
++/// box much taller than this run. Hit testing still uses the original box.
++pub(super) fn text_run_caret_geometry(
++    node: &crate::renderer::render_tree::RenderNode,
++    run: &TextRunNode,
++) -> (f64, f64) {
++    // Preserve the existing orientation contract for vertical/rotated glyphs.
++    if run.is_vertical || run.rotation != 0.0 {
++        return (node.bbox.y, node.bbox.height);
++    }
++    let font_height = run.style.font_size;
++    if !font_height.is_finite() || font_height <= 0.0 || !run.baseline.is_finite() {
++        return (node.bbox.y, node.bbox.height);
++    }
++    (node.bbox.y + run.baseline - font_height * 0.8, font_height)
+ }
+ 
+ /// A body note owns one logical slot, regardless of the number of displayed
+@@ -1703,6 +1721,8 @@
+             bbox_y: f64,
+             bbox_w: f64,
+             bbox_h: f64,
++            caret_y: f64,
++            caret_h: f64,
+             // 셀/글상자 컨텍스트 (본문 텍스트는 None)
+             cell_context: Option<CellContext>,
+             is_textbox: bool,
+@@ -1721,6 +1741,8 @@
+             bbox_y: f64,
+             bbox_w: f64,
+             bbox_h: f64,
++            caret_y: f64,
++            caret_h: f64,
+             cell_context: Option<CellContext>,
+         }
+ 
+@@ -1956,6 +1978,7 @@
+                         } else {
+                             text_run.replay_positions_for(&text_run.text).into_owned()
+                         };
++                        let (caret_y, caret_h) = text_run_caret_geometry(node, text_run);
+                         runs.push(RunInfo {
+                             section_index: si,
+                             paragraph_index: pi,
+@@ -1966,6 +1989,8 @@
+                             bbox_y: node.bbox.y,
+                             bbox_w: node.bbox.width,
+                             bbox_h: node.bbox.height,
++                            caret_y,
++                            caret_h,
+                             cell_context,
+                             is_textbox: false,
+                             column_index: col,
+@@ -1973,6 +1998,7 @@
+                         });
+                     } else {
+                         // char_start: None → 안내문 TextRun
++                        let (caret_y, caret_h) = text_run_caret_geometry(node, text_run);
+                         guide_runs.push(GuideRunInfo {
+                             section_index: si,
+                             paragraph_index: pi,
+@@ -1980,6 +2006,8 @@
+                             bbox_y: node.bbox.y,
+                             bbox_w: node.bbox.width,
+                             bbox_h: node.bbox.height,
++                            caret_y,
++                            caret_h,
+                             cell_context,
+                         });
+                     }
+@@ -2037,7 +2065,7 @@
+             };
+             let cursor_rect = format!(
+                 ",\"cursorRect\":{{\"pageIndex\":{},\"x\":{:.1},\"y\":{:.1},\"height\":{:.1}}}",
+-                page_num, cursor_x, run.bbox_y, run.bbox_h
++                page_num, cursor_x, run.caret_y, run.caret_h
+             );
+             if let Some(ref ctx) = run.cell_context {
+                 let outer = ctx.path.first();
+@@ -2400,8 +2428,8 @@
+                     page_num,
+                     guide_char_offset,
+                     gr.bbox_x,
+-                    gr.bbox_y,
+-                    gr.bbox_h,
++                    gr.caret_y,
++                    gr.caret_h,
+                 ) {
+                     return Ok(field_hit);
+                 }
+@@ -3232,7 +3260,8 @@
+                         && ctx.path[0].cell_para_index == cp_idx
+                 });
+                 if matches_cell {
+-                    return Some((node.bbox.x, node.bbox.y, node.bbox.height));
++                    let (y, height) = text_run_caret_geometry(node, text_run);
++                    return Some((node.bbox.x, y, height));
+                 }
+             }
+             for child in &node.children {
+@@ -4136,11 +4165,12 @@
+                         } else {
+                             0.0
+                         };
++                        let (y, height) = text_run_caret_geometry(node, tr);
+                         return Some((
+                             page,
+                             node.bbox.x + xr,
+-                            node.bbox.y,
+-                            node.bbox.height,
++                            y,
++                            height,
+                             child_cell_bounds,
+                         ));
+                     }
+@@ -4242,23 +4272,10 @@
+                     if let Some(ref mut ctx) = cell_context {
+                         core.repair_unwrapped_wrapper_cell_context(section_idx, ctx);
+                     }
+-                    if cell_context_matches(&cell_context, parent_para, path) {
+-                        return Some((
+-                            page,
+-                            node.bbox.x,
+-                            node.bbox.y,
+-                            node.bbox.height,
+-                            child_cell_bounds,
+-                        ));
+-                    }
+-                    if cell_context_descends_from(&cell_context, parent_para, path) {
+-                        return Some((
+-                            page,
+-                            node.bbox.x,
+-                            node.bbox.y,
+-                            node.bbox.height.max(1.0),
+-                            child_cell_bounds,
+-                        ));
++                    let (y, height) = text_run_caret_geometry(node, tr);
++                    if cell_context_matches(&cell_context, parent_para, path)
++                        || cell_context_descends_from(&cell_context, parent_para, path) {
++                        return Some((page, node.bbox.x, y, height, child_cell_bounds));
+                     }
+                 }
+                 for child in &node.children {
+--- a/src/document_core/queries/cursor_nav.rs
++++ b/src/document_core/queries/cursor_nav.rs
+@@ -1130,13 +1130,15 @@
+                     // 이 run이 목표 줄의 char_range에 겹치는지 확인
+                     if cs < char_range.1 && cs + cc > char_range.0 {
+                         let positions = cursor_positions_for_render_run(tr, node.bbox.width);
++                        let (caret_y, caret_h) =
++                            super::cursor_rect::text_run_caret_geometry(node, tr);
+                         result.push(RunMatch {
+                             char_start: cs,
+                             char_count: cc,
+                             char_positions: positions,
+                             bbox_x: node.bbox.x,
+-                            bbox_y: node.bbox.y,
+-                            bbox_h: node.bbox.height,
++                            bbox_y: caret_y,
++                            bbox_h: caret_h,
+                         });
+                     }
+                 }

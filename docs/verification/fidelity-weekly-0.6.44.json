@@ -1,0 +1,309 @@
+{
+  "schemaVersion": 1,
+  "verifiedOn": "2026-11-03",
+  "pwhVersion": "0.6.44",
+  "desktopVersion": "0.1.25",
+  "runtime": "rhwp-0.8.7-pwh-r17",
+  "wasmSha256": "9f98ed00d129c42d76d65d2284783eaa1b44c97578874f1f31b84e8b47116f03",
+  "buildRecordSha256": "4eb92c9dc1d3739a49fb00b2fa42a4b08f985daf909d34dc701c72ffaf8176bb",
+  "previousVerification": "fidelity-weekly-0.6.43.json",
+  "checks": [
+    {
+      "name": "Pinned source and twenty-six ordered patches produce the formal core",
+      "status": "passed",
+      "orderedPatches": 26,
+      "pinnedSourceEntries": 53,
+      "publicPatchHashesVerified": 26,
+      "rustSourceFilesVerified": 1069
+    },
+    {
+      "name": "Recorded core files and unchanged JavaScript glue ABI",
+      "status": "passed",
+      "filesVerified": 4,
+      "glueSha256": "e4b17c467ec6e5955393f7b9b162150ea0f16271085dcec7955bcd87c0014d47"
+    },
+    {
+      "name": "Two independent shared and Desktop editor builds and strict type checks",
+      "status": "passed",
+      "independentBuilds": 2,
+      "filesCompared": 6,
+      "strictTypeChecks": 2,
+      "commonEditorSha256": "5bd8705dedd912e1b4fc25247d0c0d38c63da12c80143b9f961e1adceb5cecf3",
+      "desktopEditorSha256": "bd9d32f0ce273f62bed6d1e0f67a20782332e578b913020426bdf69d6c6fd698"
+    },
+    {
+      "name": "Formal-core regression suite",
+      "status": "passed",
+      "tests": 525,
+      "passed": 463,
+      "failed": 0,
+      "skipped": 62,
+      "cancelled": 0,
+      "missingConfiguredPrerequisites": [],
+      "requiredActualCases": {
+        "independentSmallPaperFallback": 3,
+        "nativeCellOwnedUndo": 14,
+        "tableBboxSectionOwnership": 1,
+        "cellHeightScopeDifferential": 8,
+        "inlineFrameProjection": 7,
+        "repeatedHeaderReservation": 9,
+        "anchoredBlockOrder": 10,
+        "textRunCaretMetrics": 24,
+        "syntheticCellCaretGeometry": 17
+      },
+      "exclusions": "Browser, live-account, native-window and explicitly optional fixture checks have separate prerequisites."
+    },
+    {
+      "name": "Formal-core browser regression suite",
+      "status": "passed",
+      "tests": 525,
+      "passed": 511,
+      "failed": 0,
+      "skipped": 14,
+      "cancelled": 0,
+      "missingConfiguredPrerequisites": [],
+      "scope": "Core and browser test sets overlap and are not additive.",
+      "exclusions": "Live-account, native-window and explicitly optional fixture checks have separate prerequisites."
+    },
+    {
+      "name": "Native layout preserves source text and the approved eight-page prefix",
+      "status": "passed",
+      "pages": 39,
+      "sourceUnchanged": true,
+      "modelTextUnchanged": true,
+      "approvedPrefix1To8Unchanged": true,
+      "tableAndCellBottomOverflowCandidates": 0,
+      "scope": "Retained core-only observation reused after verifying unchanged four core files and BUILD record. Bounding-box candidates do not prove complete ink visibility or current UI behavior."
+    },
+    {
+      "name": "Three other documents retain original and reopened output against the prior formal core",
+      "status": "passed",
+      "pageCounts": [
+        65,
+        4,
+        2
+      ],
+      "originalPrintSvgPages": 71,
+      "reopenedPrintSvgPages": 71,
+      "sourceUnchanged": true,
+      "checks": [
+        "allPrintSvg",
+        "documentScan",
+        "textLayout",
+        "reopenedAllPrintSvg",
+        "reopenedScan",
+        "reopenedTextLayout",
+        "reopenedPageCount"
+      ],
+      "scope": "Retained core-only preservation proof reused after verifying unchanged four core files and BUILD record. Each state is compared with the prior formal core; original and reopened SVG need not equal each other in every input format."
+    },
+    {
+      "name": "Trusted Desktop input agrees with native source-path and projected DOM geometry",
+      "status": "passed",
+      "clicks": 3,
+      "keys": [
+        "ArrowLeft",
+        "ArrowRight",
+        "Home",
+        "End"
+      ],
+      "resizeApiCalls": 0,
+      "resizeStarts": 0,
+      "inputUndoTextExact": true,
+      "sourceUnchanged": true,
+      "profileIsolated": true,
+      "installedAppModified": false,
+      "logicalEndpointsPreserved": true,
+      "nativeQueries": [
+        "ByPath",
+        "ByPathNear"
+      ],
+      "nativeUiGeometryTolerancePx": 0.15,
+      "projectedDomTolerancePx": 0.85,
+      "sourceOwnedNavigationPhysicalPages": [
+        17,
+        18
+      ],
+      "ordinaryParagraphReturnVerified": true,
+      "scope": "Actual final Desktop bundle and instantiated WASM, trusted input and frozen source positions. Fresh pointer frame affinity is preserved; changed logical positions follow native path queries. Undo SVG restoration remains diagnostic."
+    },
+    {
+      "name": "Actual whole-document Desktop PDF observes the final core and editor",
+      "status": "passed",
+      "pages": 39,
+      "pdfSha256": "fe0af996e6a0f6ed181a8fd2d29e01a6203ff193714fce6f8c7368c63e168fc4",
+      "documentDirty": false,
+      "sourceUnchanged": true,
+      "wasmBytesVerified": true,
+      "editorBytesVerified": true
+    },
+    {
+      "name": "Actual PDF preserves the approved eight-page raster and text prefix",
+      "status": "passed",
+      "acceptedThrough": 8,
+      "nextPage": 9,
+      "previousPrefixPixelAndTextExact": true,
+      "exactRgbRasterDpi": 150,
+      "formalPdfMetricsFreshlyComputedPages": 39
+    },
+    {
+      "name": "Later repaired pages have separate diagnostic metrics",
+      "status": "passed",
+      "pages": [
+        17,
+        18,
+        33,
+        37
+      ],
+      "restoredContinuationPage": 18,
+      "sourceGroupHeadingPage": 33,
+      "scope": "Diagnostic observations only; no additional page has sequential fidelity approval."
+    }
+  ],
+  "policy": {
+    "id": "pwh-physical-page-quality-v1",
+    "normalMinF1": 0.95,
+    "darkMinF1": 0.9,
+    "dpi": 150,
+    "tolerancePixels": 2,
+    "normalThreshold": 245,
+    "darkThreshold": 180,
+    "alignment": "Same page origin and physical scale; no fitting, translation or page remapping."
+  },
+  "pageCounts": {
+    "hancom": 39,
+    "pwh": 39
+  },
+  "acceptedThrough": 8,
+  "nextPage": 9,
+  "pages": [
+    {
+      "page": 1,
+      "normalF1": 0.972127,
+      "darkF1": 0.957435,
+      "contentVerified": true,
+      "geometryVerified": true
+    },
+    {
+      "page": 2,
+      "normalF1": 0.99226,
+      "darkF1": 0.985106,
+      "contentVerified": true,
+      "geometryVerified": true
+    },
+    {
+      "page": 3,
+      "normalF1": 0.986816,
+      "darkF1": 0.967184,
+      "contentVerified": true,
+      "geometryVerified": true
+    },
+    {
+      "page": 4,
+      "normalF1": 0.995212,
+      "darkF1": 0.990202,
+      "contentVerified": true,
+      "geometryVerified": true
+    },
+    {
+      "page": 5,
+      "normalF1": 0.998675,
+      "darkF1": 0.996613,
+      "contentVerified": true,
+      "geometryVerified": true
+    },
+    {
+      "page": 6,
+      "normalF1": 0.976603,
+      "darkF1": 0.944863,
+      "contentVerified": true,
+      "geometryVerified": true
+    },
+    {
+      "page": 7,
+      "normalF1": 0.957781,
+      "darkF1": 0.914565,
+      "contentVerified": true,
+      "geometryVerified": true
+    },
+    {
+      "page": 8,
+      "normalF1": 0.970159,
+      "darkF1": 0.920944,
+      "contentVerified": true,
+      "geometryVerified": true
+    }
+  ],
+  "laterPageDiagnostics": {
+    "scope": "Fixed-origin metrics only; no fidelity approval.",
+    "pages": [
+      {
+        "page": 17,
+        "normalF1": 0.609485,
+        "darkF1": 0.476983,
+        "fidelityApproved": false
+      },
+      {
+        "page": 18,
+        "normalF1": 0.790985,
+        "darkF1": 0.543369,
+        "fidelityApproved": false
+      },
+      {
+        "page": 33,
+        "normalF1": 0.699319,
+        "darkF1": 0.594852,
+        "fidelityApproved": false
+      },
+      {
+        "page": 37,
+        "normalF1": 0.840997,
+        "darkF1": 0.66345,
+        "fidelityApproved": false
+      }
+    ]
+  },
+  "whole39PagesApprovedAgainstHancom": false,
+  "sharedEditorRepair": {
+    "causeLayer": "Upstream rhwp Studio cursor code used by the shared editor",
+    "scope": "Expire pointer-hit geometry when its logical owner changes and use full-path geometry for deep-cell Home and End. Logical navigation endpoints and the WASM core are unchanged.",
+    "actualBundleRegressionExecuted": true,
+    "commonAndDesktopRebuilt": true
+  },
+  "privateProofSha256": {
+    "formalCoreCi": "51eece6486c29423052dd0e9e7696af0e55eb399b4dceb5e874a078caa0fba65",
+    "coreInputLinkage": "13852b1294cfb9799e436bb253cd0147f9a28233ebd82911e3cd7ca1fe52cbd5",
+    "browserRunLog": "b5d97767d2a8a2da2b110dca8e2f798ffe58ce130a30062c5993ca68220fe37e",
+    "browserTap": "6f6b8c58192191ffdfd74154b95d455fc44a5f7bf5b6662c8e09282a9face345",
+    "browserRunConfiguration": "ad7736e09ffeb51f66c91c2886335adf9beed026006c62856dcd1155ba0504f3",
+    "browserEnvironment": "ec78f9dc097cc3fb11cca2d9099d8f701739b18c31202613a5a1395e8b65ef74",
+    "independentEditorBuildLog": "9ce9c56587c6b74e29f6296954929447b7f5e8f6476e90339c3aa99d5d39254f",
+    "nativeLayoutObservation": "da4c392d48a78ce54f0c2f84bcb9f79f53210b6e23290fb754c8626d56f6b0b1",
+    "preservedCorpus": "31450894303d234342af233985874a1ca524f10b70a3191ee72743befc94dac1",
+    "reusedCoreProofLinkage": "6a48ac2bb9afced6e83c8044198a1e5fd5491fb4666591d5b71fa81eef632630",
+    "actualPdfAudit": "9562dcc5178deebfb4992053a8fb13f47110312e2bd0469cb2c9f656ee1a3a50",
+    "actualPdfExport": "20b277fba84a5a1cb9aebbd68af567de71c11e83968925be666630d17d79e43d",
+    "trustedInputAudit": "5060bcb962f633fb75e840e8a34e8ddc936191856d57ab53c50a62ae6c1c16e0",
+    "trustedInputKeyStates": "64e547b4a2442843503504afe4a62549e9036401d49140eb96a16a3cb97412af",
+    "trustedPointerStates": "18a84be8e2633a859f055e0b3990246cf1b1adeaa5fef2716dae6ea13671c93e",
+    "trustedInputGateScript": "6e2b54c34208b0799869af9c33049c5a59a6eef18afd0e1020e64c4aef3c31dc"
+  },
+  "limitations": [
+    "Only physical pages 1 through 8 have sequential quality and content/geometry approval. Page 9 is the next frontier. All 39 pages were regenerated and measured; the remaining pages are not approved.",
+    "The approved prefix retains previously documented boundary differences from the reference. Passing the fixed quality gate does not mean exact layout.",
+    "Later-page repairs, bounding-box checks and diagnostic scores do not establish whole-document fidelity.",
+    "Deep nested paragraph reflow after Undo and existing vertical-parent nested-table text limitations remain outside this repair scope.",
+    "Core and browser test sets overlap. Environment-specific skips are excluded from passes.",
+    "No new performance improvement is claimed by these checks.",
+    "No user source document or existing installation was modified. Private documents, original PDF/image data, institution text, account information and local paths are excluded.",
+    "Installer artifact verification and publication are separate release records; this snapshot does not assert MSI installation or availability."
+  ],
+  "releaseStatus": "core-editor-qualified",
+  "qualificationScope": "Formal source, shared WASM, reproducible editor builds, trusted input, actual PDF and regression results. Installer artifact verification is recorded separately.",
+  "artifactVerificationRef": {
+    "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/v0.6.44/DESKTOP-VERIFICATION.json",
+    "artifact": "PwhDesktop-0.1.25.msi",
+    "recordEmbeddedInThisSnapshot": false,
+    "scope": "Separate Desktop installer artifact verification; no circular installer-record hash is embedded here."
+  }
+}

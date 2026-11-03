@@ -1,0 +1,14 @@
+import fs from 'node:fs/promises';
+import {mapHwpxMember} from './hwpx-fixture-utils.mjs';
+const seed=await fs.readFile(new URL('../fixtures/rowbreak-table/synthetic-rowbreak-single-line-control.hwpx',import.meta.url));
+export function repeatedNestedHeaderFixture({repeatHeader=true,pageHeight=9000,headerRows=1,cellSpacing=0,sourceRows=6,linesPerRow=3}={}){
+ const para=(text,pos=0,controls='')=>`<hp:p id="0" paraPrIDRef="0" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0"><hp:run charPrIDRef="0">${controls}<hp:t>${text}</hp:t></hp:run><hp:linesegarray><hp:lineseg textpos="0" vertpos="${pos}" vertsize="1000" textheight="1000" baseline="850" spacing="200" horzpos="0" horzsize="24000" flags="393216"/></hp:linesegarray></hp:p>`;
+ const cell=(row,col,body,{width=12000,height=0,header=false}={})=>`<hp:tc hasMargin="1" header="${header?1:0}" borderFillIDRef="1"><hp:subList textDirection="HORIZONTAL" lineWrap="BREAK" vertAlign="TOP">${body}</hp:subList><hp:cellAddr colAddr="${col}" rowAddr="${row}"/><hp:cellSpan colSpan="1" rowSpan="1"/><hp:cellSz width="${width}" height="${height}"/><hp:cellMargin left="100" right="100" top="100" bottom="100"/></hp:tc>`;
+ const table=(id,body,{rows=1,cols=1,width=24000,height=20000,repeat=false}={})=>`<hp:tbl id="${id}" zOrder="0" numberingType="TABLE" textWrap="TOP_AND_BOTTOM" textFlow="BOTH_SIDES" pageBreak="CELL" repeatHeader="${repeat?1:0}" noAdjust="1" rowCnt="${rows}" colCnt="${cols}" cellSpacing="${cellSpacing}" borderFillIDRef="1"><hp:sz width="${width}" height="${height}" widthRelTo="ABSOLUTE" heightRelTo="ABSOLUTE"/><hp:pos treatAsChar="0" affectLSpacing="0" flowWithText="1" allowOverlap="0" vertRelTo="PARA" horzRelTo="COLUMN" vertAlign="TOP" horzAlign="LEFT" vertOffset="0" horzOffset="0"/><hp:outMargin left="0" right="0" top="0" bottom="0"/><hp:inMargin left="0" right="0" top="0" bottom="0"/>${body}</hp:tbl>`;
+ const child=table(20,Array.from({length:sourceRows},(_,r)=>'<hp:tr>'+[0,1].map(c=>cell(r,c,Array.from({length:r<headerRows?1:linesPerRow},(_,i)=>para(`CHILD_${r}_${c}_${i}`,i*1200)).join(''),{header:r<headerRows})).join('')+'</hp:tr>').join(''),{rows:sourceRows,cols:2,repeat:repeatHeader});
+ const parent=table(10,'<hp:tr>'+cell(0,0,para('PARENT_PREFIX')+para('',0,child)+para('FOLLOWING_PARAGRAPH',20000),{width:24000,height:24000})+'</hp:tr><hp:tr>'+cell(1,0,para('NEXT_ROW_TEXT'),{width:24000,height:1400})+'</hp:tr>',{rows:2,height:25400});
+ const sec=`<hp:secPr id="0"><hp:pagePr width="30000" height="${pageHeight}" landscape="WIDELY"><hp:margin left="0" right="0" top="0" bottom="0" header="0" footer="0" gutter="0"/></hp:pagePr></hp:secPr>`;
+ let bytes=mapHwpxMember(seed,'Contents/section0.xml',x=>x.replace(/(<hs:sec\b[^>]*>)[\s\S]*<\/hs:sec>/,'$1'+para('',0,sec+parent)+'</hs:sec>'));
+ return mapHwpxMember(bytes,'Contents/header.xml',x=>x.replace(/(<hh:charPr\b[^>]*\bheight=")[^"]+/,'$11000'));
+}
+

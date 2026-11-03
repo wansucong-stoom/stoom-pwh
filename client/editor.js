@@ -32677,6 +32677,17 @@ var mf = class e {
 		charOffset: 0
 	};
 	rect = null;
+	pointerHitPosition = null;
+	discardPointerHitGeometry() {
+		this.pointerHitPosition = null, this.position.cursorRect && (this.position = {
+			...this.position,
+			cursorRect: void 0
+		});
+	}
+	currentPointerHitRect() {
+		let t = this.pointerHitPosition, n = this.position;
+		return !t || !n.cursorRect || !e.sameFocusedCellPosition(t, n) || t.bodyCursor?.sectionIndex !== n.bodyCursor?.sectionIndex || t.bodyCursor?.paragraphIndex !== n.bodyCursor?.paragraphIndex || t.bodyCursor?.textOffset !== n.bodyCursor?.textOffset || t.bodyCursor?.logicalOffset !== n.bodyCursor?.logicalOffset ? (this.discardPointerHitGeometry(), null) : n.cursorRect;
+	}
 	focusedGeometryValid = !1;
 	focusedGeometryRevision = null;
 	preparedFocusedGeometry = null;
@@ -32870,7 +32881,7 @@ var mf = class e {
 		return !this.focusedGeometryValid || !this.rect || this.rect.cellOverflowed === !0 || !Number.isFinite(t.deltaX) || t.revision <= t.baseRevision || !n || !e.sameFocusedCellPosition(this.position, t.source) || this.isInVerticalCell() ? (this.invalidateFocusedCellCursorGeometry(), !1) : (this.preparedFocusedGeometry = t, !0);
 	}
 	invalidateFocusedCellCursorGeometry() {
-		this.preparedFocusedGeometry = null, this.focusedGeometryValid = !1, this.focusedGeometryRevision = null;
+		this.discardPointerHitGeometry(), this.preparedFocusedGeometry = null, this.focusedGeometryValid = !1, this.focusedGeometryRevision = null;
 	}
 	applyPreparedFocusedCellCursorGeometry() {
 		let t = this.preparedFocusedGeometry;
@@ -32903,10 +32914,17 @@ var mf = class e {
 		}
 	}
 	moveTo(e) {
-		this.position = this.isInHeaderFooter() || this.isInFootnote() ? { ...e } : this.wasm.bodyPositionFromText(e), this.atLineEnd = !1, this.updateRect();
+		this.position = this.isInHeaderFooter() || this.isInFootnote() ? { ...e } : this.wasm.bodyPositionFromText(e), this.discardPointerHitGeometry(), this.atLineEnd = !1, this.updateRect();
 	}
 	moveToHit(e) {
-		this.position = { ...e }, this.atLineEnd = !1, this.preparedFocusedGeometry = null, e.cursorRect ? (this.rect = { ...e.cursorRect }, this.focusedGeometryValid = !0, this.focusedGeometryRevision = null) : this.updateRect();
+		this.position = {
+			...e,
+			cursorRect: e.cursorRect ? { ...e.cursorRect } : void 0
+		}, this.pointerHitPosition = e.cursorRect ? {
+			...e,
+			cellPath: e.cellPath?.map((e) => ({ ...e })),
+			bodyCursor: e.bodyCursor ? { ...e.bodyCursor } : void 0
+		} : null, this.atLineEnd = !1, this.preparedFocusedGeometry = null, e.cursorRect ? (this.rect = { ...e.cursorRect }, this.focusedGeometryValid = !0, this.focusedGeometryRevision = null) : this.updateRect();
 	}
 	resetPreferredX() {
 		this.preferredX = null, this.atLineEnd = !1;
@@ -33061,7 +33079,7 @@ var mf = class e {
 		}
 	}
 	moveToLineStart() {
-		this.preferredX = null;
+		this.discardPointerHitGeometry(), this.preferredX = null;
 		try {
 			let e = this.position, t = this.getLineInfoAtCursor();
 			if (this.atLineEnd && e.charOffset === t.charStart && e.charOffset > 0) {
@@ -33079,7 +33097,7 @@ var mf = class e {
 		}
 	}
 	moveToLineEnd() {
-		this.preferredX = null;
+		this.discardPointerHitGeometry(), this.preferredX = null;
 		try {
 			let e = this.position, t = this.getLineInfoAtCursor();
 			if (this.atLineEnd && e.charOffset === t.charStart && e.charOffset > 0) {
@@ -33104,6 +33122,7 @@ var mf = class e {
 	}
 	getCursorRectOnVisualLine(e, t) {
 		let n = this.position;
+		if ((n.cellPath?.length ?? 0) > 1) return null;
 		try {
 			return this.wasm.getCursorRectOnLine(n.sectionIndex, n.paragraphIndex, e, t, n.parentParaIndex ?? 4294967295, n.controlIndex ?? 4294967295, n.cellIndex ?? 4294967295, n.cellParaIndex ?? 4294967295);
 		} catch {
@@ -33418,6 +33437,7 @@ var mf = class e {
 		this.updateRect();
 	}
 	updateRect() {
+		let e = this.currentPointerHitRect();
 		try {
 			if (this._headerFooterMode !== "none") {
 				this.preparedFocusedGeometry = null, this.focusedGeometryValid = !1, this.focusedGeometryRevision = null;
@@ -33443,11 +33463,11 @@ var mf = class e {
 				let { sectionIndex: e, parentParaIndex: t, controlIndex: n, cellIndex: r, cellParaIndex: i, charOffset: a } = this.position;
 				this.rect = this.wasm.getCursorRectInCell(e, t, n, r, i, a);
 			} else this.rect = this.wasm.getBodyCursorRect(this.position);
-			this.rect && this.position.cursorRect && this.rect.pageIndex !== this.position.cursorRect.pageIndex && (console.warn("[CursorState] 캐럿 페이지 불일치 (WASM=%d, hitTest=%d) → hitTest 폴백", this.rect.pageIndex, this.position.cursorRect.pageIndex), this.rect = { ...this.position.cursorRect }), this.focusedGeometryValid = this.rect !== null, this.focusedGeometryRevision = null;
-		} catch (e) {
+			this.rect && e && this.rect.pageIndex !== e.pageIndex && (console.warn("[CursorState] 캐럿 페이지 불일치 (WASM=%d, hitTest=%d) → 현재 hitTest 폴백", this.rect.pageIndex, e.pageIndex), this.rect = { ...e }), this.focusedGeometryValid = this.rect !== null, this.focusedGeometryRevision = null;
+		} catch (t) {
 			this.invalidateFocusedCellCursorGeometry();
-			let t = this.position;
-			t.cursorRect ? (console.warn("[CursorState] updateRect 실패 → hitTest 폴백 pos=(%d,%d,%d) cell=(%s,%s,%s,%s):", t.sectionIndex, t.paragraphIndex, t.charOffset, t.parentParaIndex, t.controlIndex, t.cellIndex, t.cellParaIndex, e), this.rect = { ...t.cursorRect }) : (String(e).includes("인라인 컨트롤 위치") || console.warn("[CursorState] updateRect 실패 → rect=null pos=(%d,%d,%d) cell=(%s,%s,%s,%s):", t.sectionIndex, t.paragraphIndex, t.charOffset, t.parentParaIndex, t.controlIndex, t.cellIndex, t.cellParaIndex, e), this.rect = null);
+			let n = this.position;
+			e ? (console.warn("[CursorState] updateRect 실패 → hitTest 폴백 pos=(%d,%d,%d) cell=(%s,%s,%s,%s):", n.sectionIndex, n.paragraphIndex, n.charOffset, n.parentParaIndex, n.controlIndex, n.cellIndex, n.cellParaIndex, t), this.rect = { ...e }) : (String(t).includes("인라인 컨트롤 위치") || console.warn("[CursorState] updateRect 실패 → rect=null pos=(%d,%d,%d) cell=(%s,%s,%s,%s):", n.sectionIndex, n.paragraphIndex, n.charOffset, n.parentParaIndex, n.controlIndex, n.cellIndex, n.cellParaIndex, t), this.rect = null);
 		}
 	}
 	enterCellSelectionMode(e = "manual") {
