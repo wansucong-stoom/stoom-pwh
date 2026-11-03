@@ -428,6 +428,130 @@ const patches = [
     }
   ]
 },
+{
+  "file": "rhwp-0.8.7-nested-forward-frame-ownership.patch",
+  "sha256": "3ddfc7823422697f17643d92be9c53dd852d4c63db4d7d9aef1bdcec4896a60d",
+  "sources": [
+    {
+      "path": "src/diagnostics/ir_field_sweep.rs",
+      "originalSha256": "91e4a10a4260d7b8b41927da31037094beb62e9dd5ca4ad60f4720e3cbc25769",
+      "patchedSha256": "1aa743f35d8c76ca2ffb765f3ace294e2e62d654ee1337e6c2c7a65f9205f04c"
+    },
+    {
+      "path": "src/model/mod.rs",
+      "originalSha256": "e67c61ebf2d9805879960bf104684b1e0da656b889b48168bb9ee5c657eb5127",
+      "patchedSha256": "95ac7d56ba61cce397905257cc9c624a43654be29837858c1bf3a4eb9fb253c0"
+    },
+    {
+      "path": "src/model/paragraph.rs",
+      "originalSha256": "81597b84b0bb5420c8fdd17a4f075a70ecdaec59b4e7cb9392338a0abcb0aa18",
+      "patchedSha256": "9f2d4cf4558922bb259815cd3b14a2ee6271ed153283336190f685571a130ec4"
+    },
+    {
+      "path": "src/model/source_layout_history.rs",
+      "originalSha256": null,
+      "patchedSha256": "08dc313d8e1cf65e1c9a6937e3b611cf4ebc83f787e99c1b5c60c88edf50053d"
+    },
+    {
+      "path": "src/parser/hwpx/mod.rs",
+      "originalSha256": "25933d7891a1ad8103df385e91c37e78d5de042d167fddb8d1d57a88edcf4d81",
+      "patchedSha256": "2cae589e622d9af2d3eecdfa06b35511a90a340887ca6512ff2e5e0ed7e71935"
+    },
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "58b077be613178a52be82f384a5d164bdf5a2c10636592fb25e141ef456995cc",
+      "patchedSha256": "6f0f869cb242025adddaf649841fe41451b6fe1f5ab30d7b7e73fd1d2dbe0b1e"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "1947802fa680e582f1d8c3306d08d8876926faa4ca3859d83b609bd701f0bd5b",
+      "patchedSha256": "adec882ae2033aa0db5f0b374d6a7d51a4ce9acdbd1b894aab971a7dad15cfc2"
+    },
+    {
+      "path": "src/renderer/typeset/table/continuation/fragment/emit.rs",
+      "originalSha256": "f6ed29c256c3d3c03862fa7507d75ede620a56a6dc0c09d27aaa31a6bea71caa",
+      "patchedSha256": "05c5d864ddae3bbd7a8d3043ad41355ee900afee6b031f5030158e2742cb5766"
+    },
+    {
+      "path": "src/renderer/typeset/table/continuation/fragment/scan.rs",
+      "originalSha256": "29392e51e08f3bac33f8eb97df5729a974d21a31d3b54b0f1247865bcd07cd6d",
+      "patchedSha256": "ff8815ec77b1cc74f7a04cbb140a8f663d9df5d8bc00be014b5a99b086d64547"
+    },
+    {
+      "path": "src/renderer/typeset/table/scan/runner/block_step.rs",
+      "originalSha256": "608ab1b48b1c35846d827d3ce49a35d1af69c7a87076532ce74acf05f03a7160",
+      "patchedSha256": "d6a7b744f2af3c12dabc78e60b4b3b595c84202b462702f2bfb555beab5d52ed"
+    },
+    {
+      "path": "src/renderer/typeset/table/scan/runner/row_step.rs",
+      "originalSha256": "f6ba47d29ff094655bfd2e214dbcd4c90f2e941b436f2345876755bef7ba8636",
+      "patchedSha256": "63cf121e427a4f8a5a76395a6366fe21d95f6e4c1f31345c6a7952bb190f2693"
+    },
+    {
+      "path": "src/renderer/typeset/table/scan/types.rs",
+      "originalSha256": "5175948a57d37fab2fc99ba83de3b1fd08134eda0ff5e2f1f208a912c02c346c",
+      "patchedSha256": "4a82fd31b6b057f21a2448967a518dee5d185ed3554c9c458f0d2006dffda861"
+    },
+    {
+      "path": "src/serializer/hwpx/mod.rs",
+      "originalSha256": "02672436020f06200e1cf99b7775dea00d5fc796ab65db4728c5bdb2c17afee0",
+      "patchedSha256": "a229497d2ff10f2adaca6b72faa7a413e4ab4bbdb681eb39ba53bafe8172a0c4"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-authenticated-float-projection.patch",
+  "sha256": "ed1ddf6ccc1fc28a0990773179d799a378f72ed9432851bc7c185b6cc0695dab",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "6f0f869cb242025adddaf649841fe41451b6fe1f5ab30d7b7e73fd1d2dbe0b1e",
+      "patchedSha256": "ac249c0b3d003e3b9b420a951ebd3c0c435febe0924bcd8db9940ae62e873c43"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-cell-caret-fragment-geometry.patch",
+  "sha256": "92f24dc1d995c9f833c5ddaefa3b1b52f5afb0e215dda65e4dfeb0caa02bfdae",
+  "sources": [
+    {
+      "path": "src/document_core/queries/cursor_rect.rs",
+      "originalSha256": "f06dfa3e5b8047ac081d388016f1c132ab8dac8f91022d020b62313d7c556100",
+      "patchedSha256": "6660adb8b23dc5fd0941e211cd150e6b3912fd96ace55c5a35b276e8455ce27f"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-scoped-table-height-and-bbox-query.patch",
+  "sha256": "a9e0ab37b35672f2c0c5ce2b126b47ea7e44c870924c3c91e4f77756a09bd313",
+  "sources": [
+    {
+      "path": "src/document_core/queries/cursor_rect.rs",
+      "originalSha256": "6660adb8b23dc5fd0941e211cd150e6b3912fd96ace55c5a35b276e8455ce27f",
+      "patchedSha256": "9b27bebb475069f6eba68babc6b5b28d547d22d35079077f2789c059d156e661"
+    },
+    {
+      "path": "src/document_core/commands/object_ops/table.rs",
+      "originalSha256": "a51bcb772d1d33afad1cbed097c2024094e763017c9b1bfd99e37708d7892772",
+      "patchedSha256": "42aab9a7ff095507e23f3329017fced03c060497a68860ca5277ccce83d846cc"
+    },
+    {
+      "path": "src/document_core/commands/table_ops.rs",
+      "originalSha256": "200390b3e6245a7216bc47eca1c3f64f7ef9b06b0d3110fc77dc62800cca53c7",
+      "patchedSha256": "efea4ac784307f3d33d8ddcc252e2da91996001fad378a7da5cec8894de8d2c4"
+    },
+    {
+      "path": "src/document_core/queries/rendering.rs",
+      "originalSha256": "e0b3ae18e8a30e6650f791c5c42b7bfb2d42666f0b8372431e9150e27a15b645",
+      "patchedSha256": "1ac9314f99b2b735a9fe0c7f81e7ca0c69baef99abf844fe98f9209844f955a9"
+    },
+    {
+      "path": "src/renderer/height_measurer.rs",
+      "originalSha256": "a44687b8bf6f8345eaa10609dfafc49417a24a0e6c9e561b39d30216f8c35f85",
+      "patchedSha256": "5211e582a59efe1d87384a1a44711851d40226e60785bb73ab10c7e8f1762eb7"
+    }
+  ]
+},
 ];
 const help = `Usage: node scripts/build-patched-core.mjs
   --source-archive <fixed upstream source ZIP>
@@ -531,7 +655,18 @@ const applyArgs = ['--work-tree=.', '-c', 'core.autocrlf=false', '-c', 'core.eol
 for (const patch of patches) {
   const patchFile = path.join(repoRoot, 'docs/engine-patches', patch.file);
   for (const source of patch.sources) {
-    await assertHash(path.join(sourceRoot, source.path), source.originalSha256);
+    const sourcePath = path.join(sourceRoot, source.path);
+    if (source.originalSha256 === null) {
+      // A pinned added file must be absent before its patch. Never accept an
+      // existing file merely because the patch describes it as a new source.
+      const existing = await fs.lstat(sourcePath).catch(error => {
+        if (error.code !== 'ENOENT') throw error;
+        return null;
+      });
+      if (existing) throw Error(`Added patch source already exists: ${source.path}`);
+    } else {
+      await assertHash(sourcePath, source.originalSha256);
+    }
   }
   await run('git', [...applyArgs, '--check', patchFile], {cwd: sourceRoot});
   await run('git', [...applyArgs, patchFile], {cwd: sourceRoot});

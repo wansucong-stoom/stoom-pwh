@@ -1,25 +1,25 @@
 {
   "kind": "studio-inline",
-  "version": "0.6.42",
+  "version": "0.6.43",
   "upstreamVersion": "0.8.7",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "files": {
-    "editor.js": "3422a0aa9c05226da6a5d44217cc8ca09fd250bc46051fa4c4f9f22f01bdf0f9",
+    "editor.js": "4322f6e8cad5b2ca44714e3d15cea5817d1bafc71786a68ae08188542ad3a014",
     "rhwp-studio.css": "36fac005da9ae7342d413bbb7822f2a8cdb5527b9111384f6e756b02c8071357",
     "editor-body.html": "afc04317043d01ef99fb91eb9bce88723fac82491bf42473e4b30436e5066ceb"
   },
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "common",
-    "sha256": "07f93521b3f7acbdf52c8186f5118912ace2413a51ea2a516791b66d04b7317a",
+    "sha256": "6f4ec439a7c8870d5dc5558a55e8f536703e18a9949038dc962da6ddd65ebcbd",
     "files": [
       {
         "path": "package.json",
-        "sha256": "45fee7180665b2d1462f42b4ba17a6817d24ee4eb700a328f78b8486240a882d"
+        "sha256": "ee698d7939ba96b14cc5cb4ed3866df4c783983545a8436d53c56aa8032925cf"
       },
       {
         "path": "scripts/build-inline.mjs",
-        "sha256": "6ef472c2b9906a59b00b7cfa14fd50bf7645faa781ad85b8ebb586512a691cb7"
+        "sha256": "4bdfc98834a121990e4aed3737ad4a66409d6ff1b787aeacae2c3ded042d8afd"
       },
       {
         "path": "scripts/bundle-client.mjs",
@@ -127,7 +127,7 @@
       },
       {
         "path": "src/inline-host.js",
-        "sha256": "37557e8fdad47bd78dce8f3dec67f48997a0d0760912a52f2728e77f6e93c527"
+        "sha256": "d11eced1be50e464d8be8bbbb867c65effcfbb508cfb9d2408a26d51cf863ba1"
       },
       {
         "path": "src/inline-image-urls.mjs",

@@ -45,6 +45,8 @@ jobs:
           $env:PWH_ENGINE_SOURCE = $inputs.PWH_ENGINE_SOURCE
           $env:PWH_REFERENCE_CORE_JS = $inputs.PWH_REFERENCE_CORE_JS
           $env:PWH_REFERENCE_CORE_WASM = $inputs.PWH_REFERENCE_CORE_WASM
+          $env:PWH_FLOAT_FRAME_BASE_JS = $inputs.PWH_FLOAT_FRAME_BASE_JS
+          $env:PWH_FLOAT_FRAME_BASE_WASM = $inputs.PWH_FLOAT_FRAME_BASE_WASM
           $env:PWH_RUSTC = (rustup which --toolchain 1.93.1 rustc)
           $env:RUSTC = $env:PWH_RUSTC
           node scripts/run-ci-tests.mjs core

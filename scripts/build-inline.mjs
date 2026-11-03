@@ -33,6 +33,14 @@ if(!mouse.includes('pwh word and paragraph multiclick')){
  mouse="// pwh word and paragraph multiclick\n"+generatedImport+mouse.replace(anchor,"    this.cursor.moveToHit(hit);\n    this.cursor.resetPreferredX();\n    if (e.button === 0 && !e.ctrlKey && !e.altKey && !e.metaKey && selectMulticlick(this.cursor,this.wasm,e.detail)) {\n      this.active = true; this.cellSelectionDragCandidate = null; this.updateCaret(true); this.textarea.focus(); e.preventDefault(); return;\n    }\n    this.prepareClickHerePointerEntry?.(pageX);");
  await fs.writeFile(mousePath,mouse);
 }
+// Empty continuation fragments can resolve to a real insertion position on a
+// different page. Ordinary same-page clicks must keep their existing viewport.
+if(!mouse.includes('pwh resolved click page visibility')){
+ const anchor='    const rect = this.cursor.getRect();\n    if (rect) {\n      this.caret.show(rect, zoom);\n    }\n    this.selectionRenderer.clear();';
+ if(mouse.split(anchor).length!==2)throw Error('Unsupported resolved click caret visibility');
+ mouse=mouse.replace(anchor,'    const rect = this.cursor.getRect();\n    if (rect) {\n      this.caret.show(rect, zoom);\n      // pwh resolved click page visibility\n      if (rect.pageIndex !== pageIdx) this.scrollCaretIntoView(rect);\n    }\n    this.selectionRenderer.clear();');
+ await fs.writeFile(mousePath,mouse);
+}
 // Reuse the editor's object-properties command, including the complete nested
 // cell or header/footer reference, rather than constructing a second dialog.
 if(!mouse.includes('pwh image double-click properties')){
@@ -134,6 +142,47 @@ if(!tableDialog.includes('pwh direct detail dialog')){
 }
 const tableInputPath=path.join(studio,'src/engine/input-handler.ts');
 let tableInput=await fs.readFile(tableInputPath,'utf8');
+
+// Plain cell insertion Undo already owns synchronous complete pagination. Its
+// pending preview job must be cancelled, not paginated immediately before it.
+const editCommandPath=path.join(studio,'src/engine/command.ts');
+let editCommand=await fs.readFile(editCommandPath,'utf8');
+if(!editCommand.includes('pwh plain cell undo owns pagination')){
+ const signature='  undo(wasm: WasmBridge): DocumentPosition;';
+ const point=`  getPageLocalTextEditOptions(): { insertedText: string } {
+    return { insertedText: this.text };
+  }
+
+  undo(wasm: WasmBridge): DocumentPosition {`;
+ if(editCommand.split(signature).length!==2||editCommand.split(point).length!==2)throw Error('Unsupported plain cell Undo capability');
+ editCommand=editCommand.replace(signature,signature+'\n  /** 이 역연산이 동기 전체 페이지 조판을 완료하는 좁은 셀 입력 경로인지 판정한다. */\n  canUndoWithoutPaginationFlush?(): boolean;');
+ editCommand=editCommand.replace(point,point.replace('  undo(wasm: WasmBridge): DocumentPosition {',`  // pwh plain cell undo owns pagination
+  canUndoWithoutPaginationFlush(): boolean {
+    // 조각 복원·치환·예약 서식·중첩 경로 등은 기존 선행 barrier를 유지한다.
+    return isCell(this.position) && !isNestedCell(this.position)
+      && (this.position.cellIndex ?? 65535) < 65534
+      && this.text.length > 0 && !/[\\r\\n\\t]/.test(this.text)
+      && this.charFormat === undefined && this.replacedText.length === 0
+      && this.fragmentIds.length === 0;
+  }
+
+  undo(wasm: WasmBridge): DocumentPosition {`));
+ await fs.writeFile(editCommandPath,editCommand);
+}
+if(!tableInput.includes('pwh immediate cell undo owns pagination')){
+ const before=`  private handleUndo(): void {
+    this.flushDeferredPaginationIfNeeded('before-undo', false);`;
+ const after=`  private handleUndo(): void {
+    // pwh immediate cell undo owns pagination
+    if (this.history.peekUndoTop()?.canUndoWithoutPaginationFlush?.() === true) {
+      this.cancelDeferredPaginationForOwnedMutation();
+    } else {
+      this.flushDeferredPaginationIfNeeded('before-undo', false);
+    }`;
+ if(tableInput.split(before).length!==2||!tableInput.includes('  cancelDeferredPaginationForOwnedMutation(): void {'))throw Error('Unsupported owned pagination Undo boundary');
+ tableInput=tableInput.replace(before,after);await fs.writeFile(tableInputPath,tableInput);
+}
+
 if(!tableInput.includes('pwh caret char shape dialog')){
  const anchor='  /** 지정된 선택 범위에 글자 서식을 적용한다 (커맨드 시스템용) */';
  if(!tableInput.includes(anchor))throw Error('Unsupported character shape command API');
@@ -301,6 +350,29 @@ if(noteText.includes('const targetState=JSON.stringify([this.cursor.getPosition(
  noteText=noteText.replace('const targetState=JSON.stringify([this.cursor.getPosition(),this.cursor.getSelectionOrdered()]);',"const state=()=>JSON.stringify([this.cursor.getPosition(),this.cursor.getSelectionOrdered()],(key,value)=>key==='cursorRect'?undefined:value);\n    const targetState=state();").replace('JSON.stringify([this.cursor.getPosition(),this.cursor.getSelectionOrdered()])===targetState','state()===targetState');await fs.writeFile(noteTextPath,noteText);
 }
 let keyboard=await fs.readFile(keyboardPath,'utf8');
+// The ribbon may open table properties from a text caret, but an unmodified P
+// key still belongs to text input unless an object itself is selected.
+if(!keyboard.includes('pwh object shortcut preserves text input')){
+ const anchor='        if (cmdId) {\n          // 실행된 키만 삼킨다.';
+ if(keyboard.split(anchor).length!==2)throw Error('Unsupported contextual object properties shortcut');
+ keyboard=keyboard.replace(anchor,"        if (cmdId) {\n          // pwh object shortcut preserves text input\n          if (cmdId === 'format:object-properties' && !this.cursor.isInPictureObjectSelection() && !this.cursor.isInTableObjectSelection()) break;\n          // 실행된 키만 삼킨다.");
+ await fs.writeFile(keyboardPath,keyboard);
+}
+// Table object selection, like picture selection, must dispatch P before its
+// generic printable-key fallback clears the selected object.
+if(!keyboard.includes('pwh table object properties before deselection')){
+ const before='    // 그 외 키 → 표 객체 선택 해제 후 기본 키 처리';
+ const after=`    // pwh table object properties before deselection
+    const pwhObjectCommand = matchShortcut(e, defaultShortcuts);
+    if (pwhObjectCommand === 'format:object-properties' && this.dispatcher?.isEnabled?.(pwhObjectCommand)) {
+      e.preventDefault();
+      this.dispatcher.dispatch(pwhObjectCommand);
+      return;
+    }
+`+before;
+ if(keyboard.split(before).length!==2)throw Error('Unsupported selected table object shortcut');
+ keyboard=keyboard.replace(before,after);await fs.writeFile(keyboardPath,keyboard);
+}
 // A failed or empty clipboard read must never delete the selected source text.
 if(!keyboard.includes('pwh reject empty plain paste before deletion')){
  const before=`function pastePlainText(this: any, text: string, hasSelection: boolean): void {

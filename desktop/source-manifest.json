@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pluginVersion": "0.6.42",
+  "pluginVersion": "0.6.43",
   "copyPolicy": "Original bytes; .test.mjs filenames renamed to .check.mjs for staged-only discovery.",
   "files": [
     {
@@ -61,7 +61,7 @@
       "path": "standalone-pwh/build-msi.mjs",
       "source": "standalone-pwh/build-msi.mjs",
       "size": 16391,
-      "sha256": "5e4eb0efef6bf662c3b5bec46c715917c0e0396e7568011a31677b8314cc875e"
+      "sha256": "80e9d6ea4a06f604234b0c78a559ce143ddb7a1fd9a5342022738c0270eae75a"
     },
     {
       "path": "standalone-pwh/build-native-launcher.mjs",
@@ -73,7 +73,7 @@
       "path": "standalone-pwh/build-offline.mjs",
       "source": "standalone-pwh/build-offline.mjs",
       "size": 8191,
-      "sha256": "e7a9e29486d92d5aaa7c9cc0f468f0376eea13fdae315a71374fa80dcbc60676"
+      "sha256": "d3fe5ebb4a7a2a34431f1cbab8de3a7ece12331dbe086bdefa65fae9819f9d7a"
     },
     {
       "path": "standalone-pwh/build-stoom-icon.mjs",
@@ -102,14 +102,14 @@
     {
       "path": "standalone-pwh/client/editor.js",
       "source": "standalone-pwh/client/editor.js",
-      "size": 2694572,
-      "sha256": "9e5d15f00aa2ef90bbb32af872f5e7cf9c9b59f5ddb20cfb355fd5090a9c2657"
+      "size": 2695333,
+      "sha256": "2c2f37f67c381db0528b6e5942f4fe0fb4235216f163161c9031fb4b02f101f1"
     },
     {
       "path": "standalone-pwh/client/manifest.json",
       "source": "standalone-pwh/client/manifest.json",
       "size": 10223,
-      "sha256": "dcff3833a9ffc8d97411eef255f792cfa7f55a5e5d36d2d504be282b5a55a0ba"
+      "sha256": "58836acfcf344d86192becbe38f59eb437eb182cdeaf7df68ed46cb5db5a30ab"
     },
     {
       "path": "standalone-pwh/codex-agent.mjs",
@@ -144,8 +144,8 @@
     {
       "path": "standalone-pwh/codex-plugin-setup.mjs",
       "source": "standalone-pwh/codex-plugin-setup.mjs",
-      "size": 14049,
-      "sha256": "55b728633e5a24fdde02866122efd448c973586a1160411e8c11a5cac0a9bca4"
+      "size": 15005,
+      "sha256": "3286e6f94562de10cbac8f14760dd6bbb498e5a6d5e25f294d07daf8fd127581"
     },
     {
       "path": "standalone-pwh/CODEX-RATATUI-MIT.txt",
@@ -499,7 +499,7 @@
       "path": "standalone-pwh/version.json",
       "source": "standalone-pwh/version.json",
       "size": 21,
-      "sha256": "e8c44cb3e3d0bac4714b789abf636f723fa9a3b3187988d39c78480c014f7f96"
+      "sha256": "de4b29cccc129616d2388bd93e998fb7bd75b0fb2f1dfe0a1b2fb67e5239fdaf"
     },
     {
       "path": "standalone-pwh/window-close-controller.mjs",

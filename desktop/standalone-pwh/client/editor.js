@@ -31347,6 +31347,9 @@ var _d = class e {
 	getPageLocalTextEditOptions() {
 		return { insertedText: this.text };
 	}
+	canUndoWithoutPaginationFlush() {
+		return qu(this.position) && !Ju(this.position) && (this.position.cellIndex ?? 65535) < 65534 && this.text.length > 0 && !/[\r\n\t]/.test(this.text) && this.charFormat === void 0 && this.replacedText.length === 0 && this.fragmentIds.length === 0;
+	}
 	undo(e) {
 		this.lastMutationEffects = B;
 		let [t, ...n] = this.fragmentIds;
@@ -35766,7 +35769,7 @@ function Kp(e) {
 		} else this.cellSelectionDragCandidate = null;
 		this.startTextSelectionDrag(e);
 		let n = this.cursor.getRect();
-		n && this.caret.show(n, a), this.selectionRenderer.clear(), this.emitCursorFormatState(), this.updateFieldMarkers(), document.addEventListener("mouseup", this.onMouseUpBound, { once: !0 }), this.textarea.focus();
+		n && (this.caret.show(n, a), n.pageIndex !== u && this.scrollCaretIntoView(n)), this.selectionRenderer.clear(), this.emitCursorFormatState(), this.updateFieldMarkers(), document.addEventListener("mouseup", this.onMouseUpBound, { once: !0 }), this.textarea.focus();
 	} catch (e) {
 		console.warn("[InputHandler] hitTest 실패:", e);
 	}
@@ -38975,6 +38978,11 @@ function Bg(e) {
 			return;
 		}
 		if (e.key === "Shift" || e.key === "Control" || e.key === "Alt" || e.key === "Meta") return;
+		let t = Ah(e, kh);
+		if (t === "format:object-properties" && this.dispatcher?.isEnabled?.(t)) {
+			e.preventDefault(), this.dispatcher.dispatch(t);
+			return;
+		}
 		this.cursor.exitTableObjectSelection(), this.eventBus.emit("table-object-selection-changed", !1);
 	}
 	if (this.cursor.isInBlockSelectionMode() && e.key === "Escape") {
@@ -39127,6 +39135,7 @@ function Bg(e) {
 		default: if (this.dispatcher) {
 			let t = Ah(e, kh);
 			if (t) {
+				if (t === "format:object-properties" && !this.cursor.isInPictureObjectSelection() && !this.cursor.isInTableObjectSelection()) break;
 				let n = this.dispatcher.dispatchWithResult(t);
 				(n.ok || n.reason === "threw") && e.preventDefault();
 			}
@@ -41962,7 +41971,7 @@ var av = class {
 		});
 	}
 	handleUndo() {
-		this.flushDeferredPaginationIfNeeded("before-undo", !1);
+		this.history.peekUndoTop()?.canUndoWithoutPaginationFlush?.() === !0 ? this.cancelDeferredPaginationForOwnedMutation() : this.flushDeferredPaginationIfNeeded("before-undo", !1);
 		let e;
 		try {
 			e = this.history.undo(this.wasm);

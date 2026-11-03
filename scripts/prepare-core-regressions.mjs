@@ -76,6 +76,9 @@ const environment = {
   PWH_ENGINE_SOURCE: sourceRoot,
   PWH_REFERENCE_CORE_JS: path.join(referenceRoot, 'rhwp.js'),
   PWH_REFERENCE_CORE_WASM: path.join(referenceRoot, 'rhwp_bg.wasm'),
+  // The smaller-paper preservation tests use this same independent r13 core.
+  PWH_FLOAT_FRAME_BASE_JS: path.join(referenceRoot, 'rhwp.js'),
+  PWH_FLOAT_FRAME_BASE_WASM: path.join(referenceRoot, 'rhwp_bg.wasm'),
 };
 await fs.writeFile(path.join(work, 'environment.json'), JSON.stringify(environment, null, 2) + '\n', {flag: 'wx'});
 console.log(JSON.stringify({ok: true, patchedSourcePrepared: true, referenceRuntime: id, installed: false}));

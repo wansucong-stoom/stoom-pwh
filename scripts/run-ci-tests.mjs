@@ -11,6 +11,13 @@ if(files.some(name=>!/^tests\/[\w/.-]+\.test\.mjs$/.test(name)||name.includes('.
 if(!['core','browser'].includes(mode)||!process.env.PWH_RUNTIME_ROOT)throw Error('Use core|browser with an isolated PWH_RUNTIME_ROOT');
 const work=await fs.mkdtemp(path.join(os.tmpdir(),'pwh-ci-tests-'));
 const env={...process.env,PWH_CORE_JS:path.join(process.env.PWH_RUNTIME_ROOT,'core/rhwp.js'),PWH_CORE_WASM:path.join(process.env.PWH_RUNTIME_ROOT,'core/rhwp_bg.wasm'),PWH_OUTPUT_ROOT:path.join(work,'outputs'),PWH_FONT_ROOT:path.join(process.env.PWH_RUNTIME_ROOT,'fonts')};
+// Keep an explicitly chosen baseline; otherwise reuse the independent reference
+// prepared for actual-core CI. Never fill half of a different baseline pair.
+if(env.PWH_REFERENCE_CORE_JS&&env.PWH_REFERENCE_CORE_WASM&&!env.PWH_FLOAT_FRAME_BASE_JS&&!env.PWH_FLOAT_FRAME_BASE_WASM){
+  env.PWH_FLOAT_FRAME_BASE_JS=env.PWH_REFERENCE_CORE_JS;
+  env.PWH_FLOAT_FRAME_BASE_WASM=env.PWH_REFERENCE_CORE_WASM;
+}
+const floatReferenceConfigured=Boolean(env.PWH_REFERENCE_CORE_JS||env.PWH_REFERENCE_CORE_WASM||env.PWH_FLOAT_FRAME_BASE_JS||env.PWH_FLOAT_FRAME_BASE_WASM);
 // Account-, clipboard- and native-window tests require separate authorization.
 for(const key of ['PWH_CHATGPT_LIVE','PWH_CODEX_LIVE','PWH_HANCOM_CLIPBOARD','PWH_HANCOM_TARGET','PWH_TEST_CHATGPT_DATA','PWH_TEST_CODEX_RUNTIME','PWH_CODEX_TEST_EXE','PWH_NATIVE_TEST_LAUNCHER','PWH_ELECTRON_EXE','PWH_TEST_DESKTOP_PAYLOAD','PWH_ENGINE_TESTS','PWH_TEMPLATE_TEST_FILE'])delete env[key];
 if(mode==='browser'){
@@ -37,6 +44,6 @@ const code=await new Promise((resolve,reject)=>{
 });
 try{await log.writeFile(output);}finally{await log.close();}
 const skips=output.split(/\r?\n/).filter(line=>/ # SKIP\b/.test(line));
-const missing=skips.filter(line=>/PWH_CORE_JS|PWH_CORE_WASM/.test(line)||(mode==='browser'&&/PWH_BROWSER_TESTS|PWH_DESKTOP_SOURCE_ROOT|Requires browser module/.test(line)));
+const missing=skips.filter(line=>/PWH_CORE_JS|PWH_CORE_WASM/.test(line)||(mode==='browser'&&/PWH_BROWSER_TESTS|PWH_DESKTOP_SOURCE_ROOT|Requires browser module/.test(line))||(floatReferenceConfigured&&/PWH_FLOAT_FRAME_BASE|Requires an explicit prior-core fallback baseline/.test(line)));
 console.log(JSON.stringify({mode,report,skipped:skips.length,missingConfiguredPrerequisites:missing}));
 if(code!==0||missing.length)process.exitCode=code||1;

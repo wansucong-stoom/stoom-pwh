@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "verifiedOn": "2026-11-03",
+  "pwhVersion": "0.6.43",
+  "desktopVersion": "0.1.24",
+  "runtime": "rhwp-0.8.7-pwh-r16",
+  "wasmSha256": "b9a96ac2bbe5171e20ef86b398f781b76bd53438ae33bcf28cd1f6a4da8f8fd1",
+  "buildRecordSha256": "bfba233b25379aaeb1ee47347eeaf7fc5478c0ff22ac736882d577f0d382b5d0",
+  "previousVerification": "fidelity-weekly-0.6.42.json",
+  "checks": [
+    {
+      "name": "Pinned source and twenty-two ordered patches produce the formal core",
+      "status": "passed",
+      "orderedPatches": 22,
+      "pinnedSourceEntries": 52,
+      "rustSourceFilesExactVsFinalCandidate": 1040,
+      "publicPatchHashesVerified": 22,
+      "retainedCargoPackages": 373,
+      "dependencyLockExactVsHistoricalFormal19": true
+    },
+    {
+      "name": "Recorded core files and unchanged JavaScript glue ABI",
+      "status": "passed",
+      "glueSha256": "e4b17c467ec6e5955393f7b9b162150ea0f16271085dcec7955bcd87c0014d47"
+    },
+    {
+      "name": "Formal twenty-two-patch and historical nineteen-patch actual PDF outputs match on all 39 physical pages",
+      "status": "passed",
+      "pages": 39,
+      "exactRgbRasterDpi": 150,
+      "normalizedTextExact": true,
+      "scope": "Output equivalence, not whole-document quality approval",
+      "referenceStage": "historical nineteen-patch formal core"
+    },
+    {
+      "name": "Page 8 actual PDF glyph and vector geometry matches the independently audited historical nineteen-patch output",
+      "status": "passed",
+      "glyphs": 542,
+      "lines": 48,
+      "rectangles": 16,
+      "curves": 271,
+      "coordinatesAndPaintAttributesExact": true
+    },
+    {
+      "name": "Other three source documents retain print SVG, text and reopen page counts",
+      "status": "passed",
+      "pageCounts": [
+        65,
+        4,
+        2
+      ],
+      "svgFiles": 71,
+      "reference": "Historical nineteen-patch formal core",
+      "sourceUnchanged": true,
+      "checks": [
+        "allPrintSvg",
+        "documentScan",
+        "reopenedText",
+        "reopenedPageCount"
+      ],
+      "limitation": "Reopened text and page count were compared; reopened all-page SVG was not part of this corpus check."
+    },
+    {
+      "name": "Actual whole-document Desktop PDF observes the formal WASM",
+      "status": "passed",
+      "pages": 39,
+      "documentDirty": false,
+      "sourceUnchanged": true,
+      "pdfSha256": "cb33aa762641d25559153b3be9fbaf574bfc3a6176ded0d402d2ffd7b7462eb6"
+    },
+    {
+      "name": "Fixed sequential PDF quality gate and separate content/geometry audits",
+      "status": "passed",
+      "acceptedThrough": 8,
+      "nextPage": 9,
+      "previousPrefixPreserved": true,
+      "previousPrefixDirectlyRevalidatedPages": 7,
+      "formalPdfMetricsFreshlyComputedPages": 8
+    },
+    {
+      "name": "Formal-core regression suite",
+      "status": "passed",
+      "tests": 468,
+      "passed": 407,
+      "failed": 0,
+      "skipped": 61,
+      "cancelled": 0,
+      "missingConfiguredPrerequisites": [],
+      "testWrappersDiscovered": 120,
+      "requiredActualCases": {
+        "cellOwnedUndo": 14,
+        "cellHeightScopeDifferential": 8,
+        "syntheticCellCaretGeometry": 17,
+        "tableBboxSectionOwnership": 1,
+        "independentSmallPaperFallback": 3
+      },
+      "exclusions": "Browser, live-account, native-window and explicitly optional fixture checks require separate prerequisites.",
+      "scope": "Completed before six new Desktop installation regression cases were added; those cases are included in the final complete browser run. The formal WASM is unchanged."
+    },
+    {
+      "name": "Formal-core actual-ink browser regression",
+      "status": "passed",
+      "tests": 474,
+      "passed": 460,
+      "failed": 0,
+      "skipped": 14,
+      "cancelled": 0,
+      "missingConfiguredPrerequisites": [],
+      "desktopEditorSha256": "2c2f37f67c381db0528b6e5942f4fe0fb4235216f163161c9031fb4b02f101f1",
+      "scope": "Complete browser-configured suite, including the six new Desktop installation regression cases. Core/browser sets overlap and are not additive.",
+      "exclusions": "Live-account, native-window and explicitly optional fixture checks require separate prerequisites."
+    }
+  ],
+  "policy": {
+    "id": "pwh-physical-page-quality-v1",
+    "normalMinF1": 0.95,
+    "darkMinF1": 0.9,
+    "dpi": 150,
+    "tolerancePixels": 2,
+    "normalThreshold": 245,
+    "darkThreshold": 180,
+    "alignment": "Same page origin and physical scale; no fitting, translation or page remapping."
+  },
+  "pageCounts": {
+    "hancom": 39,
+    "pwh": 39
+  },
+  "acceptedThrough": 8,
+  "nextPage": 9,
+  "pages": [
+    {
+      "page": 1,
+      "normalF1": 0.972127,
+      "darkF1": 0.957435,
+      "contentVerified": true,
+      "geometryVerified": true
+    },
+    {
+      "page": 2,
+      "normalF1": 0.99226,
+      "darkF1": 0.985106,
+      "contentVerified": true,
+      "geometryVerified": true
+    },
+    {
+      "page": 3,
+      "normalF1": 0.986816,
+      "darkF1": 0.967184,
+      "contentVerified": true,
+      "geometryVerified": true
+    },
+    {
+      "page": 4,
+      "normalF1": 0.995212,
+      "darkF1": 0.990202,
+      "contentVerified": true,
+      "geometryVerified": true
+    },
+    {
+      "page": 5,
+      "normalF1": 0.998675,
+      "darkF1": 0.996613,
+      "contentVerified": true,
+      "geometryVerified": true
+    },
+    {
+      "page": 6,
+      "normalF1": 0.976603,
+      "darkF1": 0.944863,
+      "contentVerified": true,
+      "geometryVerified": true
+    },
+    {
+      "page": 7,
+      "normalF1": 0.957781,
+      "darkF1": 0.914565,
+      "contentVerified": true,
+      "geometryVerified": true
+    },
+    {
+      "page": 8,
+      "normalF1": 0.970159,
+      "darkF1": 0.920944,
+      "contentVerified": true,
+      "geometryVerified": true
+    }
+  ],
+  "page8Improvement": {
+    "previousNormalF1": 0.809888,
+    "previousDarkF1": 0.689251,
+    "normalPercentagePointGain": 16.0271,
+    "darkPercentagePointGain": 23.1693,
+    "referenceCharacters": 542,
+    "outputCharacters": 542,
+    "prematureNextPageCharactersRemoved": 90,
+    "changedPages8to11CharacterMultisetPreserved": true,
+    "pages12to39PixelsAndNormalizedTextPreserved": true
+  },
+  "sourceHistoryScope": {
+    "causeLayer": "Pwh additional source-layout proof in the shared rhwp core",
+    "regressionIntroducedByPwhCandidate": true,
+    "purpose": "Preserve paragraph-local evidence that an edited nested paragraph must not reuse its stored source frame after HWPX save and reopen",
+    "entry": "META-INF/rhwp-source-layout-history.json",
+    "validation": "Exact emitted header and section hashes, structural table/cell/paragraph paths and terminal paragraph fingerprints",
+    "role": "Negative source-frame evidence only; does not restore actual layout-space metrics or authorize new stored layout",
+    "standardXmlUnchanged": true,
+    "externalRemovalOrMismatch": "Ignore unverified metadata; exact reflowed layout after external removal is not guaranteed"
+  },
+  "limitations": [
+    "Only physical pages 1 through 8 have passed sequential quality and content/geometry approval; page 9 is the next frontier. All 39 pages were regenerated, not approved.",
+    "At page 8 the inner and outer lower boundaries remain about 1.2974 pt and 1.3594 pt below the reference. Their cause is unresolved. Passing the fixed quality gate does not mean exact 1:1 layout.",
+    "The page 8 source/clip audit is inherited only after exact historical-nineteen-patch/final-twenty-two-patch actual PDF pixels, text and glyph/vector geometry. Formal fixed-threshold metrics were recomputed independently.",
+    "The source-layout history fixes a Pwh proof-lifecycle regression; it is not a general restoration of edited character spacing, fonts or all external-editor round trips.",
+    "The native CLI, editor SDK and historical full Studio remain preserved base components; active Pwh and Desktop inline editors share the formal r16 core.",
+    "No user document was modified. Private documents, original PDF/image data, institution text, local paths and private audit records are excluded from public artifacts.",
+    "The formal core and final complete browser suites passed. Their test sets overlap and have different collection sizes because six Desktop installation cases were added after the core run. Environment-specific exclusions are not passes. This snapshot does not assert installer installation or publication; consult artifactVerificationRef for that separate artifact record."
+  ],
+  "historicalStages": [
+    {
+      "stage": "nineteen-patch audit before interaction and fallback fixes",
+      "orderedPatches": 19,
+      "wasmSha256": "eaf3d718eab770b18e737f46720699e801b94f20b59800918293d3d012f4e030",
+      "buildRecordSha256": "4fa3b9f90f99bd938e2581d164004f60482c1752018fb4a60f6f85cb213b4b13",
+      "pdfSha256": "10ff272b0d0be55024011f29bb8f9abf7f8cfc2e982c4566fa28545062b33eda",
+      "role": "Historical exact-output reference; not the final r16 core"
+    }
+  ],
+  "releaseStatus": "core-editor-qualified",
+  "historicalBrowserRuns": [
+    {
+      "status": "failed",
+      "scope": "Completed whole suite. Two Windows Codex-plugin installation fixtures failed during directory publication; final qualification remains unresolved. Core/browser test sets overlap and are not additive.",
+      "tests": 468,
+      "passed": 452,
+      "failed": 2,
+      "skipped": 14,
+      "cancelled": 0,
+      "missingConfiguredPrerequisites": [],
+      "desktopEditorSha256": "2c2f37f67c381db0528b6e5942f4fe0fb4235216f163161c9031fb4b02f101f1",
+      "failures": [
+        {
+          "test": "an already updated Git plugin also receives the bundled engine without changing custom paths",
+          "errorCode": "ENOENT",
+          "operation": "verify runtime destination after directory rename"
+        },
+        {
+          "test": "registers an offline local plugin with a persistent runtime and skill",
+          "errorCode": "EPERM",
+          "operation": "publish staged marketplace by directory rename"
+        }
+      ],
+      "stage": "Before bounded Windows directory-publication retry"
+    }
+  ],
+  "desktopPluginPublication": {
+    "layer": "Pwh Desktop installer/plugin integration, not the rhwp core or shared editor",
+    "change": "Bounded retry for Windows directory publication; validate a concurrently published destination before treating the race as success. Persistent failure remains an error and unmanaged paths are not overwritten.",
+    "additionalRegressionCases": 6,
+    "targetedRun": {
+      "passed": 12,
+      "failed": 0,
+      "skipped": 1
+    },
+    "includedInFinalWholeBrowserSuite": true
+  },
+  "qualificationScope": "Immutable source, formal WASM, actual PDF and core/editor test results for Pwh 0.6.43 and Desktop 0.1.24; installer artifact verification is a separate release record.",
+  "artifactVerificationRef": {
+    "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/v0.6.43/DESKTOP-VERIFICATION.json",
+    "artifact": "PwhDesktop-0.1.24.msi",
+    "scope": "Separate Desktop installer artifact verification. This core/editor evidence snapshot does not assert MSI installation, publication or availability.",
+    "recordEmbeddedInThisSnapshot": false
+  }
+}

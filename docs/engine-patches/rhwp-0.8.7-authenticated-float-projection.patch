@@ -1,0 +1,22 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -12867,13 +12867,12 @@
+                     && matches!(t.common.text_wrap, TextWrap::TopAndBottom)
+                     && !self.nested_table_is_overlay(t)
+                     && matches!(t.page_break, TablePageBreak::RowBreak)
+-                    && !stored_float_anchor_has_leading_host_line(
+-                        p, cell.paragraphs.get(pi + 1), t,
+-                        self.profile.get().hwpx_stored_layout()
+-                            || self.profile.get().hwp5_stored_pagination_layout(),
+-                        self.profile.get().session_edited(),
+-                        self.render_normalization.borrow().table_text_reflowed(t),
+-                    ));
++                    // Projection, reservation and paint must authenticate the same
++                    // physical owner. Source shape alone can survive a paper-size
++                    // change even when that saved frame no longer fits the body.
++                    && self.closed_stored_nested_float_frame(
++                        table, p, cell.paragraphs.get(pi + 1), &comp.lines, t, styles,
++                    ).is_none());
+             let projected_mixed_block_table = para_has_visible_text && projected_source_block_table;
+             if has_table_in_para && (p.text.trim().is_empty() || projected_mixed_block_table) {
+                 let nested_tables: Vec<&crate::model::table::Table> = p

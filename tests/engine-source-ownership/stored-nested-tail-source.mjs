@@ -17,29 +17,30 @@ mod model {
   #[derive(Clone,Copy,PartialEq)] pub enum ColumnBreakType{None,Page,Section,Column,MultiColumn}
   #[derive(Clone)] pub struct LineSeg{pub vertical_pos:i32,pub line_height:i32,pub line_spacing:i32,pub segment_width:i32,pub tag:u32}
   impl LineSeg{pub const TAG_IMPLEMENTATION_PROPERTY:u32=1<<31;}
-  #[derive(Clone)] pub struct Paragraph{pub text:String,pub dirty:bool,pub cell_format_vpos_dirty:bool,pub layout_space_metrics:Vec<()>,pub line_segs:Vec<LineSeg>,pub controls:Vec<Control>,pub column_type:ColumnBreakType,pub para_shape_id:u16}
+  #[derive(Clone)] pub struct Paragraph{pub text:String,pub dirty:bool,pub cell_format_vpos_dirty:bool,pub source_frame_reflowed:bool,pub layout_space_metrics:Vec<()>,pub line_segs:Vec<LineSeg>,pub controls:Vec<Control>,pub column_type:ColumnBreakType,pub para_shape_id:u16,pub raw_break_type:u8}
   impl Paragraph{pub fn stored_text_partition_is_dirty(&self)->bool{self.dirty}}
  }
- pub mod control {use super::table::Table;#[derive(Clone)] pub enum Control{Table(Box<Table>),Other}}
+ pub mod control {use super::table::Table;#[derive(Clone)] pub enum Control{Table(Box<Table>),ColumnDef(Columns),Other} #[derive(Clone)] pub struct Columns{pub column_count:u16}}
  pub mod table {
   use super::paragraph::Paragraph;use super::shape::*;
   #[derive(Clone,Copy,PartialEq)] pub enum TablePageBreak{RowBreak,None}
   #[derive(Clone)] pub struct Common{pub treat_as_char:bool,pub flow_with_text:bool,pub allow_overlap:bool,pub text_wrap:TextWrap,pub vert_rel_to:VertRelTo,pub vert_align:VertAlign,pub vertical_offset:u32,pub height:u32}
-  #[derive(Clone)] pub struct Cell{pub dirty_flag:bool,pub row:u16,pub row_span:u16,pub paragraphs:Vec<Paragraph>}
-  #[derive(Clone)] pub struct Table{pub common:Common,pub caption:Option<()>,pub row_count:u16,pub col_count:u16,pub page_break:TablePageBreak,pub cell_spacing:u16,pub outer_margin_top:u16,pub outer_margin_bottom:u16,pub cells:Vec<Cell>,pub raw:Vec<u32>,pub headers:Vec<usize>}
+  #[derive(Clone)] pub struct Cell{pub dirty_flag:bool,pub row:u16,pub col:u16,pub col_span:u16,pub text_direction:u8,pub height:u32,pub padding:Padding,pub apply_inner_margin:bool,pub row_span:u16,pub paragraphs:Vec<Paragraph>} #[derive(Clone,Copy)] pub struct Padding{pub top:i16,pub bottom:i16} impl Cell{pub fn effective_padding(&self,table:&Padding)->Padding{if self.apply_inner_margin {self.padding}else{*table}}}
+  #[derive(Clone)] pub struct Table{pub common:Common,pub caption:Option<()>,pub row_count:u16,pub col_count:u16,pub padding:Padding,pub page_break:TablePageBreak,pub cell_spacing:u16,pub outer_margin_top:i16,pub outer_margin_bottom:i16,pub cells:Vec<Cell>,pub raw:Vec<u32>,pub headers:Vec<usize>}
   impl Table{pub fn get_raw_row_heights(&self)->Vec<u32>{self.raw.clone()} pub fn leading_header_rows(&self)->Vec<usize>{self.headers.clone()}}
  }
 }
 mod engine {
-use crate::model::{control::Control,paragraph::{Paragraph,LineSeg,ColumnBreakType},table::{Table,Cell,Common,TablePageBreak},shape::*};
+use crate::model::{control::Control,paragraph::{Paragraph,LineSeg,ColumnBreakType},table::{Table,Cell,Common,TablePageBreak,Padding},shape::*};
 #[derive(Clone,Copy,Debug)]
 ${sourceBlock(source,'pub(super) struct StoredNestedTailOpeningFrame {')}
 ${sourceBlock(source,'impl StoredNestedTailOpeningFrame {')}
 ${sourceBlock(source,'fn stored_nested_tail_table_is_original(')}
 ${sourceBlock(source,'fn stored_nested_tail_cell_prefix_is_original(')}
+${sourceBlock(source,'fn stored_nested_inline_tail_row_is_closed(')}
 ${sourceBlock(source,'fn stored_nested_tail_opening_frame_source(')}
-fn paragraph(text:&str,vpos:i32,width:i32)->Paragraph{Paragraph{text:text.into(),dirty:false,cell_format_vpos_dirty:false,layout_space_metrics:vec![],line_segs:vec![LineSeg{vertical_pos:vpos,line_height:1000,line_spacing:600,segment_width:width,tag:0}],controls:vec![],column_type:ColumnBreakType::None,para_shape_id:0}}
-fn child()->Table{Table{common:Common{treat_as_char:false,flow_with_text:true,allow_overlap:false,text_wrap:TextWrap::TopAndBottom,vert_rel_to:VertRelTo::Para,vert_align:VertAlign::Top,vertical_offset:0,height:10000},caption:None,row_count:6,col_count:1,page_break:TablePageBreak::RowBreak,cell_spacing:0,outer_margin_top:100,outer_margin_bottom:100,cells:(0..6).map(|row|Cell{dirty_flag:false,row,row_span:1,paragraphs:vec![paragraph("row",0,18000)]}).collect(),raw:vec![1200,2000,2500,1500,2200,3000],headers:vec![]}}
+fn paragraph(text:&str,vpos:i32,width:i32)->Paragraph{Paragraph{text:text.into(),dirty:false,cell_format_vpos_dirty:false,source_frame_reflowed:false,layout_space_metrics:vec![],line_segs:vec![LineSeg{vertical_pos:vpos,line_height:1000,line_spacing:600,segment_width:width,tag:0}],controls:vec![],column_type:ColumnBreakType::None,para_shape_id:0,raw_break_type:0}}
+fn child()->Table{Table{common:Common{treat_as_char:false,flow_with_text:true,allow_overlap:false,text_wrap:TextWrap::TopAndBottom,vert_rel_to:VertRelTo::Para,vert_align:VertAlign::Top,vertical_offset:0,height:10000},caption:None,row_count:6,col_count:1,padding:Padding{top:100,bottom:100},page_break:TablePageBreak::RowBreak,cell_spacing:0,outer_margin_top:100,outer_margin_bottom:100,cells:(0..6).map(|row|Cell{dirty_flag:false,row,col:0,col_span:1,text_direction:0,height:1000,padding:Padding{top:0,bottom:0},apply_inner_margin:false,row_span:1,paragraphs:vec![paragraph("row",0,18000)]}).collect(),raw:vec![1200,2000,2500,1500,2200,3000],headers:vec![]}}
 struct Fixture{host:Paragraph,next:Paragraph,measured:Vec<i64>}
 fn fixture()->Fixture{let table=child();let mut host=paragraph("",4800,0);host.controls=vec![Control::Table(Box::new(table))];Fixture{host,next:paragraph("AFTER",3200,18000),measured:vec![1200,2000,2500,1500,2200,3000]}}
 fn table(f:&Fixture)->&Table{let Control::Table(t)=&f.host.controls[0]else{panic!()};t}
@@ -120,7 +121,7 @@ fn rejects(change:impl FnOnce(&mut Fixture)){let mut f=fixture();change(&mut f);
 #[test]fn explicit_column_break_cannot_be_transferred(){rejects(|f|f.next.column_type=ColumnBreakType::Column);}
 #[test]fn explicit_multicolumn_break_cannot_be_transferred(){rejects(|f|f.next.column_type=ColumnBreakType::MultiColumn);}
 #[test]fn explicit_host_page_break_rejects(){rejects(|f|f.host.column_type=ColumnBreakType::Page);}
-fn prefix_fixture()->Cell{let f=fixture();Cell{dirty_flag:false,row:0,row_span:1,paragraphs:vec![paragraph("PREFIX",0,18000),f.host,f.next]}}
+fn prefix_fixture()->Cell{let f=fixture();Cell{dirty_flag:false,row:0,col:0,col_span:1,text_direction:0,height:1000,padding:Padding{top:0,bottom:0},apply_inner_margin:false,row_span:1,paragraphs:vec![paragraph("PREFIX",0,18000),f.host,f.next]}}
 fn prefix_rejects(change:impl FnOnce(&mut Cell)){let mut cell=prefix_fixture();change(&mut cell);assert!(!stored_nested_tail_cell_prefix_is_original(&cell,&cell.paragraphs[1]));}
 #[test]fn accepts_original_containing_prefix(){let cell=prefix_fixture();assert!(stored_nested_tail_cell_prefix_is_original(&cell,&cell.paragraphs[1]));}
 #[test]fn prefix_host_must_be_the_exact_owner(){let cell=prefix_fixture();let other=cell.paragraphs[1].clone();assert!(!stored_nested_tail_cell_prefix_is_original(&cell,&other));}

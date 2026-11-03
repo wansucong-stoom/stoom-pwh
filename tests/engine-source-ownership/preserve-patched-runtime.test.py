@@ -70,6 +70,23 @@ class PreservationTests(unittest.TestCase):
         (core/'BUILD-RECORD.json').write_bytes(m.js(record))
         with self.assertRaisesRegex(ValueError,'glue'):
             m.verify_core(core,project,lock)
+    def test_added_source_requires_reviewed_creation_and_output_digest(self):
+        core,project,record,lock=self.core()
+        source=record['patches'][0]['sources'][0]
+        source['originalSha256']=None
+        (core/'BUILD-RECORD.json').write_bytes(m.js(record))
+        with self.assertRaisesRegex(ValueError,'Added source'):
+            m.verify_core(core,project,lock)
+        patch=b'--- /dev/null\n+++ b/src/layout.rs\n@@ -0,0 +1 @@\n+// added source\n'
+        (project/'docs/engine-patches/source.patch').write_bytes(patch)
+        record['patches'][0]['sha256']=m.sha(patch)
+        (core/'BUILD-RECORD.json').write_bytes(m.js(record))
+        m.verify_core(core,project,lock)
+        for invalid in (None, '', 'b'*63, 123):
+            source['patchedSha256']=invalid
+            (core/'BUILD-RECORD.json').write_bytes(m.js(record))
+            with self.subTest(invalid=invalid),self.assertRaisesRegex(ValueError,'Invalid source digest'):
+                m.verify_core(core,project,lock)
     def test_dependency_drift_is_rejected(self):
         core,project,record,lock=self.core();record['lockAudit']['changedRetainedPackages']=1;(core/'BUILD-RECORD.json').write_bytes(m.js(record))
         with self.assertRaisesRegex(ValueError,'drift'):m.verify_core(core,project,lock)

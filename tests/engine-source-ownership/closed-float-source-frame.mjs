@@ -1,12 +1,16 @@
 import {loadEngineSource,sourceBlock,runRustTests} from './harness.mjs';
 const {source,sourceSha256}=await loadEngineSource();
+const projectionStart=source.indexOf('let projected_source_block_table = ');
+const projectionEnd=source.indexOf(';',projectionStart);
+if(projectionStart<0||projectionEnd<0)throw Error('Missing actual projection consumer');
+const projection=source.slice(projectionStart,projectionEnd+1);
 const code=`
 mod model {
  pub mod paragraph {
   #[derive(Clone)]pub struct LineSeg {pub vertical_pos:i32,pub line_height:i32,pub segment_width:i32,pub line_spacing:i32,pub tag:u32}
   impl LineSeg{pub const TAG_IMPLEMENTATION_PROPERTY:u32=0x80000000;}
-  #[derive(Clone)]pub struct Paragraph {pub text:String,pub controls:Vec<super::control::Control>,pub line_segs:Vec<LineSeg>,pub dirty:bool,pub cell_format_vpos_dirty:bool,pub layout_space_metrics:Vec<u8>}
-  impl Paragraph {pub fn stored_text_partition_is_dirty(&self)->bool{self.dirty}}
+  #[derive(Clone)]pub struct Paragraph {pub text:String,pub para_shape_id:u16,pub controls:Vec<super::control::Control>,pub line_segs:Vec<LineSeg>,pub dirty:bool,pub cell_format_vpos_dirty:bool,pub source_frame_reflowed:bool,pub layout_space_metrics:Vec<u8>}
+  impl Paragraph {pub fn stored_text_partition_is_dirty(&self)->bool{self.dirty}pub fn control_text_positions(&self)->Vec<usize>{vec![0]}}
  }
  pub mod shape{
   #[derive(Clone,PartialEq)]pub enum TextWrap{TopAndBottom,Square}
@@ -14,14 +18,15 @@ mod model {
   #[derive(Clone,PartialEq)]pub enum VertAlign{Top,Bottom}
  }
  pub mod table {
+  #[derive(Clone,PartialEq)]pub enum TablePageBreak{RowBreak,None}
   #[derive(Clone)]pub struct Common {pub treat_as_char:bool,pub flow_with_text:bool,pub allow_overlap:bool,pub text_wrap:super::shape::TextWrap,pub vert_rel_to:super::shape::VertRelTo,pub vert_align:super::shape::VertAlign,pub height:u32,pub vertical_offset:u32}
   #[derive(Clone)]pub struct Cell{pub dirty_flag:bool,pub paragraphs:Vec<super::paragraph::Paragraph>}
-  #[derive(Clone)]pub struct Table {pub common:Common,pub caption:Option<u8>,pub cells:Vec<Cell>,pub outer_margin_top:u16,pub outer_margin_bottom:u16}
+  #[derive(Clone)]pub struct Table {pub row_count:u16,pub page_break:TablePageBreak,pub measured_height:f64,pub reflowed:bool,pub common:Common,pub caption:Option<u8>,pub cells:Vec<Cell>,pub outer_margin_top:u16,pub outer_margin_bottom:u16}
  }
  pub mod control {#[derive(Clone)]pub enum Control{Table(Box<super::table::Table>),Other}}
 }
 use model::paragraph::{Paragraph,LineSeg};use model::control::Control;
-use model::table::{Table,Common,Cell};use model::shape::{TextWrap,VertRelTo,VertAlign};
+use model::table::{Table,Common,Cell,TablePageBreak};use model::shape::{TextWrap,VertRelTo,VertAlign};
 fn signed_hwpunit(value:u32)->i32{value as i32}
 mod renderer {pub mod float_placement {
  #[derive(Clone,Copy,Debug)]pub enum ParagraphFloatFlow {Exclusion}
@@ -39,8 +44,8 @@ ${sourceBlock(source,'fn stored_float_frame_owner_is_original(')}
 ${sourceBlock(source,'fn stored_float_frame_geometry_agrees(')}
 ${sourceBlock(source,'fn stored_float_anchor_has_leading_host_line(')}
 fn line(vpos:i32)->LineSeg{LineSeg{vertical_pos:vpos,line_height:1100,segment_width:18000,line_spacing:600,tag:0}}
-fn paragraph(vpos:i32)->Paragraph{Paragraph{text:"VISIBLE".into(),controls:vec![],line_segs:vec![line(vpos)],dirty:false,cell_format_vpos_dirty:false,layout_space_metrics:vec![]}}
-fn subject()->(Paragraph,Paragraph){let t=Table{common:Common{treat_as_char:false,flow_with_text:true,allow_overlap:false,text_wrap:TextWrap::TopAndBottom,vert_rel_to:VertRelTo::Para,vert_align:VertAlign::Top,height:4800,vertical_offset:1200},caption:None,cells:vec![Cell{dirty_flag:false,paragraphs:vec![paragraph(0)]}],outer_margin_top:0,outer_margin_bottom:0};let mut p=paragraph(1100);p.controls.push(Control::Table(Box::new(t)));(p,paragraph(7100))}
+fn paragraph(vpos:i32)->Paragraph{Paragraph{text:"VISIBLE".into(),para_shape_id:0,controls:vec![],line_segs:vec![line(vpos)],dirty:false,cell_format_vpos_dirty:false,source_frame_reflowed:false,layout_space_metrics:vec![]}}
+fn subject()->(Paragraph,Paragraph){let t=Table{row_count:3,page_break:TablePageBreak::RowBreak,measured_height:64.0,reflowed:false,common:Common{treat_as_char:false,flow_with_text:true,allow_overlap:false,text_wrap:TextWrap::TopAndBottom,vert_rel_to:VertRelTo::Para,vert_align:VertAlign::Top,height:4800,vertical_offset:1200},caption:None,cells:vec![Cell{dirty_flag:false,paragraphs:vec![paragraph(0)]}],outer_margin_top:0,outer_margin_bottom:0};let mut p=paragraph(1100);p.controls.push(Control::Table(Box::new(t)));(p,paragraph(7100))}
 fn table(p:&Paragraph)->&Table{let Control::Table(t)=&p.controls[0]else{panic!()};t}
 fn table_mut(p:&mut Paragraph)->&mut Table{let Control::Table(t)=&mut p.controls[0]else{panic!()};t}
 fn prove(p:&Paragraph,n:&Paragraph)->bool{stored_float_anchor_has_leading_host_line(p,Some(n),table(p),true,false,false)}
@@ -82,7 +87,69 @@ fn composed(p:&Paragraph)->ComposedLine{let l=&p.line_segs[0];ComposedLine{runs:
 #[test]fn original_source_origin_and_whole_occupied_end_must_fit_the_physical_body(){let(p,n)=subject();let frame=stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false).unwrap();for page in [2500,4000,6000]{assert!(!stored_float_frame_fits_original_body(&p,frame,page as f64/75.0,96.0));}for page in [7100,7200,9300]{assert!(stored_float_frame_fits_original_body(&p,frame,page as f64/75.0,96.0));}assert!(!stored_float_frame_fits_original_body(&p,frame,6000.0/75.0,96.0),"The object alone fits, but its real source origin and preceding offset do not");}
 #[test]fn missing_or_invalid_physical_body_is_not_a_source_fit_estimate(){let(p,n)=subject();let frame=stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false).unwrap();for height in [0.0,-1.0,f64::NAN,f64::INFINITY]{assert!(!stored_float_frame_fits_original_body(&p,frame,height,96.0));}}
 
-#[test]fn current_composition_metrics_reject_unchanged_source_tags(){let(mut p,mut n)=subject();assert!(stored_float_frame_owner_is_original(&p));p.layout_space_metrics.push(1);assert!(!stored_float_frame_owner_is_original(&p));p.layout_space_metrics.clear();assert!(stored_float_frame_owner_is_original(&p));n.layout_space_metrics.push(1);assert!(!stored_float_frame_owner_is_original(&n));}
-#[test]fn a_deep_edited_owner_cannot_authenticate_the_same_measured_height(){let(mut p,_)=subject();table_mut(&mut p).cells[0].paragraphs[0].layout_space_metrics.push(1);assert!(!stored_float_frame_owner_is_original(&p));table_mut(&mut p).cells[0].paragraphs[0].layout_space_metrics.clear();let(mut deep,_)=subject();deep.layout_space_metrics.push(1);let common=table(&p).common.clone();table_mut(&mut p).cells[0].paragraphs[0].controls.push(Control::Table(Box::new(Table{common,caption:None,cells:vec![Cell{dirty_flag:false,paragraphs:vec![deep]}],outer_margin_top:0,outer_margin_bottom:0})));assert!(!stored_float_frame_owner_is_original(&p));}
+#[test]fn current_composition_metrics_reject_unchanged_source_tags(){
+ let(mut p,mut n)=subject();assert!(stored_float_frame_owner_is_original(&p));
+ p.layout_space_metrics.push(1);assert!(!stored_float_frame_owner_is_original(&p));
+ p.layout_space_metrics.clear();assert!(stored_float_frame_owner_is_original(&p));
+ n.layout_space_metrics.push(1);assert!(!stored_float_frame_owner_is_original(&n));
+ p.source_frame_reflowed=true;assert!(!stored_float_frame_owner_is_original(&p));
+ n.layout_space_metrics.clear();n.source_frame_reflowed=true;
+ assert!(!stored_float_frame_owner_is_original(&n),"Saved successor history remains nonoriginal after runtime metrics are absent");
+ let(mut owner,_)=subject();table_mut(&mut owner).cells[0].paragraphs[0].source_frame_reflowed=true;
+ assert!(!stored_float_frame_owner_is_original(&owner),"Saved descendant history cannot authenticate the enclosing float");
+}
+#[test]fn a_deep_edited_owner_cannot_authenticate_the_same_measured_height(){let(mut p,_)=subject();table_mut(&mut p).cells[0].paragraphs[0].layout_space_metrics.push(1);assert!(!stored_float_frame_owner_is_original(&p));table_mut(&mut p).cells[0].paragraphs[0].layout_space_metrics.clear();let(mut deep,_)=subject();deep.layout_space_metrics.push(1);let common=table(&p).common.clone();table_mut(&mut p).cells[0].paragraphs[0].controls.push(Control::Table(Box::new(Table{row_count:3,page_break:TablePageBreak::RowBreak,measured_height:64.0,reflowed:false,common,caption:None,cells:vec![Cell{dirty_flag:false,paragraphs:vec![deep]}],outer_margin_top:0,outer_margin_bottom:0})));assert!(!stored_float_frame_owner_is_original(&p));}
+// The actual consumer is extracted as well: a raw source-shape witness must
+// not block projection if the shared physical-frame proof rejects this body.
+#[derive(Clone,Copy)]struct Profile;
+impl Profile{fn hwpx_stored_layout(&self)->bool{true}fn hwp5_stored_pagination_layout(&self)->bool{false}fn session_edited(&self)->bool{false}}
+struct Normalization;
+impl Normalization{fn table_text_reflowed(&self,t:&Table)->bool{t.reflowed}}
+struct ParaStyle{spacing_before:f64,spacing_after:f64}
+struct ResolvedStyleSet{para_styles:Vec<ParaStyle>}
+struct Composed{lines:Vec<ComposedLine>}
+struct Engine{profile:std::cell::Cell<Profile>,render_normalization:std::cell::RefCell<Normalization>,current_body_area:std::cell::Cell<(f64,f64,f64,f64)>,dpi:f64}
+impl Engine{
+ fn new(height:i32)->Self{Self{profile:std::cell::Cell::new(Profile),render_normalization:std::cell::RefCell::new(Normalization),current_body_area:std::cell::Cell::new((0.0,0.0,400.0,height as f64/75.0)),dpi:96.0}}
+ fn nested_table_is_overlay(&self,_:&Table)->bool{false}
+ fn nested_table_body_height(&self,t:&Table,_:&ResolvedStyleSet)->f64{t.measured_height}
+ ${sourceBlock(source,'fn closed_stored_nested_float_frame(')}
+ fn project(&self,table:&Table,cell:&Cell,comp:&Composed,styles:&ResolvedStyleSet)->bool{
+  let pi=0;let p=&cell.paragraphs[pi];
+  ${projection}
+  projected_source_block_table
+ }
+}
+fn styles()->ResolvedStyleSet{ResolvedStyleSet{para_styles:vec![ParaStyle{spacing_before:0.0,spacing_after:0.0}]}}
+fn consumer(height:i32,mutate:impl FnOnce(&mut Cell,&mut Composed,&mut Table,&mut ResolvedStyleSet))->bool{
+ let(p,n)=subject();let mut parent=table(&p).clone();let mut comp=Composed{lines:vec![composed(&p)]};
+ let mut cell=Cell{dirty_flag:false,paragraphs:vec![p,n]};let mut style=styles();
+ mutate(&mut cell,&mut comp,&mut parent,&mut style);
+ Engine::new(height).project(&parent,&cell,&comp,&style)
+}
+#[test]fn consumer_only_suppresses_projection_for_a_frame_fitting_the_body(){
+ for height in [7100,7200,9300]{assert!(!consumer(height,|_,_,_,_|{}));}
+ for height in [2500,4000,6000]{assert!(consumer(height,|_,_,_,_|{}),"A source-ineligible physical frame must retain its prior projection path");}
+}
+#[test]fn consumer_authenticates_current_width_and_measured_child_height(){
+ assert!(consumer(9300,|_,comp,_,_|comp.lines[0].segment_width-=1));
+ assert!(consumer(9300,|cell,_,_,_|table_mut(&mut cell.paragraphs[0]).measured_height+=1.0));
+}
+#[test]fn consumer_keeps_host_successor_and_descendant_reflow_history_ineligible(){
+ for owner in 0..3{assert!(consumer(9300,|cell,_,_,_|match owner{
+  0=>cell.paragraphs[0].source_frame_reflowed=true,
+  1=>cell.paragraphs[1].source_frame_reflowed=true,
+  _=>table_mut(&mut cell.paragraphs[0]).cells[0].paragraphs[0].source_frame_reflowed=true,
+ }));}
+}
+#[test]fn consumer_keeps_current_composition_metrics_ineligible(){
+ assert!(consumer(9300,|cell,_,_,_|cell.paragraphs[0].layout_space_metrics.push(1)));
+ assert!(consumer(9300,|cell,_,_,_|cell.paragraphs[1].layout_space_metrics.push(1)));
+}
+#[test]fn consumer_does_not_borrow_an_edited_parent_or_paragraph_margins(){
+ assert!(consumer(9300,|_,_,parent,_|parent.reflowed=true));
+ assert!(consumer(9300,|_,_,_,style|style.para_styles[0].spacing_before=1.0));
+}
+
 `;
 await runRustTests({name:'closed-float-source-frame',sourceSha256,code});

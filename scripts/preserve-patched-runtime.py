@@ -97,8 +97,12 @@ def verify_core(root, project, lock):
         if sha(data) != patch['sha256'] or not patch['sources']: raise ValueError('Core patch digest mismatch')
         for source in patch['sources']:
             safe_name(source['path'])
-            if any(not re.fullmatch('[a-f0-9]{64}', source[k]) for k in ('originalSha256', 'patchedSha256')):
+            original, patched = source['originalSha256'], source['patchedSha256']
+            if (not isinstance(patched, str) or not re.fullmatch('[a-f0-9]{64}', patched)
+                or original is not None and (not isinstance(original, str) or not re.fullmatch('[a-f0-9]{64}', original))):
                 raise ValueError('Invalid source digest')
+            if original is None and ('--- /dev/null\n+++ b/' + source['path'] + '\n').encode() not in data:
+                raise ValueError('Added source is not declared by its reviewed patch')
         patches[patch['file']] = data
     if sorted(record['files']) != sorted(CORE_FILES): raise ValueError('Unexpected core output files')
     files = {}
@@ -212,13 +216,17 @@ def main():
     core_inputs['scripts/preserve-patched-runtime.py'] = regular(project/'scripts/preserve-patched-runtime.py')
     core_inputs['scripts/prepare-core-regressions.mjs'] = regular(project/'scripts/prepare-core-regressions.mjs')
     core_inputs['scripts/check-layout-gates.mjs'] = regular(project/'scripts/check-layout-gates.mjs')
-    for name in ('scripts/setup.mjs','scripts/preserved-runtime.mjs','src/nested-table-paste.mjs','src/request-state.mjs','package.json'):
+    for name in ('scripts/setup.mjs','scripts/preserved-runtime.mjs','scripts/run-ci-tests.mjs','src/nested-table-paste.mjs','src/request-state.mjs','package.json'):
         core_inputs[name] = regular(project/name)
     core_inputs.update(tree(project/'tests/engine-source-ownership', 'tests/engine-source-ownership/', frozenset({'__pycache__'})))
     fidelity_tests = ('tests/stored-float-frame.test.mjs', 'tests/stored-page-margin.test.mjs', 'tests/stored-nested-block-host.test.mjs', 'tests/shape-fill-transparency.test.mjs', 'tests/nested-declared-row-pagination.test.mjs', 'tests/mixed-block-source-order.test.mjs',
-                      'tests/nested-opening-frame.test.mjs', 'tests/stored-float-source.test.mjs', 'tests/stored-nested-tail.test.mjs',
+                      'tests/nested-opening-frame.test.mjs', 'tests/stored-float-source.test.mjs', 'tests/stored-nested-tail.test.mjs', 'tests/stored-nested-forward-tail.test.mjs', 'tests/stored-cell-height-scope.test.mjs',
                       'tests/nested-opening-frame-browser.test.mjs', 'tests/sibling-table-offset.test.mjs', 'tests/stored-float-host-frame.test.mjs',
-                      'docs/verification/r14-regression-inputs.json', 'tests/layout-gates.test.mjs',
+                      'tests/cell-caret-fragment.test.mjs', 'tests/engine-cursor/empty-cell-caret.mjs', 'tests/engine-cursor/empty-cell-fixture.mjs',
+                      'tests/cell-text-owned-undo.test.mjs', 'tests/engine-cursor/cell-text-owned-undo.mjs',
+                      'tests/desktop-cell-caret-browser.test.mjs', 'tests/desktop-owned-undo-browser.test.mjs',
+                      'tests/table-bbox-query.test.mjs',
+                      'docs/verification/r14-regression-inputs.json', 'tests/layout-gates.test.mjs', 'tests/ci-core-reference.test.mjs',
                       'tests/compare-pages.test.py', 'tests/fixtures/rowbreak-table/synthetic-rowbreak-single-line-control.hwpx')
     for name in fidelity_tests:
         core_inputs[name] = regular(project/name)

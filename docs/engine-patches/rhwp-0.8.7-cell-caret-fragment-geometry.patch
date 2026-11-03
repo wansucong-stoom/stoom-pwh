@@ -1,0 +1,322 @@
+--- a/src/document_core/queries/cursor_rect.rs
++++ b/src/document_core/queries/cursor_rect.rs
+@@ -2408,7 +2408,8 @@
+             }
+         }
+ 
+-        if runs.is_empty() {
++        if runs.is_empty() && !cell_bboxes.iter().any(|cb| cb.has_meta
++            && x >= cb.x && x <= cb.x + cb.w && y >= cb.y && y <= cb.y + cb.h) {
+             // 텍스트가 없는 페이지: 첫 구역의 첫 문단 시작 반환
+             let (page_content, _, _) = self.find_page(page_num)?;
+             return Ok(format!(
+@@ -2696,7 +2697,72 @@
+             // 양식 컨트롤(FormObject)만 있는 셀: TextRun이 없어 cell_runs가 비어있음.
+             // table_meta(또는 runs)에서 채워진 meta로 커서 진입.
+             if cb.has_meta {
+-                let caret_h = (cb.h - 4.0).max(12.0);
++                // A blank continuation fragment is not an empty logical cell.
++                // Keep its caret at a real character boundary in the same cell.
++                let target_path: Vec<(usize, usize, usize)> = cb.cell_context.as_ref()
++                    .map(|ctx| ctx.path.iter().map(|entry|
++                        (entry.control_index, entry.cell_index, entry.cell_para_index)).collect())
++                    .unwrap_or_else(|| vec![(cb.control_index, cb.cell_index, 0)]);
++                let logically_empty = self.resolve_cell_by_path(
++                    cb.section_index, cb.parent_para_index, &target_path,
++                ).is_ok_and(|cell| cell.paragraphs.len() == 1
++                    && cell.paragraphs[0].text.is_empty() && cell.paragraphs[0].controls.is_empty());
++                if let Some(&(ctrl, cell, _)) = target_path.first().filter(|_| !logically_empty) {
++                    let mut candidates = self.find_pages_for_cell_position(
++                        cb.section_index, cb.parent_para_index, ctrl, cell, None,
++                    )?;
++                    candidates.retain(|page| *page != page_num);
++                    let prefer_next = y > cb.y + cb.h * 0.5;
++                    candidates.sort_by_key(|page| (page.abs_diff(page_num),
++                        (*page > page_num) != prefer_next));
++                    for candidate_page in candidates {
++                        let candidate_tree = self.build_page_tree_cached(candidate_page)?;
++                        let mut candidate_runs = Vec::new();
++                        collect_runs(&candidate_tree.root, &mut candidate_runs,
++                            &mut Vec::new(), &mut Vec::new(), &mut Vec::new(),
++                            None, None, None, None, None);
++                        for run in &mut candidate_runs {
++                            if let Some(ref mut context) = run.cell_context {
++                                self.repair_unwrapped_wrapper_cell_context(run.section_index, context);
++                            }
++                        }
++                        let mut same_cell: Vec<&RunInfo> = candidate_runs.iter().filter(|run|
++                            run.section_index == cb.section_index && run.cell_context.as_ref().is_some_and(|ctx|
++                                ctx.parent_para_index == cb.parent_para_index
++                                && ctx.path.len() == target_path.len()
++                                && ctx.path.iter().zip(&target_path).enumerate().all(|(index, (a, b))|
++                                    a.control_index == b.0 && a.cell_index == b.1
++                                    && (index + 1 == target_path.len() || a.cell_para_index == b.2))))
++                            .collect();
++                        same_cell.sort_by_key(|run| (
++                            run.cell_context.as_ref().and_then(|ctx| ctx.innermost())
++                                .map(|entry| entry.cell_para_index).unwrap_or(0),
++                            run.char_start));
++                        if let Some(run) = if candidate_page < page_num {
++                            same_cell.last().copied()
++                        } else { same_cell.first().copied() } {
++                            let offset = run.char_start + if candidate_page < page_num {
++                                run.char_count
++                            } else { 0 };
++                            // Use the shared cursor query for the chosen logical
++                            // endpoint, including its existing overflow clipping policy.
++                            let mut hit: serde_json::Value = serde_json::from_str(
++                                &format_hit(run, offset, candidate_page),
++                            ).map_err(|error| HwpError::RenderError(error.to_string()))?;
++                            let cursor = self.get_cursor_rect_by_path_with_hint(
++                                run.section_index, cb.parent_para_index,
++                                &hit["cellPath"].to_string(), offset, Some(candidate_page),
++                            )?;
++                            hit["cursorRect"] = serde_json::from_str(&cursor)
++                                .map_err(|error| HwpError::RenderError(error.to_string()))?;
++                            return Ok(hit.to_string());
++                        }
++                    }
++                }
++                let bounds = CellCursorBounds { x: cb.x, y: cb.y, w: cb.w, h: cb.h };
++                let (caret_x, caret_y, caret_h) = self.empty_cell_caret_geometry(
++                    cb.section_index, cb.parent_para_index, &target_path, 0, bounds,
++                )?;
+                 if let Some(ref ctx) = cb.cell_context {
+                     if let (Some(outer), Some(inner)) = (ctx.path.first(), ctx.innermost()) {
+                         let path_entries: Vec<String> = ctx
+@@ -2718,7 +2784,7 @@
+                             ctx.parent_para_index, outer.control_index, outer.cell_index, outer.cell_para_index,
+                             path_entries.join(","),
+                             page_num,
+-                            cb.x + 2.0, cb.y + 2.0, caret_h
++                            caret_x, caret_y, caret_h
+                         ));
+                     }
+                 }
+@@ -2731,7 +2797,7 @@
+                     cb.parent_para_index, cb.control_index, cb.cell_index,
+                     cb.control_index, cb.cell_index,
+                     page_num,
+-                    cb.x + 2.0, cb.y + 2.0, caret_h
++                    caret_x, caret_y, caret_h
+                 ));
+             }
+         }
+@@ -2932,6 +2998,82 @@
+         first_empty_clickhere.or(first_clickhere)
+     }
+ 
++    /// Missing TextRun caret: font metrics define its size; the cell is only
++    /// a clipping boundary. A large table frame is never a font-height source.
++    fn empty_cell_caret_geometry(
++        &self,
++        section_idx: usize,
++        parent_para_idx: usize,
++        path: &[(usize, usize, usize)],
++        char_offset: usize,
++        bounds: CellCursorBounds,
++    ) -> Result<(f64, f64, f64), HwpError> {
++        use crate::model::style::Alignment;
++        use crate::model::table::VerticalAlign;
++        let para = self.resolve_paragraph_by_path(section_idx, parent_para_idx, path)?;
++        let cell = self.resolve_cell_by_path(section_idx, parent_para_idx, path)?;
++        let table = self.resolve_table_by_path(section_idx, parent_para_idx, path)?;
++        let (left, right, top, bottom) = self.layout_engine.resolve_cell_padding(cell, table);
++        let default_char = crate::renderer::style_resolver::ResolvedCharStyle::default();
++        let style = para.char_shape_id_at(char_offset)
++            .and_then(|id| self.styles.char_styles.get(id as usize))
++            .or_else(|| self.styles.char_styles.first()).unwrap_or(&default_char);
++        let font_height = if style.font_size.is_finite() && style.font_size > 0.0 {
++            style.font_size
++        } else { default_char.font_size };
++        let default_para = crate::renderer::style_resolver::ResolvedParaStyle::default();
++        let paragraph_style = self.styles.para_styles.get(para.para_shape_id as usize)
++            .unwrap_or(&default_para);
++        let line = para.line_segs.first();
++        let line_height = line.map(|line| crate::renderer::hwpunit_to_px(
++            line.line_height, self.dpi))
++            .filter(|height| height.is_finite() && *height > 0.0).unwrap_or(font_height);
++        let baseline = line.map(|line| crate::renderer::hwpunit_to_px(
++            line.baseline_distance, self.dpi))
++            .filter(|baseline| baseline.is_finite() && *baseline >= 0.0)
++            .unwrap_or(font_height * 0.8);
++        let inner_width = (bounds.w - left - right).max(0.0);
++        let inner_height = (bounds.h - top - bottom).max(0.0);
++        let before = paragraph_style.spacing_before.max(0.0);
++        let unused = (inner_height - before - line_height).max(0.0);
++        let align_y = match cell.vertical_align {
++            VerticalAlign::Top => 0.0,
++            VerticalAlign::Center => unused * 0.5,
++            VerticalAlign::Bottom => unused,
++        };
++        let para_left = paragraph_style.margin_left + paragraph_style.indent;
++        let para_right = paragraph_style.margin_right;
++        let anchor_x = match paragraph_style.alignment {
++            Alignment::Center => (para_left + inner_width - para_right) * 0.5,
++            Alignment::Right => inner_width - para_right,
++            _ => para_left,
++        };
++        let (anchor_x, anchor_y) = if cell.text_direction == 0 {
++            (bounds.x + left + anchor_x,
++                bounds.y + top + align_y + before + (baseline - font_height * 0.8).max(0.0))
++        } else {
++            // Empty vertical cells have no glyph nodes. Match the renderer's
++            // right-to-left column origin; keep its existing caret orientation.
++            let unused_width = (inner_width - line_height).max(0.0);
++            let column_left = match cell.vertical_align {
++                VerticalAlign::Top => unused_width,
++                VerticalAlign::Center => unused_width * 0.5,
++                VerticalAlign::Bottom => 0.0,
++            };
++            let text_lead = match paragraph_style.alignment {
++                Alignment::Center => (inner_height - font_height).max(0.0) * 0.5,
++                Alignment::Right => (inner_height - font_height).max(0.0),
++                _ => 0.0,
++            };
++            (bounds.x + left + column_left + (line_height - font_height).max(0.0) * 0.5,
++                bounds.y + top + text_lead)
++        };
++        let (x, y, height, _) = clamp_cursor_to_cell_bounds(
++            anchor_x, anchor_y, font_height, bounds,
++        );
++        Ok((x, y, height))
++    }
++
+     /// 셀의 (col, row, pad_left_px, pad_top_px, pad_bottom_px)를 모델에서 조회한다.
+     pub(crate) fn resolve_cell_position(
+         &self,
+@@ -3164,14 +3306,14 @@
+             cell_pos.0,
+             cell_pos.1,
+         ) {
+-            // 셀 bbox 좌상단 + 패딩 위치에 커서 배치
+-            let pad_left = cell_pos.2;
+-            let pad_top = cell_pos.3;
+-            let caret_h = (ch - pad_top - cell_pos.4).max(10.0); // 패딩 제외한 높이
++            let (caret_x, caret_y, caret_h) = self.empty_cell_caret_geometry(
++                section_idx, parent_para_idx, &[(control_idx, cell_idx, cell_para_idx)],
++                char_offset, CellCursorBounds { x: cx, y: cy, w: _cw, h: ch },
++            )?;
+             return Ok(format_cursor_rect_json(
+                 first_page,
+-                cx + pad_left,
+-                cy + pad_top,
++                caret_x,
++                caret_y,
+                 caret_h,
+                 Some(CellCursorBounds {
+                     x: cx,
+@@ -3736,6 +3878,34 @@
+         }
+ 
+         let _para = self.resolve_paragraph_by_path(section_idx, parent_para_idx, &path)?;
++        // A genuinely empty cell may paint on several row fragments. Its one
++        // logical position can use the clicked fragment; nonempty cells must
++        // instead keep the actual run owner selected by hit_test_native.
++        if let Some(page) = hint_page {
++            let logically_empty = self.resolve_cell_by_path(section_idx, parent_para_idx, &path)
++                .is_ok_and(|cell| cell.paragraphs.len() == 1
++                    && cell.paragraphs[0].text.is_empty() && cell.paragraphs[0].controls.is_empty());
++            let hint_owns_section = self.find_page(page)
++                .is_ok_and(|(content, _, _)| content.section_index == section_idx);
++            if logically_empty && char_offset == 0 && hint_owns_section {
++                if let Ok(tree) = self.build_page_tree_cached(page) {
++                    // An actual (including zero-character) run remains the
++                    // authoritative insertion anchor on this fragment.
++                    if let Some((pi, x, y, height, bounds)) = find_cursor_by_path(
++                        self, &tree.root, section_idx, parent_para_idx, &path,
++                        char_offset, page, None, None, None,
++                    ) {
++                        return Ok(format_cursor_rect_json(pi, x, y, height, bounds));
++                    }
++                    if let Some(bounds) = find_empty_cell_fragment(self, &tree.root, section_idx, parent_para_idx, &path, None, None, None) {
++                        let (x, y, height) = self.empty_cell_caret_geometry(
++                            section_idx, parent_para_idx, &path, char_offset, bounds,
++                        )?;
++                        return Ok(format_cursor_rect_json(page, x, y, height, Some(bounds)));
++                    }
++                }
++            }
++        }
+ 
+         // 커서 좌표를 렌더 트리에서 찾기 ([#2021] 힌트 페이지 우선 탐색)
+         // [#4128] 바깥 표 셀 기준으로 후보를 좁힌다. depth 1 이면 char_offset 까지,
+@@ -3814,6 +3984,52 @@
+             })
+         }
+ 
++        // A renderer may unwrap a one-cell wrapper. Resolve the physical
++        // fragment with the same context repair as normal TextRun queries,
++        // rather than requiring a one-to-one physical/model table hierarchy.
++        fn find_empty_cell_fragment(
++            core: &DocumentCore,
++            node: &RenderNode,
++            section_idx: usize,
++            parent_para: usize,
++            path: &[(usize, usize, usize)],
++            current_section: Option<usize>,
++            current_table_ctx: Option<CellContext>,
++            current_cell_ctx: Option<CellContext>,
++        ) -> Option<CellCursorBounds> {
++            let owner_section = if let RenderNodeType::Table(table) = &node.node_type {
++                table.section_index.or(current_section)
++            } else { current_section };
++            if owner_section.is_some_and(|owner| owner != section_idx) { return None; }
++            let table_ctx = table_ctx_from_node(
++                node, current_table_ctx.as_ref(), current_cell_ctx.as_ref(),
++            );
++            let mut child_cell_ctx = current_cell_ctx;
++            if let RenderNodeType::TableCell(cell) = &node.node_type {
++                if let Some(cell_index) = cell.model_cell_index {
++                    child_cell_ctx = cell_ctx_for_table_cell(
++                        table_ctx.as_ref(), cell_index as usize, 0, cell.text_direction,
++                    );
++                    if let Some(mut logical) = child_cell_ctx.clone() {
++                        core.repair_unwrapped_wrapper_cell_context(section_idx, &mut logical);
++                        if owner_section == Some(section_idx)
++                            && cell_context_matches(&Some(logical), parent_para, path)
++                        {
++                            return Some(CellCursorBounds { x: node.bbox.x, y: node.bbox.y,
++                                w: node.bbox.width, h: node.bbox.height });
++                        }
++                    }
++                }
++            }
++            for child in &node.children {
++                if let Some(bounds) = find_empty_cell_fragment(
++                    core, child, section_idx, parent_para, path, owner_section,
++                    table_ctx.clone(), child_cell_ctx.clone(),
++                ) { return Some(bounds); }
++            }
++            None
++        }
++
+         fn effective_cell_context(
+             text_ctx: &Option<CellContext>,
+             traversal_ctx: &Option<CellContext>,
+@@ -4058,6 +4274,25 @@
+                         child_cell_bounds,
+                     ) {
+                         return Some(hit);
++                    }
++                }
++                if matches!(node.node_type, RenderNodeType::TableCell(_)) {
++                    let same_cell = child_cell_ctx.as_ref().is_some_and(|ctx|
++                        ctx.parent_para_index == parent_para && ctx.path.len() == path.len()
++                        && ctx.path.iter().zip(path).enumerate().all(|(index, (a, b))|
++                            a.control_index == b.0 && a.cell_index == b.1
++                            && (index + 1 == path.len() || a.cell_para_index == b.2)));
++                    let logically_empty = core.resolve_cell_by_path(section_idx, parent_para, path)
++                        .is_ok_and(|cell| cell.paragraphs.len() == 1
++                            && cell.paragraphs[0].text.is_empty() && cell.paragraphs[0].controls.is_empty());
++                    if same_cell && logically_empty {
++                        if let Some(bounds) = child_cell_bounds {
++                            if let Ok((x, y, height)) = core.empty_cell_caret_geometry(
++                                section_idx, parent_para, path, 0, bounds,
++                            ) {
++                                return Some((page, x, y, height, Some(bounds)));
++                            }
++                        }
+                     }
+                 }
+                 None

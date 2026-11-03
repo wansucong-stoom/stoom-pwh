@@ -100,7 +100,7 @@ node tests/engine-source-ownership/sibling-table-offset.mjs
 node tests/engine-source-ownership/nested-opening-frame-source.mjs
 ```
 
-- `closed-float-source-frame.mjs`: 33개 실제 소스 사례. 글보다 앞에 저장된 컨트롤 앵커와 표시 순서를 구분하고, 원래 줄·오프셋·개체 끝·다음 문단 원점이 닫힌 배치를 증명하는지 확인합니다. 본체만 들어가고 전체 저장 프레임은 본문 영역을 벗어나는 경우, 재구성된 줄과 깊은 셀 수정은 제외합니다.
+- `closed-float-source-frame.mjs`: 38개 실제 소스 사례. 글보다 앞에 저장된 컨트롤 앵커와 표시 순서를 구분하고, 원래 줄·오프셋·개체 끝·다음 문단 원점이 닫힌 배치를 증명하는지 확인합니다. 본체만 들어가고 전체 저장 프레임은 본문 영역을 벗어나는 경우, 재구성된 줄과 깊은 셀 수정은 제외합니다. 원래 함수뿐 아니라 실제 행 분할 선택 분기도 추출하여, 용지 크기·현재 조판·저장된 편집 이력·문단 여백 때문에 배치가 거절되면 기존 행 분할이 유지되는지 검사합니다.
 - `sibling-table-offset.mjs`: 9개 실제 소스 사례. 같은 호스트의 형제 개체 위치를 예약과 그리기에서 같은 근거로 처리하는 조건을 확인합니다.
 - `nested-opening-frame-source.mjs`: 18개 실제 소스 사례. 승인된 자식 프레임을 소유한 빈 호스트만 여백을 추가하며, 다른 표 포인터·글이 있는 호스트·합성 줄·재조판된 줄·중첩 편집 후의 원본처럼 보이는 줄 등을 거절하는지 확인합니다.
 
@@ -125,6 +125,46 @@ node --test tests/nested-opening-frame-browser.test.mjs
 브라우저 시험은 Playwright의 Chromium을 사용합니다. 별도 모듈은 `PWH_PLAYWRIGHT_MODULE`로, 설치된 시험용 브라우저는 `PWH_BROWSER_EXECUTABLE`로 지정할 수 있습니다. 실제 SVG에 적용된 클립을 확인해 두 쪽의 12개 표식이 각각 한 번만 보이고 숨김·부분 잘림이 없는지 검사합니다. 수치상 레이아웃에 글자가 있다는 사실만으로 표시 성공을 판단하지 않습니다.
 
 운영 런타임을 r14로 승격할 때는 배포 코어를 사용하는 core·browser CI에 이 명시 플래그를 켜거나 후보 전용 gate를 제거해야 합니다. `stored-float-host-frame`, `stored-float-source`, `sibling-table-offset`, `nested-opening-frame` 및 해당 browser 시험이 계속 건너뛰어지는 상태를 배포 완료로 인정하지 않습니다. 승격 검증은 후보 플래그를 끈 r13 경로의 보존과 플래그를 켠 새 코어의 실제 실행 기록을 각각 남깁니다.
+
+## 셀 높이 변경의 측정 재사용
+
+`stored-cell-height-scope.mjs`는 동일한 합성 문서를 두 실제 코어 인스턴스로 열어, 즉시 높이 변경과 batch 안의 일반 측정 경로를 비교합니다. 한 문단에 여러 최상위 표와 3단 중첩 표를 함께 배치하며, 별도 사용자 문서나 로컬 진단 파일을 읽지 않습니다.
+
+```powershell
+$env:PWH_CORE_JS = '<검증할 core의 rhwp.js>'
+$env:PWH_CORE_WASM = '<검증할 core의 rhwp_bg.wasm>'
+node --test tests/stored-cell-height-scope.test.mjs
+```
+
+8개 시험은 같은 문단의 글자처럼 취급하는 표와 부동 표, 깊은 중첩 표, 실제 HWP5로 내보내 다시 연 문서의 첫 편집, 너비·높이 혼합 변경, 앞선 본문·글자 서식·용지 변경이 남아 있는 상태, 실행 취소 후의 높이 변경을 검사합니다. 수정 전의 실제 원문 경로를 사용하며, 기존 변경과 크기 변경 사이에는 렌더링이나 내보내기로 dirty 상태를 지우지 않습니다.
+
+각 단계에서 전체 인쇄 SVG, 텍스트 좌표, 원문 scan, 내보낸 모든 XML과 쪽수가 같은지 비교합니다. 실제 원문이 변경됐는지, 저장·재열기 결과가 두 경로에서 같은지, 스냅샷 복원이 최초 결과와 정확히 같은지도 확인합니다. 캐시 호출 횟수나 구현에서 계산한 기대값으로 정확성을 판정하지 않습니다.
+
+코어 경로가 없으면 이 시험은 명시적으로 건너뜁니다. core CI는 배포 대상 코어를 주입해 8개를 실제 실행해야 합니다. 같은 코어의 두 측정 경로를 비교하는 회귀 검사이므로, 두 경로가 공유하는 조판 오류나 한글 기준 PDF와의 일치율까지 증명하지는 않습니다.
+
+## 분할 셀의 커서 위치와 글자 크기
+
+`tests/cell-caret-fragment.test.mjs`는 완전 합성 문서를 사용하는 17개 시험으로 빈 셀과 비어 보이는 이어진 셀 조각을 구분합니다. 글자가 없는 이어진 조각에서는 같은 셀의 실제 문자 경계를 선택하며, 완전히 빈 셀에서는 실제 문단·글자 서식과 셀 조각을 사용합니다. 셀 전체 높이를 커서 높이로 사용하지 않는지 확인합니다.
+
+8·24pt, 여러 문단, 중첩 표, 위·가운데·아래 정렬, 빈 세로쓰기 셀, 144DPI, 실제 0글자 TextRun 및 다른 구역의 같은 인덱스를 가진 쪽 힌트를 검사합니다. `hitTest`와 `getCursorRectByPathNear`의 쪽·좌표·높이 일치, 기존 `getCursorRectInCell`의 같은 논리 경계·쪽·높이, 읽기 조회의 조판 보존, 합성 문서의 삽입·삭제 역연산과 저장·재열기를 검증합니다. 기존 InCell과 ByPath API의 baseline 여유 계산 차이까지 새 동작으로 바꾸지는 않습니다.
+
+```powershell
+$env:PWH_CORE_JS = '<검증할 core의 rhwp.js>'
+$env:PWH_CORE_WASM = '<검증할 core의 rhwp_bg.wasm>'
+node --test tests/cell-caret-fragment.test.mjs
+```
+
+`tests/engine-cursor/empty-cell-fixture.mjs` 생성기를 브라우저 시험에서도 재사용합니다. native 시험만으로 실제 DOM 커서 가시성이나 키 입력 성공을 판단하지 않습니다. 다른 쪽의 실제 경계로 이동할 때는 편집기 스크롤과 입력 위치도 함께 검증해야 합니다. 사용자 원문·문구·로컬 경로는 공개 fixture에 포함하지 않습니다.
+
+### 셀 입력 실행 취소의 중복 페이지네이션
+
+`tests/cell-text-owned-undo.test.mjs`의 14개 합성 시험은 지연 삽입 뒤 기존 `flush → 동기 삭제`와 `진행 중 작업 취소 → 동기 삭제`를 같은 코어에서 비교합니다. 모든 쪽의 SVG·문자 좌표·검색 텍스트·저장 XML과 보조 이력, 저장 후 재열기, 다시 실행과 두 번째 실행 취소가 같아야 합니다. 실제 9쪽 작업의 생성·한 조각 진행·취소를 강제하며, 잘못된 삭제 대상이 거절된 뒤에도 최신 삽입 상태를 다시 페이지네이션할 수 있는지 확인합니다.
+
+짧은 입력·줄바꿈 증가·한글과 Unicode 보조 문자·빈 셀·HWP5 첫 편집·여러 구역·중첩 표를 포함합니다. 중첩 ByPath는 기존 즉시 처리 경로로 별도 확인합니다. 이 시험은 서식 변경이나 선택 영역 교체 등 모든 Undo의 사전 동기화를 생략할 근거가 아니며, Studio의 일반 셀 입력 명령 제한과 실제 키 입력 시험도 유지해야 합니다.
+
+```powershell
+node --test tests/cell-text-owned-undo.test.mjs
+```
 
 ## Patched runtime preservation integrity
 

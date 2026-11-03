@@ -14,6 +14,29 @@ const compare=(a,b)=>{const x=a.split('.').map(Number),y=b.split('.').map(Number
 const canonical=async p=>path.resolve((await fs.realpath(p)).replace(/^\\\\\?\\/, '')).toLowerCase();
 const isOfficialGit=value=>typeof value==='string'&&value.replace(/\.git\/?$/i,'').replace(/\/$/,'').toLowerCase()===repository;
 
+// A freshly written directory can briefly be held by a Windows scanner. Retry
+// only publication into an absent destination; never replace a competing tree.
+async function publishDirectory(stage,destination,verifyExisting){
+ let originalError;
+ for(const delay of [0,40,80,160]){
+  if(delay)await new Promise(resolve=>setTimeout(resolve,delay));
+  try{await fs.rename(stage,destination);return;}catch(error){
+   originalError??=error;
+   if(!['EEXIST','ENOTEMPTY','EPERM','EACCES','EBUSY'].includes(error.code))throw error;
+   let existing;
+   try{existing=await fs.lstat(destination);}catch(check){if(check.code!=='ENOENT'){originalError.cause=check;throw originalError;}}
+   if(existing){
+    if(verifyExisting&&existing.isDirectory()&&!existing.isSymbolicLink()){
+     try{await verifyExisting();return;}catch(check){originalError.cause=check;}
+    }
+    throw originalError;
+   }
+   if(process.platform!=='win32'||!['EPERM','EACCES','EBUSY'].includes(error.code))throw originalError;
+  }
+ }
+ throw originalError;
+}
+
 function runCommand(executable,args,{cwd,env=process.env,timeout=90000}={}){
  return new Promise((resolve,reject)=>{
   const child=spawn(executable,args,{cwd,env,windowsHide:true,stdio:['ignore','pipe','pipe']});let output='',diagnostic='',finished=false;
@@ -43,7 +66,7 @@ async function prepareBundledMarketplace(installRoot,dataRoot){
   await fs.writeFile(path.join(stage,ownedMarker),JSON.stringify({kind:'Pwh Desktop Codex marketplace',schema:1})+'\n');
   try{const marker=JSON.parse(await fs.readFile(path.join(destination,ownedMarker),'utf8'));if(marker.kind!=='Pwh Desktop Codex marketplace'||marker.schema!==1)throw Error('기존 Codex 연결의 출처를 확인하지 못했습니다.');await fs.rename(destination,backup);moved=true;}
   catch(error){if(error.code!=='ENOENT')throw error;try{await fs.access(destination);throw Error('기존 Codex 연결을 덮어쓰지 않았습니다.');}catch(check){if(check.code!=='ENOENT')throw check;}}
-  try{await fs.rename(stage,destination);}catch(error){if(moved)await fs.rename(backup,destination);throw error;}
+  try{await publishDirectory(stage,destination);}catch(error){if(moved)await fs.rename(backup,destination);throw error;}
   if(moved)await fs.rm(backup,{recursive:true,force:true});
   return destination;
  }finally{await fs.rm(stage,{recursive:true,force:true});}
@@ -64,7 +87,7 @@ async function preservePluginRuntime(installRoot,dataRoot){
  try{
   await fs.cp(source,path.join(stage,'engine'),{recursive:true,errorOnExist:true,force:false});await fs.writeFile(path.join(stage,'node.exe'),nodeBytes,{flag:'wx'});
   await fs.writeFile(path.join(stage,'.pwh-runtime.json'),JSON.stringify({identity,archiveSha256:pin.archiveSha256,nodeSha256:nodeHash})+'\n',{flag:'wx'});
-  try{await fs.rename(stage,destination);}catch(error){if(!['EEXIST','ENOTEMPTY','EPERM'].includes(error.code))throw error;}
+  await publishDirectory(stage,destination,verify);
   return await verify();
  }finally{await fs.rm(stage,{recursive:true,force:true});}
 }

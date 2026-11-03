@@ -71,6 +71,58 @@ test('registers an offline local plugin with a persistent runtime and skill',asy
 });
 test('leaves Desktop available when Codex is absent',async t=>{const f=await fixture(t);const result=await setupCodexPlugin({...f,env:{PATH:'',LOCALAPPDATA:f.home}});assert.equal(result.status,'not-installed');assert.match(result.message,/설치되면/);});
 
+test('a transient Windows runtime publication lock is retried without losing the staged engine',{skip:process.platform!=='win32'},async t=>{
+ const f=await fixture(t),rename=fs.rename;let attempts=0;
+ t.mock.method(fs,'rename',async(from,to)=>{if(path.basename(from).startsWith('.stage-')&&++attempts===1)throw Object.assign(Error('Synthetic scanner lock'),{code:'EPERM'});return rename(from,to);});
+ const result=await setupCodexPlugin({...f,executable:'codex',run:async()=>({installed:[gitPlugin('0.6.30')]})});
+ assert.equal(result.status,'ready');assert.equal(attempts,2);
+ const config=JSON.parse(await fs.readFile(path.join(f.home,'.stoom-pwh/config.json'),'utf8'));
+ assert.equal(await fs.readFile(path.join(config.runtimeRoot,'core/rhwp_bg.wasm'),'utf8'),'wasm fixture');
+});
+
+test('a persistent Windows runtime lock retains the original error and never claims installation',{skip:process.platform!=='win32'},async t=>{
+ const f=await fixture(t),rename=fs.rename,denied=Object.assign(Error('Synthetic persistent lock'),{code:'EPERM'});let attempts=0;
+ t.mock.method(fs,'rename',async(from,to)=>{if(path.basename(from).startsWith('.stage-')){attempts++;throw denied;}return rename(from,to);});
+ await assert.rejects(setupCodexPlugin({...f,executable:'codex',run:async()=>({installed:[gitPlugin('0.6.30')]})}),error=>error===denied);
+ assert.equal(attempts,4);assert.deepEqual(await fs.readdir(path.join(f.dataRoot,'codex-runtimes')),[]);
+ await assert.rejects(fs.access(path.join(f.home,'.stoom-pwh/config.json')),{code:'ENOENT'});
+});
+
+test('a competing complete runtime is accepted only after its identity and required files verify',async t=>{
+ const f=await fixture(t),rename=fs.rename;let attempts=0;
+ t.mock.method(fs,'rename',async(from,to)=>{if(path.basename(from).startsWith('.stage-')){attempts++;await rename(from,to);throw Object.assign(Error('Synthetic completed competing publisher'),{code:'EPERM'});}return rename(from,to);});
+ const result=await setupCodexPlugin({...f,executable:'codex',run:async()=>({installed:[gitPlugin('0.6.30')]})});
+ assert.equal(result.status,'ready');assert.equal(attempts,1);
+ const config=JSON.parse(await fs.readFile(path.join(f.home,'.stoom-pwh/config.json'),'utf8'));
+ assert.equal(await fs.readFile(path.join(config.runtimeRoot,'core/rhwp_bg.wasm'),'utf8'),'wasm fixture');
+});
+
+test('an incomplete competing runtime is preserved and rejected with the original publication error',async t=>{
+ const f=await fixture(t),rename=fs.rename,denied=Object.assign(Error('Synthetic competing tree'),{code:'EPERM'});let destination,attempts=0;
+ t.mock.method(fs,'rename',async(from,to)=>{if(path.basename(from).startsWith('.stage-')){attempts++;destination=to;await fs.mkdir(to);await fs.writeFile(path.join(to,'unrelated.txt'),'preserve');throw denied;}return rename(from,to);});
+ await assert.rejects(setupCodexPlugin({...f,executable:'codex',run:async()=>({installed:[gitPlugin('0.6.30')]})}),error=>error===denied&&error.cause?.code==='ENOENT');
+ assert.equal(attempts,1);assert.deepEqual(await fs.readdir(destination),['unrelated.txt']);assert.equal(await fs.readFile(path.join(destination,'unrelated.txt'),'utf8'),'preserve');
+ assert.ok(!(await fs.readdir(path.join(f.dataRoot,'codex-runtimes'))).some(name=>name.startsWith('.stage-')));
+});
+
+test('a transient Windows marketplace publication lock is retried before Codex registration',{skip:process.platform!=='win32'},async t=>{
+ const f=await fixture(t),rename=fs.rename;let attempts=0,registered=false;
+ t.mock.method(fs,'rename',async(from,to)=>{if(path.basename(from).startsWith('.codex-marketplace-')&&!path.basename(from).startsWith('.codex-marketplace-backup-')&&++attempts===1)throw Object.assign(Error('Synthetic scanner lock'),{code:'EPERM'});return rename(from,to);});
+ const run=async(_exe,args)=>{if(args[1]==='list')return {installed:registered?[{pluginId:'pwh@pwh',version:'0.6.30'}]:[]};if(args[1]==='add')registered=true;return {};};
+ const result=await setupCodexPlugin({...f,executable:'codex',run});assert.equal(result.status,'ready');assert.equal(attempts,2);assert.equal(registered,true);
+ assert.match(await fs.readFile(path.join(f.dataRoot,'codex-marketplace/skills/pwh/SKILL.md'),'utf8'),/name: pwh/);
+});
+
+test('a persistent marketplace lock restores the previous owned tree without registering an update',{skip:process.platform!=='win32'},async t=>{
+ const f=await fixture(t),rename=fs.rename,market=path.join(f.dataRoot,'codex-marketplace'),denied=Object.assign(Error('Synthetic persistent marketplace lock'),{code:'EPERM'});let attempts=0,registered=false;
+ await fs.mkdir(market,{recursive:true});await fs.writeFile(path.join(market,'.pwh-desktop-marketplace.json'),JSON.stringify({kind:'Pwh Desktop Codex marketplace',schema:1}));await fs.writeFile(path.join(market,'previous.txt'),'previous owned plugin');
+ t.mock.method(fs,'rename',async(from,to)=>{if(path.basename(from).startsWith('.codex-marketplace-')&&!path.basename(from).startsWith('.codex-marketplace-backup-')){attempts++;throw denied;}return rename(from,to);});
+ const run=async(_exe,args)=>{if(args[1]==='list')return {installed:[{pluginId:'pwh@pwh',version:'0.6.29',marketplaceSource:{sourceType:'local',source:market}}]};if(args[1]==='add')registered=true;return {};};
+ await assert.rejects(setupCodexPlugin({...f,executable:'codex',run}),error=>error===denied);
+ assert.equal(attempts,4);assert.equal(registered,false);assert.equal(await fs.readFile(path.join(market,'previous.txt'),'utf8'),'previous owned plugin');
+ assert.ok(!(await fs.readdir(f.dataRoot)).some(name=>name.startsWith('.codex-marketplace-')));
+});
+
 test('the actual Codex CLI installs and upgrades the bundled local marketplace in an isolated home',{skip:!process.env.PWH_CODEX_TEST_EXE,timeout:120000},async t=>{
  const f=await fixture(t),home=path.join(f.dir,'isolated-codex-home');await fs.mkdir(home);const env={...process.env,CODEX_HOME:home};
  const packageFile=path.join(f.installRoot,'release-source/package.json'),pluginFile=path.join(f.installRoot,'release-source/.codex-plugin/plugin.json');

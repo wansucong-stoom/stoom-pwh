@@ -1,0 +1,276 @@
+{
+  "schemaVersion": 1,
+  "status": "core-editor-qualified",
+  "measurement": {
+    "host": "isolated Chrome host, not the installed Electron application",
+    "baselineWasmSha256": "1712db726e2a6f3fdc2ebf10454cdef06045d8f55f1f08d83d8a7db7fda467ce",
+    "timedCandidateWasmSha256": "552394a7571d696af7d285cc2eddb1f56a4b96f8c4716ba51f8897873998c2e7",
+    "alternatingFreshSessionPairs": 3,
+    "pageCount": 39,
+    "sameMachineBrowserFrontendAndInput": true,
+    "trustedKeyboardInput": true,
+    "selectionPreserved": true,
+    "originalFileUnchanged": true,
+    "wallCompletionBoundary": "two requestAnimationFrame callbacks; not physical monitor presentation",
+    "rows": [
+      {
+        "metric": "singleHeightChangeWall",
+        "baselineMedianMs": 782.7236,
+        "candidateMedianMs": 383.0122,
+        "reductionPercent": 51.0667
+      },
+      {
+        "metric": "fiveRepeatedHeightChangesWall",
+        "baselineMedianMs": 3646.236,
+        "candidateMedianMs": 1544.9292,
+        "reductionPercent": 57.6295
+      },
+      {
+        "metric": "internalHeightChangeCall",
+        "baselineMedianMs": 428.95,
+        "candidateMedianMs": 210.2,
+        "reductionPercent": 50.9966
+      },
+      {
+        "metric": "internalTableBoundsCall",
+        "baselineMedianMs": 205.9,
+        "candidateMedianMs": 20.5,
+        "reductionPercent": 90.0437
+      }
+    ],
+    "limitations": [
+      "One machine and one complex document; not a general latency guarantee.",
+      "Operating-system scheduling varied during the third pair of sessions.",
+      "Internal call timings overlap wall timings and must not be added.",
+      "The timed candidate precedes the final caret refinements; these timings are not a fresh measurement of the final installer."
+    ]
+  },
+  "finalCandidateCorrectness": {
+    "wasmSha256": "b60692bc6c63d7fc2d5e0428f5ac7d5ba1e92c028d347028ae2401cef171f41e",
+    "referenceWasmSha256": "1712db726e2a6f3fdc2ebf10454cdef06045d8f55f1f08d83d8a7db7fda467ce",
+    "pageCount": 39,
+    "phases": [
+      "load",
+      "heightChange",
+      "snapshotUndo",
+      "saveAndReopen"
+    ],
+    "equalOutputs": [
+      "allPrintSvg",
+      "allPageTextLayout",
+      "documentScan",
+      "allExportedXml",
+      "pageCount"
+    ],
+    "meaning": "No regression from the performance reference in the checked operations; not full Hancom layout equivalence.",
+    "formalSourceReplayMatchesCandidate": true,
+    "formalQualificationScope": "Formal twenty-two-patch build, core functional suite and final complete browser suite passed. Installer and release artifact verification is not asserted by this snapshot."
+  },
+  "isolatedElectronCapabilityCheck": {
+    "electronVersion": "45.1.0",
+    "chromiumVersion": "156.0.8078.49",
+    "scope": "fresh private profile and empty home screen; no user document or installed profile",
+    "gpuCanvas": "enabled",
+    "gpuCompositing": "enabled",
+    "gpuRasterization": "enabled",
+    "multipleRasterThreads": "enabled_on",
+    "workerOffscreenCanvasPixelRoundTrip": "passed",
+    "rendererNodeRequire": "undefined",
+    "meaning": "Runtime capabilities only; current editor layout remains CPU work and does not use a Worker."
+  },
+  "privacy": "No source document, content, screenshot, local path or raw profile is included.",
+  "formalCoreQualification": {
+    "wasmSha256": "b9a96ac2bbe5171e20ef86b398f781b76bd53438ae33bcf28cd1f6a4da8f8fd1",
+    "buildRecordSha256": "bfba233b25379aaeb1ee47347eeaf7fc5478c0ff22ac736882d577f0d382b5d0",
+    "orderedPatches": 22,
+    "tests": 468,
+    "passed": 407,
+    "failed": 0,
+    "skipped": 61,
+    "samePerformanceTimingsAsFinalBinaryClaimed": false,
+    "actualPdfAll39PixelsAndTextEqualHistoricalFormal19": true,
+    "scope": "Completed before six new Desktop installation regression cases were added; those cases are included in the final complete browser run. The formal WASM is unchanged."
+  },
+  "plainCellOwnedUndo": {
+    "layer": "Common Studio input-history/deferred-pagination adapter; no additional Rust patch",
+    "scope": "One-depth plain cell insertion with no newline/tab, pending character format, replaced text or saved paragraph fragment",
+    "change": "Cancel the pending preview before the synchronous deletion inverse which already owns complete pagination; preserve the failure barrier.",
+    "nativeDifferentialCasesPassed": 14,
+    "finalWholeBrowserSuite": "passed: 474 tests, 460 passed, zero failed, 14 environment-specific exclusions",
+    "electronLatencyClaimed": true,
+    "actualBrowserUndoCasePassed": true,
+    "electronLatencyScope": "Controlled actual Electron comparison only; see controlledElectronMeasurement for diagnostic baseline and excluded/unresolved attempts. Not a final installer benchmark."
+  },
+  "formalBrowserQualification": {
+    "status": "passed",
+    "tests": 474,
+    "passed": 460,
+    "failed": 0,
+    "skipped": 14,
+    "cancelled": 0,
+    "missingConfiguredPrerequisites": [],
+    "desktopEditorSha256": "2c2f37f67c381db0528b6e5942f4fe0fb4235216f163161c9031fb4b02f101f1",
+    "scope": "Complete browser-configured suite, including the six new Desktop installation regression cases. Core/browser sets overlap and are not additive.",
+    "exclusions": "Live-account, native-window and explicitly optional fixture checks require separate prerequisites."
+  },
+  "controlledElectronMeasurement": {
+    "status": "completed-valid-subset-with-unresolved-selection-observation",
+    "host": "Actual packaged Electron shell, displayed inactive windows, fresh isolated profiles; not the installed application or an MSI upgrade benchmark",
+    "electronVersion": "45.1.0",
+    "chromiumVersion": "156.0.8078.49",
+    "editorBundleFileSha256": "2c2f37f67c381db0528b6e5942f4fe0fb4235216f163161c9031fb4b02f101f1",
+    "baselineWasmSha256": "1712db726e2a6f3fdc2ebf10454cdef06045d8f55f1f08d83d8a7db7fda467ce",
+    "finalWasmSha256": "b9a96ac2bbe5171e20ef86b398f781b76bd53438ae33bcf28cd1f6a4da8f8fd1",
+    "baseline": "Pre-performance candidate core with the same final UI, except a test-response override returns plain-cell Undo to its previous flush-first boundary. This is a controlled diagnostic baseline, not a previously released installer.",
+    "final": "Formal twenty-two-patch core and final shared editor bundle without the baseline Undo override",
+    "alternatingFreshSessionPairs": 3,
+    "validSessionCount": 6,
+    "pageCount": 39,
+    "timingBoundary": "Trusted keyboard dispatch through two requestAnimationFrame callbacks; excludes startup and does not measure physical-screen presentation",
+    "sourceCopiesOnly": true,
+    "originalFileUnchanged": true,
+    "selectedRangeAndUndoTextChecksPassedInAllValidSessions": true,
+    "rows": [
+      {
+        "metric": "singleResize",
+        "samplesPerArm": 9,
+        "baselineMedianMs": 714.0968,
+        "finalMedianMs": 299.542,
+        "reductionPercent": 58.053,
+        "improvementClaimed": true
+      },
+      {
+        "metric": "fiveRepeatedResize",
+        "samplesPerArm": 3,
+        "baselineMedianMs": 3321.316,
+        "finalMedianMs": 1393.6927,
+        "reductionPercent": 58.0379,
+        "improvementClaimed": true
+      },
+      {
+        "metric": "textUndo",
+        "samplesPerArm": 9,
+        "baselineMedianMs": 922.3176,
+        "finalMedianMs": 528.2545,
+        "reductionPercent": 42.7253,
+        "improvementClaimed": true
+      },
+      {
+        "metric": "typing",
+        "samplesPerArm": 9,
+        "baselineMedianMs": 101.5776,
+        "finalMedianMs": 98.4139,
+        "reductionPercent": 3.1146,
+        "improvementClaimed": false
+      },
+      {
+        "metric": "resizeUndo",
+        "samplesPerArm": 3,
+        "baselineMedianMs": 522.9981,
+        "finalMedianMs": 472.8824,
+        "reductionPercent": 9.5824,
+        "improvementClaimed": true
+      }
+    ],
+    "allAttemptsPassed": false,
+    "excludedAttempts": [
+      {
+        "kind": "recorder-error",
+        "count": 1,
+        "reason": "The harness replaced a recorded array instead of resetting it in place; native-call recording was invalid."
+      },
+      {
+        "kind": "hidden-window-raf-throttling",
+        "count": 1,
+        "reason": "Hidden-window frame callbacks waited roughly two seconds, so this was not a displayed-input latency measurement."
+      },
+      {
+        "kind": "unexplained-selection-loss",
+        "count": 1,
+        "reason": "An initial displayed final-candidate attempt lost the selected cell range after five repeated keys. The cause remains unconfirmed; later successful sessions do not explain the failure.",
+        "evidenceLimit": "The attempt ended before detailed native-key/focus traces and a failure screenshot were preserved."
+      }
+    ],
+    "limitations": [
+      "One machine and one complex document. The controlled baseline is not the previously installed release.",
+      "Selection loss in one excluded attempt remains unresolved; success of the six valid sessions is not a claim that all attempts passed.",
+      "Typing medians were 101.6 ms and 98.4 ms with overlapping variation; no typing-speed improvement is claimed.",
+      "Internal timings overlap end-to-end timings and must not be added.",
+      "Event defaultPrevented was sampled after the capture listener in a microtask, not as a reliable final-after-handler result. Trusted state, Ctrl/repeat, target, DOM focus and native-call counts were recorded separately."
+    ],
+    "selectionFollowup": {
+      "status": "passed-in-tested-path-initial-cause-unconfirmed",
+      "host": "Displayed inactive isolated Electron window; trusted CDP keyboard events with DOM textarea focus",
+      "purpose": "Functional repeated-input verification, not a latency measurement",
+      "burstCount": 10,
+      "keysPerBurst": 5,
+      "actualArrowKeys": 50,
+      "nativeResizeCalls": 50,
+      "keyEventAudit": {
+        "trusted": 50,
+        "ctrl": 50,
+        "defaultPrevented": 50,
+        "focused": 50,
+        "count": 50
+      },
+      "selectedRangeStableAfterEveryArrow": true,
+      "selectionLossDuringArrowInput": 0,
+      "documentTextUnchanged": true,
+      "undoPreviousStateAll39PageSvgLayoutAndTextExact": true,
+      "snapshotInitialStateAll39PageSvgLayoutAndTextExact": true,
+      "sourceUnchanged": true,
+      "postArrowUndoSelectionReset": "One expected reset from explicit Ctrl+Z through the existing history-jump selection reset; no selection loss occurred during arrow input.",
+      "initialUnexplainedIncidentResolved": false,
+      "limitation": "The initial selection-loss attempt was not reproduced in this 50-key follow-up; this does not establish its cause or absence in all environments."
+    }
+  },
+  "historicalBrowserRuns": [
+    {
+      "status": "failed",
+      "scope": "Completed whole suite. Two Windows Codex-plugin installation fixtures failed during directory publication; final qualification remains unresolved. Core/browser test sets overlap and are not additive.",
+      "tests": 468,
+      "passed": 452,
+      "failed": 2,
+      "skipped": 14,
+      "cancelled": 0,
+      "missingConfiguredPrerequisites": [],
+      "desktopEditorSha256": "2c2f37f67c381db0528b6e5942f4fe0fb4235216f163161c9031fb4b02f101f1",
+      "failures": [
+        {
+          "test": "an already updated Git plugin also receives the bundled engine without changing custom paths",
+          "errorCode": "ENOENT",
+          "operation": "verify runtime destination after directory rename"
+        },
+        {
+          "test": "registers an offline local plugin with a persistent runtime and skill",
+          "errorCode": "EPERM",
+          "operation": "publish staged marketplace by directory rename"
+        }
+      ],
+      "stage": "Before bounded Windows directory-publication retry"
+    }
+  ],
+  "desktopPluginPublication": {
+    "layer": "Pwh Desktop installer/plugin integration, not the rhwp core or shared editor",
+    "change": "Bounded retry for Windows directory publication; validate a concurrently published destination before treating the race as success. Persistent failure remains an error and unmanaged paths are not overwritten.",
+    "additionalRegressionCases": 6,
+    "targetedRun": {
+      "passed": 12,
+      "failed": 0,
+      "skipped": 1
+    },
+    "includedInFinalWholeBrowserSuite": true
+  },
+  "productVersions": {
+    "pwh": "0.6.43",
+    "desktop": "0.1.24",
+    "runtime": "r16"
+  },
+  "qualificationScope": "Fixed core/editor functional results and controlled performance measurements; the unresolved initial selection observation and excluded trials remain part of the record. Installer verification is separate.",
+  "artifactVerificationRef": {
+    "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/v0.6.43/DESKTOP-VERIFICATION.json",
+    "artifact": "PwhDesktop-0.1.24.msi",
+    "scope": "Separate Desktop installer artifact verification. This core/editor evidence snapshot does not assert MSI installation, publication or availability.",
+    "recordEmbeddedInThisSnapshot": false
+  }
+}

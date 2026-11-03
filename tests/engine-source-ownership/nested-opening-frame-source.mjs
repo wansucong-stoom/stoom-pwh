@@ -10,7 +10,7 @@ mod model {
 use model::table::Table;
 enum Control {Table(Box<Table>),Other}
 struct Line {vertical_pos:i32,line_height:i32,segment_width:i32,tag:u32}
-struct Paragraph {text:String,dirty:bool,cell_format_vpos_dirty:bool,layout_space_metrics:Vec<()>,controls:Vec<Control>,line_segs:Vec<Line>}
+struct Paragraph {text:String,dirty:bool,cell_format_vpos_dirty:bool,source_frame_reflowed:bool,layout_space_metrics:Vec<()>,controls:Vec<Control>,line_segs:Vec<Line>}
 impl Paragraph {fn stored_text_partition_is_dirty(&self)->bool{self.dirty}}
 struct ResolvedStyleSet;
 struct Engine{accepted:bool}
@@ -18,13 +18,19 @@ impl Engine {
 fn saved_nested_inline_owner_opening_frame_height(&self,_t:&Table,a:usize,b:usize,c:&[usize],d:&[usize],_:&ResolvedStyleSet)->Option<f64>{assert_eq!((a,b,c,d),(0,3,&[][..],&[1,2][..]));self.accepted.then_some(136.0)}
 ${sourceBlock(source, 'pub(crate) fn saved_nested_opening_outer_frame_height(')}
 }
-fn fixture()->Paragraph{Paragraph{text:String::new(),dirty:false,cell_format_vpos_dirty:false,layout_space_metrics:Vec::new(),controls:vec![Control::Table(Box::new(Table{common:model::table::Common{flow_with_text:true,allow_overlap:false,vert_align:model::shape::VertAlign::Top},caption:None}))],line_segs:vec![Line{vertical_pos:1600,line_height:1000,segment_width:0,tag:0}]}}
+fn fixture()->Paragraph{Paragraph{text:String::new(),dirty:false,cell_format_vpos_dirty:false,source_frame_reflowed:false,layout_space_metrics:Vec::new(),controls:vec![Control::Table(Box::new(Table{common:model::table::Common{flow_with_text:true,allow_overlap:false,vert_align:model::shape::VertAlign::Top},caption:None}))],line_segs:vec![Line{vertical_pos:1600,line_height:1000,segment_width:0,tag:0}]}}
 fn run(p:&Paragraph,accepted:bool)->Option<f64>{let Control::Table(t)=&p.controls[0]else{panic!()};Engine{accepted}.saved_nested_opening_outer_frame_height(p,t,0,3,&[],&[1,2],&ResolvedStyleSet)}
 #[test]fn accepts_original_owned_empty_host(){assert_eq!(run(&fixture(),true),Some(136.0));}
 #[test]fn rejects_unaccepted_physical_frame(){assert_eq!(run(&fixture(),false),None);}
 #[test]fn rejects_visible_host(){let mut p=fixture();p.text="text".into();assert_eq!(run(&p,true),None);}
 #[test]fn rejects_changed_text_partition(){let mut p=fixture();p.dirty=true;assert_eq!(run(&p,true),None);}
-#[test]fn rejects_republished_clean_rows_with_original_tag(){let mut p=fixture();p.layout_space_metrics.push(());assert!(!p.dirty);assert_eq!(p.line_segs[0].tag,0);assert_eq!(run(&p,true),None);}
+#[test]fn rejects_republished_clean_rows_with_original_tag(){
+ let mut p=fixture();p.layout_space_metrics.push(());
+ assert!(!p.dirty);assert_eq!(p.line_segs[0].tag,0);assert_eq!(run(&p,true),None);
+ p.layout_space_metrics.clear();assert_eq!(run(&p,true),Some(136.0));
+ p.source_frame_reflowed=true;assert!(!p.dirty);assert_eq!(p.line_segs[0].tag,0);
+ assert_eq!(run(&p,true),None,"Saved reflow history remains nonoriginal after runtime metrics are absent");
+}
 #[test]fn rejects_changed_source_positions(){let mut p=fixture();p.cell_format_vpos_dirty=true;assert_eq!(run(&p,true),None);}
 #[test]fn rejects_caption(){let mut p=fixture();let Control::Table(t)=&mut p.controls[0]else{panic!()};t.caption=Some(());assert_eq!(run(&p,true),None);}
 #[test]fn rejects_nonflow(){let mut p=fixture();let Control::Table(t)=&mut p.controls[0]else{panic!()};t.common.flow_with_text=false;assert_eq!(run(&p,true),None);}
