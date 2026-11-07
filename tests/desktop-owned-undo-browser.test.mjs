@@ -31,7 +31,7 @@ test('plain cell typing Undo owns one complete pagination and preserves failed-m
       if(!run)throw Error('Synthetic right cell text missing');
       const b=sc.getBoundingClientRect(),z=ih.viewportManager.getZoom();
       window.__undoBoundaryCalls=[];window.__undoTrustedKeys=[];
-      for(const [obj,name,label]of [[d.wasm,'flushDeferredPagination','flush'],[d.wasm,'deleteTextInCell','delete'],[ih,'cancelDeferredPaginationForOwnedMutation','cancel']]){
+      for(const [obj,name,label]of [[d.wasm,'flushDeferredPagination','flush'],[d.wasm,'restoreDeleteFragment','restore'],[ih,'cancelDeferredPaginationForOwnedMutation','cancel']]){
         const original=obj[name];obj[name]=function(...args){window.__undoBoundaryCalls.push(label);return original.apply(this,args);};
       }
       document.addEventListener('keydown',event=>window.__undoTrustedKeys.push({key:event.key,trusted:event.isTrusted}),true);
@@ -43,7 +43,8 @@ test('plain cell typing Undo owns one complete pagination and preserves failed-m
     const box=await page.locator('#editor').boundingBox();await page.mouse.click(box.x+setup.x,box.y+setup.y);
     // Establish live metrics once before the same-flow insertion under test.
     await page.keyboard.type('w');await page.keyboard.press('ArrowLeft');await page.keyboard.press('ArrowRight');await settle();
-    setup.text=await editor.evaluate(()=>window.rhwpStudio.plugins.deps.wasm.doc.getTextFileText());
+    const before=await editor.evaluate(()=>{const doc=window.rhwpStudio.plugins.deps.wasm.doc;return {text:doc.getTextFileText(),view:Array.from({length:doc.pageCount()},(_,i)=>[doc.renderPageSvgWithProfile(i,'print'),doc.getPageTextLayout(i)])};});
+    setup.text=before.text;
     await page.waitForTimeout(350); // Keep warm-up outside the editor's 300 ms typing merge window.
     await page.keyboard.type('z');await settle();
     const pending=await editor.evaluate(()=>{const ih=window.rhwpStudio.plugins.deps.getInputHandler();return {pending:ih.hasDeferredPaginationPending(),eligible:ih.history.peekUndoTop()?.canUndoWithoutPaginationFlush?.(),text:ih.wasm.doc.getTextFileText()};});
@@ -51,8 +52,9 @@ test('plain cell typing Undo owns one complete pagination and preserves failed-m
     await editor.evaluate(()=>window.__undoBoundaryCalls=[]);
     await page.keyboard.press('Control+z');await settle();
     const undone=await editor.evaluate(()=>{const ih=window.rhwpStudio.plugins.deps.getInputHandler();return {pending:ih.hasDeferredPaginationPending(),calls:window.__undoBoundaryCalls,text:ih.wasm.doc.getTextFileText(),pages:ih.wasm.doc.pageCount(),focused:document.activeElement===ih.textarea};});
-    assert.equal(undone.pending,false);assert.deepEqual(undone.calls,['cancel','delete']);
+    assert.equal(undone.pending,false);assert.deepEqual(undone.calls,['cancel','restore']);
     assert.ok(undone.text===setup.text,'Undo restores exactly the text before the tested insertion');assert.equal(undone.pages,setup.pages);assert.ok(undone.focused);
+    assert.deepEqual(await editor.evaluate(()=>{const doc=window.rhwpStudio.plugins.deps.wasm.doc;return Array.from({length:doc.pageCount()},(_,i)=>[doc.renderPageSvgWithProfile(i,'print'),doc.getPageTextLayout(i)]);}),before.view,'Trusted Undo restores its pre-edit SVG and text geometry');
     await page.keyboard.press('Control+y');await settle();
     assert.equal(await editor.evaluate(()=>window.rhwpStudio.plugins.deps.wasm.doc.getTextFileText()),pending.text);
 
@@ -73,9 +75,9 @@ test('plain cell typing Undo owns one complete pagination and preserves failed-m
     await page.keyboard.press('ArrowLeft');await page.keyboard.press('ArrowRight');await page.keyboard.type('v');await settle();
     const beforeFailure=await editor.evaluate(()=>{const d=window.rhwpStudio.plugins.deps;return {pending:d.getInputHandler().hasDeferredPaginationPending(),text:d.wasm.doc.getTextFileText()};});
     assert.ok(beforeFailure.pending);
-    await editor.evaluate(()=>{const d=window.rhwpStudio.plugins.deps;window.__restoreOwnedDelete=d.wasm.deleteTextInCell;d.wasm.deleteTextInCell=()=>{throw Error('Synthetic owned mutation failure');};window.__undoBoundaryCalls=[];});
+    await editor.evaluate(()=>{const d=window.rhwpStudio.plugins.deps;window.__restoreOwnedFragment=d.wasm.restoreDeleteFragment;d.wasm.restoreDeleteFragment=()=>{throw Error('Synthetic owned mutation failure');};window.__undoBoundaryCalls=[];});
     await page.keyboard.press('Control+z');await settle();
-    const failed=await editor.evaluate(()=>{const d=window.rhwpStudio.plugins.deps;d.wasm.deleteTextInCell=window.__restoreOwnedDelete;return {pending:d.getInputHandler().hasDeferredPaginationPending(),text:d.wasm.doc.getTextFileText()};});
+    const failed=await editor.evaluate(()=>{const d=window.rhwpStudio.plugins.deps;d.wasm.restoreDeleteFragment=window.__restoreOwnedFragment;return {pending:d.getInputHandler().hasDeferredPaginationPending(),text:d.wasm.doc.getTextFileText()};});
     assert.ok(failed.pending);assert.ok(failed.text===beforeFailure.text);
     await page.keyboard.press('ArrowLeft');await settle();
     assert.equal(await editor.evaluate(()=>window.rhwpStudio.plugins.deps.getInputHandler().hasDeferredPaginationPending()),false);

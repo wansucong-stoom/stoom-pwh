@@ -10,7 +10,7 @@ const pinned = {
   upstreamCommit: '1a76570e833917d15817415a53c09ad61ab3203f',
   sourceArchiveSha256: '067feefc25d36921ee41fea5df6fead00255ffa86441891fbaa202f96de202a2',
   blankTemplateSha256: '43f472751fafefb8c66b0f831660ebed51e443a46bebe44c75bba918154ce4c9',
-  expectedGlueSha256: 'e4b17c467ec6e5955393f7b9b162150ea0f16271085dcec7955bcd87c0014d47',
+  expectedGlueSha256: 'c9cd6fdb42c3c6f3c99210a184ec042089adb34d5c9ecd7ac5e9f247f0d72bdb',
 };
 const patches = [
   {
@@ -598,6 +598,22 @@ const patches = [
     }
   ]
 },
+{
+  "file": "rhwp-0.8.7-scoped-cell-text-history.patch",
+  "sha256": "866b9aa2cf2dcf434ee2ad5185fae94fe2d6343b00cc2dfd770f2f59b825e42f",
+  "sources": [
+    {
+      "path": "src/document_core/commands/delete_fragment.rs",
+      "originalSha256": "c9012e5fab887ca7684f77710e4c58f71fe9814488da2b26fa62fe7dfb0e1555",
+      "patchedSha256": "9f40899a8fd8ccae0eba03853ab682c7c0361935267d5e4691173efeec3da35a"
+    },
+    {
+      "path": "src/wasm_api.rs",
+      "originalSha256": "850357a5a4557b51ddaeac8f3ba59fbca561bcd9293ad7110daf31b5f471b23b",
+      "patchedSha256": "67ba646b399ada1585b380ae62dc28eac75df7458aca6f405989add654693244"
+    }
+  ]
+}
 ];
 const help = `Usage: node scripts/build-patched-core.mjs
   --source-archive <fixed upstream source ZIP>

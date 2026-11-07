@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "version": "0.6.45",
+  "desktopVersion": "0.1.26",
+  "runtime": "rhwp-0.8.7-pwh-r18",
+  "wasmSha256": "9fef2eb76f0f98d271b3e3205247b57c3164c8730e17cfe4ae3d1c1616a6ab8a",
+  "buildRecordSha256": "717c84caf20bdc52de05a8c6dc29eed9ef20ab8e65c1db2f644b94589c710b76",
+  "patchCount": 27,
+  "editor": {
+    "commonSha256": "ff2ee950c543e8210f6307f0c1d8ea5185fa87edeb5946bb1ffa81dfac3a058c",
+    "desktopSha256": "7d4b50da7f99de127f8a45eb731e6e46aa36f256d75913fae060124e1d4a216d"
+  },
+  "checks": [
+    {
+      "name": "Independent official core build equals tested core, glue, and types",
+      "status": "passed",
+      "files": 4
+    },
+    {
+      "name": "Core suite and actual Chromium suite",
+      "status": "passed",
+      "actualCore": {
+        "total": 540,
+        "passed": 476,
+        "failed": 0,
+        "skipped": 64
+      },
+      "browser": {
+        "total": 540,
+        "passed": 526,
+        "failed": 0,
+        "skipped": 14,
+        "firstRun": {
+          "total": 540,
+          "passed": 524,
+          "failed": 2,
+          "skipped": 14
+        },
+        "nativeRunnerLaunchRetries": 2
+      }
+    },
+    {
+      "name": "Synthetic table edit and Undo restore the pre-edit saved and rendered state",
+      "status": "passed",
+      "pagesBefore": 2,
+      "pagesAfterUndo": 2,
+      "previousAfterInverseDelete": 3
+    },
+    {
+      "name": "Private 39-page corpus edit and Undo restore exact SVG, text geometry, and HWPX XML",
+      "status": "passed",
+      "baselineChangedPages": 8,
+      "candidateChangedPages": 0
+    },
+    {
+      "name": "Isolated Electron trusted pointer and keyboard, focused caret, all-page Undo SVG",
+      "status": "passed",
+      "pages": 39
+    },
+    {
+      "name": "Unedited open/save/reopen comparison with previous core on three other documents",
+      "status": "passed",
+      "documents": 3,
+      "pages": 71
+    },
+    {
+      "name": "Common and Desktop independently rebuilt and typechecked twice",
+      "status": "passed",
+      "comparedFiles": 6
+    }
+  ],
+  "scope": {
+    "hancomFidelityApprovalExtended": false,
+    "previouslyAcceptedThroughPage": 8,
+    "untestedNativeIme": true,
+    "userInstallationChanged": false,
+    "physicalPrintTested": false
+  }
+}

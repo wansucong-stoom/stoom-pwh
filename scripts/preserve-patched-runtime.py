@@ -216,7 +216,7 @@ def main():
     core_inputs['scripts/preserve-patched-runtime.py'] = regular(project/'scripts/preserve-patched-runtime.py')
     core_inputs['scripts/prepare-core-regressions.mjs'] = regular(project/'scripts/prepare-core-regressions.mjs')
     core_inputs['scripts/check-layout-gates.mjs'] = regular(project/'scripts/check-layout-gates.mjs')
-    for name in ('scripts/setup.mjs','scripts/preserved-runtime.mjs','scripts/run-ci-tests.mjs','scripts/patch-pointer-hit-geometry.mjs','src/nested-table-paste.mjs','src/request-state.mjs','package.json'):
+    for name in ('scripts/setup.mjs','scripts/preserved-runtime.mjs','scripts/run-ci-tests.mjs','scripts/patch-pointer-hit-geometry.mjs','scripts/patch-cell-text-history.mjs','src/nested-table-paste.mjs','src/request-state.mjs','package.json'):
         core_inputs[name] = regular(project/name)
     core_inputs.update(tree(project/'tests/engine-source-ownership', 'tests/engine-source-ownership/', frozenset({'__pycache__'})))
     fidelity_tests = ('tests/stored-float-frame.test.mjs', 'tests/stored-page-margin.test.mjs', 'tests/stored-nested-block-host.test.mjs', 'tests/shape-fill-transparency.test.mjs', 'tests/nested-declared-row-pagination.test.mjs', 'tests/mixed-block-source-order.test.mjs',
@@ -225,8 +225,8 @@ def main():
                       'tests/cell-caret-fragment.test.mjs', 'tests/engine-cursor/empty-cell-caret.mjs', 'tests/engine-cursor/empty-cell-fixture.mjs',
                       'tests/text-line-caret.test.mjs', 'tests/engine-cursor/text-line-caret.mjs', 'tests/engine-cursor/text-line-caret-fixture.mjs',
                       'tests/stored-block-anchor-order.test.mjs', 'tests/stored-inline-frame-projection.test.mjs', 'tests/nested-repeated-header-reservation.test.mjs',
-                      'tests/cell-text-owned-undo.test.mjs', 'tests/engine-cursor/cell-text-owned-undo.mjs',
-                      'tests/desktop-cell-caret-browser.test.mjs', 'tests/desktop-pointer-hit-browser.test.mjs', 'tests/desktop-owned-undo-browser.test.mjs',
+                      'tests/cell-text-owned-undo.test.mjs', 'tests/engine-cursor/cell-text-owned-undo.mjs', 'tests/cell-text-layout-history.test.mjs',
+                      'tests/desktop-cell-caret-browser.test.mjs', 'tests/desktop-pointer-hit-browser.test.mjs', 'tests/desktop-owned-undo-browser.test.mjs', 'tests/desktop-cell-layout-history-browser.test.mjs',
                       'tests/table-bbox-query.test.mjs',
                       'docs/verification/r14-regression-inputs.json', 'tests/layout-gates.test.mjs', 'tests/ci-core-reference.test.mjs',
                       'tests/compare-pages.test.py', 'tests/fixtures/rowbreak-table/synthetic-rowbreak-single-line-control.hwpx')

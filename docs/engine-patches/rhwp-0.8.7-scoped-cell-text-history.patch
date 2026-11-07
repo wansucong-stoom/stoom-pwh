@@ -1,0 +1,140 @@
+--- a/src/document_core/commands/delete_fragment.rs
++++ b/src/document_core/commands/delete_fragment.rs
+@@ -40,6 +40,9 @@
+ /// 선택 삭제 1회분의 복원 조각.
+ #[derive(Debug, Clone)]
+ pub struct DeleteFragment {
++    /// Cell text edits preserve only the edited paragraph and its cell-local
++    /// vpos tail. None retains the existing body-range fragment contract.
++    pub cell_text_path: Option<(usize, Vec<(usize, usize, usize)>)>,
+     /// 대상 구역
+     pub section_idx: usize,
+     /// 삭제 범위 시작 문단 (포함)
+@@ -109,6 +112,7 @@
+             .map(|p| p.line_segs.clone())
+             .collect();
+         let fragment = DeleteFragment {
++            cell_text_path: None,
+             section_idx,
+             start_para,
+             end_para,
+@@ -130,6 +134,86 @@
+         Ok(id)
+     }
+ 
++    /// Capture one table-cell paragraph before a text/format mutation. The
++    /// outer table and unrelated cell contents are never cloned. The strict
++    /// LIFO history owner must undo later structural commands first.
++    pub fn capture_cell_text_fragment_native(
++        &mut self,
++        section_idx: usize,
++        parent_para_idx: usize,
++        path: &[(usize, usize, usize)],
++    ) -> Result<u32, HwpError> {
++        let target_idx = path.last().ok_or_else(|| {
++            HwpError::RenderError("Empty cell text fragment path".to_string())
++        })?.2;
++        let text_reflowed_table_paths = self.text_reflowed_table_paths_for_snapshot();
++        // resolve_cell_by_path validates every ancestor and rejects text boxes
++        // and caption sentinels; those consumers retain their previous path.
++        let cell = self.resolve_cell_by_path(section_idx, parent_para_idx, path)?;
++        let paragraph = cell.paragraphs.get(target_idx).ok_or_else(|| {
++            HwpError::RenderError("Cell text fragment paragraph out of range".to_string())
++        })?;
++        let captured_paras = vec![paragraph.clone()];
++        let tail_line_segs = cell.paragraphs[target_idx + 1..].iter()
++            .map(|p| p.line_segs.clone()).collect();
++        let pre_para_count = cell.paragraphs.len();
++        let section = &self.document.sections[section_idx];
++        let fragment = DeleteFragment {
++            cell_text_path: Some((parent_para_idx, path.to_vec())),
++            section_idx,
++            start_para: target_idx,
++            end_para: target_idx,
++            pre_para_count,
++            captured_paras,
++            tail_line_segs,
++            raw_stream: section.raw_stream.clone(),
++            raw_provenance: section.raw_provenance.clone(),
++            caret: (self.document.doc_properties.caret_list_id,
++                    self.document.doc_properties.caret_para_id),
++            text_reflowed_table_paths,
++        };
++        let id = self.next_fragment_id;
++        self.next_fragment_id += 1;
++        self.fragment_store.push((id, fragment));
++        Ok(id)
++    }
++
++    fn restore_cell_text_fragment_native(
++        &mut self, pos: usize, frag: DeleteFragment,
++    ) -> Result<String, HwpError> {
++        let (parent_para_idx, path) = frag.cell_text_path.as_ref().expect("cell fragment");
++        // Validate before changing anything. Failed restore retains the ID so
++        // history can retry or discard it, like the body-range implementation.
++        let cell = self.resolve_cell_by_path(frag.section_idx, *parent_para_idx, path)?;
++        if cell.paragraphs.len() != frag.pre_para_count
++            || frag.start_para >= cell.paragraphs.len() {
++            return Err(HwpError::RenderError("Cell text fragment structure changed".to_string()));
++        }
++        let paragraphs = self.get_cell_paragraphs_mut_by_path(
++            frag.section_idx, *parent_para_idx, path)?;
++        paragraphs[frag.start_para] = frag.captured_paras[0].clone();
++        for (paragraph, lines) in paragraphs[frag.start_para + 1..].iter_mut()
++            .zip(&frag.tail_line_segs) {
++            paragraph.line_segs = lines.clone();
++        }
++        let section = &mut self.document.sections[frag.section_idx];
++        section.raw_stream = frag.raw_stream;
++        section.raw_provenance = frag.raw_provenance;
++        self.document.doc_properties.caret_list_id = frag.caret.0;
++        self.document.doc_properties.caret_para_id = frag.caret.1;
++        self.restore_text_reflowed_tables_from_snapshot(&frag.text_reflowed_table_paths);
++        // Source line segments and reflow provenance are already restored.
++        // Rebuilding derived caches must not run another editing reflow.
++        self.rebuild_derived_state();
++        self.fragment_store.remove(pos);
++        self.event_log.push(DocumentEvent::CellTextChanged {
++            section: frag.section_idx, para: *parent_para_idx,
++            ctrl: path[0].0, cell: path[0].1,
++        });
++        Ok(super::super::helpers::json_ok_with(&format!(
++            "\"paraIdx\":{},\"charOffset\":0", frag.start_para)))
++    }
++
+     /// 조각을 원래 자리에 되돌려 끼운다 — 삭제의 참 역연산.
+     ///
+     /// 범위 앞뒤는 그대로 두고 `[start..=end]` 자리에 캡처 원본을 다시 끼우고,
+@@ -144,6 +228,9 @@
+         // 전제 검증이 실패하면 호출자가 원인을 해소한 뒤 같은 undo 를 다시 시도할 수
+         // 있어야 한다. 따라서 항목은 성공한 복원 끝에서만 소비한다.
+         let frag = self.fragment_store[pos].1.clone();
++        if frag.cell_text_path.is_some() {
++            return self.restore_cell_text_fragment_native(pos, frag);
++        }
+ 
+         if frag.section_idx >= self.document.sections.len() {
+             return Err(HwpError::RenderError(format!(
+--- a/src/wasm_api.rs
++++ b/src/wasm_api.rs
+@@ -7109,6 +7109,20 @@
+         end_para: usize,
+     ) -> Result<u32, JsValue> {
+         self.capture_delete_range_native(section_idx, start_para, end_para)
++            .map_err(|e| e.into())
++    }
++
++    /// Capture a table-cell text checkpoint, including nested cell ownership.
++    /// Restore/discard use the existing fragment lifecycle APIs.
++    #[wasm_bindgen(js_name = captureCellTextFragment)]
++    pub fn capture_cell_text_fragment(
++        &mut self,
++        section_idx: usize,
++        parent_para_idx: usize,
++        cell_path_json: &str,
++    ) -> Result<u32, JsValue> {
++        let path = parse_cell_path_arg(cell_path_json)?;
++        self.capture_cell_text_fragment_native(section_idx, parent_para_idx, &path)
+             .map_err(|e| e.into())
+     }
+ 

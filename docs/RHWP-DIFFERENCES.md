@@ -5,12 +5,16 @@ Pwh는 [rhwp](https://github.com/edwardkim/rhwp)와 rhwp Studio를 기반으로 
 ## 비교 기준
 
 - **기준 원본:** rhwp 0.8.7, 커밋 [`1a76570e833917d15817415a53c09ad61ab3203f`](https://github.com/edwardkim/rhwp/commit/1a76570e833917d15817415a53c09ad61ab3203f).
-- **공통 코어:** 이 버전 소스는 `rhwp-0.8.7-pwh-r17`의 누적 26개 패치와 공통 Studio 편집기 보완을 포함합니다. 이전 r16·r15 기록은 별도로 보존합니다. 배포 런타임의 Windows x64 자산과 확정된 해시는 [runtime-lock.json](../runtime-lock.json)에 기록합니다.
+- **공통 코어:** 이 버전 소스는 `rhwp-0.8.7-pwh-r18`의 누적 27개 패치와 공통 Studio 편집기 보완을 포함합니다. 이전 r17 이하의 검증 기록은 보존합니다. 배포 런타임의 Windows x64 자산과 확정된 해시는 [runtime-lock.json](../runtime-lock.json)에 기록합니다.
 - **비교 범위:** 위 고정 버전 대비 Pwh에서 보존한 코어 패치와 Studio 빌드 변경, 그리고 별도의 pwh 연결 기능입니다. 현재 최신 rhwp와의 비교는 아닙니다.
 - **배포 방식:** 고정 소스와 패치·빌드 입력을 보존해 재빌드하는 방식입니다. 전체 upstream 저장소의 Git 포크나 모든 원본 파일을 그대로 포함한 저장소라는 뜻은 아닙니다.
 - **반영 상태:** 아래는 pwh 쪽 변경입니다. rhwp 원본에 병합되었다고 주장하지 않습니다.
 
 ## 1. rhwp 조판 코어 변경
+
+### r18: 셀 문자 편집의 실행 취소
+
+rhwp Studio 유래의 일반 셀 입력 Undo가 문자 역연산으로 끝나면서 코어의 저장 줄 배치를 복원하지 못했습니다. 27번 코어 패치와 공통 Studio 변경이 편집 전 문단, 셀 내부 줄 좌표, 원본 프레임 이력을 함께 되돌립니다. Desktop 전용 호스트 변경과 구분합니다. [재현과 복원 규칙](engine-patches/CELL-TEXT-HISTORY.md)
 
 ### r17: 글자 커서와 중첩 표 연속 배치
 

@@ -1,12 +1,12 @@
 {
-  "sha256": "bd9d32f0ce273f62bed6d1e0f67a20782332e578b913020426bdf69d6c6fd698",
-  "baseVersion": "0.6.44",
-  "baseEditorSha256": "5bd8705dedd912e1b4fc25247d0c0d38c63da12c80143b9f961e1adceb5cecf3",
+  "sha256": "7d4b50da7f99de127f8a45eb731e6e46aa36f256d75913fae060124e1d4a216d",
+  "baseVersion": "0.6.45",
+  "baseEditorSha256": "ff2ee950c543e8210f6307f0c1d8ea5185fa87edeb5946bb1ffa81dfac3a058c",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "desktop",
-    "sha256": "69fc287aa441ee91f40b6639c4fc940ac4be306d53d1b783abafbb451ef6372d",
+    "sha256": "dabcf0be1024a8dae1d35f12735fadbcf727c3b7090e578307a318cff2566f20",
     "files": [
       {
         "path": "desktop/standalone-pwh/build-desktop-editor.mjs",
@@ -22,11 +22,11 @@
       },
       {
         "path": "package.json",
-        "sha256": "221b965b467f0d76f45c9a07c64a886b3d9aea60528eb0a575cd72929c5c9de7"
+        "sha256": "7355f9c694c181ca20d69a8ff5a71faa4fcf253365854e9e9cb497df3e5f12c4"
       },
       {
         "path": "scripts/build-inline.mjs",
-        "sha256": "15436ccc90d2e60abc68566363c1b37c7216ca98825f206d17cf3d7d14be94d0"
+        "sha256": "04a5b3b1c9f2cd00ba25e9f777aafce953c96ff645e5af4eb4c1a6dd7b6f8d09"
       },
       {
         "path": "scripts/bundle-client.mjs",
@@ -34,11 +34,15 @@
       },
       {
         "path": "scripts/editor-build-contract.mjs",
-        "sha256": "5c41772433bf416e781fefc5a7d04706469466b428055d1ea577949f7262d3b6"
+        "sha256": "11260ab43f1b068431f312fcc3188020b921d91c6c6209005d3996692f490d27"
       },
       {
         "path": "scripts/patch-body-cursor-contract.mjs",
         "sha256": "6f81b1ea37a28280481c45319ba63a071dcd2377ae2c092d78adf34286601f0f"
+      },
+      {
+        "path": "scripts/patch-cell-text-history.mjs",
+        "sha256": "7237b0b5cdf888b40ea63a9dc878eab11c2cf8b641104ba0b06af1c17f3f4c09"
       },
       {
         "path": "scripts/patch-object-properties.mjs",
