@@ -1,0 +1,190 @@
+diff --git a/src/renderer/layout/table_layout.rs b/src/renderer/layout/table_layout.rs
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -14795,6 +14795,109 @@
+         None
+     }
+ 
++    /// A saved HWPX table can split its last row independently in each cell.
++    /// Authenticate the first physical frame against the repeated header, the
++    /// declared table edge and the first restart in every parallel cell.
++    fn hwpx_parallel_first_frame_closes(
++        table: &crate::model::table::Table,
++        cell: &crate::model::table::Cell,
++        previous: &crate::model::paragraph::LineSeg,
++        next: &crate::model::paragraph::LineSeg,
++    ) -> bool {
++        let row = usize::from(cell.row);
++        if row == 0
++            || row + 1 != usize::from(table.row_count)
++            || !table.repeat_header
++            || table.common.text_wrap != TextWrap::TopAndBottom
++            || !table.common.flow_with_text
++            || table.leading_header_rows().len() != row
++        {
++            return false;
++        }
++
++        let header_height = table
++            .get_raw_row_heights()
++            .iter()
++            .take(row)
++            .map(|&height| i64::from(height))
++            .sum::<i64>()
++            + i64::from(table.cell_spacing) * row as i64;
++        let frame = i64::from(table.common.height) - header_height;
++        let padding = cell.effective_padding(&table.padding);
++        let visible_end = i64::from(previous.vertical_pos)
++            + i64::from(previous.line_height)
++            + i64::from(padding.top)
++            + i64::from(padding.bottom);
++        let spacing = i64::from(previous.line_spacing);
++        if visible_end > frame || visible_end + spacing <= frame {
++            return false;
++        }
++
++        let mut parallel_count = 0;
++        for owner in table.cells.iter().filter(|owner| {
++            let start = usize::from(owner.row);
++            start <= row && row < start + usize::from(owner.row_span)
++        }) {
++            if owner.row != cell.row
++                || owner.row_span != 1
++                || owner.vertical_align != VerticalAlign::Top
++                || owner.dirty_flag
++                || i64::from(owner.height) <= frame
++            {
++                return false;
++            }
++            let mut prior: Option<&crate::model::paragraph::LineSeg> = None;
++            let mut restart = None;
++            'prefix: for para in &owner.paragraphs {
++                if !para.controls.is_empty()
++                    || para.stored_text_partition_is_dirty()
++                    || para.cell_format_vpos_dirty
++                    || para.line_segs.is_empty()
++                {
++                    return false;
++                }
++                for seg in &para.line_segs {
++                    if seg.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0
++                        || seg.line_height <= 0
++                        || seg.vertical_pos < 0
++                    {
++                        return false;
++                    }
++                    if let Some(last) = prior {
++                        if seg.vertical_pos < last.vertical_pos {
++                            restart = Some((last, seg));
++                            break 'prefix;
++                        }
++                    }
++                    prior = Some(seg);
++                }
++            }
++            let Some((last, first)) = restart else {
++                return false;
++            };
++            if !crate::renderer::float_placement::stored_parallel_row_page_reset(last, first, frame) {
++                return false;
++            }
++            if std::ptr::eq(owner, cell) {
++                if !std::ptr::eq(last, previous) || !std::ptr::eq(first, next) {
++                    return false;
++                }
++            } else {
++                let owner_padding = owner.effective_padding(&table.padding);
++                let owner_end = i64::from(last.vertical_pos)
++                    + i64::from(last.line_height)
++                    + i64::from(owner_padding.top)
++                    + i64::from(owner_padding.bottom);
++                let line_advance = i64::from(last.line_height) + i64::from(last.line_spacing.max(0));
++                if owner_end > frame || (visible_end - owner_end).abs() > line_advance {
++                    return false;
++                }
++                parallel_count += 1;
++            }
++        }
++        parallel_count > 0
++    }
++
+     /// [#3931] 저장 다행 RowBreak 셀의 물리 쪽 재시작 직전에서
+     /// 그려지지 않는 마지막 줄간격과 문단 뒤 간격.
+     ///
+@@ -14808,6 +14911,7 @@
+         table: &crate::model::table::Table,
+         cell: &crate::model::table::Cell,
+         units: &[CellUnit],
++        start_cut: usize,
+         end_cut: usize,
+         styles: &ResolvedStyleSet,
+     ) -> f64 {
+@@ -14891,6 +14995,18 @@
+             || (next_seg.vertical_pos > 0 && !returns_to_positive_origin)
+         {
+             return 0.0;
++        }
++
++        if direct_hwpx_frame
++            && start_cut == 0
++            && !same_paragraph
++            && next_unit.vis_start == 0
++            && Self::hwpx_parallel_first_frame_closes(table, cell, previous_seg, next_seg)
++        {
++            // The following line belongs to the next page. Retain the current
++            // line and cell padding in both the fit budget and painted box.
++            return hwpunit_to_px(previous_seg.line_spacing.max(0), self.dpi)
++                .min(previous_unit.height);
+         }
+ 
+         if !next_unit.hard_break_before
+@@ -15307,7 +15423,7 @@
+             }
+         }
+         let trim =
+-            self.native_multirow_saved_reset_trailing_trim(table, cell, units, end_cut, styles);
++            self.native_multirow_saved_reset_trailing_trim(table, cell, units, start_cut, end_cut, styles);
+         if trim > 0.0 || start_cut != 0 || end_cut == 0 || end_cut > units.len() {
+             return trim;
+         }
+@@ -23396,7 +23512,7 @@
+ 
+         let plain_cell = &host.cells[0];
+         assert!(
+-            eng.native_multirow_saved_reset_trailing_trim(&host, plain_cell, &units, 1, &styles,)
++            eng.native_multirow_saved_reset_trailing_trim(&host, plain_cell, &units, 0, 1, &styles,)
+                 > 0.0,
+             "plain-text 문단 사이 저장 reset은 마지막 줄의 trailing spacing을 trim"
+         );
+@@ -23416,6 +23532,7 @@
+                 &positive_origin,
+                 &positive_origin.cells[0],
+                 &positive_units,
++                0,
+                 2,
+                 &styles,
+             ),
+@@ -23428,6 +23545,7 @@
+                 &positive_origin,
+                 &positive_origin.cells[0],
+                 &positive_units,
++                0,
+                 2,
+                 &styles,
+             ),
+@@ -23444,6 +23562,7 @@
+                 &host,
+                 &host.cells[0],
+                 &units,
++                0,
+                 1,
+                 &styles,
+             ),
+@@ -23459,6 +23578,7 @@
+                 &host,
+                 &host.cells[0],
+                 &units,
++                0,
+                 1,
+                 &styles,
+             ),

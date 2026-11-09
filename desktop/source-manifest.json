@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pluginVersion": "0.6.45",
+  "pluginVersion": "0.6.46",
   "copyPolicy": "Original bytes; .test.mjs filenames renamed to .check.mjs for staged-only discovery.",
   "files": [
     {
@@ -61,7 +61,7 @@
       "path": "standalone-pwh/build-msi.mjs",
       "source": "standalone-pwh/build-msi.mjs",
       "size": 16391,
-      "sha256": "d7ba405b3db692f88275be846fb368f3c78695f9bc2a07f2e75ad8a25175a09c"
+      "sha256": "bc84a71376e9b75f95e69b6f78450921fd1394080ef7af829f7de3c98c43da7a"
     },
     {
       "path": "standalone-pwh/build-native-launcher.mjs",
@@ -73,7 +73,7 @@
       "path": "standalone-pwh/build-offline.mjs",
       "source": "standalone-pwh/build-offline.mjs",
       "size": 8191,
-      "sha256": "5e862482399ecf3084d92dcba7586e82c7fb411fb6c75257b193b749c964d003"
+      "sha256": "d294f40677ecee15a9c0d35ee3f43ac27e55addc27e0470913177010a3b9aa0c"
     },
     {
       "path": "standalone-pwh/build-stoom-icon.mjs",
@@ -109,7 +109,7 @@
       "path": "standalone-pwh/client/manifest.json",
       "source": "standalone-pwh/client/manifest.json",
       "size": 10540,
-      "sha256": "2f723f96410f30d4feb0fd14ac3f1f49ea8c2b16014ee1e9af252fd1f7dea914"
+      "sha256": "e487b9cb65c588cfd7461ecea68c171596f94dfd3c1c11e67ab90a7a0feb0acc"
     },
     {
       "path": "standalone-pwh/codex-agent.mjs",
@@ -499,7 +499,7 @@
       "path": "standalone-pwh/version.json",
       "source": "standalone-pwh/version.json",
       "size": 21,
-      "sha256": "64272aa364bb4a13330bd6605c46fa2ed0d2d110f276c0f1e9e45d014d8be08f"
+      "sha256": "2db3399c816459f115b394192f74023cfba717c97c87a85c2aa6190441efee6d"
     },
     {
       "path": "standalone-pwh/window-close-controller.mjs",

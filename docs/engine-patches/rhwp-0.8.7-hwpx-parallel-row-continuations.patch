@@ -1,0 +1,155 @@
+diff --git a/src/renderer/layout/table_layout.rs b/src/renderer/layout/table_layout.rs
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -14796,11 +14796,11 @@
+     }
+ 
+     /// A saved HWPX table can split its last row independently in each cell.
+-    /// Authenticate the first physical frame against the repeated header, the
+-    /// declared table edge and the first restart in every parallel cell.
+-    fn hwpx_parallel_first_frame_closes(
++    /// Match the current source frame with the same frame in each parallel cell.
++    fn hwpx_parallel_frame_closes(
+         table: &crate::model::table::Table,
+         cell: &crate::model::table::Cell,
++        opening: &crate::model::paragraph::LineSeg,
+         previous: &crate::model::paragraph::LineSeg,
+         next: &crate::model::paragraph::LineSeg,
+     ) -> bool {
+@@ -14829,15 +14829,19 @@
+             + i64::from(padding.top)
+             + i64::from(padding.bottom);
+         let spacing = i64::from(previous.line_spacing);
+-        if visible_end > frame || visible_end + spacing <= frame {
++        if opening.vertical_pos != 0 || visible_end > frame || visible_end + spacing <= frame {
+             return false;
+         }
+ 
++        let siblings = table.cells.iter().filter(|owner| {
++            let start = usize::from(owner.row);
++            !std::ptr::eq(*owner, cell)
++                && start <= row
++                && row < start + usize::from(owner.row_span)
++        });
+         let mut parallel_count = 0;
+-        for owner in table.cells.iter().filter(|owner| {
+-            let start = usize::from(owner.row);
+-            start <= row && row < start + usize::from(owner.row_span)
+-        }) {
++        let mut source_frame = 0;
++        for owner in std::iter::once(cell).chain(siblings) {
+             if owner.row != cell.row
+                 || owner.row_span != 1
+                 || owner.vertical_align != VerticalAlign::Top
+@@ -14846,8 +14850,11 @@
+             {
+                 return false;
+             }
++            let current_owner = std::ptr::eq(owner, cell);
+             let mut prior: Option<&crate::model::paragraph::LineSeg> = None;
+-            let mut restart = None;
++            let mut origin = None;
++            let mut frame_index = 0;
++            let mut closing_line = None;
+             'prefix: for para in &owner.paragraphs {
+                 if !para.controls.is_empty()
+                     || para.stored_text_partition_is_dirty()
+@@ -14863,26 +14870,40 @@
+                     {
+                         return false;
+                     }
+-                    if let Some(last) = prior {
+-                        if seg.vertical_pos < last.vertical_pos {
+-                            restart = Some((last, seg));
++                    if let Some(last) = prior.filter(|last| seg.vertical_pos < last.vertical_pos) {
++                        if !crate::renderer::float_placement::stored_parallel_row_page_reset(
++                            last, seg, frame,
++                        ) {
++                            return false;
++                        }
++                        let selected = if current_owner {
++                            std::ptr::eq(last, previous) && std::ptr::eq(seg, next)
++                        } else {
++                            frame_index == source_frame
++                        };
++                        if selected {
++                            if current_owner {
++                                if !origin.is_some_and(|first| std::ptr::eq(first, opening)) {
++                                    return false;
++                                }
++                                source_frame = frame_index;
++                            }
++                            closing_line = Some(last);
+                             break 'prefix;
+                         }
++                        frame_index += 1;
++                        origin = Some(seg);
++                    }
++                    if origin.is_none() {
++                        origin = Some(seg);
+                     }
+                     prior = Some(seg);
+                 }
+             }
+-            let Some((last, first)) = restart else {
++            let Some(last) = closing_line else {
+                 return false;
+             };
+-            if !crate::renderer::float_placement::stored_parallel_row_page_reset(last, first, frame) {
+-                return false;
+-            }
+-            if std::ptr::eq(owner, cell) {
+-                if !std::ptr::eq(last, previous) || !std::ptr::eq(first, next) {
+-                    return false;
+-                }
+-            } else {
++            if !current_owner {
+                 let owner_padding = owner.effective_padding(&table.padding);
+                 let owner_end = i64::from(last.vertical_pos)
+                     + i64::from(last.line_height)
+@@ -14956,9 +14977,6 @@
+         }
+         if !previous_para.controls.is_empty()
+             || !next_para.controls.is_empty()
+-            || (same_paragraph
+-                && (!next_unit.stored_frame_break_before
+-                    || !Self::cut_has_shared_stored_frame(cell, table, units, end_cut)))
+             || (!same_paragraph
+                 && !previous_unit.empty_spacer
+                 && previous_unit.vis_end != previous_para.line_segs.len())
+@@ -14997,16 +15015,26 @@
+             return 0.0;
+         }
+ 
+-        if direct_hwpx_frame
+-            && start_cut == 0
+-            && !same_paragraph
+-            && next_unit.vis_start == 0
+-            && Self::hwpx_parallel_first_frame_closes(table, cell, previous_seg, next_seg)
++        if direct_hwpx_frame && start_cut < end_cut {
++            let start_unit = &units[start_cut];
++            let opening = cell
++                .paragraphs
++                .get(start_unit.para_idx)
++                .and_then(|para| para.line_segs.get(start_unit.vis_start));
++            if opening.is_some_and(|line| {
++                Self::hwpx_parallel_frame_closes(table, cell, line, previous_seg, next_seg)
++            }) {
++                // The following line belongs to the next page. Retain the current
++                // line and cell padding in both the fit budget and painted box.
++                return hwpunit_to_px(previous_seg.line_spacing.max(0), self.dpi)
++                    .min(previous_unit.height);
++            }
++        }
++        if same_paragraph
++            && (!next_unit.stored_frame_break_before
++                || !Self::cut_has_shared_stored_frame(cell, table, units, end_cut))
+         {
+-            // The following line belongs to the next page. Retain the current
+-            // line and cell padding in both the fit budget and painted box.
+-            return hwpunit_to_px(previous_seg.line_spacing.max(0), self.dpi)
+-                .min(previous_unit.height);
++            return 0.0;
+         }
+ 
+         if !next_unit.hard_break_before

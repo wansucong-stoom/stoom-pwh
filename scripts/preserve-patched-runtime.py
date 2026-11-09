@@ -227,7 +227,7 @@ def main():
                       'tests/stored-block-anchor-order.test.mjs', 'tests/stored-inline-frame-projection.test.mjs', 'tests/nested-repeated-header-reservation.test.mjs',
                       'tests/cell-text-owned-undo.test.mjs', 'tests/engine-cursor/cell-text-owned-undo.mjs', 'tests/cell-text-layout-history.test.mjs',
                       'tests/desktop-cell-caret-browser.test.mjs', 'tests/desktop-pointer-hit-browser.test.mjs', 'tests/desktop-owned-undo-browser.test.mjs', 'tests/desktop-cell-layout-history-browser.test.mjs',
-                      'tests/table-bbox-query.test.mjs',
+                      'tests/table-bbox-query.test.mjs', 'tests/hwpx-parallel-row-page-edge.test.mjs',
                       'docs/verification/r14-regression-inputs.json', 'tests/layout-gates.test.mjs', 'tests/ci-core-reference.test.mjs',
                       'tests/compare-pages.test.py', 'tests/fixtures/rowbreak-table/synthetic-rowbreak-single-line-control.hwpx')
     for name in fidelity_tests:

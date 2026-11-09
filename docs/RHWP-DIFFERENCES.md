@@ -5,12 +5,16 @@ Pwh는 [rhwp](https://github.com/edwardkim/rhwp)와 rhwp Studio를 기반으로 
 ## 비교 기준
 
 - **기준 원본:** rhwp 0.8.7, 커밋 [`1a76570e833917d15817415a53c09ad61ab3203f`](https://github.com/edwardkim/rhwp/commit/1a76570e833917d15817415a53c09ad61ab3203f).
-- **공통 코어:** 이 버전 소스는 `rhwp-0.8.7-pwh-r18`의 누적 27개 패치와 공통 Studio 편집기 보완을 포함합니다. 이전 r17 이하의 검증 기록은 보존합니다. 배포 런타임의 Windows x64 자산과 확정된 해시는 [runtime-lock.json](../runtime-lock.json)에 기록합니다.
+- **공통 코어:** 이 버전 소스는 `rhwp-0.8.7-pwh-r20`의 누적 29개 패치와 공통 Studio 편집기 보완을 포함합니다. 이전 r18 이하의 검증 기록은 보존합니다. 배포 런타임의 Windows x64 자산과 확정된 해시는 [runtime-lock.json](../runtime-lock.json)에 기록합니다.
 - **비교 범위:** 위 고정 버전 대비 Pwh에서 보존한 코어 패치와 Studio 빌드 변경, 그리고 별도의 pwh 연결 기능입니다. 현재 최신 rhwp와의 비교는 아닙니다.
 - **배포 방식:** 고정 소스와 패치·빌드 입력을 보존해 재빌드하는 방식입니다. 전체 upstream 저장소의 Git 포크나 모든 원본 파일을 그대로 포함한 저장소라는 뜻은 아닙니다.
 - **반영 상태:** 아래는 pwh 쪽 변경입니다. rhwp 원본에 병합되었다고 주장하지 않습니다.
 
 ## 1. rhwp 조판 코어 변경
+
+### 28~29번 패치의 표 분할
+
+고정 rhwp 원천 코어는 여러 셀이 다음 쪽으로 이어지는 HWPX 표의 첫 조각에서, 다음 줄까지의 간격을 현재 쪽의 수용 높이에 포함할 수 있습니다. Pwh 공통 WASM의 28번 패치는 선언 표 높이와 같은 행 셀의 저장 줄 좌표로 실제 쪽 경계를 확인한 경우에만 줄 뒤 간격을 제외합니다. 29번은 같은 저장 프레임 순서를 확인할 수 있는 이어지는 조각에도 이 규칙을 적용합니다. [적용 범위와 검증](engine-patches/README.md#hwpx-parallel-row-continuations)
 
 ### r18: 셀 문자 편집의 실행 취소
 

@@ -613,6 +613,28 @@ const patches = [
       "patchedSha256": "67ba646b399ada1585b380ae62dc28eac75df7458aca6f405989add654693244"
     }
   ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-parallel-row-page-edge.patch",
+  "sha256": "9ddc2d5c813603703b3f3252da71bb00b8c380c545cdfce0683439e456b58f5f",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "418dbde796b3129bf1c8a90b4c76c1435d8ac7f1ea096446862ad441907baa1c",
+      "patchedSha256": "5ee6e1eb68117b654e7f4d50660c09372bca7087f9c114bc1b84b1d82cd305cc"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-parallel-row-continuations.patch",
+  "sha256": "928eac0fd0b1d1743dd07365bb17d5644c58d55ab3cbe646e843c0ae7cc2f835",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "5ee6e1eb68117b654e7f4d50660c09372bca7087f9c114bc1b84b1d82cd305cc",
+      "patchedSha256": "7d627cf017fe74d0326b8657d9ae930c6be1726ceb8e3c891788dd0657f661e2"
+    }
+  ]
 }
 ];
 const help = `Usage: node scripts/build-patched-core.mjs
