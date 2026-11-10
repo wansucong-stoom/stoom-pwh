@@ -22,7 +22,7 @@ HWP·HWPX 문서를 열고, 글과 표를 직접 편집하거나 선택한 부�
 | **Pwh Desktop** · Windows x64 | 제품 사이트 또는 GitHub 릴리스에서 **MSI**를 내려받아 설치합니다. 앱에서 ChatGPT 계정을 연결할 수 있으며, 별도 Codex 설치 없이도 실행됩니다. [Desktop 설치와 사용](docs/PWH-DESKTOP.md#설치와-사용) |
 | **Pwh 플러그인** · Codex 데스크톱 | Codex 대화와 나란히 한글 편집기를 엽니다. GitHub에서 소스와 플러그인 **ZIP**을 받을 수 있습니다. [Codex 플러그인 설치](docs/USER-GUIDE.md#codex-plugin) |
 
-**시험 배포**는 Pwh **0.6.47**, Desktop **0.1.28**, 공통 코어 **r21**입니다. 버전별 다운로드, 변경 이력, SHA-256과 MSI 검증 범위는 [GitHub 프리릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases/tag/v0.6.47)에서 확인할 수 있습니다.
+**최신 정식 릴리스**는 Pwh **0.6.47**, Desktop **0.1.28**, 공통 코어 **r21**입니다. 버전별 다운로드, 변경 이력, SHA-256과 MSI 검증 범위는 [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases/tag/v0.6.47)에서 확인할 수 있습니다.
 
 ## 할 수 있는 일
 
