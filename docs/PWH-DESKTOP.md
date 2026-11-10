@@ -2,6 +2,8 @@
 
 Pwh Desktop은 AI 대화와 한글 문서 편집기를 한 창에서 사용하는 Windows 앱입니다. 문서 조판 코어와 텍스트·표 편집 코드는 Pwh 플러그인과 공유합니다. Desktop 호스트는 파일 창, AI 연결 설정, 설치·제거와 Windows 아이콘을 담당합니다.
 
+[문서 모음](README.md) · [설치와 업데이트](#설치와-사용) · [편집과 인쇄](#공통-편집-기능) · [빌드](#소스와-빌드)
+
 ## 설치와 사용
 
 [GitHub Releases](https://github.com/wansucong-stoom/stoom-pwh/releases)에서 `PwhDesktop` MSI를 내려받아 설치합니다. 제어판의 프로그램 제거 또는 Windows 설정의 설치된 앱에서 제거할 수 있습니다. HWP·HWPX의 연결 프로그램에서도 Pwh Desktop을 선택할 수 있습니다.

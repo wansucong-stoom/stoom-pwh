@@ -128,3 +128,56 @@
 ## 유지관리
 
 rhwp 기준 버전을 바꿀 때는 코어 쪽 범위 지정 API, Studio 커서 좌표의 수명, 문서 글꼴 목록과 해석기의 호환성을 다시 확인합니다. 기능을 되살리는 업데이트와 Pwh에서 추가한 보완을 구분하고, README·원본 대비 차이·엔진 패치 문서·변경 이력을 함께 갱신합니다. 세부 배포 해시는 릴리스의 검증 자료와 `runtime-lock.json`을 기준으로 합니다.
+
+<a id="editor-performance-history"></a>
+
+## 0.6.13 대형 문서·글꼴 계측 기록
+
+The 0.6.13 candidate removes full context/export work from the 750 ms AI button
+availability update. Presentation/poll state uses a digest cache invalidated by
+document mutation/change events and keyed by epoch, sequence, format, page count
+and dirty state. The authoritative `getDocumentState()` and mutation guards stay
+fresh; the cached method is separate. Polling yields during pointer interaction
+and recent keyboard/wheel input. Files above the 8 MiB recovery limit skip the
+repeated full export used only to discover that they are too large for recovery.
+
+Selection line wrapping still uses the renderer's actual text runs. During one
+pointer gesture, a bounded 32-page cache reuses parsed text layouts. End/cancel,
+document identity, edits and font/layout invalidation discard the cache. Source
+text and selection bounds are checked on every request. Selection rectangles
+themselves are not cached.
+
+Canvas font preparation first attempts exact, unambiguous installed full/PostScript
+face names with the real weight/slant. A failed/unsupported local load has a one
+second bound and falls back to the verified font-byte path. This local path does
+not verify font bytes and never searches a broad family name. The server's byte
+fallback caches file bytes/SHA with a 64 MiB limit, shares concurrent reads and
+checks the authorized catalog stamp on every chunk.
+
+### Evidence and limits
+
+On the reported 13-page, approximately 10.4 MiB document, original full export/hash
+state reads averaged 849 ms in a local engine probe. Thirty unchanged presentation
+reads required one export; `document-changed` invalidated that cache, and two
+authoritative reads still performed two fresh exports. Existing controller
+apply/revert/conflict/rollback tests passed (11 tests).
+
+With cursor/hit-test warmed, the original wrapped-selection correction measured
+22.32 ms median on one body paragraph, versus 0.29 ms with the gesture cache
+(10 reads). These are local query measurements, not end-to-end drag latency or a
+guarantee for every document. Browser local-font availability, final rendering,
+selection/undo/save behavior and perceived latency must also be checked in the
+real Codex editor before calling the UI change verified.
+
+The native CLI/WASM remain unchanged. Engine revision 2 retains the new client
+source, overlay and build dependencies separately from revision 1.
+
+### Observed in the Codex editor
+
+The real document reopened with 13 pages and active editing controls. The DOM
+reported four local font loads and one byte-transfer fallback. The user confirmed
+that opening became visibly faster. The frame used the r2 client engine with an
+existing 0.6.12 host bridge; therefore the newest host-only idle-poll/recovery-size
+guards have not been verified in that frame. Do not equate this opening result
+with a complete end-to-end drag/typing latency measurement. The current automation
+can inspect this MCP App but cannot perform a native canvas drag.

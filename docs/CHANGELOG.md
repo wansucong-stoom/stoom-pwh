@@ -4,6 +4,13 @@
 
 ## 0.6.47 · Desktop 0.1.28
 
+- **공통 조판 코어 r21**에서 긴 중첩 표의 분할, 테두리 위치와 쪽을 넘긴 표 뒤의 본문 누락을 보완했습니다.
+- **Desktop 인쇄**에서 문서에 지정된 대체 글꼴을 선택할 수 있습니다.
+- 두 시험 문서 **111쪽**의 순차 검증과 MSI 추출본의 인쇄 결과를 확인했습니다. [조판 전후 결과](LAYOUT-FIDELITY.md#test-document-update)
+
+<details>
+<summary>공통 코어 변경 상세 펼치기</summary>
+
 - 저장된 표 외곽 상자의 위 여백을 테두리 원점에 반영하고, 같은 문단의 인라인 표가 쪽을 넘긴 뒤의 본문 줄을 보존합니다. TEST 문서 B 59·62쪽의 표 위치와 63쪽의 본문 누락을 수정했습니다. [공통 코어 패치](engine-patches/README.md#hwpx-owned-table-insets-and-reset-suffix)
 - Desktop 인쇄 창의 기타 설정에서 문서에 지정된 대체 글꼴을 선택할 수 있습니다. 출력 창이 실제로 불러온 글꼴을 별도 조판 사본의 미리보기와 인쇄에 함께 사용합니다.
 - 마지막 행의 모든 글줄이 들어가고 원본 병합 셀이 표 높이를 입증하면, 남은 빈 높이를 테두리에도 적용합니다. TEST 문서 B 50쪽 아래 테두리 오차가 57.07pt에서 0.84pt로 줄었고, 최종 코어가 1~50쪽 순차 검증을 통과했습니다. [공통 코어 패치](engine-patches/README.md#hwpx-terminal-cut-merged-frame)
@@ -70,6 +77,8 @@
 - 저장된 중첩 표의 연속 조각에서 글줄 경계, 왼쪽 기준점과 바깥 여백을 보완합니다. [41번 코어 패치](engine-patches/README.md#hwpx-nested-table-frame-ledger)
 - 세로 병합을 포함한 중첩 표에서 원본 글줄의 쪽 배정과 상위 표의 행 높이·여백을 보완합니다. [40번 코어 패치](engine-patches/README.md#hwpx-nested-rowspan-opening)
 - 저장된 행 높이와 문단 앵커를 함께 사용해 중첩 표의 행 간격과 시작 위치를 보완합니다. [39번 코어 패치](engine-patches/README.md#hwpx-stored-nested-row-geometry)
+
+</details>
 
 ## 0.6.46 · Desktop 0.1.27
 
@@ -276,7 +285,7 @@
 
 ## 0.6.14
 
-- 편집기의 내장 그림 표시를 개선했습니다. [기술 기록](embedded-images-2026-10-19.md)
+- 편집기의 내장 그림 표시를 개선했습니다. [기술 기록](ARCHITECTURE.md#embedded-image-history)
 
 ## 0.6.13
 

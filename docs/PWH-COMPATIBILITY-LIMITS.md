@@ -22,3 +22,9 @@
 - 중첩 표를 넣으면 셀 경계 밖으로 넘친 내용이 이웃 셀에 겹치지 않도록 잘림 표시를 적용한다. 가려진 표의 열과 내용은 문서에 남는다. 보기 메뉴의 잘림 보기로 표시 방식을 변경할 수 있다.
 
 관련 구현은 `src/clipboard-structure.mjs`, `src/table-clipboard.mjs`, `src/nested-table-paste.mjs`, `src/table-content.mjs`, `src/table-style.mjs`, `src/studio-inline-adapter.ts`, `scripts/build-inline.mjs`를 참조한다.
+
+## 개체 속성과 표 크기
+
+- 개체 속성에서 중첩 표 자체의 전체 속성 편집은 지원 범위가 제한됩니다. [개체 속성의 적용 범위](OBJECT-PROPERTIES.md)
+- 셀 테두리의 여러 갈래 대각선은 기존 문서의 저장 정보를 보존합니다. 편집기에서 조판하고 편집할 수 있는 대각선 형식에는 제한이 있습니다.
+- 표 만들기에서 '글자처럼 취급'을 끈 표는 일부 조건에서 지정한 너비·높이가 그대로 적용되지 않을 수 있습니다.

@@ -2,6 +2,8 @@
 
 Pwh는 rhwp를 사용하는 로컬 AI 문서 작업 플러그인이다. 독립적인 조판 엔진이나 AI 모델을 포함하지 않는다. 주요 작업은 **주석으로 협업**하고 **기관의 한글 양식을 최대한 보존·활용**하는 것이다.
 
+[문서 모음](README.md) · [0.6.14 내장 그림 기록](#embedded-image-history)
+
 ## 구성과 데이터 흐름
 
 ```text
@@ -73,3 +75,66 @@ font-provider는 같은 origin의 Studio 공개 API에 catalog를 등록한다. 
 기본 시험은 합성 HWPX의 원본 서식·앵커·병합 셀 보존, 충돌·부적절한 수정 거절, MCP discovery, font provider 계약과 설치 계획을 검증한다. 선택 통합시험은 실제 엔진의 생성·편집·PNG·PDF·재열기 동작을 확인한다.
 
 테스트 통과는 한컴 화면과의 동일성, 임의 기관 서식의 완벽한 보존이나 내용의 적절성을 보증하지 않는다. 최종 제출 문서는 사용자가 한컴 환경에서 다시 확인하는 과정이 필요할 수 있다.
+
+<a id="embedded-image-history"></a>
+
+## 0.6.14 내장 그림 표시 기록
+
+### Trigger and cause
+
+A valid HWPX can display its embedded PNGs in Hancom and native rhwp output
+while showing broken image elements in the embedded editor. The preserved
+Studio flow-image cache creates `blob:` object URLs. A host sandbox whose
+image policy permits `data:` but not `blob:` blocks those URLs, even though
+WASM returns the complete, valid PNG bytes. This does not depend on Google Drive
+or external image references.
+
+The failure was reproduced with the complete inline editor in an opaque-origin
+iframe under `img-src data:`. Browser policy errors named the rejected object
+URLs. The same four images decoded correctly after the compatibility change.
+
+### Scope of the fix
+
+`client-assets.mjs` still verifies the preserved Studio files against their
+installation hashes first. `inline-image-urls.mjs` then adapts only the known
+flow-image cache in the response HTML to use cached `data:` URLs. It leaves the
+engine files, HWPX bytes, layout, crop, image MIME and decoded bytes unchanged.
+Other object URLs and the existing document-generation cache invalidation are
+preserved. No external resource domains or connection permissions are added.
+
+The compatibility adapter requires one recognized cache region and one known
+URL factory. A different or ambiguous bundle fails explicitly rather than
+silently applying a broad source replacement. An engine upgrade must review
+this adapter as well as the normal preservation checks.
+
+Base64 strings add memory compared with binary blobs; the existing cache keeps
+encoding to once per image identity and is cleared with document generations.
+The module is served with the plugin source and does not require republishing
+the unchanged preserved runtime archive.
+
+### Verification
+
+- Unit tests compare exact image bytes across encoding chunk boundaries, check
+  one-read cache reuse, preserve unrelated object URLs and reject changed bundles.
+- The optional real-browser test decodes the same synthetic PNG through both
+  routes under the restricted image policy: old route fails, new route succeeds.
+- A local 15-page HWPX with four PNG charts was opened in the complete editor.
+  All four old image elements failed, and all four patched elements decoded at
+  their original dimensions. The private document and screenshots are excluded
+  from this public repository and package.
+- The plugin version and fresh file resource are 0.6.14. Previous resource
+  identities remain readable, including 0.6.13. Existing unsaved frames are not
+  silently replaced: save and reopen them after installing the update.
+
+The iframe browser reproduction is distinct from confirming display in a newly
+updated Codex desktop session. A loaded document or increased state counter
+alone is not evidence that an image appeared.
+
+To run the optional browser regression with an existing Playwright installation:
+
+```text
+PWH_BROWSER_TESTS=1
+PWH_PLAYWRIGHT_MODULE=<module specifier or file URL for Playwright>
+PWH_BROWSER_EXECUTABLE=<optional installed Chromium executable>
+node --test tests/inline-image-browser.test.mjs
+```
