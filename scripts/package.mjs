@@ -13,12 +13,12 @@ const FILES = Object.freeze([
   'engine.config.json', 'engine.config.example.json', 'runtime-lock.json', 'README.md', 'LICENSE', 'SECURITY.md', 'requirements-render-compare.txt', 'scripts/editor-build-contract.mjs', 'scripts/verify-editor-build.mjs', 'scripts/run-ci-tests.mjs',
   'THIRD_PARTY_NOTICES.md', 'CONTRIBUTING.md', 'scripts/setup.mjs', 'scripts/stage-electron.mjs', 'scripts/brand-electron.mjs',
   'scripts/inspect_template.py', 'scripts/fill_form.py', 'scripts/replace_image.py', 'scripts/inspect_image.py', 'scripts/compare-pages.py', 'scripts/build-studio.ps1',
-  'scripts/package.mjs', 'scripts/build-inline.mjs', 'scripts/patch-body-cursor-contract.mjs', 'scripts/patch-pointer-hit-geometry.mjs', 'scripts/patch-cell-text-history.mjs', 'scripts/patch-object-properties.mjs', 'scripts/bundle-client.mjs', 'scripts/read-clipboard.ps1', 'scripts/save-dialog.ps1', 'scripts/launch.mjs', 'scripts/preserved-runtime.mjs', 'scripts/preserve-engine.py', 'scripts/preserve-patched-runtime.py', 'scripts/build-patched-core.mjs',
+  'scripts/package.mjs', 'scripts/build-inline.mjs', 'scripts/patch-body-cursor-contract.mjs', 'scripts/patch-pointer-hit-geometry.mjs', 'scripts/patch-cell-text-history.mjs', 'scripts/patch-object-properties.mjs', 'scripts/patch-viewport-table-selection.mjs', 'scripts/patch-table-and-symbol-shortcuts.mjs', 'scripts/patch-hancom-key-aliases.mjs', 'scripts/bundle-client.mjs', 'scripts/read-clipboard.ps1', 'scripts/save-dialog.ps1', 'scripts/launch.mjs', 'scripts/preserved-runtime.mjs', 'scripts/preserve-engine.py', 'scripts/preserve-patched-runtime.py', 'scripts/build-patched-core.mjs',
 ]);
 const DIRECTORIES = Object.freeze(['docs', 'licenses', 'skills', 'src', 'examples', 'client']);
 const SOURCE_EXTENSIONS = new Set(['.md', '.txt', '.json', '.mjs', '.js', '.ts', '.html', '.css', '.svg', '.patch']);
 const MAX_SOURCE_BYTES = 64 * 1024 * 1024;
-const REQUIRED = ['scripts/launch.mjs','scripts/build-inline.mjs','src/inline-host.js','src/studio-inline-adapter.ts','src/editor-session.mjs','src/server.mjs', 'src/native-mcp.mjs', 'src/cli.mjs', 'src/engine.mjs',
+const REQUIRED = ['scripts/launch.mjs','scripts/build-inline.mjs','src/inline-host.js', 'src/table-equal-size.ts','src/studio-inline-adapter.ts','src/editor-session.mjs','src/server.mjs', 'src/native-mcp.mjs', 'src/cli.mjs', 'src/engine.mjs',
   'src/config.mjs', 'src/live.mjs', 'src/editor.html', 'src/editor-client.mjs', 'src/viewer.html',
   'src/studio-selection.ts', 'src/template.mjs', 'src/form.mjs', 'skills/pwh/SKILL.md',
   'licenses/naver-nanum-OFL-1.1.txt', 'examples/demo.json', 'examples/changes.json'];

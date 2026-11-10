@@ -1,0 +1,143 @@
+--- a/src/renderer/layout/text_measurement.rs
++++ b/src/renderer/layout/text_measurement.rs
+@@ -359,13 +359,15 @@
+     let has_custom_tabs = !style.tab_stops.is_empty() || style.auto_tab_right;
+ 
+     let supplemental = super::super::supplemental_metrics::standalone_scalar_mask(text, style);
++    let fonts = embedded_fonts_for_run(style);
+     let char_width = |i: usize| -> f64 {
+-        char_width_decision(
++        char_width_decision_with_fonts(
+             &chars,
+             &cluster_len,
+             i,
+             style,
+             supplemental.as_ref().is_some_and(|mask| mask[i]),
++            Some(fonts),
+         )
+         .final_width_px
+     };
+@@ -480,10 +482,7 @@
+         let has_custom_tabs = !style.tab_stops.is_empty() || style.auto_tab_right;
+ 
+         let supplemental = super::super::supplemental_metrics::standalone_scalar_mask(text, style);
+-        let main_font = EmbeddedFont::new(style.metric_font_family.as_deref().unwrap_or(&style.font_family));
+-        let latin_font = style.ascii_punct_latin.as_deref().map_or(main_font, |latin| {
+-            EmbeddedFont::new(latin.metric_font_family.as_deref().unwrap_or(&latin.font_family))
+-        });
++        let fonts = embedded_fonts_for_run(style);
+         let char_width = |i: usize| -> f64 {
+             char_width_decision_with_fonts(
+                 &chars,
+@@ -491,7 +490,7 @@
+                 i,
+                 style,
+                 supplemental.as_ref().is_some_and(|mask| mask[i]),
+-                Some((main_font, latin_font)),
++                Some(fonts),
+             )
+             .final_width_px
+         };
+@@ -1022,10 +1021,11 @@
+ struct EmbeddedFont<'a> {
+     primary_name: &'a str,
+     kopub_dotum: Option<bool>,
++    metric: Option<font_metrics_data::MetricLookupDecision<'a>>,
+ }
+ 
+ impl<'a> EmbeddedFont<'a> {
+-    fn new(font_family: &'a str) -> Self {
++    fn new(font_family: &'a str, bold: bool, italic: bool) -> Self {
+         let primary_name = font_family
+             .split(',')
+             .next()
+@@ -1041,8 +1041,25 @@
+         } else {
+             None
+         };
+-        Self { primary_name, kopub_dotum }
+-    }
++        let metric = font_metrics_data::find_metric_decision(primary_name, bold, italic);
++        Self { primary_name, kopub_dotum, metric }
++    }
++}
++
++fn embedded_fonts_for_run(style: &TextStyle) -> (EmbeddedFont<'_>, EmbeddedFont<'_>) {
++    let main = EmbeddedFont::new(
++        style.metric_font_family.as_deref().unwrap_or(&style.font_family),
++        style.bold,
++        style.italic,
++    );
++    let latin = style.ascii_punct_latin.as_deref().map_or(main, |latin| {
++        EmbeddedFont::new(
++            latin.metric_font_family.as_deref().unwrap_or(&latin.font_family),
++            style.bold,
++            style.italic,
++        )
++    });
++    (main, latin)
+ }
+ 
+ fn kopub_char_width(kopub_dotum: Option<bool>, c: char, font_size: f64) -> Option<f64> {
+@@ -1244,14 +1261,12 @@
+     hft_hangul_face: bool,
+ ) -> EmbeddedWidthDecision<'a> {
+     measure_char_width_embedded_prepared(
+-        EmbeddedFont::new(font_family), bold, italic, c, font_size, font_metric_trusted, hft_hangul_face,
++        EmbeddedFont::new(font_family, bold, italic), c, font_size, font_metric_trusted, hft_hangul_face,
+     )
+ }
+ 
+ fn measure_char_width_embedded_prepared<'a>(
+     font: EmbeddedFont<'a>,
+-    bold: bool,
+-    italic: bool,
+     c: char,
+     font_size: f64,
+     font_metric_trusted: bool,
+@@ -1266,7 +1281,7 @@
+             character_match: "hit",
+         };
+     }
+-    let Some(mm) = font_metrics_data::find_metric_decision(primary_name, bold, italic) else {
++    let Some(mm) = font.metric else {
+         return EmbeddedWidthDecision {
+             width_px: None,
+             width_source: "metricMiss",
+@@ -1513,13 +1528,15 @@
+         let font = match (fonts, latin) {
+             (Some((_, latin_font)), Some(_)) => latin_font,
+             (Some((main_font, _)), None) => main_font,
+-            (None, Some(l)) => EmbeddedFont::new(l.metric_font_family.as_deref().unwrap_or(&l.font_family)),
+-            (None, None) => EmbeddedFont::new(style.metric_font_family.as_deref().unwrap_or(&style.font_family)),
++            (None, Some(l)) => EmbeddedFont::new(
++                l.metric_font_family.as_deref().unwrap_or(&l.font_family), style.bold, style.italic,
++            ),
++            (None, None) => EmbeddedFont::new(
++                style.metric_font_family.as_deref().unwrap_or(&style.font_family), style.bold, style.italic,
++            ),
+         };
+         let mut embedded = measure_char_width_embedded_prepared(
+             font,
+-            style.bold,
+-            style.italic,
+             c,
+             font_size,
+             latin.map_or(style.font_metric_trusted, |l| l.font_metric_trusted),
+@@ -1695,13 +1712,15 @@
+     let char_count = chars.len();
+ 
+     let supplemental = super::super::supplemental_metrics::standalone_scalar_mask(text, style);
++    let fonts = embedded_fonts_for_run(style);
+     let char_width = |i: usize| -> f64 {
+-        char_width_decision(
++        char_width_decision_with_fonts(
+             &chars,
+             &cluster_len,
+             i,
+             style,
+             supplemental.as_ref().is_some_and(|mask| mask[i]),
++            Some(fonts),
+         )
+         .final_width_px
+     };

@@ -8,6 +8,31 @@
 <a id="cause-and-scope"></a>
 ## 원인과 적용 범위
 
+<a id="nested-text-capacity-continuation"></a>
+### 75번 패치의 중첩 표 연속 조각
+
+[패치 소스](rhwp-0.8.7-use-capacity-after-nested-text-frame-displacement.patch)는 실제 가용 높이로 나뉜 HWPX 중첩 표의 연속 조각에서, 다음에 만나는 평문 저장 좌표가 현재 쪽을 비우도록 강제하는 문제를 보완합니다. 같은 자식 표에서 앞서 소비한 내용 범위, 분할 속성, 명시적 쪽·단 나눔, 독립된 저장 개체 프레임과 현재 조각의 실제 높이를 확인합니다. 기존 평문 규칙과 같이 남은 공간이 해당 조각에 주어진 예산의 절반보다 커야 하며, 이어지는 줄도 그 예산 안에 들어가야 합니다. 한 단만 선언한 메타데이터는 쪽·단 나눔으로 읽지 않습니다. 원문 줄 좌표와 문서 여백은 수정하지 않습니다. [합성 조판 회귀 시험](../../tests/nested-capacity-rewind.test.mjs)
+
+<a id="reuse-font-metric-decisions-per-run"></a>
+### 74번 패치의 글꼴 폭 표 재사용
+
+[패치 소스](rhwp-0.8.7-reuse-font-metric-decisions-per-run.patch)는 글줄 폭, 줄바꿈용 폭, 글자 경계 위치를 계산할 때 같은 서식의 글꼴 폭 표 조회를 재사용합니다. 글꼴 선택, 장평, 자간과 반올림 규칙은 기존 계산과 같습니다. [성능과 출력 검증](../RHWP-DIFFERENCES.md#reuse-font-metric-decisions-per-run)
+
+<a id="rebuild-cell-flow-after-width-change"></a>
+### 73번 패치의 셀 폭 변경 뒤 문단 위치
+
+[패치 소스](rhwp-0.8.7-rebuild-cell-flow-after-width-change.patch)는 최외곽 표와 중첩 표의 폭 변경에서 실제 폭이 달라진 셀만 재조판하고, 기존 표 나누기 경로와 같은 문단 높이 누적 규칙으로 줄의 세로 위치를 다시 계산합니다. 합성 시험과 여러 단계로 중첩된 시험 사본에서 문단 겹침, 실행 취소와 HWPX 저장·재열기를 확인했습니다.
+
+<a id="prepare-font-measurement-per-run"></a>
+### 72번 패치의 글꼴 판별 재사용
+
+[패치 소스](rhwp-0.8.7-prepare-font-measurement-per-run.patch)는 글줄의 문자 폭을 계산할 때 기본 글꼴과 영문 구두점 슬롯의 글꼴 이름을 미리 판별합니다. KoPub 이름의 Unicode 소문자 변환 결과와 기존 폭 계산을 그대로 사용합니다. 재사용 범위는 해당 글줄로 한정합니다. [성능과 출력 검증](../RHWP-DIFFERENCES.md#prepare-font-measurement-per-run)
+
+<a id="viewport-table-cell-selection"></a>
+### 71번 패치의 셀 선택 좌표 조회
+
+[패치 소스](rhwp-0.8.7-viewport-table-cell-selection.patch)는 행·열·병합 구조를 모델에서 조회하고, 선택을 그릴 때 요청한 물리 쪽의 셀 경계만 조회합니다. 키보드 조절의 대상은 표 전체의 구조에서 결정하므로 화면 밖 행이나 병합 셀도 포함합니다. 기존 좌표 조회와 치수 변경 후 조판 경로를 유지합니다. 정식 r22에 71~75번 패치가 포함됩니다.
+
 <a id="hwpx-owned-table-insets-and-reset-suffix"></a>
 ### 70번 패치의 표 바깥 여백과 쪽을 이은 문단
 

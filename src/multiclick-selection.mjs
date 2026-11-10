@@ -20,7 +20,7 @@ export function wordRange(text,offset){
 
 // The two endpoints inherit the exact clicked container, including every nested
 // cell-path component and its paragraph index. No adjacent cell can be selected.
-export function selectMulticlick(cursor,wasm,count){
+export function selectMulticlick(cursor,wasm,count,pointer){
  if(count!==2&&count!==3)return false;
  if(cursor.isInHeaderFooter()||cursor.isInFootnote()||cursor.isInTextBox()||cursor.isInCellSelectionMode())return false;
  const pos=cursor.getPosition(),sec=pos.sectionIndex;let len,text;
@@ -30,7 +30,19 @@ export function selectMulticlick(cursor,wasm,count){
    else{const {parentParaIndex:ppi,controlIndex:ci,cellIndex:cell,cellParaIndex:para}=pos;if(ci===undefined||cell===undefined||para===undefined)return false;len=wasm.getCellParagraphLength(sec,ppi,ci,cell,para);text=wasm.getTextInCell(sec,ppi,ci,cell,para,0,len);}
   }else{len=wasm.getParagraphLength(sec,pos.paragraphIndex);text=wasm.getTextRange(sec,pos.paragraphIndex,0,len);}
   if(!Number.isInteger(len)||len<1||Array.from(text).length!==len)return false;
-  const range=count===3?{start:0,end:len}:wordRange(text,pos.charOffset);if(!range||range.end<=range.start)return false;
+  let wordOffset=pos.charOffset;
+  const hit=pos.cursorRect;
+  if(count===2&&pointer&&hit?.pageIndex===pointer.pageIndex&&
+     pointer.y>=hit.y&&pointer.y<=hit.y+hit.height){
+   // A hit-test offset is an insertion boundary. Its left half belongs to
+   // the preceding glyph, even when the boundary is followed by a space.
+   if(pointer.x<hit.x&&wordOffset>0)wordOffset--;
+   const chars=Array.from(text);
+   if(/^\s$/u.test(chars[wordOffset]??'')&&/^[\p{L}\p{N}\p{M}]$/u.test(chars[wordOffset-1]??'')){
+    wordOffset--;
+   }
+  }
+  const range=count===3?{start:0,end:len}:wordRange(text,wordOffset);if(!range||range.end<=range.start)return false;
   // A hit-test rectangle belongs to the clicked offset, not to either endpoint.
   const {cursorRect,...base}=pos;
   const move=offset=>{

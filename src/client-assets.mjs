@@ -16,7 +16,15 @@ export async function chooseSavePath({initialDirectory,suggestedName}) {
 export async function selectClientSaveDestination(args,meta={},choose=chooseSavePath) {
   const source=documentPath(meta,args.documentId);
   if(!hashPattern.test(args.expectedSourceSha256||'')||sha(await fs.readFile(source))!==args.expectedSourceSha256) throw new Error('Source changed; reopen the document');
-  const selected=await choose({initialDirectory:path.dirname(source),suggestedName:`${path.basename(source,path.extname(source))}-수정본-${randomUUID().slice(0,8)}.hwpx`});
+  const initialDirectory=path.dirname(source);
+  const stem=path.basename(source,path.extname(source)).replace(/-수정본(?:-[\da-f]{8}| \(\d+\))?$/i,'')+'-수정본';
+  let suggestedName=stem+'.hwpx';
+  for(let index=2;;index++){
+    try { await fs.lstat(path.join(initialDirectory,suggestedName)); }
+    catch(error) { if(error.code==='ENOENT') break; throw error; }
+    suggestedName=stem+' ('+index+').hwpx';
+  }
+  const selected=await choose({initialDirectory,suggestedName});
   if(selected.cancelled)return {cancelled:true};
   const filename=selected.path;
   if(typeof filename!=='string'||!path.isAbsolute(filename)||!/\.hwpx$/i.test(filename))throw new Error('Choose an absolute HWPX filename');

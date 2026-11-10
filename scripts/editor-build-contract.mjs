@@ -3,7 +3,7 @@ import path from 'node:path';
 import {createHash} from 'node:crypto';
 
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
-const buildScripts = ['build-inline.mjs', 'bundle-client.mjs', 'patch-body-cursor-contract.mjs', 'patch-pointer-hit-geometry.mjs', 'patch-cell-text-history.mjs', 'patch-object-properties.mjs', 'editor-build-contract.mjs'];
+const buildScripts = ['build-inline.mjs', 'bundle-client.mjs', 'patch-body-cursor-contract.mjs', 'patch-pointer-hit-geometry.mjs', 'patch-cell-text-history.mjs', 'patch-object-properties.mjs', 'patch-viewport-table-selection.mjs', 'patch-table-and-symbol-shortcuts.mjs', 'patch-hancom-key-aliases.mjs', 'editor-build-contract.mjs'];
 const desktopInputs = ['build-desktop-editor.mjs', 'table-plan.mjs', 'desktop-body-style.mjs'];
 
 // Rolldown's source-region labels are comments, but contain staging paths.

@@ -61,6 +61,12 @@ export function installPrintPreviewView(view, printPages = []) {
   minus.onclick = () => step(-1); plus.onclick = () => step(1);
   const wheel = event => { if (event.ctrlKey || event.metaKey) { event.preventDefault(); step(event.deltaY > 0 ? -1 : 1); } };
   const key = event => {
+    if (!event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey &&
+        (event.code === 'NumpadAdd' || event.code === 'NumpadSubtract')) {
+      event.preventDefault();
+      step(event.code === 'NumpadAdd' ? 1 : -1);
+      return;
+    }
     if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
     if (['+', '=', '-'].includes(event.key)) { event.preventDefault(); step(event.key === '-' ? -1 : 1); }
     if (event.key === '0') { event.preventDefault(); mode = '100'; select.value = mode; apply(); }

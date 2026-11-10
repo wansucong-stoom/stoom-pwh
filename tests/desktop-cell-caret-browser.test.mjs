@@ -71,6 +71,24 @@ test('blank continued cells reveal their logical caret and preserve typing, undo
     const same=await point(0,30,30);
     await page.mouse.click(box.x+same.x,box.y+same.y);await settle();
     const sameAfter=await state();assert.equal(sameAfter.rect.pageIndex,0);assert.equal(sameAfter.scrollTop,same.scrollTop);
+    const height=()=>editor.evaluate(()=>{
+      const d=window.rhwpStudio.plugins.deps,p=d.getInputHandler().cursor.getPosition();
+      return JSON.parse(d.wasm.doc.getCellProperties(p.sectionIndex,p.parentParaIndex,p.controlIndex,p.cellIndex)).height;
+    });
+    const initialHeight=await height();
+    await page.keyboard.press('F5');await settle();
+    assert.ok(await editor.locator('.cell-selection-highlight').count(),'F5 highlights the selected cell');
+    await page.keyboard.press('Control+ArrowDown');await settle();
+    const enlargedHeight=await height();
+    assert.ok(enlargedHeight>initialHeight,'Ctrl+Down increases the saved row height');
+    await page.keyboard.press('Control+ArrowUp');await settle();
+    assert.equal(await height(),initialHeight,'Ctrl+Up reverses the resize');
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Control+z');await settle();
+    assert.equal(await height(),enlargedHeight,'Undo restores the preceding height');
+    await page.keyboard.press('Control+z');await settle();
+    assert.equal(await height(),initialHeight,'Undo restores the original row height');
+    await page.mouse.click(box.x+same.x,box.y+same.y);await settle();
     const end=await point(0,90,30);
     await page.mouse.move(box.x+same.x,box.y+same.y);await page.mouse.down();
     await page.mouse.move(box.x+end.x,box.y+end.y,{steps:8});await page.mouse.up();await settle();

@@ -40,7 +40,16 @@ test('a long document tab keeps its close button visible and working',{
    assert.ok(geometry.button.right<=geometry.list.right+1,'close is not clipped by the tab strip');
    assert.equal(geometry.overflow,true,'long file name is ellipsized');assert.ok(geometry.title.startsWith(filename),'full file name remains available');
   }
-  await page.setViewportSize({width:1200,height:850});await close.click();
+  await page.setViewportSize({width:1200,height:850});
+  const distances=await editor.locator('body').evaluate(()=>{
+   const last=document.querySelector('.pwh-desktop-tab:last-child').getBoundingClientRect();
+   const add=document.querySelector('.pwh-desktop-new-tab').getBoundingClientRect();
+   const version=document.querySelector('#pwh-version').getBoundingClientRect();
+   return {afterLast:add.left-last.right,afterAdd:version.left-add.right};
+  });
+  assert.ok(distances.afterLast>=0&&distances.afterLast<=8,'add follows the last tab');
+  assert.ok(distances.afterAdd>=0&&distances.afterAdd<=16,'version follows add');
+  await close.click();
   await page.waitForFunction(()=>document.querySelectorAll('#documents iframe').length===1,null,{timeout:15000});
  }finally{await browser.close();await new Promise(resolve=>app.server.close(resolve));await fs.rm(dir,{recursive:true,force:true,maxRetries:10,retryDelay:100});}
 });

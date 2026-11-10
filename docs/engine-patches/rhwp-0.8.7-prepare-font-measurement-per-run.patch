@@ -1,0 +1,138 @@
+--- a/src/renderer/layout/text_measurement.rs
++++ b/src/renderer/layout/text_measurement.rs
+@@ -480,13 +480,18 @@
+         let has_custom_tabs = !style.tab_stops.is_empty() || style.auto_tab_right;
+ 
+         let supplemental = super::super::supplemental_metrics::standalone_scalar_mask(text, style);
++        let main_font = EmbeddedFont::new(style.metric_font_family.as_deref().unwrap_or(&style.font_family));
++        let latin_font = style.ascii_punct_latin.as_deref().map_or(main_font, |latin| {
++            EmbeddedFont::new(latin.metric_font_family.as_deref().unwrap_or(&latin.font_family))
++        });
+         let char_width = |i: usize| -> f64 {
+-            char_width_decision(
++            char_width_decision_with_fonts(
+                 &chars,
+                 &cluster_len,
+                 i,
+                 style,
+                 supplemental.as_ref().is_some_and(|mask| mask[i]),
++                Some((main_font, latin_font)),
+             )
+             .final_width_px
+         };
+@@ -1013,13 +1018,35 @@
+     288, 900, 612, 612, 632, 596, 416, 432, 350, 604, 506, 772, 588, 516, 476, 312, 468, 312, 648,
+ ];
+ 
+-fn kopub_char_width(primary_name: &str, c: char, font_size: f64) -> Option<f64> {
+-    let lower = primary_name.to_lowercase();
+-    let is_dotum = primary_name.contains("KoPub돋움체") || lower.contains("kopub dotum");
+-    let is_batang = primary_name.contains("KoPub바탕체") || lower.contains("kopub batang");
+-    if !is_dotum && !is_batang {
+-        return None;
+-    }
++#[derive(Clone, Copy)]
++struct EmbeddedFont<'a> {
++    primary_name: &'a str,
++    kopub_dotum: Option<bool>,
++}
++
++impl<'a> EmbeddedFont<'a> {
++    fn new(font_family: &'a str) -> Self {
++        let primary_name = font_family
++            .split(',')
++            .next()
++            .unwrap_or(font_family)
++            .trim()
++            .trim_matches('\'')
++            .trim_matches('"');
++        let lower = primary_name.to_lowercase();
++        let kopub_dotum = if primary_name.contains("KoPub돋움체") || lower.contains("kopub dotum") {
++            Some(true)
++        } else if primary_name.contains("KoPub바탕체") || lower.contains("kopub batang") {
++            Some(false)
++        } else {
++            None
++        };
++        Self { primary_name, kopub_dotum }
++    }
++}
++
++fn kopub_char_width(kopub_dotum: Option<bool>, c: char, font_size: f64) -> Option<f64> {
++    let is_dotum = kopub_dotum?;
+ 
+     // [#7390] 공백은 표가 아니라 **반각**이다. 글꼴의 `hmtx`/`/Widths` 는 KoPubDotum
+     // 290 · KoPubBatang 312 이지만 한/글은 그 값으로 전진시키지 않는다. 정본
+@@ -1216,14 +1243,22 @@
+     font_metric_trusted: bool,
+     hft_hangul_face: bool,
+ ) -> EmbeddedWidthDecision<'a> {
+-    let primary_name = font_family
+-        .split(',')
+-        .next()
+-        .unwrap_or(font_family)
+-        .trim()
+-        .trim_matches('\'')
+-        .trim_matches('"');
+-    if let Some(w) = kopub_char_width(primary_name, c, font_size) {
++    measure_char_width_embedded_prepared(
++        EmbeddedFont::new(font_family), bold, italic, c, font_size, font_metric_trusted, hft_hangul_face,
++    )
++}
++
++fn measure_char_width_embedded_prepared<'a>(
++    font: EmbeddedFont<'a>,
++    bold: bool,
++    italic: bool,
++    c: char,
++    font_size: f64,
++    font_metric_trusted: bool,
++    hft_hangul_face: bool,
++) -> EmbeddedWidthDecision<'a> {
++    let primary_name = font.primary_name;
++    if let Some(w) = kopub_char_width(font.kopub_dotum, c, font_size) {
+         return EmbeddedWidthDecision {
+             width_px: Some(w),
+             width_source: "kopubTable",
+@@ -1368,6 +1403,17 @@
+     style: &'a TextStyle,
+     allow_supplemental: bool,
+ ) -> CharWidthDecision<'a> {
++    char_width_decision_with_fonts(chars, cluster_len, i, style, allow_supplemental, None)
++}
++
++fn char_width_decision_with_fonts<'a>(
++    chars: &[char],
++    cluster_len: &[u8],
++    i: usize,
++    style: &'a TextStyle,
++    allow_supplemental: bool,
++    fonts: Option<(EmbeddedFont<'a>, EmbeddedFont<'a>)>,
++) -> CharWidthDecision<'a> {
+     let (font_size, ratio, _) = style_params(style);
+     let c = chars[i];
+     // [#7418] 영문 슬롯으로 재는 구두점 — 글꼴·폭 표·자간·장평만 영문 슬롯 값이고, 배치가
+@@ -1464,15 +1510,14 @@
+             c
+         };
+         // [#7391] 폭 표를 고를 때만 선언 face 로 되돌린다.
+-        let metric_family = match latin {
+-            Some(l) => l.metric_font_family.as_deref().unwrap_or(&l.font_family),
+-            None => style
+-                .metric_font_family
+-                .as_deref()
+-                .unwrap_or(&style.font_family),
+-        };
+-        let mut embedded = measure_char_width_embedded_decision_for_font(
+-            metric_family,
++        let font = match (fonts, latin) {
++            (Some((_, latin_font)), Some(_)) => latin_font,
++            (Some((main_font, _)), None) => main_font,
++            (None, Some(l)) => EmbeddedFont::new(l.metric_font_family.as_deref().unwrap_or(&l.font_family)),
++            (None, None) => EmbeddedFont::new(style.metric_font_family.as_deref().unwrap_or(&style.font_family)),
++        };
++        let mut embedded = measure_char_width_embedded_prepared(
++            font,
+             style.bold,
+             style.italic,
+             c,

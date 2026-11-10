@@ -13,7 +13,7 @@ test('Ctrl+N then T opens the detailed table dialog without entering text',()=>{
 test('unrelated keys, expired chords and other modifiers retain their normal behavior',()=>{
  const calls=[],owner={dispatcher:{dispatch:(...x)=>calls.push(x)}};
  assert.equal(handleTableCreateChord(owner,key('KeyN','n',{ctrlKey:true}),100),true);
- const other=key('KeyA','a');assert.equal(handleTableCreateChord(owner,other,101),false);assert.equal(other.prevented,undefined);
+ const other=key('KeyX','x');assert.equal(handleTableCreateChord(owner,other,101),false);assert.equal(other.prevented,undefined);
  assert.equal(handleTableCreateChord(owner,key('KeyN','n',{ctrlKey:true}),200),true);
  const late=key('KeyT','t');assert.equal(handleTableCreateChord(owner,late,3000),false);assert.equal(late.prevented,undefined);
  assert.equal(handleTableCreateChord(owner,key('KeyN','n',{ctrlKey:true,shiftKey:true}),4000),false);

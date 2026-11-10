@@ -1,0 +1,112 @@
+--- a/src/document_core/commands/table_ops.rs
++++ b/src/document_core/commands/table_ops.rs
+@@ -2204,12 +2204,14 @@
+         let original_row_height_sum: u32 = table.get_row_heights().iter().sum();
+         let mut applied_width_delta: i64 = 0;
+         let mut applied_height_delta: i64 = 0;
++        let mut original_cell_widths = std::collections::BTreeMap::new();
+         for update in updates {
+             let Some(cell) = table.cells.get_mut(update.cell_idx) else {
+                 continue;
+             };
+             if update.width_delta != 0 {
+                 let old_width = cell.width;
++                original_cell_widths.entry(update.cell_idx).or_insert(old_width);
+                 cell.width =
+                     (cell.width as i32 + update.width_delta).max(MIN_CELL_SIZE as i32) as u32;
+                 applied_width_delta += i64::from(cell.width) - i64::from(old_width);
+@@ -2257,10 +2259,12 @@
+             }
+         }
+ 
+-        updates
+-            .iter()
+-            .filter(|u| u.width_delta != 0)
+-            .filter_map(|u| Some((u.cell_idx, table.cells.get(u.cell_idx)?.paragraphs.len())))
++        original_cell_widths
++            .into_iter()
++            .filter_map(|(index, old_width)| {
++                let cell = &table.cells[index];
++                (cell.width != old_width).then_some((index, cell.paragraphs.len()))
++            })
+             .collect()
+     }
+ 
+@@ -2393,6 +2397,10 @@
+                     cell_para_idx,
+                 );
+             }
++            if para_count != 0 {
++                inner_path[depth] = (control_idx, cell_idx, 0);
++                self.rebuild_table_cell_vpos_ladder_by_path(section_idx, parent_para_idx, &inner_path);
++            }
+         }
+ 
+         self.document.sections[section_idx].raw_stream = None;
+@@ -2446,6 +2454,9 @@
+ 
+         // 너비가 변경된 셀의 모든 문단에 대해 line_segs 재계산 (텍스트 리플로우)
+         self.reflow_table_cell_paragraphs(section_idx, parent_para_idx, control_idx, &reflow_cells);
++        for (cell_idx, _) in reflow_cells {
++            self.rebuild_table_cell_vpos_ladder_native(section_idx, parent_para_idx, control_idx, cell_idx);
++        }
+ 
+         self.document.sections[section_idx].raw_stream = None;
+         // Height-only changes retain text widths and paragraph ownership.
+--- a/src/document_core/commands/text_editing.rs
++++ b/src/document_core/commands/text_editing.rs
+@@ -151,6 +151,19 @@
+             next_vpos += gap;
+         }
+     }
++}
++
++fn rebuild_cell_vpos_after_width_change(
++    paragraphs: &mut [Paragraph],
++    styles: &ResolvedStyleSet,
++    dpi: f64,
++    is_hwp3_variant: bool,
++) {
++    // Fragment resets were recorded for the old line widths.
++    for paragraph in paragraphs.iter_mut() {
++        paragraph.cell_vpos_reset = Some(false);
++    }
++    apply_cell_vpos_ladder(paragraphs, 0, paragraphs.len(), styles, dpi, is_hwp3_variant);
+ }
+ 
+ fn shift_paragraph_vpos_origin(para: &mut Paragraph, target_vpos: i32) {
+@@ -3097,19 +3110,21 @@
+         let Some(cell) = table.cells.get_mut(cell_idx) else {
+             return;
+         };
+-        let stop_para = cell.paragraphs.len();
+-        // Width reflow deliberately discards the old fragment coordinate frames.
+-        for para in &mut cell.paragraphs {
+-            para.cell_vpos_reset = Some(false);
+-        }
+-        apply_cell_vpos_ladder(
+-            &mut cell.paragraphs,
+-            0,
+-            stop_para,
+-            styles,
+-            dpi,
+-            is_hwp3_variant,
+-        );
++        rebuild_cell_vpos_after_width_change(&mut cell.paragraphs, styles, dpi, is_hwp3_variant);
++    }
++
++    pub(crate) fn rebuild_table_cell_vpos_ladder_by_path(
++        &mut self,
++        section_idx: usize,
++        parent_para_idx: usize,
++        path: &[(usize, usize, usize)],
++    ) {
++        let styles = self.resolve_render_styles();
++        let dpi = self.dpi;
++        let is_hwp3_variant = self.document.layout_profile().hwp3_layout();
++        if let Ok(paragraphs) = self.get_cell_paragraphs_mut_by_path(section_idx, parent_para_idx, path) {
++            rebuild_cell_vpos_after_width_change(paragraphs, &styles, dpi, is_hwp3_variant);
++        }
+     }
+ 
+     /// [#2755] 컨트롤+cell_idx 로부터 셀 폭·좌우 패딩(HWPUNIT)을 해석한다.

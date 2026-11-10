@@ -5,6 +5,9 @@ import {patchBodyCursorContract} from './patch-body-cursor-contract.mjs';
 import {patchPointerHitGeometry} from './patch-pointer-hit-geometry.mjs';
 import {patchCellTextHistory} from './patch-cell-text-history.mjs';
 import {patchObjectProperties} from './patch-object-properties.mjs';
+import {patchViewportTableSelection} from './patch-viewport-table-selection.mjs';
+import {patchTableAndSymbolShortcuts} from './patch-table-and-symbol-shortcuts.mjs';
+import {patchHancomKeyAliases} from './patch-hancom-key-aliases.mjs';
 const root=path.resolve(process.argv[2]);
 const studio=path.join(root,'rhwp-studio');
 // The pinned editor includes its WASM glue. Old runtime cores keep the default
@@ -30,6 +33,9 @@ ${anchor}`);
  await fs.writeFile(coreGluePath,coreGlue);
 }
 await patchObjectProperties(studio);
+await patchViewportTableSelection(studio);
+await patchTableAndSymbolShortcuts(studio);
+await patchHancomKeyAliases(studio);
 await fs.copyFile(new URL('../src/pwh-page-margin-layout.ts',import.meta.url),path.join(studio,'src/ui/pwh-page-margin-layout.ts'));
 await fs.copyFile(new URL('../src/print-preview-view.mjs',import.meta.url),path.join(studio,'src/command/commands/pwh-print-preview-view.mjs'));
 const pageSetupPath=path.join(studio,'src/ui/page-setup-dialog.ts');
@@ -54,7 +60,14 @@ if(!mouse.includes('pwh word and paragraph multiclick')){
  const anchor='    this.cursor.moveToHit(hit);\n    this.cursor.resetPreferredX();\n    this.prepareClickHerePointerEntry?.(pageX);';
  if(!mouse.includes(anchor))throw Error('Unsupported mouse text selection');
  const generatedImport="import {selectMulticlick} from "+JSON.stringify('./pwh-multiclick-selection.mjs')+";\n";
- mouse="// pwh word and paragraph multiclick\n"+generatedImport+mouse.replace(anchor,"    this.cursor.moveToHit(hit);\n    this.cursor.resetPreferredX();\n    if (e.button === 0 && !e.ctrlKey && !e.altKey && !e.metaKey && selectMulticlick(this.cursor,this.wasm,e.detail)) {\n      this.active = true; this.cellSelectionDragCandidate = null; this.updateCaret(true); this.textarea.focus(); e.preventDefault(); return;\n    }\n    this.prepareClickHerePointerEntry?.(pageX);");
+ mouse="// pwh word and paragraph multiclick\n"+generatedImport+mouse.replace(anchor,"    this.cursor.moveToHit(hit);\n    this.cursor.resetPreferredX();\n    if (e.button === 0 && !e.ctrlKey && !e.altKey && !e.metaKey && selectMulticlick(this.cursor,this.wasm,e.detail,{pageIndex:pageIdx,x:pageX,y:pageY})) {\n      this.active = true; this.cellSelectionDragCandidate = null; this.updateCaret(true); this.textarea.focus(); e.preventDefault(); return;\n    }\n    this.prepareClickHerePointerEntry?.(pageX);");
+ await fs.writeFile(mousePath,mouse);
+}
+// Preserved Studio inputs can already contain the earlier multiclick hook.
+const oldMulticlickCall = 'selectMulticlick(this.cursor,this.wasm,e.detail)';
+if (mouse.includes(oldMulticlickCall)) {
+ if (mouse.split(oldMulticlickCall).length !== 2) throw Error('Unsupported multiclick pointer hook');
+ mouse = mouse.replace(oldMulticlickCall, 'selectMulticlick(this.cursor,this.wasm,e.detail,{pageIndex:pageIdx,x:pageX,y:pageY})');
  await fs.writeFile(mousePath,mouse);
 }
 // Empty continuation fragments can resolve to a real insertion position on a

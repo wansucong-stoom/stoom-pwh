@@ -11,7 +11,7 @@ const pinned = {
   upstreamCommit: '1a76570e833917d15817415a53c09ad61ab3203f',
   sourceArchiveSha256: '067feefc25d36921ee41fea5df6fead00255ffa86441891fbaa202f96de202a2',
   blankTemplateSha256: '43f472751fafefb8c66b0f831660ebed51e443a46bebe44c75bba918154ce4c9',
-  expectedGlueSha256: '4805b815e0ef26bd36c7e3e6c79a19a18b54f43efbcb4bc6f96a6dc203526058',
+  expectedGlueSha256: 'dc7fb5022f96dd917d6f8541b4b357a273264d2e45045c092b678bab29a713cb',
 };
 const patches = [
   {
@@ -1372,6 +1372,76 @@ const patches = [
       "patchedSha256": "d022ae8e04fa9fb00d71689e87bcd6d9766b008d202ad5208b9734dd9a800297"
     }
   ]
+},
+{
+  "file": "rhwp-0.8.7-viewport-table-cell-selection.patch",
+  "sha256": "85b5ab8c5356a894cadb0cbf659e22881e09f7fa64a1ed11de207878f16ce420",
+  "sources": [
+    {
+      "path": "src/document_core/commands/object_ops/table.rs",
+      "originalSha256": "42aab9a7ff095507e23f3329017fced03c060497a68860ca5277ccce83d846cc",
+      "patchedSha256": "75ed6240c3d4d9e0e40eaab2bb43a72a17be7bccc6ce146be62e290c2ac05c09"
+    },
+    {
+      "path": "src/document_core/queries/cursor_rect.rs",
+      "originalSha256": "e7597fd66bc4190b5bdeb3f8bc3cd1430819cb0a3790c55a1794d1969e283ce0",
+      "patchedSha256": "a1bb27fa8f9fe5143d8e78ad4e3c19d49bc0b2ed9dfdb85e907e124597103e02"
+    },
+    {
+      "path": "src/wasm_api.rs",
+      "originalSha256": "e14aeda012f929bdad22d81b370a324a7ca3e2f7d93ce98ad8b530028a5dc650",
+      "patchedSha256": "e876c2106ba99a72917b54d5262bc5accc22da724bec0aa917d090a3fd54aa29"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-prepare-font-measurement-per-run.patch",
+  "sha256": "c5a5de89e30176234b02ed5cf3cd801fc2d7045043201eb8ccba6a8b1dc2ea35",
+  "sources": [
+    {
+      "path": "src/renderer/layout/text_measurement.rs",
+      "originalSha256": "d8d40c5aec1868f6198f0f7fdd37f237ee151fe2bfdf7bbdb7424734ab5b27ff",
+      "patchedSha256": "b6cc37207b26700265a3341a4e601832523c6fd9334e9f9fd11fff6297a8b128"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-rebuild-cell-flow-after-width-change.patch",
+  "sha256": "559d9d6a8edcdf840ba6ced51abe6415efbd8cca8abb41770481aa7bef0c8a75",
+  "sources": [
+    {
+      "path": "src/document_core/commands/table_ops.rs",
+      "originalSha256": "efea4ac784307f3d33d8ddcc252e2da91996001fad378a7da5cec8894de8d2c4",
+      "patchedSha256": "ef36eb72e016aa75fcf83ed17b77999e076c924d9841d74d446b704b7f095f41"
+    },
+    {
+      "path": "src/document_core/commands/text_editing.rs",
+      "originalSha256": "12341f00051996a9f163cdd506a5111c3993eb9f107314272b3c0230f10df62c",
+      "patchedSha256": "4b54374e018904c9a899781b843fa2e2f25fcbd9524344d0d56325aca01a6fc2"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-reuse-font-metric-decisions-per-run.patch",
+  "sha256": "d2b34968a412dbd04cf0104d80035301fccd992b215ef1f26c583844409c7109",
+  "sources": [
+    {
+      "path": "src/renderer/layout/text_measurement.rs",
+      "originalSha256": "b6cc37207b26700265a3341a4e601832523c6fd9334e9f9fd11fff6297a8b128",
+      "patchedSha256": "0082802eb13710117cb8f05fcaf18df1a864764dbf76c086e87cbadc870f7084"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-use-capacity-after-nested-text-frame-displacement.patch",
+  "sha256": "bd3da10095f32a6f757ccd01f49e483df4dc6fcd8579a81dae4635e48c819705",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "b75a854d7962c76b6aa4aa4cd30110ce125a38d0895b0efae2592a4b8373f691",
+      "patchedSha256": "6945b6241bdf85b6a740df6ded667b8a03654d65a582922953c440e97864aaf6"
+    }
+  ]
 }
 ];
 const help = `Usage: node scripts/build-patched-core.mjs
@@ -1519,11 +1589,14 @@ if (!/^rustc 1\.93\.1\b/.test(versions.rustc) || !/^cargo 1\.93\.1\b/.test(versi
     || !/^wasm-bindgen 0\.2\.127\b/.test(versions.wasmBindgen)) throw Error('Required tool versions do not match: ' + JSON.stringify(versions));
 const buildArgs = ['build', '--lib', '--target', 'wasm32-unknown-unknown', '--release'];
 if (args.offline) buildArgs.push('--offline');
+const sysroot = await run(rustc, ['--print', 'sysroot'], {capture: true});
+if (!path.isAbsolute(sysroot)) throw Error('Rust sysroot must be an absolute path');
 const remapRoots = [
   [sourceRoot, '/pwh/source'],
   [targetDir, '/pwh/target'],
   [path.resolve(process.env.CARGO_HOME || path.join(os.homedir(), '.cargo')), '/cargo'],
   [path.resolve(process.env.RUSTUP_HOME || path.join(os.homedir(), '.rustup')), '/rustup'],
+  [path.resolve(sysroot), '/rustup/toolchain'],
 ];
 const remapFlags = remapRoots.map(([local, portable]) => '--remap-path-prefix=' + local + '=' + portable);
 await run(cargo, buildArgs, {cwd: sourceRoot, env: {

@@ -140,6 +140,13 @@
    else if(state.action==='ai-default-closed'&&!aiUserChoice){aiOpen=false;publishWorkspace();}
    else if(state.action==='activate'&&typeof state.id==='string')activate(state.id);
    else if(state.action==='close'&&typeof state.id==='string')void closeTab(state.id);
+   else if(state.action==='close-active'&&active===tab.id)void closeTab(tab.id);
+   else if(state.action==='close-window'&&active===tab.id)void closeWindow();
+   else if(active===tab.id&&(state.action==='next-tab'||state.action==='previous-tab')&&!updateLocked&&!closeLocked&&!starting){
+    const ids=[...tabs.keys()],index=ids.indexOf(tab.id);
+    const direction=state.action==='next-tab'?1:-1;
+    activate(ids[(index+direction+ids.length)%ids.length]);
+   }
    else if(state.action==='new')$('new-tab').click();
    else if(state.action==='home')showHome({focus:true});
    else if(state.action==='update')$('workspace-update').click();

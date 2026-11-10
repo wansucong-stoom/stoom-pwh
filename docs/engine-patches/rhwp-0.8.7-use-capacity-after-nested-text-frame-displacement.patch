@@ -1,0 +1,89 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -16594,6 +16594,63 @@
+         true
+     }
+ 
++    /// A capacity cut may already have moved the end of a saved frame onto
++    /// this page. A later plain-text rewind in that child table can
++    /// then reuse this page's remaining space. Explicit breaks and physical
++    /// child frames still own their boundary.
++    fn nested_plain_rewind_follows_capacity_cut(
++        &self,
++        cell: &crate::model::table::Cell,
++        first: &CellUnit,
++        next: &CellUnit,
++        styles: &ResolvedStyleSet,
++    ) -> bool {
++        let (Some(first_row), Some(row), Some(first_fragment), Some(next_fragment)) = (
++            first.nested_row,
++            next.nested_row,
++            first.nested_table_fragment.as_ref(),
++            next.nested_table_fragment.as_ref(),
++        ) else {
++            return false;
++        };
++        if first.para_idx != next.para_idx
++            || row < first_row
++            || first.stored_frame_break_before
++            || first.hard_break_before
++            || first_fragment.start_cut.iter().all(|&index| index == 0)
++        {
++            return false;
++        }
++        let Some([Control::Table(child)]) = cell.paragraphs.get(next.para_idx)
++            .map(|paragraph| paragraph.controls.as_slice())
++        else {
++            return false;
++        };
++        child.page_break == TablePageBreak::RowBreak
++            && child.cells.iter().filter(|cell| usize::from(cell.row) == row).all(|cell| {
++                cell.paragraphs.iter().all(|paragraph| {
++                    use crate::model::paragraph::ColumnBreakType;
++                    match paragraph.column_type {
++                        ColumnBreakType::None => true,
++                        ColumnBreakType::MultiColumn => paragraph.raw_break_type == 0x02
++                            && paragraph.controls.iter().any(|control| {
++                                matches!(control, Control::ColumnDef(columns) if columns.column_count == 1)
++                            }),
++                        _ => false,
++                    }
++                })
++            })
++            && self.nested_row_cut_plain_source_frame_boundary(
++                child, row, &next_fragment.start_cut, styles,
++            ) == Some(true)
++            && self.nested_row_cut_closed_inline_frame_boundary(
++                child, row, &next_fragment.start_cut, styles,
++            ) != Some(true)
++            && self.nested_row_cut_owned_tail_frame_boundary(
++                child, row, &next_fragment.start_cut, styles,
++            ) != Some(true)
++    }
++
+     fn should_absorb_midpage_saved_vpos_reset(
+         &self,
+         table: &crate::model::table::Table,
+@@ -21601,14 +21658,14 @@
+                             && !units[start..j].iter().all(|unit| unit.empty_spacer)
+                             && !tiny_fragment_waste))
+                 {
+-                    if !strict_saved_frame_break
+-                        && self.should_absorb_midpage_saved_vpos_reset(
+-                            table,
+-                            u,
+-                            h,
+-                            avail_height,
+-                            allow_midpage_reset_absorb,
+-                        )
++                    if self.should_absorb_midpage_saved_vpos_reset(
++                        table, u, h, avail_height, allow_midpage_reset_absorb,
++                    ) && (!strict_saved_frame_break
++                        || (self.profile.get().hwpx_stored_layout()
++                            && h + u.height <= avail_height
++                            && self.nested_plain_rewind_follows_capacity_cut(
++                                cell, &units[start], u, styles,
++                            )))
+                     {
+                         h += u.height;
+                         j += 1;

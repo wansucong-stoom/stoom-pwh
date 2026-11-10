@@ -1,25 +1,25 @@
 {
   "kind": "studio-inline",
-  "version": "0.6.47",
+  "version": "0.6.48",
   "upstreamVersion": "0.8.7",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "files": {
-    "editor.js": "7273db353c973ba2542b05eed79d341df3b2b491c745bbec67a73624743fae6f",
-    "rhwp-studio.css": "36fac005da9ae7342d413bbb7822f2a8cdb5527b9111384f6e756b02c8071357",
+    "editor.js": "57814c100e51199fbd10d4439bd7c30875648044078f8550ea4abd2f80be79ef",
+    "rhwp-studio.css": "0c7f20ff8eb51405332746667bd032ec8dd59e97d592a78e438b30dee5e89859",
     "editor-body.html": "afc04317043d01ef99fb91eb9bce88723fac82491bf42473e4b30436e5066ceb"
   },
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "common",
-    "sha256": "51dc81ae4a11fd54aef875b0625a1375fffb6deca233daf9058bced82504df4a",
+    "sha256": "20086eb070434aac339032d6db25009c1b8dd6e0fff77fffa85cb9a99f509daa",
     "files": [
       {
         "path": "package.json",
-        "sha256": "1162bdb31fc5b009a74b84955d0672e458f6550da5de0db78fcf7913fa1251b8"
+        "sha256": "a02232aa15ba327b5cf3e577fa994cc54885a1900c116918bdc06d19b51a1c8b"
       },
       {
         "path": "scripts/build-inline.mjs",
-        "sha256": "4885b0186989644659c952fc5fd5fe0c10739bb58f8690b9f02e8e157d8a89c7"
+        "sha256": "5a8675015fa0b082ed75506a9039626b42f668fc53b16a13fe6a19b3f71af843"
       },
       {
         "path": "scripts/bundle-client.mjs",
@@ -27,7 +27,7 @@
       },
       {
         "path": "scripts/editor-build-contract.mjs",
-        "sha256": "11260ab43f1b068431f312fcc3188020b921d91c6c6209005d3996692f490d27"
+        "sha256": "b45b0657ca2cd936ee01f5ce19deffd335325b11a876b5dee16328472f7f327c"
       },
       {
         "path": "scripts/patch-body-cursor-contract.mjs",
@@ -38,12 +38,24 @@
         "sha256": "7237b0b5cdf888b40ea63a9dc878eab11c2cf8b641104ba0b06af1c17f3f4c09"
       },
       {
+        "path": "scripts/patch-hancom-key-aliases.mjs",
+        "sha256": "f6dbaa20c42136842b16f55f4903aa47c723dd95b84d1eef24b1db915c94b6a0"
+      },
+      {
         "path": "scripts/patch-object-properties.mjs",
         "sha256": "621161e9d22410176230cd4081aff7632e250dc4e2cd369c45ee5eb3d42fa356"
       },
       {
         "path": "scripts/patch-pointer-hit-geometry.mjs",
         "sha256": "19f3118df9de43b23af6fb21c782d3d42a31528cf21b171193b45eb5b4aea5b2"
+      },
+      {
+        "path": "scripts/patch-table-and-symbol-shortcuts.mjs",
+        "sha256": "1cc46c6e523e644ba863d1f36cf4b690955eddb4cb0c0d00790bb8caecfe9184"
+      },
+      {
+        "path": "scripts/patch-viewport-table-selection.mjs",
+        "sha256": "8b09180ddee928667f597323695183eb34d0683133dc13502755b8ac304cc106"
       },
       {
         "path": "src/blank-compose.ts",
@@ -71,7 +83,7 @@
       },
       {
         "path": "src/client-assets.mjs",
-        "sha256": "227aff3bfad73f93d4a376e593159537af5619b40fa404758e361e27cdc87daa"
+        "sha256": "f4bb00117385bbb3b1695c9125c79a66a29d40a37a182e728fad12a8beb231a6"
       },
       {
         "path": "src/clipboard-structure.mjs",
@@ -155,7 +167,7 @@
       },
       {
         "path": "src/multiclick-selection.mjs",
-        "sha256": "16a59c159b678f68ab081160c5035f25fd1c8f53937bef2b423b17fc70febd8b"
+        "sha256": "dd07ced84a08afe0b0234fe779932070a81b98664731ba33e1b66bb3594fdefd"
       },
       {
         "path": "src/native-clipboard.mjs",
@@ -191,7 +203,7 @@
       },
       {
         "path": "src/print-preview-view.mjs",
-        "sha256": "f9f782913c56aa646298e133f7500d4634412849da865e043490c538ab11421f"
+        "sha256": "58b508004f01352da0aa8d7cd844bed32987f4bae8c90f61e08a1c1ea067ceca"
       },
       {
         "path": "src/pwh-cell-border-dialog.css",
@@ -263,7 +275,11 @@
       },
       {
         "path": "src/table-create-shortcut.mjs",
-        "sha256": "793c590ee1e60114ce5dbb391840db02d8be4576683818625d6383e1d10dc8b6"
+        "sha256": "0b9409372c0568845d0b7809fe8ce030dccb9a67f68330fde123cbffc07cffcd"
+      },
+      {
+        "path": "src/table-equal-size.ts",
+        "sha256": "a30dfc3d8d50cfc69dd05d965bfe3b897f823bc0e7a53549de2925a2ee7b7433"
       },
       {
         "path": "src/table-paste-dialog.ts",
