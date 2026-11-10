@@ -5,6 +5,11 @@ const root=process.argv[2]||process.env.PWH_ENGINE_SOURCE;
 if(!root)throw Error('An explicit candidate source tree is required');
 const source=await fs.readFile(root+'/src/renderer/layout/table_layout.rs','utf8');
 const sourceSha256=createHash('sha256').update(source).digest('hex');
+const readsPlainTail=source.includes('fn stored_nested_plain_tail_row_is_closed(');
+const readsDeclaredFrames=source.includes('fn saved_cell_source_frames(');
+const readsDeclaredInline=source.includes('A saved inline box owns its original line.');
+const floatPlacement=readsDeclaredFrames
+  ? await fs.readFile(root+'/src/renderer/float_placement.rs','utf8') : '';
 const code=String.raw`
 mod model {
  pub mod shape {
@@ -37,8 +42,52 @@ ${sourceBlock(source,'pub(super) struct StoredNestedTailOpeningFrame {')}
 ${sourceBlock(source,'impl StoredNestedTailOpeningFrame {')}
 ${sourceBlock(source,'fn stored_nested_tail_table_is_original(')}
 ${sourceBlock(source,'fn stored_nested_tail_cell_prefix_is_original(')}
+${readsPlainTail ? [
+ sourceBlock(source,'fn stored_float_frame_owner_is_original('),
+ 'struct LayoutEngine;',
+ 'impl LayoutEngine {',
+ sourceBlock(source,'fn stored_plain_cell_paragraph('),
+ sourceBlock(source,'fn saved_plain_cell_end_hu('),
+ '}',
+ sourceBlock(source,'fn stored_nested_plain_tail_row_is_closed('),
+].join('\n') : ''}
 ${sourceBlock(source,'fn stored_nested_inline_tail_row_is_closed(')}
 ${sourceBlock(source,'fn stored_nested_tail_opening_frame_source(')}
+${readsPlainTail ? String.raw`
+#[test]fn an_inline_row_accepts_a_shorter_multiline_text_sibling() {
+ let mut f=expanded_fixture();
+ let child=table_mut(&mut f);
+ child.col_count=2;
+ let mut sibling=child.cells[4].clone();
+ sibling.col=1;
+ sibling.height=200;
+ let mut text=paragraph("text",0,18000);
+ let mut line=text.line_segs[0].clone();
+ line.vertical_pos=1600;
+ text.line_segs.push(line);
+ sibling.paragraphs=vec![text];
+ child.cells.push(sibling);
+ assert!(stored_nested_inline_tail_row_is_closed(child,4,5200));
+ child.cells.last_mut().unwrap().paragraphs[0].line_segs[1].vertical_pos=4200;
+ assert!(!stored_nested_inline_tail_row_is_closed(child,4,5200));
+}
+#[test]fn an_exact_frame_accepts_a_padding_only_multiline_tail() {
+ let mut f=fixture();
+ let child=table_mut(&mut f);
+ child.common.height=9400;
+ child.raw[5]=200;
+ child.cells[5].height=200;
+ let p=&mut child.cells[5].paragraphs[0];
+ let mut second=p.line_segs[0].clone();
+ second.vertical_pos=1600;
+ p.line_segs.push(second);
+ f.measured[5]=2800;
+ f.next.line_segs[0].vertical_pos=3000;
+ assert_eq!(run(&f).unwrap().tail_start_row,5);
+ table_mut(&mut f).cells[5].paragraphs[0].line_segs[1].vertical_pos+=1;
+ assert!(run(&f).is_none());
+}
+` : ''}
 fn paragraph(text:&str,vpos:i32,width:i32)->Paragraph{Paragraph{text:text.into(),dirty:false,cell_format_vpos_dirty:false,source_frame_reflowed:false,layout_space_metrics:vec![],line_segs:vec![LineSeg{vertical_pos:vpos,line_height:1000,line_spacing:600,segment_width:width,tag:0}],controls:vec![],column_type:ColumnBreakType::None,para_shape_id:0,raw_break_type:0}}
 fn child()->Table{Table{common:Common{treat_as_char:false,flow_with_text:true,allow_overlap:false,text_wrap:TextWrap::TopAndBottom,vert_rel_to:VertRelTo::Para,vert_align:VertAlign::Top,vertical_offset:0,height:10000},caption:None,row_count:6,col_count:1,padding:Padding{top:100,bottom:100},page_break:TablePageBreak::RowBreak,cell_spacing:0,outer_margin_top:100,outer_margin_bottom:100,cells:(0..6).map(|row|Cell{dirty_flag:false,row,col:0,col_span:1,text_direction:0,height:1000,padding:Padding{top:0,bottom:0},apply_inner_margin:false,row_span:1,paragraphs:vec![paragraph("row",0,18000)]}).collect(),raw:vec![1200,2000,2500,1500,2200,3000],headers:vec![]}}
 struct Fixture{host:Paragraph,next:Paragraph,measured:Vec<i64>}
@@ -193,6 +242,7 @@ struct ParaStyle{spacing_before:f64,spacing_after:f64}
 struct ResolvedStyleSet{para_styles:Vec<ParaStyle>}
 struct Engine{profile:std::cell::Cell<Profile>,render_normalization:std::cell::RefCell<Overlay>,dpi:f64,measured_override:Option<Vec<i64>>,declared_trust_allowed:std::cell::Cell<bool>}
 impl Engine{
+fn saved_complete_child_row_heights(&self,_:&Table)->Option<Vec<i64>>{None}
 fn resolve_row_heights(&self,_table:&Table,_cols:usize,_rows:usize,_measured:Option<&()>,_styles:&ResolvedStyleSet,_relaxed:bool)->Vec<f64>{
  // Faithful legacy ambient-state behavior; the extracted new helper must isolate it.
  self.declared_trust_allowed.set(true);
@@ -228,6 +278,71 @@ fn expanded_wrapper_run(e:&Engine,c:&Cell,p:&Table,s:&ResolvedStyleSet)->Option<
 #[test]fn history_expanded_owner_cannot_regain_source(){expanded_rejects(|f|table_mut(f).cells[4].paragraphs[0].source_frame_reflowed=true);}
 #[test]fn history_deep_inline_cannot_regain_source(){expanded_rejects(|f|expanded_inline(f).cells[0].paragraphs[0].source_frame_reflowed=true);}
 
+${readsDeclaredFrames ? String.raw`
+type CommonObjAttr=Common;
+pub mod renderer {
+ pub mod float_placement {
+  use super::super::{CommonObjAttr,TextWrap,VertRelTo};
+  ${sourceBlock(floatPlacement,'pub(crate) fn is_para_topbottom_float(')}
+ }
 }
+struct SavedFrameProbe;
+impl SavedFrameProbe {
+ ${sourceBlock(source,'fn stored_plain_cell_paragraph(')}
+ ${sourceBlock(source,'fn stored_nested_outer_margin_host(')}
+ ${sourceBlock(source,'pub(super) fn saved_row_frame_float_advance(')}
+ ${sourceBlock(source,'fn saved_cell_source_frames(')}
+}
+fn cell_with_saved_frames()->Cell {
+ let mut cell=child().cells.remove(0);
+ let mut object=child();
+ object.common.height=3700;
+ object.common.vertical_offset=175;
+ let mut anchor=paragraph("",1600,0);
+ anchor.controls.push(Control::Table(Box::new(object)));
+ cell.paragraphs=vec![
+  paragraph("opening",0,18000),paragraph("continued",1600,18000),
+  paragraph("middle",0,18000),anchor,paragraph("after object",5675,18000),
+  paragraph("tail",0,18000),paragraph("end",1600,18000),
+ ];
+ cell
+}
+#[test]fn preserves_three_independent_saved_frames_and_float_extent() {
+ assert_eq!(SavedFrameProbe::saved_cell_source_frames(&cell_with_saved_frames()),
+  Some(vec![(0,2600),(2,6675),(5,2600)]));
+}
+#[test]fn rejects_float_when_saved_successor_no_longer_closes_it() {
+ let mut cell=cell_with_saved_frames();
+ cell.paragraphs[4].line_segs[0].vertical_pos+=1;
+ assert_eq!(SavedFrameProbe::saved_cell_source_frames(&cell),None);
+}
+#[test]fn rejects_changed_descendant_layout_even_with_the_same_declared_box() {
+ let mut cell=cell_with_saved_frames();
+ let Control::Table(object)=&mut cell.paragraphs[3].controls[0] else {unreachable!()};
+ object.cells[0].paragraphs[0].source_frame_reflowed=true;
+ assert_eq!(SavedFrameProbe::saved_cell_source_frames(&cell),None);
+}
+#[test]fn rejects_gap_between_original_text_lines() {
+ let mut cell=cell_with_saved_frames();
+ cell.paragraphs[6].line_segs[0].vertical_pos+=1;
+ assert_eq!(SavedFrameProbe::saved_cell_source_frames(&cell),None);
+}
+${readsDeclaredInline ? String.raw`
+#[test]fn an_inline_object_reserves_its_exact_original_line_once() {
+ let mut cell=cell_with_saved_frames();
+ let Control::Table(object)=&mut cell.paragraphs[3].controls[0] else {unreachable!()};
+ object.common.treat_as_char=true;
+ object.common.vertical_offset=0;
+ cell.paragraphs[3].line_segs[0].line_height=3900;
+ cell.paragraphs[4].line_segs[0].vertical_pos=6100;
+ assert_eq!(SavedFrameProbe::saved_cell_source_frames(&cell),
+  Some(vec![(0,2600),(2,7100),(5,2600)]));
+ cell.paragraphs[3].line_segs[0].line_height-=1;
+ assert_eq!(SavedFrameProbe::saved_cell_source_frames(&cell),None);
+}
+` : ''}
+` : ''}
+}
+${readsDeclaredFrames ? 'pub use engine::renderer;' : ''}
 `;
 await runRustTests({name:'stored-nested-tail-wrapper-state',sourceSha256,code});

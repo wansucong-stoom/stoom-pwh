@@ -1,0 +1,240 @@
+--- a/src/renderer/float_placement.rs
++++ b/src/renderer/float_placement.rs
+@@ -237,6 +237,139 @@
+ }
+ 
+ /// 그림 띠 뒤의 빈 마지막 줄을 담는 원본 셀 프레임.
++/// A saved paragraph float can have a single row that wraps stacked
++/// paragraphs. The unwrapped rows own their individual saved heights.
++pub(crate) fn saved_stacked_float_row_heights(table: &Table, dpi: f64) -> Option<Vec<f64>> {
++    let count = usize::from(table.row_count);
++    let object = &table.common;
++    if count < 2 || object.treat_as_char || !object.flow_with_text || !object.allow_overlap
++        || object.vert_rel_to != crate::model::shape::VertRelTo::Para
++        || object.vert_align != crate::model::shape::VertAlign::Top
++        || object.text_wrap != TextWrap::TopAndBottom || signed_hwpunit(object.vertical_offset) <= 0
++        || table.caption.is_some() || table.cell_spacing < 0
++        || !dpi.is_finite() || dpi <= 0.0
++    {
++        return None;
++    }
++    let mut rows = vec![0_i64; count];
++    let mut stacked = None;
++    for cell in &table.cells {
++        let row = usize::from(cell.row);
++        if cell.row_span != 1 || cell.text_direction != 0 || cell.dirty_flag
++            || row >= count || cell.height == 0 || cell.height > i32::MAX as u32
++            || cell.paragraphs.is_empty()
++        {
++            return None;
++        }
++        let mut body = i64::from(cell.effective_vertical_padding_hu(&table.padding));
++        for (index, para) in cell.paragraphs.iter().enumerate() {
++            let [line] = para.line_segs.as_slice() else { return None; };
++            let one_column = matches!(para.controls.as_slice(), [Control::ColumnDef(columns)]
++                if columns.column_count == 1 && columns.spacing == 0);
++            if para.stored_text_partition_is_dirty() || para.cell_format_vpos_dirty
++                || para.source_frame_reflowed || !para.layout_space_metrics.is_empty()
++                || !(para.controls.is_empty() || one_column) || para.text.trim().is_empty()
++                || line.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0
++                || line.vertical_pos != 0 || line.line_height <= 0 || line.line_spacing < 0
++            {
++                return None;
++            }
++            body += i64::from(line.line_height);
++            if index + 1 < cell.paragraphs.len() {
++                body += i64::from(line.line_spacing);
++            }
++        }
++        let saved = i64::from(cell.height);
++        if cell.paragraphs.len() > 1 {
++            if stacked.is_some_and(|earlier| earlier != row) {
++                return None;
++            }
++            stacked = Some(row);
++        } else if body > saved {
++            return None;
++        }
++        rows[row] = rows[row].max(saved.max(body));
++    }
++    let row = stacked?;
++    let total = rows.iter().sum::<i64>() + i64::from(table.cell_spacing) * (count - 1) as i64;
++    let leftover = i64::from(object.height) - total;
++    if leftover < 0 || rows.iter().any(|&height| height <= 0) {
++        return None;
++    }
++    rows[row] += leftover;
++    Some(rows.into_iter().map(|height| height as f64 * dpi / 7200.0).collect())
++}
++
++/// In an original noAdjust inline table the stored line boxes can grow
++/// each individual row. Use those physical rows only when they exactly close
++/// the whole object and leave room for every spanning cell.
++pub(crate) fn saved_inline_no_adjust_row_heights(
++    table: &Table,
++    dpi: f64,
++) -> Option<Vec<f64>> {
++    let row_count = usize::from(table.row_count);
++    if !table.common.treat_as_char
++        || table.raw_table_record_attr & 0x08 == 0
++        || table.common.height == 0 || table.common.height > i32::MAX as u32
++        || row_count < 2
++        || !dpi.is_finite() || dpi <= 0.0
++        || !table.cells.iter().any(|cell| cell.row_span > 1)
++    {
++        return None;
++    }
++    let mut rows = vec![0.0_f64; row_count];
++    let mut spans = Vec::new();
++    let mut grew = false;
++    for cell in &table.cells {
++        let row = usize::from(cell.row);
++        let span = usize::from(cell.row_span);
++        if span == 0 || row.checked_add(span)? > row_count
++            || cell.dirty_flag || cell.height == 0 || cell.height > i32::MAX as u32
++            || cell.paragraphs.iter().any(|para|
++                para.stored_text_partition_is_dirty() || para.cell_format_vpos_dirty
++                || para.source_frame_reflowed || !para.layout_space_metrics.is_empty())
++        {
++            return None;
++        }
++        let saved = hwpunit_to_px(cell.height as i32, dpi);
++        let [para] = cell.paragraphs.as_slice() else { return None; };
++        let [line] = para.line_segs.as_slice() else { return None; };
++        let cached_formula = matches!(para.controls.as_slice(), [Control::Field(field)]
++            if field.field_type == crate::model::control::FieldType::Formula
++                && !para.text.trim().is_empty() && para.field_ranges.len() == 1
++                && para.orphan_field_ends.is_empty());
++        if cell.text_direction != 0 || line.vertical_pos != 0 || line.line_height <= 0
++            || line.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0
++            || !(para.controls.is_empty() || cached_formula)
++        {
++            return None;
++        }
++        let end = hwpunit_to_px(line.line_height, dpi);
++        let pad = hwpunit_to_px(cell.effective_vertical_padding_hu(&table.padding), dpi);
++        let required = saved.max(end + pad);
++        if span == 1 {
++            rows[row] = rows[row].max(required);
++            grew |= required > saved;
++        } else {
++            spans.push((row, row + span, required));
++        }
++    }
++    let gap = hwpunit_to_px(i32::from(table.cell_spacing), dpi);
++    let unit = dpi / 7200.0;
++    let target = f64::from(table.common.height) * unit;
++    let total = rows.iter().sum::<f64>() + gap * (row_count - 1) as f64;
++    if !grew || rows.iter().any(|&height| height <= 0.0)
++        || (total - target).abs() > unit
++        || spans.into_iter().any(|(start, end, required)| {
++            rows[start..end].iter().sum::<f64>() + gap * ((end - start - 1) as f64)
++                < required - unit
++        })
++    {
++        return None;
++    }
++    Some(rows)
++}
++
+ /// 그림들은 같은 띠의 원점에서 움직이며 각 그림 높이로 원점을 따로 역산하지 않는다.
+ #[derive(Debug, Clone, Copy)]
+ pub(crate) struct StoredEmptyPictureCellFrame {
+--- a/src/renderer/height_measurer.rs
++++ b/src/renderer/height_measurer.rs
+@@ -4312,7 +4312,20 @@
+         // 편집으로 셀이 자란 성장분까지 선언높이로 눌러 다른 행의 몫을 잠식한다
+         // (셀 Enter 재현: 표가 선언 높이에 고정된 채 행 경계만 위로 밀림).
+         // 편집 세션은 실측을 신뢰한다.
+-        let table_height = if table.common.treat_as_char
++        let saved_inline_rows = (self.hwpx_stored_layout && !self.session_edited
++            && !self.render_normalization.table_text_reflowed(table))
++            .then(|| {
++                use crate::renderer::float_placement::{
++                    saved_inline_no_adjust_row_heights, saved_stacked_float_row_heights,
++                };
++                saved_inline_no_adjust_row_heights(table, self.dpi)
++                    .or_else(|| saved_stacked_float_row_heights(table, self.dpi))
++            })
++            .flatten();
++        let table_height = if let Some(rows) = saved_inline_rows {
++            row_heights = rows;
++            common_h
++        } else if table.common.treat_as_char
+             && !self.session_edited
+             && common_h > 0.0
+             && raw_table_height > common_h + shrink_threshold
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -219,11 +219,12 @@
+     stored: bool,
+     edited: bool,
+     reflowed: bool,
++    allow_original_blank_boundary: bool,
+ ) -> Option<StoredLeadingHostFloatFrame> {
+     if !stored || edited || reflowed || para.text.trim().is_empty()
+         || para.stored_text_partition_is_dirty() || para.cell_format_vpos_dirty
+         || table.common.treat_as_char || !table.common.flow_with_text
+-        || table.common.allow_overlap || table.caption.is_some()
++        || (table.common.allow_overlap && !allow_original_blank_boundary) || table.caption.is_some()
+         || table.common.text_wrap != crate::model::shape::TextWrap::TopAndBottom
+         || table.common.vert_rel_to != crate::model::shape::VertRelTo::Para
+         || table.common.vert_align != crate::model::shape::VertAlign::Top
+@@ -243,7 +244,9 @@
+         || i64::from(offset) + i64::from(table.outer_margin_top) < i64::from(line.line_height)
+     { return None; }
+     let Some(next) = next else { return None; };
+-    if next.text.trim().is_empty() || !next.controls.is_empty()
++    if (next.text.trim().is_empty()
++        && (!allow_original_blank_boundary || next.line_segs.len() != 1))
++        || !next.controls.is_empty()
+         || next.stored_text_partition_is_dirty() || next.cell_format_vpos_dirty
+     { return None; }
+     let Some(next_line) = next.line_segs.first() else { return None; };
+@@ -328,7 +331,7 @@
+     para: &Paragraph, next: Option<&Paragraph>, table: &crate::model::table::Table,
+     stored: bool, edited: bool, reflowed: bool,
+ ) -> bool {
+-    stored_leading_host_float_frame(para, next, table, stored, edited, reflowed).is_some()
++    stored_leading_host_float_frame(para, next, table, stored, edited, reflowed, false).is_some()
+ }
+ 
+ 
+@@ -4591,6 +4594,19 @@
+         relaxed_pad: bool,
+         suppress_unused_padding: bool,
+     ) -> Vec<f64> {
++        if self.profile.get().hwpx_stored_layout()
++            && !self.profile.get().session_edited()
++            && !self.render_normalization.borrow().table_text_reflowed(table)
++        {
++            use crate::renderer::float_placement::{
++                saved_inline_no_adjust_row_heights, saved_stacked_float_row_heights,
++            };
++            if let Some(rows) = saved_inline_no_adjust_row_heights(table, self.dpi)
++                .or_else(|| saved_stacked_float_row_heights(table, self.dpi))
++            {
++                return rows;
++            }
++        }
+         if let Some(mt) = measured_table {
+             let picture_frame = (self.profile.get().hwpx_stored_layout()
+                 && !self.profile.get().session_edited())
+@@ -16897,6 +16913,9 @@
+         {
+             return false;
+         }
++        if self.saved_complete_row_frame_boundary(table, row, cut, styles).is_some() {
++            return true;
++        }
+         if (Self::saved_nested_inline_opening_row_band_hu(table, row).is_some()
+             && self.saved_nested_inline_owner_opening_frame_height(
+                 table, 0, row + 1, &[], cut, styles,
+@@ -19829,6 +19848,7 @@
+                 || self.profile.get().hwp5_stored_pagination_layout(),
+             self.profile.get().session_edited(),
+             self.render_normalization.borrow().table_text_reflowed(child),
++            self.profile.get().hwpx_stored_layout(),
+         )?;
+         if !stored_float_frame_owner_is_original(para)
+             || !stored_float_frame_owner_is_original(next)

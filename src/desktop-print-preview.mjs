@@ -46,7 +46,7 @@ body.pwh-print-ui .pwh-print-sheet .page{position:absolute!important;break-after
 export async function showPwhPrintPreview(view,metadata={}){
  const doc=view.document,native=view.pwhNative;
  if(!native?.getPrinters||!native?.printDocument)throw Error('Pwh 인쇄 연결을 확인하지 못했습니다.');
- const originals=[...doc.querySelectorAll('body>.page')];
+ let originals=[...doc.querySelectorAll('body>.page')];
  if(!originals.length)throw Error('인쇄할 문서가 없습니다.');
  const pages=originals.map((el,index)=>{
   const style=view.getComputedStyle(el),original=metadata.pages?.[index],physical=metadata.printPages?.[index];
@@ -54,6 +54,7 @@ export async function showPwhPrintPreview(view,metadata={}){
   return {widthMm:physical?.widthMm??snap(parseFloat(style.width)*25.4/96),heightMm:physical?.heightMm??snap(parseFloat(style.height)*25.4/96),sectionIndex:original?.sectionIndex??0};
  });
  const context={pages,currentPage:metadata.currentPage||0,selectedPages:metadata.selectedPages||[]};
+ const originalLayout={originals, ...context};
  const name=metadata.name||doc.title.replace(/\s*[—–-]\s*인쇄.*$/,'');
  doc.title='인쇄';doc.body.className='pwh-print-ui';
  const style=doc.createElement('style');style.textContent=CSS;doc.head.append(style);
@@ -79,6 +80,8 @@ export async function showPwhPrintPreview(view,metadata={}){
    <label class="pwh-print-field"><span>모아 찍기</span><select id="pwh-per-sheet"><option value="1">1쪽</option><option value="2">2쪽</option><option value="4">4쪽</option><option value="6">6쪽</option><option value="9">9쪽</option><option value="16">16쪽</option></select></label>
    <label class="pwh-print-field"><span>양면 인쇄</span><select id="pwh-duplex"><option value="simplex">단면</option><option value="longEdge">양면 · 긴 쪽 넘김</option><option value="shortEdge">양면 · 짧은 쪽 넘김</option></select></label>
    <label class="pwh-print-field"><input id="pwh-collate" type="checkbox" checked>한 부씩 인쇄</label>
+   <label class="pwh-print-field" id="pwh-print-font-field" hidden><input id="pwh-print-font" type="checkbox">문서에 지정된 대체 글꼴 사용</label>
+   <p id="pwh-print-font-status" class="pwh-print-message" aria-live="polite" hidden></p>
   </details>
   <p id="pwh-print-message" class="pwh-print-message" aria-live="polite"></p>
  </section>
@@ -95,7 +98,7 @@ export async function showPwhPrintPreview(view,metadata={}){
  root.querySelector('.pwh-print-filename').textContent=name;root.querySelector('.pwh-print-filename').title=name;
  $('pwh-range').querySelector('[value=selected]').disabled=!context.selectedPages.length;
  $('pwh-paper').firstElementChild.textContent=`문서 크기 (${pages[0].widthMm.toFixed(1)} × ${pages[0].heightMm.toFixed(1)} mm)`;
- let plan=null,sheetIndex=0,printing=false,finished=false,resolveResult;
+ let plan=null,sheetIndex=0,printing=false,loadingFonts=false,finished=false,resolveResult;
  const result=new Promise(resolve=>{resolveResult=resolve;});
  const finish=value=>{if(finished)return;finished=true;resolveResult(value);};
  view.addEventListener('beforeunload',()=>finish({ok:false,cancelled:true}),{once:true});
@@ -130,16 +133,51 @@ export async function showPwhPrintPreview(view,metadata={}){
   try{
    const copies=Number($('pwh-copies').value);if(!Number.isInteger(copies)||copies<1||copies>999)throw Error('인쇄 매수는 1~999를 입력해 주세요.');
    const indexes=selectedPrintPages($('pwh-range').value,context,$('pwh-range-text').value);
-   plan=createPrintPlan(pages,indexes,{paper:$('pwh-paper').value,orientation:$('pwh-orientation').value,fit:$('pwh-fit').value,perSheet:Number($('pwh-per-sheet').value)});
+   plan=createPrintPlan(context.pages,indexes,{paper:$('pwh-paper').value,orientation:$('pwh-orientation').value,fit:$('pwh-fit').value,perSheet:Number($('pwh-per-sheet').value)});
    sheetIndex=Math.min(sheetIndex,plan.sheets.length-1);holder.replaceChildren(sheetElement(plan.sheets[sheetIndex]));
    const numbers=plan.sheets[sheetIndex].placements.map(p=>p.pageIndex+1).join(', ');
    $('pwh-sheet-number').textContent=`${sheetIndex+1} / ${plan.sheets.length} 용지 · ${numbers}쪽`;
    $('pwh-prev').disabled=sheetIndex===0;$('pwh-next').disabled=sheetIndex===plan.sheets.length-1;
    root.querySelector('.pwh-print-total').textContent=`${plan.pageCount}쪽 · ${copies}부 · ${plan.sheets.length*copies}면`;
-   submit.disabled=printing||printer.disabled||!printer.value;zoomPreview();
+   submit.disabled=printing||loadingFonts||printer.disabled||!printer.value;zoomPreview();
   }catch(error){plan=null;submit.disabled=true;holder.replaceChildren();message.setAttribute('role','alert');message.textContent=error.message;}
  }
- root.querySelectorAll('select,input').forEach(el=>{el.addEventListener('change',render);if(el.tagName==='INPUT')el.addEventListener('input',render);});
+ root.querySelectorAll('select,input:not(#pwh-print-font)').forEach(el=>{el.addEventListener('change',render);if(el.tagName==='INPUT')el.addEventListener('input',render);});
+ if (metadata.fontSubstitutes) {
+  const checkbox = $('pwh-print-font'), status = $('pwh-print-font-status');
+  $('pwh-print-font-field').hidden = false;
+  status.hidden = false;
+  let alternate;
+  checkbox.addEventListener('change', async () => {
+   if (printing || loadingFonts || finished) return;
+   loadingFonts = checkbox.disabled = true;
+   status.textContent = checkbox.checked ? '대체 글꼴을 확인하고 있습니다.' : '';
+   render();
+   try {
+    if (checkbox.checked) alternate ??= await metadata.fontSubstitutes(view);
+    if (finished) return;
+    const layout = checkbox.checked ? alternate : originalLayout;
+    for (const face of alternate?.faces ?? []) {
+     if (checkbox.checked) doc.fonts.add(face);
+     else doc.fonts.delete(face);
+    }
+    originals = layout.originals;
+    Object.assign(context, {pages: layout.pages, currentPage: layout.currentPage, selectedPages: layout.selectedPages});
+    $('pwh-range').value = 'all';
+    $('pwh-range').querySelector('[value=selected]').disabled = !context.selectedPages.length;
+    const first = context.pages[0];
+    $('pwh-paper').firstElementChild.textContent = `문서 크기 (${first.widthMm.toFixed(1)} × ${first.heightMm.toFixed(1)} mm)`;
+    sheetIndex = 0;
+    status.textContent = checkbox.checked ? layout.status : '';
+   } catch (error) {
+    checkbox.checked = false;
+    status.textContent = error.message;
+   } finally {
+    loadingFonts = checkbox.disabled = false;
+    render();
+   }
+  });
+ }
  $('pwh-prev').onclick=()=>{sheetIndex--;render();};$('pwh-next').onclick=()=>{sheetIndex++;render();};
  const resize=new view.ResizeObserver(zoomPreview);resize.observe(canvas);result.finally(()=>resize.disconnect());
  submit.onclick=async()=>{

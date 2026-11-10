@@ -1,0 +1,110 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -16737,7 +16737,14 @@
+         &self, table: &crate::model::table::Table, row: usize, cell: usize, start: &[usize],
+         end: &[usize], styles: &ResolvedStyleSet,
+     ) -> Option<f64> {
+-        let (_, owner, frames) = self.saved_declared_nested_row_frames(table, row, styles)?;
++        let Some((_, owner, frames)) = self.saved_declared_nested_row_frames(table, row, styles) else {
++            if start.iter().any(|&cursor| cursor != 0)
++                || (!end.is_empty() && end != self.complete_row_cut(table, row, styles))
++            { return None; }
++            let frames = Self::saved_cell_source_frames(table.cells.get(cell)?)?;
++            let [(_, ink)] = frames.as_slice() else { return None; };
++            return Some(*ink as f64 * self.dpi / 7200.0);
++        };
+         if cell != owner { return None; }
+         let i = frames.iter().position(|(cut, _)| cut == start || (start.is_empty() && cut.iter().all(|&u| u == 0)))?;
+         if frames.get(i + 1).map_or(!end.is_empty(), |(next, _)| next != end) { return None; }
+@@ -16748,6 +16755,35 @@
+         let paragraph = units.get(frames[i].0[column])?.para_idx;
+         let (_, ink) = Self::saved_cell_source_frames(cell)?.into_iter().find(|&(start, _)| start == paragraph)?;
+         Some(ink as f64 * self.dpi / 7200.0)
++    }
++
++    // A whole original row can fit inside the physical page even if its
++    // requested blank space does not. The source content must fit in full.
++    fn saved_complete_float_row_ink(
++        &self, table: &crate::model::table::Table, row: usize,
++    ) -> Option<(f64, f64)> {
++        let order = Self::row_cut_cell_order(table, row);
++        if order.len() != usize::from(table.col_count) || Self::row_has_prior_rowspan_cover(table, row)
++            || self.render_normalization.borrow().table_text_reflowed(table)
++        { return None; }
++        let requested = table.cells[*order.first()?].height;
++        let mut has_float = false;
++        let mut minimum = 0.0f64;
++        for index in order {
++            let cell = &table.cells[index];
++            if cell.height != requested || cell.dirty_flag || cell.row_span != 1
++                || cell.col_span != 1 || cell.text_direction != 0
++            { return None; }
++            let frames = Self::saved_cell_source_frames(cell)?;
++            let [(_, ink)] = frames.as_slice() else { return None; };
++            has_float |= cell.paragraphs.iter().any(|p| matches!(p.controls.as_slice(),
++                [Control::Table(child)] if !child.common.treat_as_char));
++            let (_, _, top, bottom) = self.resolve_cell_padding(cell, table);
++            minimum = minimum.max(top + *ink as f64 * self.dpi / 7200.0 + bottom);
++        }
++        has_float.then_some((self.saved_frame_printable_row_height(
++            hwpunit_to_px(i32::try_from(requested).ok()?, self.dpi),
++        ), minimum))
+     }
+ 
+     #[allow(clippy::too_many_arguments)]
+@@ -16764,18 +16800,13 @@
+         { return None; }
+         let (first_row, last_row) = (first.nested_row?, last.nested_row?);
+         if first_row > last_row || !opening_first { return None; }
+-        let (declared, _, frames) = self.saved_declared_nested_row_frames(child, last_row, styles)?;
+-        let next = frames.iter().position(|(cut, _)| cut == &last_cut.end_cut)?;
+-        let current = next.checked_sub(1)?;
+         let initial = first.nested_table_fragment.as_ref().map_or(&[][..], |cut| cut.start_cut.as_slice());
+         let carried = carried.filter(|band| band.parent_row == row
+             && band.host_paragraph == last.para_idx && band.row == first_row
+             && band.saved_remaining.is_some());
+         let prior_height = if first_row == last_row {
+-            if initial != frames[current].0 || current == 0 { return None; }
+             0.0
+         } else {
+-            if current != 0 { return None; }
+             // Zero cursors select a complete row. Give it the same
+             // declared minimum as the recursive painter's whole-row path.
+             let first_height = carried.map_or_else(|| {
+@@ -16795,8 +16826,34 @@
+         let overhead = top + bottom + child_margins;
+         let unit = self.dpi / 600.0;
+         let next_capacity = ((physical_limit - bottom - overhead) / unit).ceil() * unit;
+-        let height = if first_row == last_row { carried?.height } else { next_capacity - prior_height };
+-        let remaining = if first_row == last_row { carried?.saved_remaining? } else { declared };
++        let height = if first_row == last_row && carried.is_some() {
++            carried?.height
++        } else {
++            next_capacity - prior_height
++        };
++        let Some((declared, _, frames)) = self.saved_declared_nested_row_frames(child, last_row, styles) else {
++            if first_row == last_row && initial.iter().any(|&cursor| cursor != 0) { return None; }
++            let (declared, ink) = self.saved_complete_float_row_ink(child, last_row)?;
++            if height + 0.1 < ink || height + 0.1 >= declared { return None; }
++            let units = self.cell_units(owner, parent, styles);
++            let completed = units.get(end - 1..)?.iter()
++                .take_while(|u| u.para_idx == last.para_idx && u.nested_row == Some(last_row))
++                .position(|u| u.nested_table_fragment.as_ref().is_some_and(|cut| cut.terminal))?;
++            let band = NestedRowBand {
++                parent_row: row, host_paragraph: last.para_idx, row: last_row, height,
++                content_height: None, saved_remaining: Some(height),
++            };
++            return Some((end + completed, band, None, prior_height + overhead + height));
++        };
++        let next = frames.iter().position(|(cut, _)| cut == &last_cut.end_cut)?;
++        let current = next.checked_sub(1)?;
++        let remaining = if first_row == last_row {
++            if initial != frames[current].0 || current == 0 { return None; }
++            carried?.saved_remaining?
++        } else {
++            if current != 0 { return None; }
++            declared
++        };
+         if height > next_capacity + 0.1 || height + 0.1 < frames[current].1 { return None; }
+         let after = remaining - height;
+         let following = frames.get(next + 1);

@@ -4,6 +4,7 @@ const projectionStart=source.indexOf('let projected_source_block_table = ');
 const projectionEnd=source.indexOf(';',projectionStart);
 if(projectionStart<0||projectionEnd<0)throw Error('Missing actual projection consumer');
 const projection=source.slice(projectionStart,projectionEnd+1);
+const hasHwpxBlankFrame = source.includes('allow_original_blank_boundary: bool');
 const code=`
 mod model {
  pub mod paragraph {
@@ -43,6 +44,26 @@ ${sourceBlock(source,'fn stored_float_frame_fits_original_body(')}
 ${sourceBlock(source,'fn stored_float_frame_owner_is_original(')}
 ${sourceBlock(source,'fn stored_float_frame_geometry_agrees(')}
 ${sourceBlock(source,'fn stored_float_anchor_has_leading_host_line(')}
+fn legacy_stored_leading_host_float_frame(p:&Paragraph,n:Option<&Paragraph>,t:&Table,stored:bool,edited:bool,reflowed:bool)->Option<StoredLeadingHostFloatFrame>{
+ stored_leading_host_float_frame(p,n,t,stored,edited,reflowed${hasHwpxBlankFrame ? ',false' : ''})
+}
+${hasHwpxBlankFrame ? `
+#[test]fn hwpx_blank_source_line_can_close_a_physically_separate_float(){
+ let(mut p,mut n)=subject();
+ table_mut(&mut p).common.allow_overlap=true;
+ n.text.clear();
+ assert!(stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false,true).is_some());
+ n.line_segs[0].vertical_pos+=3;
+ assert!(stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false,true).is_none());
+}
+#[test]fn hwpx_overlap_permission_does_not_authenticate_actual_overlap(){
+ let(mut p,mut n)=subject();
+ table_mut(&mut p).common.allow_overlap=true;
+ table_mut(&mut p).common.vertical_offset=500;
+ n.text.clear();n.line_segs[0].vertical_pos=6400;
+ assert!(stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false,true).is_none());
+}
+` : ''}
 fn line(vpos:i32)->LineSeg{LineSeg{vertical_pos:vpos,line_height:1100,segment_width:18000,line_spacing:600,tag:0}}
 fn paragraph(vpos:i32)->Paragraph{Paragraph{text:"VISIBLE".into(),para_shape_id:0,controls:vec![],line_segs:vec![line(vpos)],dirty:false,cell_format_vpos_dirty:false,source_frame_reflowed:false,layout_space_metrics:vec![]}}
 fn subject()->(Paragraph,Paragraph){let t=Table{row_count:3,page_break:TablePageBreak::RowBreak,measured_height:64.0,reflowed:false,common:Common{treat_as_char:false,flow_with_text:true,allow_overlap:false,text_wrap:TextWrap::TopAndBottom,vert_rel_to:VertRelTo::Para,vert_align:VertAlign::Top,height:4800,vertical_offset:1200},caption:None,cells:vec![Cell{dirty_flag:false,paragraphs:vec![paragraph(0)]}],outer_margin_top:0,outer_margin_bottom:0};let mut p=paragraph(1100);p.controls.push(Control::Table(Box::new(t)));(p,paragraph(7100))}
@@ -70,22 +91,22 @@ fn prove(p:&Paragraph,n:&Paragraph)->bool{stored_float_anchor_has_leading_host_l
 #[test]fn empty_visible_text_and_negative_successor_origin_reject_geometry_proof(){let(mut p,mut n)=subject();p.text=" ".into();assert!(!prove(&p,&n));p.text="VISIBLE".into();n.text="".into();assert!(!prove(&p,&n));n.text="VISIBLE".into();n.line_segs[0].vertical_pos=-1;assert!(!prove(&p,&n));}
 
 fn physical_subject()->(Paragraph,Paragraph){let(mut p,mut n)=subject();p.line_segs[0].vertical_pos=1800;p.line_segs[0].line_height=1200;let t=table_mut(&mut p);t.common.vertical_offset=1400;t.common.height=5000;t.outer_margin_top=100;t.outer_margin_bottom=200;n.line_segs[0].vertical_pos=8500;(p,n)}
-#[test]fn one_source_witness_reserves_the_exact_frame_for_measure_and_paint(){let(p,n)=physical_subject();let source=stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false).unwrap();assert_eq!(source.table_top_hu,1500);assert_eq!(source.occupied_bottom_hu,6700);let frame=source.resolve(200.0,96.0).unwrap();let host_advance=frame.table_top-200.0;let table_advance=frame.occupied_bottom-frame.table_top;assert!((host_advance+table_advance-6700.0/75.0).abs()<1e-10);assert!((frame.table_top-220.0).abs()<1e-10);assert!((table_advance-5200.0/75.0).abs()<1e-10);}
-#[test]fn trailing_line_spacing_does_not_move_a_source_closed_object(){for spacing in [0,100,233,600,4000]{let(mut p,n)=physical_subject();p.line_segs[0].line_spacing=spacing;let frame=stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false).unwrap().resolve(0.0,96.0).unwrap();assert!((frame.table_top-20.0).abs()<1e-10);assert!((frame.occupied_bottom-(6700.0/75.0)).abs()<1e-10);assert!(frame.table_top>=1200.0/75.0);}}
-#[test]fn only_unused_trailing_spacing_may_be_reclaimed(){let(mut p,mut n)=physical_subject();table_mut(&mut p).common.vertical_offset=1000;n.line_segs[0].vertical_pos=8100;assert!(!prove(&p,&n));table_mut(&mut p).common.vertical_offset=1100;n.line_segs[0].vertical_pos=8200;let frame=stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false).unwrap();assert_eq!(frame.table_top_hu,1200);}
+#[test]fn one_source_witness_reserves_the_exact_frame_for_measure_and_paint(){let(p,n)=physical_subject();let source=legacy_stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false).unwrap();assert_eq!(source.table_top_hu,1500);assert_eq!(source.occupied_bottom_hu,6700);let frame=source.resolve(200.0,96.0).unwrap();let host_advance=frame.table_top-200.0;let table_advance=frame.occupied_bottom-frame.table_top;assert!((host_advance+table_advance-6700.0/75.0).abs()<1e-10);assert!((frame.table_top-220.0).abs()<1e-10);assert!((table_advance-5200.0/75.0).abs()<1e-10);}
+#[test]fn trailing_line_spacing_does_not_move_a_source_closed_object(){for spacing in [0,100,233,600,4000]{let(mut p,n)=physical_subject();p.line_segs[0].line_spacing=spacing;let frame=legacy_stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false).unwrap().resolve(0.0,96.0).unwrap();assert!((frame.table_top-20.0).abs()<1e-10);assert!((frame.occupied_bottom-(6700.0/75.0)).abs()<1e-10);assert!(frame.table_top>=1200.0/75.0);}}
+#[test]fn only_unused_trailing_spacing_may_be_reclaimed(){let(mut p,mut n)=physical_subject();table_mut(&mut p).common.vertical_offset=1000;n.line_segs[0].vertical_pos=8100;assert!(!prove(&p,&n));table_mut(&mut p).common.vertical_offset=1100;n.line_segs[0].vertical_pos=8200;let frame=legacy_stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false).unwrap();assert_eq!(frame.table_top_hu,1200);}
 #[test]fn negative_trailing_spacing_is_not_authenticated(){let(mut p,n)=physical_subject();p.line_segs[0].line_spacing=-1;assert!(!prove(&p,&n));}
-#[test]fn resolve_rejects_invalid_runtime_origins_and_scale(){let(p,n)=physical_subject();let frame=stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false).unwrap();for dpi in [0.0,-1.0,f64::NAN,f64::INFINITY]{assert!(frame.resolve(0.0,dpi).is_none());}for origin in [f64::NAN,f64::INFINITY,f64::NEG_INFINITY]{assert!(frame.resolve(origin,96.0).is_none());}}
-#[test]fn source_frame_scales_once_and_never_uses_a_rendered_successor(){let(p,n)=physical_subject();let frame=stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false).unwrap();for dpi in [72.0,96.0,150.0,300.0]{let resolved=frame.resolve(50.0,dpi).unwrap();assert!((resolved.table_top-50.0-1500.0*dpi/7200.0).abs()<1e-10);assert!((resolved.occupied_bottom-50.0-6700.0*dpi/7200.0).abs()<1e-10);assert!(resolved.stored_successor_line_origin.is_none());}}
+#[test]fn resolve_rejects_invalid_runtime_origins_and_scale(){let(p,n)=physical_subject();let frame=legacy_stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false).unwrap();for dpi in [0.0,-1.0,f64::NAN,f64::INFINITY]{assert!(frame.resolve(0.0,dpi).is_none());}for origin in [f64::NAN,f64::INFINITY,f64::NEG_INFINITY]{assert!(frame.resolve(origin,96.0).is_none());}}
+#[test]fn source_frame_scales_once_and_never_uses_a_rendered_successor(){let(p,n)=physical_subject();let frame=legacy_stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false).unwrap();for dpi in [72.0,96.0,150.0,300.0]{let resolved=frame.resolve(50.0,dpi).unwrap();assert!((resolved.table_top-50.0-1500.0*dpi/7200.0).abs()<1e-10);assert!((resolved.occupied_bottom-50.0-6700.0*dpi/7200.0).abs()<1e-10);assert!(resolved.stored_successor_line_origin.is_none());}}
 
 #[test]fn measurement_must_still_match_the_declared_physical_body(){let body=5000.0/75.0;assert!(stored_float_frame_geometry_agrees(5000,body,96.0,[0.0;3]));assert!(stored_float_frame_geometry_agrees(5000,body+1.0/75.0,96.0,[0.0;3]));assert!(!stored_float_frame_geometry_agrees(5000,body+3.0/75.0,96.0,[0.0;3]));for bad in [f64::NAN,f64::INFINITY,0.0,-1.0]{assert!(!stored_float_frame_geometry_agrees(5000,bad,96.0,[0.0;3]));}}
 #[test]fn paragraph_margins_require_another_explicit_source_contract(){let body=5000.0/75.0;for index in 0..3{for value in [1.0,-1.0,f64::NAN,f64::INFINITY]{let mut spacing=[0.0;3];spacing[index]=value;assert!(!stored_float_frame_geometry_agrees(5000,body,96.0,spacing));}}}
 
 fn composed(p:&Paragraph)->ComposedLine{let l=&p.line_segs[0];ComposedLine{runs:vec![ComposedTextRun{text:p.text.clone()}],line_height:l.line_height,segment_width:l.segment_width,line_spacing:l.line_spacing,char_start:0}}
-#[test]fn actual_width_recomposition_must_keep_one_original_visible_line(){let(p,n)=physical_subject();let frame=stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false).unwrap();let line=composed(&p);assert!(stored_float_frame_composed_line_agrees(&p,&[line.clone()],frame));assert!(!stored_float_frame_composed_line_agrees(&p,&[],frame));assert!(!stored_float_frame_composed_line_agrees(&p,&[line.clone(),line.clone()],frame));for field in 0..5{let mut changed=line.clone();match field{0=>changed.line_height+=1,1=>changed.segment_width-=1,2=>changed.char_start=1,3=>changed.line_spacing+=1,_=>changed.runs[0].text=" ".into()};assert!(!stored_float_frame_composed_line_agrees(&p,&[changed],frame));}}
-#[test]fn composed_visible_height_cannot_be_hidden_inside_a_shorter_frame(){let(mut p,n)=physical_subject();let mut frame=stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false).unwrap();let line=composed(&p);frame.table_top_hu=999;assert!(!stored_float_frame_composed_line_agrees(&p,&[line],frame));p.line_segs[0].line_height=0;let line=composed(&p);assert!(!stored_float_frame_composed_line_agrees(&p,&[line],frame));}
+#[test]fn actual_width_recomposition_must_keep_one_original_visible_line(){let(p,n)=physical_subject();let frame=legacy_stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false).unwrap();let line=composed(&p);assert!(stored_float_frame_composed_line_agrees(&p,&[line.clone()],frame));assert!(!stored_float_frame_composed_line_agrees(&p,&[],frame));assert!(!stored_float_frame_composed_line_agrees(&p,&[line.clone(),line.clone()],frame));for field in 0..5{let mut changed=line.clone();match field{0=>changed.line_height+=1,1=>changed.segment_width-=1,2=>changed.char_start=1,3=>changed.line_spacing+=1,_=>changed.runs[0].text=" ".into()};assert!(!stored_float_frame_composed_line_agrees(&p,&[changed],frame));}}
+#[test]fn composed_visible_height_cannot_be_hidden_inside_a_shorter_frame(){let(mut p,n)=physical_subject();let mut frame=legacy_stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false).unwrap();let line=composed(&p);frame.table_top_hu=999;assert!(!stored_float_frame_composed_line_agrees(&p,&[line],frame));p.line_segs[0].line_height=0;let line=composed(&p);assert!(!stored_float_frame_composed_line_agrees(&p,&[line],frame));}
 
-#[test]fn original_source_origin_and_whole_occupied_end_must_fit_the_physical_body(){let(p,n)=subject();let frame=stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false).unwrap();for page in [2500,4000,6000]{assert!(!stored_float_frame_fits_original_body(&p,frame,page as f64/75.0,96.0));}for page in [7100,7200,9300]{assert!(stored_float_frame_fits_original_body(&p,frame,page as f64/75.0,96.0));}assert!(!stored_float_frame_fits_original_body(&p,frame,6000.0/75.0,96.0),"The object alone fits, but its real source origin and preceding offset do not");}
-#[test]fn missing_or_invalid_physical_body_is_not_a_source_fit_estimate(){let(p,n)=subject();let frame=stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false).unwrap();for height in [0.0,-1.0,f64::NAN,f64::INFINITY]{assert!(!stored_float_frame_fits_original_body(&p,frame,height,96.0));}}
+#[test]fn original_source_origin_and_whole_occupied_end_must_fit_the_physical_body(){let(p,n)=subject();let frame=legacy_stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false).unwrap();for page in [2500,4000,6000]{assert!(!stored_float_frame_fits_original_body(&p,frame,page as f64/75.0,96.0));}for page in [7100,7200,9300]{assert!(stored_float_frame_fits_original_body(&p,frame,page as f64/75.0,96.0));}assert!(!stored_float_frame_fits_original_body(&p,frame,6000.0/75.0,96.0),"The object alone fits, but its real source origin and preceding offset do not");}
+#[test]fn missing_or_invalid_physical_body_is_not_a_source_fit_estimate(){let(p,n)=subject();let frame=legacy_stored_leading_host_float_frame(&p,Some(&n),table(&p),true,false,false).unwrap();for height in [0.0,-1.0,f64::NAN,f64::INFINITY]{assert!(!stored_float_frame_fits_original_body(&p,frame,height,96.0));}}
 
 #[test]fn current_composition_metrics_reject_unchanged_source_tags(){
  let(mut p,mut n)=subject();assert!(stored_float_frame_owner_is_original(&p));
@@ -116,6 +137,8 @@ impl Engine{
  ${sourceBlock(source,'fn closed_stored_nested_float_frame(')}
  fn project(&self,table:&Table,cell:&Cell,comp:&Composed,styles:&ResolvedStyleSet)->bool{
   let pi=0;let p=&cell.paragraphs[pi];
+  // These cases model a leading host, before its block.
+  let stored_displaced_host=false;
   ${projection}
   projected_source_block_table
  }

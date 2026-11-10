@@ -1,0 +1,187 @@
+--- a/src/renderer/float_placement.rs
++++ b/src/renderer/float_placement.rs
+@@ -127,10 +127,19 @@
+     Some(line_height.max(table_height))
+ }
+ 
+-/// A first cell line can be displaced below the table it anchors. Its saved
++/// A cell line can be displaced below the table it anchors. Its saved
+ /// start independently closes the measured table body plus both outer margins.
+ pub(crate) fn stored_cell_line_after_nested_table(
+     para: &Paragraph,
++    measure_band: impl FnOnce(&Table) -> f64,
++    dpi: f64,
++) -> Option<&crate::model::paragraph::LineSeg> {
++    stored_cell_line_after_nested_table_at(para, 0, measure_band, dpi)
++}
++
++pub(crate) fn stored_cell_line_after_nested_table_at(
++    para: &Paragraph,
++    origin: i64,
+     measure_band: impl FnOnce(&Table) -> f64,
+     dpi: f64,
+ ) -> Option<&crate::model::paragraph::LineSeg> {
+@@ -156,8 +165,8 @@
+     }
+     let band = i64::from(table.common.height)
+         + i64::from(table.outer_margin_top) + i64::from(table.outer_margin_bottom);
+-    (band == i64::from(line.vertical_pos)
+-        && (measure_band(table) - hwpunit_to_px(line.vertical_pos, dpi)).abs() <= hwpunit_to_px(2, dpi))
++    (band == i64::from(line.vertical_pos) - origin
++        && (measure_band(table) - band as f64 * dpi / 7200.0).abs() <= hwpunit_to_px(2, dpi))
+         .then_some(line)
+ }
+ 
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -16555,11 +16555,15 @@
+             child, last_row, &fragment.end_cut, styles,
+         );
+         let leaf_ink = self.saved_nested_leaf_restart_ink(child, last_row, &fragment.end_cut, styles);
++        let closed_object_height = self.saved_complete_row_frame(
++            child, last_row, &fragment.end_cut, styles,
++        ).filter(|&(_, owns_object)| owns_object).map(|(height, _)| hwpunit_to_px(height as i32, self.dpi));
+         if first.para_idx != last.para_idx || first_row >= last_row || fragment.terminal
+             || !Self::stored_nested_outer_margin_host(host, child)
+             || child.outer_margin_top < 0 || child.outer_margin_bottom < 0
+             || !(same_paragraph_restart || terminal_plain_restart || inline_restart
+-                || carried_plain_boundary || anchored_restart || leaf_ink.is_some() || parallel_restart)
++                || carried_plain_boundary || anchored_restart || leaf_ink.is_some()
++                || parallel_restart || closed_object_height.is_some())
+         { return None; }
+         if same_paragraph_restart {
+             if initial.iter().any(|&cursor| cursor != 0)
+@@ -16571,7 +16575,8 @@
+                 return None;
+             }
+         }
+-        let min = leaf_ink.or_else(|| Self::row_cut_cell_order(child, last_row).into_iter().zip(&fragment.end_cut)
++        let min = leaf_ink.or(closed_object_height)
++            .or_else(|| Self::row_cut_cell_order(child, last_row).into_iter().zip(&fragment.end_cut)
+             .try_fold(0.0f64, |height, (index, &count)| {
+                 if count == 0 { return Some(height); }
+                 let owner = &child.cells[index];
+@@ -16626,8 +16631,11 @@
+             + spacing * (last_row - first_row) as f64 + top;
+         let margins = hwpunit_to_px(i32::from(child.outer_margin_top), self.dpi)
+             + hwpunit_to_px(i32::from(child.outer_margin_bottom), self.dpi);
+-        let frame = physical_limit - bottom;
+-        let opening = frame - before - margins - bottom;
++        let available = physical_limit - bottom;
++        let overhead = before + margins + bottom;
++        let opening = closed_object_height.unwrap_or(available - overhead);
++        let frame = opening + overhead;
++        if frame > available + hwpunit_to_px(2, self.dpi) { return None; }
+         let full = *heights.get(last_row)?;
+         let remaining = if inline_restart {
+             (full - opening).min(frame - top - margins - bottom)
+@@ -16658,7 +16666,9 @@
+             if measured < opening { return None; }
+             return Some((end, band, None, frame));
+         }
+-        if anchored_restart || leaf_ink.is_some() || parallel_restart { return Some((end, band, None, frame)); }
++        if anchored_restart || leaf_ink.is_some() || parallel_restart || closed_object_height.is_some() {
++            return Some((end, band, None, frame));
++        }
+         if inline_restart && remaining < natural {
+             // The following object's original box establishes its own frame.
+             // The declared residual has no authority over that larger object.
+@@ -19097,6 +19107,13 @@
+         &self, table: &crate::model::table::Table, row: usize,
+         cut: &[usize], styles: &ResolvedStyleSet,
+     ) -> Option<i64> {
++        self.saved_complete_row_frame(table, row, cut, styles).map(|(height, _)| height)
++    }
++
++    fn saved_complete_row_frame(
++        &self, table: &crate::model::table::Table, row: usize,
++        cut: &[usize], styles: &ResolvedStyleSet,
++    ) -> Option<(i64, bool)> {
+         if !self.profile.get().hwpx_stored_layout() || self.profile.get().session_edited()
+             || table.common.treat_as_char || table.page_break != TablePageBreak::RowBreak
+             || !crate::renderer::float_placement::is_para_topbottom_float(&table.common)
+@@ -19120,6 +19137,7 @@
+             return None;
+         }
+         let mut next_owners = 0;
++        let mut owns_closed_object = false;
+         for (cell, &index) in cells.iter().zip(cut) {
+             let units = self.cell_units(cell, table, styles);
+             if index > units.len() { return None; }
+@@ -19133,20 +19151,20 @@
+                 return None;
+             }
+             if Self::saved_nested_inline_opening_owner(cell, current, i64::from(requested)).is_none() {
+-                Self::saved_contiguous_plain_frame_opening(cell, current)?;
++                owns_closed_object |= self.saved_contiguous_frame_opening(cell, table, current, styles)?;
+             }
+             next_owners += 1;
+         }
+-        (next_owners > 0).then_some(i64::from(requested))
+-    }
+-
+-    // A complete, original plain-text prefix and an exact adjacent line
+-    // after the reset establish two distinct stored source frames. The cut
+-    // has already been chosen by pagination before reserving row geometry.
+-    fn saved_contiguous_plain_frame_opening(
+-        cell: &crate::model::table::Cell,
+-        unit: &CellUnit,
+-    ) -> Option<()> {
++        (next_owners > 0).then_some((i64::from(requested), owns_closed_object))
++    }
++
++    // Contiguous stored advances on both sides of a reset prove the source
++    // boundary. An earlier floating object owns space only when its measured
++    // box exactly explains the displacement of the line that anchors it.
++    fn saved_contiguous_frame_opening(
++        &self, cell: &crate::model::table::Cell, table: &crate::model::table::Table,
++        unit: &CellUnit, styles: &ResolvedStyleSet,
++    ) -> Option<bool> {
+         if !unit.hard_break_before || !unit.page_frame_reset_before
+             || unit.vis_start != 0 || unit.vis_end != 1
+             || unit.mixed_nested_fragment || unit.non_inline_control_range.is_some()
+@@ -19165,10 +19183,41 @@
+                 && line.line_height > 0 && line.line_spacing >= 0)
+                 .then_some(expected + i64::from(line.line_height) + i64::from(line.line_spacing))
+         };
+-        cell.paragraphs.get(..unit.para_idx)?.iter().try_fold(0, |expected, paragraph| stored(paragraph, expected))?;
++        let opening = cell.paragraphs.get(..unit.para_idx)?;
++        let mut owns_object = false;
++        let advance = opening.iter().try_fold(0, |expected, paragraph| {
++            if let Some(next) = stored(paragraph, expected) { return Some(next); }
++            let line = crate::renderer::float_placement::stored_cell_line_after_nested_table_at(
++                paragraph, expected, |child| self.calc_nested_table_height(child, styles), self.dpi,
++            )?;
++            if line.line_spacing < 0 { return None; }
++            owns_object = true;
++            Some(i64::from(line.vertical_pos) + i64::from(line.line_height) + i64::from(line.line_spacing))
++        })?;
+         let next = stored(cell.paragraphs.get(unit.para_idx)?, 0)?;
+-        stored(cell.paragraphs.get(unit.para_idx + 1)?, next)?;
+-        Some(())
++        let successor = cell.paragraphs.get(unit.para_idx + 1)?;
++        if !owns_object {
++            stored(successor, next)?;
++            return Some(false);
++        }
++        let last = opening.last()?.line_segs.first()?;
++        let padded_advance = advance + i64::from(cell.effective_vertical_padding_hu(&table.padding));
++        let height = i64::from(cell.height);
++        if height < padded_advance - i64::from(last.line_spacing) || height > padded_advance {
++            return None;
++        }
++        let [Control::Table(inline)] = successor.controls.as_slice() else { return None; };
++        let [line] = successor.line_segs.as_slice() else { return None; };
++        let inline_band = i64::from(inline.common.height) + i64::from(inline.outer_margin_top)
++            + i64::from(inline.outer_margin_bottom);
++        (successor.text.trim().is_empty() && inline.common.treat_as_char && inline.common.flow_with_text
++            && !inline.common.allow_overlap && inline.caption.is_none()
++            && inline.outer_margin_top >= 0 && inline.outer_margin_bottom >= 0
++            && i64::from(line.vertical_pos) == next && line.line_height > 0
++            && i64::from(line.line_height) == inline_band
++            && (self.calc_nested_table_height(inline, styles)
++                - hwpunit_to_px(line.line_height, self.dpi)).abs() <= hwpunit_to_px(2, self.dpi))
++            .then_some(true)
+     }
+ 
+     /// A stored flag alone is not physical-page authority. Reuse the exact

@@ -1,0 +1,68 @@
+--- a/src/document_core/font_environment.rs
++++ b/src/document_core/font_environment.rs
+@@ -31,4 +31,44 @@
+     pub fn font_environment(&self) -> Option<&FontEnvironment> {
+         self.font_environment.as_ref()
+     }
++
++    /// Read document-declared substitutes that can be selected by a single
++    /// family mapping. Conflicting language slots and embedded faces stay as-is.
++    pub(crate) fn declared_print_font_substitutions(&self) -> String {
++        let mut families = std::collections::BTreeMap::new();
++        for font in self.document.doc_info.font_faces.iter().flatten() {
++            let replacement = font.subst_font.as_ref()
++                .filter(|target| !font.is_embedded && !target.is_embedded && target.font_type == 1)
++                .map(|target| target.face.trim())
++                .filter(|face| !face.is_empty() && *face != font.name);
++            families.entry(font.name.as_str())
++                .and_modify(|current| {
++                    if *current != replacement {
++                        *current = None;
++                    }
++                })
++                .or_insert(replacement);
++        }
++        let pairs: Vec<_> = families.into_iter()
++            .filter_map(|(from, to)| to.map(|to| (from, to)))
++            .collect();
++        serde_json::to_string(&pairs).expect("font name pairs are serializable")
++    }
++
++    /// Capture the current source and editing provenance for one print window.
++    /// The print window paginates this copy when it sets its font environment.
++    pub(crate) fn print_font_snapshot(&self) -> Self {
++        let mut snapshot = Self::new_empty();
++        snapshot.document = self.document.clone();
++        snapshot.font_environment = self.font_environment.clone();
++        snapshot.dpi = self.dpi;
++        snapshot.fallback_font = self.fallback_font.clone();
++        snapshot.respect_vpos_reset = self.respect_vpos_reset;
++        snapshot.hangul2024_compat = self.hangul2024_compat;
++        snapshot.clip_enabled = self.clip_enabled;
++        snapshot.restore_text_reflowed_tables_from_snapshot(
++            &self.text_reflowed_table_paths_for_snapshot(),
++        );
++        snapshot
++    }
+ }
+--- a/src/wasm_api.rs
++++ b/src/wasm_api.rs
+@@ -1073,6 +1073,18 @@
+         self.core
+             .set_font_environment(environment)
+             .map_err(|e| JsValue::from_str(&e.to_string()))
++    }
++
++    #[wasm_bindgen(js_name = getDeclaredPrintFontSubstitutions)]
++    pub fn get_declared_print_font_substitutions(&self) -> String {
++        self.core.declared_print_font_substitutions()
++    }
++
++    #[wasm_bindgen(js_name = createPrintFontSnapshot)]
++    pub fn create_print_font_snapshot(&self) -> HwpDocument {
++        HwpDocument {
++            core: self.core.print_font_snapshot(),
++        }
+     }
+ 
+     /// CanvasKit direct replay 정책 진단을 JSON 문자열로 반환한다.

@@ -110,6 +110,8 @@ def verify_core(root, project, lock):
         data = regular(root / name); item = record['files'][name]
         if len(data) != item['size'] or sha(data) != item['sha256']: raise ValueError('Core output digest mismatch')
         files[name] = data
+    if re.search(rb'(?i)(?:[a-z]:[\\/]+users[\\/]+|/(?:users|home)/)[^\x00-\x20\\/]+[\\/]', files['rhwp_bg.wasm']):
+        raise ValueError('User-home path in the compiled WASM core')
     if sha(files['rhwp.js']) != record.get('expectedGlueSha256', record.get('unchangedGlueSha256')): raise ValueError('Core glue differs from verified ABI')
     return record, raw, files, patches
 
@@ -228,6 +230,7 @@ def main():
                       'tests/cell-text-owned-undo.test.mjs', 'tests/engine-cursor/cell-text-owned-undo.mjs', 'tests/cell-text-layout-history.test.mjs',
                       'tests/desktop-cell-caret-browser.test.mjs', 'tests/desktop-pointer-hit-browser.test.mjs', 'tests/desktop-owned-undo-browser.test.mjs', 'tests/desktop-cell-layout-history-browser.test.mjs',
                       'tests/table-bbox-query.test.mjs', 'tests/hwpx-parallel-row-page-edge.test.mjs',
+                      'tests/stored-inline-reset-suffix.test.mjs',
                       'docs/verification/r14-regression-inputs.json', 'tests/layout-gates.test.mjs', 'tests/ci-core-reference.test.mjs',
                       'tests/compare-pages.test.py', 'tests/fixtures/rowbreak-table/synthetic-rowbreak-single-line-control.hwpx')
     for name in fidelity_tests:

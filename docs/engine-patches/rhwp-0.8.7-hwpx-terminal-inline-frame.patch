@@ -1,0 +1,252 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -3019,7 +3019,7 @@
+         resolved_table_origin: Option<(Option<f64>, f64)>,
+         host_char_border_fill_id: TableCharBorder,
+     ) -> f64 {
+-        self.layout_table_with_wrapper_margin(
++        self.layout_table_in_frame(
+             tree,
+             col_node,
+             table,
+@@ -3046,11 +3046,12 @@
+             resolved_table_origin,
+             host_char_border_fill_id,
+             false,
++            false,
+         )
+     }
+ 
+     #[allow(clippy::too_many_arguments)]
+-    fn layout_table_with_wrapper_margin(
++    pub(super) fn layout_table_in_frame(
+         &self,
+         tree: &mut PageLayoutContext,
+         col_node: &mut RenderNode,
+@@ -3078,6 +3079,7 @@
+         resolved_table_origin: Option<(Option<f64>, f64)>,
+         host_char_border_fill_id: TableCharBorder,
+         wrapper_margin_already_applied: bool,
++        convert_stored_inline_height: bool,
+     ) -> f64 {
+         // [#6929] 진입 시점의 단 상태 — 이후 이 함수가 자식을 붙이므로 먼저 찍어 둔다.
+         let column_is_empty_on_entry = col_node.children.is_empty();
+@@ -3289,7 +3291,7 @@
+                         // 글자처럼 상자는 x 를 줄 배치가 준 inline_x_override 로 받으므로 그 값도 옮긴다.
+                         let inner_inline_x = inline_x_override.map(|x| x + pad_l + om_l);
+ 
+-                        let y_end = self.layout_table_with_wrapper_margin(
++                        let y_end = self.layout_table_in_frame(
+                             tree,
+                             col_node,
+                             nested,
+@@ -3316,6 +3318,7 @@
+                             None,
+                             TableCharBorder::default(),
+                             true,
++                            false,
+                         );
+ 
+                         // 펼친 자식은 가시 내용의 최소 높이를 결정하지만 더 큰 외곽 선언
+@@ -3377,7 +3380,7 @@
+ 
+         // ── 1. 열 폭 + 행 높이 계산 ──
+         let mut col_widths = self.resolve_column_widths(table, col_count);
+-        let row_heights = self.resolve_row_heights(
++        let mut row_heights = self.resolve_row_heights(
+             table,
+             col_count,
+             row_count,
+@@ -3385,6 +3388,20 @@
+             styles,
+             depth > 0 || table.common.treat_as_char,
+         );
++        let row_spacing = if convert_stored_inline_height {
++            let declared = hwpunit_to_px(table.common.height as i32, self.dpi);
++            let measured = row_heights.iter().sum::<f64>() + cell_spacing * row_count.saturating_sub(1) as f64;
++            if (declared - measured).abs() <= hwpunit_to_px(1, self.dpi) {
++                for height in &mut row_heights {
++                    *height = self.saved_frame_printable_row_height(*height);
++                }
++                self.saved_frame_printable_row_height(cell_spacing)
++            } else {
++                cell_spacing
++            }
++        } else {
++            cell_spacing
++        };
+         if std::env::var("RHWP_DIAG_TAC").is_ok() {
+             let decl: Vec<f64> = table
+                 .cells
+@@ -3420,7 +3437,7 @@
+         let mut row_y = vec![0.0f64; row_count + 1];
+         for i in 0..row_count {
+             row_y[i + 1] =
+-                row_y[i] + row_heights[i] + if i + 1 < row_count { cell_spacing } else { 0.0 };
++                row_y[i] + row_heights[i] + if i + 1 < row_count { row_spacing } else { 0.0 };
+         }
+ 
+         // 부모 셀 조각이 전달한 viewport보다 큰 손자 표는, source-unit split이 따로
+@@ -16671,7 +16688,7 @@
+         Some(frames)
+     }
+ 
+-    fn saved_frame_printable_row_height(&self, height: f64) -> f64 {
++    pub(super) fn saved_frame_printable_row_height(&self, height: f64) -> f64 {
+         let sheet_points = self.current_page_height.get() * 72.0 / self.dpi;
+         if sheet_points.is_finite() && sheet_points >= 1.0 {
+             height * (sheet_points.floor() / sheet_points)
+--- a/src/renderer/layout.rs
++++ b/src/renderer/layout.rs
+@@ -288,8 +288,29 @@
+     (stored_y <= col_area.height + 60.0).then_some(col_area.y + stored_y)
+ }
+ 
+-/// A single source line owns an entire inline table when its occupied box
+-/// and the following source origin agree with the paragraph style.
++/// Find the original line whose height owns the whole inline table box.
++fn saved_inline_table_owner<'a>(
++    para: &'a Paragraph,
++    table: &crate::model::table::Table,
++) -> Option<&'a crate::model::paragraph::LineSeg> {
++    use crate::model::paragraph::LineSeg;
++    if !table.common.treat_as_char || table.caption.is_some()
++        || !matches!(table.common.text_wrap, TextWrap::TopAndBottom)
++        || table.outer_margin_top < 0 || table.outer_margin_bottom < 0
++        || !para.text.trim().is_empty()
++        || para.stored_text_partition_is_dirty() || para.source_frame_reflowed
++        || !matches!(para.controls.as_slice(), [Control::Table(owner)] if std::ptr::eq(owner.as_ref(), table))
++    {
++        return None;
++    }
++    let [line] = para.line_segs.as_slice() else { return None; };
++    let height = i64::from(table.common.height)
++        + i64::from(table.outer_margin_top) + i64::from(table.outer_margin_bottom);
++    (height > 0 && i64::from(line.line_height) == height && i64::from(line.text_height) == height
++        && line.tag & LineSeg::TAG_IMPLEMENTATION_PROPERTY == 0).then_some(line)
++}
++
++/// A following source origin can confirm the line's physical position.
+ fn saved_single_inline_table_band(
+     para: &Paragraph,
+     table: &crate::model::table::Table,
+@@ -298,27 +319,14 @@
+     col_area: &LayoutRect,
+     dpi: f64,
+ ) -> Option<(f64, f64)> {
+-    use crate::model::paragraph::LineSeg;
+-    if !table.common.treat_as_char || table.caption.is_some()
+-        || !matches!(table.common.text_wrap, TextWrap::TopAndBottom)
+-        || table.outer_margin_top < 0 || table.outer_margin_bottom < 0
+-        || !para.text.trim().is_empty()
+-        || para.stored_text_partition_is_dirty() || para.source_frame_reflowed
++    let line = saved_inline_table_owner(para, table)?;
++    let next = following.line_segs.first()?;
++    let advance = line.line_height.checked_add(line.line_spacing)?;
++    let gap = hwpunit_to_px(next.vertical_pos.checked_sub(line.vertical_pos)?, dpi);
++    if line.vertical_pos <= 0 || line.line_spacing < 0
+         || following.stored_text_partition_is_dirty() || following.source_frame_reflowed
+-        || !matches!(para.controls.as_slice(), [Control::Table(owner)] if std::ptr::eq(owner.as_ref(), table))
+-    {
+-        return None;
+-    }
+-    let [line] = para.line_segs.as_slice() else { return None; };
+-    let next = following.line_segs.first()?;
+-    let height = i64::from(table.common.height)
+-        + i64::from(table.outer_margin_top) + i64::from(table.outer_margin_bottom);
+-    let gap = hwpunit_to_px(next.vertical_pos.checked_sub(line.vertical_pos)?, dpi);
+-    if line.vertical_pos <= 0 || height <= 0 || line.line_spacing < 0
+-        || i64::from(line.line_height) != height || i64::from(line.text_height) != height
+-        || [line, next].iter().any(|l| l.tag & LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0)
+-        || (gap - hwpunit_to_px(i32::try_from(height).ok()?.checked_add(line.line_spacing)?, dpi)
+-            - spacing_after).abs() > hwpunit_to_px(1, dpi)
++        || next.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0
++        || (gap - hwpunit_to_px(advance, dpi) - spacing_after).abs() > hwpunit_to_px(1, dpi)
+     {
+         return None;
+     }
+@@ -328,6 +336,35 @@
+         col_area.y + start + hwpunit_to_px(i32::from(table.outer_margin_top), dpi),
+         col_area.y + end,
+     ))
++}
++
++/// Before a saved page restart, the preceding inline line can confirm
++/// a complete table's origin instead of using a following origin.
++fn saved_terminal_inline_table_top(
++    para: &Paragraph,
++    table: &crate::model::table::Table,
++    previous: &Paragraph,
++    following: &Paragraph,
++    col_area: &LayoutRect,
++    dpi: f64,
++) -> Option<f64> {
++    use crate::model::paragraph::{ColumnBreakType, LineSeg};
++    let line = saved_inline_table_owner(para, table)?;
++    let [Control::Table(preceding)] = previous.controls.as_slice() else { return None; };
++    let before = saved_inline_table_owner(previous, preceding)?;
++    let next = following.line_segs.first()?;
++    if table.row_count < 2 || line.vertical_pos <= 0 || before.vertical_pos < 0 || before.line_spacing < 0
++        || following.column_type != ColumnBreakType::Page || next.vertical_pos != 0
++        || following.stored_text_partition_is_dirty() || following.source_frame_reflowed
++        || next.tag & LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0
++        || before.vertical_pos.checked_add(before.line_height)?.checked_add(before.line_spacing)?
++            != line.vertical_pos
++    {
++        return None;
++    }
++    let end = hwpunit_to_px(line.vertical_pos.checked_add(line.line_height)?, dpi);
++    (end <= col_area.height).then_some(col_area.y
++        + hwpunit_to_px(line.vertical_pos + i32::from(table.outer_margin_top), dpi))
+ }
+ 
+ /// 저장 outer-box paint origin 보정의 layout 단계 안전문이다.
+@@ -12564,11 +12601,34 @@
+                                     || node.bbox.y + node.bbox.height <= top))
+                             .then_some(top)
+                     }).flatten();
+-                let table_y_start = saved_terminal_float_top.unwrap_or(table_y_start);
++                let source_inline_top = (is_tac && inline_pos.is_none()
++                    && profile.hwpx_stored_layout() && !profile.session_edited()
++                    && !self.render_normalization.borrow().table_text_reflowed(t))
++                    .then(|| {
++                        let previous = paragraphs.get(para_index.checked_sub(1)?)?;
++                        let following = paragraphs.get(para_index + 1)?;
++                        if styles.para_styles.get(previous.para_shape_id as usize)?.spacing_after != 0.0
++                            || para_style?.spacing_before != 0.0
++                        {
++                            return None;
++                        }
++                        let declared = hwpunit_to_px(i32::try_from(t.common.height).ok()?, self.dpi);
++                        if (table_visual_height - declared).abs() > hwpunit_to_px(1, self.dpi) {
++                            return None;
++                        }
++                        let source_top = self.saved_frame_printable_row_height(saved_terminal_inline_table_top(
++                            para, t, previous, following, col_area, self.dpi,
++                        )?);
++                        ((source_top - table_y_start).abs() <= hwpunit_to_px(i32::from(t.outer_margin_top), self.dpi)
++                            && col_node.children.iter().all(|node|
++                                !matches!(node.node_type, RenderNodeType::Table(_))
++                                    || node.bbox.y + node.bbox.height <= source_top)).then_some(source_top)
++                    }).flatten();
++                let table_y_start = source_inline_top.or(saved_terminal_float_top).unwrap_or(table_y_start);
+                 let table_visual_end = if tac_already_rendered_inline {
+                     table_y_start + table_visual_height
+                 } else {
+-                    self.layout_table(
++                    self.layout_table_in_frame(
+                         tree,
+                         col_node,
+                         t,
+@@ -12604,8 +12664,10 @@
+                                     saved_terminal_float_top.unwrap_or(col_area.y + p.table_top),
+                                 )
+                             })
+-                            .or_else(|| saved_terminal_float_top.map(|top| (None, top))),
++                            .or_else(|| source_inline_top.or(saved_terminal_float_top).map(|top| (None, top))),
+                         Self::standalone_table_char_border_fill(Some(para), t, styles),
++                        false,
++                        source_inline_top.is_some(),
+                     )
+                 };
+                 // [#4068] 단 맨 위 테두리 보정은 표 실물만 옮긴다 — 뒤 문단은 저장 흐름이

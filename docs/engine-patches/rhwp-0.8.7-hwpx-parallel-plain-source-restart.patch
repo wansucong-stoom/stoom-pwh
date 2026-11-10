@@ -1,0 +1,177 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -13353,6 +13353,12 @@
+                                     driver_units.iter().position(|unit|
+                                         self.saved_plain_line_restarts_inside_paragraph(row_cells[driver_index], unit))
+                                 }).flatten();
++                                let parallel_restart = if projected_source_block_table && driver_has_saved_frame
++                                    && row_units.iter().filter(|units| units.iter().any(|u| u.page_frame_reset_before))
++                                        .take(2).count() == 2
++                                {
++                                    self.saved_parallel_plain_restart_cut(nt, ri, styles)
++                                } else { None };
+                                 let mut driver_before = 0.0;
+ 
+                                 for (fragment_index, driver_unit) in driver_units.iter().enumerate()
+@@ -13426,6 +13432,18 @@
+                                             }
+                                         }
+                                     }
++                                    if let Some(cut) = &parallel_restart {
++                                        let restart = cut[driver_index];
++                                        let keep_side = |at, projected: &mut RowCut| {
++                                            for (current, &stored) in projected.iter_mut().zip(cut) {
++                                                *current = if at < restart { (*current).min(stored) }
++                                                    else if at > restart { (*current).max(stored) }
++                                                    else { stored };
++                                            }
++                                        };
++                                        keep_side(fragment_index, &mut start_cut);
++                                        keep_side(fragment_end, &mut end_cut);
++                                    }
+                                     let terminal = row_units
+                                         .iter()
+                                         .zip(end_cut.iter())
+@@ -13466,7 +13484,9 @@
+                                         || (reset_before && !projected_mixed_block_table && ri == 0 && fragment_index == 0);
+                                     let mut stored_frame_break_before =
+                                         driver_unit.stored_frame_break_before;
+-                                    if saved_fragment_cut.is_some() && fragment_index > 0 {
++                                    if (saved_fragment_cut.is_some() && fragment_index > 0)
++                                        || parallel_restart.as_ref().is_some_and(|cut| cut[driver_index] == fragment_index)
++                                    {
+                                         hard_break_before = true;
+                                         stored_frame_break_before = true;
+                                     }
+@@ -16511,7 +16531,10 @@
+         let (first_row, last_row) = (first.nested_row?, last.nested_row?);
+         let initial = first.nested_table_fragment.as_ref()
+             .map_or(&[][..], |cut| cut.start_cut.as_slice());
+-        let same_paragraph_restart = self.saved_nested_plain_line_restart_boundary(
++        let parallel_restart = self.saved_parallel_plain_restart_boundary(
++            child, last_row, &fragment.end_cut, styles,
++        );
++        let same_paragraph_restart = !parallel_restart && self.saved_nested_plain_line_restart_boundary(
+             child, last_row, &fragment.end_cut, styles,
+         );
+         let terminal_plain_restart = self.saved_nested_terminal_plain_line_restart(
+@@ -16536,7 +16559,7 @@
+             || !Self::stored_nested_outer_margin_host(host, child)
+             || child.outer_margin_top < 0 || child.outer_margin_bottom < 0
+             || !(same_paragraph_restart || terminal_plain_restart || inline_restart
+-                || carried_plain_boundary || anchored_restart || leaf_ink.is_some())
++                || carried_plain_boundary || anchored_restart || leaf_ink.is_some() || parallel_restart)
+         { return None; }
+         if same_paragraph_restart {
+             if initial.iter().any(|&cursor| cursor != 0)
+@@ -16635,7 +16658,7 @@
+             if measured < opening { return None; }
+             return Some((end, band, None, frame));
+         }
+-        if anchored_restart || leaf_ink.is_some() { return Some((end, band, None, frame)); }
++        if anchored_restart || leaf_ink.is_some() || parallel_restart { return Some((end, band, None, frame)); }
+         if inline_restart && remaining < natural {
+             // The following object's original box establishes its own frame.
+             // The declared residual has no authority over that larger object.
+@@ -17548,6 +17571,7 @@
+             || self.saved_terminal_inline_restart_boundary(table, row, cut, styles)
+             || self.saved_anchored_float_restart_boundary(table, row, cut, styles)
+             || self.saved_nested_plain_line_restart_boundary(table, row, cut, styles)
++            || self.saved_parallel_plain_restart_boundary(table, row, cut, styles)
+             || self.saved_nested_rowspan_band_at_cut(table, row, cut, styles).is_some()
+             || self.saved_closed_float_plain_resume(table, row, cut, styles)
+             || self.saved_resumed_fragment_row_height(table, row, cut, styles).is_some()
+@@ -19808,6 +19832,64 @@
+                 && resume.vertical_pos == 0 && resume.line_height > 0)
+     }
+ 
++    /// Two independent cells can prove one page boundary even if their
++    /// line advances differ or one restarts inside a paragraph.
++    fn saved_parallel_plain_restart_cut(
++        &self, table: &crate::model::table::Table, row: usize, styles: &ResolvedStyleSet,
++    ) -> Option<RowCut> {
++        let profile = self.profile.get();
++        if !profile.hwpx_stored_layout() || profile.hwp5_origin_hwpx() || profile.session_edited()
++            || table.common.treat_as_char || table.page_break != TablePageBreak::RowBreak
++            || self.render_normalization.borrow().table_text_reflowed(table)
++            || Self::row_has_prior_rowspan_cover(table, row)
++        { return None; }
++        let order = Self::row_cut_cell_order(table, row);
++        if order.len() < 2 || order.len() != usize::from(table.col_count) { return None; }
++        let mut cut = Vec::with_capacity(order.len());
++        let mut owners = 0;
++        for index in order {
++            let cell = &table.cells[index];
++            if cell.row_span != 1 || cell.col_span != 1 || cell.dirty_flag || cell.text_direction != 0
++                || !cell.paragraphs.iter().all(Self::stored_plain_cell_paragraph)
++            { return None; }
++            let units = self.cell_units(cell, table, styles);
++            if units.is_empty() { return None; }
++            let mut previous: Option<&crate::model::paragraph::LineSeg> = None;
++            let mut restart = None;
++            for (at, unit) in units.iter().enumerate() {
++                if unit.nested_row.is_some() || unit.mixed_nested_fragment
++                    || unit.non_inline_control_range.is_some() || unit.vis_end != unit.vis_start + 1
++                { return None; }
++                let line = cell.paragraphs.get(unit.para_idx)?.line_segs.get(unit.vis_start)?;
++                if line.line_height <= 0 || line.line_spacing < 0 || line.segment_width <= 0 {
++                    return None;
++                }
++                let expected = previous.map_or(0, |prev| i64::from(prev.vertical_pos)
++                    + i64::from(prev.line_height) + i64::from(prev.line_spacing));
++                if i64::from(line.vertical_pos) != expected {
++                    let before = previous?;
++                    if restart.is_some() || !unit.page_frame_reset_before
++                        || before.vertical_pos <= 0 || line.vertical_pos != 0
++                        || before.column_start != line.column_start
++                        || before.segment_width != line.segment_width
++                    { return None; }
++                    restart = Some(at);
++                    owners += 1;
++                }
++                previous = Some(line);
++            }
++            cut.push(restart.unwrap_or(units.len()));
++        }
++        (owners >= 2).then_some(cut)
++    }
++
++    pub(super) fn saved_parallel_plain_restart_boundary(
++        &self, table: &crate::model::table::Table, row: usize, cut: &[usize], styles: &ResolvedStyleSet,
++    ) -> bool {
++        !cut.is_empty() && self.saved_parallel_plain_restart_cut(table, row, styles)
++            .is_some_and(|source| source == cut)
++    }
++
+     fn nested_row_cut_source_frame_boundary(
+         &self,
+         table: &crate::model::table::Table,
+@@ -19818,6 +19900,7 @@
+         let plain = self.nested_row_cut_plain_source_frame_boundary(table, row, start_cut, styles);
+         if plain == Some(true) || self.saved_nested_plain_line_restart_boundary(table, row, start_cut, styles)
+             || self.saved_nested_leaf_restart_ink(table, row, start_cut, styles).is_some()
++            || self.saved_parallel_plain_restart_boundary(table, row, start_cut, styles)
+         {
+             return Some(true);
+         }
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -4029,7 +4029,9 @@
+                                                         nested_table, last, &cut.end_cut, styles,
+                                                     ) || self.saved_nested_leaf_restart_ink(
+                                                         nested_table, last, &cut.end_cut, styles,
+-                                                    ).is_some())
++                                                    ).is_some() || self.saved_parallel_plain_restart_boundary(
++                                                        nested_table, last, &cut.end_cut, styles,
++                                                    ))
+                                         })
+                                         .map(|_| {
+                                             let (_, body_y, _, body_height) = self.current_body_area.get();
+@@ -5959,6 +5961,7 @@
+             && end_row.checked_sub(1).is_some_and(|last| {
+                 self.saved_anchored_float_restart_boundary(table, last, end_cut, styles)
+                     || self.saved_nested_leaf_restart_ink(table, last, end_cut, styles).is_some()
++                    || self.saved_parallel_plain_restart_boundary(table, last, end_cut, styles)
+                     || self.saved_next_inline_line(table, last, end_cut, styles)
+                         .is_some_and(|(height, has_successor)| has_successor || height > row_heights[last])
+             });

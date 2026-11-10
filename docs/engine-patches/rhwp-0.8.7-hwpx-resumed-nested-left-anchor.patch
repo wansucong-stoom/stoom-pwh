@@ -1,0 +1,68 @@
+diff --git a/src/renderer/layout/table_partial.rs b/src/renderer/layout/table_partial.rs
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -30,10 +30,26 @@
+ use crate::model::bin_data::BinDataContent;
+ use crate::model::control::Control;
+ use crate::model::paragraph::Paragraph;
+-use crate::model::shape::{CaptionDirection, CommonObjAttr, HorzRelTo};
++use crate::model::shape::{CaptionDirection, CommonObjAttr, HorzAlign, HorzRelTo};
+ use crate::model::style::{Alignment, BorderLine};
+ use crate::model::table::{Cell, Table};
+ use crate::renderer::float_placement::native_multirow_internal_reset_rowbreak_anchor_advance_hu;
++
++/// The source cut has already moved the complete float past its host line.
++/// Resolve its zero-offset paragraph anchor before the centered fallback.
++fn resumed_para_left_table_anchor(
++    table: &Table, area: &LayoutRect, table_width: f64, dpi: f64,
++) -> Option<f64> {
++    if table.common.horz_rel_to != HorzRelTo::Para || table.common.horz_align != HorzAlign::Left
++        || table.common.horizontal_offset != 0
++        || table.outer_margin_left < 0 || table.outer_margin_right < 0
++    {
++        return None;
++    }
++    let left = hwpunit_to_px(i32::from(table.outer_margin_left), dpi);
++    let right = hwpunit_to_px(i32::from(table.outer_margin_right), dpi);
++    (table_width > 0.0 && table_width + left + right <= area.width).then_some(area.x + left)
++}
+ 
+ /// A repeated header is a complete cell instance, not a clipped continuation.
+ /// Check source-row coverage rather than the table's continuation flag or a content clip.
+@@ -4018,6 +4034,11 @@
+                                         );
+                                         rendered_bottom - source_nested_y
+                                     } else {
++                                        let source_left = resumed_nested_successor
++                                            .filter(|(following, _)| *following == cp_idx + 1)
++                                            .and_then(|_| resumed_para_left_table_anchor(
++                                                nested_table, &ctrl_area, nested_w, self.dpi,
++                                            ));
+                                         self.layout_table(
+                                             tree,
+                                             &mut cell_node,
+@@ -4043,7 +4064,7 @@
+                                             clamp_header_negative_para_offset,
+                                             0.0,
+                                             stored_float_frame
+-                                                .map(|f| (None, f.table_top))
++                                                .map(|f| (source_left, f.table_top))
+                                                 .or_else(|| {
+                                                     self.reflow_nested_table_origin(
+                                                         para,
+@@ -4054,7 +4075,14 @@
+                                                         owns_nested_start,
+                                                     )
+                                                     .map(|(x, y)| (Some(x), y))
+-                                                }),
++                                                })
++                                                .or_else(|| source_left.map(|x| {
++                                                    let top = hwpunit_to_px(
++                                                        i32::from(nested_table.outer_margin_top),
++                                                        self.dpi,
++                                                    );
++                                                    (Some(x), nested_y + top)
++                                                })),
+                                             Self::standalone_table_char_border_fill(
+                                                 Some(para),
+                                                 nested_table,

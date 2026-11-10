@@ -6,7 +6,12 @@
 
 Codex에서 사용하는 **Pwh 플러그인**과 독립 실행하는 **Pwh Desktop**이 같은 편집기와 조판 코어를 공유합니다. [rhwp](https://github.com/edwardkim/rhwp) 0.8.7을 기반으로 하며 Windows x64를 기준으로 개발합니다.
 
-이 문서는 **Pwh 0.6.46 · Pwh Desktop 0.1.27 / r20**의 소스와 검증 범위를 설명합니다. 설치 파일의 배포 여부와 배포물별 검증은 [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases) 및 해당 릴리스에 첨부한 `DESKTOP-VERIFICATION.json`에서 확인하세요.
+이 문서는 **Pwh 0.6.47 · Pwh Desktop 0.1.28 / r21**의 소스와 검증 범위를 설명합니다.
+
+## 운영 사이트와 배포
+
+- 제품 소개와 일반 사용자용 다운로드는 [STOOM Tools의 Pwh Desktop 페이지](https://tools.stoom.win/pwh/)에서 확인할 수 있습니다.
+- 버전별 ZIP·MSI, 변경 이력, 파일 해시와 설치본 검증 기록은 [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases)에 공개합니다. 시험 배포본은 릴리스 목록의 프리릴리스 표시로 구분합니다.
 
 ## 주요 기능
 
@@ -44,13 +49,27 @@ Pwh는 rhwp 0.8.7을 기반으로 조판 엔진에 다음 보완을 적용한 �
 - **중첩 표의 이어지는 내용:** 자식 표의 실제 분할 경계를 상위 표에 전달해, 머리행만 보이고 후속 행이 출력에서 빠지는 경로를 보완했습니다.
 - **반복 머리행의 공간:** 다음 쪽에 다시 그리는 머리행과 셀 간격을 한 번 예약해, 뒤 내용과 같은 공간을 사용하는 문제를 보완했습니다.
 - **문단 기준 표와 제목의 순서:** 저장된 원본 프레임이 확인되는 문단에서 실제 제목·표 순서를 측정·쪽 나눔·그리기가 공유하도록 보완했습니다.
+- 공통 코어는 저장 글줄과 셀 여백으로 표의 행 높이를 복원합니다. 한 행이 여러 쪽에 걸치면 원본 쪽 경계마다 사용한 물리 높이를 빼고 남은 높이를 다음 조각에 넘깁니다. 연속 표의 저장 행 높이와 쪽에서 사용한 높이를 같은 좌표계로 맞춰 오차가 다음 쪽에 누적되는 문제를 줄였습니다. TEST 문서 A의 46쪽 전체가 기준을 통과했습니다. 별도 TEST 문서 B는 쪽 끝 인라인 표의 시작점과 행 높이를 원본에서 확인해 1~23쪽이 순차 통과했습니다. 이어서 공통 SVG 인쇄 렌더러에서 합성 굵기 때문에 글자가 두 번 추출되던 문제를 고쳤습니다. 문단 기준 오른쪽 정렬 표의 바깥 여백과 쪽 끝 앵커도 보완해 TEST 문서 B 32쪽까지 순차 통과했습니다. 마지막 행을 나누는 표의 앞 조각 높이를 원본 선언과 다음 쪽 원점으로 확인해 33쪽도 통과했습니다. [인쇄 비교와 적용 범위](docs/LAYOUT-FIDELITY.md#paired-rowbreak-opening-frame)
+- **개발 중인 중첩 표 연속 조각 보완**은 저장 글줄과 표 높이·여백을 대조해 행 안쪽 경계와 행 사이 경계를 계산합니다. 같은 근거로 표의 왼쪽 기준점과 이어지는 줄 위치도 복원합니다. [41번 후보 적용 범위](docs/engine-patches/README.md#hwpx-nested-table-frame-ledger)
+- **개발 중인 세로 병합 중첩 표 보완**은 원본의 줄 위치와 저장 높이가 같은 경계를 입증할 때, 일반 셀의 글줄을 나누고 세로 병합 셀을 이어 그립니다. 상위 표도 확인된 행 높이와 여백을 사용합니다. [40번 후보 적용 범위](docs/engine-patches/README.md#hwpx-nested-rowspan-opening)
+- **개발 중인 중첩 표 행과 앵커 보완**은 원본 글줄과 안 여백에서 확인된 행 경계를 사용하고, 표 뒤 빈 줄이 위치를 입증할 때 문단 기준 세로 오프셋을 한 번 적용합니다. [39번 후보 적용 범위](docs/engine-patches/README.md#hwpx-stored-nested-row-geometry)
+- **개발 중인 표 분할 행 높이 보완**은 이미 확정된 원문 경계와 현재 쪽의 행 높이를 구분하고, 안쪽 표에서 확인한 높이를 부모 표의 남은 공간 안에서 예약합니다. [38번 후보 적용 범위](docs/engine-patches/README.md#hwpx-confirmed-row-frame-reservation)
+- **개발 중인 다음 쪽 중첩 표 가로 정렬 보완**은 원본이 입증하는 문단 기준 왼쪽 앵커와 좌우 바깥 여백을 사용합니다. [37번 후보 적용 범위](docs/engine-patches/README.md#hwpx-resumed-nested-left-anchor)
+- **개발 중인 다음 쪽 중첩 표와 뒤 문단 배치 보완**은 제목이 앞쪽에 있고 표 전체가 다음 쪽에 올 때 원본에서 확인된 뒤 문단의 시작점을 유지합니다. [36번 후보 적용 범위](docs/engine-patches/README.md#hwpx-resumed-nested-successor)
+- **개발 중인 여러 줄 셀의 중첩 표 분할 보완**은 표의 첫 조각, 이어지는 행, 뒤 문단의 저장 좌표가 함께 맞을 때 같은 분할 경계를 사용합니다. [35번 후보 적용 범위](docs/engine-patches/README.md#hwpx-stored-plain-tail-frame)
+- **개발 중인 표 분할 높이 보완**은 같은 행의 셀과 안쪽 표가 저장된 쪽 경계를 함께 증명할 때, 테두리·세로 정렬·표 바깥 여백에 그 프레임을 사용합니다. [34번 후보 적용 범위](docs/engine-patches/README.md#hwpx-stored-picture-opening-frame)
+- **개발 중인 표 안 사진 분할 보완**은 원본에서 나란한 사진을 한 묶음으로 계산하고 같은 쪽에 배치합니다. [33번 후보 적용 범위](docs/engine-patches/README.md#hwpx-parallel-picture-band)
+- **개발 중인 셀 안 중첩 표 배치 보완**은 원본에서 안쪽 표 뒤에 저장된 글줄을 그 위치에 놓고 표 높이를 한 번만 계산합니다. [32번 후보 적용 범위](docs/engine-patches/README.md#hwpx-displaced-nested-table-line)
+- **개발 중인 중첩 표 경계 보완**은 글자처럼 배치한 안쪽 표가 여러 행으로 나뉘어 측정될 때도 원본이 증명하는 다음 쪽 시작과 앞 조각의 높이를 유지합니다. [31번 후보 적용 범위](docs/engine-patches/README.md#nested-inline-projected-opening-owner)
+- **개발 중인 연속 표 분할 보완**은 같은 표에서 한쪽 셀의 내용이 먼저 끝난 뒤에도 저장된 쪽 경계와 실제 수용 높이를 사용합니다. [30번 후보 적용 범위](docs/engine-patches/README.md#hwpx-row-frame-finished-cells)
 - **쪽 끝의 표 분할**은 반복 머리행 아래 셀들의 저장된 쪽 경계가 확인될 때 마지막 글줄과 셀 여백을 기준으로 표 조각을 나눕니다. 처음과 이어지는 조각에 같은 규칙을 적용합니다. [적용 범위와 검증](docs/engine-patches/README.md#hwpx-parallel-row-continuations)
 - **셀 입력과 실행 취소:** r18은 일반·중첩 셀에서 글을 되돌릴 때 원래 줄 배치와 쪽 나눔도 복원합니다. [발생 계층과 검증](docs/engine-patches/CELL-TEXT-HISTORY.md)
 - **기본 글머리표:** 별도 정의를 참조하지 않는 기본 글머리표도 본문의 글자 모양과 함께 표시합니다.
 - **도형 표시:** HWPX 채움 투명도를 저장값대로 읽고 테두리와 구분합니다. 둥근 사각형의 모서리 비율과 저장·재열기도 보완했습니다.
+- **인쇄용 대체 글꼴과 표 조판:** Desktop 인쇄 창의 기타 설정에서 문서에 지정된 대체 글꼴을 선택할 수 있습니다. 공통 코어는 원본 글줄로 확인한 표 외곽 상자와 테두리 위치를 구분하고, 쪽을 넘긴 인라인 표 뒤의 본문 줄을 보존합니다. 별도의 한컴 기준 글꼴 환경에서 TEST 문서 B 65쪽 전체가 순차 검증을 통과했습니다. [검증 기준과 결과](docs/LAYOUT-FIDELITY.md#test-b-final-65)
 - **각주·미주의 편집 위치:** 본문의 주석 번호·조판부호와 커서·클릭·삭제의 원문 위치를 맞췄습니다. 화면 좌표와 본문 글자 오프셋을 구분해 주석 뒤 입력과 실행 취소에서도 인접 본문·주석 위치·혼합 글자 서식을 보존합니다.
 
-기준은 고정된 rhwp 0.8.7입니다. r20은 r18의 27개 패치에 HWPX 표 조각의 쪽 분할을 다루는 28~29번을 추가합니다. 위 내용은 **편집기용 WASM 코어**에 적용됩니다. 별도의 네이티브 CLI와 역사적으로 보존한 전체 Studio 출력 경로가 모두 같은 패치를 사용하는 것은 아닙니다.
+기준은 고정된 rhwp 0.8.7입니다. r21은 누적 70개 패치를 사용합니다. 이번 변경은 저장된 글줄과 본문 가용 높이로 쪽을 넘기는 표와 뒤 본문의 위치를 계산합니다. 위 내용은 **편집기용 WASM 코어**에 적용됩니다. 별도의 네이티브 CLI와 역사적으로 보존한 전체 Studio 출력 경로가 모두 같은 패치를 사용하는 것은 아닙니다.
 
 공통 편집기는 쪽을 넘는 키 이동 뒤 이전 클릭 좌표가 커서 위치에 섞이던 rhwp Studio 유래 경로도 보완했습니다. 깊은 셀의 Home/End는 전체 셀 경로의 코어 기하를 사용합니다. 두 제품에 함께 적용되는 편집기 수정이며, 위 26개 WASM 패치와는 별도입니다.
 
@@ -61,6 +80,15 @@ r17의 전체 코어 검사는 **525건 중 463건 통과·62건 환경별 제�
 선택 표시, 글꼴, 표 복사와 셀 편집 등 Studio의 변경 및 AI 연결 기능은 **[rhwp 원본과 Pwh의 차이](docs/RHWP-DIFFERENCES.md)**에 구분해 정리했습니다. 적용 조건과 검증 방법은 [rhwp 엔진 패치 상세](docs/engine-patches/README.md), 표·문단·개체에 공통으로 적용하는 기준은 [조판 소유권 규칙](docs/engine-patches/LAYOUT-OWNERSHIP-RULES.md)에 정리했습니다. 이 변경이 rhwp 원본 프로젝트에 반영됐다는 뜻은 아닙니다.
 
 ### 한글 출력과의 비교
+
+0.6.47의 공통 코어에서 두 시험 문서 111쪽을 순차 검증했습니다. 표 분할과 테두리 위치를 보완하고, 쪽을 넘긴 인라인 표 뒤의 누락 본문을 복원했습니다.
+
+| 시험 문서 | 출력 쪽 수 전후 | 일반 잉크 F1 전후 | 진한 글자·선 F1 전후 |
+| --- | ---: | ---: | ---: |
+| TEST 문서 A | 48 → 46 | 60.4097% → 97.8304% | 50.7933% → 95.4884% |
+| TEST 문서 B | 65 → 65 | 97.4459% → 99.2010% | 95.6450% → 98.3818% |
+
+한컴 기준 PDF와 실제 Pwh Desktop 인쇄 PDF를 150dpi, 위치 오차 2픽셀 조건으로 비교한 값입니다. 두 문서의 시작점은 다르며 TEST 문서 B의 전체 전후에는 인쇄용 기준 글꼴의 효과가 포함됩니다. 같은 글꼴로 비교한 마지막 패치의 효과와 이전에 통과한 쪽의 회귀 결과는 [전후 검증 기록](docs/LAYOUT-FIDELITY.md#test-document-update)에 정리했습니다. 공개 자료에는 익명 집계와 합성 시험만 포함합니다.
 
 한컴에서 만든 기준 PDF와 Pwh의 실제 인쇄 경로에서 만든 PDF를 같은 PDF 렌더러로 이미지화해 비교합니다. 문서의 문자·셀 크기·글꼴을 바꾸거나 출력 위치를 이동·확대해 맞추지 않습니다.
 
@@ -111,7 +139,7 @@ r16 코어·편집기를 실행한 격리 Electron 통제 비교에서는 셀 �
 
 ### Pwh Desktop
 
-1. [최신 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases/latest)에서 `PwhDesktop-<버전>.msi`를 내려받아 설치합니다.
+1. [STOOM Tools의 Pwh Desktop 페이지](https://tools.stoom.win/pwh/) 또는 [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases)에서 원하는 버전의 `PwhDesktop-<버전>.msi`를 내려받아 설치합니다.
 2. 앱의 AI 설정에서 **ChatGPT로 계속**을 선택해 OpenAI 계정을 연결하거나, 설치된 Codex 또는 별도로 준비한 로컬 AI 서버를 선택합니다. ChatGPT 연결에는 별도의 Codex 설치가 필요하지 않습니다.
 
 설치기에는 편집기와 엔진이 포함되어 있으며, Windows 설정 또는 제어판에서 제거할 수 있습니다. Codex가 설치되어 있으면 설치 중 Pwh 플러그인과 스킬의 갱신 또는 연결을 시도합니다. 기존 GitHub 연결을 갱신하려면 인터넷이 필요합니다. Codex가 없거나 연결이 실패해도 Desktop은 설치되며, 나중에 다시 연결할 수 있습니다.
@@ -209,6 +237,7 @@ AI에게 수정을 맡긴 부분은 그대로 두고 다른 영역을 편집할 
 | [변경 이력](docs/CHANGELOG.md) | 버전별 주요 변경 |
 | [rhwp 원본 대비 차이](docs/RHWP-DIFFERENCES.md) | 코어 패치, 공통 편집기 보완, AI 연결 기능의 구분 |
 | [조판 일치 검증](docs/LAYOUT-FIDELITY.md) | 한컴 PDF와의 비교 결과, 개선 원인과 남은 차이 |
+| [한컴 조판 관측과 새 코어의 입력 계약](docs/engine-patches/HANCOM-LAYOUT-EVIDENCE.md) | 원본·한글 화면·PDF를 연결하는 관측 기준과 조판 계산 규칙 |
 | [쪽별 조판 검증 기준](docs/LAYOUT-QUALITY-GATES.md) | 1쪽부터 순차 승인하는 고정 목표와 앞쪽 구간 회귀 검사 |
 | [편집기 성능 검증](docs/EDITOR-PERFORMANCE.md) | 대형 문서의 선택·입력 개선과 검증 범위 |
 | [기능 범위와 제한](docs/PWH-COMPATIBILITY-LIMITS.md) | 복사·붙여넣기와 AI 편집의 지원 범위 |

@@ -6,7 +6,7 @@ const source=await fs.readFile(root+'/src/renderer/layout/table_layout.rs','utf8
 const code=String.raw`
 mod model {
  pub mod table {
-  pub struct Table {pub caption:Option<()>,pub common:super::Common,pub page_break:super::TablePageBreak,pub cells:Vec<Cell>,pub col_count:u16,pub content:f64,pub boundary:bool,pub direct:Option<usize>,pub dirty:bool}
+  pub struct Table {pub caption:Option<()>,pub common:super::Common,pub page_break:super::TablePageBreak,pub cells:Vec<Cell>,pub col_count:u16,pub content:f64,pub boundary:bool,pub inline_height:Option<i64>,pub direct:Option<usize>,pub dirty:bool}
   pub struct Cell {pub paragraphs:Vec<super::Paragraph>,pub units:Vec<super::CellUnit>,pub height:u32,pub col_span:u16}
  }
  pub struct Common{pub treat_as_char:bool}
@@ -25,6 +25,8 @@ struct Frame{tail_start_row:usize}
 struct Engine{profile:std::cell::Cell<Profile>,render_normalization:std::cell::RefCell<Normalization>,dpi:f64}
 fn hwpunit_to_px(h:i32,dpi:f64)->f64{f64::from(h)*dpi/7200.0}
 impl Engine{
+ fn saved_complete_row_frame_boundary(&self,t:&Table,_r:usize,_cut:&[usize],_s:&ResolvedStyleSet)->Option<i64>{t.inline_height}
+ fn saved_plain_split_cursor_owner(&self,_:&Cell,_:&CellUnit,_:&Table,_:usize)->bool{false}
  fn row_cut_cell_order(t:&Table,_r:usize)->Vec<usize>{(0..t.cells.len()).collect()}
  fn cell_units<'a>(&self,c:&'a Cell,_t:&Table,_s:&ResolvedStyleSet)->&'a [CellUnit]{&c.units}
  fn saved_nested_tail_opening_frame(&self,_p:&Table,_c:&Cell,_h:&Paragraph,_n:Option<&Paragraph>,t:&Table,_s:&ResolvedStyleSet)->Option<Frame>{t.direct.map(|tail_start_row|Frame{tail_start_row})}
@@ -36,18 +38,26 @@ impl Engine{
 fn engine()->Engine{Engine{profile:std::cell::Cell::new(Profile{stored:true,edited:false}),render_normalization:std::cell::RefCell::new(Normalization),dpi:7200.0}}
 fn atom()->CellUnit{CellUnit{nested_row:None,para_idx:0,nested_table_fragment:None}}
 fn table()->Table{
- let grandchild=Table{caption:None,common:Common{treat_as_char:false},page_break:TablePageBreak::RowBreak,cells:vec![],col_count:1,content:1.0,boundary:false,direct:Some(2),dirty:false};
- Table{caption:None,common:Common{treat_as_char:false},page_break:TablePageBreak::RowBreak,col_count:1,content:50.0,boundary:true,direct:None,dirty:false,
+ let grandchild=Table{caption:None,common:Common{treat_as_char:false},page_break:TablePageBreak::RowBreak,cells:vec![],col_count:1,content:1.0,boundary:false,inline_height:None,direct:Some(2),dirty:false};
+ Table{caption:None,common:Common{treat_as_char:false},page_break:TablePageBreak::RowBreak,col_count:1,content:50.0,boundary:true,inline_height:None,direct:None,dirty:false,
  cells:vec![Cell{height:120,col_span:1,paragraphs:vec![Paragraph{controls:vec![Control::Table(Box::new(grandchild))]},Paragraph{controls:vec![]}],
  units:vec![atom(),atom(),CellUnit{nested_row:Some(2),para_idx:0,nested_table_fragment:None}]}]}
 }
 fn frame(e:&Engine,t:&Table,start:&[usize],available:f64)->Option<f64>{e.stored_owned_tail_row_frame_height(t,0,start,&[2],&ResolvedStyleSet,available)}
 fn wrapper(child:Table)->Table{
- Table{caption:None,common:Common{treat_as_char:false},page_break:TablePageBreak::RowBreak,col_count:1,content:90.0,boundary:true,direct:None,dirty:false,
+ Table{caption:None,common:Common{treat_as_char:false},page_break:TablePageBreak::RowBreak,col_count:1,content:90.0,boundary:true,inline_height:None,direct:None,dirty:false,
  cells:vec![Cell{height:1000,col_span:1,paragraphs:vec![Paragraph{controls:vec![Control::Table(Box::new(child))]}],
  units:vec![CellUnit{nested_row:Some(0),para_idx:0,nested_table_fragment:Some(Fragment{start_cut:vec![],end_cut:vec![2],terminal:false})},atom()]}]}
 }
 fn wrapped(e:&Engine,t:&Table,available:f64)->Option<f64>{e.stored_owned_tail_row_frame_height(t,0,&[],&[1],&ResolvedStyleSet,available)}
+${source.includes('fn saved_complete_row_frame_boundary(') ? String.raw`
+#[test]fn proven_inline_opening_caps_first_fragment_only(){
+ let e=engine();
+ let mut t=table(); t.boundary=false; t.inline_height=Some(120);
+ assert_eq!(frame(&e,&t,&[0],80.0),Some(80.0));
+ assert_eq!(frame(&e,&t,&[1],80.0),None);
+}
+` : ''}
 #[test]fn direct_declared_minimum(){assert_eq!(frame(&engine(),&table(),&[],200.0),Some(120.0));}
 #[test]fn zero_first_cursor(){assert_eq!(frame(&engine(),&table(),&[0],200.0),Some(120.0));}
 #[test]fn minimum_caps_to_real_available(){assert_eq!(frame(&engine(),&table(),&[],80.0),Some(80.0));}

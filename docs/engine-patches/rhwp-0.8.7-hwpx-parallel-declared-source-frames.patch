@@ -1,0 +1,149 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -13202,10 +13202,12 @@
+                             _ => (0.0, 0.0),
+                         }
+                     };
++                    let saved_anchored_prefix = projected_mixed_block_table.then(||
++                        self.saved_block_opening_prefix(p, nt, &rhs)).flatten();
+                     let mixed_table_precedes_host_text = stored_displaced_host
+                         || (projected_mixed_block_table
+                             && p.control_text_positions().first() == Some(&0)
+-                            && self.saved_block_opening_prefix(p, nt, &rhs).is_none());
++                            && saved_anchored_prefix.is_none());
+                     let append_mixed_host_text = |target: &mut Vec<CellUnit>, cumulative: &mut f64| {
+                         for (li, line) in comp.lines.iter().enumerate() {
+                             let include_spacing = !(is_last_para && li + 1 == line_count)
+@@ -13375,7 +13377,11 @@
+                                 // Saved multi-frame declared height includes page void.
+                                 // The child stream already accounts for its occupied frames;
+                                 // charging that void again delays following source content.
+-                                let row_extra = if projected_source_block_table && driver_has_saved_frame {
++                                let declared_parallel_restart = saved_anchored_prefix
++                                    .and_then(|_| self.saved_parallel_declared_restart_cut(nt, ri, styles));
++                                let row_extra = if projected_source_block_table
++                                    && (driver_has_saved_frame || declared_parallel_restart.is_some())
++                                {
+                                     0.0
+                                 } else {
+                                     let occupied = if projected_source_block_table {
+@@ -13410,7 +13416,7 @@
+                                         .take(2).count() == 2
+                                 {
+                                     self.saved_parallel_plain_restart_cut(nt, ri, styles)
+-                                } else { None };
++                                } else { None }.or(declared_parallel_restart);
+                                 let mut driver_before = 0.0;
+ 
+                                 for (fragment_index, driver_unit) in driver_units.iter().enumerate()
+@@ -16679,46 +16685,65 @@
+             hwpunit_to_px(i32::try_from(original).ok()?, self.dpi),
+         );
+         if requested <= 0.0 { return None; }
+-        let mut owner = None;
+-        let mut peer_min = 0.0f64;
+-        let mut complete = Vec::with_capacity(order.len());
+-        for (index, &cell_idx) in order.iter().enumerate() {
++        let mut source_cells = Vec::with_capacity(order.len());
++        for &cell_idx in &order {
+             let cell = &table.cells[cell_idx];
+             if cell.dirty_flag || cell.height != original || cell.row_span != 1
+                 || cell.col_span != 1 || cell.text_direction != 0
+             { return None; }
++            source_cells.push(Self::saved_cell_source_frames(cell)?);
++        }
++        let owner_count = source_cells.iter().filter(|frames| frames.len() > 1).count();
++        let owner = source_cells.iter().position(|frames| frames.len() > 1)?;
++        let frame_count = source_cells[owner].len();
++        if source_cells.iter().any(|frames| frames.len() != 1 && frames.len() != frame_count) {
++            return None;
++        }
++        let mut frames = vec![(vec![0; order.len()], 0.0f64); frame_count];
++        for (column, (&cell_idx, source)) in order.iter().zip(source_cells).enumerate() {
++            let cell = &table.cells[cell_idx];
+             let units = self.cell_units(cell, table, styles);
+-            complete.push(units.len());
+             let (_, _, top, bottom) = self.resolve_cell_padding(cell, table);
+-            let frame_height = |ink: i64| top + ink as f64 * self.dpi / 7200.0 + bottom;
+-            let frames = Self::saved_cell_source_frames(cell)?;
+-            if let [(_, ink)] = frames.as_slice() {
+-                peer_min = peer_min.max(frame_height(*ink));
++            if let [(_, ink)] = source.as_slice() {
++                frames[0].1 = frames[0].1.max(top + *ink as f64 * self.dpi / 7200.0 + bottom);
++                for (cut, _) in &mut frames[1..] { cut[column] = units.len(); }
+                 continue;
+             }
+-            if owner.is_some() { return None; }
+-            let cuts = frames.into_iter().map(|(paragraph, ink)| {
+-                let cursor = units.iter().position(|u| u.para_idx == paragraph)?;
+-                let start = units.get(cursor)?;
+-                if start.nested_row.is_some() || start.vis_start != 0
+-                    || (cursor != 0 && !start.page_frame_reset_before)
+-                { return None; }
+-                Some((cursor, frame_height(ink)))
+-            }).collect::<Option<Vec<_>>>()?;
+-            owner = Some((index, cell_idx, cuts));
+-        }
+-        let (column, cell_idx, cuts) = owner?;
+-        let frames = cuts.into_iter().enumerate().map(|(i, (cursor, height))| {
+-            let mut cut = if i == 0 { vec![0; order.len()] } else { complete.clone() };
+-            cut[column] = cursor;
+-            (cut, if i == 0 { height.max(peer_min) } else { height })
+-        }).collect::<Vec<_>>();
++            for ((cut, height), (paragraph, ink)) in frames.iter_mut().zip(source) {
++                let cursor = units.iter().position(|unit| unit.para_idx == paragraph)?;
++                let start = &units[cursor];
++                if start.nested_row.is_some() || start.vis_start != 0 { return None; }
++                if cursor != 0 && !start.page_frame_reset_before {
++                    // At origin zero a single line can start either frame.
++                    // Require a peer cell to supply an independent restart.
++                    let prior = cell.paragraphs.get(paragraph.checked_sub(1)?)?;
++                    let resume = cell.paragraphs.get(paragraph)?;
++                    if owner_count < 2 || prior.text.trim().is_empty() || resume.text.trim().is_empty()
++                        || prior.line_segs.last()?.vertical_pos != 0 || resume.line_segs.first()?.vertical_pos != 0
++                    { return None; }
++                }
++                cut[column] = cursor;
++                *height = height.max(top + ink as f64 * self.dpi / 7200.0 + bottom);
++            }
++        }
++        let cell_idx = order[owner];
+         let minimum = frames.iter().map(|(_, height)| height).sum::<f64>();
+         // A complete inline line retains its own minimum when a smaller
+         // declared height cannot account for all source content.
+         (minimum <= requested || frames.last().is_some_and(|(cut, _)|
+             self.saved_frame_starts_with_inline_table(table, row, cut, styles)))
+             .then_some((requested, cell_idx, frames))
++    }
++
++    fn saved_parallel_declared_restart_cut(
++        &self, table: &crate::model::table::Table, row: usize, styles: &ResolvedStyleSet,
++    ) -> Option<RowCut> {
++        let (_, _, frames) = self.saved_declared_nested_row_frames(table, row, styles)?;
++        let cut = &frames.get(1)?.0;
++        let continuing = Self::row_cut_cell_order(table, row).into_iter().zip(cut).filter(|&(index, cursor)| {
++            *cursor < self.cell_units(&table.cells[index], table, styles).len()
++        }).count();
++        (continuing > 1).then(|| cut.clone())
+     }
+ 
+     fn saved_frame_starts_with_inline_table(
+@@ -16745,7 +16770,6 @@
+             let [(_, ink)] = frames.as_slice() else { return None; };
+             return Some(*ink as f64 * self.dpi / 7200.0);
+         };
+-        if cell != owner { return None; }
+         let i = frames.iter().position(|(cut, _)| cut == start || (start.is_empty() && cut.iter().all(|&u| u == 0)))?;
+         if frames.get(i + 1).map_or(!end.is_empty(), |(next, _)| next != end) { return None; }
+         let cell = &table.cells[cell];
+@@ -16753,7 +16777,9 @@
+             .position(|&index| std::ptr::eq(&table.cells[index], cell))?;
+         let units = self.cell_units(cell, table, styles);
+         let paragraph = units.get(frames[i].0[column])?.para_idx;
+-        let (_, ink) = Self::saved_cell_source_frames(cell)?.into_iter().find(|&(start, _)| start == paragraph)?;
++        let source = Self::saved_cell_source_frames(cell)?;
++        if !std::ptr::eq(cell, &table.cells[owner]) && source.len() != frames.len() { return None; }
++        let (_, ink) = source.into_iter().find(|&(start, _)| start == paragraph)?;
+         Some(ink as f64 * self.dpi / 7200.0)
+     }
+ 

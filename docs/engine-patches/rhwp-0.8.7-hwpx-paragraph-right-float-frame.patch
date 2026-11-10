@@ -1,0 +1,133 @@
+--- a/src/renderer/float_placement.rs
++++ b/src/renderer/float_placement.rs
+@@ -1403,7 +1403,13 @@
+         || table.common.treat_as_char
+         || !table.common.flow_with_text
+         || !is_para_topbottom_float(&table.common)
+-        || table.common.horz_rel_to != HorzRelTo::Column
++        || !(table.common.horz_rel_to == HorzRelTo::Column
++            || (table.common.horz_rel_to == HorzRelTo::Para
++                && anchor.segment_width == 0
++                && !table.common.allow_overlap
++                && !previous.source_frame_reflowed
++                && !host.source_frame_reflowed
++                && !successor.source_frame_reflowed))
+         || !matches!(table.common.vert_align, VertAlign::Top | VertAlign::Inside)
+         || table.page_break != TablePageBreak::RowBreak
+         || table.caption.is_some()
+@@ -4633,7 +4639,39 @@
+     }
+ }
+ 
+-/// Compute the same depth-0 horizontal range used by table layout.
++/// Align the outer right edge to the paragraph, then recover the table body.
++pub(crate) fn paragraph_right_float_table_x(
++    table: &Table,
++    width_px: f64,
++    ctx: FloatPlacementContext,
++    dpi: f64,
++) -> Option<f64> {
++    let common = &table.common;
++    if !is_para_topbottom_float(common)
++        || common.horz_rel_to != HorzRelTo::Para
++        || common.horz_align != HorzAlign::Right
++    {
++        return None;
++    }
++
++    let offset = signed_hwpunit(common.horizontal_offset);
++    let inset = hwpunit_to_px(offset, dpi)
++        + hwpunit_to_px(i32::from(table.outer_margin_right), dpi);
++    Some(ctx.col_area.x + ctx.col_area.width - ctx.host_margin_right - width_px - inset)
++}
++
++pub(crate) fn float_table_horizontal_range(
++    table: &Table,
++    width_px: f64,
++    ctx: FloatPlacementContext,
++    dpi: f64,
++) -> (f64, f64) {
++    paragraph_right_float_table_x(table, width_px, ctx, dpi)
++        .map(|x| (x, x + width_px.max(0.0)))
++        .unwrap_or_else(|| horizontal_range(&table.common, width_px, ctx, dpi))
++}
++
++/// Compute the legacy depth-0 horizontal range for other floating anchors.
+ pub(crate) fn horizontal_range(
+     common: &CommonObjAttr,
+     width_px: f64,
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -18,8 +18,9 @@
+ use crate::model::style::{Alignment, BorderLine, CenterLine};
+ use crate::model::table::{TablePageBreak, VerticalAlign};
+ use crate::renderer::float_placement::{
+-    original_hwpx_column_rowbreak_equal_outer_margin_hu, signed_hwpunit,
+-    topbottom_float_outer_margin_left_hu, topbottom_flow_vertical_offset_hu,
++    original_hwpx_column_rowbreak_equal_outer_margin_hu, paragraph_right_float_table_x,
++    signed_hwpunit, topbottom_float_outer_margin_left_hu, topbottom_flow_vertical_offset_hu,
++    FloatPlacementContext,
+ };
+ 
+ const ROWBREAK_OBJECT_BOTTOM_BLEED_TOLERANCE_PX: f64 = 64.0;
+@@ -5713,6 +5714,11 @@
+                 _ => ref_x,
+             }
+         } else if depth == 0 {
++            let ctx = FloatPlacementContext::new(*col_area)
++                .with_host_margins(host_margin_left, host_margin_right);
++            if let Some(x) = paragraph_right_float_table_x(table, table_width, ctx, self.dpi) {
++                return x;
++            }
+             // 표 자체 위치 속성
+             let horz_rel_to = table.common.horz_rel_to;
+             let horz_align = table.common.horz_align;
+--- a/src/renderer/layout.rs
++++ b/src/renderer/layout.rs
+@@ -8,7 +8,7 @@
+ };
+ use super::float_placement::{
+     empty_host_physical_ladder_extras_hu, empty_offset_float_deferred_text_ladder_hu,
+-    horizontal_range, is_para_topbottom_float, native_empty_host_physical_outer_box_paint_inset,
++    float_table_horizontal_range, is_para_topbottom_float, native_empty_host_physical_outer_box_paint_inset,
+     native_empty_host_rowbreak_line_advance_hu,
+     original_hwpx_column_rowbreak_equal_outer_margin_hu,
+     para_relative_left_aligned_outer_margin_left_hu, signed_hwpunit,
+@@ -12009,7 +12009,7 @@
+                         .with_paper_width(layout.page_width)
+                         .with_host_margins(effective_margin, margin_right);
+                     let (x_start, x_end) =
+-                        horizontal_range(&t.common, width_px, placement_ctx, self.dpi);
++                        float_table_horizontal_range(t, width_px, placement_ctx, self.dpi);
+                     let v_offset_px =
+                         hwpunit_to_px(signed_hwpunit(t.common.vertical_offset), self.dpi);
+                     let fragment_outer_top_px = native_empty_host_rowbreak_line_advance_hu(
+--- a/src/renderer/typeset/controls/empty_float.rs
++++ b/src/renderer/typeset/controls/empty_float.rs
+@@ -11,7 +11,7 @@
+ use crate::renderer::{
+     composer::ComposedParagraph,
+     float_placement::{
+-        horizontal_range, is_para_topbottom_float, signed_hwpunit, FloatLaneSet,
++        float_table_horizontal_range, is_para_topbottom_float, signed_hwpunit, FloatLaneSet,
+         FloatPlacementContext,
+     },
+     hwpunit_to_px,
+@@ -125,7 +125,7 @@
+         .with_body_area(page.layout.body_area)
+         .with_paper_width(page.layout.page_width)
+         .with_host_margins(effective_margin, margin_right);
+-    let (x_start, mut x_end) = horizontal_range(&table.common, width_px, placement_ctx, dpi);
++    let (x_start, mut x_end) = float_table_horizontal_range(table, width_px, placement_ctx, dpi);
+     let square_outer_frame = !page.profile.session_edited()
+         && (page.profile.native_hwp5_layout() || page.profile.hwpx_stored_layout())
+         && page.layout.column_areas.len() == 1
+@@ -326,7 +326,7 @@
+             };
+             let previous_width = hwpunit_to_px(signed_hwpunit(previous.common.width), dpi);
+             let (previous_start, previous_end) =
+-                horizontal_range(&previous.common, previous_width, placement_ctx, dpi);
++                float_table_horizontal_range(previous, previous_width, placement_ctx, dpi);
+             let overlaps = crate::renderer::float_placement::ranges_overlap(
+                 x_start,
+                 x_end,

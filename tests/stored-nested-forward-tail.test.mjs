@@ -246,13 +246,60 @@ for (const [name, script, count] of [
   ['source closure and metadata', 'stored-nested-forward-tail-source.mjs', 135],
   ['direct and recursive cursor ownership', 'stored-nested-forward-tail-consumer.mjs', 18],
   ['physical frame projection', 'stored-nested-forward-tail-physical.mjs', 26],
+  ['original plain and floating-object frame opening', 'stored-plain-frame-opening-source.mjs', 16],
   ['resumed child outer margin ownership', 'stored-nested-forward-tail-margin-owner.mjs', 21],
 ]) {
-  test(`stored forward tail: extracted ${name} contract (${count} Rust cases)`,
-    {skip: !process.env.PWH_ENGINE_SOURCE ? 'Requires explicit source root' : false, timeout: 120000}, async () => {
+  test(`stored forward tail: extracted ${name} contract`,
+    {skip: !process.env.PWH_ENGINE_SOURCE ? 'Requires explicit source root' : false, timeout: 120000}, async t => {
+      const source = await fs.readFile(path.join(process.env.PWH_ENGINE_SOURCE,
+        'src/renderer/layout/table_layout.rs'), 'utf8');
+      const hasFrameReservation = source.includes('fn saved_complete_row_frame_boundary(');
+      if (script === 'stored-plain-frame-opening-source.mjs' && !hasFrameReservation) {
+        t.skip('Requires confirmed row frame reservation');
+        return;
+      }
+      let expectedCount = count;
+      if (script === 'stored-nested-forward-tail-source.mjs'
+        && source.includes('fn stored_nested_plain_tail_row_is_closed(')) expectedCount += 2;
+      if (script === 'stored-nested-forward-tail-source.mjs'
+        && source.includes('fn saved_cell_source_frames(')) expectedCount += 4;
+      if (script === 'stored-nested-forward-tail-source.mjs'
+        && source.includes('A saved inline box owns its original line.')) expectedCount++;
+      if (hasFrameReservation && (script === 'stored-nested-forward-tail-consumer.mjs'
+        || script === 'stored-nested-forward-tail-physical.mjs')) expectedCount++;
+      if (script === 'stored-nested-forward-tail-consumer.mjs'
+        && source.includes('fn saved_terminal_nested_row_prefix(')) expectedCount += 2;
       const file = fileURLToPath(new URL('./engine-source-ownership/' + script, import.meta.url));
       const {stdout} = await promisify(execFile)(process.execPath, [file, process.env.PWH_ENGINE_SOURCE],
         {windowsHide: true, env: process.env, maxBuffer: 2 * 1024 * 1024});
-      assert.match(stdout, new RegExp(`test result: ok\\. ${count} passed; 0 failed;`));
+      assert.match(stdout, new RegExp(`test result: ok\\. ${expectedCount} passed; 0 failed;`));
     });
 }
+
+test('stored forward tail: the complete resumed child owns its following line',
+  {skip: !process.env.PWH_ENGINE_SOURCE ? 'Requires explicit source root' : false, timeout: 120000}, async t => {
+    const sourceRoot = process.env.PWH_ENGINE_SOURCE;
+    const source = await fs.readFile(path.join(sourceRoot, 'src/renderer/layout/table_layout.rs'), 'utf8');
+    if (!source.includes('fn saved_resumed_nested_successor')) {
+      t.skip('Requires the resumed successor patch');
+      return;
+    }
+    const file = fileURLToPath(new URL('./engine-source-ownership/resumed-nested-successor-source.mjs', import.meta.url));
+    const {stdout} = await promisify(execFile)(process.execPath, [file, sourceRoot],
+      {windowsHide: true, env: process.env, maxBuffer: 2 * 1024 * 1024});
+    assert.match(stdout, /test result: ok\. 6 passed; 0 failed;/);
+  });
+
+test('stored forward tail: a complete resumed child can use its left paragraph anchor',
+  {skip: !process.env.PWH_ENGINE_SOURCE ? 'Requires explicit source root' : false, timeout: 120000}, async t => {
+    const root = process.env.PWH_ENGINE_SOURCE;
+    const source = await fs.readFile(path.join(root, 'src/renderer/layout/table_partial.rs'), 'utf8');
+    if (!source.includes('fn resumed_para_left_table_anchor(')) {
+      t.skip('Requires the resumed table anchor patch');
+      return;
+    }
+    const file = fileURLToPath(new URL('./engine-source-ownership/resumed-nested-anchor-source.mjs', import.meta.url));
+    const {stdout} = await promisify(execFile)(process.execPath, [file, root],
+      {windowsHide: true, env: process.env, maxBuffer: 2 * 1024 * 1024});
+    assert.match(stdout, /test result: ok\. 3 passed; 0 failed;/);
+  });

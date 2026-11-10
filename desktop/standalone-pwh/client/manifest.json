@@ -1,12 +1,12 @@
 {
-  "sha256": "7d4b50da7f99de127f8a45eb731e6e46aa36f256d75913fae060124e1d4a216d",
-  "baseVersion": "0.6.46",
-  "baseEditorSha256": "ff2ee950c543e8210f6307f0c1d8ea5185fa87edeb5946bb1ffa81dfac3a058c",
+  "sha256": "4a5d9dfbc6443791ccbe86782f53e267ea023e448ff312efdc773831fe91dc6d",
+  "baseVersion": "0.6.47",
+  "baseEditorSha256": "7273db353c973ba2542b05eed79d341df3b2b491c745bbec67a73624743fae6f",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "desktop",
-    "sha256": "245d57524f9429d6f827b9a3f04fb619e85b03acaed087c340340e881b5b5bb8",
+    "sha256": "45cdeebd1c9ee3de3054ac2904afefc79d58a5b389f367a4438096ba5cc2bba9",
     "files": [
       {
         "path": "desktop/standalone-pwh/build-desktop-editor.mjs",
@@ -22,11 +22,11 @@
       },
       {
         "path": "package.json",
-        "sha256": "06b34b6c9feee7e9769de5e6ab152ddd9f198f4e13a72befd25d8e181554bc11"
+        "sha256": "1162bdb31fc5b009a74b84955d0672e458f6550da5de0db78fcf7913fa1251b8"
       },
       {
         "path": "scripts/build-inline.mjs",
-        "sha256": "04a5b3b1c9f2cd00ba25e9f777aafce953c96ff645e5af4eb4c1a6dd7b6f8d09"
+        "sha256": "4885b0186989644659c952fc5fd5fe0c10739bb58f8690b9f02e8e157d8a89c7"
       },
       {
         "path": "scripts/bundle-client.mjs",
@@ -98,7 +98,7 @@
       },
       {
         "path": "src/desktop-print-preview.mjs",
-        "sha256": "09561a46076f71e2dfd3ab4cee46f1cd14f3d05631df7777062348ce4e31eed4"
+        "sha256": "733bde9283ceab4e5eef86001cab94fb8bf0a6e22706c4eeab674eff35f68af6"
       },
       {
         "path": "src/document-font-requests.mjs",
@@ -187,6 +187,10 @@
       {
         "path": "src/picture-replace.ts",
         "sha256": "4c1471b1a051e8a3440b587cbd860495e3fcf3341164aef3070c0784083b4120"
+      },
+      {
+        "path": "src/print-font-substitutions.mjs",
+        "sha256": "ef3c023465dff164a173cb9fedef3269e8a0dc33c5c46915035c50a313c8ac3f"
       },
       {
         "path": "src/print-plan.mjs",

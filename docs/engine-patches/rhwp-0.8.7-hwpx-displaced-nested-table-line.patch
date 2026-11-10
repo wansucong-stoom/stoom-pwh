@@ -1,0 +1,116 @@
+diff --git a/src/renderer/float_placement.rs b/src/renderer/float_placement.rs
+--- a/src/renderer/float_placement.rs
++++ b/src/renderer/float_placement.rs
+@@ -125,6 +125,40 @@
+         || signed_hwpunit(table.common.vertical_offset) != 0 || table_height <= line_height
+     { return None; }
+     Some(line_height.max(table_height))
++}
++
++/// A first cell line can be displaced below the table it anchors. Its saved
++/// start independently closes the measured table body plus both outer margins.
++pub(crate) fn stored_cell_line_after_nested_table(
++    para: &Paragraph,
++    measure_band: impl FnOnce(&Table) -> f64,
++    dpi: f64,
++) -> Option<&crate::model::paragraph::LineSeg> {
++    let [line] = para.line_segs.as_slice() else { return None; };
++    let table = match para.controls.as_slice() {
++        [Control::Table(table)] => table,
++        [Control::ColumnDef(columns), Control::Table(table)] if columns.column_count == 1 => table,
++        _ => return None,
++    };
++    if !para_has_non_whitespace_text(para)
++        || para.stored_text_partition_is_dirty() || para.cell_format_vpos_dirty
++        || para.source_frame_reflowed || !para.layout_space_metrics.is_empty()
++        || line.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0
++        || line.line_height <= 0 || !is_para_topbottom_float(&table.common)
++        || !table.common.flow_with_text || table.common.allow_overlap
++        || table.common.vert_align != VertAlign::Top || table.caption.is_some()
++        || table.row_count < 2 || table.page_break != TablePageBreak::RowBreak
++        || signed_hwpunit(table.common.vertical_offset) > 0
++        || table.common.height == 0 || table.common.height > i32::MAX as u32
++        || table.outer_margin_top < 0 || table.outer_margin_bottom < 0
++    {
++        return None;
++    }
++    let band = i64::from(table.common.height)
++        + i64::from(table.outer_margin_top) + i64::from(table.outer_margin_bottom);
++    (band == i64::from(line.vertical_pos)
++        && (measure_band(table) - hwpunit_to_px(line.vertical_pos, dpi)).abs() <= hwpunit_to_px(2, dpi))
++        .then_some(line)
+ }
+ 
+ /// On reflow, an adjustable multi-row table is constrained by its physical
+diff --git a/src/renderer/height_measurer.rs b/src/renderer/height_measurer.rs
+--- a/src/renderer/height_measurer.rs
++++ b/src/renderer/height_measurer.rs
+@@ -2736,6 +2736,13 @@
+                                     crate::model::shape::VertRelTo::Para
+                                 ))
+                         });
++                    if pidx == 0 && self.hwpx_stored_layout {
++                        if let Some(line) = crate::renderer::float_placement::stored_cell_line_after_nested_table(
++                            p, |_| nested_h, self.dpi,
++                        ) {
++                            return para_top + hwpunit_to_px(line.line_height, self.dpi);
++                        }
++                    }
+                     let candidate = if host_line_displaced_below_float {
+                         nested_h
+                     } else {
+diff --git a/src/renderer/layout/table_layout.rs b/src/renderer/layout/table_layout.rs
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -9952,6 +9952,13 @@
+                         .first()
+                         .map(|s| hwpunit_to_px(s.vertical_pos, self.dpi))
+                         .unwrap_or(0.0);
++                    if pidx == 0 && self.profile.get().hwpx_stored_layout() && !self.profile.get().session_edited() {
++                        if let Some(line) = crate::renderer::float_placement::stored_cell_line_after_nested_table(
++                            p, |_| nested_h, self.dpi,
++                        ) {
++                            return para_top + hwpunit_to_px(line.line_height, self.dpi);
++                        }
++                    }
+                     let candidate = para_top + nested_h;
+                     // 절대배치의 직접 증거는 "표의 공간이 호스트 줄 **위**에 이미
+                     // 예약됨"이다 — 직전 저장 줄 끝→호스트 vpos 갭이 표 높이만큼
+@@ -12912,7 +12919,13 @@
+             // indexes, not UTF-16 storage offsets. Keep the host's text lines as separate
+             // source atoms in the existing text/table flow order, and project
+             // the nested rows with their exact child cuts.
+-            let projected_source_block_table = p.controls.len() == 1
++            let stored_displaced_host = pi == 0 && comp.lines.len() == 1
++                && self.profile.get().hwpx_stored_layout()
++                && !self.profile.get().session_edited()
++                && crate::renderer::float_placement::stored_cell_line_after_nested_table(
++                    p, |child| self.calc_nested_table_height(child, styles), self.dpi,
++                ).is_some();
++            let projected_source_block_table = stored_displaced_host || (p.controls.len() == 1
+                 && p.control_text_positions().first().is_some_and(|position|
+                     *position == 0 || *position == p.text.chars().count())
+                 && matches!(&p.controls[0], Control::Table(t)
+@@ -12925,7 +12938,7 @@
+                     // change even when that saved frame no longer fits the body.
+                     && self.closed_stored_nested_float_frame(
+                         table, p, cell.paragraphs.get(pi + 1), &comp.lines, t, styles,
+-                    ).is_none());
++                    ).is_none()));
+             let projected_mixed_block_table = para_has_visible_text && projected_source_block_table;
+             if has_table_in_para && (p.text.trim().is_empty() || projected_mixed_block_table) {
+                 let nested_tables: Vec<&crate::model::table::Table> = p
+@@ -12998,9 +13011,10 @@
+                             _ => (0.0, 0.0),
+                         }
+                     };
+-                    let mixed_table_precedes_host_text = projected_mixed_block_table
+-                        && p.control_text_positions().first() == Some(&0)
+-                        && !self.stored_block_begins_below_host_line(p, nt, &rhs);
++                    let mixed_table_precedes_host_text = stored_displaced_host
++                        || (projected_mixed_block_table
++                            && p.control_text_positions().first() == Some(&0)
++                            && !self.stored_block_begins_below_host_line(p, nt, &rhs));
+                     let append_mixed_host_text = |target: &mut Vec<CellUnit>, cumulative: &mut f64| {
+                         for (li, line) in comp.lines.iter().enumerate() {
+                             let include_spacing = !(is_last_para && li + 1 == line_count)

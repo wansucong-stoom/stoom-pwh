@@ -5,6 +5,7 @@ const root=process.argv[2]||process.env.PWH_ENGINE_SOURCE;
 if(!root)throw Error('An explicit candidate source tree is required');
 const source=await fs.readFile(root+'/src/renderer/layout/table_layout.rs','utf8');
 const sourceSha256=createHash('sha256').update(source).digest('hex');
+const readsPlainTail=source.includes('fn stored_nested_plain_tail_row_is_closed(');
 const code=String.raw`
 mod model {
  pub mod shape {
@@ -37,6 +38,15 @@ ${sourceBlock(source,'pub(super) struct StoredNestedTailOpeningFrame {')}
 ${sourceBlock(source,'impl StoredNestedTailOpeningFrame {')}
 ${sourceBlock(source,'fn stored_nested_tail_table_is_original(')}
 ${sourceBlock(source,'fn stored_nested_tail_cell_prefix_is_original(')}
+${readsPlainTail ? [
+ sourceBlock(source,'fn stored_float_frame_owner_is_original('),
+ 'struct LayoutEngine;',
+ 'impl LayoutEngine {',
+ sourceBlock(source,'fn stored_plain_cell_paragraph('),
+ sourceBlock(source,'fn saved_plain_cell_end_hu('),
+ '}',
+ sourceBlock(source,'fn stored_nested_plain_tail_row_is_closed('),
+].join('\n') : ''}
 ${sourceBlock(source,'fn stored_nested_inline_tail_row_is_closed(')}
 ${sourceBlock(source,'fn stored_nested_tail_opening_frame_source(')}
 fn paragraph(text:&str,vpos:i32,width:i32)->Paragraph{Paragraph{text:text.into(),dirty:false,cell_format_vpos_dirty:false,source_frame_reflowed:false,layout_space_metrics:vec![],line_segs:vec![LineSeg{vertical_pos:vpos,line_height:1000,line_spacing:600,segment_width:width,tag:0}],controls:vec![],column_type:ColumnBreakType::None,para_shape_id:0,raw_break_type:0}}
@@ -142,6 +152,8 @@ struct ParaStyle{spacing_before:f64,spacing_after:f64}
 struct ResolvedStyleSet{para_styles:Vec<ParaStyle>}
 struct Engine{profile:std::cell::Cell<Profile>,render_normalization:std::cell::RefCell<Overlay>,dpi:f64,declared_trust_allowed:std::cell::Cell<bool>}
 impl Engine{
+// This fixture exercises the wrapper with legacy row measurements.
+fn saved_complete_child_row_heights(&self, _table: &Table) -> Option<Vec<i64>> { None }
 fn resolve_row_heights(&self,_table:&Table,_cols:usize,_rows:usize,_measured:Option<&()>,_styles:&ResolvedStyleSet,_relaxed:bool)->Vec<f64>{
  // Faithful legacy ambient-state behavior; the extracted new helper must isolate it.
  self.declared_trust_allowed.set(true);

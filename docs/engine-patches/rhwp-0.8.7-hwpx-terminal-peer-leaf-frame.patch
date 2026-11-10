@@ -1,0 +1,244 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -2052,6 +2052,7 @@
+ }
+ 
+ /// [Task #993] 한 셀의 콘텐츠 유닛 — 합성 줄 1개 또는 중첩 표 atom 1개.
++#[derive(Clone)]
+ pub(super) struct CellUnit {
+     /// 유닛 높이 (px). [#5880] table_partial 의 조각 원점 보정이 소비분 합산에 읽는다.
+     pub(super) height: f64,
+@@ -13171,6 +13172,7 @@
+                         rhs[..complete].copy_from_slice(&rows[..complete]);
+                     }
+                     let terminal_prefix = self.saved_terminal_nested_row_prefix(cell, p, nt);
++                    let terminal_peers = self.saved_terminal_peer_leaf_frame(cell, p, nt);
+                     let ncs = hwpunit_to_px(nt.cell_spacing as i32, self.dpi);
+                     let om_top = hwpunit_to_px(nt.outer_margin_top as i32, self.dpi);
+                     let om_bot = hwpunit_to_px(nt.outer_margin_bottom as i32, self.dpi);
+@@ -13418,6 +13420,7 @@
+                                     self.saved_parallel_plain_restart_cut(nt, ri, styles)
+                                 } else { None }.or(declared_parallel_restart);
+                                 let mut driver_before = 0.0;
++                                let first_fragment = units.len();
+ 
+                                 for (fragment_index, driver_unit) in driver_units.iter().enumerate()
+                                 {
+@@ -13553,6 +13556,7 @@
+                                         && self.nested_row_cut_source_frame_boundary(nt, ri, &start_cut, styles) == Some(true))
+                                         || self.nested_row_cut_closed_inline_frame_boundary(nt, ri, &start_cut, styles) == Some(true)
+                                         || self.saved_nested_leaf_restart_ink(nt, ri, &start_cut, styles).is_some()
++                                        || self.saved_terminal_peer_leaf_ink(nt, ri, &start_cut, styles).is_some()
+                                     {
+                                         hard_break_before = true;
+                                         stored_frame_break_before = true;
+@@ -13656,6 +13660,37 @@
+                                     });
+                                     unit_cum += uh;
+                                     driver_before = driver_after;
++                                }
++                                if let Some((_, deferred, height)) = terminal_peers.filter(|(row, _, _)| *row == ri) {
++                                    let peer_cut = row_units.iter().enumerate().map(|(i, units)|
++                                        if i == deferred { 0 } else { units.len() }
++                                    ).collect::<RowCut>();
++                                    if let Some(first) = units.get(first_fragment) {
++                                        let mut prefix = first.clone();
++                                        prefix.height = height;
++                                        prefix.hard_break_before = false;
++                                        prefix.stored_frame_break_before = false;
++                                        prefix.page_frame_reset_before = false;
++                                        prefix.nested_table_fragment = Some(NestedTableUnitCut {
++                                            start_cut: vec![0; peer_cut.len()], end_cut: peer_cut.clone(), terminal: false,
++                                        });
++                                        for (i, unit) in units[first_fragment..].iter_mut().enumerate() {
++                                            if let Some(fragment) = unit.nested_table_fragment.as_mut() {
++                                                for (j, &peer) in peer_cut.iter().enumerate() {
++                                                    if j == deferred { continue; }
++                                                    fragment.start_cut[j] = peer;
++                                                    fragment.end_cut[j] = peer;
++                                                }
++                                            }
++                                            if i == 0 {
++                                                unit.hard_break_before = true;
++                                                unit.stored_frame_break_before = true;
++                                                unit.page_frame_reset_before = true;
++                                            }
++                                        }
++                                        units.insert(first_fragment, prefix);
++                                        unit_cum += height;
++                                    }
+                                 }
+                                 continue;
+                             }
+@@ -16857,6 +16892,17 @@
+         } else {
+             next_capacity - prior_height
+         };
++        if first_row < last_row {
++            if let Some(ink) = self.saved_terminal_peer_leaf_ink(child, last_row, &last_cut.end_cut, styles) {
++                if ink <= height + 0.1 {
++                    let band = NestedRowBand {
++                        parent_row: row, host_paragraph: last.para_idx, row: last_row, height: ink,
++                        content_height: Some(ink), saved_remaining: Some(ink),
++                    };
++                    return Some((end, band, None, prior_height + overhead + ink));
++                }
++            }
++        }
+         let Some((declared, _, frames)) = self.saved_declared_nested_row_frames(child, last_row, styles) else {
+             if first_row == last_row && initial.iter().any(|&cursor| cursor != 0) { return None; }
+             let (declared, ink) = self.saved_complete_float_row_ink(child, last_row)?;
+@@ -18540,6 +18586,120 @@
+         }
+         (owners == 1 && ink < i64::from(declared))
+             .then(|| hwpunit_to_px(ink as i32, self.dpi))
++    }
++
++    /// An object-only cell may begin after its peers even within the same
++    /// row. Require the stored table box to close at the peers' visible edge.
++    fn saved_terminal_peer_leaf_frame(
++        &self, cell: &crate::model::table::Cell, host: &Paragraph, child: &crate::model::table::Table,
++    ) -> Option<(usize, usize, f64)> {
++        let profile = self.profile.get();
++        if !profile.hwpx_stored_layout() || profile.hwp5_origin_hwpx() || profile.session_edited()
++            || child.page_break != TablePageBreak::RowBreak || child.cell_spacing < 0
++            || !crate::renderer::float_placement::is_para_topbottom_float(&child.common)
++            || child.common.vertical_offset != 0 || child.common.height == 0
++            || child.outer_margin_top < 0 || child.outer_margin_bottom < 0
++            || !child.leading_header_rows().is_empty()
++            || !Self::stored_nested_outer_margin_host(host, child)
++            || !cell.paragraphs.last().is_some_and(|p| std::ptr::eq(p, host))
++            || self.render_normalization.borrow().table_text_reflowed(child)
++        { return None; }
++        let prefix = cell.paragraphs.get(..cell.paragraphs.len().checked_sub(1)?)?;
++        let origin = prefix.iter().try_fold(0, |mut expected, para| {
++            if !Self::stored_plain_cell_paragraph(para) || para.text.trim().is_empty()
++                || para.line_segs.is_empty() { return None; }
++            for line in &para.line_segs {
++                if i64::from(line.vertical_pos) != expected || line.line_height <= 0 || line.line_spacing < 0 {
++                    return None;
++                }
++                expected += i64::from(line.line_height) + i64::from(line.line_spacing);
++            }
++            Some(expected)
++        })?;
++        if origin <= 0 || origin != i64::from(host.line_segs.first()?.vertical_pos) { return None; }
++
++        let declared = i64::from(child.common.height);
++        let mut accumulated = 0;
++        for row in 0..usize::from(child.row_count) {
++            if Self::row_has_prior_rowspan_cover(child, row) { return None; }
++            let order = Self::row_cut_cell_order(child, row);
++            if order.len() != usize::from(child.col_count) { return None; }
++            let mut deferred = None;
++            let mut visible = 0;
++            for (column, index) in order.into_iter().enumerate() {
++                let cell = &child.cells[index];
++                if cell.dirty_flag || cell.row_span != 1 || cell.col_span != 1 || cell.text_direction != 0 {
++                    return None;
++                }
++                let delayed = matches!(cell.paragraphs.as_slice(), [para] if
++                    para.text.trim().is_empty() && stored_float_frame_owner_is_original(para)
++                    && matches!(para.controls.as_slice(), [Control::Table(object)] if
++                        crate::renderer::float_placement::is_para_topbottom_float(&object.common)
++                        && object.common.flow_with_text && !object.common.allow_overlap
++                        && object.common.height > 0 && object.caption.is_none()
++                        && object.common.vert_align == VertAlign::Top && object.common.vertical_offset == 0)
++                    && matches!(para.line_segs.as_slice(), [line] if line.vertical_pos == 0 && line.line_height > 0));
++                if delayed {
++                    if deferred.replace(column).is_some() { return None; }
++                    continue;
++                }
++                let frames = Self::saved_cell_source_frames(cell)?;
++                let [(_, ink)] = frames.as_slice() else { return None; };
++                let padding = i64::from(cell.effective_vertical_padding_hu(&child.padding));
++                visible = visible.max((*ink + padding).max(i64::from(cell.height)));
++            }
++            accumulated += visible + if row > 0 { i64::from(child.cell_spacing) } else { 0 };
++            if let Some(deferred) = deferred {
++                return (row > 0 && visible > 0 && accumulated == declared)
++                    .then_some((row, deferred, visible as f64 * self.dpi / 7200.0));
++            }
++            if accumulated >= declared { return None; }
++        }
++        None
++    }
++
++    pub(super) fn saved_terminal_peer_leaf_edge(
++        &self, cell: &crate::model::table::Cell, host: &Paragraph, table: &crate::model::table::Table,
++        row: usize, cut: &[usize], styles: &ResolvedStyleSet,
++    ) -> bool {
++        let Some((owner, deferred, _)) = self.saved_terminal_peer_leaf_frame(cell, host, table) else { return false; };
++        if row != owner || cut.is_empty() { return false; }
++        let mut peers = self.complete_row_cut(table, row, styles);
++        let Some(cursor) = peers.get_mut(deferred) else { return false; };
++        *cursor = 0;
++        peers == cut
++    }
++
++    fn saved_terminal_peer_leaf_ink(
++        &self, table: &crate::model::table::Table, row: usize, cut: &[usize], styles: &ResolvedStyleSet,
++    ) -> Option<f64> {
++        let order = Self::row_cut_cell_order(table, row);
++        if order.len() != cut.len() || Self::row_has_prior_rowspan_cover(table, row) { return None; }
++        let mut terminal_leaf = false;
++        let mut ink = 0.0f64;
++        for (index, &cursor) in order.into_iter().zip(cut) {
++            let cell = &table.cells[index];
++            let units = self.cell_units(cell, table, styles);
++            let (_, _, top, bottom) = self.resolve_cell_padding(cell, table);
++            let end = if cursor == units.len() {
++                Self::saved_plain_cell_end_hu(cell)?
++            } else {
++                let unit = units.get(cursor)?;
++                let fragment = unit.nested_table_fragment.as_ref()?;
++                let host = cell.paragraphs.get(unit.para_idx)?;
++                let [Control::Table(child)] = host.controls.as_slice() else { return None; };
++                if terminal_leaf || !unit.stored_frame_break_before
++                    || !self.saved_terminal_peer_leaf_edge(
++                        cell, host, child, unit.nested_row?, &fragment.start_cut, styles,
++                    )
++                { return None; }
++                terminal_leaf = true;
++                i64::from(host.line_segs.first()?.vertical_pos) + i64::from(child.common.height)
++                    + i64::from(child.outer_margin_top) + i64::from(child.outer_margin_bottom)
++            };
++            ink = ink.max(top + end as f64 * self.dpi / 7200.0 + bottom);
++        }
++        terminal_leaf.then_some(ink)
+     }
+ 
+     /// A terminal floating table can declare just its opening rows. A
+@@ -24216,8 +24376,13 @@
+         let terminal_prefix_edge = terminal_prefix
+             .is_some_and(|row| (cut.start_row == row && cut.start_cut.is_empty())
+                 || (cut.end_row == row && cut.end_cut.is_empty()));
++        let terminal_peer_edge = self.saved_terminal_peer_leaf_edge(
++            cell, para, child, cut.start_row, &cut.start_cut, styles,
++        ) || self.saved_terminal_peer_leaf_edge(
++            cell, para, child, cut.end_row.saturating_sub(1), &cut.end_cut, styles,
++        );
+         let reopens_outer_frame = leaf_opening || leaf_resume || tail_frame_body.is_some()
+-            || terminal_prefix_edge || reflow_nested_table_has_outer_frame(para, child)
++            || terminal_prefix_edge || terminal_peer_edge || reflow_nested_table_has_outer_frame(para, child)
+             || cut.end_row.checked_sub(1).is_some_and(|row|
+                 cut.start_row > 0 && Self::stored_nested_outer_margin_host(para, child)
+                     && self.saved_terminal_inline_restart_boundary(child, row, &cut.end_cut, styles)
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -4037,8 +4037,14 @@
+                                         cut.start_row == 0 && cut.start_cut.is_empty()
+                                             && saved_anchored_prefix == Some(cut.end_row) && cut.end_cut.is_empty()
+                                     });
++                                    let terminal_peer_edge = source_cut.as_ref().is_some_and(|cut|
++                                        self.saved_terminal_peer_leaf_edge(
++                                            cell, para, nested_table, cut.start_row, &cut.start_cut, styles,
++                                        ) || self.saved_terminal_peer_leaf_edge(
++                                            cell, para, nested_table, cut.end_row.saturating_sub(1), &cut.end_cut, styles,
++                                        ));
+                                     let opens_outer_frame = leaf_edge || opening_outer_frame.is_some() || owned_tail_outer_frame
+-                                        || next_inline_restart || terminal_prefix_edge || anchored_opening
++                                        || next_inline_restart || terminal_prefix_edge || terminal_peer_edge || anchored_opening
+                                         || source_start_row_height.is_some() || end_band.is_some();
+                                     let source_resume_outer_top = source_cut.as_ref().is_some_and(|cut|
+                                         self.saved_nested_source_resume_outer_top(

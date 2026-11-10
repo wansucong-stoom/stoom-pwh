@@ -1,0 +1,37 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -16596,13 +16596,27 @@
+             }
+             if origin != expected { return None; }
+             if let [Control::Table(child)] = para.controls.as_slice() {
+-                expected += Self::saved_row_frame_float_advance(
+-                    para, cell.paragraphs.get(index + 1)?, child,
+-                )?;
+-                ink = expected;
+-                continue;
+-            }
+-            if !Self::stored_plain_cell_paragraph(para) { return None; }
++                if child.common.treat_as_char {
++                    // A saved inline box owns its original line. The line
++                    // advance already includes the table and its outer margins.
++                    let [line] = para.line_segs.as_slice() else { return None; };
++                    let height = i64::from(child.common.height)
++                        + i64::from(child.outer_margin_top) + i64::from(child.outer_margin_bottom);
++                    if !para.text.trim().is_empty() || !child.common.flow_with_text
++                        || child.common.allow_overlap || child.caption.is_some()
++                        || child.common.height == 0 || child.outer_margin_top < 0 || child.outer_margin_bottom < 0
++                        || i64::from(line.line_height) != height
++                    { return None; }
++                } else {
++                    expected += Self::saved_row_frame_float_advance(
++                        para, cell.paragraphs.get(index + 1)?, child,
++                    )?;
++                    ink = expected;
++                    continue;
++                }
++            } else if !Self::stored_plain_cell_paragraph(para) {
++                return None;
++            }
+             for line in &para.line_segs {
+                 if i64::from(line.vertical_pos) != expected || line.line_height <= 0 || line.line_spacing < 0 {
+                     return None;

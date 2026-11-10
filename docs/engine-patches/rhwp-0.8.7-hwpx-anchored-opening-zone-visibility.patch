@@ -1,0 +1,204 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -3734,7 +3734,13 @@
+         // ── 4-2. cellzone 배경 렌더링 (zone 전체 영역에 한 번) ──
+         let mut cellzone_diagonal_nodes = Vec::new();
+         let mut cellzone_diagonal_origin_covered = vec![vec![false; col_count]; row_count];
+-        for zone in &table.zones {
++        // A zone that owns no visible row cannot paint outside this fragment.
++        let visible_zone = |zone: &crate::model::table::TableZone| {
++            split_row_range.is_none_or(|(start, end)| {
++                usize::from(zone.end_row) >= start && usize::from(zone.start_row) < end
++            })
++        };
++        for zone in table.zones.iter().filter(|zone| visible_zone(zone)) {
+             if zone.border_fill_id == 0 {
+                 continue;
+             }
+@@ -3899,7 +3905,7 @@
+         // ── 5-0. cellzone 테두리 덮어쓰기 (#6619) ──
+         // zone 배경·대각선은 4-2 에서 이미 그렸다. 네 변은 셀 테두리 그리드가 다 찬
+         // 다음에 덮어써야 셀 고유 선을 이긴다(31쪽 점선 → zone 실선).
+-        for zone in &table.zones {
++        for zone in table.zones.iter().filter(|zone| visible_zone(zone)) {
+             if zone.border_fill_id == 0 {
+                 continue;
+             }
+@@ -11431,12 +11437,12 @@
+     /// its host line even when the control precedes that text in the XML.
+     /// Authenticate a complete original row prefix, not a positive offset alone.
+     /// Whole-frame and body-ineligible floats retain their existing fallback.
+-    fn stored_block_begins_below_host_line(
++    fn saved_block_opening_prefix(
+         &self, para: &Paragraph, child: &crate::model::table::Table,
+         row_heights: &[f64],
+-    ) -> bool {
++    ) -> Option<usize> {
+         let profile = self.profile.get();
+-        let [line] = para.line_segs.as_slice() else { return false; };
++        let [line] = para.line_segs.as_slice() else { return None; };
+         if !(profile.hwpx_stored_layout() || profile.hwp5_stored_pagination_layout())
+             || profile.session_edited()
+             || para.stored_text_partition_is_dirty() || para.cell_format_vpos_dirty
+@@ -11453,14 +11459,14 @@
+             || child.outer_margin_top < 0 || child.outer_margin_bottom < 0
+             || row_heights.len() != usize::from(child.row_count) || row_heights.len() < 2
+             || row_heights.iter().any(|h| !h.is_finite() || *h <= 0.0)
+-        { return false; }
++        { return None; }
+         let declared = hwpunit_to_px(child.common.height as i32, self.dpi);
+         let spacing = hwpunit_to_px(child.cell_spacing as i32, self.dpi);
+         let tolerance = hwpunit_to_px(2, self.dpi);
+         let full = row_heights.iter().sum::<f64>()
+             + spacing * row_heights.len().saturating_sub(1) as f64;
+         if declared + tolerance >= full || !stored_nested_tail_table_is_original(child) {
+-            return false;
++            return None;
+         }
+         // The offset already starts at the host paragraph's origin. Check the
+         // union of its line and the opening block box; do not charge the line twice.
+@@ -11468,16 +11474,61 @@
+         let occupied = hwpunit_to_px(child.common.vertical_offset as i32, self.dpi)
+             + declared + hwpunit_to_px(child.outer_margin_top as i32, self.dpi)
+             + hwpunit_to_px(child.outer_margin_bottom as i32, self.dpi);
+-        if !body.is_finite() || body <= 0.0 || occupied > body + tolerance { return false; }
++        if !body.is_finite() || body <= 0.0 || occupied > body + tolerance { return None; }
+         let mut prefix = 0.0;
+         for end in 1..row_heights.len() {
+             prefix += row_heights[end - 1] + if end > 1 { spacing } else { 0.0 };
+             if (prefix - declared).abs() <= tolerance {
+-                return !child.cells.iter().any(|cell| usize::from(cell.row) < end
+-                    && usize::from(cell.row) + usize::from(cell.row_span) > end);
+-            }
+-        }
+-        false
++                return (!child.cells.iter().any(|cell| usize::from(cell.row) < end
++                    && usize::from(cell.row) + usize::from(cell.row_span) > end)).then_some(end);
++            }
++        }
++        None
++    }
++
++    pub(super) fn saved_anchored_block_opening(
++        &self, para: &Paragraph, child: &crate::model::table::Table, styles: &ResolvedStyleSet,
++    ) -> Option<usize> {
++        if child.common.vertical_offset as i32 <= 0
++            || child.page_break != TablePageBreak::RowBreak
++            || !child.common.flow_with_text || child.common.allow_overlap
++            || child.common.vert_align != VertAlign::Top || !stored_float_frame_owner_is_original(para)
++        { return None; }
++        let trust = self.declared_trust_allowed.get();
++        let rows = self.resolve_row_heights(
++            child, usize::from(child.col_count), usize::from(child.row_count), None, styles, true,
++        );
++        self.declared_trust_allowed.set(trust);
++        self.saved_block_opening_prefix(para, child, &rows)
++    }
++
++    pub(super) fn saved_anchored_child_opening_closes(
++        &self, parent: &crate::model::table::Table, row: usize, end: &[usize],
++        styles: &ResolvedStyleSet,
++    ) -> bool {
++        if !self.profile.get().hwpx_stored_layout() || self.profile.get().session_edited()
++            || Self::row_has_prior_rowspan_cover(parent, row)
++        { return false; }
++        let order = Self::row_cut_cell_order(parent, row);
++        if end.is_empty() || end.len() != order.len() { return false; }
++        let mut found = false;
++        for (cell, &cursor) in order.into_iter().zip(end) {
++            let cell = &parent.cells[cell];
++            let units = self.cell_units(cell, parent, styles);
++            if cursor == units.len() { continue; }
++            let Some((previous, next)) = cursor.checked_sub(1)
++                .and_then(|last| units.get(last).zip(units.get(cursor))) else { return false; };
++            let Some((before, after)) = previous.nested_row.zip(next.nested_row) else { return false; };
++            if previous.para_idx != next.para_idx || before + 1 != after
++                || previous.nested_table_fragment.as_ref().is_some_and(|part| !part.terminal)
++                || next.nested_table_fragment.as_ref().is_some_and(|part| part.start_cut.iter().any(|&v| v != 0))
++            { return false; }
++            let Some(host) = cell.paragraphs.get(next.para_idx) else { return false; };
++            let [Control::Table(child)] = host.controls.as_slice() else { return false; };
++            if self.saved_anchored_block_opening(host, child, styles) != Some(after) { return false; }
++            found = true;
++        }
++        found
+     }
+ 
+     /// [Task #1949] `cell_units_uncached` 의 메모이즈 래퍼. 거대 셀이 RowBreak 로
+@@ -13154,7 +13205,7 @@
+                     let mixed_table_precedes_host_text = stored_displaced_host
+                         || (projected_mixed_block_table
+                             && p.control_text_positions().first() == Some(&0)
+-                            && !self.stored_block_begins_below_host_line(p, nt, &rhs));
++                            && self.saved_block_opening_prefix(p, nt, &rhs).is_none());
+                     let append_mixed_host_text = |target: &mut Vec<CellUnit>, cumulative: &mut f64| {
+                         for (li, line) in comp.lines.iter().enumerate() {
+                             let include_spacing = !(is_last_para && li + 1 == line_count)
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -3935,9 +3935,23 @@
+                                             let (start,end)=split.recursive_cut.as_ref().map(|c|(c.start_cut.as_slice(),c.end_cut.as_slice())).unwrap_or((&[],&[]));
+                                             plan.body_for_cut(split.start_row,split.end_row,start,end,self.dpi)
+                                         }));
+-                                    let mut source_cut=split_info.as_ref().and_then(|split|split.recursive_cut.clone().or_else(||
+-                                        source_tail_frame.map(|_|NestedTableCut{start_row:split.start_row,end_row:split.end_row,
+-                                            start_cut:Vec::new(),end_cut:Vec::new(),is_block_split:false,start_cut_is_block:false})));
++                                    let saved_anchored_prefix = split_info.as_ref().and_then(|split| {
++                                        if split.offset_within_start.abs() > 0.5 || split.start_row != 0 {
++                                            return None;
++                                        }
++                                        self.saved_anchored_block_opening(para, nested_table, styles)
++                                            .filter(|&prefix| split.end_row == prefix)
++                                    });
++                                    let mut source_cut = split_info.as_ref().and_then(|split| {
++                                        split.recursive_cut.clone().or_else(|| {
++                                            (source_tail_frame.is_some() || saved_anchored_prefix.is_some())
++                                                .then(|| NestedTableCut {
++                                                    start_row: split.start_row, end_row: split.end_row,
++                                                    start_cut: Vec::new(), end_cut: Vec::new(),
++                                                    is_block_split: false, start_cut_is_block: false,
++                                                })
++                                        })
++                                    });
+                                     let source_end_row_height=source_tail_frame.and_then(|frame|source_cut.as_ref().and_then(|cut| {
+                                         let previous_declared_trust = self.declared_trust_allowed.get();
+                                         let rows=self.resolve_row_heights(nested_table,nested_table.col_count as usize,nested_table.row_count as usize,None,styles,true);
+@@ -3999,8 +4013,12 @@
+                                         self.saved_terminal_nested_row_prefix(cell, para, nested_table)
+                                             .is_some_and(|row| (cut.start_row == row && cut.start_cut.is_empty())
+                                                 || (cut.end_row == row && cut.end_cut.is_empty())));
++                                    let anchored_opening = source_cut.as_ref().is_some_and(|cut| {
++                                        cut.start_row == 0 && cut.start_cut.is_empty()
++                                            && saved_anchored_prefix == Some(cut.end_row) && cut.end_cut.is_empty()
++                                    });
+                                     let opens_outer_frame = leaf_edge || opening_outer_frame.is_some() || owned_tail_outer_frame
+-                                        || next_inline_restart || terminal_prefix_edge
++                                        || next_inline_restart || terminal_prefix_edge || anchored_opening
+                                         || source_start_row_height.is_some() || end_band.is_some();
+                                     let source_resume_outer_top = source_cut.as_ref().is_some_and(|cut|
+                                         self.saved_nested_source_resume_outer_top(
+@@ -4020,7 +4038,13 @@
+                                     let opening_outer_bottom = if opens_outer_frame || source_outer_bottom {
+                                         hwpunit_to_px(nested_table.outer_margin_bottom as i32, self.dpi)
+                                     } else { 0.0 };
+-                                    let source_nested_y = nested_y + opening_outer_top;
++                                    let source_nested_y = if anchored_opening {
++                                        para_y_before_lines + hwpunit_to_px(
++                                            nested_table.common.vertical_offset as i32, self.dpi,
++                                        ) + opening_outer_top
++                                    } else {
++                                        nested_y + opening_outer_top
++                                    };
+                                     let terminal_inline_frame_bottom = source_cut.as_ref()
+                                         .filter(|cut| {
+                                             let last = cut.end_row.saturating_sub(1);
+@@ -6016,7 +6040,8 @@
+         });
+         // Pagination accepted this exact physical box. Other overrides, reflow,
+         // notes and nested/block cursors retain the legacy folding contract.
+-        let fold_last_row = fold_last_row.filter(|_| !source_parallel_frame);
++        let fold_last_row = fold_last_row.filter(|&row| !source_parallel_frame
++            && !self.saved_anchored_child_opening_closes(table, row, end_cut, styles));
+         let mut fold_slack = f64::INFINITY;
+         self.layout_partial_table_cells(
+             tree,

@@ -1,0 +1,89 @@
+diff --git a/src/renderer/layout/table_layout.rs b/src/renderer/layout/table_layout.rs
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -382,14 +382,21 @@
+     ).collect();
+     if cells.len() != usize::from(table.col_count) || cells.is_empty()
+         || cells.iter().any(|cell| usize::from(cell.row) != row || cell.row_span != 1
+-            || cell.col_span != 1 || cell.text_direction != 0 || cell.paragraphs.len() != 1)
++            || cell.col_span != 1 || cell.text_direction != 0)
+     { return false; }
+     let mut columns = std::collections::BTreeSet::new();
+     let mut closed_height = 0i64;
+     let mut inline_height = 0i64;
+     for cell in cells {
+         if cell.col >= table.col_count || !columns.insert(cell.col) { return false; }
+-        let para = &cell.paragraphs[0];
++        let pad = cell.effective_padding(&table.padding);
++        if pad.top < 0 || pad.bottom < 0 { return false; }
++        let padding = i64::from(pad.top) + i64::from(pad.bottom);
++        if let Some(end) = LayoutEngine::saved_plain_cell_end_hu(cell) {
++            closed_height = closed_height.max(end + padding).max(i64::from(cell.height));
++            continue;
++        }
++        let [para] = cell.paragraphs.as_slice() else { return false; };
+         let [line] = para.line_segs.as_slice() else { return false; };
+         // HWPX colPr(colCount=1) is restored as the 0x02 column-declaration
+         // bit and MultiColumn enum even though it has no layout break. The
+@@ -401,9 +408,7 @@
+         if (para.column_type != crate::model::paragraph::ColumnBreakType::None && !one_column_metadata)
+             || line.vertical_pos != 0 || line.line_height <= 0 || line.line_spacing < 0
+         { return false; }
+-        let pad = cell.effective_padding(&table.padding);
+-        if pad.top < 0 || pad.bottom < 0 { return false; }
+-        let cell_height = i64::from(line.line_height) + i64::from(pad.top) + i64::from(pad.bottom);
++        let cell_height = i64::from(line.line_height) + padding;
+         let mut inline_owner = None;
+         let mut column_metadata = 0;
+         for control in &para.controls {
+@@ -429,6 +434,35 @@
+         closed_height = closed_height.max(cell_height).max(i64::from(cell.height));
+     }
+     inline_height == measured && closed_height == measured
++}
++
++/// A raw cell containing only its padding can still have an original
++/// multiline text box. Trust that expansion only if the complete row closes
++/// at exactly the measured height and no span crosses the source row.
++fn stored_nested_plain_tail_row_is_closed(
++    table: &crate::model::table::Table, row: usize, measured: i64,
++) -> bool {
++    let cells: Vec<_> = table.cells.iter().filter(|cell|
++        usize::from(cell.row) <= row && row < usize::from(cell.row) + usize::from(cell.row_span)
++    ).collect();
++    if cells.len() != usize::from(table.col_count) || cells.is_empty()
++        || cells.iter().any(|cell| usize::from(cell.row) != row || cell.row_span != 1
++            || cell.col_span != 1 || cell.height > i32::MAX as u32)
++    { return false; }
++    let mut columns = std::collections::BTreeSet::new();
++    let mut closed_height = 0i64;
++    let mut padding_only = false;
++    for cell in cells {
++        if cell.col >= table.col_count || !columns.insert(cell.col) { return false; }
++        let Some(end) = LayoutEngine::saved_plain_cell_end_hu(cell) else { return false; };
++        let pad = cell.effective_padding(&table.padding);
++        if pad.top < 0 || pad.bottom < 0 { return false; }
++        let padding = i64::from(pad.top) + i64::from(pad.bottom);
++        let declared = i64::from(cell.height);
++        padding_only |= declared == padding && end + padding == measured;
++        closed_height = closed_height.max(end + padding).max(declared);
++    }
++    padding_only && closed_height == measured
+ }
+ 
+ fn stored_nested_tail_opening_frame_source(
+@@ -475,8 +509,12 @@
+         if prefix>opening || opening>=full || tail+margins!=i64::from(following.vertical_pos)
+             || (following.vertical_pos >= line.vertical_pos && !exact_opening)
+             || measured_rows_hu[boundary..].iter().zip(raw[boundary..].iter()).enumerate()
+-                .any(|(offset,(m,r))| *m!=i64::from(*r)
+-                    && (!exact_opening || !stored_nested_inline_tail_row_is_closed(table,boundary+offset,*m)))
++                .any(|(offset, (measured, declared))| {
++                    if *measured == i64::from(*declared) { return false; }
++                    let row = boundary + offset;
++                    !exact_opening || !(stored_nested_inline_tail_row_is_closed(table, row, *measured)
++                        || stored_nested_plain_tail_row_is_closed(table, row, *measured))
++                })
+             || table.cells.iter().any(|c|usize::from(c.row)<boundary && usize::from(c.row)+usize::from(c.row_span)>boundary)
+         {continue;}
+         if found.is_some(){return None;}

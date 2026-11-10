@@ -1,0 +1,334 @@
+--- a/src/renderer/float_placement.rs
++++ b/src/renderer/float_placement.rs
+@@ -331,7 +331,7 @@
+             return None;
+         }
+         let saved = i64::from(cell.height);
+-        let end = saved_inline_cell_ink_end(cell)?;
++        let end = saved_contiguous_cell_ink_end(cell)?;
+         let pad = i64::from(cell.effective_vertical_padding_hu(&table.padding));
+         let required = saved.max(end + pad);
+         if span == 1 {
+@@ -357,7 +357,7 @@
+ 
+ /// The last line contributes its visible height. Earlier lines contribute
+ /// their complete advance to the next original line, even across paragraphs.
+-fn saved_inline_cell_ink_end(cell: &crate::model::table::Cell) -> Option<i64> {
++pub(crate) fn saved_contiguous_cell_ink_end(cell: &crate::model::table::Cell) -> Option<i64> {
+     let mut next_top = 0;
+     let mut ink_end = None;
+     for para in &cell.paragraphs {
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -13112,7 +13112,13 @@
+                     // `pi324` 5×3 은 내용 행 합 149.8px 에 선언 174.0px 이라 19쪽 표 조각이
+                     // 본문 바닥을 4.0px 넘었다. 내용이 선언보다 긴 page-larger 표(#1073)에는
+                     // 맞춤이 아무것도 더하지 않으므로 행 단위 분할은 그대로다.
+-                    let rhs = self.resolve_row_heights(nt, ncol, nrow, None, styles, true);
++                    let mut rhs = self.resolve_row_heights(nt, ncol, nrow, None, styles, true);
++                    let leaf_frame = Self::plain_leaf_owner_host(p, nt)
++                        .then(|| self.saved_plain_leaf_frame(nt)).flatten();
++                    if let Some(rows) = &leaf_frame {
++                        let complete = rows.len() - 1;
++                        rhs[..complete].copy_from_slice(&rows[..complete]);
++                    }
+                     let ncs = hwpunit_to_px(nt.cell_spacing as i32, self.dpi);
+                     let om_top = hwpunit_to_px(nt.outer_margin_top as i32, self.dpi);
+                     let om_bot = hwpunit_to_px(nt.outer_margin_bottom as i32, self.dpi);
+@@ -13224,6 +13230,12 @@
+                                 None
+                             };
+                             let saved_fragment_cut = saved_rowspan_cut.or_else(|| {
++                                let rows = leaf_frame.as_ref()?;
++                                (ri + 1 == rows.len() && row_units.iter().all(|units| !units.is_empty())
++                                    && row_units.iter().filter(|units| units.len() == 2).count() == 1
++                                    && row_units.iter().all(|units| units.len() <= 2))
++                                    .then(|| (vec![1; row_units.len()], rows[ri]))
++                            }).or_else(|| {
+                                 let (rows, _) = saved_plain_split.as_ref()?;
+                                 (ri + 1 == rows.len() && row_units.iter().all(|units| !units.is_empty())
+                                     && row_units.iter().filter(|units| units.len() == 2).count() == 1
+@@ -13461,6 +13473,7 @@
+                                     if (projected_source_block_table
+                                         && self.nested_row_cut_source_frame_boundary(nt, ri, &start_cut, styles) == Some(true))
+                                         || self.nested_row_cut_closed_inline_frame_boundary(nt, ri, &start_cut, styles) == Some(true)
++                                        || self.saved_nested_leaf_restart_ink(nt, ri, &start_cut, styles).is_some()
+                                     {
+                                         hard_break_before = true;
+                                         stored_frame_break_before = true;
+@@ -16518,10 +16531,12 @@
+         let anchored_restart = self.saved_anchored_float_restart_boundary(
+             child, last_row, &fragment.end_cut, styles,
+         );
++        let leaf_ink = self.saved_nested_leaf_restart_ink(child, last_row, &fragment.end_cut, styles);
+         if first.para_idx != last.para_idx || first_row >= last_row || fragment.terminal
+             || !Self::stored_nested_outer_margin_host(host, child)
+             || child.outer_margin_top < 0 || child.outer_margin_bottom < 0
+-            || !(same_paragraph_restart || terminal_plain_restart || inline_restart || carried_plain_boundary || anchored_restart)
++            || !(same_paragraph_restart || terminal_plain_restart || inline_restart
++                || carried_plain_boundary || anchored_restart || leaf_ink.is_some())
+         { return None; }
+         if same_paragraph_restart {
+             if initial.iter().any(|&cursor| cursor != 0)
+@@ -16533,7 +16548,7 @@
+                 return None;
+             }
+         }
+-        let min = Self::row_cut_cell_order(child, last_row).into_iter().zip(&fragment.end_cut)
++        let min = leaf_ink.or_else(|| Self::row_cut_cell_order(child, last_row).into_iter().zip(&fragment.end_cut)
+             .try_fold(0.0f64, |height, (index, &count)| {
+                 if count == 0 { return Some(height); }
+                 let owner = &child.cells[index];
+@@ -16571,7 +16586,7 @@
+                 let origin = owner.paragraphs.first()?.line_segs.first()?;
+                 let end = line.vertical_pos.checked_add(line.line_height)?;
+                 Some(height.max(top + hwpunit_to_px(end.checked_sub(origin.vertical_pos)?, self.dpi) + bottom))
+-            })?;
++            }))?;
+         let heights = self.resolve_row_heights(
+             child, usize::from(child.col_count), usize::from(child.row_count), None, styles, true,
+         );
+@@ -16620,7 +16635,7 @@
+             if measured < opening { return None; }
+             return Some((end, band, None, frame));
+         }
+-        if anchored_restart { return Some((end, band, None, frame)); }
++        if anchored_restart || leaf_ink.is_some() { return Some((end, band, None, frame)); }
+         if inline_restart && remaining < natural {
+             // The following object's original box establishes its own frame.
+             // The declared residual has no authority over that larger object.
+@@ -17527,7 +17542,9 @@
+                 })
+             });
+         }
+-        if self.saved_complete_row_frame_boundary(table, row, cut, styles).is_some()
++        if self.saved_plain_leaf_boundary(table, row, cut)
++            || self.saved_nested_leaf_restart_ink(table, row, cut, styles).is_some()
++            || self.saved_complete_row_frame_boundary(table, row, cut, styles).is_some()
+             || self.saved_terminal_inline_restart_boundary(table, row, cut, styles)
+             || self.saved_anchored_float_restart_boundary(table, row, cut, styles)
+             || self.saved_nested_plain_line_restart_boundary(table, row, cut, styles)
+@@ -17827,6 +17844,122 @@
+ 
+     // This is a stored first frame only if every completed row has an
+     // independent original line box and the last row closes at its first line.
++    /// A plain floating grid can end its stored first frame halfway through
++    /// the last cell's paragraph. The stored height must close at that exact
++    /// line, including every complete row and the owning cells' padding.
++    pub(super) fn saved_plain_leaf_frame(&self, table: &crate::model::table::Table) -> Option<Vec<f64>> {
++        let profile = self.profile.get();
++        if !profile.hwpx_stored_layout() || profile.hwp5_origin_hwpx() || profile.session_edited()
++            || table.raw_table_record_attr & 0x08 != 0 || table.page_break != TablePageBreak::RowBreak
++            || !crate::renderer::float_placement::is_para_topbottom_float(&table.common)
++            || table.common.vertical_offset != 0 || !table.common.flow_with_text || table.common.allow_overlap
++            || table.caption.is_some() || table.outer_margin_top < 0 || table.outer_margin_bottom < 0
++            || table.common.height == 0 || table.common.height > i32::MAX as u32 || table.cell_spacing < 0
++            || self.render_normalization.borrow().table_text_reflowed(table)
++        { return None; }
++        let mut restart = None;
++        for cell in &table.cells {
++            let [paragraph] = cell.paragraphs.as_slice() else { continue; };
++            let [before, after] = paragraph.line_segs.as_slice() else { continue; };
++            if before.vertical_pos != 0 || after.vertical_pos != 0 { continue; }
++            let padding = i64::from(cell.effective_vertical_padding_hu(&table.padding));
++            if restart.is_some() || !Self::stored_plain_cell_paragraph(paragraph)
++                || paragraph.text.trim().is_empty() || before.text_start >= after.text_start
++                || before.line_height <= 0 || before.line_height != after.line_height
++                || before.line_spacing < 0 || before.line_spacing != after.line_spacing
++                || before.column_start != after.column_start || before.segment_width <= 0
++                || before.segment_width != after.segment_width
++                || i64::from(cell.height) != i64::from(before.line_height) + padding
++            { return None; }
++            restart = Some((cell.row as usize, cell.col, i64::from(before.line_height)));
++        }
++        let (split_row, split_col, first_line) = restart?;
++        if split_row == 0 || split_row + 1 >= usize::from(table.row_count) { return None; }
++
++        let mut heights = Vec::with_capacity(split_row + 1);
++        for row in 0..=split_row {
++            if Self::row_has_prior_rowspan_cover(table, row) { return None; }
++            let mut col = 0;
++            let mut height = 0;
++            for index in Self::row_cut_cell_order(table, row) {
++                let cell = &table.cells[index];
++                if cell.col != col || cell.col_span == 0 || cell.row_span != 1
++                    || cell.dirty_flag || cell.text_direction != 0
++                    || !cell.paragraphs.iter().all(Self::stored_plain_cell_paragraph)
++                { return None; }
++                col = col.checked_add(cell.col_span)?;
++                let end = if row == split_row && cell.col == split_col {
++                    first_line
++                } else {
++                    if row == split_row && !matches!(cell.paragraphs.as_slice(), [p] if p.line_segs.len() == 1) {
++                        return None;
++                    }
++                    crate::renderer::float_placement::saved_contiguous_cell_ink_end(cell)?
++                };
++                let padding = i64::from(cell.effective_vertical_padding_hu(&table.padding));
++                height = height.max((end + padding).max(i64::from(cell.height)));
++            }
++            if col != table.col_count || height <= 0 || height > i64::from(i32::MAX) { return None; }
++            heights.push(height);
++        }
++        let total = heights.iter().sum::<i64>() + i64::from(table.cell_spacing) * split_row as i64;
++        if total != i64::from(table.common.height) { return None; }
++        Some(heights.into_iter().map(|height| hwpunit_to_px(height as i32, self.dpi)).collect())
++    }
++
++    pub(super) fn saved_plain_leaf_boundary(
++        &self, table: &crate::model::table::Table, row: usize, cut: &[usize],
++    ) -> bool {
++        !cut.is_empty() && cut.iter().all(|&cursor| cursor == 1)
++            && cut.len() == Self::row_cut_cell_order(table, row).len()
++            && self.saved_plain_leaf_frame(table).is_some_and(|rows| rows.len() == row + 1)
++    }
++
++    fn plain_leaf_owner_host(host: &Paragraph, child: &crate::model::table::Table) -> bool {
++        if Self::stored_nested_outer_margin_host(host, child) { return true; }
++        matches!(host.controls.as_slice(), [Control::ColumnDef(columns), Control::Table(owner)]
++            if columns.column_count == 1 && columns.spacing == 0 && std::ptr::eq(owner.as_ref(), child))
++            && host.text.trim().is_empty() && stored_float_frame_owner_is_original(host)
++            && matches!(host.line_segs.as_slice(), [line] if line.vertical_pos == 0
++                && line.segment_width == 0 && line.line_height > 0)
++    }
++
++    /// A parent continuation can inherit the authenticated cut of its sole
++    /// projected leaf. Its first fragment reserves the complete leaf box.
++    pub(super) fn saved_nested_leaf_restart_ink(
++        &self, table: &crate::model::table::Table, row: usize, cut: &[usize],
++        styles: &ResolvedStyleSet,
++    ) -> Option<f64> {
++        let order = Self::row_cut_cell_order(table, row);
++        if cut.len() != order.len() || Self::row_has_prior_rowspan_cover(table, row) { return None; }
++        let mut owner = None;
++        let mut ink = 0.0f64;
++        for (index, &cursor) in order.into_iter().zip(cut) {
++            let cell = &table.cells[index];
++            let units = self.cell_units(cell, table, styles);
++            let (_, _, top, bottom) = self.resolve_cell_padding(cell, table);
++            if cursor == units.len() {
++                let end = Self::saved_plain_cell_end_hu(cell)?;
++                ink = ink.max(top + end as f64 * self.dpi / 7200.0 + bottom);
++                continue;
++            }
++            let [host] = cell.paragraphs.as_slice() else { return None; };
++            let child = host.controls.iter().find_map(|control| match control {
++                Control::Table(child) => Some(child.as_ref()), _ => None,
++            })?;
++            let unit = units.get(cursor)?;
++            let fragment = unit.nested_table_fragment.as_ref()?;
++            if owner.is_some() || !Self::plain_leaf_owner_host(host, child)
++                || !unit.stored_frame_break_before
++                || !self.saved_plain_leaf_boundary(child, unit.nested_row?, &fragment.start_cut)
++            { return None; }
++            let height = i64::from(child.common.height)
++                + i64::from(child.outer_margin_top) + i64::from(child.outer_margin_bottom);
++            owner = Some(top + height as f64 * self.dpi / 7200.0 + bottom);
++        }
++        owner.map(|height| ink.max(height))
++    }
++
+     fn saved_nested_plain_split(&self, table: &crate::model::table::Table)
+         -> Option<(Vec<f64>, i64)>
+     {
+@@ -19683,7 +19816,9 @@
+         styles: &ResolvedStyleSet,
+     ) -> Option<bool> {
+         let plain = self.nested_row_cut_plain_source_frame_boundary(table, row, start_cut, styles);
+-        if plain == Some(true) || self.saved_nested_plain_line_restart_boundary(table, row, start_cut, styles) {
++        if plain == Some(true) || self.saved_nested_plain_line_restart_boundary(table, row, start_cut, styles)
++            || self.saved_nested_leaf_restart_ink(table, row, start_cut, styles).is_some()
++        {
+             return Some(true);
+         }
+         if self.nested_row_cut_closed_inline_frame_boundary(table, row, start_cut, styles) == Some(true) {
+@@ -23336,6 +23471,13 @@
+         } else {
+             return None;
+         };
++        let leaf_frame = Self::plain_leaf_owner_host(para, child)
++            .then(|| self.saved_plain_leaf_frame(child)).flatten();
++        let leaf_opening = leaf_frame.as_ref().is_some_and(|rows| cut.start_row == 0
++            && cut.start_cut.is_empty() && cut.end_row == rows.len() && !cut.end_cut.is_empty()
++            && cut.end_cut.iter().all(|&cursor| cursor == 1));
++        let leaf_resume = leaf_frame.as_ref().is_some_and(|rows| cut.start_row + 1 == rows.len()
++            && !cut.start_cut.is_empty() && cut.start_cut.iter().all(|&cursor| cursor == 1));
+         let mut physical = 0.0;
+         // Continuation headers are physical fragment content, not additional
+         // source units. Reserve the same leading rows that table_partial paints
+@@ -23362,7 +23504,9 @@
+                 &[]
+             };
+             let content = self.row_cut_content_height(child, row, start_cut, end_cut, styles);
+-            physical += if start_cut.is_empty() && end_cut.is_empty() && row + 1 == cut.end_row
++            physical += if leaf_opening {
++                leaf_frame.as_ref().and_then(|rows| rows.get(row)).copied().unwrap_or(content)
++            } else if start_cut.is_empty() && end_cut.is_empty() && row + 1 == cut.end_row
+                 && end < run_end && self.saved_terminal_inline_ink_height(child, row).is_some()
+             {
+                 self.saved_terminal_inline_ink_height(child, row).unwrap_or(content)
+@@ -23422,7 +23566,8 @@
+             .and_then(|frame|frame.body_for_cut(cut.start_row,cut.end_row,&cut.start_cut,&cut.end_cut,self.dpi));
+         if let Some(frame)=tail_frame_body {physical=physical.max(frame);}
+         let style = styles.para_styles.get(para.para_shape_id as usize);
+-        let reopens_outer_frame = tail_frame_body.is_some() || reflow_nested_table_has_outer_frame(para, child)
++        let reopens_outer_frame = leaf_opening || leaf_resume || tail_frame_body.is_some()
++            || reflow_nested_table_has_outer_frame(para, child)
+             || cut.end_row.checked_sub(1).is_some_and(|row|
+                 cut.start_row > 0 && Self::stored_nested_outer_margin_host(para, child)
+                     && self.saved_terminal_inline_restart_boundary(child, row, &cut.end_cut, styles)
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -3990,7 +3990,12 @@
+                                             ) && self.saved_next_inline_line(
+                                                 nested_table, last, &cut.end_cut, styles,
+                                             ).is_some_and(|(_, has_successor)| has_successor)));
+-                                    let opens_outer_frame = opening_outer_frame.is_some() || owned_tail_outer_frame
++                                    let leaf_edge = source_cut.as_ref().is_some_and(|cut|
++                                        self.saved_plain_leaf_boundary(nested_table, cut.start_row, &cut.start_cut)
++                                            || self.saved_plain_leaf_boundary(
++                                                nested_table, cut.end_row.saturating_sub(1), &cut.end_cut,
++                                            ));
++                                    let opens_outer_frame = leaf_edge || opening_outer_frame.is_some() || owned_tail_outer_frame
+                                         || next_inline_restart
+                                         || source_start_row_height.is_some() || end_band.is_some();
+                                     let source_resume_outer_top = source_cut.as_ref().is_some_and(|cut|
+@@ -4019,9 +4024,12 @@
+                                                 && self.saved_terminal_inline_restart_boundary(
+                                                     nested_table, last, &cut.end_cut, styles,
+                                                 )
+-                                                || end_band.is_some() && self.saved_anchored_float_restart_boundary(
+-                                                    nested_table, last, &cut.end_cut, styles,
+-                                                )
++                                                || end_band.is_some()
++                                                    && (self.saved_anchored_float_restart_boundary(
++                                                        nested_table, last, &cut.end_cut, styles,
++                                                    ) || self.saved_nested_leaf_restart_ink(
++                                                        nested_table, last, &cut.end_cut, styles,
++                                                    ).is_some())
+                                         })
+                                         .map(|_| {
+                                             let (_, body_y, _, body_height) = self.current_body_area.get();
+@@ -5803,6 +5811,14 @@
+             }
+         }
+ 
++        if !is_block_split && !start_cut_is_block && start_row == 0 && start_cut.is_empty()
++            && self.saved_plain_leaf_boundary(table, end_row.saturating_sub(1), end_cut)
++        {
++            if let Some(rows) = self.saved_plain_leaf_frame(table) {
++                row_heights[..rows.len()].copy_from_slice(&rows);
++            }
++        }
++
+         // 렌더링 영역의 행별 y 위치 계산 (0부터 시작)
+         let mut render_row_y: Vec<f64> = Vec::new(); // 각 render_rows 항목의 시작 y
+         let mut y_accum = 0.0;
+@@ -5942,6 +5958,7 @@
+         let align_owned_opening_frame = terminal_inline_frame_bottom.is_some()
+             && end_row.checked_sub(1).is_some_and(|last| {
+                 self.saved_anchored_float_restart_boundary(table, last, end_cut, styles)
++                    || self.saved_nested_leaf_restart_ink(table, last, end_cut, styles).is_some()
+                     || self.saved_next_inline_line(table, last, end_cut, styles)
+                         .is_some_and(|(height, has_successor)| has_successor || height > row_heights[last])
+             });

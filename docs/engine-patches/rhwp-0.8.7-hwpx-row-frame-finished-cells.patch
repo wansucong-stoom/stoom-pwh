@@ -1,0 +1,97 @@
+diff --git a/src/renderer/layout/table_layout.rs b/src/renderer/layout/table_layout.rs
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -14796,7 +14796,8 @@
+     }
+ 
+     /// A saved HWPX table can split its last row independently in each cell.
+-    /// Match the current source frame with the same frame in each parallel cell.
++    /// Match the source frames across the row. A cell that confirmed the
++    /// opening frame still belongs to the row after consuming its last line.
+     fn hwpx_parallel_frame_closes(
+         table: &crate::model::table::Table,
+         cell: &crate::model::table::Cell,
+@@ -14841,6 +14842,7 @@
+         });
+         let mut parallel_count = 0;
+         let mut source_frame = 0;
++        let mut opening_bottom = None;
+         for owner in std::iter::once(cell).chain(siblings) {
+             if owner.row != cell.row
+                 || owner.row_span != 1
+@@ -14855,6 +14857,12 @@
+             let mut origin = None;
+             let mut frame_index = 0;
+             let mut closing_line = None;
++            let mut shares_opening_frame = false;
++            let padding = owner.effective_padding(&table.padding);
++            let padded_end = |line: &crate::model::paragraph::LineSeg| {
++                i64::from(line.vertical_pos) + i64::from(line.line_height)
++                    + i64::from(padding.top) + i64::from(padding.bottom)
++            };
+             'prefix: for para in &owner.paragraphs {
+                 if !para.controls.is_empty()
+                     || para.stored_text_partition_is_dirty()
+@@ -14875,6 +14883,19 @@
+                             last, seg, frame,
+                         ) {
+                             return false;
++                        }
++                        if frame_index == 0 {
++                            let bottom = padded_end(last);
++                            if current_owner {
++                                opening_bottom = Some(bottom);
++                            } else {
++                                let advance =
++                                    i64::from(last.line_height) + i64::from(last.line_spacing.max(0));
++                                shares_opening_frame = bottom <= frame
++                                    && opening_bottom.is_some_and(|edge| {
++                                        (edge - bottom).abs() <= advance
++                                    });
++                            }
+                         }
+                         let selected = if current_owner {
+                             std::ptr::eq(last, previous) && std::ptr::eq(seg, next)
+@@ -14900,21 +14921,29 @@
+                     prior = Some(seg);
+                 }
+             }
+-            let Some(last) = closing_line else {
+-                return false;
+-            };
+-            if !current_owner {
+-                let owner_padding = owner.effective_padding(&table.padding);
+-                let owner_end = i64::from(last.vertical_pos)
+-                    + i64::from(last.line_height)
+-                    + i64::from(owner_padding.top)
+-                    + i64::from(owner_padding.bottom);
+-                let line_advance = i64::from(last.line_height) + i64::from(last.line_spacing.max(0));
+-                if owner_end > frame || (visible_end - owner_end).abs() > line_advance {
++            if current_owner {
++                if closing_line.is_none() {
+                     return false;
+                 }
+-                parallel_count += 1;
+-            }
++                continue;
++            }
++
++            let supports_frame = if let Some(last) = closing_line {
++                let owner_end = padded_end(last);
++                let advance = i64::from(last.line_height) + i64::from(last.line_spacing.max(0));
++                owner_end <= frame && (visible_end - owner_end).abs() <= advance
++            } else {
++                // A finished cell has no next origin to match. Its intact
++                // source lines must close inside its last frame, and its
++                // earlier restart must corroborate this same physical row.
++                shares_opening_frame
++                    && frame_index <= source_frame
++                    && prior.is_some_and(|last| padded_end(last) <= frame)
++            };
++            if !supports_frame {
++                return false;
++            }
++            parallel_count += 1;
+         }
+         parallel_count > 0
+     }

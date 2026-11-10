@@ -1,0 +1,103 @@
+--- a/src/renderer/svg.rs
++++ b/src/renderer/svg.rs
+@@ -3345,7 +3345,7 @@
+                 self.metric_faces.insert(face);
+             }
+         }
+-        let attrs_for_cluster = |cluster_str: &str, fill: &str| {
++        let attrs_for_cluster = |cluster_str: &str, fill: &str, stroke: Option<f64>| {
+             let cluster_font_family = if super::contains_old_hangul_jamo(cluster_str) {
+                 &old_hangul_font_family
+             } else {
+@@ -3356,7 +3356,7 @@
+                 escape_xml(cluster_font_family),
+                 base_attrs,
+                 fill,
+-                faux_bold_stroke.map_or_else(String::new, |w| faux_bold_stroke_attr(w, fill)),
++                stroke.map_or_else(String::new, |w| faux_bold_stroke_attr(w, fill)),
+             )
+         };
+ 
+@@ -3441,7 +3441,7 @@
+                     script_advance_scale,
+                     ratio,
+                 );
+-                let shadow_attrs = attrs_for_cluster(cluster_str, &shadow_color);
++                let shadow_attrs = attrs_for_cluster(cluster_str, &shadow_color, faux_bold_stroke);
+                 if has_ratio {
+                     self.output.push_str(&format!(
+                         "<text transform=\"translate({},{}) scale({:.4},1)\" {}{}>{}</text>\n",
+@@ -3468,6 +3468,15 @@
+         // 원본 텍스트 렌더링. Canonical decoration/leader sidecars reuse the exact
+         // positioning calculation below without repainting their TextRun mirror.
+         if !self.suppress_text_glyphs {
++            // Chromium writes fill and stroke as separate PDF text operators. Keep
++            // the fill searchable and serialize the faux-bold stroke as artwork.
++            let (text_stroke, print_stroke) =
++                if self.profile == crate::paint::RenderProfile::Print {
++                    (None, faux_bold_stroke)
++                } else {
++                    (faux_bold_stroke, None)
++                };
++            let mut print_strokes = String::new();
+             for (char_idx, cluster_str) in clusters.iter() {
+                 // 공백의 저장 전진폭·장식은 유지하되 글꼴의 잘못된 NBSP 윤곽선은 그리지 않는다.
+                 if cluster_str.chars().all(char::is_whitespace) {
+@@ -3568,28 +3577,38 @@
+                     script_advance_scale,
+                     ratio,
+                 );
+-                let common_attrs = attrs_for_cluster(cluster_str, &color);
+-
+-                if has_ratio {
+-                    self.output.push_str(&format!(
+-                        "<text transform=\"translate({},{}) scale({:.4},1)\" {}{}>{}</text>\n",
+-                        char_x,
+-                        y,
+-                        ratio,
+-                        common_attrs,
+-                        length_attrs,
+-                        escape_xml(cluster_str),
++                let position = if has_ratio {
++                    format!("transform=\"translate({char_x},{y}) scale({ratio:.4},1)\"")
++                } else {
++                    format!("x=\"{char_x}\" y=\"{y}\"")
++                };
++                let glyph = escape_xml(cluster_str);
++                let common_attrs = attrs_for_cluster(cluster_str, &color, text_stroke);
++                self.output.push_str(&format!(
++                    "<text {position} {common_attrs}{length_attrs}>{glyph}</text>\n"
++                ));
++                if let Some(width) = print_stroke {
++                    let stroke_attrs = attrs_for_cluster(cluster_str, "none", None);
++                    let stroke = faux_bold_stroke_attr(width, &color);
++                    print_strokes.push_str(&format!(
++                        "<text {position} {stroke_attrs}{stroke}{length_attrs}>{glyph}</text>\n"
+                     ));
+-                } else {
+-                    self.output.push_str(&format!(
+-                        "<text x=\"{}\" y=\"{}\" {}{}>{}</text>\n",
+-                        char_x,
+-                        y,
+-                        common_attrs,
+-                        length_attrs,
+-                        escape_xml(cluster_str),
++                }
++            }
++            if !print_strokes.is_empty() {
++                let id = format!("rhwp-print-faux-bold-{}", &color[1..]);
++                if self.defs_ids.insert(id.clone()) {
++                    self.defs.push(format!(
++                        "<filter id=\"{id}\" x=\"-50%\" y=\"-50%\" width=\"200%\" height=\"200%\" \
++                            color-interpolation-filters=\"sRGB\">\
++                            <feFlood flood-color=\"{color}\" result=\"ink\"/>\
++                            <feComposite in=\"ink\" in2=\"SourceAlpha\" operator=\"in\"/>\
++                         </filter>\n"
+                     ));
+                 }
++                self.output.push_str(&format!(
++                    "<g aria-hidden=\"true\" filter=\"url(#{id})\">{print_strokes}</g>\n"
++                ));
+             }
+         }
+ 

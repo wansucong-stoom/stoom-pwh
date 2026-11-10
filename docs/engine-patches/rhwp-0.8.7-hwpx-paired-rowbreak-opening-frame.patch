@@ -1,0 +1,98 @@
+--- a/src/renderer/float_placement.rs
++++ b/src/renderer/float_placement.rs
+@@ -1481,6 +1481,43 @@
+     let margins = i64::from(table.outer_margin_top) + i64::from(table.outer_margin_bottom);
+     (remaining > 0 && remaining + margins == i64::from(after.vertical_pos))
+         .then(|| remaining as f64 * dpi / 7200.0)
++}
++
++/// A terminal row split can use the declared opening height when the
++/// successor independently closes the remainder of that same row.
++pub(crate) fn stored_rowbreak_opening_frame_with_closing_row(
++    host: &Paragraph,
++    successor: &Paragraph,
++    table: &Table,
++    dpi: f64,
++) -> Option<f64> {
++    let [anchor] = host.line_segs.as_slice() else {
++        return None;
++    };
++    let [next] = successor.line_segs.as_slice() else {
++        return None;
++    };
++    if !host.text.is_empty()
++        || !successor.text.is_empty()
++        || !matches!(host.controls.as_slice(), [Control::Table(_)])
++        || host.source_frame_reflowed
++        || successor.source_frame_reflowed
++        || host.cell_format_vpos_dirty
++        || successor.cell_format_vpos_dirty
++        || anchor.segment_width != 0
++        || anchor.line_height <= 0
++        || next.line_height <= 0
++        || !table.common.flow_with_text
++        || table.common.allow_overlap
++        || table.common.vertical_offset != 0
++        || table.common.height > i32::MAX as u32
++    {
++        return None;
++    }
++    let closing = stored_rowbreak_closing_frame_height(host, successor, table, dpi)?;
++    let last = i32::try_from(*table.get_raw_row_heights().last()?).ok()?;
++    (closing < hwpunit_to_px(last, dpi))
++        .then(|| hwpunit_to_px(table.common.height as i32, dpi))
+ }
+ 
+ /// 단일 셀의 전체 선언 높이와 첫 개체 프레임의 차이를 뒤 빈 문단이
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -6033,6 +6033,23 @@
+                     self.saved_multirow_opening_frame_height(
+                         table, start_row, end_row, start_cut, end_cut, styles,
+                     )
++                    .or_else(|| {
++                        if !self.profile.get().hwpx_stored_layout()
++                            || self.profile.get().session_edited()
++                            || start_row != 0
++                            || end_row != row_count
++                            || !start_cut.is_empty()
++                            || end_cut.is_empty()
++                        {
++                            return None;
++                        }
++                        crate::renderer::float_placement::stored_rowbreak_opening_frame_with_closing_row(
++                            paragraphs.get(para_index)?,
++                            paragraphs.get(para_index + 1)?,
++                            table,
++                            self.dpi,
++                        )
++                    })
+                 })
+             });
+         let align_owned_opening_frame = terminal_inline_frame_bottom.is_some()
+--- a/src/renderer/typeset/table/continuation/fragment/emit.rs
++++ b/src/renderer/typeset/table/continuation/fragment/emit.rs
+@@ -317,12 +317,19 @@
+             && std::ptr::eq(table, row_geometry_table))
+         .then(|| {
+             input.source.paragraphs_all.get(para_idx + 1).and_then(|next| {
++                let host = input.source.paragraph;
+                 crate::renderer::float_placement::stored_cumulative_rowbreak_opening_frame_height(
+-                    input.source.paragraph,
+-                    next,
+-                    table,
+-                    self.dpi,
++                    host, next, table, self.dpi,
+                 )
++                .or_else(|| {
++                    (st.profile.hwpx_stored_layout() && end_row == row_count)
++                        .then(|| {
++                            crate::renderer::float_placement::stored_rowbreak_opening_frame_with_closing_row(
++                                host, next, table, self.dpi,
++                            )
++                        })
++                        .flatten()
++                })
+             })
+         })
+         .flatten();

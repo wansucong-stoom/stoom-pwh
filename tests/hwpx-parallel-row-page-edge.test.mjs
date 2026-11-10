@@ -19,12 +19,16 @@ function cell(row, col, height, body) {
     '<hp:cellSz width="18000" height="' + height + '"/><hp:cellMargin left="100" right="100" top="100" bottom="100"/></hp:tc>';
 }
 
-function fixture({leftRestart = 0, bottom = 1300, continuation = false, leftSecondRestart = 0} = {}) {
+function fixture({
+  leftRestart = 0, bottom = 1300, continuation = false, leftSecondRestart = 0,
+  leftEndsInContinuation = false, swapColumns = false,
+} = {}) {
   const second = (marker, closing, restart) => !continuation ? '' :
     Array.from({length: 25}, (_, i) => paragraph(marker + i, (i + 1) * 1700)).join('') +
     paragraph(closing, 44200) + paragraph(marker + 'END', restart);
   const left = Array.from({length: 26}, (_, i) => paragraph('LEFT' + i, i * 1700)).join('') +
-    paragraph('LEFTNEXT', leftRestart) + second('LEFTSECOND', 'LEFTCLOSE', leftSecondRestart);
+    paragraph('LEFTNEXT', leftRestart) +
+    (leftEndsInContinuation ? '' : second('LEFTSECOND', 'LEFTCLOSE', leftSecondRestart));
   const right = Array.from({length: 26}, (_, i) => paragraph('RIGHT' + i, i * 1700)).join('') +
     paragraph('CLOSING', 44200) + paragraph('RIGHTNEXT', 0) + second('RIGHTSECOND', 'RIGHTCLOSE', 0);
   const table = '<hp:tbl id="17" numberingType="TABLE" textWrap="TOP_AND_BOTTOM" textFlow="BOTH_SIDES" ' +
@@ -35,7 +39,8 @@ function fixture({leftRestart = 0, bottom = 1300, continuation = false, leftSeco
     '<hp:outMargin left="0" right="0" top="0" bottom="0"/><hp:inMargin left="100" right="100" top="100" bottom="100"/>' +
     '<hp:tr>' + cell(0, 0, 2400, paragraph('HEADLEFT', 0, 0)) +
     cell(0, 1, 2400, paragraph('HEADRIGHT', 0, 0)) + '</hp:tr>' +
-    '<hp:tr>' + cell(1, 0, 52000, left) + cell(1, 1, 52000, right) + '</hp:tr></hp:tbl>';
+    '<hp:tr>' + cell(1, 0, 52000, swapColumns ? right : left) +
+    cell(1, 1, 52000, swapColumns ? left : right) + '</hp:tr></hp:tbl>';
   const page = '<hp:secPr id="0"><hp:pagePr width="40000" height="50100" landscape="WIDELY">' +
     '<hp:margin left="100" right="100" top="100" bottom="' + bottom + '" header="0" footer="700" gutter="0"/>' +
     '</hp:pagePr></hp:secPr>';
@@ -56,13 +61,15 @@ test('a saved parallel row uses the visible closing line at the page edge', {
   const digest = createHash('sha256').update(wasm).digest('hex');
   const releasedR18 = digest === '9fef2eb76f0f98d271b3e3205247b57c3164c8730e17cfe4ae3d1c1616a6ab8a';
   const firstFrameOnly = digest === 'acd654d86053f89f3bbd788f710a1ade314bd41cbc06a27a7114bbd418581eb2';
+  const simultaneousRestartsOnly = digest === 'a56124fc94e47baa90650f5aea8c4bb211e6a7e86b76c5c70a75b6685a3ea45f';
   function pages(options) {
     const doc = new core.HwpDocument(fixture(options));
     try {
       const layout = Array.from({length: doc.pageCount()}, (_, page) => JSON.parse(doc.getPageTextLayout(page)).runs);
       const {height, marginBottom, marginFooter} = JSON.parse(doc.getPageInfo(0));
-      const {controls} = JSON.parse(doc.getPageControlLayout(0));
-      return {layout, bodyBottom: height - marginBottom - marginFooter, table: controls.find(control => control.type === 'table')};
+      const tables = layout.map((_, page) =>
+        JSON.parse(doc.getPageControlLayout(page)).controls.find(control => control.type === 'table'));
+      return {layout, bodyBottom: height - marginBottom - marginFooter, table: tables[0], tables};
     } finally {
       doc.free();
     }
@@ -92,5 +99,25 @@ test('a saved parallel row uses the visible closing line at the page edge', {
   assert.equal(pageOf(continued, 'RIGHTCLOSE'), expectedClosingPage);
   assert.equal(pageOf(continued, 'RIGHTSECONDEND'), 2);
   assert.equal(pageOf(pages({continuation: true, leftSecondRestart: 44100}), 'RIGHTCLOSE'), 2);
+
+  const finished = {continuation: true, leftEndsInContinuation: true};
+  const expectedWithFinishedCell = releasedR18 || firstFrameOnly || simultaneousRestartsOnly ? 2 : 1;
+  for (const swapColumns of [false, true]) {
+    const result = pages({...finished, swapColumns});
+    assert.equal(pageOf(result, 'LEFTNEXT'), 1, 'the short cell is consumed once');
+    assert.equal(pageOf(result, 'RIGHTCLOSE'), expectedWithFinishedCell);
+    assert.equal(pageOf(result, 'RIGHTSECONDEND'), 2);
+    const continuing = result.tables[1];
+    const edge = continuing.y + continuing.h;
+    assert.ok(edge <= result.bodyBottom + 0.2, 'continuation stays within the body boundary');
+    if (expectedWithFinishedCell === 1) {
+      const closing = result.layout[1].find(run => run.text === 'RIGHTCLOSE');
+      assert.ok(closing.y + closing.h <= edge + 0.2, 'the continuation border encloses the closing line');
+      const terminal = result.tables[2];
+      assert.ok(terminal.y + terminal.h < edge, 'the final fragment closes at its content');
+    }
+  }
+  assert.equal(pageOf(pages({...finished, leftRestart: 44100}), 'RIGHTCLOSE'), 2,
+    'a short cell without a corroborating source boundary does not authenticate the row');
 
 });

@@ -1,0 +1,97 @@
+--- a/src/renderer/layout.rs
++++ b/src/renderer/layout.rs
+@@ -12556,8 +12556,32 @@
+                             return None;
+                         }
+                         saved_single_inline_table_band(para, t, following, style.spacing_after, col_area, self.dpi)
+-                            .filter(|(top, _)| (*top - table_y_start).abs()
+-                                <= hwpunit_to_px(t.outer_margin_top as i32, self.dpi))
++                            .filter(|(top, _)| {
++                                let drift = *top - table_y_start;
++                                if drift.abs() <= hwpunit_to_px(i32::from(t.outer_margin_top), self.dpi) {
++                                    return true;
++                                }
++                                // A closed source chain on both sides can resolve
++                                // drift left by earlier paragraph spacing on the page.
++                                let confirmed = para_index.checked_sub(1).and_then(|index| {
++                                    let previous = paragraphs.get(index)?;
++                                    let [before] = previous.line_segs.as_slice() else { return None; };
++                                    let [current] = para.line_segs.as_slice() else { return None; };
++                                    if previous.stored_text_partition_is_dirty() || previous.source_frame_reflowed
++                                        || before.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0
++                                        || before.vertical_pos < 0 || before.line_height <= 0 || before.line_spacing <= 0
++                                    { return None; }
++                                    let source_gap = current.vertical_pos.checked_sub(before.vertical_pos)?
++                                        .checked_sub(before.line_height)?.checked_sub(before.line_spacing)?;
++                                    let spacing = styles.para_styles.get(previous.para_shape_id as usize)?.spacing_after;
++                                    ((hwpunit_to_px(source_gap, self.dpi) - spacing).abs() <= hwpunit_to_px(1, self.dpi))
++                                        .then_some(hwpunit_to_px(before.line_spacing, self.dpi))
++                                });
++                                confirmed.is_some_and(|max_drift| (0.0..=max_drift).contains(&drift))
++                                    && col_node.children.iter().all(|node|
++                                        !matches!(node.node_type, RenderNodeType::Table(_))
++                                            || node.bbox.y + node.bbox.height <= *top)
++                            })
+                     })
+                 } else { None };
+                 let table_y_start = if is_tac && inline_pos.is_none() {
+@@ -12609,7 +12633,9 @@
+                     && t.common.vert_rel_to == VertRelTo::Para
+                     && t.common.vert_align == crate::model::shape::VertAlign::Top
+                     && t.common.flow_with_text && !t.common.allow_overlap
+-                    && t.caption.is_none() && t.outer_margin_top >= 0
++                    && t.caption.as_ref().is_none_or(|caption|
++                        caption.direction == crate::model::shape::CaptionDirection::Bottom)
++                    && t.outer_margin_top >= 0
+                     && para.text.trim().is_empty()
+                     && !para.stored_text_partition_is_dirty() && !para.source_frame_reflowed
+                     && matches!(para.controls.as_slice(), [Control::Table(_)]))
+@@ -12618,12 +12644,21 @@
+                         let previous = paragraphs.get(para_index.checked_sub(1)?)?;
+                         let next = paragraphs.get(para_index + 1)?;
+                         let [line] = para.line_segs.as_slice() else { return None; };
+-                        let [Control::Table(preceding)] = previous.controls.as_slice() else { return None; };
+-                        let before = saved_inline_table_owner(previous, preceding)?;
++                        let before = match previous.controls.as_slice() {
++                            [Control::Table(preceding)] => saved_inline_table_owner(previous, preceding)?,
++                            [] if !previous.text.trim().is_empty()
++                                && !previous.stored_text_partition_is_dirty() && !previous.source_frame_reflowed
++                                && t.common.vertical_offset == 0 => {
++                                let [before] = previous.line_segs.as_slice() else { return None; };
++                                before
++                            }
++                            _ => return None,
++                        };
+                         if next.column_type != ColumnBreakType::Page
+                             || next.line_segs.first()?.vertical_pos < 0
+-                            || line.tag & LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0
++                            || (line.tag | before.tag) & LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0
+                             || line.line_height <= 0 || line.vertical_pos <= 0
++                            || before.vertical_pos < 0 || before.line_height <= 0 || before.line_spacing <= 0
+                             || !(0..line.line_height).contains(&signed_hwpunit(t.common.vertical_offset))
+                         { return None; }
+                         let advance = before.vertical_pos.checked_add(before.line_height)?
+@@ -12631,14 +12666,20 @@
+                         let spacing = styles.para_styles.get(previous.para_shape_id as usize)?.spacing_after
+                             + para_style?.spacing_before;
+                         let remaining = hwpunit_to_px(line.vertical_pos.checked_sub(advance)?, self.dpi);
+-                        if spacing <= 0.0 || (remaining - spacing).abs() > hwpunit_to_px(1, self.dpi) {
++                        if (remaining - spacing).abs() > hwpunit_to_px(1, self.dpi) {
+                             return None;
+                         }
++                        let max_drift = if previous.controls.is_empty() {
++                            hwpunit_to_px(before.line_spacing, self.dpi)
++                        } else {
++                            spacing
++                        };
+                         let top = col_area.y + hwpunit_to_px(
+                             line.vertical_pos.checked_add(i32::from(t.outer_margin_top))?, self.dpi);
+-                        let height = hwpunit_to_px(i32::try_from(t.common.height).ok()?, self.dpi);
++                        let height = table_visual_height.max(
++                            hwpunit_to_px(i32::try_from(t.common.height).ok()?, self.dpi));
+                         (height > 0.0 && top + height <= col_area.y + col_area.height
+-                            && (0.0..=spacing).contains(&(top - table_y_start))
++                            && max_drift > 0.0 && (0.0..=max_drift).contains(&(top - table_y_start))
+                             && col_node.children.iter().all(|node|
+                                 !matches!(node.node_type, RenderNodeType::Table(_))
+                                     || node.bbox.y + node.bbox.height <= top))

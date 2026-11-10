@@ -1,0 +1,756 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -13103,6 +13103,16 @@
+                     if projected_mixed_block_table && !mixed_table_precedes_host_text {
+                         append_mixed_host_text(&mut units, &mut unit_cum);
+                     }
++                    let saved_plain_split = (projected_source_block_table
++                        && Self::stored_nested_outer_margin_host(p, nt))
++                        .then(|| self.saved_nested_plain_split(nt))
++                        .flatten()
++                        .filter(|(_, tail)| cell.paragraphs.get(pi + 1)
++                            .filter(|next| Self::stored_plain_cell_paragraph(next))
++                            .and_then(|next| next.line_segs.first())
++                            .is_some_and(|line| i64::from(line.vertical_pos)
++                                == *tail + i64::from(nt.outer_margin_top)
++                                    + i64::from(nt.outer_margin_bottom)));
+                     for (ri, rh) in rhs.iter().enumerate() {
+                         // [#4069] CELL 분할 중첩 표는 큰 행을 단일 atom으로 바깥
+                         // 원장에 올리지 않는다. 행에서 콘텐츠가 가장 높은 셀의 unit
+@@ -13134,6 +13144,13 @@
+                             } else {
+                                 None
+                             };
++                            let saved_fragment_cut = saved_rowspan_cut.or_else(|| {
++                                let (rows, _) = saved_plain_split.as_ref()?;
++                                (ri + 1 == rows.len() && row_units.iter().all(|units| !units.is_empty())
++                                    && row_units.iter().filter(|units| units.len() == 2).count() == 1
++                                    && row_units.iter().all(|units| units.len() <= 2))
++                                    .then(|| (vec![1; row_units.len()], rows[ri]))
++                            });
+                             let driver = row_units
+                                 .iter()
+                                 .enumerate()
+@@ -13203,10 +13220,10 @@
+                                     || projected_source_block_table
+                                     || row_units[*driver_index].iter().any(|unit|
+                                         self.cell_unit_starts_closed_inline_frame(nt, row_cells[*driver_index], unit, styles))
+-                                    || saved_rowspan_cut.is_some())
+-                                    && (!row_has_crossing_span || saved_rowspan_cut.is_some())
++                                    || saved_fragment_cut.is_some())
++                                    && (!row_has_crossing_span || saved_fragment_cut.is_some())
+                                     && row_units[*driver_index].len() > 1
+-                                    && (saved_rowspan_cut.is_none() || row_units[*driver_index].len() == 2)
++                                    && (saved_fragment_cut.is_none() || row_units[*driver_index].len() == 2)
+                             }) {
+                                 let driver_units = &row_units[driver_index];
+                                 let driver_total: f64 =
+@@ -13256,7 +13273,7 @@
+                                             })
+                                             .collect()
+                                     };
+-                                    let (start_cut, end_cut) = if let Some((cut, _)) = &saved_rowspan_cut {
++                                    let (start_cut, end_cut) = if let Some((cut, _)) = &saved_fragment_cut {
+                                         if fragment_index == 0 {
+                                             (vec![0; row_units.len()], cut.clone())
+                                         } else {
+@@ -13269,7 +13286,7 @@
+                                         .iter()
+                                         .zip(end_cut.iter())
+                                         .all(|(cell_units, end)| *end >= cell_units.len());
+-                                    let mut uh = if let Some((_, band)) = &saved_rowspan_cut {
++                                    let mut uh = if let Some((_, band)) = &saved_fragment_cut {
+                                         if fragment_index == 0 {
+                                             *band
+                                         } else {
+@@ -13279,7 +13296,7 @@
+                                         fragment_height + if fragment_index == 0 { row_extra * 0.5 } else { 0.0 }
+                                     };
+                                     if fragment_end == driver_units.len() {
+-                                        if saved_rowspan_cut.is_none() {
++                                        if saved_fragment_cut.is_none() {
+                                             uh += row_extra - row_extra * 0.5;
+                                         }
+                                         if ri + 1 < nrow {
+@@ -13305,7 +13322,7 @@
+                                         || (reset_before && !projected_mixed_block_table && ri == 0 && fragment_index == 0);
+                                     let mut stored_frame_break_before =
+                                         driver_unit.stored_frame_break_before;
+-                                    if saved_rowspan_cut.is_some() && fragment_index > 0 {
++                                    if saved_fragment_cut.is_some() && fragment_index > 0 {
+                                         hard_break_before = true;
+                                         stored_frame_break_before = true;
+                                     }
+@@ -16621,11 +16638,18 @@
+         let rows=self.resolve_row_heights(child,child.col_count as usize,child.row_count as usize,None,styles,true);
+         self.declared_trust_allowed.set(previous_declared_trust);
+         if !self.dpi.is_finite() || self.dpi<=0.0 || rows.iter().any(|h|!h.is_finite()||*h<=0.0||*h*7200.0/self.dpi>f64::from(i32::MAX)){return None;}
+-        let measured:Vec<i64>=rows.iter().map(|h|(h*7200.0/self.dpi).round()as i64).collect();
+-        let plan=stored_nested_tail_opening_frame_source(host,Some(next),child,&measured,
+-            profile.hwpx_stored_layout()||profile.hwp5_stored_pagination_layout(),profile.session_edited(),false,true,
++        let mut measured:Vec<i64>=rows.iter().map(|h|(h*7200.0/self.dpi).round()as i64).collect();
++        let plan_for = |heights: &[i64]| stored_nested_tail_opening_frame_source(
++            host, Some(next), child, heights,
++            profile.hwpx_stored_layout() || profile.hwp5_stored_pagination_layout(),
++            profile.session_edited(), false, true,
+             [hs.spacing_before,hs.spacing_after,ns.spacing_before]);
+-        let plan=plan?;
++        let plan = if let Some(plan) = plan_for(&measured) {
++            plan
++        } else {
++            measured = self.saved_complete_child_row_heights(child)?;
++            plan_for(&measured)?
++        };
+         let raw=child.get_raw_row_heights();
+         // An inline line's closed height excludes paragraph spacing. Check
+         // the resolved source style before accepting an expanded tail row.
+@@ -16637,7 +16661,7 @@
+         let body_hu = i64::from(self.render_normalization.borrow().source_body_height_hu(parent)?);
+         let margins = i64::from(child.outer_margin_top) + i64::from(child.outer_margin_bottom);
+         let opening_end = i64::from(line.vertical_pos) + i64::from(plan.opening_height_hu) + margins;
+-        (rows.iter().take(plan.tail_start_row).sum::<f64>() <= f64::from(plan.opening_height_hu)*self.dpi/7200.0
++        (measured.iter().take(plan.tail_start_row).sum::<i64>() <= i64::from(plan.opening_height_hu)
+             && opening_end <= body_hu
+             && plan.tail_height_hu + margins <= body_hu).then_some(plan)
+     }
+@@ -16861,11 +16885,157 @@
+             }
+             let row = end_row.checked_sub(1)?;
+             self.saved_nested_rowspan_band_at_cut(table, row, end_cut, styles)
++                .or_else(|| self.saved_nested_plain_split_rows(table, start_row, end_row, start_cut, end_cut)
++                    .map(|rows| rows[row]))
+                 .or_else(|| self.saved_nested_rowspan_wrapper_opening_rows(
+                     table, start_row, end_row, start_cut, end_cut, styles,
+                 ).map(|rows| rows[row]))?;
+             Some(hwpunit_to_px(table.common.height as i32, self.dpi))
+         })
++    }
++
++    /// Recover the source-local extent of a verified resumed wrapper. Its
++    /// innermost split must close at exactly the saved following line.
++    pub(super) fn saved_rowspan_wrapper_resume_rows(
++        &self, table: &crate::model::table::Table, row: usize, cut: &[usize],
++        styles: &ResolvedStyleSet,
++    ) -> Option<Vec<f64>> {
++        if row == 0 || row >= usize::from(table.row_count)
++            || !self.profile.get().hwpx_stored_layout() || self.profile.get().session_edited()
++            || !crate::renderer::float_placement::is_para_topbottom_float(&table.common)
++            || !table.common.flow_with_text || table.common.allow_overlap
++            || table.common.vertical_offset != 0 || table.caption.is_some()
++            || table.page_break != TablePageBreak::RowBreak
++            || self.render_normalization.borrow().table_text_reflowed(table)
++        { return None; }
++        let order = Self::row_cut_cell_order(table, row);
++        let columns = usize::from(table.col_count);
++        if order.len() != columns || cut.len() != columns { return None; }
++        let mut owner_height = None;
++        for (&index, &start) in order.iter().zip(cut) {
++            let cell = &table.cells[index];
++            if cell.col_span != 1 || cell.dirty_flag || cell.text_direction != 0 { return None; }
++            let units = self.cell_units(cell, table, styles);
++            if start == units.len() { continue; }
++            let (host, child, child_row, child_cut, following) =
++                self.saved_nested_resume_cursor(cell, &units, start, units.len())?;
++            if host != 1 || owner_height.is_some() { return None; }
++            self.saved_nested_rowspan_band_at_cut(child, child_row, child_cut, styles)?;
++            let first = self.row_cut_content_height(child, child_row, child_cut, &[], styles);
++            let rest: f64 = (child_row + 1..usize::from(child.row_count))
++                .map(|r| self.row_cut_content_height(child, r, &[], &[], styles)).sum();
++            let spacing = f64::from(child.cell_spacing)
++                * (usize::from(child.row_count) - child_row - 1) as f64;
++            let physical = (first + rest) * 7200.0 / self.dpi + spacing;
++            let margins = i64::from(child.outer_margin_top) + i64::from(child.outer_margin_bottom);
++            if physical.round() as i64 + margins != i64::from(following.vertical_pos) {
++                return None;
++            }
++            owner_height = Some(i64::from(following.vertical_pos) + i64::from(following.line_height)
++                + i64::from(cell.effective_vertical_padding_hu(&table.padding)));
++        }
++        let mut heights = vec![owner_height?];
++        for row in row + 1..usize::from(table.row_count) {
++            let order = Self::row_cut_cell_order(table, row);
++            if order.len() != columns { return None; }
++            let mut height = 0;
++            for (col, index) in order.into_iter().enumerate() {
++                let cell = &table.cells[index];
++                if usize::from(cell.col) != col || cell.col_span != 1 { return None; }
++                let content = Self::saved_plain_cell_end_hu(cell)?;
++                let padding = i64::from(cell.effective_vertical_padding_hu(&table.padding));
++                height = height.max((content + padding).max(i64::from(cell.height)));
++            }
++            heights.push(height);
++        }
++        Some(heights.into_iter().map(|h| hwpunit_to_px(h as i32, self.dpi)).collect())
++    }
++
++    fn saved_nested_resume_cursor<'a, 'u>(
++        &self, cell: &'a crate::model::table::Cell, units: &'u [CellUnit],
++        start: usize, end: usize,
++    ) -> Option<(usize, &'a crate::model::table::Table, usize, &'u [usize],
++        &'a crate::model::paragraph::LineSeg)>
++    {
++        let end = end.min(units.len());
++        if start == 0 || end != units.len() || start >= end.saturating_sub(1)
++            || cell.dirty_flag || cell.text_direction != 0
++        { return None; }
++        let first = units.get(start)?;
++        let host = first.para_idx;
++        let row = first.nested_row?;
++        let start_cut = &first.nested_table_fragment.as_ref()?.start_cut;
++        let same_row = units.get(start - 1).is_some_and(|prior| prior.para_idx == host
++            && prior.nested_row == Some(row) && prior.nested_table_fragment.as_ref()
++                .is_some_and(|cut| !cut.terminal && cut.end_cut == *start_cut));
++        let successor = &units[end - 1];
++        if !same_row || units[start..end - 1].iter().any(|u| u.para_idx != host || u.nested_row.is_none())
++            || successor.para_idx != host + 1 || successor.vis_start != 0 || successor.vis_end != 1
++        { return None; }
++        let [host_para, following] = cell.paragraphs.get(host..)? else { return None; };
++        let [Control::Table(child)] = host_para.controls.as_slice() else { return None; };
++        let [line] = following.line_segs.as_slice() else { return None; };
++        if !Self::stored_nested_outer_margin_host(host_para, child)
++            || !Self::stored_plain_cell_paragraph(following) || following.text.trim().is_empty()
++            || line.vertical_pos <= 0 || line.line_height <= 0 || line.segment_width <= 0
++        { return None; }
++        Some((host, child, row, start_cut, line))
++    }
++
++    pub(super) fn saved_resumed_fragment_successor<'a>(
++        &self, cell: &'a crate::model::table::Cell, units: &[CellUnit],
++        start: usize, end: usize, styles: &ResolvedStyleSet,
++    ) -> Option<(usize, &'a crate::model::paragraph::LineSeg, bool)> {
++        let (host, child, row, cut, line) = self.saved_nested_resume_cursor(cell, units, start, end)?;
++        let margins = i64::from(child.outer_margin_top) + i64::from(child.outer_margin_bottom);
++        if let Some((_, tail)) = self.saved_nested_plain_split(child) {
++            if row + 1 == usize::from(child.row_count)
++                && Self::saved_nested_plain_split_boundary(child, cut)
++                && tail + margins == i64::from(line.vertical_pos)
++            {
++                return Some((host + 1, line, false));
++            }
++        }
++        let rows = self.saved_rowspan_wrapper_resume_rows(child, row, cut, styles)?;
++        let spacing = f64::from(child.cell_spacing) * rows.len().saturating_sub(1) as f64;
++        let height = (rows.iter().sum::<f64>() * 7200.0 / self.dpi + spacing).round() as i64;
++        (height + margins == i64::from(line.vertical_pos)).then_some((host + 1, line, true))
++    }
++
++    fn saved_resumed_fragment_row_height(
++        &self, table: &crate::model::table::Table, row: usize, cut: &[usize],
++        styles: &ResolvedStyleSet,
++    ) -> Option<f64> {
++        if cut.is_empty() || Self::row_has_prior_rowspan_cover(table, row) { return None; }
++        let order = Self::row_cut_cell_order(table, row);
++        if order.len() != cut.len() || cut.len() != usize::from(table.col_count) { return None; }
++        let mut result = None;
++        for (index, &start) in order.into_iter().zip(cut) {
++            let cell = &table.cells[index];
++            if cell.col_span != 1 || cell.dirty_flag { return None; }
++            let units = self.cell_units(cell, table, styles);
++            if start == units.len() { continue; }
++            let (next, line, reserve) =
++                self.saved_resumed_fragment_successor(cell, &units, start, units.len(), styles)?;
++            if result.is_some() { return None; }
++            let [Control::Table(child)] = cell.paragraphs[next - 1].controls.as_slice() else { return None; };
++            let padding = i64::from(cell.effective_vertical_padding_hu(&table.padding));
++            let occupied = i64::from(line.vertical_pos) + i64::from(line.line_height) + padding;
++            let height = if reserve {
++                if table.cells.iter().filter(|sibling| usize::from(sibling.row) == row)
++                    .any(|sibling| sibling.height != cell.height || sibling.row_span != 1) { return None; }
++                let anchor = cell.paragraphs[next - 1].line_segs.first()?;
++                let opening = i64::from(anchor.vertical_pos) + i64::from(child.common.height)
++                    + i64::from(child.outer_margin_top) + i64::from(child.outer_margin_bottom) + padding;
++                let remainder = i64::from(cell.height) - opening;
++                if remainder < occupied { return None; }
++                remainder
++            } else {
++                occupied
++            };
++            result = Some(hwpunit_to_px(i32::try_from(height).ok()?, self.dpi));
++        }
++        result
+     }
+ 
+     /// An entire child table can start a new frame after its host text has
+@@ -16956,6 +17126,11 @@
+         if self.saved_complete_row_frame_boundary(table, row, cut, styles).is_some()
+             || self.saved_nested_rowspan_band_at_cut(table, row, cut, styles).is_some()
+             || self.saved_closed_float_plain_resume(table, row, cut, styles)
++            || self.saved_resumed_fragment_row_height(table, row, cut, styles).is_some()
++            || self.saved_rowspan_wrapper_resume_rows(table, row, cut, styles).is_some()
++            || (row + 1 == usize::from(table.row_count)
++                && Self::saved_nested_plain_split_boundary(table, cut)
++                && self.saved_nested_plain_split(table).is_some())
+         {
+             return true;
+         }
+@@ -17241,6 +17416,157 @@
+         let height = rows.iter().sum::<i64>() + i64::from(table.cell_spacing) * last as i64;
+         if height != i64::from(table.common.height) { return None; }
+         Some(rows.into_iter().map(|height| hwpunit_to_px(height as i32, self.dpi)).collect())
++    }
++
++    // This is a stored first frame only if every completed row has an
++    // independent original line box and the last row closes at its first line.
++    fn saved_nested_plain_split(&self, table: &crate::model::table::Table)
++        -> Option<(Vec<f64>, i64)>
++    {
++        let profile = self.profile.get();
++        let last = usize::from(table.row_count).checked_sub(1)?;
++        if last == 0 || !profile.hwpx_stored_layout() || profile.hwp5_origin_hwpx()
++            || profile.session_edited() || table.raw_table_record_attr & 0x08 != 0
++            || !crate::renderer::float_placement::is_para_topbottom_float(&table.common)
++            || table.common.vertical_offset != 0 || !table.common.flow_with_text
++            || table.common.allow_overlap || table.caption.is_some()
++            || table.common.vert_align != VertAlign::Top || table.outer_margin_top < 0
++            || table.outer_margin_bottom < 0 || table.page_break != TablePageBreak::RowBreak
++            || table.common.height == 0 || table.common.height > i32::MAX as u32
++            || self.render_normalization.borrow().table_text_reflowed(table)
++        { return None; }
++        let columns = usize::from(table.col_count);
++        let mut heights = vec![0i64; last + 1];
++        let mut tail = None;
++        for (row, height) in heights.iter_mut().enumerate() {
++            let order = Self::row_cut_cell_order(table, row);
++            if order.len() != columns || columns == 0 { return None; }
++            for (col, index) in order.into_iter().enumerate() {
++                let cell = &table.cells[index];
++                if usize::from(cell.col) != col || cell.col_span != 1 || cell.dirty_flag
++                    || cell.text_direction != 0 || cell.height > i32::MAX as u32 { return None; }
++                let padding = cell.effective_padding(&table.padding);
++                if padding.top < 0 || padding.bottom < 0 { return None; }
++                let padding = i64::from(padding.top) + i64::from(padding.bottom);
++                let content_end = if row == last {
++                    let mut lines = cell.paragraphs.iter().flat_map(|p| p.line_segs.iter());
++                    if !cell.paragraphs.iter().all(Self::stored_plain_cell_paragraph) { return None; }
++                    let first = lines.next()?;
++                    if first.vertical_pos != 0 || first.line_height <= 0 { return None; }
++                    if let Some(second) = lines.next() {
++                        let [first_para, second_para] = cell.paragraphs.as_slice() else { return None; };
++                        if tail.is_some() || lines.next().is_some()
++                            || first_para.text.trim().is_empty() || second_para.text.trim().is_empty()
++                            || second.vertical_pos != 0 || second.line_height <= 0
++                            || first.column_start != second.column_start
++                            || first.segment_width <= 0 || first.segment_width != second.segment_width
++                            || i64::from(cell.height) != padding
++                        { return None; }
++                        tail = Some(i64::from(second.line_height) + padding);
++                    }
++                    i64::from(first.line_height)
++                } else {
++                    Self::saved_nested_complete_cell_lines(cell)?
++                };
++                *height = (*height).max((content_end + padding).max(i64::from(cell.height)));
++            }
++        }
++        let tail = tail?;
++        let frame = heights.iter().sum::<i64>() + i64::from(table.cell_spacing) * last as i64;
++        if frame != i64::from(table.common.height) { return None; }
++        Some((heights.into_iter().map(|height| hwpunit_to_px(height as i32, self.dpi)).collect(), tail))
++    }
++
++    pub(super) fn saved_complete_child_row_heights(
++        &self, table: &crate::model::table::Table,
++    ) -> Option<Vec<i64>> {
++        if !self.profile.get().hwpx_stored_layout() || self.profile.get().session_edited()
++            || !crate::renderer::float_placement::is_para_topbottom_float(&table.common)
++            || !table.common.flow_with_text || table.common.allow_overlap
++            || table.common.vertical_offset != 0 || table.caption.is_some()
++            || table.page_break != TablePageBreak::RowBreak
++            || self.render_normalization.borrow().table_text_reflowed(table)
++        { return None; }
++        let columns = usize::from(table.col_count);
++        if columns == 0 { return None; }
++        (0..usize::from(table.row_count)).map(|row| {
++            let order = Self::row_cut_cell_order(table, row);
++            if order.len() != columns { return None; }
++            let mut result = 0;
++            for (col, index) in order.into_iter().enumerate() {
++                let cell = &table.cells[index];
++                if usize::from(cell.col) != col || cell.col_span != 1 || cell.dirty_flag
++                    || cell.text_direction != 0 || cell.height > i32::MAX as u32 { return None; }
++                let padding = cell.effective_padding(&table.padding);
++                if padding.top < 0 || padding.bottom < 0 { return None; }
++                let end = Self::saved_nested_complete_cell_lines(cell)?;
++                result = result.max((end + i64::from(padding.top) + i64::from(padding.bottom))
++                    .max(i64::from(cell.height)));
++            }
++            (result > 0 && result <= i64::from(i32::MAX)).then_some(result)
++        }).collect()
++    }
++
++    pub(super) fn saved_complete_nested_block(
++        &self, host: &Paragraph, next: Option<&Paragraph>, table: &crate::model::table::Table,
++    ) -> bool {
++        if !Self::stored_nested_outer_margin_host(host, table) { return false; }
++        let Some(next) = next.filter(|p| Self::stored_plain_cell_paragraph(p) && !p.text.trim().is_empty()) else { return false; };
++        let ([anchor], [successor]) = (host.line_segs.as_slice(), next.line_segs.as_slice()) else { return false; };
++        if anchor.vertical_pos <= 0 || table.outer_margin_top < 0 || table.outer_margin_bottom < 0
++            || successor.line_height <= 0
++            || i64::from(anchor.vertical_pos) + i64::from(table.common.height)
++                + i64::from(table.outer_margin_top) + i64::from(table.outer_margin_bottom)
++                != i64::from(successor.vertical_pos)
++        { return false; }
++        self.saved_complete_child_row_heights(table).is_some_and(|rows| {
++            rows.iter().sum::<i64>() + i64::from(table.cell_spacing) * rows.len().saturating_sub(1) as i64
++                == i64::from(table.common.height)
++        })
++    }
++
++    fn saved_nested_complete_cell_lines(cell: &crate::model::table::Cell) -> Option<i64> {
++        if let Some(end) = Self::saved_plain_cell_end_hu(cell) { return Some(end); }
++        let mut cursor = 0i64;
++        let mut end = 0i64;
++        for para in &cell.paragraphs {
++            if !stored_float_frame_owner_is_original(para) { return None; }
++            let [line] = para.line_segs.as_slice() else { return None; };
++            if i64::from(line.vertical_pos) != cursor || line.line_height <= 0 || line.line_spacing < 0 {
++                return None;
++            }
++            if !Self::stored_plain_cell_paragraph(para) {
++                let [Control::Table(child)] = para.controls.as_slice() else { return None; };
++                if !child.common.treat_as_char || child.caption.is_some()
++                    || child.outer_margin_top < 0 || child.outer_margin_bottom < 0
++                    || i64::from(child.common.height) + i64::from(child.outer_margin_top)
++                        + i64::from(child.outer_margin_bottom) != i64::from(line.line_height)
++                { return None; }
++            }
++            end = cursor + i64::from(line.line_height);
++            cursor = end + i64::from(line.line_spacing);
++        }
++        (end > 0).then_some(end)
++    }
++
++    pub(super) fn saved_nested_plain_split_rows(
++        &self, table: &crate::model::table::Table, start_row: usize, end_row: usize,
++        start_cut: &[usize], end_cut: &[usize],
++    ) -> Option<Vec<f64>> {
++        if start_row != 0 || end_row != usize::from(table.row_count)
++            || start_cut.iter().any(|&cut| cut != 0)
++            || !Self::saved_nested_plain_split_boundary(table, end_cut)
++        { return None; }
++        self.saved_nested_plain_split(table).map(|(rows, _)| rows)
++    }
++
++    fn saved_nested_plain_split_boundary(table: &crate::model::table::Table, cut: &[usize]) -> bool {
++        let Some(last) = usize::from(table.row_count).checked_sub(1) else { return false; };
++        let order = Self::row_cut_cell_order(table, last);
++        order.len() == cut.len() && order.len() == usize::from(table.col_count)
++            && order.into_iter().zip(cut).all(|(index, &cursor)| cursor == 1
++                || (cursor == 0 && table.cells[index].paragraphs.iter()
++                    .all(|p| p.text.trim().is_empty() && p.controls.is_empty())))
+     }
+ 
+     fn saved_nested_inline_opening_row_band_hu(
+@@ -18237,6 +18563,7 @@
+             && unit.nested_table_fragment.as_ref().is_some_and(|fragment| {
+                 self.saved_complete_row_frame_boundary(child, row, &fragment.start_cut, styles)
+                     .is_some()
++                    || self.saved_plain_split_cursor_owner(cell, unit, child, row)
+             })
+         {
+             return true;
+@@ -18320,9 +18647,10 @@
+                 fragment.start_cut.is_empty() || (fragment.start_cut.len()
+                     == Self::row_cut_cell_order(child, nested_row).len()
+                     && fragment.start_cut.iter().all(|&cursor| cursor == 0)));
+-            opens_row && self.saved_nested_tail_opening_frame(
++            (opens_row && self.saved_nested_tail_opening_frame(
+                 table, cell, host, cell.paragraphs.get(unit.para_idx + 1), child, styles,
+-            ).is_some_and(|frame| frame.tail_start_row == nested_row)
++            ).is_some_and(|frame| frame.tail_start_row == nested_row))
++                || (!opens_row && self.saved_plain_split_cursor_owner(cell, unit, child, nested_row))
+         });
+         if direct_owner {
+             let declared = cells.iter().map(|cell| cell.height)
+@@ -18371,6 +18699,66 @@
+         let content = self.row_cut_content_height(table, row, start_cut, end_cut, styles);
+         let frame = minimum.min(available);
+         (frame > content).then_some(frame)
++    }
++
++    // The wrapper's capacity excludes the child owner's bottom padding.
++    // Follow the selected nested cursor; unrelated row and table margins
++    // still use their original capacity path.
++    fn saved_plain_split_cursor_owner(
++        &self, cell: &crate::model::table::Cell, unit: &CellUnit,
++        child: &crate::model::table::Table, row: usize,
++    ) -> bool {
++        if !unit.hard_break_before || !unit.page_frame_reset_before
++            || row + 1 != usize::from(child.row_count)
++            || !unit.nested_table_fragment.as_ref().is_some_and(|fragment|
++                Self::saved_nested_plain_split_boundary(child, &fragment.start_cut))
++        {
++            return false;
++        }
++        self.saved_nested_plain_split(child).is_some_and(|(_, tail)|
++            cell.paragraphs.get(unit.para_idx + 1)
++                .filter(|next| Self::stored_plain_cell_paragraph(next))
++                .and_then(|next| next.line_segs.first())
++                .is_some_and(|line| i64::from(line.vertical_pos)
++                    == tail + i64::from(child.outer_margin_top) + i64::from(child.outer_margin_bottom)))
++    }
++
++    pub(super) fn saved_plain_split_bottom_inset(
++        &self, table: &crate::model::table::Table, row: usize, cut: &[usize],
++        styles: &ResolvedStyleSet,
++    ) -> Option<f64> {
++        let order = Self::row_cut_cell_order(table, row);
++        if order.len() != cut.len() { return None; }
++        for (index, &cursor) in order.into_iter().zip(cut) {
++            let cell = &table.cells[index];
++            let units = self.cell_units(cell, table, styles);
++            if let Some(unit) = units.get(cursor) {
++                if let Some((nested_row, fragment)) = unit.nested_row.zip(unit.nested_table_fragment.as_ref()) {
++                    if let Some([Control::Table(child)]) = cell.paragraphs.get(unit.para_idx).map(|p| p.controls.as_slice()) {
++                        if nested_row + 1 == usize::from(child.row_count)
++                            && Self::saved_nested_plain_split_boundary(child, &fragment.start_cut)
++                            && self.cell_unit_starts_owned_nested_tail_frame(table, cell, unit, styles)
++                        {
++                            return Some(hwpunit_to_px(i32::from(cell.effective_padding(&table.padding).bottom), self.dpi));
++                        }
++                    }
++                }
++            }
++            if let Some(unit) = cursor.checked_sub(1).and_then(|last| units.get(last)) {
++                if let Some((nested_row, fragment)) = unit.nested_row.zip(unit.nested_table_fragment.as_ref()) {
++                    if let Some([Control::Table(child)]) = cell.paragraphs.get(unit.para_idx).map(|p| p.controls.as_slice()) {
++                        if !fragment.terminal {
++                            if let Some(inset) = self.saved_plain_split_bottom_inset(
++                                child, nested_row, &fragment.end_cut, styles,
++                            ) {
++                                return Some(inset);
++                            }
++                        }
++                    }
++                }
++            }
++        }
++        None
+     }
+ 
+     /// Completed siblings have no continuation owner. All still-visible owners
+@@ -22201,6 +22589,17 @@
+                 physical = physical.max(frame);
+             }
+         }
++        if end == run_end && cut.end_row == usize::from(child.row_count) && cut.end_cut.is_empty() {
++            if let Some(rows) = self.saved_rowspan_wrapper_resume_rows(child, cut.start_row, &cut.start_cut, styles) {
++                physical = rows.iter().sum::<f64>()
++                    + hwpunit_to_px(i32::from(child.cell_spacing), self.dpi) * rows.len().saturating_sub(1) as f64;
++            }
++        }
++        if start == run_start && self.saved_nested_plain_split_rows(
++            child, cut.start_row, cut.end_row, &cut.start_cut, &cut.end_cut,
++        ).is_some() {
++            physical = hwpunit_to_px(child.common.height as i32, self.dpi);
++        }
+         if start == run_start && self.saved_nested_rowspan_wrapper_opening_rows(
+             child, cut.start_row, cut.end_row, &cut.start_cut, &cut.end_cut, styles,
+         ).is_some() {
+@@ -22755,6 +23154,11 @@
+             .filter_map(|idx| table.cells.get(idx))
+             .collect();
+         let is_whole_row = start_cut.is_empty() && end_cut.is_empty();
++        if !start_cut.is_empty() && end_cut.is_empty() {
++            if let Some(height) = self.saved_resumed_fragment_row_height(table, row, start_cut, styles) {
++                return height;
++            }
++        }
+         // [#5910] 병합 선언이 걸친 행합보다 작으면 마지막 걸침 행의 **선언** 높이를
+         // 그만큼 낮춘 값이 한글 실측 행 높이다. 컷 회계가 원 선언을 그대로 쓰면
+         // HeightMeasurer 가 이미 줄여 둔 행을 다시 부풀려(row_cut_h > mt.row_heights)
+@@ -22852,6 +23256,9 @@
+             }
+         }
+         if !end_cut.is_empty() {
++            if let Some(rows) = self.saved_nested_plain_split_rows(table, 0, row + 1, start_cut, end_cut) {
++                return rows[row];
++            }
+             if start_cut.iter().all(|&cursor| cursor == 0) {
+                 if let Some(band) = self.saved_nested_rowspan_band_at_cut(table, row, end_cut, styles) {
+                     max_h = max_h.max(band);
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -46,6 +46,15 @@
+     {
+         return None;
+     }
++    let left = hwpunit_to_px(i32::from(table.outer_margin_left), dpi);
++    let right = hwpunit_to_px(i32::from(table.outer_margin_right), dpi);
++    (table_width > 0.0 && table_width + left + right <= area.width).then_some(area.x + left)
++}
++
++fn saved_nested_block_left(table: &Table, area: &LayoutRect, table_width: f64, dpi: f64) -> Option<f64> {
++    if !matches!(table.common.horz_rel_to, HorzRelTo::Para | HorzRelTo::Column)
++        || table.common.horz_align != HorzAlign::Left || table.common.horizontal_offset != 0
++        || table.outer_margin_left < 0 || table.outer_margin_right < 0 { return None; }
+     let left = hwpunit_to_px(i32::from(table.outer_margin_left), dpi);
+     let right = hwpunit_to_px(i32::from(table.outer_margin_right), dpi);
+     (table_width > 0.0 && table_width + left + right <= area.width).then_some(area.x + left)
+@@ -1847,7 +1856,13 @@
+             });
+             let cell_content_cut_by_slice = has_multicol_nested
+                 && self.cell_units_content_height(cell, table, styles) > inner_height + 0.5;
+-            let effective_align = if cut_frame_owns_alignment || opening_frame_owns_alignment {
++            let resumed_fragment = cut_units.and_then(|(start, end)| {
++                let units = self.cell_units(cell, table, styles);
++                self.saved_resumed_fragment_successor(cell, &units, start, end, styles)
++                    .map(|(_, line, reserve)| (line.vertical_pos + line.line_height, reserve))
++            });
++            let effective_align = if cut_frame_owns_alignment || opening_frame_owns_alignment
++                || resumed_fragment.is_some() {
+                 // 앞 조각의 빈 공간을 보존한 물리 상자는 이 조각 내용으로 정렬한다.
+                 cell.vertical_align
+             } else if center_saved_spanning_cell == Some(cell_idx) {
+@@ -1887,7 +1902,9 @@
+                 && end_row.checked_sub(1).is_some_and(|last_row| {
+                     cell_row <= last_row && last_row < cell_row + cell.row_span as usize
+                 });
+-            let centered_content_height = if full_width_frame_owns_alignment {
++            let centered_content_height = if let Some((height, _)) = resumed_fragment {
++                hwpunit_to_px(height, self.dpi)
++            } else if full_width_frame_owns_alignment {
+                 // Align the painted cut, excluding its final line advance.
+                 // Capacity accounting owns that advance as physical space;
+                 // it is not ink at the bottom of this fragment.
+@@ -2136,6 +2153,8 @@
+             let resumed_nested_successor = cut_units.and_then(|(start, end)| {
+                 let units = self.cell_units(cell, table, styles);
+                 self.saved_resumed_nested_successor(cell, &units, start, end, styles)
++                    .or_else(|| self.saved_resumed_fragment_successor(cell, &units, start, end, styles)
++                        .map(|(index, line, _)| (index, line)))
+             });
+             let parallel_picture_positions = cut_units.and_then(|(start, end)| {
+                 let units = self.cell_units(cell, table, styles);
+@@ -3888,6 +3907,9 @@
+                                         let end_height=(frame-prefix).max(*rows.get(cut.end_row.checked_sub(1)?)?);
+                                         (end_height.is_finite()&&end_height>0.0).then_some(end_height)
+                                     }));
++                                    let complete_block = self.saved_complete_nested_block(
++                                        para, cell.paragraphs.get(cp_idx + 1), nested_table,
++                                    );
+                                     let opening_outer_frame = nested_cursor_split.as_ref()
+                                         .filter(|_| mixed_nested_split.is_none())
+                                         .and_then(|split| split.recursive_cut.as_ref())
+@@ -4023,8 +4045,13 @@
+                                             clamp_header_negative_para_offset,
+                                             // [#4149] 프로브는 최외곽 표에만 적용한다.
+                                             None,
+-                                            source_tail_frame.filter(|_| recursive_cut.start_row == 0)
+-                                                .map(|_| para_alignment),
++                                            (source_tail_frame.is_some()
++                                                || (recursive_cut.start_row == 0 && self.saved_nested_plain_split_rows(
++                                                    nested_table, recursive_cut.start_row, recursive_cut.end_row,
++                                                    &recursive_cut.start_cut, &recursive_cut.end_cut,
++                                                ).is_some()))
++                                                .then_some(para_alignment)
++                                                .filter(|_| recursive_cut.start_row == 0),
+                                         );
+                                         // [#3820/issue2007 p14] recursive cut은 현재 호출의
+                                         // source 범위를 제한하지만 parent flow_height는 기존
+@@ -4037,11 +4064,15 @@
+                                         );
+                                         rendered_bottom - source_nested_y
+                                     } else {
+-                                        let source_left = resumed_nested_successor
+-                                            .filter(|(following, _)| *following == cp_idx + 1)
+-                                            .and_then(|_| resumed_para_left_table_anchor(
+-                                                nested_table, &ctrl_area, nested_w, self.dpi,
+-                                            ));
++                                        let source_left = if complete_block {
++                                            saved_nested_block_left(nested_table, &ctrl_area, nested_w, self.dpi)
++                                        } else {
++                                            resumed_nested_successor
++                                                .filter(|(following, _)| *following == cp_idx + 1)
++                                                .and_then(|_| resumed_para_left_table_anchor(
++                                                    nested_table, &ctrl_area, nested_w, self.dpi,
++                                                ))
++                                        };
+                                         self.layout_table(
+                                             tree,
+                                             &mut cell_node,
+@@ -4068,6 +4099,8 @@
+                                             0.0,
+                                             stored_float_frame
+                                                 .map(|f| (source_left, f.table_top))
++                                                .or_else(|| complete_block.then_some((source_left,
++                                                    nested_y + hwpunit_to_px(i32::from(nested_table.outer_margin_top), self.dpi))))
+                                                 .or_else(|| {
+                                                     self.reflow_nested_table_origin(
+                                                         para,
+@@ -5307,7 +5340,31 @@
+             let last = end_row - 1;
+             row_heights[last] = row_heights[last].max((frame - before).max(0.0));
+         }
++        let plain_opening_rows = self.saved_nested_plain_split_rows(
++            table, start_row, end_row, start_cut, end_cut,
++        );
++        if let Some(rows) = plain_opening_rows.as_ref() {
++            row_heights[..rows.len()].copy_from_slice(rows);
++        }
++        let whole_source_opening_rows = if source_tail_opening_alignment.is_some()
++            && start_row == 0 && end_row < row_count && start_cut.is_empty() && end_cut.is_empty()
++        {
++            self.saved_complete_child_row_heights(table).filter(|rows| {
++                rows[..end_row].iter().sum::<i64>() + i64::from(table.cell_spacing) * end_row.saturating_sub(1) as i64
++                    == i64::from(table.common.height)
++            })
++        } else { None };
++        if let Some(rows) = whole_source_opening_rows.as_ref() {
++            for (height, &source) in row_heights[..end_row].iter_mut().zip(rows) {
++                *height = hwpunit_to_px(source as i32, self.dpi);
++            }
++        }
+         if enclosing_cell_ctx.is_some() {
++            if is_continuation && end_row == row_count && end_cut.is_empty() {
++                if let Some(rows) = self.saved_rowspan_wrapper_resume_rows(table, start_row, start_cut, styles) {
++                    row_heights[start_row..end_row].copy_from_slice(&rows);
++                }
++            }
+             if let Some(rows) = self.saved_nested_rowspan_wrapper_opening_rows(
+                 table, start_row, end_row, start_cut, end_cut, styles,
+             ) {
+@@ -5578,7 +5635,8 @@
+             source_tail_opening_alignment.unwrap_or(Alignment::Left),
+             host_margin_left,
+             host_margin_right,
+-            None,
++            (plain_opening_rows.is_some() || whole_source_opening_rows.is_some())
++                .then(|| saved_nested_block_left(table, col_area, table_width, self.dpi)).flatten(),
+             false,
+             paper_w,
+         );
+@@ -5605,7 +5663,9 @@
+         // Source ownership limits the content cursor, not the original row's
+         // physical frame. Nested tables use the parent's already reserved
+         // area; the same helper also caps the outer pagination reservation.
+-        if end_row_height_override.is_none() && !is_block_split && !start_cut_is_block && !end_cut.is_empty() {
++        if plain_opening_rows.is_none() && end_row_height_override.is_none()
++            && !is_block_split && !start_cut_is_block && !end_cut.is_empty()
++        {
+             if let Some(last) = end_row.checked_sub(1).filter(|&row| row < row_count) {
+                 let start = if last == start_row { start_cut } else { &[] };
+                 let prefix = render_rows.iter().take_while(|&&row| row != last)
+@@ -5615,6 +5675,22 @@
+                     table, last, start, end_cut, styles, available,
+                 ) {
+                     row_heights[last] = row_heights[last].max(frame);
++                }
++            }
++        }
++
++        // This bottom padding remains reserved by the cut ledger. It sits
++        // outside the visible row box, so remove it only from painting.
++        if enclosing_cell_ctx.is_none() && table.col_count == 1
++            && !is_block_split && !start_cut_is_block && !end_cut.is_empty()
++        {
++            let last = end_row - 1;
++            let start = if last == start_row { start_cut } else { &[] };
++            if let Some(inset) = self.saved_plain_split_bottom_inset(table, last, end_cut, styles) {
++                let ink = self.row_cut_content_height(table, last, start, end_cut, styles);
++                if inset > 0.0 && row_heights[last] >= ink + inset {
++                    row_heights[last] -= inset;
++                    stored_reset_logical_height_delta += inset;
+                 }
+             }
+         }

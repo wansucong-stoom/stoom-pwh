@@ -1,0 +1,402 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -16551,7 +16551,7 @@
+                     host_paragraph: unit.para_idx,
+                     row: child_row,
+                     height: opening,
+-                    content_height: None,
++                    content_height: None, saved_remaining: None,
+                 };
+                 return Some((cursor + 1, band, NestedRowBand {
+                     height: full - opening, ..band
+@@ -16559,6 +16559,196 @@
+             }
+         }
+         None
++    }
++
++    /// The original anchor and the next stored line must close the same
++    /// floating object box before the object can contribute to a row frame.
++    pub(super) fn saved_row_frame_float_advance(
++        host: &Paragraph, successor: &Paragraph, child: &crate::model::table::Table,
++    ) -> Option<i64> {
++        if !Self::stored_nested_outer_margin_host(host, child)
++            || !crate::renderer::float_placement::is_para_topbottom_float(&child.common)
++            || child.common.height == 0 || child.common.height > i32::MAX as u32
++            || (child.common.vertical_offset as i32) < 0
++            || child.outer_margin_top < 0 || child.outer_margin_bottom < 0
++            || !stored_float_frame_owner_is_original(host)
++        { return None; }
++        let origin = i64::from(host.line_segs.first()?.vertical_pos);
++        let advance = i64::from(child.common.height)
++            + i64::from(child.common.vertical_offset as i32)
++            + i64::from(child.outer_margin_top) + i64::from(child.outer_margin_bottom);
++        (origin + advance == i64::from(successor.line_segs.first()?.vertical_pos)).then_some(advance)
++    }
++
++    fn saved_cell_source_frames(cell: &crate::model::table::Cell) -> Option<Vec<(usize, i64)>> {
++        let mut frames = Vec::new();
++        let mut start = 0;
++        let mut expected = 0;
++        let mut ink = 0;
++        for (index, para) in cell.paragraphs.iter().enumerate() {
++            if !stored_float_frame_owner_is_original(para) { return None; }
++            let origin = i64::from(para.line_segs.first()?.vertical_pos);
++            if origin == 0 && expected > 0 {
++                if ink <= 0 { return None; }
++                frames.push((start, ink));
++                start = index;
++                expected = 0;
++            }
++            if origin != expected { return None; }
++            if let [Control::Table(child)] = para.controls.as_slice() {
++                expected += Self::saved_row_frame_float_advance(
++                    para, cell.paragraphs.get(index + 1)?, child,
++                )?;
++                ink = expected;
++                continue;
++            }
++            if !Self::stored_plain_cell_paragraph(para) { return None; }
++            for line in &para.line_segs {
++                if i64::from(line.vertical_pos) != expected || line.line_height <= 0 || line.line_spacing < 0 {
++                    return None;
++                }
++                ink = expected + i64::from(line.line_height);
++                expected = ink + i64::from(line.line_spacing);
++            }
++        }
++        if ink <= 0 { return None; }
++        frames.push((start, ink));
++        Some(frames)
++    }
++
++    /// A fixed row declaration can belong to several physical fragments.
++    /// Require a complete original coordinate ladder and one continuing cell;
++    /// the other cells must have finished before its first saved restart.
++    fn saved_declared_nested_row_frames(
++        &self, table: &crate::model::table::Table, row: usize, styles: &ResolvedStyleSet,
++    ) -> Option<(f64, usize, Vec<(RowCut, f64)>)> {
++        let profile = self.profile.get();
++        if !profile.hwpx_stored_layout() || profile.hwp5_origin_hwpx() || profile.session_edited()
++            || !crate::renderer::float_placement::is_para_topbottom_float(&table.common)
++            || table.page_break != TablePageBreak::RowBreak || table.caption.is_some()
++            || Self::row_has_prior_rowspan_cover(table, row)
++            || self.render_normalization.borrow().table_text_reflowed(table)
++        { return None; }
++        let order = Self::row_cut_cell_order(table, row);
++        if order.len() != usize::from(table.col_count) { return None; }
++        let requested = hwpunit_to_px(i32::try_from(table.cells[*order.first()?].height).ok()?, self.dpi);
++        let original = table.cells[*order.first()?].height;
++        if requested <= 0.0 { return None; }
++        let mut owner = None;
++        let mut peer_min = 0.0f64;
++        let mut complete = Vec::with_capacity(order.len());
++        for (index, &cell_idx) in order.iter().enumerate() {
++            let cell = &table.cells[cell_idx];
++            if cell.dirty_flag || cell.height != original || cell.row_span != 1
++                || cell.col_span != 1 || cell.text_direction != 0
++            { return None; }
++            let units = self.cell_units(cell, table, styles);
++            complete.push(units.len());
++            let (_, _, top, bottom) = self.resolve_cell_padding(cell, table);
++            let frame_height = |ink: i64| top + ink as f64 * self.dpi / 7200.0 + bottom;
++            let frames = Self::saved_cell_source_frames(cell)?;
++            if let [(_, ink)] = frames.as_slice() {
++                peer_min = peer_min.max(frame_height(*ink));
++                continue;
++            }
++            if owner.is_some() { return None; }
++            let cuts = frames.into_iter().map(|(paragraph, ink)| {
++                let cursor = units.iter().position(|u| u.para_idx == paragraph)?;
++                let start = units.get(cursor)?;
++                if start.nested_row.is_some() || start.vis_start != 0
++                    || (cursor != 0 && !start.page_frame_reset_before)
++                { return None; }
++                Some((cursor, frame_height(ink)))
++            }).collect::<Option<Vec<_>>>()?;
++            owner = Some((index, cell_idx, cuts));
++        }
++        let (column, cell_idx, cuts) = owner?;
++        let frames = cuts.into_iter().enumerate().map(|(i, (cursor, height))| {
++            let mut cut = if i == 0 { vec![0; order.len()] } else { complete.clone() };
++            cut[column] = cursor;
++            (cut, if i == 0 { height.max(peer_min) } else { height })
++        }).collect::<Vec<_>>();
++        (frames.iter().map(|(_, height)| height).sum::<f64>() <= requested)
++            .then_some((requested, cell_idx, frames))
++    }
++
++    pub(super) fn saved_declared_frame_cell_ink(
++        &self, table: &crate::model::table::Table, row: usize, cell: usize, start: &[usize],
++        end: &[usize], styles: &ResolvedStyleSet,
++    ) -> Option<f64> {
++        let (_, owner, frames) = self.saved_declared_nested_row_frames(table, row, styles)?;
++        if cell != owner { return None; }
++        let i = frames.iter().position(|(cut, _)| cut == start || (start.is_empty() && cut.iter().all(|&u| u == 0)))?;
++        if frames.get(i + 1).map_or(!end.is_empty(), |(next, _)| next != end) { return None; }
++        let cell = &table.cells[cell];
++        let column = Self::row_cut_cell_order(table, row).iter()
++            .position(|&index| std::ptr::eq(&table.cells[index], cell))?;
++        let units = self.cell_units(cell, table, styles);
++        let paragraph = units.get(frames[i].0[column])?.para_idx;
++        let (_, ink) = Self::saved_cell_source_frames(cell)?.into_iter().find(|&(start, _)| start == paragraph)?;
++        Some(ink as f64 * self.dpi / 7200.0)
++    }
++
++    #[allow(clippy::too_many_arguments)]
++    fn saved_anchored_declared_row_bands(
++        &self, parent: &crate::model::table::Table, row: usize, owner: &crate::model::table::Cell,
++        host: &Paragraph, child: &crate::model::table::Table, first: &CellUnit, last: &CellUnit,
++        opening_first: bool, end: usize, physical_limit: f64,
++        carried: Option<crate::renderer::pagination::NestedRowBand>, styles: &ResolvedStyleSet,
++    ) -> Option<(usize, crate::renderer::pagination::NestedRowBand, Option<crate::renderer::pagination::NestedRowBand>, f64)> {
++        use crate::renderer::pagination::NestedRowBand;
++        let last_cut = last.nested_table_fragment.as_ref()?;
++        if first.para_idx != last.para_idx || last_cut.terminal || !child.leading_header_rows().is_empty()
++            || self.saved_anchored_block_opening(host, child, styles).is_none()
++        { return None; }
++        let (first_row, last_row) = (first.nested_row?, last.nested_row?);
++        if first_row > last_row || !opening_first { return None; }
++        let (declared, _, frames) = self.saved_declared_nested_row_frames(child, last_row, styles)?;
++        let next = frames.iter().position(|(cut, _)| cut == &last_cut.end_cut)?;
++        let current = next.checked_sub(1)?;
++        let initial = first.nested_table_fragment.as_ref().map_or(&[][..], |cut| cut.start_cut.as_slice());
++        let carried = carried.filter(|band| band.parent_row == row
++            && band.host_paragraph == last.para_idx && band.row == first_row
++            && band.saved_remaining.is_some());
++        let prior_height = if first_row == last_row {
++            if initial != frames[current].0 || current == 0 { return None; }
++            0.0
++        } else {
++            if current != 0 { return None; }
++            // Zero cursors select a complete row. Give it the same
++            // declared minimum as the recursive painter's whole-row path.
++            let first_cut = if initial.iter().all(|&cursor| cursor == 0) { &[] } else { initial };
++            let first_height = carried.map_or_else(|| self.row_cut_content_height(
++                child, first_row, first_cut, &[], styles,
++            ), |band| band.height);
++            first_height + (first_row + 1..last_row).map(|r|
++                self.row_cut_content_height(child, r, &[], &[], styles)
++            ).sum::<f64>() + hwpunit_to_px(i32::from(child.cell_spacing), self.dpi) * (last_row - first_row) as f64
++        };
++        let (_, _, top, bottom) = self.resolve_cell_padding(owner, parent);
++        let child_margins = hwpunit_to_px(i32::from(child.outer_margin_top)
++            + i32::from(child.outer_margin_bottom), self.dpi);
++        let overhead = top + bottom + child_margins;
++        let next_capacity = physical_limit - bottom - overhead;
++        let height = if first_row == last_row { carried?.height } else { next_capacity - prior_height };
++        let remaining = if first_row == last_row { carried?.saved_remaining? } else { declared };
++        if height > next_capacity + 0.1 || height + 0.1 < frames[current].1 { return None; }
++        let after = remaining - height;
++        let following = frames.get(next + 1);
++        let next_height = if following.is_some() { next_capacity } else { after };
++        if next_height > next_capacity + 0.1 || next_height + 0.1 < frames[next].1
++            || (following.is_some() && after - next_height + 0.1 < frames[next + 1].1)
++        { return None; }
++        let band = NestedRowBand {
++            parent_row: row, host_paragraph: last.para_idx, row: last_row, height,
++            content_height: Some(frames[current].1), saved_remaining: Some(remaining),
++        };
++        let next_content = self.row_cut_content_height(
++            child, last_row, &frames[next].0, following.map_or(&[][..], |(cut, _)| cut.as_slice()), styles,
++        );
++        Some((end, band, Some(NestedRowBand {
++            height: next_height, content_height: Some(next_content), saved_remaining: Some(after), ..band
++        }), prior_height + overhead + height))
+     }
+ 
+     /// A line restart can split a declared row whose opening consists only of
+@@ -16587,6 +16777,15 @@
+         let (first_row, last_row) = (first.nested_row?, last.nested_row?);
+         let initial = first.nested_table_fragment.as_ref()
+             .map_or(&[][..], |cut| cut.start_cut.as_slice());
++        let opens_last_row = first_row == last_row || units.get(start..end)?.iter()
++            .find(|unit| unit.nested_row == Some(last_row))
++            .and_then(|unit| unit.nested_table_fragment.as_ref())
++            .is_some_and(|part| part.start_cut.iter().all(|&cursor| cursor == 0));
++        if let Some(bands) = self.saved_anchored_declared_row_bands(
++            table, row, cell, host, child, first, last, opens_last_row, end, physical_limit, carried, styles,
++        ) {
++            return Some(bands);
++        }
+         let parallel_restart = self.saved_parallel_plain_restart_boundary(
+             child, last_row, &fragment.end_cut, styles,
+         );
+@@ -16723,7 +16922,7 @@
+         if min <= 0.0 || opening + edge_tolerance < min { return None; }
+         let band = NestedRowBand {
+             parent_row: row, host_paragraph: last.para_idx, row: last_row, height: opening,
+-            content_height: Some(min),
++            content_height: Some(min), saved_remaining: None,
+         };
+         // A verified following source origin closes this carried frame. The
+         // later plain fragment keeps its own normal resolved height.
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -143,6 +143,7 @@
+     host_line_spacing: f64,
+     resolved_table_top: Option<f64>,
+     nested_row_bands: crate::renderer::pagination::NestedRowBands,
++    align_declared_row_frames: bool,
+     terminal_inline_frame_bottom: Option<f64>,
+ }
+ 
+@@ -1139,6 +1140,7 @@
+         center_saved_spanning_cell: Option<usize>,
+         align_saved_opening_frame: bool,
+         align_nested_opening_frame: bool,
++        align_declared_row_frames: bool,
+         // [#6976] 접기 대상 행(모델 행 인덱스)과 그 행이 남긴 여분의 최솟값 수집기.
+         fold_last_row: Option<usize>,
+         fold_slack: &mut f64,
+@@ -1433,11 +1435,18 @@
+                             table, cell_row, end_cut, styles,
+                         ).is_some())
+                 };
++            let declared_frame_ink = (align_declared_row_frames && !is_block_split && !start_cut_is_block
++                && (cell_row == start_row || cell_row + 1 == end_row))
++                .then(|| self.saved_declared_frame_cell_ink(
++                    table, cell_row, cell_idx,
++                    if cell_row == start_row { start_cut } else { &[] },
++                    if cell_row + 1 == end_row { end_cut } else { &[] }, styles,
++                )).flatten();
+             let saved_frame_needs_alignment = (align_saved_opening_frame
+                 && cell_row + 1 == end_row
+                 || cut_frame_owns_alignment
+                 || opening_frame_owns_alignment
+-                || full_width_frame_owns_alignment)
++                || full_width_frame_owns_alignment || declared_frame_ink.is_some())
+                 && cell.vertical_align != crate::model::table::VerticalAlign::Top;
+             let composition_window = if saved_frame_needs_alignment {
+                 None
+@@ -1868,7 +1877,7 @@
+                     .map(|(_, line, reserve)| (line.vertical_pos + line.line_height, reserve))
+             });
+             let effective_align = if cut_frame_owns_alignment || opening_frame_owns_alignment
+-                || resumed_fragment.is_some() {
++                || resumed_fragment.is_some() || declared_frame_ink.is_some() {
+                 // 앞 조각의 빈 공간을 보존한 물리 상자는 이 조각 내용으로 정렬한다.
+                 cell.vertical_align
+             } else if center_saved_spanning_cell == Some(cell_idx) {
+@@ -2042,12 +2051,10 @@
+             let align_inner_height = (align_cell_height - pad_top - pad_bottom).max(0.0);
+             let text_y_start = match effective_align {
+                 VerticalAlign::Top => cell_y + pad_top,
+-                VerticalAlign::Center => {
+-                    cell_y + pad_top + (align_inner_height - centered_content_height).max(0.0) / 2.0
+-                }
+-                VerticalAlign::Bottom => {
+-                    cell_y + pad_top + (align_inner_height - total_content_height).max(0.0)
+-                }
++                VerticalAlign::Center => cell_y + pad_top
++                    + (align_inner_height - declared_frame_ink.unwrap_or(centered_content_height)).max(0.0) / 2.0,
++                VerticalAlign::Bottom => cell_y + pad_top
++                    + (align_inner_height - declared_frame_ink.unwrap_or(total_content_height)).max(0.0),
+             };
+             let text_y_start = text_y_start
+                 + stored_empty_picture_frame
+@@ -3654,7 +3661,20 @@
+                                             )
+                                         })
+                                         .flatten().filter(|_| !projected_block_host);
+-                                    let nested_y = if let Some(frame) = stored_float_frame {
++                                    let declared_float = declared_frame_ink.and_then(|_| {
++                                        let advance = Self::saved_row_frame_float_advance(
++                                            para, cell.paragraphs.get(cp_idx + 1)?, nested_table,
++                                        )?;
++                                        let top = hwpunit_to_px(
++                                            nested_table.common.vertical_offset as i32 + i32::from(nested_table.outer_margin_top),
++                                            self.dpi,
++                                        );
++                                        Some((para_y_before_lines + top,
++                                            para_y_before_lines + advance as f64 * self.dpi / 7200.0))
++                                    });
++                                    let nested_y = if let Some((top, _)) = declared_float {
++                                        top
++                                    } else if let Some(frame) = stored_float_frame {
+                                         frame.table_top
+                                     } else if let Some(offset) = stored_square_offset {
+                                         para_y_before_lines + hwpunit_to_px(offset, self.dpi)
+@@ -4025,7 +4045,7 @@
+                                             para, nested_table, cut.start_row, &cut.start_cut, styles,
+                                         ));
+                                     let opening_outer_top = if (opens_outer_frame || source_resume_outer_top)
+-                                        && stored_float_frame.is_none() {
++                                        && stored_float_frame.is_none() && declared_float.is_none() {
+                                         hwpunit_to_px(nested_table.outer_margin_top as i32, self.dpi)
+                                     } else { 0.0 };
+                                     let source_outer_bottom = source_cut.as_ref().is_some_and(|cut|
+@@ -4134,8 +4154,11 @@
+                                                 pre_emitted_host_content_height: 0.0,
+                                                 host_line_spacing: 0.0,
+                                                 nested_row_bands: Default::default(),
++                                                align_declared_row_frames: [start_band, end_band].into_iter()
++                                                    .flatten().any(|band| band.saved_remaining.is_some()),
+                                                 terminal_inline_frame_bottom,
+                                                 resolved_table_top: opens_outer_frame.then_some(source_nested_y)
++                                                    .or_else(|| declared_float.map(|(top, _)| top))
+                                                     .or_else(|| stored_float_frame.map(|f| f.table_top))
+                                                     .or_else(|| {
+                                                         self.reflow_nested_table_origin(
+@@ -4230,8 +4253,8 @@
+                                             false,
+                                             clamp_header_negative_para_offset,
+                                             0.0,
+-                                            stored_float_frame
+-                                                .map(|f| (source_left, f.table_top))
++                                            declared_float.map(|(top, _)| (source_left, top))
++                                                .or_else(|| stored_float_frame.map(|f| (source_left, f.table_top)))
+                                                 .or_else(|| complete_block.then_some((source_left,
+                                                     nested_y + hwpunit_to_px(i32::from(nested_table.outer_margin_top), self.dpi))))
+                                                 .or_else(|| {
+@@ -4266,11 +4289,10 @@
+                                     // An uncut stored float already resolved its physical
+                                     // body and margins. The renderer's returned total band
+                                     // must not add those margins again at table_top.
+-                                    para_y = stored_float_frame
+-                                        .filter(|_| split_info.is_none())
+-                                        .map_or(source_nested_y + visible_table_h + opening_outer_bottom, |frame| {
+-                                            frame.occupied_bottom
+-                                        });
++                                    para_y = declared_float.map(|(_, bottom)| bottom)
++                                        .or_else(|| stored_float_frame.filter(|_| split_info.is_none())
++                                            .map(|frame| frame.occupied_bottom))
++                                        .unwrap_or(source_nested_y + visible_table_h + opening_outer_bottom);
+                                     has_preceding_text = true;
+                                 }
+                             }
+@@ -4672,6 +4694,7 @@
+                 host_line_spacing,
+                 resolved_table_top,
+                 nested_row_bands,
++                align_declared_row_frames: false,
+                 terminal_inline_frame_bottom: None,
+             },
+             section_index,
+@@ -4749,6 +4772,7 @@
+             host_line_spacing,
+             resolved_table_top,
+             nested_row_bands,
++            align_declared_row_frames,
+             terminal_inline_frame_bottom,
+         } = host;
+ 
+@@ -6087,6 +6111,7 @@
+             center_saved_spanning_cell,
+             align_saved_opening_frame,
+             align_nested_opening_frame,
++            align_declared_row_frames,
+             fold_last_row,
+             &mut fold_slack,
+             source_tail_opening_alignment.is_some(),
+--- a/src/renderer/pagination.rs
++++ b/src/renderer/pagination.rs
+@@ -582,6 +582,8 @@
+     /// Existing content height already counted by the ordinary scan.
+     /// A band with no remaining content has no such reservation.
+     pub content_height: Option<f64>,
++    /// The declared row height still available at this source cursor.
++    pub saved_remaining: Option<f64>,
+ }
+ 
+ impl NestedRowBand {

@@ -1,0 +1,108 @@
+diff --git a/src/renderer/layout/table_layout.rs b/src/renderer/layout/table_layout.rs
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -16812,6 +16812,68 @@
+         ).map(|_| hwpunit_to_px(table.common.height as i32, self.dpi)))
+     }
+ 
++    /// An entire child table can start a new frame after its host text has
++    /// been consumed. Its saved successor is local to that child frame.
++    pub(super) fn saved_resumed_nested_successor<'a>(
++        &self, cell: &'a crate::model::table::Cell, units: &[CellUnit],
++        start: usize, end: usize, styles: &ResolvedStyleSet,
++    ) -> Option<(usize, &'a crate::model::paragraph::LineSeg)> {
++        // An open end in a paint cut denotes the same complete tail as the
++        // bounded end used by measurement.
++        let end = if end == usize::MAX { units.len() } else { end };
++        if start == 0 || end != units.len() || start >= end.saturating_sub(1) || cell.dirty_flag
++            || cell.text_direction != 0 || !self.profile.get().hwpx_stored_layout()
++            || self.profile.get().session_edited()
++        {
++            return None;
++        }
++        let child_units = &units[start..end - 1];
++        let host_idx = child_units[0].para_idx;
++        let prior = &units[start - 1];
++        let successor_unit = &units[end - 1];
++        if prior.para_idx != host_idx || prior.vis_start != 0 || prior.vis_end != 1
++            || prior.mixed_nested_fragment
++            || units[..start].iter().rev().take_while(|u| u.para_idx == host_idx)
++                .any(|u| u.mixed_nested_fragment || u.nested_row.is_some())
++            || !child_units.iter().all(|u| u.para_idx == host_idx
++                && u.mixed_nested_fragment && !u.mixed_nested_trailing
++                && !u.mixed_nested_recursive && u.nested_table_fragment.is_none())
++            || successor_unit.para_idx != host_idx + 1
++            || successor_unit.vis_start != 0 || successor_unit.vis_end != 1
++            || successor_unit.mixed_nested_fragment
++        {
++            return None;
++        }
++        let [host, next] = cell.paragraphs.get(host_idx..)? else { return None; };
++        let [Control::Table(child)] = host.controls.as_slice() else { return None; };
++        let ([line], [successor]) = (host.line_segs.as_slice(), next.line_segs.as_slice())
++            else { return None; };
++        if host.text.trim().is_empty() || !stored_float_frame_owner_is_original(host)
++            || !Self::stored_plain_cell_paragraph(next) || next.text.trim().is_empty()
++            || line.vertical_pos < 0 || line.line_height <= 0 || successor.line_height <= 0
++            || line.segment_width <= 0 || successor.segment_width <= 0
++            || successor.vertical_pos.checked_add(successor.line_height).is_none()
++            || child.common.treat_as_char
++            || child.common.text_wrap != crate::model::shape::TextWrap::Square
++            || child.common.vert_rel_to != crate::model::shape::VertRelTo::Para
++            || child.common.vertical_offset != 0 || !child.common.flow_with_text
++            || child.common.allow_overlap || child.common.vert_align != VertAlign::Top
++            || child.caption.is_some() || child.common.height == 0
++            || child.common.height > i32::MAX as u32
++            || child.outer_margin_top < 0 || child.outer_margin_bottom < 0
++            || self.render_normalization.borrow().table_text_reflowed(child)
++            || styles.para_styles.get(next.para_shape_id as usize)?.spacing_before != 0.0
++        {
++            return None;
++        }
++        let band = i64::from(child.common.height)
++            + i64::from(child.outer_margin_top) + i64::from(child.outer_margin_bottom);
++        if band != i64::from(successor.vertical_pos) { return None; }
++        let actual = self.calc_nested_table_height(child, styles);
++        ((actual * crate::renderer::HWPUNIT_PER_INCH / self.dpi).round() == band as f64)
++            .then_some((host_idx + 1, successor))
++    }
++
+     fn stored_nested_outer_margin_host(host: &Paragraph, table: &crate::model::table::Table) -> bool {
+         table.caption.is_none() && table.common.flow_with_text && !table.common.allow_overlap
+             && table.common.vert_align == VertAlign::Top && host.text.trim().is_empty()
+@@ -22335,6 +22397,9 @@
+             let content: f64 =
+                 (units[su..eu].iter().map(|u| u.height).sum::<f64>() - trailing_trim).max(0.0)
+                     + mixed_nested_extra;
++            let content = self.saved_resumed_nested_successor(cell, &units, su, eu, styles)
++                .map(|(_, line)| hwpunit_to_px(line.vertical_pos + line.line_height, self.dpi))
++                .unwrap_or(content);
+             let (_, _, pad_top, pad_bottom) = self.resolve_cell_padding(cell, table);
+             let has_visible_cut = units[su..eu]
+                 .iter()
+diff --git a/src/renderer/layout/table_partial.rs b/src/renderer/layout/table_partial.rs
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -2114,6 +2114,10 @@
+                 });
+             // Resume at the same band origin used by the cut ledger. The first
+             // picture's original offset already included the consumed text line.
++            let resumed_nested_successor = cut_units.and_then(|(start, end)| {
++                let units = self.cell_units(cell, table, styles);
++                self.saved_resumed_nested_successor(cell, &units, start, end, styles)
++            });
+             let parallel_picture_positions = cut_units.and_then(|(start, end)| {
+                 let units = self.cell_units(cell, table, styles);
+                 let (band, _, offsets) = self.stored_parallel_picture_band_units(cell, &units)?;
+@@ -2386,6 +2390,11 @@
+                     &self.single_line_overflow_cache,
+                 );
+ 
++                if let Some((owner, line)) = resumed_nested_successor {
++                    if cp_idx == owner {
++                        para_y = text_y_start + hwpunit_to_px(line.vertical_pos, self.dpi);
++                    }
++                }
+                 if preserve_linear_single_cell_vpos && projected_block_order != Some(true) {
+                     let target_seg = para
+                         .line_segs

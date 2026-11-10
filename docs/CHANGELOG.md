@@ -2,6 +2,75 @@
 
 사용에 영향을 주는 주요 변경을 정리합니다. 각 버전의 지원 범위는 당시 기준이며, 현재 사용법과 제한 사항은 [README](../README.md)와 [pwh 스킬](../skills/pwh/SKILL.md)을 참고하세요.
 
+## 0.6.47 · Desktop 0.1.28
+
+- 저장된 표 외곽 상자의 위 여백을 테두리 원점에 반영하고, 같은 문단의 인라인 표가 쪽을 넘긴 뒤의 본문 줄을 보존합니다. TEST 문서 B 59·62쪽의 표 위치와 63쪽의 본문 누락을 수정했습니다. [공통 코어 패치](engine-patches/README.md#hwpx-owned-table-insets-and-reset-suffix)
+- Desktop 인쇄 창의 기타 설정에서 문서에 지정된 대체 글꼴을 선택할 수 있습니다. 출력 창이 실제로 불러온 글꼴을 별도 조판 사본의 미리보기와 인쇄에 함께 사용합니다.
+- 마지막 행의 모든 글줄이 들어가고 원본 병합 셀이 표 높이를 입증하면, 남은 빈 높이를 테두리에도 적용합니다. TEST 문서 B 50쪽 아래 테두리 오차가 57.07pt에서 0.84pt로 줄었고, 최종 코어가 1~50쪽 순차 검증을 통과했습니다. [공통 코어 패치](engine-patches/README.md#hwpx-terminal-cut-merged-frame)
+- 앞뒤 원본 글줄로 인라인 표 위치를 확인하고, 쪽 끝의 아래 캡션이 붙은 표도 저장 앵커에 배치합니다. TEST 문서 B 43쪽 진한 잉크 F1이 45.35%에서 95.00%로 올랐고, 49쪽까지 순차 검증을 통과했습니다. [공통 코어 패치](engine-patches/README.md#hwpx-adjacent-source-table-anchors)
+- 쪽 끝 부동 표는 앞 인라인 표의 원본 줄과 문단 간격이 저장 앵커를 확인할 때 그 원점을 사용합니다. TEST 문서 B 42쪽의 주요 가로선 최대 오차가 1.18pt에서 0.31pt로 줄었습니다. [공통 코어 패치](engine-patches/README.md#hwpx-terminal-object-only-float-origin)
+- HWPX의 셀 안쪽 표에서 선언한 단 기준 왼쪽 앵커를 복원했습니다. TEST 문서 B 41쪽에서 표 선 18개가 기준 출력에 대응하고 진한 잉크 일치율이 94.97%에서 99.87%로 올랐습니다. [공통 코어 패치](engine-patches/README.md#hwpx-nested-column-left-anchor)
+- 마지막 행이 두 쪽으로 나뉜 표에서 다음 원본 문단이 이어받은 행의 높이와 바깥 여백을 정확히 확인하면, 첫 조각의 선언 높이를 예약과 테두리 배치에 함께 사용합니다. TEST 문서 B 1~33쪽이 순차 통과했습니다. [64번 공통 코어 패치](engine-patches/README.md#hwpx-paired-rowbreak-opening-frame)
+- 문단 기준 오른쪽 정렬 표의 본체를 부호 있는 오프셋과 오른쪽 바깥 여백으로 배치합니다. 앞 저장 글줄과 다음 쪽 원점으로 확인한 온전한 표에는 위 바깥 여백을 한 번 반영합니다. TEST 문서 B 1~32쪽이 순차 통과했습니다. [63번 공통 코어 패치](engine-patches/README.md#hwpx-paragraph-right-float-frame)
+- 공통 SVG 인쇄 렌더러가 일반 글줄의 합성 굵기 획을 그래픽으로 출력하고 본문 글자를 한 번만 검색할 수 있게 합니다. 새 코어로 출력한 TEST 문서 B 1~29쪽이 순차 검증을 통과했습니다. [62번 공통 코어 패치](engine-patches/README.md#print-faux-bold-text)
+- 쪽 나누기 앞의 인라인 표가 전용 저장 줄을 소유하고 앞 표의 전진량으로 그 시작점을 확인할 수 있을 때, 같은 물리 단위로 원점과 행 높이를 계산합니다. 실제 인쇄 비교에서 TEST 문서 B 1~23쪽이 통과했습니다. [61번 공통 코어 패치](engine-patches/README.md#hwpx-terminal-inline-frame)
+
+- HWPX의 저장 줄을 기준으로 인라인 표의 위치와 목차의 가운데 정렬 폭을 계산합니다. 쪽 끝 떠 있는 표의 원본 앵커와 글상자의 쪽 번호 설정을 반영합니다. 별도 TEST 문서 B 1~4쪽이 실제 인쇄 비교를 통과했습니다. [60번 공통 코어 패치](engine-patches/README.md#hwpx-source-inline-tab-and-float-anchors)
+
+- 표가 다음 쪽에서 이어질 때 원본 경계로 확인한 상위 표와 새로 시작하는 안쪽 표의 바깥 위 여백을 각각 적용합니다. TEST 문서 A 46쪽 전체가 실제 인쇄 비교를 통과했습니다. [59번 공통 코어 패치](engine-patches/README.md#hwpx-resumed-peer-frame-margins)
+
+- 중첩 표의 저장 높이가 먼저 보이는 셀에서 닫히면 같은 행의 다른 셀에 있는 떠 있는 표를 다음 쪽에 배치합니다. 실제 인쇄 비교에서 1~45쪽이 통과했습니다. [58번 공통 코어 패치](engine-patches/README.md#hwpx-terminal-peer-leaf-frame)
+
+- 같은 행의 여러 셀이 각각 저장 원점을 다시 시작할 때 각 셀의 줄 경계를 한 조각에 묶습니다. 실제 인쇄 비교에서 1~44쪽이 통과했습니다. [57번 공통 코어 패치](engine-patches/README.md#hwpx-parallel-declared-source-frames)
+
+- 떠 있는 표가 포함된 행의 실제 내용이 한 쪽에 들어가면 마지막 글줄까지 그 쪽에 배치하고, 선언 높이의 남은 빈 공간은 그 쪽 경계에서 닫습니다. 실제 인쇄 비교에서 1~43쪽이 통과했습니다. [56번 공통 코어 패치](engine-patches/README.md#hwpx-complete-float-row-frame)
+
+- 연속 표의 원본 행 높이, 완전한 중간 행과 쪽의 물리 높이를 같은 기준으로 계산합니다. 다음 쪽 인라인 표는 전용 줄의 최소 높이를 유지합니다. 실제 인쇄 비교에서 1~42쪽이 통과했습니다. [55번 공통 코어 패치](engine-patches/README.md#hwpx-source-frame-height-reconciliation)
+
+- 저장 줄 높이가 인라인 표와 바깥 여백의 합으로 확인되면, 해당 줄을 여러 쪽에 걸친 행 높이 계산에 포함합니다. 실제 인쇄 비교에서 1~41쪽이 순서대로 통과했습니다. [54번 공통 코어 패치](engine-patches/README.md#hwpx-inline-declared-row-frame)
+
+- 여러 쪽에 걸친 표 행의 저장 높이를 조각별로 배분합니다. 사용한 높이와 다음 쪽에 남은 높이를 따로 추적하고, 각 조각의 글줄과 안쪽 표를 같은 행 상자에 정렬합니다. 실제 인쇄 비교에서 1~40쪽이 순서대로 통과했습니다. [53번 공통 코어 패치](engine-patches/README.md#hwpx-declared-row-fragment-balance)
+
+- 안쪽 표의 완전한 행들이 저장 높이를 닫으면 그 행 경계에서 쪽을 나눕니다. 다음 표의 원본 앵커와 바깥 여백을 반영하고, 보이는 행이 없는 셀 영역은 다음 쪽에 그리지 않습니다. 실제 인쇄 비교에서 1~37쪽이 통과했습니다. [51·52번 공통 코어 패치](engine-patches/README.md#hwpx-terminal-nested-row-prefix)
+
+- 떠 있는 표가 원본 글줄의 이동량을 정확히 설명하면, 이어지는 원본 줄과 인라인 표를 확인해 현재 쪽의 행 높이를 저장값으로 확정합니다. TEST 문서 A의 실제 인쇄 비교에서 1~35쪽이 순서대로 통과했습니다. [50번 코어 패치](engine-patches/README.md#hwpx-closed-object-row-frame)
+
+- 안쪽 표의 저장 높이가 원본 글줄의 쪽 경계를 입증하면 그 경계에서 표를 나눕니다. 같은 행의 셀이 각각 저장한 쪽 경계도 확인해 제목과 본문을 각 셀의 글줄 높이에 맞춰 나눕니다. TEST 문서 A의 실제 인쇄 비교에서 1~34쪽이 순서대로 통과했습니다. [48·49번 코어 패치](engine-patches/README.md#hwpx-plain-leaf-source-frame)
+
+- 다음 쪽의 떠 있는 표가 원본 앵커와 높이로 경계를 입증할 때 현재 쪽의 테두리와 글줄을 같은 높이에 맞춥니다. TEST 문서 A의 실제 인쇄 비교에서 1~32쪽이 순서대로 통과했습니다. [47번 코어 패치](engine-patches/README.md#hwpx-anchored-float-restart-frame)
+
+- 여러 문단을 담은 인라인 표의 행 높이와 원본 표 전용 줄의 쪽 나눔을 보완했습니다. TEST 문서 A의 실제 인쇄 비교에서 1~31쪽이 순서대로 통과했습니다. [46번 코어 패치](engine-patches/README.md#hwpx-closed-inline-row-ownership)
+
+- 중첩 표의 연속 조각에서 현재 쪽의 테두리, 남은 안쪽 행 높이, 이어지는 원본 글줄을 따로 계산합니다. TEST 문서 A의 실제 인쇄 비교에서 1~30쪽이 순서대로 통과했습니다. [45번 코어 패치](engine-patches/README.md#hwpx-nested-restart-frame-ownership)
+
+- 중첩 표에서 원본 줄이 다음 쪽을 시작할 때 앞쪽 글줄을 보존하고, 앞뒤 조각의 실제 행 높이를 나눠 계산합니다. [44번 코어 패치](engine-patches/README.md#hwpx-nested-original-text-restart)
+
+- 인라인 표가 문단의 마지막 저장 줄에 들어갈 때 그 줄의 높이를 한 번만 예약하고 같은 줄 원점에 표를 그립니다. [43번 코어 패치](engine-patches/README.md#hwpx-original-inline-object-line)
+
+- 중첩 표의 마지막 인라인 줄과 빈 행의 물리 높이를 따로 계산하고, 원본에 저장된 다음 쪽 시작점을 표 조각에 전달합니다. [42번 코어 패치](engine-patches/README.md#hwpx-nested-terminal-frame-continuation)
+
+- 이어지는 HWPX 표에서 일부 셀의 내용이 먼저 끝나도 같은 행의 저장 경계와 현재 쪽의 수용 높이로 표 조각을 계산합니다. [30번 코어 패치](engine-patches/README.md#hwpx-row-frame-finished-cells)
+
+- 안쪽 표를 여러 행으로 나누어 측정할 때 저장된 다음 쪽 시작점을 부모 표에도 전달합니다. [31번 코어 패치](engine-patches/README.md#nested-inline-projected-opening-owner)
+
+- 셀 안 중첩 표와 같은 문단에 속한 안내문이 원본에서 표 아래에 있으면 그 순서를 유지합니다. [32번 코어 패치](engine-patches/README.md#hwpx-displaced-nested-table-line)
+
+- 셀의 서로 다른 문단에 저장된 사진 두 장이 같은 높이에 나란히 배치된 경우, 중첩 표의 분할에서도 함께 이동합니다. [33번 코어 패치](engine-patches/README.md#hwpx-parallel-picture-band)
+
+- 안쪽 표의 사진이 다음 쪽으로 이어질 때 원본에서 확인된 첫 조각의 행 높이와 셀 정렬을 보존합니다. 저장된 경계에 맞춰 자식 표의 바깥 여백도 반영합니다. [34번 코어 패치](engine-patches/README.md#hwpx-stored-picture-opening-frame)
+
+- 중첩 표의 이어지는 행에서 셀의 저장 높이가 안 여백만 나타낼 때, 원본 글줄과 뒤 문단의 좌표로 실제 행 높이를 확인합니다. [35번 코어 패치](engine-patches/README.md#hwpx-stored-plain-tail-frame)
+
+- 제목과 중첩 표가 서로 다른 쪽에 배치될 때, 표와 여백이 닫는 저장 좌표를 뒤 문단과 해당 조각 높이에 함께 사용합니다. [36번 코어 패치](engine-patches/README.md#hwpx-resumed-nested-successor)
+
+- 다음 쪽으로 통째로 이동한 어울림 중첩 표의 문단 기준 왼쪽 정렬을 복원합니다. [37번 코어 패치](engine-patches/README.md#hwpx-resumed-nested-left-anchor)
+
+- 원본 글줄이 입증하는 쪽 경계에서 표의 마지막 행 높이와 셀 세로 정렬을 복원합니다. [38번 코어 패치](engine-patches/README.md#hwpx-confirmed-row-frame-reservation)
+
+- 저장된 중첩 표의 연속 조각에서 글줄 경계, 왼쪽 기준점과 바깥 여백을 보완합니다. [41번 코어 패치](engine-patches/README.md#hwpx-nested-table-frame-ledger)
+- 세로 병합을 포함한 중첩 표에서 원본 글줄의 쪽 배정과 상위 표의 행 높이·여백을 보완합니다. [40번 코어 패치](engine-patches/README.md#hwpx-nested-rowspan-opening)
+- 저장된 행 높이와 문단 앵커를 함께 사용해 중첩 표의 행 간격과 시작 위치를 보완합니다. [39번 코어 패치](engine-patches/README.md#hwpx-stored-nested-row-geometry)
+
 ## 0.6.46 · Desktop 0.1.27
 
 - 반복 머리행이 있는 HWPX 표에서 첫 조각과 이어지는 조각의 마지막 글줄이 다음 쪽으로 밀리는 경우를 보완합니다. [코어 적용 범위](engine-patches/README.md#hwpx-parallel-row-continuations)

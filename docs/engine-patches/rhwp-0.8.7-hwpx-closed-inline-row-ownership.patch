@@ -1,0 +1,253 @@
+--- a/src/renderer/float_placement.rs
++++ b/src/renderer/float_placement.rs
+@@ -300,52 +300,39 @@
+     Some(rows.into_iter().map(|height| height as f64 * dpi / 7200.0).collect())
+ }
+ 
+-/// In an original noAdjust inline table the stored line boxes can grow
+-/// each individual row. Use those physical rows only when they exactly close
+-/// the whole object and leave room for every spanning cell.
++/// Use original inline row boxes only when the cells' stored text advances
++/// and margins close exactly at the declared table height.
+ pub(crate) fn saved_inline_no_adjust_row_heights(
+     table: &Table,
+     dpi: f64,
+ ) -> Option<Vec<f64>> {
+     let row_count = usize::from(table.row_count);
++    let has_span = table.cells.iter().any(|cell| cell.row_span > 1);
+     if !table.common.treat_as_char
+         || table.raw_table_record_attr & 0x08 == 0
+         || table.common.height == 0 || table.common.height > i32::MAX as u32
+-        || row_count < 2
++        || row_count < 2 || table.cell_spacing < 0
+         || !dpi.is_finite() || dpi <= 0.0
+-        || !table.cells.iter().any(|cell| cell.row_span > 1)
+-    {
+-        return None;
+-    }
+-    let mut rows = vec![0.0_f64; row_count];
++        || (!has_span && (!table.common.flow_with_text || table.common.allow_overlap
++            || table.caption.is_some()))
++    {
++        return None;
++    }
++    let mut rows = vec![0_i64; row_count];
+     let mut spans = Vec::new();
+     let mut grew = false;
+     for cell in &table.cells {
+         let row = usize::from(cell.row);
+         let span = usize::from(cell.row_span);
+         if span == 0 || row.checked_add(span)? > row_count
+-            || cell.dirty_flag || cell.height == 0 || cell.height > i32::MAX as u32
+-            || cell.paragraphs.iter().any(|para|
+-                para.stored_text_partition_is_dirty() || para.cell_format_vpos_dirty
+-                || para.source_frame_reflowed || !para.layout_space_metrics.is_empty())
++            || cell.text_direction != 0 || cell.dirty_flag
++            || cell.height == 0 || cell.height > i32::MAX as u32
+         {
+             return None;
+         }
+-        let saved = hwpunit_to_px(cell.height as i32, dpi);
+-        let [para] = cell.paragraphs.as_slice() else { return None; };
+-        let [line] = para.line_segs.as_slice() else { return None; };
+-        let cached_formula = matches!(para.controls.as_slice(), [Control::Field(field)]
+-            if field.field_type == crate::model::control::FieldType::Formula
+-                && !para.text.trim().is_empty() && para.field_ranges.len() == 1
+-                && para.orphan_field_ends.is_empty());
+-        if cell.text_direction != 0 || line.vertical_pos != 0 || line.line_height <= 0
+-            || line.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0
+-            || !(para.controls.is_empty() || cached_formula)
+-        {
+-            return None;
+-        }
+-        let end = hwpunit_to_px(line.line_height, dpi);
+-        let pad = hwpunit_to_px(cell.effective_vertical_padding_hu(&table.padding), dpi);
++        let saved = i64::from(cell.height);
++        let end = saved_inline_cell_ink_end(cell)?;
++        let pad = i64::from(cell.effective_vertical_padding_hu(&table.padding));
+         let required = saved.max(end + pad);
+         if span == 1 {
+             rows[row] = rows[row].max(required);
+@@ -354,20 +341,52 @@
+             spans.push((row, row + span, required));
+         }
+     }
+-    let gap = hwpunit_to_px(i32::from(table.cell_spacing), dpi);
+-    let unit = dpi / 7200.0;
+-    let target = f64::from(table.common.height) * unit;
+-    let total = rows.iter().sum::<f64>() + gap * (row_count - 1) as f64;
+-    if !grew || rows.iter().any(|&height| height <= 0.0)
+-        || (total - target).abs() > unit
++    let gap = i64::from(table.cell_spacing);
++    let target = i64::from(table.common.height);
++    let total = rows.iter().sum::<i64>() + gap * (row_count - 1) as i64;
++    if !grew || rows.iter().any(|&height| height <= 0)
++        || (total - target).abs() > 1
+         || spans.into_iter().any(|(start, end, required)| {
+-            rows[start..end].iter().sum::<f64>() + gap * ((end - start - 1) as f64)
+-                < required - unit
++            rows[start..end].iter().sum::<i64>() + gap * ((end - start - 1) as i64) < required - 1
+         })
+     {
+         return None;
+     }
+-    Some(rows)
++    Some(rows.into_iter().map(|height| height as f64 * dpi / 7200.0).collect())
++}
++
++/// The last line contributes its visible height. Earlier lines contribute
++/// their complete advance to the next original line, even across paragraphs.
++fn saved_inline_cell_ink_end(cell: &crate::model::table::Cell) -> Option<i64> {
++    let mut next_top = 0;
++    let mut ink_end = None;
++    for para in &cell.paragraphs {
++        let cached_formula = matches!(para.controls.as_slice(), [Control::Field(field)]
++            if field.field_type == crate::model::control::FieldType::Formula
++                && !para.text.trim().is_empty() && para.field_ranges.len() == 1
++                && para.orphan_field_ends.is_empty()
++                && cell.paragraphs.len() == 1 && para.line_segs.len() == 1);
++        let one_column = matches!(para.controls.as_slice(), [Control::ColumnDef(columns)]
++            if columns.column_count == 1 && columns.spacing == 0);
++        if para.stored_text_partition_is_dirty() || para.cell_format_vpos_dirty
++            || para.source_frame_reflowed || !para.layout_space_metrics.is_empty()
++            || !(para.controls.is_empty() || cached_formula || one_column) || para.line_segs.is_empty()
++        {
++            return None;
++        }
++        for line in &para.line_segs {
++            if i64::from(line.vertical_pos) != next_top || line.line_height <= 0
++                || line.line_spacing < 0
++                || line.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0
++            {
++                return None;
++            }
++            let end = next_top + i64::from(line.line_height);
++            next_top = end + i64::from(line.line_spacing);
++            ink_end = Some(end);
++        }
++    }
++    ink_end
+ }
+ 
+ /// 그림들은 같은 띠의 원점에서 움직이며 각 그림 높이로 원점을 따로 역산하지 않는다.
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -9762,6 +9762,40 @@
+             + hwpunit_to_px(table.outer_margin_bottom as i32, self.dpi)
+     }
+ 
++    /// A one-column definition changes no line geometry. A stored row that
++    /// can contain its sole inline line and cell padding owns that line whole.
++    fn saved_inline_cell_row_owner(
++        &self, cell: &crate::model::table::Cell, parent: &crate::model::table::Table,
++        styles: &ResolvedStyleSet,
++    ) -> bool {
++        let profile = self.profile.get();
++        let [para] = cell.paragraphs.as_slice() else { return false; };
++        let [Control::ColumnDef(columns), Control::Table(table)] = para.controls.as_slice()
++            else { return false; };
++        let [line] = para.line_segs.as_slice() else { return false; };
++        if !profile.hwpx_stored_layout() || profile.hwp5_origin_hwpx() || profile.session_edited()
++            || cell.dirty_flag || cell.row_span != 1 || cell.text_direction != 0
++            || columns.column_count != 1 || columns.spacing != 0
++            || !matches!(para.column_type,
++                crate::model::paragraph::ColumnBreakType::None
++                    | crate::model::paragraph::ColumnBreakType::MultiColumn)
++            || !table.common.treat_as_char || !table.common.flow_with_text
++            || table.common.allow_overlap || table.caption.is_some()
++            || table.outer_margin_top < 0 || table.outer_margin_bottom < 0
++            || !stored_float_frame_owner_is_original(para)
++            || para.text.chars().any(|ch| ch > '\u{001F}' && ch != '\u{FFFC}')
++            || line.vertical_pos != 0 || line.line_height <= 0 || line.line_spacing < 0
++        {
++            return false;
++        }
++        let declared = i64::from(table.common.height) + i64::from(table.outer_margin_top)
++            + i64::from(table.outer_margin_bottom);
++        let padded = declared + i64::from(cell.effective_vertical_padding_hu(&parent.padding));
++        i64::from(line.line_height) == declared && padded <= i64::from(cell.height)
++            && (hwpunit_to_px(line.line_height, self.dpi)
++                - self.calc_nested_table_height(table, styles)).abs() <= hwpunit_to_px(2, self.dpi)
++    }
++
+     /// A complete original inline table can own a dedicated trailing line of
+     /// a text paragraph. The line and the object reserve the same space.
+     pub(super) fn saved_inline_table_owner_line(
+@@ -13058,7 +13092,8 @@
+                     && p.line_segs.len() == 1
+                     && !line_seg_is_synthetic(&p.line_segs[0])
+                     && hwpunit_to_px(p.line_segs[0].line_height, self.dpi)
+-                        + hwpunit_to_px(2, self.dpi) >= self.calc_nested_table_height(child, styles));
++                        + hwpunit_to_px(2, self.dpi) >= self.calc_nested_table_height(child, styles)
++                    || self.saved_inline_cell_row_owner(cell, table, styles));
+                 if nested_tables.len() == 1
+                     && !stored_inline_object
+                     && nested_tables[0].row_count >= 2
+@@ -17443,6 +17478,26 @@
+                 && line.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY == 0)
+     }
+ 
++    /// At a whole-row boundary between independently owned inline lines, the
++    /// previous fragment closes the bottom margin and the new one owns top.
++    pub(super) fn saved_nested_inline_row_boundary(
++        &self, host: &Paragraph, table: &crate::model::table::Table,
++        row: usize, cut: &[usize], styles: &ResolvedStyleSet,
++    ) -> bool {
++        if row == 0 || row >= usize::from(table.row_count)
++            || cut.iter().any(|&cursor| cursor != 0)
++            || !Self::stored_nested_outer_margin_host(host, table)
++        {
++            return false;
++        }
++        let owns_inline = |row| {
++            Self::row_cut_cell_order(table, row).into_iter().any(|index| {
++                self.saved_inline_cell_row_owner(&table.cells[index], table, styles)
++            })
++        };
++        owns_inline(row - 1) && owns_inline(row)
++    }
++
+     // A resumed source cursor reopens the top margin of the same stored
+     // object frame. Bottom margin still follows the current fragment's end.
+     pub(super) fn saved_nested_source_resume_outer_top(
+@@ -17455,7 +17510,8 @@
+             return false;
+         }
+         if cut.iter().all(|&cursor| cursor == 0) {
+-            return row.checked_sub(1).is_some_and(|previous| {
++            return self.saved_nested_inline_row_boundary(host, table, row, cut, styles)
++                || row.checked_sub(1).is_some_and(|previous| {
+                 Self::row_cut_cell_order(table, previous).into_iter().any(|index| {
+                     let cell = &table.cells[index];
+                     cell.paragraphs.last().is_some_and(|paragraph| {
+@@ -23315,7 +23371,9 @@
+         ) {
+             physical += hwpunit_to_px(child.outer_margin_top as i32, self.dpi);
+         }
+-        if end == run_end || reopens_outer_frame || self.saved_nested_picture_parent_owns_outer_bottom(
++        if end == run_end || reopens_outer_frame
++            || self.saved_nested_inline_row_boundary(para, child, cut.end_row, &cut.end_cut, styles)
++            || self.saved_nested_picture_parent_owns_outer_bottom(
+             para, child, cut.start_row, cut.end_row, &cut.start_cut, &cut.end_cut, styles,
+         ) {
+             physical += hwpunit_to_px(child.outer_margin_bottom as i32, self.dpi);
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -4001,12 +4001,14 @@
+                                         && stored_float_frame.is_none() {
+                                         hwpunit_to_px(nested_table.outer_margin_top as i32, self.dpi)
+                                     } else { 0.0 };
+-                                    let source_picture_outer_bottom = source_cut.as_ref().is_some_and(|cut|
+-                                        self.saved_nested_picture_parent_owns_outer_bottom(
++                                    let source_outer_bottom = source_cut.as_ref().is_some_and(|cut|
++                                        self.saved_nested_inline_row_boundary(
++                                            para, nested_table, cut.end_row, &cut.end_cut, styles,
++                                        ) || self.saved_nested_picture_parent_owns_outer_bottom(
+                                             para, nested_table, cut.start_row, cut.end_row,
+                                             &cut.start_cut, &cut.end_cut, styles,
+                                         ));
+-                                    let opening_outer_bottom = if opens_outer_frame || source_picture_outer_bottom {
++                                    let opening_outer_bottom = if opens_outer_frame || source_outer_bottom {
+                                         hwpunit_to_px(nested_table.outer_margin_bottom as i32, self.dpi)
+                                     } else { 0.0 };
+                                     let source_nested_y = nested_y + opening_outer_top;

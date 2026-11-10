@@ -1,0 +1,189 @@
+diff --git a/src/renderer/layout/table_layout.rs b/src/renderer/layout/table_layout.rs
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -16518,6 +16518,91 @@
+         self.stored_owned_tail_row_physical_minimum(table, last, start, end_cut, styles).is_some()
+     }
+ 
++    fn saved_nested_inline_opening_row_band_hu(
++        table: &crate::model::table::Table,
++        row: usize,
++    ) -> Option<i64> {
++        if row == 0 || table.common.treat_as_char
++            || table.common.text_wrap != TextWrap::TopAndBottom
++            || table.common.vert_rel_to != crate::model::shape::VertRelTo::Para
++            || table.common.vertical_offset as i32 != 0
++            || table.page_break != TablePageBreak::RowBreak
++            || table.common.height > i32::MAX as u32
++            || table.cells.iter().any(|cell| cell.row_span != 1 || cell.col_span != 1)
++        {
++            return None;
++        }
++        let raw = table.get_raw_row_heights();
++        let before = raw.iter().take(row).map(|&height| i64::from(height)).sum::<i64>()
++            + i64::from(table.cell_spacing) * row as i64;
++        let band = i64::from(table.common.height) - before;
++        (band > 0 && band < i64::from(*raw.get(row)?)).then_some(band)
++    }
++
++    fn saved_nested_inline_opening_owner(
++        cell: &crate::model::table::Cell,
++        unit: &CellUnit,
++        row_band_hu: i64,
++    ) -> Option<()> {
++        if !unit.hard_break_before || !unit.page_frame_reset_before
++            || unit.vis_start != 0 || unit.mixed_nested_fragment
++            || unit.non_inline_control_range.is_some()
++        {
++            return None;
++        }
++        let host = cell.paragraphs.get(unit.para_idx)?;
++        let previous = cell.paragraphs.get(unit.para_idx.checked_sub(1)?)?;
++        let following = cell.paragraphs.get(unit.para_idx + 1)?;
++        let [Control::Table(inline)] = host.controls.as_slice() else { return None; };
++        let ([reset], [successor]) = (host.line_segs.as_slice(), following.line_segs.as_slice())
++            else { return None; };
++        let before = previous.line_segs.last()?;
++        let authentic = |paragraph: &Paragraph, line: &crate::model::paragraph::LineSeg| {
++            !paragraph.stored_text_partition_is_dirty() && !paragraph.cell_format_vpos_dirty
++                && paragraph.layout_space_metrics.is_empty() && !paragraph.source_frame_reflowed
++                && line.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY == 0
++        };
++        if previous.text.trim().is_empty() || !previous.controls.is_empty()
++            || !host.text.trim().is_empty()
++            || following.text.trim().is_empty() || !following.controls.is_empty()
++            || !authentic(previous, before) || !authentic(host, reset)
++            || !authentic(following, successor)
++            || !inline.common.treat_as_char || inline.caption.is_some()
++            || inline.common.height == 0 || inline.common.height > i32::MAX as u32
++            || before.vertical_pos <= 0 || reset.vertical_pos != 0
++            || reset.line_height <= 0 || reset.line_spacing < 0
++            || successor.line_height <= 0
++        {
++            return None;
++        }
++        let band = i64::from(inline.common.height)
++            + i64::from(inline.outer_margin_top) + i64::from(inline.outer_margin_bottom);
++        if band <= row_band_hu || band != i64::from(reset.line_height)
++            || band + i64::from(reset.line_spacing) != i64::from(successor.vertical_pos)
++        {
++            return None;
++        }
++
++        // A measured expansion can expose the same original inline owner as
++        // several child rows. Only the first cursor can inherit its source start.
++        if unit.nested_row.is_some() || unit.nested_table_fragment.is_some() {
++            if unit.nested_row != Some(0)
++                || unit.nested_table_fragment.as_ref().is_some_and(|cut|
++                    cut.start_cut.iter().any(|&cursor| cursor != 0))
++                || !stored_nested_tail_cell_prefix_is_original(cell, host)
++            {
++                return None;
++            }
++            let raw = inline.get_raw_row_heights();
++            let extent = raw.iter().map(|&height| i64::from(height)).sum::<i64>()
++                + i64::from(inline.cell_spacing) * raw.len().saturating_sub(1) as i64;
++            if extent != i64::from(inline.common.height) {
++                return None;
++            }
++        }
++        Some(())
++    }
++
+     /// An immutable nested table can store an opening physical frame whose
+     /// last row continues with an inline-table owner on the next source frame.
+     /// The source cursor remains authoritative: this is a physical band only,
+@@ -16553,26 +16638,12 @@
+                         & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0)))
+         { return None; }
+         let last_row = end_row - 1;
+-        let raw = table.get_raw_row_heights();
+-        let before_hu = raw.iter().take(last_row).map(|&h| i64::from(h)).sum::<i64>()
+-            + i64::from(table.cell_spacing) * last_row as i64;
+-        let frame_hu = i64::from(table.common.height);
+-        let row_hu = i64::from(*raw.get(last_row)?);
+-        // This table's declaration crosses a real row, rather than describing
+-        // the complete table or a fabricated over-sized page-filling band.
+-        if before_hu >= frame_hu || frame_hu >= before_hu + row_hu
+-            || table.cells.iter().any(|cell| cell.row_span != 1 || cell.col_span != 1)
+-        { return None; }
++        let row_band_hu = Self::saved_nested_inline_opening_row_band_hu(table, last_row)?;
+         let cells: Vec<_> = Self::row_cut_cell_order(table, last_row).into_iter()
+             .filter_map(|index| table.cells.get(index)).collect();
+         if cells.len() != end_cut.len() || cells.len() != usize::from(table.col_count) {
+             return None;
+         }
+-        let authentic = |p: &Paragraph| !p.stored_text_partition_is_dirty()
+-            && !p.cell_format_vpos_dirty && (p.layout_space_metrics.is_empty() && !p.source_frame_reflowed)
+-            && !p.line_segs.is_empty()
+-            && p.line_segs.iter().all(|line|
+-                line.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY == 0);
+         let mut active_owners = 0usize;
+         for (cell, &cursor) in cells.iter().zip(end_cut) {
+             let units = self.cell_units(cell, table, styles);
+@@ -16580,48 +16651,20 @@
+             if cursor == units.len() { continue; }
+             let current = units.get(cursor)?;
+             let previous = cursor.checked_sub(1).and_then(|index| units.get(index))?;
+-            if !current.hard_break_before || !current.page_frame_reset_before
+-                || current.vis_start != 0 || previous.para_idx + 1 != current.para_idx
+-                || previous.vis_start >= previous.vis_end
+-                || current.nested_row.is_some() || current.nested_table_fragment.is_some()
+-                || current.mixed_nested_fragment || current.non_inline_control_range.is_some()
+-            { return None; }
+             let previous_para = cell.paragraphs.get(previous.para_idx)?;
+-            let owner = cell.paragraphs.get(current.para_idx)?;
+-            let following = cell.paragraphs.get(current.para_idx + 1)?;
+-            if !authentic(previous_para) || !authentic(owner) || !authentic(following)
+-                || previous_para.text.trim().is_empty() || !previous_para.controls.is_empty()
+-                || !owner.text.trim().is_empty() || owner.controls.len() != 1
+-                || owner.line_segs.len() != 1 || following.line_segs.len() != 1
+-                || following.text.trim().is_empty() || !following.controls.is_empty()
++            if previous.para_idx + 1 != current.para_idx || previous.vis_start >= previous.vis_end
+                 || previous.vis_end != previous_para.line_segs.len()
+-            { return None; }
+-            let Control::Table(inline) = &owner.controls[0] else { return None; };
+-            let before = previous_para.line_segs.last()?;
+-            let reset = owner.line_segs.first()?;
+-            let successor = following.line_segs.first()?;
+-            let band_hu = i64::from(inline.common.height)
+-                + i64::from(inline.outer_margin_top) + i64::from(inline.outer_margin_bottom);
+-            // The next content owner's real line is exactly its inline object
+-            // plus margins. Its successor independently closes that same band.
+-            if !inline.common.treat_as_char || inline.common.height == 0 || inline.caption.is_some()
+-                || inline.common.height > i32::MAX as u32
+-                || before.vertical_pos <= 0 || reset.vertical_pos != 0
+-                || reset.line_height <= 0 || reset.line_spacing < 0
+-                || band_hu != i64::from(reset.line_height)
+-                || successor.line_height <= 0 || successor.vertical_pos < 0
+-                || i64::from(successor.vertical_pos) != band_hu + i64::from(reset.line_spacing)
+-                // A small inline owner fitting the whole opening row band is
+-                // not independent proof of a page frame; it may be local vpos.
+-                || band_hu <= frame_hu - before_hu
+-            { return None; }
++            {
++                return None;
++            }
++            Self::saved_nested_inline_opening_owner(cell, current, row_band_hu)?;
+             active_owners += 1;
+         }
+         if active_owners == 0 { return None; }
+         let frame = hwpunit_to_px(table.common.height as i32, self.dpi);
+         let body_height = self.current_body_area.get().3;
+         let cut_content = self.row_cut_content_height(table, last_row, &[], end_cut, styles);
+-        let row_band = hwpunit_to_px((frame_hu - before_hu) as i32, self.dpi);
++        let row_band = hwpunit_to_px(row_band_hu as i32, self.dpi);
+         (body_height > 0.0 && frame <= body_height + 0.5 && cut_content <= row_band + 0.5)
+             .then_some(frame)
+     }
+@@ -17561,6 +17604,10 @@
+         let Some(host) = cell.paragraphs.get(unit.para_idx) else { return false; };
+         if !stored_nested_tail_cell_prefix_is_original(cell, host) { return false; }
+         let [Control::Table(child)] = host.controls.as_slice() else { return false; };
++        if child.common.treat_as_char && unit.nested_row.is_some() {
++            return Self::saved_nested_inline_opening_row_band_hu(table, usize::from(cell.row))
++                .is_some_and(|band| Self::saved_nested_inline_opening_owner(cell, unit, band).is_some());
++        }
+         if let (Some(row), Some(fragment)) = (unit.nested_row, unit.nested_table_fragment.as_ref()) {
+             return self.nested_row_cut_closed_inline_frame_boundary(
+                 child, row, &fragment.start_cut, styles,

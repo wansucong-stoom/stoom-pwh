@@ -7,6 +7,28 @@ import {patchCellTextHistory} from './patch-cell-text-history.mjs';
 import {patchObjectProperties} from './patch-object-properties.mjs';
 const root=path.resolve(process.argv[2]);
 const studio=path.join(root,'rhwp-studio');
+// The pinned editor includes its WASM glue. Old runtime cores keep the default
+// print path until both print-snapshot exports are available in the loaded WASM.
+const coreGluePath=path.join(root,'pkg/rhwp.js');
+let coreGlue=await fs.readFile(coreGluePath,'utf8');
+if(!coreGlue.includes('    createPrintFontSnapshot() {')){
+ const anchor='    getDocumentInfo() {';
+ if(coreGlue.split(anchor).length!==2)throw Error('Unsupported WASM print font bindings');
+ coreGlue=coreGlue.replace(anchor,`    createPrintFontSnapshot() {
+        return HwpDocument.__wrap(wasm.hwpdocument_createPrintFontSnapshot(this.__wbg_ptr));
+    }
+    getDeclaredPrintFontSubstitutions() {
+        if (!wasm.hwpdocument_getDeclaredPrintFontSubstitutions || !wasm.hwpdocument_createPrintFontSnapshot) return '[]';
+        const [ptr, len] = wasm.hwpdocument_getDeclaredPrintFontSubstitutions(this.__wbg_ptr);
+        try {
+            return getStringFromWasm0(ptr, len);
+        } finally {
+            wasm.__wbindgen_free(ptr, len, 1);
+        }
+    }
+${anchor}`);
+ await fs.writeFile(coreGluePath,coreGlue);
+}
 await patchObjectProperties(studio);
 await fs.copyFile(new URL('../src/pwh-page-margin-layout.ts',import.meta.url),path.join(studio,'src/ui/pwh-page-margin-layout.ts'));
 await fs.copyFile(new URL('../src/print-preview-view.mjs',import.meta.url),path.join(studio,'src/command/commands/pwh-print-preview-view.mjs'));
@@ -757,7 +779,13 @@ printCommand=printCommand.replace('if (button) button.hidden = true;',"if (butto
 // already-previewed SVG sheets directly, without a second settings dialog.
 await fs.copyFile(new URL('../src/print-plan.mjs',import.meta.url),path.join(studio,'src/print-plan.mjs'));
 await fs.copyFile(new URL('../src/desktop-print-preview.mjs',import.meta.url),path.join(studio,'src/pwh-desktop-print-preview.mjs'));
+await fs.copyFile(new URL('../src/print-font-substitutions.mjs',import.meta.url),path.join(studio,'src/print-font-substitutions.mjs'));
+await fs.copyFile(new URL('../src/local-font-face.mjs',import.meta.url),path.join(studio,'src/local-font-face.mjs'));
 if(!printCommand.includes("import {showPwhPrintPreview}"))printCommand="import {showPwhPrintPreview} from '@/pwh-desktop-print-preview.mjs';\n"+printCommand;
+if(!printCommand.includes("import {loadPrintFontSubstitutions}"))printCommand=`import {loadPrintFontSubstitutions} from '@/print-font-substitutions.mjs';
+import {getLocalFontRecords, resolveRendererLocalFont, loadRendererLocalFont} from '@/core/local-fonts';
+import {normalizeFontFaceData} from '@/core/sfnt-face';
+`+printCommand;
 printCommand=printCommand.replaceAll('options?: {printer: string, copies: number}','options?: any').replaceAll('params?.pwhPrintOptions as {printer: string, copies: number} | undefined','params?.pwhPrintOptions as any');
 const previewFunction=printCommand.indexOf('async function runPrintPreview('),previewBody=printCommand.indexOf('    if (direct) { // pwh ',previewFunction),previewTail=printCommand.indexOf('\n    console.info(',previewBody);
 if(previewFunction<0||previewBody<0||previewTail<0)throw Error('Unsupported Pwh print preview boundary');
@@ -765,7 +793,38 @@ printCommand=printCommand.slice(0,previewBody)+`    if (direct) { // pwh native 
       const readySurface = surface;
       const native = (readySurface.window as any).pwhNative;
       if (native?.getPrinters) {
-        const result = await showPwhPrintPreview(readySurface.window, { ...options, printPages: printPages.map(page => ({ widthMm: page.widthMm, heightMm: page.heightMm })) });
+        const fontJob = selectedPages ? null : wasm.createPwhPrintFontJob();
+        let fontJobActive = true;
+        const fontSubstitutes = fontJob && (async (view: Window) => {
+          const resolved = await loadPrintFontSubstitutions(view, fontJob.pairs, {
+            records: getLocalFontRecords({includeRegistered: true}),
+            resolve: resolveRendererLocalFont,
+            load: loadRendererLocalFont,
+            normalize: normalizeFontFaceData,
+          });
+          if (!resolved.faces.length) throw new Error('사용 가능한 문서 대체 글꼴을 찾지 못했습니다.');
+          if (!fontJobActive || view.closed) throw new Error('인쇄 창이 닫혔습니다.');
+          const snapshot = fontJob.snapshot;
+          snapshot.setFontEnvironment(JSON.stringify(resolved.environment));
+          const container = view.document.createElement('div');
+          const pages = Array.from({length: snapshot.pageCount()}, (_, index) => {
+            const info = JSON.parse(snapshot.getPageInfo(index));
+            const page = createPrintPage(snapshot.renderPageSvgWithProfile(index, 'print'), info, index);
+            appendSvgPage(view.document, container, page);
+            return {widthMm: page.widthMm, heightMm: page.heightMm, sectionIndex: info.sectionIndex ?? 0};
+          });
+          const status = resolved.missing.length
+            ? '사용할 수 없는 글꼴은 원래 설정을 유지했습니다. ' + resolved.missing.join(', ')
+            : '문서에 지정된 대체 글꼴을 적용했습니다.';
+          return {originals: Array.from(container.children), pages, currentPage: 0, selectedPages: [], status, faces: resolved.faces};
+        });
+        let result;
+        try {
+          result = await showPwhPrintPreview(readySurface.window, { ...options, fontSubstitutes, printPages: printPages.map(page => ({ widthMm: page.widthMm, heightMm: page.heightMm })) });
+        } finally {
+          fontJobActive = false;
+          fontJob?.snapshot.free();
+        }
         window.dispatchEvent(new CustomEvent('pwh-print-result', { detail: result }));
         readySurface.close();
       } else {
@@ -806,6 +865,21 @@ if(!localFonts.includes('pwh host fonts in menu'))localFonts=localFonts.replace(
 await fs.writeFile(localFontsPath,localFonts);
 const wasmPath=path.join(studio,'src/core/wasm-bridge.ts');
 let wasm=await fs.readFile(wasmPath,'utf8');
+if(!wasm.includes('createPwhPrintFontJob()')){
+ const anchor='  getDocumentInfo(): DocumentInfo {';
+ if(!wasm.includes(anchor))throw Error('Unsupported print font snapshot bridge');
+ wasm=wasm.replace(anchor,`  createPwhPrintFontJob() {
+    const doc = this.doc as (HwpDocument & {
+      getDeclaredPrintFontSubstitutions?: () => string;
+      createPrintFontSnapshot?: () => HwpDocument & {setFontEnvironment: (json: string) => boolean};
+    }) | null;
+    if (!doc?.getDeclaredPrintFontSubstitutions || !doc.createPrintFontSnapshot) return null;
+    const pairs = JSON.parse(doc.getDeclaredPrintFontSubstitutions()) as [string, string][];
+    return pairs.length ? {pairs, snapshot: doc.createPrintFontSnapshot()} : null;
+  }
+
+${anchor}`);
+}
 if(!wasm.includes('pwh source font preparation')){
  const start='      const records = this.withPortableMetrics(() => {',end='      await this.hostCanvasFonts.prepare(records);';
  const first=wasm.indexOf(start),last=wasm.indexOf(end,first);

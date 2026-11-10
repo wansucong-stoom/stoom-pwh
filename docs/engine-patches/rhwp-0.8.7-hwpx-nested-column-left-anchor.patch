@@ -1,0 +1,27 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -5825,6 +5825,24 @@
+                     HorzAlign::Center => area_x + (area_w - table_width) / 2.0 + offset,
+                     HorzAlign::Right | HorzAlign::Outside => area_x + area_w - table_width - offset,
+                 };
++            }
++            // A stored multi-column table can keep its explicit column-left
++            // anchor when the full outer box fits inside the parent cell.
++            if self.profile.get().hwpx_stored_layout()
++                && !self.profile.get().session_edited()
++                && !table.common.treat_as_char
++                && table.common.text_wrap == TextWrap::TopAndBottom
++                && table.common.horz_rel_to == HorzRelTo::Column
++                && table.common.horz_align == HorzAlign::Left
++                && table.common.horizontal_offset == 0
++                && table.page_break == TablePageBreak::RowBreak
++                && table.col_count > 1
++                && table.outer_margin_left >= 0
++                && table.outer_margin_right >= 0
++                && table_width + hwpunit_to_px(i32::from(table.outer_margin_right), self.dpi)
++                    <= area_w
++            {
++                return area_x;
+             }
+             // [#5787] 칸 안 **어울림(SQUARE)** 중첩 표가 양의 horzOffset 을 선언하고
+             // 그 자리로 표가 셀 안에 온전히 들어가면 한글은 저장 오프셋을 그대로

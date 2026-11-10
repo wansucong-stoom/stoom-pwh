@@ -1,0 +1,162 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -16630,6 +16630,35 @@
+         Some(frames)
+     }
+ 
++    fn saved_frame_printable_row_height(&self, height: f64) -> f64 {
++        let sheet_points = self.current_page_height.get() * 72.0 / self.dpi;
++        if sheet_points.is_finite() && sheet_points >= 1.0 {
++            height * (sheet_points.floor() / sheet_points)
++        } else {
++            height
++        }
++    }
++
++    pub(super) fn saved_frame_whole_row_height(
++        &self, table: &crate::model::table::Table, row: usize, styles: &ResolvedStyleSet,
++    ) -> f64 {
++        let measured = self.row_cut_content_height(table, row, &[], &[], styles);
++        let cells = Self::row_cut_cell_order(table, row);
++        let Some(first) = cells.first().map(|&index| &table.cells[index]) else { return measured; };
++        if cells.len() == usize::from(table.col_count)
++            && cells.into_iter().all(|index| {
++                let cell = &table.cells[index];
++                cell.height == first.height && !cell.dirty_flag && cell.row_span == 1 && cell.col_span == 1
++            })
++            && first.height <= i32::MAX as u32
++            && (hwpunit_to_px(first.height as i32, self.dpi) - measured).abs() <= hwpunit_to_px(1, self.dpi)
++        {
++            self.saved_frame_printable_row_height(measured)
++        } else {
++            measured
++        }
++    }
++
+     /// A fixed row declaration can belong to several physical fragments.
+     /// Require a complete original coordinate ladder and one continuing cell;
+     /// the other cells must have finished before its first saved restart.
+@@ -16645,8 +16674,10 @@
+         { return None; }
+         let order = Self::row_cut_cell_order(table, row);
+         if order.len() != usize::from(table.col_count) { return None; }
+-        let requested = hwpunit_to_px(i32::try_from(table.cells[*order.first()?].height).ok()?, self.dpi);
+         let original = table.cells[*order.first()?].height;
++        let requested = self.saved_frame_printable_row_height(
++            hwpunit_to_px(i32::try_from(original).ok()?, self.dpi),
++        );
+         if requested <= 0.0 { return None; }
+         let mut owner = None;
+         let mut peer_min = 0.0f64;
+@@ -16682,8 +16713,24 @@
+             cut[column] = cursor;
+             (cut, if i == 0 { height.max(peer_min) } else { height })
+         }).collect::<Vec<_>>();
+-        (frames.iter().map(|(_, height)| height).sum::<f64>() <= requested)
++        let minimum = frames.iter().map(|(_, height)| height).sum::<f64>();
++        // A complete inline line retains its own minimum when a smaller
++        // declared height cannot account for all source content.
++        (minimum <= requested || frames.last().is_some_and(|(cut, _)|
++            self.saved_frame_starts_with_inline_table(table, row, cut, styles)))
+             .then_some((requested, cell_idx, frames))
++    }
++
++    fn saved_frame_starts_with_inline_table(
++        &self, table: &crate::model::table::Table, row: usize, cut: &[usize], styles: &ResolvedStyleSet,
++    ) -> bool {
++        Self::row_cut_cell_order(table, row).into_iter().zip(cut).any(|(index, &cursor)| {
++            let cell = &table.cells[index];
++            self.cell_units(cell, table, styles).get(cursor).and_then(|unit| {
++                cell.paragraphs.get(unit.para_idx)
++            }).is_some_and(|para| matches!(para.controls.as_slice(), [Control::Table(child)]
++                if child.common.treat_as_char))
++        })
+     }
+ 
+     pub(super) fn saved_declared_frame_cell_ink(
+@@ -16731,25 +16778,40 @@
+             if current != 0 { return None; }
+             // Zero cursors select a complete row. Give it the same
+             // declared minimum as the recursive painter's whole-row path.
+-            let first_cut = if initial.iter().all(|&cursor| cursor == 0) { &[] } else { initial };
+-            let first_height = carried.map_or_else(|| self.row_cut_content_height(
+-                child, first_row, first_cut, &[], styles,
+-            ), |band| band.height);
++            let first_height = carried.map_or_else(|| {
++                if initial.iter().all(|&cursor| cursor == 0) {
++                    self.saved_frame_whole_row_height(child, first_row, styles)
++                } else {
++                    self.row_cut_content_height(child, first_row, initial, &[], styles)
++                }
++            }, |band| band.height);
+             first_height + (first_row + 1..last_row).map(|r|
+-                self.row_cut_content_height(child, r, &[], &[], styles)
++                self.saved_frame_whole_row_height(child, r, styles)
+             ).sum::<f64>() + hwpunit_to_px(i32::from(child.cell_spacing), self.dpi) * (last_row - first_row) as f64
+         };
+         let (_, _, top, bottom) = self.resolve_cell_padding(owner, parent);
+         let child_margins = hwpunit_to_px(i32::from(child.outer_margin_top)
+             + i32::from(child.outer_margin_bottom), self.dpi);
+         let overhead = top + bottom + child_margins;
+-        let next_capacity = physical_limit - bottom - overhead;
++        let unit = self.dpi / 600.0;
++        let next_capacity = ((physical_limit - bottom - overhead) / unit).ceil() * unit;
+         let height = if first_row == last_row { carried?.height } else { next_capacity - prior_height };
+         let remaining = if first_row == last_row { carried?.saved_remaining? } else { declared };
+         if height > next_capacity + 0.1 || height + 0.1 < frames[current].1 { return None; }
+         let after = remaining - height;
+         let following = frames.get(next + 1);
+-        let next_height = if following.is_some() { next_capacity } else { after };
++        let next_content = self.row_cut_content_height(
++            child, last_row, &frames[next].0, following.map_or(&[][..], |(cut, _)| cut.as_slice()), styles,
++        );
++        let next_height = if following.is_some() {
++            next_capacity
++        } else if after + 0.1 < frames[next].1
++            && self.saved_frame_starts_with_inline_table(child, last_row, &frames[next].0, styles)
++        {
++            next_content.max(frames[next].1)
++        } else {
++            after
++        };
+         if next_height > next_capacity + 0.1 || next_height + 0.1 < frames[next].1
+             || (following.is_some() && after - next_height + 0.1 < frames[next + 1].1)
+         { return None; }
+@@ -16757,11 +16819,9 @@
+             parent_row: row, host_paragraph: last.para_idx, row: last_row, height,
+             content_height: Some(frames[current].1), saved_remaining: Some(remaining),
+         };
+-        let next_content = self.row_cut_content_height(
+-            child, last_row, &frames[next].0, following.map_or(&[][..], |(cut, _)| cut.as_slice()), styles,
+-        );
+         Some((end, band, Some(NestedRowBand {
+-            height: next_height, content_height: Some(next_content), saved_remaining: Some(after), ..band
++            height: next_height, content_height: Some(next_content),
++            saved_remaining: Some(after.max(next_height)), ..band
+         }), prior_height + overhead + height))
+     }
+ 
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -5339,6 +5339,10 @@
+                     // mt 가 중첩 높이를 과소 계상해 재계산이 행 겹침을 막고
+                     // 있으므로(rowbreak-problem-pages p7 pi=21 r2, 기존 회귀
+                     // 테스트) 종전 재계산을 유지한다.
++                    if align_declared_row_frames && su.is_empty() && eu.is_empty() {
++                        row_heights[r] = self.saved_frame_whole_row_height(table, r, styles);
++                        continue;
++                    }
+                     if su.is_empty() && eu.is_empty() && measured_table.is_some() {
+                         if self.whole_fragment_row_uses_measured_height(table, r) {
+                             continue;
+--- a/src/renderer/pagination.rs
++++ b/src/renderer/pagination.rs
+@@ -582,7 +582,7 @@
+     /// Existing content height already counted by the ordinary scan.
+     /// A band with no remaining content has no such reservation.
+     pub content_height: Option<f64>,
+-    /// The declared row height still available at this source cursor.
++    /// Remaining saved height at this cursor, with any independent inline minimum.
+     pub saved_remaining: Option<f64>,
+ }
+ 

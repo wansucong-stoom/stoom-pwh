@@ -1,0 +1,144 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -16515,10 +16515,13 @@
+             child, last_row, &fragment.end_cut, styles,
+         ) && self.saved_next_inline_line(child, last_row, &fragment.end_cut, styles)
+             .is_some_and(|(_, has_successor)| has_successor);
++        let anchored_restart = self.saved_anchored_float_restart_boundary(
++            child, last_row, &fragment.end_cut, styles,
++        );
+         if first.para_idx != last.para_idx || first_row >= last_row || fragment.terminal
+             || !Self::stored_nested_outer_margin_host(host, child)
+             || child.outer_margin_top < 0 || child.outer_margin_bottom < 0
+-            || !(same_paragraph_restart || terminal_plain_restart || inline_restart || carried_plain_boundary)
++            || !(same_paragraph_restart || terminal_plain_restart || inline_restart || carried_plain_boundary || anchored_restart)
+         { return None; }
+         if same_paragraph_restart {
+             if initial.iter().any(|&cursor| cursor != 0)
+@@ -16617,6 +16620,7 @@
+             if measured < opening { return None; }
+             return Some((end, band, None, frame));
+         }
++        if anchored_restart { return Some((end, band, None, frame)); }
+         if inline_restart && remaining < natural {
+             // The following object's original box establishes its own frame.
+             // The declared residual has no authority over that larger object.
+@@ -17525,6 +17529,7 @@
+         }
+         if self.saved_complete_row_frame_boundary(table, row, cut, styles).is_some()
+             || self.saved_terminal_inline_restart_boundary(table, row, cut, styles)
++            || self.saved_anchored_float_restart_boundary(table, row, cut, styles)
+             || self.saved_nested_plain_line_restart_boundary(table, row, cut, styles)
+             || self.saved_nested_rowspan_band_at_cut(table, row, cut, styles).is_some()
+             || self.saved_closed_float_plain_resume(table, row, cut, styles)
+@@ -19268,6 +19273,69 @@
+             }
+         }
+         (owners > 0).then_some(true)
++    }
++
++    /// A zero-width host can start a physical page with a floating table.
++    /// The first blank paragraph below it independently closes the object
++    /// box, and the following text confirms that the new origin continues.
++    pub(super) fn saved_anchored_float_restart_boundary(
++        &self, table: &crate::model::table::Table, row: usize, cut: &[usize],
++        styles: &ResolvedStyleSet,
++    ) -> bool {
++        let profile = self.profile.get();
++        if !profile.hwpx_stored_layout() || profile.hwp5_origin_hwpx() || profile.session_edited()
++            || table.common.treat_as_char || table.page_break != TablePageBreak::RowBreak
++            || self.render_normalization.borrow().table_text_reflowed(table)
++            || Self::row_has_prior_rowspan_cover(table, row)
++        {
++            return false;
++        }
++        let order = Self::row_cut_cell_order(table, row);
++        if order.len() != cut.len() || order.len() != usize::from(table.col_count) { return false; }
++        let mut owner_found = false;
++        for (index, &cursor) in order.into_iter().zip(cut) {
++            let cell = &table.cells[index];
++            let units = self.cell_units(cell, table, styles);
++            if cell.row_span != 1 || cell.dirty_flag { return false; }
++            if cursor == units.len() && Self::saved_plain_cell_end_hu(cell).is_some() { continue; }
++            let Some(unit) = units.get(cursor) else { return false; };
++            if owner_found || unit.vis_start != 0 || !unit.hard_break_before
++                || unit.nested_row.is_some_and(|r| r != 0)
++                || unit.nested_table_fragment.as_ref().is_some_and(|f| f.start_cut.iter().any(|&v| v != 0))
++            { return false; }
++            let Some(before) = unit.para_idx.checked_sub(2) else { return false; };
++            let Some([prior, previous, host, blank, successor]) =
++                cell.paragraphs.get(before..=unit.para_idx + 2) else { return false; };
++            let [Control::Table(child)] = host.controls.as_slice() else { return false; };
++            let ([a], [b], [origin], [end], [next]) = (
++                prior.line_segs.as_slice(), previous.line_segs.as_slice(), host.line_segs.as_slice(),
++                blank.line_segs.as_slice(), successor.line_segs.as_slice(),
++            ) else { return false; };
++            let offset = signed_hwpunit(child.common.vertical_offset);
++            let declared = i64::from(child.common.height) + i64::from(child.outer_margin_top)
++                + i64::from(child.outer_margin_bottom);
++            let advance = |line: &crate::model::paragraph::LineSeg|
++                i64::from(line.vertical_pos) + i64::from(line.line_height) + i64::from(line.line_spacing);
++            if !Self::stored_nested_outer_margin_host(host, child)
++                || !stored_float_frame_owner_is_original(host)
++                || !crate::renderer::float_placement::is_para_topbottom_float(&child.common)
++                || child.common.treat_as_char || child.outer_margin_top < 0 || child.outer_margin_bottom < 0
++                || origin.vertical_pos != 0 || offset <= 0 || declared <= 0
++                || ![prior, previous, blank, successor].into_iter().all(Self::stored_plain_cell_paragraph)
++                || prior.text.trim().is_empty() || previous.text.trim().is_empty()
++                || !blank.text.trim().is_empty() || successor.text.trim().is_empty()
++                || [a,b,end,next].iter().any(|line| line.line_height <= 0 || line.line_spacing < 0)
++                || a.vertical_pos <= 0 || advance(a) != i64::from(b.vertical_pos)
++                || declared + i64::from(offset) != i64::from(end.vertical_pos)
++                || advance(end) != i64::from(next.vertical_pos)
++                || (declared as f64 * self.dpi / 7200.0
++                    - self.calc_nested_table_height(child, styles)).abs() > 0.5
++            {
++                return false;
++            }
++            owner_found = true;
++        }
++        owner_found
+     }
+ 
+     pub(super) fn saved_terminal_inline_restart_boundary(
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -4013,10 +4013,16 @@
+                                     } else { 0.0 };
+                                     let source_nested_y = nested_y + opening_outer_top;
+                                     let terminal_inline_frame_bottom = source_cut.as_ref()
+-                                        .filter(|_| source_start_row_height.is_some() || next_inline_restart)
+-                                        .filter(|cut| self.saved_terminal_inline_restart_boundary(
+-                                            nested_table, cut.end_row - 1, &cut.end_cut, styles,
+-                                        ))
++                                        .filter(|cut| {
++                                            let last = cut.end_row.saturating_sub(1);
++                                            (source_start_row_height.is_some() || next_inline_restart)
++                                                && self.saved_terminal_inline_restart_boundary(
++                                                    nested_table, last, &cut.end_cut, styles,
++                                                )
++                                                || end_band.is_some() && self.saved_anchored_float_restart_boundary(
++                                                    nested_table, last, &cut.end_cut, styles,
++                                                )
++                                        })
+                                         .map(|_| {
+                                             let (_, body_y, _, body_height) = self.current_body_area.get();
+                                             let outer_bottom = hwpunit_to_px(
+@@ -5933,12 +5939,13 @@
+                     )
+                 })
+             });
+-        let align_owned_inline_lead = terminal_inline_frame_bottom.is_some()
++        let align_owned_opening_frame = terminal_inline_frame_bottom.is_some()
+             && end_row.checked_sub(1).is_some_and(|last| {
+-                self.saved_next_inline_line(table, last, end_cut, styles)
+-                    .is_some_and(|(height, has_successor)| has_successor || height > row_heights[last])
++                self.saved_anchored_float_restart_boundary(table, last, end_cut, styles)
++                    || self.saved_next_inline_line(table, last, end_cut, styles)
++                        .is_some_and(|(height, has_successor)| has_successor || height > row_heights[last])
+             });
+-        let align_nested_opening_frame = align_owned_inline_lead
++        let align_nested_opening_frame = align_owned_opening_frame
+             || (!is_continuation && !is_block_split && nested_opening_frame
+                 .is_some_and(|frame_height| (partial_table_height - frame_height).abs() <= 0.5));
+         let align_saved_opening_frame = align_nested_opening_frame || (!is_continuation

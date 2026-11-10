@@ -1,0 +1,63 @@
+--- a/src/renderer/typeset/table/continuation/fragment/emit.rs
++++ b/src/renderer/typeset/table/continuation/fragment/emit.rs
+@@ -924,6 +924,60 @@
+                     (row_count, true),
+                 )
+                 .is_none_or(|remaining| remaining <= 0.0);
++
++        // A terminal cut can consume all the text and still leave part of a
++        // saved table box. Confirm the source frame before extending the cut
++        // height. Reservation and paint then share the same final-row height.
++        if terminal_cut_consumed
++            && st.profile.hwpx_stored_layout()
++            && !st.profile.session_edited()
++            && !self.render_normalization.table_text_reflowed(table)
++            && !is_continuation
++            && cursor_row == 0
++            && start_cut.is_empty()
++            && row_count > 1
++            && std::ptr::eq(table, row_geometry_table)
++            && !table.common.treat_as_char
++            && table.common.text_wrap == crate::model::shape::TextWrap::TopAndBottom
++            && table.common.vert_rel_to == crate::model::shape::VertRelTo::Para
++            && table.caption.is_none()
++            && table_footnotes.is_empty()
++            && st.current_footnote_height <= 0.0
++            && input.source.paragraph.text.trim().is_empty()
++            && !input.source.paragraph.stored_text_partition_is_dirty()
++            && !input.source.paragraph.source_frame_reflowed
++            && input.source.paragraph.line_segs.first().is_some_and(|line|
++                line.vertical_pos >= 0 && !is_synthetic_line_seg(line))
++            && input.source.paragraphs_all.get(para_idx + 1).is_some_and(|next|
++                next.column_type == crate::model::paragraph::ColumnBreakType::Page
++                    && next.line_segs.first().is_some_and(|line|
++                        line.vertical_pos == 0 && !is_synthetic_line_seg(line)))
++        {
++            let row = row_count - 1;
++            let frame = hwpunit_to_px(table.common.height as i32, self.dpi);
++            let prefix = cut_row_h[..row].iter().sum::<f64>()
++                + hwpunit_to_px(i32::from(table.cell_spacing), self.dpi) * row as f64;
++            let last = frame - prefix;
++            let mut merged = table.cells.iter().filter(|cell|
++                cell.row == 0 && cell.row_span as usize == row_count
++                    && !cell.dirty_flag);
++            let last_cells = table.cells.iter().filter(|cell|
++                cell.row as usize == row && cell.row_span == 1 && !cell.dirty_flag);
++            let source_min = last_cells.map(|cell|
++                hwpunit_to_px(cell.height as i32, self.dpi)).min_by(f64::total_cmp);
++            let source_agrees = source_min.is_some_and(|minimum|
++                minimum >= last && merged.any(|cell| {
++                    let span = hwpunit_to_px(cell.height as i32, self.dpi);
++                    span >= frame && span - frame < minimum
++                }));
++            let cut_height = layout_engine.row_cut_content_height(
++                table, row, &[], &split_end_cut, styles,
++            );
++            if source_agrees && frame <= avail_for_rows && last > cut_height {
++                end_row_height_override = Some(last);
++                partial_height = partial_height.max(frame);
++            }
++        }
+ 
+         // 중간 또는 내용이 완전히 소비된 최종 컷 fragment 배치
+         st.append_item(PageItem::PartialTable {

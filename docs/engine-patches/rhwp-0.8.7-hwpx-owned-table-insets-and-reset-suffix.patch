@@ -1,0 +1,274 @@
+--- a/src/renderer/composer.rs
++++ b/src/renderer/composer.rs
+@@ -722,6 +722,56 @@
+     pub top: i32,
+     pub end: i32,
+     pub occupied_end: i32,
++}
++
++/// Confirm a run of table-only original rows followed by a separate text row.
++/// The HWPX control stream and both saved heights must identify each owner.
++pub(crate) fn stored_inline_table_prefix(para: &Paragraph) -> Option<usize> {
++    let count = para.controls.len();
++    let text_start = u32::try_from(count).ok()?.checked_mul(8)?;
++    if count < 2 || para.line_segs.get(count)?.text_start != text_start
++        || para.char_offsets.first().copied() != Some(text_start)
++        || para.text.trim().is_empty() || para.stored_text_partition_is_dirty()
++        || para.source_frame_reflowed || para.cell_format_vpos_dirty
++        || para.line_segs.iter().any(|line| line.tag & LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0)
++    {
++        return None;
++    }
++    for (index, control) in para.controls.iter().enumerate() {
++        let Control::Table(table) = control else { return None; };
++        let line = &para.line_segs[index];
++        let outer = i64::from(table.common.height) + i64::from(table.outer_margin_top)
++            + i64::from(table.outer_margin_bottom);
++        if !table.common.treat_as_char || !table.common.flow_with_text || table.common.allow_overlap
++            || table.common.text_wrap != crate::model::shape::TextWrap::TopAndBottom
++            || table.caption.is_some() || table.outer_margin_top < 0 || table.outer_margin_bottom < 0
++            || outer <= 0 || i64::from(line.line_height) != outer || line.line_height != line.text_height
++            || line.text_start != u32::try_from(index).ok()?.checked_mul(8)?
++        {
++            return None;
++        }
++    }
++    Some(count)
++}
++
++/// The final table opened this physical frame; its following original text is
++/// still part of that frame. Trailing paragraph spacing has no ink to fit.
++pub(crate) fn stored_inline_table_reset_suffix(para: &Paragraph) -> Option<(usize, &LineSeg)> {
++    let start = stored_inline_table_prefix(para)?;
++    let owner = &para.line_segs[start - 1];
++    let before = &para.line_segs[start - 2];
++    let tail = &para.line_segs[start..];
++    if before.vertical_pos <= 0 || owner.vertical_pos != 0 || owner.line_spacing < 0
++        || owner.line_height.checked_add(owner.line_spacing)? != tail[0].vertical_pos
++        || tail.iter().any(|line| line.line_height <= 0 || line.line_spacing < 0)
++        || tail.windows(2).any(|pair| {
++            pair[0].vertical_pos.checked_add(pair[0].line_height)
++                .and_then(|end| end.checked_add(pair[0].line_spacing)) != Some(pair[1].vertical_pos)
++        })
++    {
++        return None;
++    }
++    Some((start, tail.last()?))
+ }
+ 
+ /// 가시 텍스트 없이 첫 저장 줄 전체를 소유한 TAC 표의 줄 상자다.
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -8454,6 +8454,16 @@
+                             }
+                         } else {
+                             // 비-TAC 표: 기존 수직 배치
++                            // The cell's measured occupied box already includes both
++                            // outer margins. Inset only the child frame when a closed
++                            // source line chain proves the start of that box.
++                            let source_outer_inset = (stored_float_frame.is_none()
++                                && !projected_block_host && fragment_cut_units.is_none()
++                                && !cell_float_group_side_by_side)
++                                .then(|| self.saved_nested_terminal_float_inset(
++                                    table, cell, cp_idx, para, nested_table, styles,
++                                    inner_area.y + inner_area.height - nested_y,
++                                )).flatten().unwrap_or(0.0);
+                             // 앞 텍스트 너비만큼 x 오프셋 적용
+                             let tac_text_offset = if nested_table.attr & 0x01 != 0 {
+                                 let mut text_w = 0.0;
+@@ -8600,7 +8610,7 @@
+                                 None,
+                                 false,
+                                 clamp_header_negative_para_offset,
+-                                0.0,
++                                source_outer_inset,
+                                 float_x.map(|x| (Some(x), nested_y)).or_else(|| {
+                                     self.reflow_nested_table_origin(
+                                         para,
+@@ -9906,6 +9916,55 @@
+             table,
+             self.profile.get().hwpx_stored_layout(),
+         )
++    }
++
++    #[allow(clippy::too_many_arguments)]
++    fn saved_nested_terminal_float_inset(
++        &self,
++        parent: &crate::model::table::Table,
++        cell: &crate::model::table::Cell,
++        host_index: usize,
++        host: &Paragraph,
++        child: &crate::model::table::Table,
++        styles: &ResolvedStyleSet,
++        available: f64,
++    ) -> Option<f64> {
++        use crate::model::shape::{HorzAlign, HorzRelTo, VertAlign};
++        use crate::renderer::float_placement::is_para_topbottom_float;
++        if !self.profile.get().hwpx_stored_layout() || self.profile.get().session_edited()
++            || self.render_normalization.borrow().table_text_reflowed(parent)
++            || cell.dirty_flag || cell.row_span != 1 || cell.text_direction != 0
++            || host_index + 1 != cell.paragraphs.len()
++            || !is_para_topbottom_float(&child.common)
++            || !child.common.flow_with_text || child.common.allow_overlap
++            || child.common.vert_align != VertAlign::Top || child.common.vertical_offset != 0
++            || child.common.horz_rel_to != HorzRelTo::Column
++            || child.common.horz_align != HorzAlign::Left || child.common.horizontal_offset != 0
++            || child.caption.is_some() || child.outer_margin_top <= 0 || child.outer_margin_bottom < 0
++            || !host.text.trim().is_empty()
++            || !matches!(host.controls.as_slice(), [Control::Table(owner)] if std::ptr::eq(owner.as_ref(), child))
++            || !stored_float_frame_owner_is_original(host)
++        {
++            return None;
++        }
++        let previous = cell.paragraphs.get(host_index.checked_sub(1)?)?;
++        let [line] = host.line_segs.as_slice() else { return None; };
++        let before = previous.line_segs.last()?;
++        if previous.text.trim().is_empty() || !previous.controls.is_empty()
++            || !stored_float_frame_owner_is_original(previous)
++            || line.vertical_pos <= 0 || line.segment_width != 0
++            || before.vertical_pos < 0 || before.line_height <= 0 || before.line_spacing < 0
++        {
++            return None;
++        }
++        let gap = line.vertical_pos.checked_sub(before.vertical_pos)?
++            .checked_sub(before.line_height)?.checked_sub(before.line_spacing)?;
++        let spacing = styles.para_styles.get(previous.para_shape_id as usize)?.spacing_after
++            + styles.para_styles.get(host.para_shape_id as usize)?.spacing_before;
++        let epsilon = hwpunit_to_px(1, self.dpi);
++        ((hwpunit_to_px(gap, self.dpi) - spacing).abs() <= epsilon
++            && self.calc_nested_table_height(child, styles) <= available + epsilon)
++            .then_some(hwpunit_to_px(i32::from(child.outer_margin_top), self.dpi))
+     }
+ 
+     /// 시각적 표 높이와 별개인 문단 흐름 전진량. 측정과 실제 배치가 공유한다.
+--- a/src/renderer/layout.rs
++++ b/src/renderer/layout.rs
+@@ -336,6 +336,35 @@
+         col_area.y + start + hwpunit_to_px(i32::from(table.outer_margin_top), dpi),
+         col_area.y + end,
+     ))
++}
++
++/// An object-only source line before a page reset owns an outer box even
++/// when the same paragraph has visible text in a later physical frame.
++fn saved_inline_table_before_reset_top(
++    para: &Paragraph,
++    previous: &Paragraph,
++    control_index: usize,
++    col_area: &LayoutRect,
++    flow_top: f64,
++    dpi: f64,
++) -> Option<f64> {
++    let [Control::Table(preceding)] = previous.controls.as_slice() else { return None; };
++    let before = saved_inline_table_owner(previous, preceding)?;
++    crate::renderer::composer::stored_inline_table_prefix(para)?;
++    let [Control::Table(table), ..] = para.controls.as_slice() else { return None; };
++    let [line, reset, ..] = para.line_segs.as_slice() else { return None; };
++    if control_index != 0
++        || line.vertical_pos <= 0 || reset.vertical_pos != 0
++        || before.vertical_pos.checked_add(before.line_height)?.checked_add(before.line_spacing)?
++            != line.vertical_pos
++    {
++        return None;
++    }
++    let pen = col_area.y + hwpunit_to_px(line.vertical_pos, dpi);
++    let end = pen + hwpunit_to_px(line.line_height, dpi);
++    ((pen - flow_top).abs() <= hwpunit_to_px(2, dpi)
++        && end <= col_area.y + col_area.height)
++        .then_some(pen + hwpunit_to_px(i32::from(table.outer_margin_top), dpi))
+ }
+ 
+ /// Before a saved page restart, the preceding inline line can confirm
+@@ -11204,7 +11233,28 @@
+                     //   1) start_line > 0 (문단 첫 PP 미적용)
+                     //   2) para 가 TAC 표 보유 (treat_as_char=true)
+                     //   3) para_start_y 등록 (Table item 선행 처리됨 → 같은 column)
+-                    let pp_y_in = if *start_line > 0
++                    let stored_reset_tail_top = (self.profile.get().hwpx_stored_layout()
++                        && !self.profile.get().session_edited())
++                        .then(|| crate::renderer::composer::stored_inline_table_reset_suffix(para))
++                        .flatten().filter(|(start, _)| *start == *start_line && *end_line == para.line_segs.len())
++                        .and_then(|(start, last)| {
++                            let owner = &para.line_segs[start - 1];
++                            let Control::Table(table) = &para.controls[start - 1] else { return None; };
++                            let preceding = col_node.children.iter().rev().find(|node| matches!(
++                                &node.node_type, RenderNodeType::Table(data)
++                                if data.para_index == Some(*para_index) && data.control_index == Some(start - 1)
++                            ))?;
++                            let frame_top = col_area.y + hwpunit_to_px(i32::from(table.outer_margin_top), self.dpi);
++                            let top = col_area.y + hwpunit_to_px(para.line_segs[start].vertical_pos, self.dpi);
++                            let end = col_area.y + hwpunit_to_px(last.vertical_pos.checked_add(last.line_height)?, self.dpi);
++                            ((preceding.bbox.y - frame_top).abs() <= hwpunit_to_px(2, self.dpi)
++                                && preceding.bbox.y + preceding.bbox.height <= top
++                                && owner.vertical_pos == 0 && end <= col_area.y + col_area.height)
++                                .then_some(top)
++                        });
++                    let pp_y_in = if let Some(top) = stored_reset_tail_top {
++                        top
++                    } else if *start_line > 0
+                         && para
+                             .controls
+                             .iter()
+@@ -12709,7 +12759,16 @@
+                                 !matches!(node.node_type, RenderNodeType::Table(_))
+                                     || node.bbox.y + node.bbox.height <= source_top)).then_some(source_top)
+                     }).flatten();
+-                let table_y_start = source_inline_top.or(saved_terminal_float_top).unwrap_or(table_y_start);
++                let source_pre_reset_top = (is_tac && inline_pos.is_none() && flow_placement.is_none()
++                    && profile.hwpx_stored_layout() && !profile.session_edited()
++                    && !self.render_normalization.borrow().table_text_reflowed(t))
++                    .then(|| saved_inline_table_before_reset_top(
++                        para, paragraphs.get(para_index.checked_sub(1)?)?, control_index,
++                        col_area, table_y_start, self.dpi,
++                    ))
++                    .flatten();
++                let saved_table_top = source_inline_top.or(source_pre_reset_top).or(saved_terminal_float_top);
++                let table_y_start = saved_table_top.unwrap_or(table_y_start);
+                 let table_visual_end = if tac_already_rendered_inline {
+                     table_y_start + table_visual_height
+                 } else {
+@@ -12749,7 +12808,7 @@
+                                     saved_terminal_float_top.unwrap_or(col_area.y + p.table_top),
+                                 )
+                             })
+-                            .or_else(|| source_inline_top.or(saved_terminal_float_top).map(|top| (None, top))),
++                            .or_else(|| saved_table_top.map(|top| (None, top))),
+                         Self::standalone_table_char_border_fill(Some(para), t, styles),
+                         false,
+                         source_inline_top.is_some(),
+--- a/src/renderer/typeset.rs
++++ b/src/renderer/typeset.rs
+@@ -5195,6 +5195,33 @@
+ 
+         // post-table 텍스트
+         let is_last_table = is_last_placed;
++        if is_last_table && st.profile.hwpx_stored_layout() && !st.profile.session_edited()
++            && !self.render_normalization.table_text_reflowed(table)
++            && total_lines == para.line_segs.len()
++        {
++            if let Some((start, last)) = crate::renderer::composer::stored_inline_table_reset_suffix(para) {
++                let owns_frame = ctrl_idx + 1 == start
++                    && matches!(st.current_items.as_slice(),
++                        [PageItem::Table { para_index, control_index }]
++                        if *para_index == para_idx && *control_index == ctrl_idx);
++                let top = hwpunit_to_px(para.line_segs[start].vertical_pos, self.dpi);
++                let end = hwpunit_to_px(last.vertical_pos.saturating_add(last.line_height), self.dpi);
++                let owner = &para.line_segs[start - 1];
++                let before_tail = hwpunit_to_px(owner.line_height, self.dpi);
++                let epsilon = hwpunit_to_px(2, self.dpi);
++                if owns_frame && st.current_height >= before_tail - epsilon
++                    && st.current_height <= top + epsilon && end <= st.available_height()
++                {
++                    st.append_item(PageItem::PartialParagraph {
++                        para_index: para_idx,
++                        start_line: start,
++                        end_line: total_lines,
++                    });
++                    st.align_flow_to(end);
++                    return;
++                }
++            }
++        }
+         let tac_table_count = para
+             .controls
+             .iter()

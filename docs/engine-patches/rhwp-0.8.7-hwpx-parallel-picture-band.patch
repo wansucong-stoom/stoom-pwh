@@ -1,0 +1,165 @@
+diff --git a/src/renderer/layout/table_layout.rs b/src/renderer/layout/table_layout.rs
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -13154,11 +13154,26 @@
+                                 } else {
+                                     (*rh - driver_total).max(0.0)
+                                 };
++                                let picture_band = self.stored_parallel_picture_band_units(
++                                    row_cells[driver_index], driver_units,
++                                ).map(|(units, _, _)| units);
+                                 let mut driver_before = 0.0;
+ 
+                                 for (fragment_index, driver_unit) in driver_units.iter().enumerate()
+                                 {
+-                                    let driver_after = driver_before + driver_unit.height;
++                                    let fragment_end = if let Some(band) = picture_band.as_ref()
++                                        .filter(|band| band.contains(&fragment_index))
++                                    {
++                                        if fragment_index != band.start {
++                                            continue;
++                                        }
++                                        band.end
++                                    } else {
++                                        fragment_index + 1
++                                    };
++                                    let fragment_height: f64 = driver_units[fragment_index..fragment_end]
++                                        .iter().map(|unit| unit.height).sum();
++                                    let driver_after = driver_before + fragment_height;
+                                     let cuts_at = |height: f64| -> RowCut {
+                                         row_units
+                                             .iter()
+@@ -13182,11 +13197,11 @@
+                                         .iter()
+                                         .zip(end_cut.iter())
+                                         .all(|(cell_units, end)| *end >= cell_units.len());
+-                                    let mut uh = driver_unit.height;
++                                    let mut uh = fragment_height;
+                                     if fragment_index == 0 {
+                                         uh += row_extra * 0.5;
+                                     }
+-                                    if fragment_index + 1 == driver_units.len() {
++                                    if fragment_end == driver_units.len() {
+                                         uh += row_extra - row_extra * 0.5;
+                                         if ri + 1 < nrow {
+                                             uh += ncs;
+@@ -14533,6 +14548,10 @@
+             }
+         }
+ 
++        if let Some((band, height, _)) = self.stored_parallel_picture_band_units(cell, &units) {
++            units[band.clone()].iter_mut().for_each(|unit| unit.height = 0.0);
++            units[band.start].height = height;
++        }
+         let _ = (pad_top, pad_bottom); // [Task #1022] cell.height 필러 제거 — row_cut_content_height 가 셀별 max(cell.height, content+pad) 로 행 단계에서 정합.
+         if std::env::var("RHWP_DIAG_6923").is_ok() && units.len() > 40 {
+             let mut cum = 0.0;
+@@ -15816,6 +15835,76 @@
+     }
+ 
+     /// `unit_idx`가 tagged Square/Tight/Through control의 source entry라면, 그
++    // Stored neighboring paragraph anchors can describe one horizontal picture
++    // band. Project only its outer cursor bounds into the parent row.
++    pub(super) fn stored_parallel_picture_band_units(
++        &self,
++        cell: &crate::model::table::Cell,
++        units: &[CellUnit],
++    ) -> Option<(std::ops::Range<usize>, f64, [f64; 2])> {
++        if !self.profile.get().hwpx_stored_layout() || self.profile.get().session_edited() {
++            return None;
++        }
++        let [lead, follow] = cell.paragraphs.as_slice() else { return None; };
++        let ([lead_line], [follow_line]) =
++            (lead.line_segs.as_slice(), follow.line_segs.as_slice()) else { return None; };
++        let lead_picture = match lead.controls.as_slice() {
++            [Control::Picture(pic)] => pic,
++            [Control::ColumnDef(columns), Control::Picture(pic)] if columns.column_count == 1 => pic,
++            _ => return None,
++        };
++        let [Control::Picture(follow_picture)] = follow.controls.as_slice() else { return None; };
++        if lead.text.trim().is_empty() || !follow.text.trim().is_empty()
++            || [lead, follow].iter().any(|p| !stored_float_frame_owner_is_original(p))
++            || [lead_line, follow_line].iter().any(|line|
++                line.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0)
++            || lead_line.vertical_pos != 0 || lead_line.line_height <= 0
++            || follow_line.vertical_pos != lead_line.line_height.saturating_add(lead_line.line_spacing)
++            || [lead_picture, follow_picture].iter().any(|p| {
++                let common = &p.common;
++                common.treat_as_char || common.allow_overlap || !common.flow_with_text
++                    || common.text_wrap != TextWrap::Square
++                    || common.vert_rel_to != VertRelTo::Para || common.vert_align != VertAlign::Top
++                    || common.horz_rel_to != crate::model::shape::HorzRelTo::Para
++                    || common.horz_align != crate::model::shape::HorzAlign::Left
++                    || common.width == 0 || common.width > i32::MAX as u32
++                    || common.height == 0 || common.height > i32::MAX as u32
++                    || common.margin.top < 0 || common.margin.bottom < 0
++            })
++        {
++            return None;
++        }
++        let a = &lead_picture.common;
++        let b = &follow_picture.common;
++        let ax = i64::from(signed_hwpunit(a.horizontal_offset));
++        let bx = i64::from(signed_hwpunit(b.horizontal_offset));
++        let ay = signed_hwpunit(a.vertical_offset);
++        let by = follow_line.vertical_pos.checked_add(signed_hwpunit(b.vertical_offset))?;
++        if ay < lead_line.line_height || signed_hwpunit(b.vertical_offset) != 0
++            || (i64::from(ay) - i64::from(by)).abs() > i64::from(lead_line.line_spacing.max(0))
++            || (ax + i64::from(a.width) > bx && bx + i64::from(b.width) > ax)
++        {
++            return None;
++        }
++        let start = units.iter().position(|u| u.para_idx == 0 && u.non_inline_control_range.is_some())?;
++        let end = units.iter().rposition(|u| u.para_idx == 1 && u.non_inline_control_range.is_some())? + 1;
++        if start >= end || units[start..end].iter().any(|u|
++            u.hard_break_before || u.page_frame_reset_before || u.stored_frame_break_before)
++        {
++            return None;
++        }
++        let bottom = |top, common: &CommonObjAttr| i64::from(top) + i64::from(common.height)
++            + i64::from(common.margin.top) + i64::from(common.margin.bottom);
++        let height_hu = bottom(ay, a).max(bottom(by, b)) - i64::from(ay.min(by));
++        let height = hwpunit_to_px(i32::try_from(height_hu).ok()?, self.dpi);
++        let origin = ay.min(by);
++        let offsets = [(ay, a.margin.top), (by, b.margin.top)].map(|(top, margin)| {
++            hwpunit_to_px(top - origin + i32::from(margin), self.dpi)
++        });
++        (height > 0.0 && height <= self.current_body_area.get().3 + 0.5)
++            .then_some((start..end, height, offsets))
++    }
++
+     /// control이 차지하는 마지막 generic unit의 exclusive index를 돌려준다. 같은
+     /// 16px fragment가 경계에서 두 control range에 걸칠 수 있으므로, entry가 되는
+     /// control 모두의 마지막 unit 중 가장 뒤를 사용한다.
+diff --git a/src/renderer/layout/table_partial.rs b/src/renderer/layout/table_partial.rs
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -2112,6 +2112,18 @@
+                         .enumerate()
+                         .any(|(ci, _)| stored_square_picture_has_adjacent_text(cell, pi, ci))
+                 });
++            // Resume at the same band origin used by the cut ledger. The first
++            // picture's original offset already included the consumed text line.
++            let parallel_picture_positions = cut_units.and_then(|(start, end)| {
++                let units = self.cell_units(cell, table, styles);
++                let (band, _, offsets) = self.stored_parallel_picture_band_units(cell, &units)?;
++                if band.start < start || band.end > end {
++                    return None;
++                }
++                let band_start = text_y_start
++                    + units[start..band.start].iter().map(|unit| unit.height).sum::<f64>();
++                Some(offsets.map(|offset| band_start + offset))
++            });
+             let mut para_y = text_y_start;
+             let mut has_preceding_text = false;
+             // [#3637] 이 조각에서 **실제로 그려지는 첫 문단**의 vpos. 아래 중첩 표
+@@ -3234,6 +3246,9 @@
+                                                 )
+                                         })
+                                         .unwrap_or(pic_y);
++                                    let pic_y = parallel_picture_positions
++                                        .and_then(|positions| positions.get(cp_idx).copied())
++                                        .unwrap_or(pic_y);
+                                     let pic_area = LayoutRect {
+                                         x: pic_x,
+                                         y: pic_y,

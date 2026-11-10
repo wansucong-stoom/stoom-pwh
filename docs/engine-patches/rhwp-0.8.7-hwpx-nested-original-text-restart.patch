@@ -1,0 +1,418 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -13251,7 +13251,8 @@
+                                 let source_cell = row_cells[driver_index];
+                                 !source_cell.paragraphs.iter().any(|paragraph|
+                                     paragraph.stored_text_partition_is_dirty() || paragraph.cell_format_vpos_dirty)
+-                                && (row_units[driver_index].iter().any(|unit| unit.stored_frame_break_before)
++                                && (row_units[driver_index].iter().any(|unit| unit.stored_frame_break_before
++                                        || self.saved_plain_line_restarts_inside_paragraph(source_cell, unit))
+                                     || source_cell.paragraphs.windows(2).any(|pair| {
+                                         pair[0].line_segs.last().zip(pair[1].line_segs.first())
+                                             .is_some_and(|(previous, next)| !line_seg_is_synthetic(previous)
+@@ -13300,6 +13301,10 @@
+                                             && row_units[i].iter().map(|unit| unit.height).sum::<f64>()
+                                                 <= lead + inline)
+                                         .then_some(at)
++                                }).flatten();
++                                let text_restart = projected_source_block_table.then(|| {
++                                    driver_units.iter().position(|unit|
++                                        self.saved_plain_line_restarts_inside_paragraph(row_cells[driver_index], unit))
+                                 }).flatten();
+                                 let mut driver_before = 0.0;
+ 
+@@ -13354,6 +13359,23 @@
+                                             }
+                                             if fragment_end >= restart {
+                                                 end_cut[index] = peer.len();
++                                            }
++                                        }
++                                    }
++                                    if let Some(restart) = text_restart {
++                                        for (index, peer) in row_units.iter().enumerate() {
++                                            if index == driver_index
++                                                || !self.saved_plain_first_line_peer_restart(row_cells[index], peer)
++                                            {
++                                                continue;
++                                            }
++                                            // A source restart assigns its first line to the
++                                            // earlier frame even when the peer uses a taller font.
++                                            if fragment_index >= restart {
++                                                start_cut[index] = start_cut[index].max(1);
++                                            }
++                                            if fragment_end >= restart {
++                                                end_cut[index] = end_cut[index].max(1);
+                                             }
+                                         }
+                                     }
+@@ -16362,7 +16384,7 @@
+         end_cut: &[usize],
+         physical_limit: f64,
+         styles: &ResolvedStyleSet,
+-    ) -> Option<(usize, crate::renderer::pagination::NestedRowBand, f64, f64)> {
++    ) -> Option<(usize, crate::renderer::pagination::NestedRowBand, crate::renderer::pagination::NestedRowBand, f64)> {
+         use crate::renderer::pagination::NestedRowBand;
+         let (&[start], &[end]) = (start_cut, end_cut) else { return None; };
+         if table.col_count != 1 || table.caption.is_some()
+@@ -16400,15 +16422,88 @@
+             let frame = physical_limit - pad_bottom;
+             let opening = frame - prefix - margin - pad_bottom;
+             if opening + 0.5 >= ink && opening < full - 0.5 {
+-                return Some((cursor + 1, NestedRowBand {
++                let band = NestedRowBand {
+                     parent_row: row,
+                     host_paragraph: unit.para_idx,
+                     row: child_row,
+                     height: opening,
+-                }, full - opening, frame));
++                    content_height: None,
++                };
++                return Some((cursor + 1, band, NestedRowBand {
++                    height: full - opening, ..band
++                }, frame));
+             }
+         }
+         None
++    }
++
++    /// A line restart can split a declared row whose opening consists only of
++    /// first source lines. The boundary divides the resolved row box while
++    /// the two fragments keep their own ordinary text cuts.
++    pub(crate) fn saved_nested_restart_row_bands(
++        &self, table: &crate::model::table::Table, row: usize,
++        start_cut: &[usize], end_cut: &[usize], physical_limit: f64, styles: &ResolvedStyleSet,
++    ) -> Option<(usize, crate::renderer::pagination::NestedRowBand, crate::renderer::pagination::NestedRowBand, f64)> {
++        use crate::renderer::pagination::NestedRowBand;
++        let (&[start], &[end]) = (start_cut, end_cut) else { return None; };
++        if table.col_count != 1 || table.caption.is_some() || start >= end
++            || !crate::renderer::float_placement::is_para_topbottom_float(&table.common)
++            || Self::row_has_prior_rowspan_cover(table, row)
++            || self.render_normalization.borrow().table_text_reflowed(table)
++        { return None; }
++        let order = Self::row_cut_cell_order(table, row);
++        let [index] = order.as_slice() else { return None; };
++        let cell = &table.cells[*index];
++        let units = self.cell_units(cell, table, styles);
++        let (first, last) = (units.get(start)?, units.get(end - 1)?);
++        let host = cell.paragraphs.get(last.para_idx)?;
++        let [Control::Table(child)] = host.controls.as_slice() else { return None; };
++        let fragment = last.nested_table_fragment.as_ref()?;
++        let (first_row, last_row) = (first.nested_row?, last.nested_row?);
++        if first.para_idx != last.para_idx || first_row >= last_row || fragment.terminal
++            || first.nested_table_fragment.as_ref().is_some_and(|f| f.start_cut.iter().any(|&v| v != 0))
++            || fragment.start_cut.iter().any(|&cursor| cursor != 0)
++            || !Self::stored_nested_outer_margin_host(host, child)
++            || child.outer_margin_top < 0 || child.outer_margin_bottom < 0
++            || !self.saved_nested_plain_line_restart_boundary(child, last_row, &fragment.end_cut, styles)
++        { return None; }
++        let min = Self::row_cut_cell_order(child, last_row).into_iter().zip(&fragment.end_cut)
++            .try_fold(0.0f64, |height, (index, &count)| {
++                if count == 0 { return Some(height); }
++                let owner = &child.cells[index];
++                let unit = self.cell_units(owner, child, styles);
++                let unit = unit.first()?;
++                if count != 1 || unit.para_idx != 0 || unit.vis_start != 0 || unit.vis_end != 1 {
++                    return None;
++                }
++                let line = owner.paragraphs.first()?.line_segs.first()?;
++                let (_, _, top, bottom) = self.resolve_cell_padding(owner, child);
++                Some(height.max(top + hwpunit_to_px(line.line_height, self.dpi) + bottom))
++            })?;
++        let heights = self.resolve_row_heights(
++            child, usize::from(child.col_count), usize::from(child.row_count), None, styles, true,
++        );
++        let (_, _, top, bottom) = self.resolve_cell_padding(cell, table);
++        let spacing = hwpunit_to_px(i32::from(child.cell_spacing), self.dpi);
++        let before = heights.get(first_row..last_row)?.iter().sum::<f64>()
++            + spacing * (last_row - first_row) as f64 + top;
++        let margins = hwpunit_to_px(i32::from(child.outer_margin_top), self.dpi)
++            + hwpunit_to_px(i32::from(child.outer_margin_bottom), self.dpi);
++        let frame = physical_limit - bottom;
++        let opening = frame - before - margins - bottom;
++        let full = *heights.get(last_row)?;
++        let remaining = full - opening;
++        let natural = self.row_cut_content_height(child, last_row, &fragment.end_cut, &[], styles);
++        if min <= 0.0 || opening + 0.1 < min || remaining < natural || remaining > physical_limit {
++            return None;
++        }
++        let band = NestedRowBand {
++            parent_row: row, host_paragraph: last.para_idx, row: last_row, height: opening,
++            content_height: Some(min),
++        };
++        Some((end, band, NestedRowBand {
++            height: remaining, content_height: Some(natural), ..band
++        }, frame))
+     }
+ 
+     pub(crate) fn advance_row_cut(
+@@ -17267,14 +17362,27 @@
+         &self, host: &Paragraph, table: &crate::model::table::Table,
+         row: usize, cut: &[usize], styles: &ResolvedStyleSet,
+     ) -> bool {
+-        if cut.is_empty() || row >= usize::from(table.row_count)
+-            || !cut.iter().any(|&cursor| cursor != 0) || table.outer_margin_top <= 0
++        if row >= usize::from(table.row_count) || table.outer_margin_top <= 0
+             || !Self::stored_nested_outer_margin_host(host, table)
+         {
+             return false;
+         }
++        if cut.iter().all(|&cursor| cursor == 0) {
++            return row.checked_sub(1).is_some_and(|previous| {
++                Self::row_cut_cell_order(table, previous).into_iter().any(|index| {
++                    let cell = &table.cells[index];
++                    cell.paragraphs.last().is_some_and(|paragraph| {
++                        let [Control::Table(child)] = paragraph.controls.as_slice() else { return false; };
++                        self.saved_inline_table_owner_line(
++                            paragraph, child, self.calc_nested_table_height(child, styles),
++                        ).is_some()
++                    })
++                })
++            });
++        }
+         if self.saved_complete_row_frame_boundary(table, row, cut, styles).is_some()
+             || self.saved_terminal_inline_restart_boundary(table, row, cut, styles)
++            || self.saved_nested_plain_line_restart_boundary(table, row, cut, styles)
+             || self.saved_nested_rowspan_band_at_cut(table, row, cut, styles).is_some()
+             || self.saved_closed_float_plain_resume(table, row, cut, styles)
+             || self.saved_resumed_fragment_row_height(table, row, cut, styles).is_some()
+@@ -19108,6 +19216,23 @@
+         false
+     }
+ 
++    pub(super) fn saved_next_inline_line_height(
++        &self, table: &crate::model::table::Table, row: usize, cut: &[usize],
++        styles: &ResolvedStyleSet,
++    ) -> Option<f64> {
++        Self::row_cut_cell_order(table, row).into_iter().zip(cut)
++            .find_map(|(index, &cursor)| {
++                let cell = &table.cells[index];
++                let units = self.cell_units(cell, table, styles);
++                let unit = units.get(cursor)?;
++                if !self.cell_unit_starts_terminal_inline_frame(cell, unit, styles) {
++                    return None;
++                }
++                let line = cell.paragraphs.get(unit.para_idx)?.line_segs.first()?;
++                Some(hwpunit_to_px(line.line_height, self.dpi))
++            })
++    }
++
+     /// A saved inline object starts a new physical frame only when its
+     /// exact source control line owns the complete, still-original object box.
+     /// A raw vpos reset alone can also be a writer-local coordinate system.
+@@ -19184,6 +19309,101 @@
+         (owners > 0).then_some(true)
+     }
+ 
++    fn saved_plain_line_restarts_inside_paragraph(
++        &self, cell: &crate::model::table::Cell, unit: &CellUnit,
++    ) -> bool {
++        let profile = self.profile.get();
++        if !profile.hwpx_stored_layout() || profile.hwp5_origin_hwpx() || profile.session_edited()
++            || cell.dirty_flag || !unit.page_frame_reset_before
++            || unit.vis_start == 0 || unit.vis_end != unit.vis_start + 1
++            || unit.nested_row.is_some() || unit.mixed_nested_fragment
++            || unit.non_inline_control_range.is_some()
++        {
++            return false;
++        }
++        let Some(paragraph) = cell.paragraphs.get(unit.para_idx) else { return false; };
++        let Some(previous) = paragraph.line_segs.get(unit.vis_start - 1) else { return false; };
++        let Some(current) = paragraph.line_segs.get(unit.vis_start) else { return false; };
++        if !stored_float_frame_owner_is_original(paragraph)
++            || !paragraph.controls.iter().all(|control|
++                matches!(control, Control::ColumnDef(columns) if columns.column_count == 1))
++            || paragraph.text.trim().is_empty()
++            || previous.text_start >= current.text_start || current.vertical_pos != 0
++            || previous.vertical_pos < 0 || previous.line_height <= 0
++            || current.line_height <= 0 || current.line_spacing < 0
++        {
++            return false;
++        }
++        let following = if let Some(line) = paragraph.line_segs.get(unit.vis_end) {
++            Some(line)
++        } else {
++            cell.paragraphs.get(unit.para_idx + 1)
++                .filter(|next| Self::stored_plain_cell_paragraph(next)
++                    && stored_float_frame_owner_is_original(next))
++                .and_then(|next| next.line_segs.first())
++        };
++        following.is_some_and(|next| current.line_height.checked_add(current.line_spacing)
++            == Some(next.vertical_pos))
++    }
++
++    pub(super) fn saved_nested_plain_line_restart_boundary(
++        &self, table: &crate::model::table::Table, row: usize, cut: &[usize],
++        styles: &ResolvedStyleSet,
++    ) -> bool {
++        if table.common.treat_as_char || table.page_break != TablePageBreak::RowBreak
++            || Self::row_has_prior_rowspan_cover(table, row)
++            || self.render_normalization.borrow().table_text_reflowed(table)
++        {
++            return false;
++        }
++        let order = Self::row_cut_cell_order(table, row);
++        if order.len() != cut.len() || order.len() != usize::from(table.col_count) {
++            return false;
++        }
++        let mut restart = false;
++        for (index, &cursor) in order.into_iter().zip(cut) {
++            let cell = &table.cells[index];
++            let units = self.cell_units(cell, table, styles);
++            if (cursor == 0 || cursor == units.len()) && cell.paragraphs.iter().all(|paragraph| {
++                stored_float_frame_owner_is_original(paragraph)
++                    && paragraph.controls.iter().all(|control|
++                        matches!(control, Control::ColumnDef(columns) if columns.column_count == 1))
++            }) {
++                continue;
++            }
++            if units.get(cursor)
++                .is_some_and(|unit| self.saved_plain_line_restarts_inside_paragraph(cell, unit))
++            {
++                restart = true;
++            } else if cursor != 1 || !self.saved_plain_first_line_peer_restart(cell, &units) {
++                return false;
++            }
++        }
++        restart
++    }
++
++    fn saved_plain_first_line_peer_restart(
++        &self, cell: &crate::model::table::Cell, units: &[CellUnit],
++    ) -> bool {
++        let [first, next, ..] = units else { return false; };
++        let [before, after, ..] = cell.paragraphs.as_slice() else { return false; };
++        if cell.dirty_flag || first.para_idx != 0 || next.para_idx != 1
++            || first.vis_start != 0 || first.vis_end != 1 || next.vis_start != 0
++            || first.nested_row.is_some() || next.nested_row.is_some()
++            || !next.page_frame_reset_before
++            || !stored_float_frame_owner_is_original(before)
++            || !stored_float_frame_owner_is_original(after)
++            || before.text.trim().is_empty() || after.text.trim().is_empty()
++            || !before.controls.iter().all(|control|
++                matches!(control, Control::ColumnDef(columns) if columns.column_count == 1))
++            || !after.controls.is_empty()
++        { return false; }
++        let [opening] = before.line_segs.as_slice() else { return false; };
++        after.line_segs.first().is_some_and(|resume|
++            opening.vertical_pos == 0 && opening.line_height > 0
++                && resume.vertical_pos == 0 && resume.line_height > 0)
++    }
++
+     fn nested_row_cut_source_frame_boundary(
+         &self,
+         table: &crate::model::table::Table,
+@@ -19192,7 +19412,9 @@
+         styles: &ResolvedStyleSet,
+     ) -> Option<bool> {
+         let plain = self.nested_row_cut_plain_source_frame_boundary(table, row, start_cut, styles);
+-        if plain == Some(true) { return plain; }
++        if plain == Some(true) || self.saved_nested_plain_line_restart_boundary(table, row, start_cut, styles) {
++            return Some(true);
++        }
+         if self.nested_row_cut_closed_inline_frame_boundary(table, row, start_cut, styles) == Some(true) {
+             return Some(true);
+         }
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -3931,9 +3931,13 @@
+                                             cut.start_row = band.row;
+                                             cut.start_cut = self.complete_row_cut(nested_table, band.row, styles);
+                                             source_start_row_height = Some(band.height);
++                                        } else if let Some(band) = start_band.filter(|b| b.row == cut.start_row) {
++                                            source_start_row_height = Some(band.height);
+                                         }
+                                         if let Some(band) = end_band.filter(|b| b.row + 1 == cut.end_row) {
+-                                            cut.end_cut = self.complete_row_cut(nested_table, band.row, styles);
++                                            if band.content_height.is_none() {
++                                                cut.end_cut = self.complete_row_cut(nested_table, band.row, styles);
++                                            }
+                                             source_end_row_height = Some(band.height);
+                                         }
+                                     }
+@@ -5892,9 +5896,14 @@
+                     )
+                 })
+             });
+-        let align_nested_opening_frame = !is_continuation && !is_block_split
+-            && nested_opening_frame
+-                .is_some_and(|frame_height| (partial_table_height - frame_height).abs() <= 0.5);
++        let align_owned_inline_lead = terminal_inline_frame_bottom.is_some()
++            && end_row.checked_sub(1).is_some_and(|last| {
++                self.saved_next_inline_line_height(table, last, end_cut, styles)
++                    .is_some_and(|height| height > row_heights[last])
++            });
++        let align_nested_opening_frame = align_owned_inline_lead
++            || (!is_continuation && !is_block_split && nested_opening_frame
++                .is_some_and(|frame_height| (partial_table_height - frame_height).abs() <= 0.5));
+         let align_saved_opening_frame = align_nested_opening_frame || (!is_continuation
+             && !is_block_split
+             && enclosing_cell_ctx.is_none()
+--- a/src/renderer/pagination.rs
++++ b/src/renderer/pagination.rs
+@@ -579,6 +579,15 @@
+     pub host_paragraph: usize,
+     pub row: usize,
+     pub height: f64,
++    /// Existing content height already counted by the ordinary scan.
++    /// A band with no remaining content has no such reservation.
++    pub content_height: Option<f64>,
++}
++
++impl NestedRowBand {
++    pub(crate) fn additional_height(self) -> f64 {
++        (self.height - self.content_height.unwrap_or(0.0)).max(0.0)
++    }
+ }
+ 
+ #[derive(Debug, Clone)]
+--- a/src/renderer/typeset/table/continuation/fragment/emit.rs
++++ b/src/renderer/typeset/table/continuation/fragment/emit.rs
+@@ -78,7 +78,15 @@
+             let physical_limit = avail_for_rows - (root_bottom - fragment_outer_bottom_overhead).max(0.0);
+             layout_engine.saved_nested_terminal_inline_row_band(
+                 table, cursor_row, start_cut, &split_end_cut, physical_limit, styles,
+-            ).map(|(end, band, remaining, frame)| {
++            ).or_else(|| layout_engine.saved_nested_restart_row_bands(
++                table, cursor_row, start_cut, &split_end_cut, physical_limit, styles,
++            )).or_else(|| {
++                let [end] = split_end_cut.as_slice() else { return None; };
++                let next = end.checked_add(1)?;
++                layout_engine.saved_nested_restart_row_bands(
++                    table, cursor_row, start_cut, &[next], physical_limit, styles,
++                )
++            }).map(|(end, band, remaining, frame)| {
+                 split_end_cut[0] = end;
+                 split_end_limit = frame;
+                 consumed = frame;
+@@ -89,7 +97,7 @@
+             None
+         };
+         if let Some(band) = nested_start {
+-            consumed += band.height;
++            consumed += band.additional_height();
+         }
+         let nested_row_bands = crate::renderer::pagination::NestedRowBands {
+             start: nested_start,
+@@ -1198,10 +1206,7 @@
+         }));
+         continuation.advance(end_row, split_block_start, next_cut, split_end_limit > 0.0);
+         continuation.start_row_height_override = next_start_row_height_override;
+-        continuation.nested_start_row_band = nested_opening.map(|(mut band, remaining)| {
+-            band.height = remaining;
+-            band
+-        });
++        continuation.nested_start_row_band = nested_opening.map(|(_, remaining)| remaining);
+         if let Some(((_, row, cut, height), _)) = stored_rowspan_frame {
+             continuation.row = row;
+             continuation.start_cut = cut;
+--- a/src/renderer/typeset/table/continuation/fragment.rs
++++ b/src/renderer/typeset/table/continuation/fragment.rs
+@@ -118,7 +118,7 @@
+ 
+         let mut budget = self.prepare_table_fragment_budget(st, input);
+         if let Some(band) = start.nested_start_row_band {
+-            budget.avail_for_rows = (budget.avail_for_rows - band.height).max(0.0);
++            budget.avail_for_rows = (budget.avail_for_rows - band.additional_height()).max(0.0);
+         }
+         let mut scan = self.scan_table_fragment(st, input, &budget, profile);
+         if start.nested_start_row_band.is_some() && scan.consumed > budget.avail_for_rows {

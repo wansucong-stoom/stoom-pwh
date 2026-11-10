@@ -1,0 +1,85 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -9762,6 +9762,50 @@
+             + hwpunit_to_px(table.outer_margin_bottom as i32, self.dpi)
+     }
+ 
++    /// A complete original inline table can own a dedicated trailing line of
++    /// a text paragraph. The line and the object reserve the same space.
++    pub(super) fn saved_inline_table_owner_line(
++        &self,
++        para: &Paragraph,
++        table: &crate::model::table::Table,
++        measured_height: f64,
++    ) -> Option<usize> {
++        let profile = self.profile.get();
++        if !profile.hwpx_stored_layout() || profile.hwp5_origin_hwpx() || profile.session_edited()
++            || !table.common.treat_as_char || !table.common.flow_with_text
++            || table.common.allow_overlap || table.caption.is_some()
++            || table.outer_margin_top < 0 || table.outer_margin_bottom < 0
++            || !matches!(para.controls.as_slice(), [Control::Table(t)] if std::ptr::eq(t.as_ref(), table))
++            || !stored_float_frame_owner_is_original(para)
++        {
++            return None;
++        }
++        let owner = crate::renderer::layout::control_line_seg_index(para, 0)?;
++        if owner == 0 || owner + 1 != para.line_segs.len() {
++            return None;
++        }
++        let line = &para.line_segs[owner];
++        let source_start = para.line_seg_text_start(owner);
++        let leading = para.char_offsets.partition_point(|&offset| offset < source_start);
++        if !para.text.chars().take(leading).any(|ch| !ch.is_whitespace())
++            || para.text.chars().skip(leading).any(|ch| !ch.is_whitespace())
++            || !para.line_segs.windows(2).all(|pair| {
++                let (prev, next) = (&pair[0], &pair[1]);
++                prev.vertical_pos >= 0 && prev.line_height > 0 && prev.line_spacing >= 0
++                    && i64::from(prev.vertical_pos) + i64::from(prev.line_height)
++                        + i64::from(prev.line_spacing) == i64::from(next.vertical_pos)
++            })
++        {
++            return None;
++        }
++        let declared = i64::from(table.common.height) + i64::from(table.outer_margin_top)
++            + i64::from(table.outer_margin_bottom);
++        let line_height = hwpunit_to_px(line.line_height, self.dpi);
++        (line.line_height > 0 && declared == i64::from(line.line_height)
++            && (line_height - measured_height).abs() <= hwpunit_to_px(2, self.dpi))
++            .then_some(owner)
++    }
++
+     /// Physical body size; the placement plan owns outer margins separately.
+     fn nested_table_body_height(
+         &self,
+@@ -13978,7 +14022,12 @@
+                         .line_segs
+                         .windows(2)
+                         .any(|pair| pair[1].vertical_pos < pair[0].vertical_pos);
+-                    let target_h = if let Some(frame) = closed_float_frame {
++                    let inline_line_owns_table = line_count == p.line_segs.len()
++                        && matches!(p.controls.as_slice(), [Control::Table(child)]
++                            if self.saved_inline_table_owner_line(p, child, nested_h).is_some());
++                    let target_h = if inline_line_owns_table {
++                        0.0
++                    } else if let Some(frame) = closed_float_frame {
+                         // The host atom ends exactly at this same resolved table top.
+                         // Keep the child's complete content and bottom outer margin.
+                         frame.occupied_bottom - frame.table_top
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -3631,6 +3631,15 @@
+                                         frame.table_top
+                                     } else if let Some(offset) = stored_square_offset {
+                                         para_y_before_lines + hwpunit_to_px(offset, self.dpi)
++                                    } else if composed.lines.len() == para.line_segs.len()
++                                        && self.saved_inline_table_owner_line(para, nested_table, nested_h)
++                                            .is_some_and(|owner| start_line <= owner && owner < end_line)
++                                    {
++                                        // The text pass advanced across this stored line
++                                        // already. Paint from its original line origin.
++                                        para_y_before_lines + stored_nested_table_line_offset_px(
++                                            para, ctrl_idx, start_line, self.dpi,
++                                        ).unwrap_or(0.0)
+                                     } else if resumed_stored_frame_origin.is_some()
+                                         && nested_table.common.treat_as_char
+                                         && table_host_line_only_fragment

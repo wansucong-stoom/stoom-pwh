@@ -1,0 +1,149 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -17849,6 +17849,86 @@
+         (remaining_owners > 0).then_some(all_restarted)
+     }
+ 
++    // The original row height and the next source frame define a physical
++    // request independently of the units already consumed by pagination.
++    pub(super) fn saved_complete_row_frame_boundary(
++        &self, table: &crate::model::table::Table, row: usize,
++        cut: &[usize], styles: &ResolvedStyleSet,
++    ) -> Option<i64> {
++        if !self.profile.get().hwpx_stored_layout() || self.profile.get().session_edited()
++            || table.common.treat_as_char || table.page_break != TablePageBreak::RowBreak
++            || !crate::renderer::float_placement::is_para_topbottom_float(&table.common)
++            || table.common.allow_overlap || !table.common.flow_with_text
++            || table.caption.is_some() || self.render_normalization.borrow().table_text_reflowed(table)
++            || Self::row_has_prior_rowspan_cover(table, row)
++        {
++            return None;
++        }
++        let cells: Vec<_> = Self::row_cut_cell_order(table, row).into_iter()
++            .filter_map(|index| table.cells.get(index)).collect();
++        if cells.len() != cut.len() || cells.len() != usize::from(table.col_count) {
++            return None;
++        }
++        let requested = cells.first()?.height;
++        if requested == 0 || requested > i32::MAX as u32
++            || cells.iter().any(|cell| cell.dirty_flag || cell.row_span != 1 || cell.col_span != 1
++                || cell.height != requested || cell.text_direction != 0
++                || cell.paragraphs.iter().any(|p| !stored_float_frame_owner_is_original(p)))
++        {
++            return None;
++        }
++        let mut next_owners = 0;
++        for (cell, &index) in cells.iter().zip(cut) {
++            let units = self.cell_units(cell, table, styles);
++            if index > units.len() { return None; }
++            if index == units.len() { continue; }
++            let current = units.get(index)?;
++            let prior = units.get(index.checked_sub(1)?)?;
++            let prior_para = cell.paragraphs.get(prior.para_idx)?;
++            if prior.para_idx + 1 != current.para_idx || prior.vis_start >= prior.vis_end
++                || prior.vis_end != prior_para.line_segs.len()
++            {
++                return None;
++            }
++            if Self::saved_nested_inline_opening_owner(cell, current, i64::from(requested)).is_none() {
++                Self::saved_contiguous_plain_frame_opening(cell, current)?;
++            }
++            next_owners += 1;
++        }
++        (next_owners > 0).then_some(i64::from(requested))
++    }
++
++    // A complete, original plain-text prefix and an exact adjacent line
++    // after the reset establish two distinct stored source frames. The cut
++    // has already been chosen by pagination before reserving row geometry.
++    fn saved_contiguous_plain_frame_opening(
++        cell: &crate::model::table::Cell,
++        unit: &CellUnit,
++    ) -> Option<()> {
++        if !unit.hard_break_before || !unit.page_frame_reset_before
++            || unit.vis_start != 0 || unit.vis_end != 1
++            || unit.mixed_nested_fragment || unit.non_inline_control_range.is_some()
++            || unit.nested_row.is_some() || unit.nested_table_fragment.is_some()
++        {
++            return None;
++        }
++        let stored = |paragraph: &Paragraph, expected: i64| {
++            let [line] = paragraph.line_segs.as_slice() else { return None; };
++            let neutral_control = expected == 0
++                && matches!(paragraph.controls.as_slice(), [Control::ColumnDef(columns)]
++                    if columns.column_count == 1);
++            ((paragraph.controls.is_empty() || neutral_control) && !paragraph.text.trim().is_empty()
++                && line.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY == 0
++                && i64::from(line.vertical_pos) == expected
++                && line.line_height > 0 && line.line_spacing >= 0)
++                .then_some(expected + i64::from(line.line_height) + i64::from(line.line_spacing))
++        };
++        cell.paragraphs.get(..unit.para_idx)?.iter().try_fold(0, |expected, paragraph| stored(paragraph, expected))?;
++        let next = stored(cell.paragraphs.get(unit.para_idx)?, 0)?;
++        stored(cell.paragraphs.get(unit.para_idx + 1)?, next)?;
++        Some(())
++    }
++
+     /// A stored flag alone is not physical-page authority. Reuse the exact
+     /// original closed-tail witness that produced this legacy nested-row unit,
+     /// or the same witness at the projected child's authoritative RowCut.
+@@ -17859,7 +17939,7 @@
+         unit: &CellUnit,
+         styles: &ResolvedStyleSet,
+     ) -> bool {
+-        if !unit.hard_break_before || !unit.stored_frame_break_before
++        if !unit.hard_break_before
+             || unit.mixed_nested_fragment || unit.non_inline_control_range.is_some()
+         {
+             return false;
+@@ -17867,6 +17947,19 @@
+         let Some(row) = unit.nested_row else { return false; };
+         let Some(host) = cell.paragraphs.get(unit.para_idx) else { return false; };
+         let [Control::Table(child)] = host.controls.as_slice() else { return false; };
++        // The projected child can independently authenticate its boundary.
++        // A stored flag on the parent must not select a weaker proof path.
++        if unit.page_frame_reset_before
++            && unit.nested_table_fragment.as_ref().is_some_and(|fragment| {
++                self.saved_complete_row_frame_boundary(child, row, &fragment.start_cut, styles)
++                    .is_some()
++            })
++        {
++            return true;
++        }
++        if !unit.stored_frame_break_before {
++            return false;
++        }
+         // An expanded row can carry a projected child ledger while still
+         // beginning the direct parent's authenticated whole-row tail. A zero
+         // cursor is the same original row boundary, not a deeper source owner.
+@@ -17916,8 +18009,17 @@
+             || table.page_break != TablePageBreak::RowBreak
+             || table.caption.is_some()
+             || self.render_normalization.borrow().table_text_reflowed(table)
+-            || self.nested_row_cut_owned_tail_frame_boundary(table, row, end_cut, styles) != Some(true)
+         { return None; }
++        if start_cut.iter().all(|&cursor| cursor == 0) {
++            if let Some(height) = self.saved_complete_row_frame_boundary(table, row, end_cut, styles) {
++                let minimum = hwpunit_to_px(height as i32, self.dpi);
++                let content = self.row_cut_content_height(table, row, start_cut, end_cut, styles);
++                return (minimum > content).then_some(minimum);
++            }
++        }
++        if self.nested_row_cut_owned_tail_frame_boundary(table, row, end_cut, styles) != Some(true) {
++            return None;
++        }
+         let cells: Vec<_> = Self::row_cut_cell_order(table, row).into_iter()
+             .filter_map(|index| table.cells.get(index)).collect();
+         if !start_cut.is_empty() && start_cut.len() != cells.len() { return None; }
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -1414,6 +1414,9 @@
+                         start_row, end_row.saturating_sub(1),
+                     );
+                     self.cell_cut_owns_stored_nested_opening_frame(cell, table, styles, start, end)
++                        || (start == 0 && self.saved_complete_row_frame_boundary(
++                            table, cell_row, end_cut, styles,
++                        ).is_some())
+                 };
+             let saved_frame_needs_alignment = (align_saved_opening_frame
+                 && cell_row + 1 == end_row

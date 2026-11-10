@@ -1,0 +1,257 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -13119,6 +13119,7 @@
+                         let complete = rows.len() - 1;
+                         rhs[..complete].copy_from_slice(&rows[..complete]);
+                     }
++                    let terminal_prefix = self.saved_terminal_nested_row_prefix(cell, p, nt);
+                     let ncs = hwpunit_to_px(nt.cell_spacing as i32, self.dpi);
+                     let om_top = hwpunit_to_px(nt.outer_margin_top as i32, self.dpi);
+                     let om_bot = hwpunit_to_px(nt.outer_margin_bottom as i32, self.dpi);
+@@ -13486,6 +13487,7 @@
+                                         driver_unit.stored_frame_break_before;
+                                     if (saved_fragment_cut.is_some() && fragment_index > 0)
+                                         || parallel_restart.as_ref().is_some_and(|cut| cut[driver_index] == fragment_index)
++                                        || (terminal_prefix == Some(ri) && fragment_index == 0)
+                                     {
+                                         hard_break_before = true;
+                                         stored_frame_break_before = true;
+@@ -13603,7 +13605,9 @@
+                         }
+ 
+                         let mut uh = *rh;
+-                        let hard_break_before = reset_before && !projected_mixed_block_table && ri == 0;
++                        let terminal_restart = terminal_prefix == Some(ri);
++                        let hard_break_before = terminal_restart
++                            || (reset_before && !projected_mixed_block_table && ri == 0);
+                         let mut vpos_gap_before = vpos_gap_before_para && !projected_mixed_block_table && ri == 0;
+                         if use_vpos_unit_positions && !projected_mixed_block_table && ri == 0 && !hard_break_before {
+                             if let Some(seg) = p.line_segs.first() {
+@@ -13748,7 +13752,8 @@
+                             // nested row. Project it once, just like the host's
+                             // hard break, so capacity selection keeps the header
+                             // with the following stored frame.
+-                            stored_frame_break_before: stored_frame_break_before_para && !projected_mixed_block_table && ri == 0,
++                            stored_frame_break_before: terminal_restart
++                                || (stored_frame_break_before_para && !projected_mixed_block_table && ri == 0),
+                             page_frame_reset_before: hard_break_before,
+                             vpos_gap_before,
+                             para_idx: pi,
+@@ -16558,6 +16563,8 @@
+         let closed_object_height = self.saved_complete_row_frame(
+             child, last_row, &fragment.end_cut, styles,
+         ).filter(|&(_, owns_object)| owns_object).map(|(height, _)| hwpunit_to_px(height as i32, self.dpi));
++        let terminal_nested_height = self.saved_terminal_nested_restart_ink(child, last_row, &fragment.end_cut, styles);
++        let closed_object_height = closed_object_height.or(terminal_nested_height);
+         if first.para_idx != last.para_idx || first_row >= last_row || fragment.terminal
+             || !Self::stored_nested_outer_margin_host(host, child)
+             || child.outer_margin_top < 0 || child.outer_margin_bottom < 0
+@@ -16627,8 +16634,16 @@
+         } else {
+             *heights.get(first_row)?
+         };
+-        let before = first_height + heights.get(first_row + 1..last_row)?.iter().sum::<f64>()
+-            + spacing * (last_row - first_row) as f64 + top;
++        // The finite closing frame must reserve the same complete rows as
++        // the recursive painter, including the content of anchored tables.
++        let between = if terminal_nested_height.is_some() {
++            (first_row + 1..last_row).map(|row| self.row_cut_content_height(
++                child, row, &[], &[], styles,
++            )).sum::<f64>()
++        } else {
++            heights.get(first_row + 1..last_row)?.iter().sum::<f64>()
++        };
++        let before = first_height + between + spacing * (last_row - first_row) as f64 + top;
+         let margins = hwpunit_to_px(i32::from(child.outer_margin_top), self.dpi)
+             + hwpunit_to_px(i32::from(child.outer_margin_bottom), self.dpi);
+         let available = physical_limit - bottom;
+@@ -17578,6 +17593,7 @@
+         if self.saved_plain_leaf_boundary(table, row, cut)
+             || self.saved_nested_leaf_restart_ink(table, row, cut, styles).is_some()
+             || self.saved_complete_row_frame_boundary(table, row, cut, styles).is_some()
++            || self.saved_terminal_nested_restart_ink(table, row, cut, styles).is_some()
+             || self.saved_terminal_inline_restart_boundary(table, row, cut, styles)
+             || self.saved_anchored_float_restart_boundary(table, row, cut, styles)
+             || self.saved_nested_plain_line_restart_boundary(table, row, cut, styles)
+@@ -18117,6 +18133,87 @@
+         }
+         (owners == 1 && ink < i64::from(declared))
+             .then(|| hwpunit_to_px(ink as i32, self.dpi))
++    }
++
++    /// A terminal floating table can declare just its opening rows. A
++    /// contiguous predecessor and the measured whole rows prove that this is
++    /// a source frame, rather than a minimum for the whole logical table.
++    pub(super) fn saved_terminal_nested_row_prefix(
++        &self, cell: &crate::model::table::Cell, host: &Paragraph,
++        child: &crate::model::table::Table,
++    ) -> Option<usize> {
++        if child.row_count < 2 || child.common.height == 0 || child.cell_spacing < 0
++            || child.outer_margin_top < 0 || child.outer_margin_bottom < 0
++            || !child.leading_header_rows().is_empty()
++            || !Self::stored_nested_outer_margin_host(host, child)
++            || !cell.paragraphs.last().is_some_and(|last| std::ptr::eq(last, host))
++        {
++            return None;
++        }
++        let [.., prior_host, before, _] = cell.paragraphs.as_slice() else { return None; };
++        let [Control::Table(previous)] = prior_host.controls.as_slice() else { return None; };
++        let [line] = before.line_segs.as_slice() else { return None; };
++        let anchor = host.line_segs.first()?;
++        if line.line_spacing < 0
++            || i64::from(line.vertical_pos) + i64::from(line.line_height) + i64::from(line.line_spacing)
++                != i64::from(anchor.vertical_pos)
++            || !self.saved_complete_nested_block(prior_host, Some(before), previous)
++        {
++            return None;
++        }
++        let declared = i64::from(child.common.height);
++        let spacing = i64::from(child.cell_spacing);
++        let rows = self.saved_complete_child_row_heights(child)?;
++        let mut end = 0;
++        for (index, &height) in rows[..rows.len().checked_sub(1)?].iter().enumerate() {
++            end += height + if index > 0 { spacing } else { 0 };
++            if end == declared { return Some(index + 1); }
++            if end > declared { return None; }
++        }
++        None
++    }
++
++    fn saved_terminal_nested_restart_ink(
++        &self, table: &crate::model::table::Table, row: usize, cut: &[usize],
++        styles: &ResolvedStyleSet,
++    ) -> Option<f64> {
++        let order = Self::row_cut_cell_order(table, row);
++        if cut.is_empty() || cut.len() != order.len() || Self::row_has_prior_rowspan_cover(table, row) {
++            return None;
++        }
++        let mut owner = None;
++        let mut ink = 0.0f64;
++        for (index, &cursor) in order.into_iter().zip(cut) {
++            let cell = &table.cells[index];
++            let units = self.cell_units(cell, table, styles);
++            let (_, _, top, bottom) = self.resolve_cell_padding(cell, table);
++            if cursor == units.len() {
++                let end = Self::saved_plain_cell_end_hu(cell)?;
++                ink = ink.max(top + end as f64 * self.dpi / 7200.0 + bottom);
++                continue;
++            }
++            let unit = units.get(cursor)?;
++            if owner.is_some() || !unit.stored_frame_break_before
++                || unit.nested_table_fragment.as_ref().is_some_and(|cut| cut.start_cut.iter().any(|&at| at != 0))
++            {
++                return None;
++            }
++            let host = cell.paragraphs.get(unit.para_idx)?;
++            let [Control::Table(child)] = host.controls.as_slice() else { return None; };
++            let first_tail = self.saved_terminal_nested_row_prefix(cell, host, child)?;
++            if unit.nested_row != Some(first_tail) { return None; }
++            let prior = units.get(cursor.checked_sub(1)?)?;
++            if prior.para_idx != unit.para_idx || prior.nested_row != Some(first_tail - 1)
++                || prior.nested_table_fragment.as_ref().is_some_and(|cut| !cut.terminal)
++            {
++                return None;
++            }
++            let box_bottom = i64::from(host.line_segs.first()?.vertical_pos)
++                + i64::from(child.common.height) + i64::from(child.outer_margin_top)
++                + i64::from(child.outer_margin_bottom);
++            owner = Some(top + box_bottom as f64 * self.dpi / 7200.0 + bottom);
++        }
++        owner.map(|height| ink.max(height))
+     }
+ 
+     pub(super) fn saved_complete_child_row_heights(
+@@ -19245,6 +19342,7 @@
+                 self.saved_complete_row_frame_boundary(child, row, &fragment.start_cut, styles)
+                     .is_some()
+                     || self.saved_plain_split_cursor_owner(cell, unit, child, row)
++                    || self.saved_terminal_nested_restart_ink(child, row, &fragment.start_cut, styles).is_some()
+             })
+         {
+             return true;
+@@ -19259,9 +19357,11 @@
+             fragment.start_cut.is_empty()
+                 || (fragment.start_cut.len() == Self::row_cut_cell_order(child, row).len()
+                     && fragment.start_cut.iter().all(|&cursor| cursor == 0)));
+-        if opens_whole_row && self.saved_nested_tail_opening_frame(
+-            table, cell, host, cell.paragraphs.get(unit.para_idx + 1), child, styles,
+-        ).is_some_and(|frame| frame.tail_start_row == row) {
++        if opens_whole_row && (self.saved_terminal_nested_row_prefix(cell, host, child) == Some(row)
++            || self.saved_nested_tail_opening_frame(
++                table, cell, host, cell.paragraphs.get(unit.para_idx + 1), child, styles,
++            ).is_some_and(|frame| frame.tail_start_row == row))
++        {
+             return true;
+         }
+         // A nonzero child cursor needs its own recursive source witness; it
+@@ -19949,6 +20049,7 @@
+         let plain = self.nested_row_cut_plain_source_frame_boundary(table, row, start_cut, styles);
+         if plain == Some(true) || self.saved_nested_plain_line_restart_boundary(table, row, start_cut, styles)
+             || self.saved_nested_leaf_restart_ink(table, row, start_cut, styles).is_some()
++            || self.saved_terminal_nested_restart_ink(table, row, start_cut, styles).is_some()
+             || self.saved_parallel_plain_restart_boundary(table, row, start_cut, styles)
+         {
+             return Some(true);
+@@ -23515,7 +23616,10 @@
+         let source_tail_plan = self.saved_nested_tail_opening_frame(
+             table, cell, para, cell.paragraphs.get(pi + 1), child, styles,
+         );
+-        if !reflowed_host && !separate_host_text && !stored_child_cuts && source_tail_plan.is_none() {
++        let terminal_prefix = self.saved_terminal_nested_row_prefix(cell, para, child);
++        if !reflowed_host && !separate_host_text && !stored_child_cuts
++            && source_tail_plan.is_none() && terminal_prefix.is_none()
++        {
+             return None;
+         }
+         let start = lo.max(run_start);
+@@ -23568,7 +23672,7 @@
+                 is_block_split: false,
+                 start_cut_is_block: false,
+             }
+-        } else if source_tail_plan.is_some()
++        } else if (source_tail_plan.is_some() || terminal_prefix.is_some())
+             && selected.iter().all(|unit| unit.nested_row.is_some())
+         {
+             // Legacy whole-row units carry real row ownership without an
+@@ -23576,7 +23680,11 @@
+             // frame can promote them to a physical reservation.
+             let start_row = first.nested_row?;
+             let end_row = last.nested_row? + 1;
+-            source_tail_plan?.body_for_cut(start_row, end_row, &[], &[], self.dpi)?;
++            let terminal_edge = terminal_prefix.is_some_and(|row| (start_row == 0 && end_row == row)
++                || (start_row == row && end_row == usize::from(child.row_count)));
++            if !terminal_edge {
++                source_tail_plan?.body_for_cut(start_row, end_row, &[], &[], self.dpi)?;
++            }
+             NestedTableCut {
+                 start_row,
+                 end_row,
+@@ -23698,8 +23806,11 @@
+             .and_then(|frame|frame.body_for_cut(cut.start_row,cut.end_row,&cut.start_cut,&cut.end_cut,self.dpi));
+         if let Some(frame)=tail_frame_body {physical=physical.max(frame);}
+         let style = styles.para_styles.get(para.para_shape_id as usize);
++        let terminal_prefix_edge = terminal_prefix
++            .is_some_and(|row| (cut.start_row == row && cut.start_cut.is_empty())
++                || (cut.end_row == row && cut.end_cut.is_empty()));
+         let reopens_outer_frame = leaf_opening || leaf_resume || tail_frame_body.is_some()
+-            || reflow_nested_table_has_outer_frame(para, child)
++            || terminal_prefix_edge || reflow_nested_table_has_outer_frame(para, child)
+             || cut.end_row.checked_sub(1).is_some_and(|row|
+                 cut.start_row > 0 && Self::stored_nested_outer_margin_host(para, child)
+                     && self.saved_terminal_inline_restart_boundary(child, row, &cut.end_cut, styles)
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -3995,8 +3995,12 @@
+                                             || self.saved_plain_leaf_boundary(
+                                                 nested_table, cut.end_row.saturating_sub(1), &cut.end_cut,
+                                             ));
++                                    let terminal_prefix_edge = source_cut.as_ref().is_some_and(|cut|
++                                        self.saved_terminal_nested_row_prefix(cell, para, nested_table)
++                                            .is_some_and(|row| (cut.start_row == row && cut.start_cut.is_empty())
++                                                || (cut.end_row == row && cut.end_cut.is_empty())));
+                                     let opens_outer_frame = leaf_edge || opening_outer_frame.is_some() || owned_tail_outer_frame
+-                                        || next_inline_restart
++                                        || next_inline_restart || terminal_prefix_edge
+                                         || source_start_row_height.is_some() || end_band.is_some();
+                                     let source_resume_outer_top = source_cut.as_ref().is_some_and(|cut|
+                                         self.saved_nested_source_resume_outer_top(

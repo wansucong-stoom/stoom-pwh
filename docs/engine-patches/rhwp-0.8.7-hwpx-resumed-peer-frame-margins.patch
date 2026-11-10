@@ -1,0 +1,109 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -18024,9 +18024,21 @@
+         &self, host: &Paragraph, table: &crate::model::table::Table,
+         row: usize, cut: &[usize], styles: &ResolvedStyleSet,
+     ) -> bool {
+-        if row >= usize::from(table.row_count) || table.outer_margin_top <= 0
+-            || !Self::stored_nested_outer_margin_host(host, table)
++        if row >= usize::from(table.row_count) || table.outer_margin_top <= 0 {
++            return false;
++        }
++        // A verified deferred peer owns the resumed frame even when its
++        // enclosing floating table shares the original anchor with text.
++        if crate::renderer::float_placement::is_para_topbottom_float(&table.common)
++            && table.common.flow_with_text && !table.common.allow_overlap
++            && table.common.vert_align == VertAlign::Top && table.caption.is_none()
++            && stored_float_frame_owner_is_original(host)
++            && matches!(host.controls.as_slice(), [Control::Table(owner)] if std::ptr::eq(owner.as_ref(), table))
++            && self.saved_terminal_peer_leaf_ink(table, row, cut, styles).is_some()
+         {
++            return true;
++        }
++        if !Self::stored_nested_outer_margin_host(host, table) {
+             return false;
+         }
+         if cut.iter().all(|&cursor| cursor == 0) {
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -144,6 +144,7 @@
+     resolved_table_top: Option<f64>,
+     nested_row_bands: crate::renderer::pagination::NestedRowBands,
+     align_declared_row_frames: bool,
++    resumed_terminal_peer: bool,
+     terminal_inline_frame_bottom: Option<f64>,
+ }
+ 
+@@ -1141,6 +1142,7 @@
+         align_saved_opening_frame: bool,
+         align_nested_opening_frame: bool,
+         align_declared_row_frames: bool,
++        resumed_terminal_peer: bool,
+         // [#6976] 접기 대상 행(모델 행 인덱스)과 그 행이 남긴 여분의 최솟값 수집기.
+         fold_last_row: Option<usize>,
+         fold_slack: &mut f64,
+@@ -3731,7 +3733,16 @@
+                                                         start <= first && first < end
+                                                     })
+                                             });
+-                                    let nested_y = nested_y
++                                    // The saved row already reserved this deferred float's margins.
++                                    let deferred_float_top = if resumed_terminal_peer && is_split_start_row
++                                        && start_cut.get(single_row_cut_index(table, cell)) == Some(&0)
++                                        && cp_idx == 0 && start_line == 0
++                                        && stored_float_frame.is_none() && declared_float.is_none()
++                                        && crate::renderer::float_placement::is_para_topbottom_float(&nested_table.common)
++                                    {
++                                        hwpunit_to_px(i32::from(nested_table.outer_margin_top), self.dpi)
++                                    } else { 0.0 };
++                                    let nested_y = nested_y + deferred_float_top
+                                         + if stored_float_frame.is_some()
+                                             || !crate::renderer::para_has_no_stored_line_segs(para)
+                                         {
+@@ -4037,10 +4048,12 @@
+                                         cut.start_row == 0 && cut.start_cut.is_empty()
+                                             && saved_anchored_prefix == Some(cut.end_row) && cut.end_cut.is_empty()
+                                     });
+-                                    let terminal_peer_edge = source_cut.as_ref().is_some_and(|cut|
++                                    let resumed_terminal_peer = source_cut.as_ref().is_some_and(|cut|
+                                         self.saved_terminal_peer_leaf_edge(
+                                             cell, para, nested_table, cut.start_row, &cut.start_cut, styles,
+-                                        ) || self.saved_terminal_peer_leaf_edge(
++                                        ));
++                                    let terminal_peer_edge = resumed_terminal_peer || source_cut.as_ref().is_some_and(|cut|
++                                        self.saved_terminal_peer_leaf_edge(
+                                             cell, para, nested_table, cut.end_row.saturating_sub(1), &cut.end_cut, styles,
+                                         ));
+                                     let opens_outer_frame = leaf_edge || opening_outer_frame.is_some() || owned_tail_outer_frame
+@@ -4162,6 +4175,7 @@
+                                                 nested_row_bands: Default::default(),
+                                                 align_declared_row_frames: [start_band, end_band].into_iter()
+                                                     .flatten().any(|band| band.saved_remaining.is_some()),
++                                                resumed_terminal_peer,
+                                                 terminal_inline_frame_bottom,
+                                                 resolved_table_top: opens_outer_frame.then_some(source_nested_y)
+                                                     .or_else(|| declared_float.map(|(top, _)| top))
+@@ -4701,6 +4715,7 @@
+                 resolved_table_top,
+                 nested_row_bands,
+                 align_declared_row_frames: false,
++                resumed_terminal_peer: false,
+                 terminal_inline_frame_bottom: None,
+             },
+             section_index,
+@@ -4779,6 +4794,7 @@
+             resolved_table_top,
+             nested_row_bands,
+             align_declared_row_frames,
++            resumed_terminal_peer,
+             terminal_inline_frame_bottom,
+         } = host;
+ 
+@@ -6122,6 +6138,7 @@
+             align_saved_opening_frame,
+             align_nested_opening_frame,
+             align_declared_row_frames,
++            resumed_terminal_peer,
+             fold_last_row,
+             &mut fold_slack,
+             source_tail_opening_alignment.is_some(),

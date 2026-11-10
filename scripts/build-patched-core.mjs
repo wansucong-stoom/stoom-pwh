@@ -2,6 +2,7 @@
 // Build a separate candidate. This script never installs or overwrites a runtime.
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import os from 'node:os';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {spawn} from 'node:child_process';
@@ -10,7 +11,7 @@ const pinned = {
   upstreamCommit: '1a76570e833917d15817415a53c09ad61ab3203f',
   sourceArchiveSha256: '067feefc25d36921ee41fea5df6fead00255ffa86441891fbaa202f96de202a2',
   blankTemplateSha256: '43f472751fafefb8c66b0f831660ebed51e443a46bebe44c75bba918154ce4c9',
-  expectedGlueSha256: 'c9cd6fdb42c3c6f3c99210a184ec042089adb34d5c9ecd7ac5e9f247f0d72bdb',
+  expectedGlueSha256: '4805b815e0ef26bd36c7e3e6c79a19a18b54f43efbcb4bc6f96a6dc203526058',
 };
 const patches = [
   {
@@ -635,6 +636,742 @@ const patches = [
       "patchedSha256": "7d627cf017fe74d0326b8657d9ae930c6be1726ceb8e3c891788dd0657f661e2"
     }
   ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-row-frame-finished-cells.patch",
+  "sha256": "646e47d209bd5f734ebbff07170643d148f83c8be059ad5c733e14b3398f40ad",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "7d627cf017fe74d0326b8657d9ae930c6be1726ceb8e3c891788dd0657f661e2",
+      "patchedSha256": "3e1c5a02bce8f704e781114b16997425fdaad93451bb2759feb6f99eb6108e66"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-nested-inline-projected-opening-owner.patch",
+  "sha256": "e4cb85e2e8b8796b84d5ccd9109f7f7ed1e4fbee82cc798a076b26ff2e3164c9",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "3e1c5a02bce8f704e781114b16997425fdaad93451bb2759feb6f99eb6108e66",
+      "patchedSha256": "769c3821a95fd52e9c89f25fac434c52c7e8eb6f9ecac9a7ca24390d8cc6a3e1"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-displaced-nested-table-line.patch",
+  "sha256": "b2a273a07dc1fc693fc5b49b40d3e5a66ee0805bde3cfabe36b7fa833b0bdf87",
+  "sources": [
+    {
+      "path": "src/renderer/float_placement.rs",
+      "originalSha256": "557e4097cf3fcfda6ba7c83b0c396f68e4a7ec7c7c9a6ad40e1a323113a7f37e",
+      "patchedSha256": "d6a1822347ebc9a905bae2bc0bb090f86eb9f35f0c336a7a70ebce7bad7fde51"
+    },
+    {
+      "path": "src/renderer/height_measurer.rs",
+      "originalSha256": "5211e582a59efe1d87384a1a44711851d40226e60785bb73ab10c7e8f1762eb7",
+      "patchedSha256": "3c737e13d8e0a5283d2fa2fe131ccdc6e4cfe8828f9f62339e4aa6f9269cc2af"
+    },
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "769c3821a95fd52e9c89f25fac434c52c7e8eb6f9ecac9a7ca24390d8cc6a3e1",
+      "patchedSha256": "5a8a386c8596dcef6d3a655806694e288dfadf80efbd8e8406c5962e1615b1fa"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-parallel-picture-band.patch",
+  "sha256": "d642d650b0742841cbbf95bb8392d50ce35c9d64c8da9a3543c2036769d44551",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "5a8a386c8596dcef6d3a655806694e288dfadf80efbd8e8406c5962e1615b1fa",
+      "patchedSha256": "603f3cfe1cf045f796b14af4ff55d1907bb37f7e43ef4328198cc0b1e2780331"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "adec882ae2033aa0db5f0b374d6a7d51a4ce9acdbd1b894aab971a7dad15cfc2",
+      "patchedSha256": "9d2f71a30645cdc2ec33dd0b1ffcd98fbc35f48245c66b6db42f2a0a366dd4a0"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-stored-picture-opening-frame.patch",
+  "sha256": "985abf211b2ad135aae1467aaaef18f316b6744adb5f18915036e1fbcdeafeda",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "603f3cfe1cf045f796b14af4ff55d1907bb37f7e43ef4328198cc0b1e2780331",
+      "patchedSha256": "eec2b65ed837d095f6c0d2748b7fe2ab4316bf9c4141109b621f737b9e1104b7"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "9d2f71a30645cdc2ec33dd0b1ffcd98fbc35f48245c66b6db42f2a0a366dd4a0",
+      "patchedSha256": "772278faa53c45a2ce6c4cb2244c7783b31cee91794f205e4a40f70a7347b062"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-stored-plain-tail-frame.patch",
+  "sha256": "a66131b78baf873a51b6e347583b775b7c4bc45a2c71b08becddcf72c8e3b304",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "eec2b65ed837d095f6c0d2748b7fe2ab4316bf9c4141109b621f737b9e1104b7",
+      "patchedSha256": "9eaf76fa16133b9df7a6601917e3b505e9ccec179b66581b40863f0550ef3dec"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-resumed-nested-successor.patch",
+  "sha256": "11aa896bc66d870604b318733bf5126353cf9a73ff4a16ca961341d33bd3c714",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "9eaf76fa16133b9df7a6601917e3b505e9ccec179b66581b40863f0550ef3dec",
+      "patchedSha256": "f5c35d3ce4d2ba53ec7fbf05bfd1adaedc1840604cb8c8a05d937ec41b588dce"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "772278faa53c45a2ce6c4cb2244c7783b31cee91794f205e4a40f70a7347b062",
+      "patchedSha256": "9cc5d41ff68019280d29e0c7d7d18cb014d66b2da8d94ab1308c384242827e61"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-resumed-nested-left-anchor.patch",
+  "sha256": "b48bc19f9f845a76b86ba2635324d92e13484f8df9d514abf44f0760ae7e7025",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "9cc5d41ff68019280d29e0c7d7d18cb014d66b2da8d94ab1308c384242827e61",
+      "patchedSha256": "98fd0b94cd8eb2284bae24f79175dd6e4b957ff0c3c350614ead9553307f4883"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-confirmed-row-frame-reservation.patch",
+  "sha256": "a70f12a766f2319aab520d5a2492e78d88a3750d7185fb52fb4700d6b0d24ebf",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "f5c35d3ce4d2ba53ec7fbf05bfd1adaedc1840604cb8c8a05d937ec41b588dce",
+      "patchedSha256": "a9729e046eed15e3596a0eb146aca64729a76633cb9fe907f3dc3d7ae63f5445"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "98fd0b94cd8eb2284bae24f79175dd6e4b957ff0c3c350614ead9553307f4883",
+      "patchedSha256": "da4fcebbf1de878cc8e05cfcbf12f50009c6fc2a608519c503af40cda3e35302"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-stored-nested-row-geometry.patch",
+  "sha256": "59ca59ba63927dd3d0ddb4054c6fee66d1aa8961fc83b5ff96134f6822f85a41",
+  "sources": [
+    {
+      "path": "src/renderer/float_placement.rs",
+      "originalSha256": "d6a1822347ebc9a905bae2bc0bb090f86eb9f35f0c336a7a70ebce7bad7fde51",
+      "patchedSha256": "abc36feaae8f5b235518a2df2781c8d18b4fb44a3cfff1fff9d17d9700b52471"
+    },
+    {
+      "path": "src/renderer/height_measurer.rs",
+      "originalSha256": "3c737e13d8e0a5283d2fa2fe131ccdc6e4cfe8828f9f62339e4aa6f9269cc2af",
+      "patchedSha256": "a35d2c1d41d98622a2d7e0a0007722885191116481b8e7e6e7f1382b6da8238f"
+    },
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "a9729e046eed15e3596a0eb146aca64729a76633cb9fe907f3dc3d7ae63f5445",
+      "patchedSha256": "59e749330f41241970322aad23932f792206d69f3fefb0692f21ff2b8f6866a8"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-nested-rowspan-opening.patch",
+  "sha256": "1498f7be2e8dae79fa362af8e8d0c4b494c9284f020b7e1137eeafbec41ad06f",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "59e749330f41241970322aad23932f792206d69f3fefb0692f21ff2b8f6866a8",
+      "patchedSha256": "0bacd5d4fdd3f3c256493db5ac557536b35e1f88dfd7e52a388b81edb970ab29"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "da4fcebbf1de878cc8e05cfcbf12f50009c6fc2a608519c503af40cda3e35302",
+      "patchedSha256": "0d26ee5559de7cadbe2a36114357cf6677028bc9b2b8ce50b52f516c42f88375"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-nested-table-frame-ledger.patch",
+  "sha256": "70548b65711346a5b7673c80cc58d23cf185c06aef2db4fa5ab2127cf88895b6",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "0bacd5d4fdd3f3c256493db5ac557536b35e1f88dfd7e52a388b81edb970ab29",
+      "patchedSha256": "d0daf4bea74bcf88ebf4279e96c7f44211662e935002fe0221cff73d7465c159"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "0d26ee5559de7cadbe2a36114357cf6677028bc9b2b8ce50b52f516c42f88375",
+      "patchedSha256": "d3011655cc7f70aede96e945e112582d0dac3b0f25638e5a060976c9bb84d6c3"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-nested-terminal-frame-continuation.patch",
+  "sha256": "8240004182b8cee4b6e2ef2f8963f99036ba03401c3f780b90bf0b41e648ade7",
+  "sources": [
+    {
+      "path": "src/document_core/queries/cursor_rect.rs",
+      "originalSha256": "f352654d9627509e4d01d0266ae9c74dcae42628b7cd244ef4e8accc2ea3f58a",
+      "patchedSha256": "e7597fd66bc4190b5bdeb3f8bc3cd1430819cb0a3790c55a1794d1969e283ce0"
+    },
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "d0daf4bea74bcf88ebf4279e96c7f44211662e935002fe0221cff73d7465c159",
+      "patchedSha256": "40f86518e8046884de2465a5a71c5880d57ea10303c339452f8e82cca57c79e3"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "d3011655cc7f70aede96e945e112582d0dac3b0f25638e5a060976c9bb84d6c3",
+      "patchedSha256": "035631be2bf75329fd9bec03aea75307925615073aff3e4b6df3e11e7c83f4f8"
+    },
+    {
+      "path": "src/renderer/layout.rs",
+      "originalSha256": "d730cfbd7b5e0c45f65c76b1652dad477e767d104e7c382952377ffd7b5202e2",
+      "patchedSha256": "c6bcf99a357b88d08108aa9f2abdf96ae4a95ae42afb8bbf9b8ab874aca7e1b5"
+    },
+    {
+      "path": "src/renderer/page_number.rs",
+      "originalSha256": "44d72c36fd4706785975ccf38e165f52ae56ce9bbc6fc31a3f0bb990b294757f",
+      "patchedSha256": "e5270fd8da9a932b4a5f529b1a5d5bc5ca4002756754890e1f983b2775efc55a"
+    },
+    {
+      "path": "src/renderer/pagination/engine.rs",
+      "originalSha256": "76488e910b67f26eb8ce2db739d2fb4ada1a38aac601fa0ef058ffa1c0515287",
+      "patchedSha256": "9c5b1048292b69da991965ee1d7953c80eab671ab7421fa4cc0bfbc4dcd6fb10"
+    },
+    {
+      "path": "src/renderer/pagination.rs",
+      "originalSha256": "aad3565c2fd753ba4b85d05945c1ebf56950452a221b84483c7cafa63991b58a",
+      "patchedSha256": "80d2b036e8cda5a433960ddef1a918a45256e6b77da80221d7badbe6f8cbfe33"
+    },
+    {
+      "path": "src/renderer/typeset/notes/endnotes/measure.rs",
+      "originalSha256": "81772e430c9b601e543826548ecd34e8031f479125c8021290a14ffd632f64b7",
+      "patchedSha256": "e896b0cecf88894e622a786796d620ecc418446f92a69e499aaad4c613f6ed38"
+    },
+    {
+      "path": "src/renderer/typeset/table/continuation/fragment/emit.rs",
+      "originalSha256": "05c5d864ddae3bbd7a8d3043ad41355ee900afee6b031f5030158e2742cb5766",
+      "patchedSha256": "72f2657946bd04286e1f0b037c1f0067e5d0093de54caeb2e5142aa7bb826f6e"
+    },
+    {
+      "path": "src/renderer/typeset/table/continuation/fragment.rs",
+      "originalSha256": "bb1323c57e20b738cce22974c3c065fe52fca8ee168ae01c93aa671aa03824d5",
+      "patchedSha256": "5d7b4dca9d556970bf836b539bba9844361f83af777c95abfbebbf80b149df2d"
+    },
+    {
+      "path": "src/renderer/typeset/table/continuation.rs",
+      "originalSha256": "a1079a3446f1297fcbbd0184cfea6f6446feab30fd6d40830ddcf094b3e7e295",
+      "patchedSha256": "ac0e00a837feced472c1571d5ac28c199dfaed3b3d0f281a871965303e7e1c4f"
+    },
+    {
+      "path": "src/renderer/typeset.rs",
+      "originalSha256": "667f6f0c7dc48153110dff0936a266cdeb396084267b9dad22b0430cf5eba563",
+      "patchedSha256": "d1ff98808886a577789458d136fe0ee33447d494bd2639a0c1a5b0b6e9809333"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-original-inline-object-line.patch",
+  "sha256": "5eb887b46ce204b6a87f95a40a58a7338aa44d7b66759a1451fd3cc349b26c4f",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "40f86518e8046884de2465a5a71c5880d57ea10303c339452f8e82cca57c79e3",
+      "patchedSha256": "942b1c2536a7e56c1335222469cd551db0691b220ac0f0ecdb5748d90f594b9a"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "035631be2bf75329fd9bec03aea75307925615073aff3e4b6df3e11e7c83f4f8",
+      "patchedSha256": "31476624966840e71a50de3619fbe9a5a9be54ba92849e9898cc6dc71db0b7c8"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-nested-original-text-restart.patch",
+  "sha256": "ec5155b257b66a222ae6ed650763a4ba55f6f1988d3d70686fb070ce5e5e393b",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "942b1c2536a7e56c1335222469cd551db0691b220ac0f0ecdb5748d90f594b9a",
+      "patchedSha256": "744d4929bc4cbc510cc04339b73051acd0eab0216916d4e9926b683579a21398"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "31476624966840e71a50de3619fbe9a5a9be54ba92849e9898cc6dc71db0b7c8",
+      "patchedSha256": "4bce69280526e118e40c4a97b7f06c8d89afd7bc3a665aef039dc1973cc2bd24"
+    },
+    {
+      "path": "src/renderer/pagination.rs",
+      "originalSha256": "80d2b036e8cda5a433960ddef1a918a45256e6b77da80221d7badbe6f8cbfe33",
+      "patchedSha256": "2416e94193e330d26d64668ae0100df62793b8d0a097bde3626a2211e2bc345e"
+    },
+    {
+      "path": "src/renderer/typeset/table/continuation/fragment/emit.rs",
+      "originalSha256": "72f2657946bd04286e1f0b037c1f0067e5d0093de54caeb2e5142aa7bb826f6e",
+      "patchedSha256": "a467c103c6a9d255c5f27bdb26cc5482d8ff96a72e4987d3ec6609697195f6ec"
+    },
+    {
+      "path": "src/renderer/typeset/table/continuation/fragment.rs",
+      "originalSha256": "5d7b4dca9d556970bf836b539bba9844361f83af777c95abfbebbf80b149df2d",
+      "patchedSha256": "e09d8a471ef635b5a7336ff2d27feb2cb8792c60bd19fb7b4bc7aa052aef2416"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-nested-restart-frame-ownership.patch",
+  "sha256": "14cf35511f44b09f75d2d5d00b7c61f4291dbdfc86349ae8ceae25329478fc24",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "744d4929bc4cbc510cc04339b73051acd0eab0216916d4e9926b683579a21398",
+      "patchedSha256": "011c47e076bae1c01a9ad1715fd6cec3856f8b2b6e2e97ecfb8df5bdb85a11a5"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "4bce69280526e118e40c4a97b7f06c8d89afd7bc3a665aef039dc1973cc2bd24",
+      "patchedSha256": "514e8440f47b39363282d636dcd7774134571ad79753637e7c54d95615f9b07b"
+    },
+    {
+      "path": "src/renderer/typeset/table/continuation/fragment/emit.rs",
+      "originalSha256": "a467c103c6a9d255c5f27bdb26cc5482d8ff96a72e4987d3ec6609697195f6ec",
+      "patchedSha256": "49209ea9fa00f80d22dffc06227d139ed90d62b7e8650439791fa701b9e4b669"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-closed-inline-row-ownership.patch",
+  "sha256": "094fc7b181f69715d9bc39df3461e566083f71a595bfdc879e28da1487cf6c11",
+  "sources": [
+    {
+      "path": "src/renderer/float_placement.rs",
+      "originalSha256": "abc36feaae8f5b235518a2df2781c8d18b4fb44a3cfff1fff9d17d9700b52471",
+      "patchedSha256": "9e7989a1ef39834038ffc88c5aea733d9e20ce9e736cb1d86935f98aad672ac7"
+    },
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "011c47e076bae1c01a9ad1715fd6cec3856f8b2b6e2e97ecfb8df5bdb85a11a5",
+      "patchedSha256": "45a628028dbfb71ffa878c9a1bbd89cb0988a5444f932570953a518f8c947048"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "514e8440f47b39363282d636dcd7774134571ad79753637e7c54d95615f9b07b",
+      "patchedSha256": "f62c28fac5b274e99995398d3e7fd44584a8355ac88599832a4a33541f90d669"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-anchored-float-restart-frame.patch",
+  "sha256": "cd039b8c239a97ad4f1098b750b727ae734935f91a6e465537722255291178b3",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "45a628028dbfb71ffa878c9a1bbd89cb0988a5444f932570953a518f8c947048",
+      "patchedSha256": "7971b51f648161c3b3bdfcb93d09d5c3d2effcbd3396fcedbcc1c839a315d08d"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "f62c28fac5b274e99995398d3e7fd44584a8355ac88599832a4a33541f90d669",
+      "patchedSha256": "b20694f6d7b48113891711463caf4b8944dfbeff8590065ebffdcee8aedc73f7"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-plain-leaf-source-frame.patch",
+  "sha256": "a7ceecde3897be5720c95782a4cd298c85636500b52d780a34d4dad903a0dfec",
+  "sources": [
+    {
+      "path": "src/renderer/float_placement.rs",
+      "originalSha256": "9e7989a1ef39834038ffc88c5aea733d9e20ce9e736cb1d86935f98aad672ac7",
+      "patchedSha256": "9baca63ba3fe6c6b06a9a7221047a0bfff3b422c4d32732ec91a0a2c3989f494"
+    },
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "7971b51f648161c3b3bdfcb93d09d5c3d2effcbd3396fcedbcc1c839a315d08d",
+      "patchedSha256": "2018cc0923ae9ee519b5d2334bcff5b53e23b4abc969e89f5dca643d78abdd08"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "b20694f6d7b48113891711463caf4b8944dfbeff8590065ebffdcee8aedc73f7",
+      "patchedSha256": "0e110d968e90cb303f9db5d1f43d2f6f104ac82e7d45943eef45e05ac06c3f13"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-parallel-plain-source-restart.patch",
+  "sha256": "12a29d8187f241f0965bbe1551c7066385aff7e7a051f90823dde7427c7afd5c",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "2018cc0923ae9ee519b5d2334bcff5b53e23b4abc969e89f5dca643d78abdd08",
+      "patchedSha256": "d744482617120562a2b0506ac39de9ecf633adef283b7ed74bdcc1517396e986"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "0e110d968e90cb303f9db5d1f43d2f6f104ac82e7d45943eef45e05ac06c3f13",
+      "patchedSha256": "7704f6adeecdde001bb9f290e481bda1bd89fedb4c8c2ed8576e353f8aff91a9"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-closed-object-row-frame.patch",
+  "sha256": "7c735c848a142192dccb0a03d6af9534406e019d164a6a414139ab2e3c71acdc",
+  "sources": [
+    {
+      "path": "src/renderer/float_placement.rs",
+      "originalSha256": "9baca63ba3fe6c6b06a9a7221047a0bfff3b422c4d32732ec91a0a2c3989f494",
+      "patchedSha256": "5a190794d8bb6ce6059acb2804f9afac0db358d78c9977fbd3d44f105600ecaa"
+    },
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "d744482617120562a2b0506ac39de9ecf633adef283b7ed74bdcc1517396e986",
+      "patchedSha256": "ed2ffd832daaa5d3ce759ca16a86c08531698effcfcdd4aef3460dbd763bff47"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-terminal-nested-row-prefix.patch",
+  "sha256": "fef5619b422b29e9a0026417d07158902a85ceaaf202a528df8cd0d9040cfff9",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "ed2ffd832daaa5d3ce759ca16a86c08531698effcfcdd4aef3460dbd763bff47",
+      "patchedSha256": "f399700d47d04bdf9af06bd763cd10496a8f23128309898a8096263e03a2f040"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "7704f6adeecdde001bb9f290e481bda1bd89fedb4c8c2ed8576e353f8aff91a9",
+      "patchedSha256": "c38eea074eefa33d166669bd54d9a2ba61137a8ceab6dc296506e2971158a3c3"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-anchored-opening-zone-visibility.patch",
+  "sha256": "0f528a25fdb425654304f590f64ae05373f34713ff3a2c7a3f8f63ee669b19ae",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "f399700d47d04bdf9af06bd763cd10496a8f23128309898a8096263e03a2f040",
+      "patchedSha256": "ea9a5b240094d5c91c4ab2451833d48b056aa82ada5cc9e0cea696ebf93d8095"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "c38eea074eefa33d166669bd54d9a2ba61137a8ceab6dc296506e2971158a3c3",
+      "patchedSha256": "d393bf4e82cb9ad92151960241ffdb53c6e8c113eb9af0d9f7dff025e8d5fc14"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-declared-row-fragment-balance.patch",
+  "sha256": "187f58f75dc988395786170eb98d7f1f1db6ffc6c5fec085ce643aa45c4f0261",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "ea9a5b240094d5c91c4ab2451833d48b056aa82ada5cc9e0cea696ebf93d8095",
+      "patchedSha256": "d729b10c39acfbcf4fe3f10f7ed91c6ad3e0f9aeeadc23c1aed36add96a5d450"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "d393bf4e82cb9ad92151960241ffdb53c6e8c113eb9af0d9f7dff025e8d5fc14",
+      "patchedSha256": "6ecd5db334dbf2abebf5f2b5cd5b17a8e30646cd5f07415f1c4bad88e5b0cf0b"
+    },
+    {
+      "path": "src/renderer/pagination.rs",
+      "originalSha256": "2416e94193e330d26d64668ae0100df62793b8d0a097bde3626a2211e2bc345e",
+      "patchedSha256": "8ba278b11560401c31bbbca3acba31957a6ebb99b914c5e4586ac8f37573cf14"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-inline-declared-row-frame.patch",
+  "sha256": "e138faea00d29536f7bc4a0a3d209e20ecee90aecd0638838cdeaefee23f1076",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "d729b10c39acfbcf4fe3f10f7ed91c6ad3e0f9aeeadc23c1aed36add96a5d450",
+      "patchedSha256": "b360df99ce15bbcced4d74e3784ccfbfe9b58b802601f43679188faf94d0ad55"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-source-frame-height-reconciliation.patch",
+  "sha256": "601af51283ccd644176da61ababa0a262c80de9857e2048a113fb06f006201c9",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "b360df99ce15bbcced4d74e3784ccfbfe9b58b802601f43679188faf94d0ad55",
+      "patchedSha256": "d71d1044d32a574c3bda36c507a77dba12bf1360b1fa92c9825267b77f27374d"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "6ecd5db334dbf2abebf5f2b5cd5b17a8e30646cd5f07415f1c4bad88e5b0cf0b",
+      "patchedSha256": "eba2d8a3bf99f93c118fc4665b8815a9e0c761a64f44bd84165d590349a2d2f8"
+    },
+    {
+      "path": "src/renderer/pagination.rs",
+      "originalSha256": "8ba278b11560401c31bbbca3acba31957a6ebb99b914c5e4586ac8f37573cf14",
+      "patchedSha256": "65f55a7816627a01efdb806e8351fe8996aa9692fcfdc0e0e34a596f2375afd2"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-complete-float-row-frame.patch",
+  "sha256": "261d215c1db6cdac372be7852753a728c66a2abe5c3becf99e1782b5386f9718",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "d71d1044d32a574c3bda36c507a77dba12bf1360b1fa92c9825267b77f27374d",
+      "patchedSha256": "28bce3f591a5e35c10428c0cc1279c6bfae2372084c037d638acfc50d304074f"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-parallel-declared-source-frames.patch",
+  "sha256": "840c02b4a65eed6210da1d78749827dfcd1bcd6fa6aa7a592a5a2dc2804154a9",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "28bce3f591a5e35c10428c0cc1279c6bfae2372084c037d638acfc50d304074f",
+      "patchedSha256": "40089705a6ff0eecd661f3167d5c05cb9ef22734eced934f955d7d477e82a31e"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-terminal-peer-leaf-frame.patch",
+  "sha256": "3ad22727cf7615b744d5d95f24abc5d173b9935a5299ef3ed4ccaaa8e03d183e",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "40089705a6ff0eecd661f3167d5c05cb9ef22734eced934f955d7d477e82a31e",
+      "patchedSha256": "ff83bc7d0d123e28d45f085774f36417df6d4eb3da9dadb194c61f95c4dc98f0"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "eba2d8a3bf99f93c118fc4665b8815a9e0c761a64f44bd84165d590349a2d2f8",
+      "patchedSha256": "a7dd5d28b857fc93cd058fd438c19d014b2c7bbdc94fd95b323733a93b73a248"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-resumed-peer-frame-margins.patch",
+  "sha256": "fd034013bdd507206651e4ba16b95cf105d275c9c0f41ae11e63f52db2ed262d",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "ff83bc7d0d123e28d45f085774f36417df6d4eb3da9dadb194c61f95c4dc98f0",
+      "patchedSha256": "60047882946fbf851385d6fac326fb65eca5a8d9bcd33efb88d63887bb762cbf"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "a7dd5d28b857fc93cd058fd438c19d014b2c7bbdc94fd95b323733a93b73a248",
+      "patchedSha256": "60194de1d884bcaa7acb6baf6da10454b004b1ed11614fdde34a4c6c241e8d28"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-source-inline-tab-and-float-anchors.patch",
+  "sha256": "0f8968eb35ef763c6a3faeae8b38f77a44b958afca5687b761dff44808a42261",
+  "sources": [
+    {
+      "path": "src/renderer/layout/paragraph_layout.rs",
+      "originalSha256": "2aa9dca69eb9805a4484a088f611b6efc9037295b24224e317cea6d977bb250b",
+      "patchedSha256": "31581437036e6281f9ea8b58702ed539745a0f5001a7bc5fe92e63b05ed68d3b"
+    },
+    {
+      "path": "src/renderer/layout.rs",
+      "originalSha256": "c6bcf99a357b88d08108aa9f2abdf96ae4a95ae42afb8bbf9b8ab874aca7e1b5",
+      "patchedSha256": "23b6ae78d6562e9b4635c211df169da2f2cbfd245b1ab50226adae8a841ead55"
+    },
+    {
+      "path": "src/renderer/page_number.rs",
+      "originalSha256": "e5270fd8da9a932b4a5f529b1a5d5bc5ca4002756754890e1f983b2775efc55a",
+      "patchedSha256": "8253178571b9c0dda5476d0faf98df96af655588c108b4d310db8acb88113573"
+    },
+    {
+      "path": "src/renderer/pagination/engine.rs",
+      "originalSha256": "9c5b1048292b69da991965ee1d7953c80eab671ab7421fa4cc0bfbc4dcd6fb10",
+      "patchedSha256": "f380ac2273f245567df66e86f5715649df556bf3824068538b9a6621c7debd8b"
+    },
+    {
+      "path": "src/renderer/typeset/state/finalize.rs",
+      "originalSha256": "de76f5d9b7828d0be9890f5e3db8e3b923ad357963ea70c059dec5d2219351ad",
+      "patchedSha256": "5472d90878b5cb33a805f35395ee108a8c19fa51a274f238f86199707d96ff26"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-terminal-inline-frame.patch",
+  "sha256": "9527b2fe50dd8b63826fd208adb02283c4d98deae98d4aad97107aa1db9c3d68",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "60047882946fbf851385d6fac326fb65eca5a8d9bcd33efb88d63887bb762cbf",
+      "patchedSha256": "c14f756e6ab7b2f8e090742069a443ba8ed6a60dbaa84f79798ca9c588d389bd"
+    },
+    {
+      "path": "src/renderer/layout.rs",
+      "originalSha256": "23b6ae78d6562e9b4635c211df169da2f2cbfd245b1ab50226adae8a841ead55",
+      "patchedSha256": "0d17e833c6fb352c1c846ad4e5b307af62f2f9d678ac702a4722b166c4bb6181"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-print-faux-bold-text.patch",
+  "sha256": "bca1872751f432bd3d78d98f120300c52624b4e756eafafe4fc698070054ae7d",
+  "sources": [
+    {
+      "path": "src/renderer/svg.rs",
+      "originalSha256": "bb938cb2547addd9550ed716ea2c2b682c0cda4e3817222f4390bc202cb9cabd",
+      "patchedSha256": "a4671ff603bc5b733930d64d1f08ce1d2d4c7eb53c0e291c15e8c7dc316a996c"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-paragraph-right-float-frame.patch",
+  "sha256": "c07d85ecc20fb3f5e0d5bcff5a7c7b04ef8824eec4fc762a8d21b9c9afbb96fe",
+  "sources": [
+    {
+      "path": "src/renderer/float_placement.rs",
+      "originalSha256": "5a190794d8bb6ce6059acb2804f9afac0db358d78c9977fbd3d44f105600ecaa",
+      "patchedSha256": "3447b7482a5fcfef6c23c02cd9bb7b60d2fc784b470b909876d99ede9246419e"
+    },
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "c14f756e6ab7b2f8e090742069a443ba8ed6a60dbaa84f79798ca9c588d389bd",
+      "patchedSha256": "818239da8bc783de6db02a2112ae239b3dc499e49e53da148211dd8b4523a653"
+    },
+    {
+      "path": "src/renderer/layout.rs",
+      "originalSha256": "0d17e833c6fb352c1c846ad4e5b307af62f2f9d678ac702a4722b166c4bb6181",
+      "patchedSha256": "145966fc346afb5d3e0b2389468cb70889746b0a8bb2d68c2042eb11a3775da7"
+    },
+    {
+      "path": "src/renderer/typeset/controls/empty_float.rs",
+      "originalSha256": "60f45e29d40a79386f6811c5cfcd85084a210227a4f56b8360e350c508a202e3",
+      "patchedSha256": "75cb6cea26aa495c55f0f783d6cc5dfecfc3c3c3978ee7c28df34ad077050bff"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-paired-rowbreak-opening-frame.patch",
+  "sha256": "57c59bd90c11529ce816cd5817db10387bc402c72fe6bf8e6ca8ec4562931572",
+  "sources": [
+    {
+      "path": "src/renderer/float_placement.rs",
+      "originalSha256": "3447b7482a5fcfef6c23c02cd9bb7b60d2fc784b470b909876d99ede9246419e",
+      "patchedSha256": "5be7cfd022d5c0028c43a67975b87ff2ef8db80a63548142975003461a5498fb"
+    },
+    {
+      "path": "src/renderer/layout/table_partial.rs",
+      "originalSha256": "60194de1d884bcaa7acb6baf6da10454b004b1ed11614fdde34a4c6c241e8d28",
+      "patchedSha256": "85c38e35247a74f2d3c8966b273ef8d7aba302a0fb84dd1f1e483690b0e2439f"
+    },
+    {
+      "path": "src/renderer/typeset/table/continuation/fragment/emit.rs",
+      "originalSha256": "49209ea9fa00f80d22dffc06227d139ed90d62b7e8650439791fa701b9e4b669",
+      "patchedSha256": "a6e26ccbfd0d62a86c57c355711f48d995500b46b532d0a35e09d73ca1ef8cdd"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-nested-column-left-anchor.patch",
+  "sha256": "3c1b29473dadb3687db166686e062404b5f47921b53c9777bbd28e0d475fa78c",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "818239da8bc783de6db02a2112ae239b3dc499e49e53da148211dd8b4523a653",
+      "patchedSha256": "390e165ea2e9f61f04f91a0da20fcbf8e8b2b4289748d15ea7eb54733764d131"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-print-font-snapshot.patch",
+  "sha256": "0716253e9ec971f7d826edc43c7285afe7e3c952c3e2a328c338595cae5b8f2e",
+  "sources": [
+    {
+      "path": "src/document_core/font_environment.rs",
+      "originalSha256": "6a4ad7997804081f55169ed2442af489a12e5fd7c9d92218e89fa42b039c30ef",
+      "patchedSha256": "150b3165edcfced165b9f941a9b6d4bc091ba13a2756b736543a1e92a48095b1"
+    },
+    {
+      "path": "src/wasm_api.rs",
+      "originalSha256": "67ba646b399ada1585b380ae62dc28eac75df7458aca6f405989add654693244",
+      "patchedSha256": "e14aeda012f929bdad22d81b370a324a7ca3e2f7d93ce98ad8b530028a5dc650"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-terminal-object-only-float-origin.patch",
+  "sha256": "cdc6704a510cf958a020e52444e79fc57855816d5998f786dc479c1c52e67b9c",
+  "sources": [
+    {
+      "path": "src/renderer/layout.rs",
+      "originalSha256": "145966fc346afb5d3e0b2389468cb70889746b0a8bb2d68c2042eb11a3775da7",
+      "patchedSha256": "9e5fbf2b8fe73d161d3524c15e972a7a6e1c5db3d8c973e5080655404e40a0fc"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-adjacent-source-table-anchors.patch",
+  "sha256": "f8d3b964e379f22874f522dae504fe4f77a7afca5594b06ebcd3902945f3f7c2",
+  "sources": [
+    {
+      "path": "src/renderer/layout.rs",
+      "originalSha256": "9e5fbf2b8fe73d161d3524c15e972a7a6e1c5db3d8c973e5080655404e40a0fc",
+      "patchedSha256": "5f0abd6dd78e3774929f0fc6f2599234d4407aeff1f959d4062e11ebbd754a16"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-terminal-cut-merged-frame.patch",
+  "sha256": "90ef6edd39338176331f851366951c6fc0fd1b0472aea18f00d7d7c54e14e65d",
+  "sources": [
+    {
+      "path": "src/renderer/typeset/table/continuation/fragment/emit.rs",
+      "originalSha256": "a6e26ccbfd0d62a86c57c355711f48d995500b46b532d0a35e09d73ca1ef8cdd",
+      "patchedSha256": "ccf603b6b01ce03bd80021cfa350ec06572c60232f884cc0b3b74dc63e27f28e"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-hwpx-owned-table-insets-and-reset-suffix.patch",
+  "sha256": "30508889e2cf90c10dcb8c944611e4ce46a106a68cb428b1f32f6bd93e867988",
+  "sources": [
+    {
+      "path": "src/renderer/composer.rs",
+      "originalSha256": "22b2bfe0e80332d1696babd6ae413aab42ad778bbb83250ae83dce9902912d7b",
+      "patchedSha256": "c4522b8fc150b55c5e57aa04b4ae9b946e63fd1c214be0fde60315539b1e1666"
+    },
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "390e165ea2e9f61f04f91a0da20fcbf8e8b2b4289748d15ea7eb54733764d131",
+      "patchedSha256": "b75a854d7962c76b6aa4aa4cd30110ce125a38d0895b0efae2592a4b8373f691"
+    },
+    {
+      "path": "src/renderer/layout.rs",
+      "originalSha256": "5f0abd6dd78e3774929f0fc6f2599234d4407aeff1f959d4062e11ebbd754a16",
+      "patchedSha256": "9f9fcae00d8dc0a9bb73a98449f1854b288c64129d2a68799e12ea188453aec3"
+    },
+    {
+      "path": "src/renderer/typeset.rs",
+      "originalSha256": "d1ff98808886a577789458d136fe0ee33447d494bd2639a0c1a5b0b6e9809333",
+      "patchedSha256": "d022ae8e04fa9fb00d71689e87bcd6d9766b008d202ad5208b9734dd9a800297"
+    }
+  ]
 }
 ];
 const help = `Usage: node scripts/build-patched-core.mjs
@@ -782,7 +1519,17 @@ if (!/^rustc 1\.93\.1\b/.test(versions.rustc) || !/^cargo 1\.93\.1\b/.test(versi
     || !/^wasm-bindgen 0\.2\.127\b/.test(versions.wasmBindgen)) throw Error('Required tool versions do not match: ' + JSON.stringify(versions));
 const buildArgs = ['build', '--lib', '--target', 'wasm32-unknown-unknown', '--release'];
 if (args.offline) buildArgs.push('--offline');
-await run(cargo, buildArgs, {cwd: sourceRoot, env: {CARGO_TARGET_DIR: targetDir}});
+const remapRoots = [
+  [sourceRoot, '/pwh/source'],
+  [targetDir, '/pwh/target'],
+  [path.resolve(process.env.CARGO_HOME || path.join(os.homedir(), '.cargo')), '/cargo'],
+  [path.resolve(process.env.RUSTUP_HOME || path.join(os.homedir(), '.rustup')), '/rustup'],
+];
+const remapFlags = remapRoots.map(([local, portable]) => '--remap-path-prefix=' + local + '=' + portable);
+await run(cargo, buildArgs, {cwd: sourceRoot, env: {
+  CARGO_TARGET_DIR: targetDir,
+  CARGO_ENCODED_RUSTFLAGS: remapFlags.join('\x1f'),
+}});
 
 const auditLock = String.raw`
 from pathlib import Path
@@ -817,7 +1564,7 @@ await fs.copyFile(path.join(sourceRoot, 'LICENSE'), path.join(outputRoot, 'LICEN
 await fs.writeFile(path.join(outputRoot, 'BUILD-RECORD.json'), JSON.stringify({
   schemaVersion: 1, id: 'rhwp-0.8.7-table-layout-fixes-candidate',
   ...pinned, patches, versions, target: 'wasm32-unknown-unknown', features: 'upstream defaults',
-  buildArgs, lockAudit, files,
+  buildArgs, remappedSourcePaths: true, lockAudit, files,
   installation: 'Not installed. Candidate requires regression checks and a new immutable engine release.',
 }, null, 2) + '\n');
 process.stdout.write('Separate candidate built and dependency drift checks passed. Run synthetic geometry/export/undo checks before packaging.\n');

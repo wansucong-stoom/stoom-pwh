@@ -1,0 +1,53 @@
+--- a/src/renderer/layout.rs
++++ b/src/renderer/layout.rs
+@@ -12601,6 +12601,50 @@
+                                     || node.bbox.y + node.bbox.height <= top))
+                             .then_some(top)
+                     }).flatten();
++                // An object-only terminal host can own the source line origin
++                // even when its preceding inline box has paragraph spacing.
++                let saved_empty_terminal_float_top = (!is_tac
++                    && profile.hwpx_stored_layout() && !profile.session_edited()
++                    && t.common.text_wrap == TextWrap::TopAndBottom
++                    && t.common.vert_rel_to == VertRelTo::Para
++                    && t.common.vert_align == crate::model::shape::VertAlign::Top
++                    && t.common.flow_with_text && !t.common.allow_overlap
++                    && t.caption.is_none() && t.outer_margin_top >= 0
++                    && para.text.trim().is_empty()
++                    && !para.stored_text_partition_is_dirty() && !para.source_frame_reflowed
++                    && matches!(para.controls.as_slice(), [Control::Table(_)]))
++                    .then(|| {
++                        use crate::model::paragraph::{ColumnBreakType, LineSeg};
++                        let previous = paragraphs.get(para_index.checked_sub(1)?)?;
++                        let next = paragraphs.get(para_index + 1)?;
++                        let [line] = para.line_segs.as_slice() else { return None; };
++                        let [Control::Table(preceding)] = previous.controls.as_slice() else { return None; };
++                        let before = saved_inline_table_owner(previous, preceding)?;
++                        if next.column_type != ColumnBreakType::Page
++                            || next.line_segs.first()?.vertical_pos < 0
++                            || line.tag & LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0
++                            || line.line_height <= 0 || line.vertical_pos <= 0
++                            || !(0..line.line_height).contains(&signed_hwpunit(t.common.vertical_offset))
++                        { return None; }
++                        let advance = before.vertical_pos.checked_add(before.line_height)?
++                            .checked_add(before.line_spacing)?;
++                        let spacing = styles.para_styles.get(previous.para_shape_id as usize)?.spacing_after
++                            + para_style?.spacing_before;
++                        let remaining = hwpunit_to_px(line.vertical_pos.checked_sub(advance)?, self.dpi);
++                        if spacing <= 0.0 || (remaining - spacing).abs() > hwpunit_to_px(1, self.dpi) {
++                            return None;
++                        }
++                        let top = col_area.y + hwpunit_to_px(
++                            line.vertical_pos.checked_add(i32::from(t.outer_margin_top))?, self.dpi);
++                        let height = hwpunit_to_px(i32::try_from(t.common.height).ok()?, self.dpi);
++                        (height > 0.0 && top + height <= col_area.y + col_area.height
++                            && (0.0..=spacing).contains(&(top - table_y_start))
++                            && col_node.children.iter().all(|node|
++                                !matches!(node.node_type, RenderNodeType::Table(_))
++                                    || node.bbox.y + node.bbox.height <= top))
++                            .then_some(top)
++                    }).flatten();
++                let saved_terminal_float_top = saved_terminal_float_top.or(saved_empty_terminal_float_top);
+                 let source_inline_top = (is_tac && inline_pos.is_none()
+                     && profile.hwpx_stored_layout() && !profile.session_edited()
+                     && !self.render_normalization.borrow().table_text_reflowed(t))
