@@ -1,25 +1,25 @@
 {
   "kind": "studio-inline",
-  "version": "0.6.48",
+  "version": "0.6.49",
   "upstreamVersion": "0.8.7",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "files": {
-    "editor.js": "57814c100e51199fbd10d4439bd7c30875648044078f8550ea4abd2f80be79ef",
+    "editor.js": "5497d22a835f76d2f8560c99de48ef60ba5e32f9936138ed060ea670e18744fd",
     "rhwp-studio.css": "0c7f20ff8eb51405332746667bd032ec8dd59e97d592a78e438b30dee5e89859",
     "editor-body.html": "afc04317043d01ef99fb91eb9bce88723fac82491bf42473e4b30436e5066ceb"
   },
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "common",
-    "sha256": "20086eb070434aac339032d6db25009c1b8dd6e0fff77fffa85cb9a99f509daa",
+    "sha256": "7789196e791b18d0b312ccc19b6ad2fac8ae7f28702b8f5cc61d9cf6b3a5ce1e",
     "files": [
       {
         "path": "package.json",
-        "sha256": "a02232aa15ba327b5cf3e577fa994cc54885a1900c116918bdc06d19b51a1c8b"
+        "sha256": "32f22eddca17adfca8dcbf044472dd4bf4f9eab62862f8f0f20981a47da2d5d0"
       },
       {
         "path": "scripts/build-inline.mjs",
-        "sha256": "5a8675015fa0b082ed75506a9039626b42f668fc53b16a13fe6a19b3f71af843"
+        "sha256": "3b6357a36be12b436f303d84f1045294a24c624082693512cfa80dcd506f28a5"
       },
       {
         "path": "scripts/bundle-client.mjs",
@@ -27,7 +27,7 @@
       },
       {
         "path": "scripts/editor-build-contract.mjs",
-        "sha256": "b45b0657ca2cd936ee01f5ce19deffd335325b11a876b5dee16328472f7f327c"
+        "sha256": "962e630a95fe9fd5473768a504bc546e1b350a659079cd859b31ce46593811d7"
       },
       {
         "path": "scripts/patch-body-cursor-contract.mjs",
@@ -40,6 +40,10 @@
       {
         "path": "scripts/patch-hancom-key-aliases.mjs",
         "sha256": "f6dbaa20c42136842b16f55f4903aa47c723dd95b84d1eef24b1db915c94b6a0"
+      },
+      {
+        "path": "scripts/patch-hancom-key-contexts.mjs",
+        "sha256": "af100d1ab6e4d3be076f6cea4968f67f0f2c5c6ec9c44ce836b2fe4ff118c90f"
       },
       {
         "path": "scripts/patch-object-properties.mjs",

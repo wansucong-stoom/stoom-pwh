@@ -8,6 +8,8 @@
 <a id="cause-and-scope"></a>
 ## 원인과 적용 범위
 
+한글 호환 단축키의 편집 상태 분기는 [Pwh 공통 Studio 빌드 패치](../../scripts/patch-hancom-key-contexts.mjs)에 있습니다. 고정 크기 표 조절과 행 삭제는 r22 코어 API를 사용합니다. [편집기 변경과 적용 범위](../RHWP-DIFFERENCES.md#한글-호환-단축키의-편집-상태-구분)
+
 <a id="nested-text-capacity-continuation"></a>
 ### 75번 패치의 중첩 표 연속 조각
 

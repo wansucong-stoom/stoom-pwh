@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pluginVersion": "0.6.48",
+  "pluginVersion": "0.6.49",
   "copyPolicy": "Original bytes; .test.mjs filenames renamed to .check.mjs for staged-only discovery.",
   "files": [
     {
@@ -48,8 +48,8 @@
     {
       "path": "standalone-pwh/app.js",
       "source": "standalone-pwh/app.js",
-      "size": 51569,
-      "sha256": "116cdb5efb6c1fb92c1713dfe7b0d2de1b982fafbecd04ba1b7c82df49f9c1ec"
+      "size": 51631,
+      "sha256": "c899f5c699f1f9c7abb233504adcc0fee631b50b6b558a6357b19eb7b0ea2679"
     },
     {
       "path": "standalone-pwh/build-desktop-editor.mjs",
@@ -61,7 +61,7 @@
       "path": "standalone-pwh/build-msi.mjs",
       "source": "standalone-pwh/build-msi.mjs",
       "size": 16391,
-      "sha256": "b86c2daaaad970387cc9ef6dddd3da3045f714c3b51e9c0334287b09f495ca05"
+      "sha256": "d006d4d84ac84e126624593268ef3bdbd4f992983838d2cd864b9060be9e3d2e"
     },
     {
       "path": "standalone-pwh/build-native-launcher.mjs",
@@ -73,7 +73,7 @@
       "path": "standalone-pwh/build-offline.mjs",
       "source": "standalone-pwh/build-offline.mjs",
       "size": 8191,
-      "sha256": "13e63ef130c2925b73777456d87f5fc9c57c6562ae4dd169b8138ad6aa6ebb73"
+      "sha256": "999ae5ee8ce37939c6d24b970613b9d79b63291a4ec418d084ecdeece64c91d3"
     },
     {
       "path": "standalone-pwh/build-stoom-icon.mjs",
@@ -102,14 +102,14 @@
     {
       "path": "standalone-pwh/client/editor.js",
       "source": "standalone-pwh/client/editor.js",
-      "size": 2716940,
-      "sha256": "0c77dcf0b37ec3a07d5f0989cc65eff87f6293d269e4a1bbfef340d900d8edd0"
+      "size": 2723277,
+      "sha256": "3f9b97b5949ef114ac2d5a8ee89f3da7698d9172fe827d83c709e2ee522c3a94"
     },
     {
       "path": "standalone-pwh/client/manifest.json",
       "source": "standalone-pwh/client/manifest.json",
-      "size": 11327,
-      "sha256": "0c0ff161c219ea6dbe9548e6ddc4a1f7e099fcd3d0d38b9db5e1fd741e1fd69f"
+      "size": 11486,
+      "sha256": "e44a4f0b80cf90b31fbcffdd9cb5b287bd00fba8411912d8df922834f6e699ff"
     },
     {
       "path": "standalone-pwh/codex-agent.mjs",
@@ -499,7 +499,7 @@
       "path": "standalone-pwh/version.json",
       "source": "standalone-pwh/version.json",
       "size": 21,
-      "sha256": "9d2491f3ace5537c6e5ad31b8e6ebd8cac2c6a87c1bcca1a8fad1e014c44baef"
+      "sha256": "01047991554b6e67bfe0a6067eef2e0d0e1bc2c3343ff4b23d4f9136ba56873f"
     },
     {
       "path": "standalone-pwh/window-close-controller.mjs",
