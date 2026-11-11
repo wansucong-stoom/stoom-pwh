@@ -16,10 +16,18 @@ test('Desktop restores initial editor focus without taking focus from chat', {
  const browser=await chromium.launch({headless:true,executablePath:process.env.PWH_BROWSER_EXECUTABLE});
  try{
   const page=await browser.newPage({viewport:{width:1280,height:900}});
+  const startupErrors=[];page.on('pageerror',error=>startupErrors.push(error.message));
   // Reproduce an editor trying to focus while its native window is not ready.
   await page.addInitScript(()=>{const focus=HTMLElement.prototype.focus;window.__pwhTestFocusAllowed=false;HTMLElement.prototype.focus=function(...args){if(this.getAttribute('aria-label')==='문서 편집 입력'&&!window.__pwhTestFocusAllowed)return;return focus.apply(this,args);};});
   await page.goto(app.url);
-  await page.getByRole('button',{name:'새 문서 빈 문서에서 시작하기'}).click();
+  // This case verifies editor/chat focus, not the composed home-card label.
+  // Keep Playwright's visibility/actionability checks and diagnose startup failures.
+  try{await page.locator('#home-new').click();}
+  catch(error){error.message+='\nWorkspace startup: '+JSON.stringify(await page.evaluate(()=>({
+   homeHidden:document.getElementById('home-view')?.hidden,
+   status:document.getElementById('workspace-status')?.textContent,
+   button:document.getElementById('home-new')?.outerHTML,
+  })))+'; pageErrors: '+JSON.stringify(startupErrors);throw error;}
   const child=page.frameLocator('#documents iframe').first(),editor=child.frameLocator('#editor');
   await waitForInlineEditor(editor);
   await editor.locator('body').evaluate(()=>window.__pwhTestFocusAllowed=true);
