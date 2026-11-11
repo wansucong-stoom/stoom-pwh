@@ -1,0 +1,333 @@
+--- a/src/document_core/commands/object_ops/table.rs
++++ b/src/document_core/commands/object_ops/table.rs
+@@ -858,6 +858,41 @@
+             );
+         }
+ 
++        let source = self.document.sections[section_idx].paragraphs[para_idx].clone();
++        let table = self.build_inline_table_model(section_idx, &source, char_offset,
++            row_count, col_count, col_widths_hu, row_heights_hu, None)?;
++
++        self.document.sections[section_idx].raw_stream = None;
++        let ctrl_idx = Self::insert_inline_table_model(
++            &mut self.document.sections[section_idx].paragraphs[para_idx], table, char_offset);
++
++        // rebuild
++        self.rebuild_section(section_idx);
++
++        self.event_log.push(DocumentEvent::TableRowInserted {
++            section: section_idx,
++            para: para_idx,
++            ctrl: ctrl_idx,
++        });
++        // 표 바로 뒤의 논리적 오프셋 계산
++        let logical_after = crate::document_core::helpers::text_to_logical_offset(
++            &self.document.sections[section_idx].paragraphs[para_idx],
++            char_offset,
++        ) + 1;
++        Ok(crate::document_core::helpers::json_ok_with(&format!(
++            "\"paraIdx\":{},\"controlIdx\":{},\"logicalOffset\":{}",
++            para_idx, ctrl_idx, logical_after
++        )))
++    }
++    /// Build a new table from the same model defaults in body and cell contexts.
++    fn build_inline_table_model(
++        &mut self, section_idx: usize, current_para: &Paragraph, char_offset: usize,
++        row_count: u16, col_count: u16, col_widths_hu: Option<&[u32]>,
++        row_heights_hu: Option<&[u32]>, available_width: Option<u32>,
++    ) -> Result<crate::model::table::Table, HwpError> {
++        use crate::model::paragraph::{CharShapeRef, LineSeg};
++        use crate::model::style::{BorderFill, BorderLine, BorderLineType, CenterLine, DiagonalLine, Fill};
++        use crate::model::table::{Cell, Table, TablePageBreak};
+         // ── 인라인 TAC 표 생성 ──
+ 
+         let instance_id = super::super::clone_identity::next_instance_id(&self.document)?;
+@@ -868,6 +903,8 @@
+         let content_width =
+             (pd.width as i32 - pd.margin_left as i32 - pd.margin_right as i32 - outer_margin_lr)
+                 .max(7200) as u32;
++
++        let content_width = available_width.map(|w| w.saturating_sub(outer_margin_lr as u32).max(1)).unwrap_or(content_width);
+ 
+         // 열 폭 결정
+         let col_ws: Vec<u32> = if let Some(widths) = col_widths_hu {
+@@ -936,7 +973,6 @@
+         };
+ 
+         // create_table_native 와 동일 — 커서 offset 의 글자모양을 상속 기준으로 쓴다.
+-        let current_para = &self.document.sections[section_idx].paragraphs[para_idx];
+         let default_char_shape_id: u32 = current_para.char_shape_id_at(char_offset).unwrap_or(0);
+         let default_para_shape_id: u16 = current_para.para_shape_id;
+ 
+@@ -1043,10 +1079,13 @@
+         };
+         table.rebuild_grid();
+ 
+-        // ── 기존 문단에 인라인 삽입 ──
+-        self.document.sections[section_idx].raw_stream = None;
+-        let para = &mut self.document.sections[section_idx].paragraphs[para_idx];
+-
++        Ok(table)
++    }
++
++    fn insert_inline_table_model(
++        para: &mut Paragraph, table: crate::model::table::Table, char_offset: usize,
++    ) -> usize {
++        let total_height = table.common.height;
+         // controls에 표 추가
+         let ctrl_idx = para.controls.len();
+         para.controls.push(Control::Table(Box::new(table)));
+@@ -1089,24 +1128,45 @@
+             }
+         }
+ 
+-        // rebuild
+-        self.rebuild_section(section_idx);
+-
+-        self.event_log.push(DocumentEvent::TableRowInserted {
+-            section: section_idx,
+-            para: para_idx,
+-            ctrl: ctrl_idx,
+-        });
+-        // 표 바로 뒤의 논리적 오프셋 계산
+-        let logical_after = crate::document_core::helpers::text_to_logical_offset(
+-            &self.document.sections[section_idx].paragraphs[para_idx],
+-            char_offset,
+-        ) + 1;
+-        Ok(crate::document_core::helpers::json_ok_with(&format!(
+-            "\"paraIdx\":{},\"controlIdx\":{},\"logicalOffset\":{}",
+-            para_idx, ctrl_idx, logical_after
+-        )))
+-    }
++        ctrl_idx
++    }
++
++    /// Insert into the exact cell paragraph without a scratch document or clipboard.
++    pub fn create_table_in_cell_by_path_native(
++        &mut self, section_idx: usize, parent_para_idx: usize,
++        path: &[(usize, usize, usize)], char_offset: usize, row_count: u16, col_count: u16,
++        treat_as_char: bool,
++        col_widths_hu: Option<&[u32]>, row_heights_hu: Option<&[u32]>,
++    ) -> Result<String, HwpError> {
++        if row_count == 0 || col_count == 0 || row_count > 256 || col_count > 256 {
++            return Err(HwpError::RenderError("표의 줄과 칸 수는 1~256이어야 합니다".into()));
++        }
++        let source = self.resolve_paragraph_by_path(section_idx, parent_para_idx, path)?.clone();
++        if char_offset > source.text.chars().count() {
++            return Err(HwpError::RenderError("셀의 문자 위치가 범위를 벗어났습니다".into()));
++        }
++        let owner = self.resolve_table_by_path(section_idx, parent_para_idx, path)?;
++        let cell = self.resolve_cell_by_path(section_idx, parent_para_idx, path)?;
++        let padding = cell.effective_padding(&owner.padding);
++        let width = (i64::from(cell.width) - i64::from(padding.left) - i64::from(padding.right))
++            .clamp(1, i64::from(u32::MAX)) as u32;
++        let mut table = self.build_inline_table_model(section_idx, &source, char_offset,
++            row_count, col_count, col_widths_hu, row_heights_hu, Some(width))?;
++        table.common.treat_as_char = treat_as_char;
++        let raw = &mut table.raw_ctrl_data[common_obj_offsets::FLAGS];
++        let mut flags = u32::from_le_bytes(raw.try_into().unwrap());
++        flags = if treat_as_char { flags | 1 } else { flags & !1 };
++        raw.copy_from_slice(&flags.to_le_bytes());
++        let para = self.get_cell_paragraph_mut_by_path(section_idx, parent_para_idx, path)?;
++        let control_idx = Self::insert_inline_table_model(para, table, char_offset);
++        self.reflow_cell_paragraph_by_path(section_idx, parent_para_idx, path, path.last().unwrap().2);
++        self.mark_cell_control_dirty(section_idx, parent_para_idx, path[0].0);
++        self.document.sections[section_idx].raw_stream = None;
++        self.mark_section_dirty(section_idx);
++        self.paginate_if_needed();
++        Ok(serde_json::json!({"ok":true,"paraIdx":parent_para_idx,"controlIdx":control_idx}).to_string())
++    }
++
+     /// 표 셀의 page-relative 좌상단 좌표를 HWPUNIT 단위로 계산 (#1151 floating).
+     ///
+     /// render tree 를 순회하여 cell_path 와 매칭되는 TableCell 노드를 찾고
+--- a/src/document_core/commands/table_ops.rs
++++ b/src/document_core/commands/table_ops.rs
+@@ -1225,6 +1225,87 @@
+         self.cell_properties_json(table, cell_idx, true)
+     }
+ 
++    pub fn get_cell_own_properties_by_cell_path_native(
++        &self, section_idx: usize, parent_para_idx: usize,
++        path: &[(usize, usize, usize)], cell_idx: usize,
++    ) -> Result<String, HwpError> {
++        let table = self.resolve_table_by_path(section_idx, parent_para_idx, path)?;
++        self.cell_properties_json(table, cell_idx, false)
++    }
++
++    /// All structural edits resolve the same immutable table path as property edits.
++    pub fn edit_table_structure_by_path_native(
++        &mut self, section_idx: usize, parent_para_idx: usize,
++        path: &[(usize, usize, usize)], json: &str,
++    ) -> Result<String, HwpError> {
++        #[derive(serde::Deserialize)]
++        #[serde(rename_all="camelCase", deny_unknown_fields)]
++        struct Edit {
++            operation: String,
++            #[serde(default)] row: u16, #[serde(default)] col: u16,
++            #[serde(default)] end_row: u16, #[serde(default)] end_col: u16,
++            #[serde(default="one")] count: u16,
++            #[serde(default="one")] rows: u16, #[serde(default="one")] cols: u16,
++            #[serde(default)] equal_row_height: bool, #[serde(default)] merge_first: bool,
++        }
++        fn one() -> u16 { 1 }
++        let edit: Edit = serde_json::from_str(json).map_err(|e| HwpError::RenderError(e.to_string()))?;
++        if edit.count == 0 || edit.count > 256 || edit.rows == 0 || edit.rows > 256
++            || edit.cols == 0 || edit.cols > 256 {
++            return Err(HwpError::RenderError("줄·칸 수가 범위를 벗어났습니다".into()));
++        }
++        let (rows, cols, count) = {
++            let table = self.resolve_table_mut_by_cell_path(section_idx, parent_para_idx, path)?;
++            // Validate every mutation on a table clone before replacing the live table.
++            // A multi-insert or merged-cell failure cannot leave a partial edit.
++            let mut changed = table.clone();
++            let result = match edit.operation.as_str() {
++                "insert-row-above" | "insert-row-below" => {
++                    if u32::from(changed.row_count)+u32::from(edit.count)>256 {
++                        return Err(HwpError::RenderError("표는 최대 256줄까지 지원합니다".into()));
++                    }
++                    (0..edit.count).try_for_each(|_| changed.insert_row(edit.row,edit.operation.ends_with("below")))
++                },
++                "insert-col-left" | "insert-col-right" => {
++                    if u32::from(changed.col_count)+u32::from(edit.count)>256 {
++                        return Err(HwpError::RenderError("표는 최대 256칸까지 지원합니다".into()));
++                    }
++                    (0..edit.count).try_for_each(|_| changed.insert_column(edit.col,edit.operation.ends_with("right")))
++                },
++                "delete-row" => changed.delete_row(edit.row),
++                "delete-col" => changed.delete_column(edit.col),
++                "merge-cells" => changed.merge_cells(edit.row,edit.col,edit.end_row,edit.end_col),
++                "split-cell" => changed.split_cell(edit.row,edit.col),
++                "split-cell-into" => changed.split_cell_into(edit.row,edit.col,edit.rows,edit.cols,edit.equal_row_height,edit.merge_first),
++                "split-cells-in-range" if edit.merge_first => changed.merge_cells(edit.row,edit.col,edit.end_row,edit.end_col)
++                    .and_then(|_| changed.split_cell_into(edit.row,edit.col,edit.rows,edit.cols,edit.equal_row_height,false)),
++                "split-cells-in-range" => changed.split_cells_in_range(edit.row,edit.col,edit.end_row,edit.end_col,edit.rows,edit.cols,edit.equal_row_height),
++                _ => return Err(HwpError::RenderError("지원하지 않는 표 편집 명령입니다".into())),
++            };
++            result.map_err(HwpError::RenderError)?;
++            *table=changed;
++            (table.row_count,table.col_count,table.cells.len())
++        };
++        // Width and paragraph ownership may change after merge/split/column edits.
++        // Reflow only paragraphs in this table; ancestors keep their own source data.
++        let paragraph_counts: Vec<usize> = self.resolve_table_by_path(section_idx,parent_para_idx,path)?
++            .cells.iter().map(|cell|cell.paragraphs.len()).collect();
++        for (cell, paragraphs) in paragraph_counts.into_iter().enumerate() {
++            let mut owned=path.to_vec();
++            let last=owned.last_mut().unwrap();
++            last.1=cell;
++            for paragraph in 0..paragraphs {
++                owned.last_mut().unwrap().2=paragraph;
++                self.reflow_cell_paragraph_by_path(section_idx,parent_para_idx,&owned,paragraph);
++            }
++        }
++        self.mark_cell_control_dirty(section_idx,parent_para_idx,path[0].0);
++        self.document.sections[section_idx].raw_stream=None;
++        self.mark_section_dirty(section_idx);
++        self.paginate_if_needed();
++        Ok(serde_json::json!({"ok":true,"rowCount":rows,"colCount":cols,"cellCount":count}).to_string())
++    }
++
+     fn cell_properties_json(
+         &self,
+         table: &crate::model::table::Table,
+@@ -1763,12 +1844,21 @@
+         end_col: u16,
+         json: &str,
+     ) -> Result<String, HwpError> {
++        self.set_cell_zone_properties_by_path_native(section_idx,parent_para_idx,
++            &[(control_idx,0,0)],start_row,start_col,end_row,end_col,json)
++    }
++
++    pub fn set_cell_zone_properties_by_path_native(
++        &mut self, section_idx: usize, parent_para_idx: usize,
++        path: &[(usize, usize, usize)], start_row:u16,start_col:u16,end_row:u16,end_col:u16,
++        json:&str,
++    ) -> Result<String,HwpError> {
+         // [#5959] 역연산 기록 기준선 — 생성 전 스타일 테이블 길이·dirty 플래그와
+         // 매칭 zone 의 이전 id(None 이면 신설)를 응답으로 돌려 undo 가 쓴다.
+         let border_fill_len_before = self.document.doc_info.border_fills.len();
+         let doc_info_dirty_before = self.document.doc_info.raw_stream_dirty;
+         let (zone_before_id, sr, er, sc, ec) = {
+-            let t = self.get_table_mut(section_idx, parent_para_idx, control_idx)?;
++            let t = self.resolve_table_mut_by_cell_path(section_idx, parent_para_idx, path)?;
+             if t.row_count == 0 || t.col_count == 0 {
+                 return Err(HwpError::RenderError(
+                     "빈 표에는 cellzone을 적용할 수 없습니다".to_string(),
+@@ -1795,7 +1885,7 @@
+ 
+         let cellzone_json = Self::strip_center_line_for_cellzone_json(json);
+         let new_bf_id = self.create_border_fill_from_json(&cellzone_json);
+-        let table = self.get_table_mut(section_idx, parent_para_idx, control_idx)?;
++        let table = self.resolve_table_mut_by_cell_path(section_idx, parent_para_idx, path)?;
+ 
+         if let Some(zone) = table.zones.iter_mut().find(|zone| {
+             zone.start_row == sr && zone.end_row == er && zone.start_col == sc && zone.end_col == ec
+@@ -1811,6 +1901,7 @@
+             });
+         }
+ 
++        self.mark_cell_control_dirty(section_idx,parent_para_idx,path[0].0);
+         self.document.sections[section_idx].raw_stream = None;
+         self.recompose_section(section_idx);
+         self.paginate_if_needed();
+--- a/src/wasm_api.rs
++++ b/src/wasm_api.rs
+@@ -3440,6 +3440,35 @@
+             json,
+         )
+         .map_err(|e| e.into())
++    }
++
++    #[wasm_bindgen(js_name = editTableStructureByPath)]
++    pub fn edit_table_structure_by_path(
++        &mut self, section_idx:u32,parent_para_idx:u32,path_json:&str,json:&str,
++    ) -> Result<String,JsValue> {
++        let path=DocumentCore::parse_cell_path(path_json)?;
++        self.edit_table_structure_by_path_native(section_idx as usize,parent_para_idx as usize,&path,json).map_err(Into::into)
++    }
++
++    #[wasm_bindgen(js_name = getCellOwnPropertiesByPath)]
++    pub fn get_cell_own_properties_by_path(
++        &self, section_idx:u32,parent_para_idx:u32,path_json:&str,cell_idx:u32,
++    ) -> Result<String,JsValue> {
++        let path=DocumentCore::parse_cell_path(path_json)?;
++        self.get_cell_own_properties_by_cell_path_native(section_idx as usize,parent_para_idx as usize,&path,cell_idx as usize).map_err(Into::into)
++    }
++
++    #[wasm_bindgen(js_name = setCellZonePropertiesByPath)]
++    pub fn set_cell_zone_properties_by_path(
++        &mut self,section_idx:u32,parent_para_idx:u32,path_json:&str,
++        start_row:u32,start_col:u32,end_row:u32,end_col:u32,json:&str,
++    ) -> Result<String,JsValue> {
++        let path=DocumentCore::parse_cell_path(path_json)?;
++        if [start_row,start_col,end_row,end_col].iter().any(|&v|v>u16::MAX as u32) {
++            return Err(JsValue::from_str("셀 범위가 올바르지 않습니다"));
++        }
++        self.set_cell_zone_properties_by_path_native(section_idx as usize,parent_para_idx as usize,&path,
++            start_row as u16,start_col as u16,end_row as u16,end_col as u16,json).map_err(Into::into)
+     }
+ 
+     /// [#5959] 셀/zone border_fill_id 직접 대입 (undo·redo 전용).
+@@ -3762,6 +3791,21 @@
+         }
+         let col_widths = parse_u32_array(options_json, "colWidths");
+         let row_heights = parse_u32_array(options_json, "rowHeights");
++
++        let value: serde_json::Value = serde_json::from_str(options_json)
++            .map_err(|e| JsValue::from_str(&e.to_string()))?;
++        if let Some(path_value)=value.get("cellPath") {
++            let parent=value.get("parentParaIdx").and_then(|v|v.as_u64())
++                .ok_or_else(||JsValue::from_str("parentParaIdx is required for a cell table"))? as usize;
++            let path=DocumentCore::parse_cell_path(&path_value.to_string())?;
++            let rows=value.get("rowCount").and_then(|v|v.as_u64()).unwrap_or(2);
++            let cols=value.get("colCount").and_then(|v|v.as_u64()).unwrap_or(2);
++            if rows==0 || cols==0 || rows>256 || cols>256 {
++                return Err(JsValue::from_str("표의 줄과 칸 수는 1~256이어야 합니다"));
++            }
++            return self.create_table_in_cell_by_path_native(section_idx,parent,&path,char_offset,
++                rows as u16,cols as u16,treat_as_char,col_widths.as_deref(),row_heights.as_deref()).map_err(Into::into);
++        }
+ 
+         self.create_table_ex_native(
+             section_idx,
