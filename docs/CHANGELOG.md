@@ -2,6 +2,16 @@
 
 사용에 영향을 주는 주요 변경을 정리합니다. 각 버전의 지원 범위는 당시 기준이며, 현재 사용법과 제한 사항은 [README](../README.md)와 [pwh 스킬](../skills/pwh/SKILL.md)을 참고하세요.
 
+## 0.6.50 · Desktop 0.1.31
+
+- 커서 좌표 조회와 화면 그리기에서 원본 셀의 글줄·중첩 행 계산을 재사용하고, 지연 입력에서 이전 글줄 캐시를 무효화합니다. [커서·그리기 성능](RHWP-DIFFERENCES.md#source-owned-render-measurement-reuse)
+
+- 셀 크기 조절과 중첩 셀 입력에서 변경된 셀·상위 표를 갱신하고 같은 조건의 글줄·중첩 표 높이와 뒤쪽 쪽 결과를 재사용합니다. [증분 계산과 검증 범위](RHWP-DIFFERENCES.md#incremental-table-edit-measurements)
+
+- 여러 쪽에 걸치는 셀에서 끝 그림이 다음 쪽 표 위에 겹치던 문제를 공통 조판 코어에서 보완했습니다. [그림 배치와 검증 범위](RHWP-DIFFERENCES.md#inline-picture-frame-trailing-spacing)
+
+- 공통 코어 r23의 정식 최적화 빌드에서 기존 150쪽과 그림 시험 문서 17쪽, 편집 사례 5건을 재검증했습니다. 쪽 분할의 경계 확인 순회는 계속 수행합니다.
+
 ## 0.6.49 · Desktop 0.1.30
 
 - Windows 공통 편집기에서 한글과 같은 키로 한 줄 지우기, 줄 뒤 지우기, 보통 글자 모양, 문서 처음·끝 이동을 실행합니다. 다시 실행은 `Ctrl+Shift+Z`입니다.

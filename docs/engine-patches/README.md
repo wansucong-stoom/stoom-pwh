@@ -10,6 +10,39 @@
 
 한글 호환 단축키의 편집 상태 분기는 [Pwh 공통 Studio 빌드 패치](../../scripts/patch-hancom-key-contexts.mjs)에 있습니다. 고정 크기 표 조절과 행 삭제는 r22 코어 API를 사용합니다. [편집기 변경과 적용 범위](../RHWP-DIFFERENCES.md#한글-호환-단축키의-편집-상태-구분)
 
+<a id="source-owned-render-measurement-reuse"></a>
+### 78번 패치의 커서·그리기 측정 재사용
+
+[패치 소스](rhwp-0.8.7-source-owned-render-measurement-reuse.patch)는 문서가 소유하는 표·문단만 등록해 원본 글줄 계산을 커서 조회와 화면 그리기에 전달합니다. 그리기용 임시 복제본은 이 목록의 소유 주소를 가지지 않으므로 별도로 계산합니다. 그리기의 중첩 행 높이는 같은 용지·단 프레임 안에서 재사용하고 다음 프레임에서 초기화합니다.
+
+원본이 dirty가 되면 그리기 재사용을 중지합니다. 지연 셀 입력도 표와 셀 문단의 측정값을 무효화하므로, 쪽 분할 전 그리기가 이전 글줄을 읽지 않도록 합니다. 원본의 소유 목록은 전체 무효화 이후 다음 조판에서 등록합니다. [성능·조판 검증](../RHWP-DIFFERENCES.md#source-owned-render-measurement-reuse)
+
+후보 WASM 경로를 지정해 자동 실행되는 [커서·그리기 회귀 시험](../../tests/cursor-layout-cache.test.mjs)을 실행할 수 있습니다. 기본 비교는 같은 원본의 표시 설정을 같은 값으로 다시 적용해 캐시를 비운 뒤 계산합니다. 직전 코어의 바인딩과 WASM을 PWH_RENDER_CACHE_BASE_JS·PWH_RENDER_CACHE_BASE_WASM으로 지정하면 별도 코어의 계산과도 대조합니다. 지연 입력의 긴 줄에서 재사용을 무효화하는 회귀를 포함합니다. 현재 배포 런타임 r23에 포함됩니다.
+
+<a id="incremental-table-edit-measurements"></a>
+### 77번 패치의 표 편집 증분 계산
+
+[패치 소스](rhwp-0.8.7-incremental-table-edit-measurements.patch)는 최외곽·중첩 셀의 크기 조절과 중첩 셀의 문자 삽입·삭제에 같은 측정 소유권을 적용합니다. 변경 경로의 모든 상위 표와 실제로 줄을 다시 나누는 셀 문단을 갱신합니다. 같은 원본의 중첩 표 측정, 용지·본문 영역과 안 여백 조건이 같은 행 높이, 폭과 글꼴 문맥이 같은 평문 셀 글줄을 재사용합니다. 캐시는 문서 코어가 소유하고 전체 재조판·구조 변경·실행 취소 경계에서 초기화합니다. 각 캐시의 항목 수에 상한을 둡니다.
+
+뒤쪽 쪽의 계획과 원본 의존성을 비교한 뒤 동일한 쪽의 계획·렌더 트리를 유지합니다. 편집된 호스트를 참조하는 본문·어울림·연속 표·각주·머리말·꼬리말은 갱신합니다. 분할 경계 확인 순회는 계속 수행합니다. 기존 셀 치수·그림·여백·쪽 분할의 산식은 같은 입력으로 계산합니다. [측정과 검증 범위](../RHWP-DIFFERENCES.md#incremental-table-edit-measurements)
+
+후보 코어의 두 경로를 지정해 합성 시험을 실행합니다.
+
+~~~powershell
+$env:PWH_CORE_JS = '<candidate>/rhwp.js'
+$env:PWH_CORE_WASM = '<candidate>/rhwp_bg.wasm'
+node --test tests/incremental-table-layout.test.mjs tests/inline-picture-frame.check.mjs tests/nested-capacity-rewind.test.mjs
+~~~
+
+[증분 회귀 시험](../../tests/incremental-table-layout.test.mjs)은 각 편집의 모든 쪽 글자 좌표·인쇄 SVG를 일괄 편집으로 강제한 전체 재계산과 대조합니다. 바깥 셀 폭 변경, 셀 문단 재할당, 일괄 편집 후 로컬 편집, 독립된 뒤쪽 쪽, 저장·재열기와 스냅샷 복원 뒤의 재입력을 포함합니다. 현재 배포 런타임은 r23입니다.
+
+<a id="inline-picture-frame-trailing-spacing"></a>
+### 76번 패치의 쪽 끝 인라인 그림
+
+[패치 소스](rhwp-0.8.7-inline-picture-frame-trailing-spacing.patch)는 한 셀이 쪽을 넘겨 이어지는 HWPX 표의 원본 줄을 검사합니다. 그림 하나가 글자처럼 놓여 저장 글줄 높이와 일치하고, 뒤 문단이 새 쪽 좌표에서 시작하며, 그림 끝과 셀 안 여백이 선언 프레임 안에 들어갈 때 다음 줄로 가는 간격을 현재 쪽의 그림 단위에서 제외합니다. 분할의 실제 가용 높이 검사와 그리기는 같은 셀 단위를 읽습니다. 현재 용지에 공간이 부족해 그림을 옮겨야 할 때도 그림 뒤의 확인된 쪽 경계를 유지합니다. [출력 검증 범위](../RHWP-DIFFERENCES.md#inline-picture-frame-trailing-spacing)
+
+후보의 `PWH_CORE_JS`와 `PWH_CORE_WASM` 경로를 지정하고 `node --test tests/inline-picture-frame.check.mjs`로 그림과 뒤 표의 쪽 배치, 저장·재열기를 검사할 수 있습니다.
+
 <a id="nested-text-capacity-continuation"></a>
 ### 75번 패치의 중첩 표 연속 조각
 

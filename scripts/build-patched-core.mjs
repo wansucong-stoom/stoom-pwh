@@ -1442,6 +1442,119 @@ const patches = [
       "patchedSha256": "6945b6241bdf85b6a740df6ded667b8a03654d65a582922953c440e97864aaf6"
     }
   ]
+},
+{
+  "file": "rhwp-0.8.7-inline-picture-frame-trailing-spacing.patch",
+  "sha256": "eccb5db99dac205e3fd2bd7b22b5b19d0d4cb1dcbbf027b3b499b53e2613cd43",
+  "sources": [
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "6945b6241bdf85b6a740df6ded667b8a03654d65a582922953c440e97864aaf6",
+      "patchedSha256": "a000749d4470c075568650b813a538b67a01609d3eb4837e3e4917ac2fd67197"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-incremental-table-edit-measurements.patch",
+  "sha256": "be2f5a2501651925c9478bca04ba0d5470fc81ff7159e84318c229ab773c420c",
+  "sources": [
+    {
+      "path": "src/document_core/commands/document.rs",
+      "originalSha256": "9dc140269a9e3f55173c5b6e4f18550177d19a8abba5dad43e329e32440e9119",
+      "patchedSha256": "73c1445699fd23c03cca867975c66626a67a36c1bf6acfb369a4ae6f49537ab9"
+    },
+    {
+      "path": "src/document_core/commands/table_ops.rs",
+      "originalSha256": "ef36eb72e016aa75fcf83ed17b77999e076c924d9841d74d446b704b7f095f41",
+      "patchedSha256": "801613bfedaf0bd9b3ca732b52e5e5372abdad7a73d8635200b5ff2448cd9545"
+    },
+    {
+      "path": "src/document_core/commands/text_editing.rs",
+      "originalSha256": "4b54374e018904c9a899781b843fa2e2f25fcbd9524344d0d56325aca01a6fc2",
+      "patchedSha256": "7b1d758c473c5ea507a88d02f44cacaa169f92e73b2446b2d29e68152d9da980"
+    },
+    {
+      "path": "src/document_core/mod.rs",
+      "originalSha256": "5d21aabc86799fc1514c90b561fe915d30219c1a7d6678ffda9efee555b752ae",
+      "patchedSha256": "35db3bee5435e5ab1834d218675328c3690482c8a67bf667f25c17b68a1d6b9c"
+    },
+    {
+      "path": "src/document_core/queries/rendering.rs",
+      "originalSha256": "1ac9314f99b2b735a9fe0c7f81e7ca0c69baef99abf844fe98f9209844f955a9",
+      "patchedSha256": "88ebe0a85eece10708faafa387fcb8052c005e16348fa9c1397fc33b6e73d3ce"
+    },
+    {
+      "path": "src/model/control.rs",
+      "originalSha256": "100af2e27419b932e59d0555a32617123c681917d0df968ede26ba98ef613933",
+      "patchedSha256": "a91def21d077610d687f355e3c8de11665f6b972ba133b128b1b764501b84c24"
+    },
+    {
+      "path": "src/renderer/composer.rs",
+      "originalSha256": "c4522b8fc150b55c5e57aa04b4ae9b946e63fd1c214be0fde60315539b1e1666",
+      "patchedSha256": "b9d85eec579e233cf386a72240c3ff1cff2e1a962db526d3ca234c818f4270a5"
+    },
+    {
+      "path": "src/renderer/height_measurer.rs",
+      "originalSha256": "a35d2c1d41d98622a2d7e0a0007722885191116481b8e7e6e7f1382b6da8238f",
+      "patchedSha256": "ce508da1df6ed134b5283f56509cd5a19d5817224d2a71326d15a1c1b9a05914"
+    },
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "a000749d4470c075568650b813a538b67a01609d3eb4837e3e4917ac2fd67197",
+      "patchedSha256": "947c33f60bb6cd45d22e101afb0eb605cd34a254af513d185417baa83b6ace77"
+    },
+    {
+      "path": "src/renderer/layout.rs",
+      "originalSha256": "9f9fcae00d8dc0a9bb73a98449f1854b288c64129d2a68799e12ea188453aec3",
+      "patchedSha256": "32139b89d860f81ba76abab47a8d7c6debed8688357df49dbf3c77ca0637fcd4"
+    },
+    {
+      "path": "src/renderer/page_layout.rs",
+      "originalSha256": "a144a173647800ac2a0693be747af5ad19704a0a8470ca23b91dc14f762eadd8",
+      "patchedSha256": "d26ba4e18ee85f8347f499af2c63e2275f12ad963dd7c76f56947bc910d2a416"
+    },
+    {
+      "path": "src/renderer/pagination.rs",
+      "originalSha256": "65f55a7816627a01efdb806e8351fe8996aa9692fcfdc0e0e34a596f2375afd2",
+      "patchedSha256": "5265a234fffa2dd2a8768da6c4e7e52e83b7f1ed64c6ead76e56f100e27f8b72"
+    },
+    {
+      "path": "src/renderer/typeset/table/block/prepare.rs",
+      "originalSha256": "ee47e8d52fc0211b066da95e86fe18b769146715bbf8923e2dccdf67daaed27b",
+      "patchedSha256": "c079d66b305fb795147ef98832e1dcbc60e8050d2e973b2950183f453e508ef7"
+    },
+    {
+      "path": "src/renderer/typeset.rs",
+      "originalSha256": "d022ae8e04fa9fb00d71689e87bcd6d9766b008d202ad5208b9734dd9a800297",
+      "patchedSha256": "2b6c3446c04f6ec16fb3f2ac2487da94539b23914edbbe0c0b53c3f8c8162e43"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-source-owned-render-measurement-reuse.patch",
+  "sha256": "746b84b8f2f6fd273b3b6ba66a5ac83e2b59e8863473bd967fe59194567e656e",
+  "sources": [
+    {
+      "path": "src/renderer/height_measurer.rs",
+      "originalSha256": "ce508da1df6ed134b5283f56509cd5a19d5817224d2a71326d15a1c1b9a05914",
+      "patchedSha256": "824049450b9febd76d4d1a396f53363b07084f51017dda5ec28c57a793630dcc"
+    },
+    {
+      "path": "src/renderer/layout.rs",
+      "originalSha256": "32139b89d860f81ba76abab47a8d7c6debed8688357df49dbf3c77ca0637fcd4",
+      "patchedSha256": "ff00e43b986e48648eb08e1328344dee29bc4d6f4d2775c4953218db97949864"
+    },
+    {
+      "path": "src/renderer/layout/table_layout.rs",
+      "originalSha256": "947c33f60bb6cd45d22e101afb0eb605cd34a254af513d185417baa83b6ace77",
+      "patchedSha256": "f073bd0a9d2a51eda56d3147520a46c27bcf9cf88b54130f1ddc53dbd24714db"
+    },
+    {
+      "path": "src/document_core/queries/rendering.rs",
+      "originalSha256": "88ebe0a85eece10708faafa387fcb8052c005e16348fa9c1397fc33b6e73d3ce",
+      "patchedSha256": "2dc554ebc12b36413470c4112fab31ad76db47b5eb10f5e8f23595fcfcf4d9f2"
+    }
+  ]
 }
 ];
 const help = `Usage: node scripts/build-patched-core.mjs

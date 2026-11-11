@@ -233,6 +233,10 @@ def main():
                       'tests/stored-inline-reset-suffix.test.mjs',
                       'docs/verification/r14-regression-inputs.json', 'tests/layout-gates.test.mjs', 'tests/ci-core-reference.test.mjs',
                       'tests/compare-pages.test.py', 'tests/fixtures/rowbreak-table/synthetic-rowbreak-single-line-control.hwpx')
+    fidelity_tests += ('tests/inline-picture-frame.check.mjs',
+                       'tests/incremental-table-layout.test.mjs',
+                       'tests/cursor-layout-cache.test.mjs',
+                       'tests/nested-capacity-rewind.test.mjs')
     for name in fidelity_tests:
         core_inputs[name] = regular(project/name)
         build_inputs['pwh/'+name] = regular(project/name)

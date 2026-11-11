@@ -55,7 +55,7 @@ test('plain cell typing Undo owns one complete pagination and preserves failed-m
     assert.equal(undone.pending,false);assert.deepEqual(undone.calls,['cancel','restore']);
     assert.ok(undone.text===setup.text,'Undo restores exactly the text before the tested insertion');assert.equal(undone.pages,setup.pages);assert.ok(undone.focused);
     assert.deepEqual(await editor.evaluate(()=>{const doc=window.rhwpStudio.plugins.deps.wasm.doc;return Array.from({length:doc.pageCount()},(_,i)=>[doc.renderPageSvgWithProfile(i,'print'),doc.getPageTextLayout(i)]);}),before.view,'Trusted Undo restores its pre-edit SVG and text geometry');
-    await page.keyboard.press('Control+y');await settle();
+    await page.keyboard.press('Control+Shift+z');await settle();
     assert.equal(await editor.evaluate(()=>window.rhwpStudio.plugins.deps.wasm.doc.getTextFileText()),pending.text);
 
     // Only simple real cell insertions opt in. Contexts that may restore a

@@ -1,0 +1,196 @@
+diff --git a/src/renderer/height_measurer.rs b/src/renderer/height_measurer.rs
+--- a/src/renderer/height_measurer.rs
++++ b/src/renderer/height_measurer.rs
+@@ -1573,6 +1573,9 @@
+ 
+ #[derive(Default)]
+ struct NestedMeasurementEntries {
++    source_owners_registered: bool,
++    source_tables: std::collections::HashSet<usize>,
++    source_paragraphs: std::collections::HashSet<usize>,
+     cell_lines: std::collections::HashMap<CellLineKey, ComposedParagraph>,
+     measurements: std::collections::HashMap<NestedMeasurementKey, MeasuredTable>,
+     row_geometry: std::collections::HashMap<TableRowGeometryKey, std::sync::Arc<[f64]>>,
+@@ -1586,6 +1589,43 @@
+ impl NestedMeasurements {
+     pub(crate) fn clear(&self) {
+         *self.0.lock().unwrap() = NestedMeasurementEntries::default();
++    }
++
++    /// Only addresses owned by the immutable document may cross from a
++    /// pagination walk to a rendering walk. Fragment-only clones stay local.
++    pub(crate) fn register_source_owners(&self, sections: &[crate::model::document::Section]) {
++        fn visit(paragraphs: &[Paragraph], entries: &mut NestedMeasurementEntries) {
++            for paragraph in paragraphs {
++                entries.source_paragraphs.insert(std::ptr::from_ref(paragraph) as usize);
++                for control in &paragraph.controls {
++                    if let Control::Table(table) = control {
++                        entries.source_tables.insert(std::ptr::from_ref(table.as_ref()) as usize);
++                        for cell in &table.cells {
++                            visit(&cell.paragraphs, entries);
++                        }
++                    }
++                }
++            }
++        }
++        let mut entries = self.0.lock().unwrap();
++        entries.source_tables.clear();
++        entries.source_paragraphs.clear();
++        for section in sections {
++            visit(&section.paragraphs, &mut entries);
++        }
++        entries.source_owners_registered = true;
++    }
++
++    pub(crate) fn has_source_owners(&self) -> bool {
++        self.0.lock().unwrap().source_owners_registered
++    }
++
++    pub(crate) fn owns_table(&self, table: &Table) -> bool {
++        self.0.lock().unwrap().source_tables.contains(&(std::ptr::from_ref(table) as usize))
++    }
++
++    pub(crate) fn owns_paragraph(&self, paragraph: &Paragraph) -> bool {
++        self.0.lock().unwrap().source_paragraphs.contains(&(std::ptr::from_ref(paragraph) as usize))
+     }
+ 
+     pub(crate) fn invalidate_tables(&self, tables: &[usize]) {
+diff --git a/src/renderer/layout.rs b/src/renderer/layout.rs
+--- a/src/renderer/layout.rs
++++ b/src/renderer/layout.rs
+@@ -3805,6 +3805,9 @@
+     /// Only installed for an immutable typeset walk. Renderers may create
+     /// temporary table clones and therefore use their regular calculation.
+     typeset_nested_measurements: Option<crate::renderer::height_measurer::NestedMeasurements>,
++    source_cell_measurements:
++        std::cell::RefCell<Option<crate::renderer::height_measurer::NestedMeasurements>>,
++    render_row_measurements: crate::renderer::height_measurer::NestedMeasurements,
+     /// [#4149] 셀 커서 fast path 프로브 차단 스캔(개요/번호 문단·AutoNumber 컨트롤
+     /// 보유 여부)의 표 포인터 키 메모 — 거대 표 서브트리 재스캔 방지.
+     /// `cell_units_cache` 와 동일 조판 경계에서 clear 한다.
+@@ -3932,6 +3935,8 @@
+             cell_units_cache: std::cell::RefCell::new(std::collections::HashMap::new()),
+             table_nested_text_flag_cache: std::cell::RefCell::new(std::collections::HashMap::new()),
+             typeset_nested_measurements: None,
++            source_cell_measurements: std::cell::RefCell::new(None),
++            render_row_measurements: Default::default(),
+             cursor_probe_block_cache: std::cell::RefCell::new(std::collections::HashMap::new()),
+             single_line_overflow_cache: Default::default(),
+             #[cfg(test)]
+@@ -3949,11 +3954,30 @@
+         self
+     }
+ 
++    pub(crate) fn set_source_cell_measurements(
++        &self,
++        measurements: Option<crate::renderer::height_measurer::NestedMeasurements>,
++    ) {
++        *self.source_cell_measurements.borrow_mut() = measurements;
++        self.render_row_measurements.clear();
++    }
++
++    pub(crate) fn cell_line_measurements(
++        &self,
++        paragraph: &Paragraph,
++    ) -> Option<crate::renderer::height_measurer::NestedMeasurements> {
++        self.typeset_nested_measurements.clone().or_else(|| {
++            self.source_cell_measurements.borrow().as_ref()
++                .filter(|cache| cache.owns_paragraph(paragraph)).cloned()
++        })
++    }
++
+     pub fn clear_layout_caches(&self) {
+         self.cell_units_cache.borrow_mut().clear();
+         self.table_nested_text_flag_cache.borrow_mut().clear();
+         self.cursor_probe_block_cache.borrow_mut().clear();
+         self.single_line_overflow_cache.clear();
++        self.render_row_measurements.clear();
+     }
+ 
+     pub(crate) fn register_exact_font_source(
+@@ -7694,6 +7718,9 @@
+     /// 프로브가 전량 빌드와 동일한 좌표계(용지 폭/본문 영역)에서 동작해야
+     /// cell_units 메모 등 포인터-키 캐시가 동일 값으로 채워진다.
+     pub(crate) fn prime_column_layout_env(&self, layout: &PageLayoutInfo) {
++        // Row fitting may consume mutable page/field state. Share plain source
++        // lines across phases, but keep renderer row geometry in one frame.
++        self.render_row_measurements.clear();
+         // 현재 페이지 용지 너비 설정 (표 HorzRelTo::Paper 위치 계산용)
+         self.current_paper_width.set(layout.page_width);
+         // [#3637] 쪽 높이도 여기서 채운다. 바탕쪽 분기(위)에서만 채우면 바탕쪽 없는
+diff --git a/src/renderer/layout/table_layout.rs b/src/renderer/layout/table_layout.rs
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -4301,7 +4301,12 @@
+         let compute = || self.resolve_row_heights_with_common_fit(
+             table, col_count, row_count, measured_table, styles, true, relaxed_pad, false,
+         );
+-        let out = match (&self.typeset_nested_measurements, measured_table) {
++        let row_measurements = self.typeset_nested_measurements.clone().or_else(|| {
++            self.source_cell_measurements.borrow().as_ref()
++                .filter(|cache| cache.owns_table(table))
++                .map(|_| self.render_row_measurements.clone())
++        });
++        let out = match (&row_measurements, measured_table) {
+             (Some(cache), None) => {
+                 let (x, y, width, height) = self.current_body_area.get();
+                 let key = crate::renderer::height_measurer::TableRowGeometryKey {
+@@ -5132,7 +5137,7 @@
+                     self.profile.get().legacy_hwp3_stored_geometry(),
+                     self.profile.get().native_hwp5_layout(),
+                     &self.single_line_overflow_cache,
+-                    self.typeset_nested_measurements.as_ref(),
++                    self.cell_line_measurements(p).as_ref(),
+                 )
+             })
+             .collect();
+@@ -11822,7 +11827,7 @@
+                 self.profile.get().legacy_hwp3_stored_geometry(),
+                 self.profile.get().native_hwp5_layout(),
+                 &self.single_line_overflow_cache,
+-                self.typeset_nested_measurements.as_ref(),
++                self.cell_line_measurements(p).as_ref(),
+             );
+         }
+         let mut comp = crate::renderer::composer::compose_paragraph_in_context(p, styles);
+diff --git a/src/document_core/queries/rendering.rs b/src/document_core/queries/rendering.rs
+--- a/src/document_core/queries/rendering.rs
++++ b/src/document_core/queries/rendering.rs
+@@ -4287,6 +4287,9 @@
+     /// 렌더 정규화의 section revision은 구조/기하 변경을 뜻하므로 여기서는 유지한다.
+     /// 해당 path revision은 mutation 진입점에서 별도로 증가시킨다.
+     pub(crate) fn mark_section_pagination_dirty(&mut self, section_idx: usize) {
++        // Deferred input may paint before committing pagination. It must not
++        // read composition from the previous clean source generation.
++        self.layout_engine.set_source_cell_measurements(None);
+         if section_idx < self.dirty_sections.len() {
+             self.dirty_sections[section_idx] = true;
+         }
+@@ -5079,6 +5082,12 @@
+             && self.render_normalization.sections.iter().all(Option::is_none)
+             && self.styles.kerning_measurement_context.is_none()
+             && self.styles.horizontal_shaping_context.is_none();
++        self.layout_engine.set_source_cell_measurements(
++            stable_source.then(|| self.nested_measurements.clone()),
++        );
++        if stable_source && !self.nested_measurements.has_source_owners() {
++            self.nested_measurements.register_source_owners(&self.document.sections);
++        }
+         let measurer = if stable_source {
+             measurer.with_nested_measurements(self.nested_measurements.clone())
+         } else {
+@@ -6167,6 +6176,14 @@
+                         "render normalization table-cell path mismatch: control={control_idx} cell={cell_idx} para={cell_para_idx}"
+                     )));
+                 }
++                // Flat deferred input changes the same source paragraphs as
++                // immediate nested input, even before its pagination job runs.
++                self.nested_measurements.invalidate_tables(&[
++                    std::ptr::from_ref(table.as_ref()) as usize,
++                ]);
++                let paragraphs = table.cells[cell_idx].paragraphs.iter()
++                    .map(|paragraph| std::ptr::from_ref(paragraph) as usize).collect::<Vec<_>>();
++                self.nested_measurements.invalidate_cell_lines(&paragraphs);
+                 RenderPathEntry::TableCell {
+                     control_index: control_idx,
+                     cell_index: cell_idx,

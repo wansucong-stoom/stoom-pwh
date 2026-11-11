@@ -1,6 +1,6 @@
 {
   "kind": "studio-inline",
-  "version": "0.6.49",
+  "version": "0.6.50",
   "upstreamVersion": "0.8.7",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "files": {
@@ -11,11 +11,11 @@
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "common",
-    "sha256": "7789196e791b18d0b312ccc19b6ad2fac8ae7f28702b8f5cc61d9cf6b3a5ce1e",
+    "sha256": "5e668a64bccf6abd8816b51256b230f0d6f9abb5e8e04f172b9610a63b93c56d",
     "files": [
       {
         "path": "package.json",
-        "sha256": "32f22eddca17adfca8dcbf044472dd4bf4f9eab62862f8f0f20981a47da2d5d0"
+        "sha256": "1892c932fc78326fad9edd8917e6a4d518efeaab491b999f0714cd196117534e"
       },
       {
         "path": "scripts/build-inline.mjs",

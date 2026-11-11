@@ -1,0 +1,104 @@
+diff --git a/src/renderer/layout/table_layout.rs b/src/renderer/layout/table_layout.rs
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -12163,6 +12163,64 @@
+         origin.saturating_sub(crate::renderer::px_to_hwpunit(lead, self.dpi))
+     }
+ 
++    /// A saved split cell can end its physical frame on an inline picture.
++    /// The picture occupies the saved line box; spacing after that box belongs
++    /// to same-frame flow and must not push the picture across a stored reset.
++    fn inline_picture_closes_stored_cell_frame(
++        &self,
++        cell: &crate::model::table::Cell,
++        table: &crate::model::table::Table,
++        paragraph_index: usize,
++    ) -> bool {
++        let profile = self.profile.get();
++        if !profile.hwpx_container()
++            || !profile.hwpx_stored_layout()
++            || table.common.treat_as_char
++            || !matches!(table.page_break, crate::model::table::TablePageBreak::RowBreak)
++            || table.row_count != 1
++            || table.col_count != 1
++            || cell.height <= table.common.height
++            || cell.dirty_flag
++        {
++            return false;
++        }
++        let Some((paragraph, following)) = cell.paragraphs.get(paragraph_index)
++            .zip(cell.paragraphs.get(paragraph_index + 1))
++        else {
++            return false;
++        };
++        let ([Control::Picture(picture)], [line], Some(next)) = (
++            paragraph.controls.as_slice(),
++            paragraph.line_segs.as_slice(),
++            following.line_segs.first(),
++        ) else {
++            return false;
++        };
++        let synthetic = crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY;
++        if !paragraph.text.trim().is_empty()
++            || !picture.common.treat_as_char
++            || !picture.common.flow_with_text
++            || picture.common.allow_overlap
++            || paragraph.stored_text_partition_is_dirty()
++            || following.stored_text_partition_is_dirty()
++            || (following.text.trim().is_empty() && following.controls.is_empty())
++            || (line.tag | next.tag) & synthetic != 0
++            || line.vertical_pos <= 0
++            || next.vertical_pos < 0
++            || next.vertical_pos >= line.vertical_pos
++            || line.line_height <= 0
++            || line.line_spacing <= 0
++            || picture.common.height != line.line_height as u32
++        {
++            return false;
++        }
++        let end = i64::from(line.vertical_pos)
++            + i64::from(line.line_height)
++            + i64::from(cell.effective_vertical_padding_hu(&table.padding));
++        let frame = i64::from(table.common.height);
++        end <= frame && end + i64::from(line.line_spacing) > frame
++    }
++
+     fn cell_units_uncached(
+         &self,
+         cell: &crate::model::table::Cell,
+@@ -14668,6 +14726,7 @@
+                     line_count == p.line_segs.len()
+                         && crate::renderer::height_measurer::stored_seg_is_row_fragment(p, li)
+                 };
++                let picture_closes_frame = self.inline_picture_closes_stored_cell_frame(cell, table, pi);
+                 for li in 0..line_count {
+                     if is_row_fragment(li) {
+                         continue;
+@@ -14685,8 +14744,8 @@
+                     // [#5923] trailing ls — 비-TAC 표는 문단 수 무관 마지막 줄
+                     // 제외 (HeightMeasurer 와 동일 회계). TAC 표의 다문단 셀은
+                     // 보존 핀(KTX TOC 등) 유지.
+-                    let include_trailing_ls =
+-                        !is_cell_last_line || (para_count > 1 && table.common.treat_as_char);
++                    let include_trailing_ls = !picture_closes_frame
++                        && (!is_cell_last_line || (para_count > 1 && table.common.treat_as_char));
+                     let mut lh = if collapse_stored_square_picture_source_line {
+                         0.0
+                     } else if include_trailing_ls {
+@@ -21511,6 +21570,16 @@
+                 }
+                 if self.should_defer_overflowing_top_and_bottom_entry(u, j, start, h, avail_height)
+                 {
++                    break;
++                }
++                // A picture may have needed a fresh physical page on a smaller
++                // sheet. Its saved successor still belongs to the next frame;
++                // do not absorb that reset as a short text fragment.
++                if j > start && u.hard_break_before
++                    && u.para_idx == units[j - 1].para_idx + 1
++                    && self.inline_picture_closes_stored_cell_frame(cell, table, units[j - 1].para_idx)
++                {
++                    hit_hard_break = true;
+                     break;
+                 }
+                 // [Task #1658] 미세 fragment 낭비 페이지 방지: 거대 셀이 페이지를 가로질러 분할될

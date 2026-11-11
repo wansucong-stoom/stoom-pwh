@@ -33,7 +33,7 @@ for (const fixture of [
       ih.cursor.moveTo({sectionIndex:run.secIdx,paragraphIndex:run.paraIdx,charOffset:2,parentParaIndex:run.parentParaIdx,
         controlIndex:first.controlIndex,cellIndex:first.cellIndex,cellParaIndex:first.cellParaIndex,cellPath:run.cellPath});
       ih.textarea.focus();ih.updateCaret();window.__cellHistoryEvents = [];
-      for (const type of ['keydown','compositionstart','compositionend']) document.addEventListener(type,e => window.__cellHistoryEvents.push({type:e.type,key:e.key,ctrl:e.ctrlKey,trusted:e.isTrusted}),true);
+      for (const type of ['keydown','compositionstart','compositionend']) document.addEventListener(type,e => window.__cellHistoryEvents.push({type:e.type,key:e.key,ctrl:e.ctrlKey,shift:e.shiftKey,trusted:e.isTrusted}),true);
     },fixture.marker);
     const settle = () => editor.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
     const state = () => editor.evaluate(() => {
@@ -46,12 +46,12 @@ for (const fixture of [
     const resources = await editor.evaluate(() => window.rhwpStudio.plugins.deps.getInputHandler().history.peekUndoTop().fragmentIds.length);
     assert.equal(resources,1,'Merged typing retains only its first checkpoint');
     await page.keyboard.press('Control+z');await settle();assert.deepEqual(await state(),before);
-    await page.keyboard.press('Control+y');await settle();assert.deepEqual(await state(),typed);
+    await page.keyboard.press('Control+Shift+z');await settle();assert.deepEqual(await state(),typed);
     await page.keyboard.press('Control+z');await settle();assert.deepEqual(await state(),before);
     await page.keyboard.press('Backspace');await page.keyboard.press('Backspace');await settle();
     const erased = await state();assert.notEqual(erased.text,before.text);
     await page.keyboard.press('Control+z');await settle();assert.deepEqual(await state(),before,'Consecutive Backspaces share one layout-preserving Undo');
-    await page.keyboard.press('Control+y');await settle();assert.deepEqual(await state(),erased);
+    await page.keyboard.press('Control+Shift+z');await settle();assert.deepEqual(await state(),erased);
     await page.keyboard.press('Control+z');await settle();assert.deepEqual(await state(),before);
     const cdp = await page.context().newCDPSession(page);
     await cdp.send('Input.imeSetComposition',{text:'한',selectionStart:1,selectionEnd:1});
@@ -71,7 +71,7 @@ for (const fixture of [
     // Chromium's DevTools commit/cancel delivers compositionend with
     // isTrusted=false. This proves the browser composition path, not Win32 IME.
     assert.ok(result.events.some(e => e.type === 'compositionend'),'Chromium ended the composition');
-    const undoKeys = result.events.filter(e => e.type === 'keydown' && e.ctrl && e.key === 'z');
+    const undoKeys = result.events.filter(e => e.type === 'keydown' && e.ctrl && !e.shift && e.key === 'z');
     assert.equal(undoKeys.length,5);assert.ok(undoKeys.every(e => e.trusted),'Undo goes through trusted keyboard events');
   } finally {await browser.close();await new Promise(resolve => app.server.close(resolve));}
 });

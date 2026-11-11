@@ -1,0 +1,1023 @@
+diff --git a/src/document_core/commands/document.rs b/src/document_core/commands/document.rs
+--- a/src/document_core/commands/document.rs
++++ b/src/document_core/commands/document.rs
+@@ -302,6 +302,7 @@
+             measured_tables: Vec::new(),
+             dirty_sections: vec![true; sec_count],
+             measured_sections: Vec::new(),
++            nested_measurements: Default::default(),
+             dirty_paragraphs: Vec::new(),
+             para_column_map: Vec::new(),
+             deferred_pagination_revision: 0,
+diff --git a/src/document_core/commands/table_ops.rs b/src/document_core/commands/table_ops.rs
+--- a/src/document_core/commands/table_ops.rs
++++ b/src/document_core/commands/table_ops.rs
+@@ -2369,14 +2369,12 @@
+             return Err(HwpError::RenderError(LOCAL_RESIZE_UNSUPPORTED.to_string()));
+         }
+ 
+-        // This one mutation can reuse sibling measurements only when no
+-        // deferred/batched or earlier edit has invalidated their ownership.
+         let previous_layout_profile = self.effective_layout_profile();
+-        let reuse_sibling_measurements = updates.iter().all(|update| update.width_delta == 0)
+-            && !self.batch_mode
+-            && self.pending_pagination_job.is_none()
+-            && self.deferred_pagination_descriptor.is_none()
+-            && self.dirty_sections.iter().all(|dirty| !dirty);
++        let local_edit = self.begin_local_table_edit(
++            section_idx, parent_para_idx, path,
++            updates.iter().filter(|update| update.width_delta != 0).map(|update| update.cell_idx),
++        );
++
+ 
+         let table = self.resolve_table_mut_by_cell_path(section_idx, parent_para_idx, path)?;
+         let reflow_cells = Self::apply_cell_resize_updates(table, &updates);
+@@ -2404,18 +2402,16 @@
+         }
+ 
+         self.document.sections[section_idx].raw_stream = None;
+-        // Height-only changes retain text widths and paragraph ownership.
+-        // Remeasure the outer paragraph (including its entire nested table),
+-        // while pagination still reevaluates the whole dirty section.
+-        let same_layout_profile = previous_layout_profile == self.effective_layout_profile();
+-        if same_layout_profile && updates.iter().all(|update| update.width_delta == 0) {
+-            self.recompose_paragraph(section_idx, parent_para_idx);
+-        } else {
+-            self.recompose_section(section_idx);
+-        }
+-        if reuse_sibling_measurements && same_layout_profile {
++        let profile = self.effective_layout_profile();
++        if local_edit == Some(profile) {
++            self.recompose_paragraph_for_local_table_edit(section_idx, parent_para_idx);
+             self.paginate_with_table_measurement_scope(Some((section_idx, parent_para_idx, path[0].0)));
+         } else {
++            if previous_layout_profile == profile && updates.iter().all(|update| update.width_delta == 0) {
++                self.recompose_paragraph(section_idx, parent_para_idx);
++            } else {
++                self.recompose_section(section_idx);
++            }
+             self.paginate_if_needed();
+         }
+ 
+@@ -2439,15 +2435,12 @@
+             return Err(HwpError::RenderError(LOCAL_RESIZE_UNSUPPORTED.to_string()));
+         }
+ 
+-        // 셀 업데이트 적용
+-        // This one mutation can reuse sibling measurements only when no
+-        // deferred/batched or earlier edit has invalidated their ownership.
+         let previous_layout_profile = self.effective_layout_profile();
+-        let reuse_sibling_measurements = updates.iter().all(|update| update.width_delta == 0)
+-            && !self.batch_mode
+-            && self.pending_pagination_job.is_none()
+-            && self.deferred_pagination_descriptor.is_none()
+-            && self.dirty_sections.iter().all(|dirty| !dirty);
++        let local_edit = self.begin_local_table_edit(
++            section_idx, parent_para_idx, &[(control_idx, 0, 0)],
++            updates.iter().filter(|update| update.width_delta != 0).map(|update| update.cell_idx),
++        );
++
+ 
+         let table = self.get_table_mut(section_idx, parent_para_idx, control_idx)?;
+         let reflow_cells = Self::apply_cell_resize_updates(table, &updates);
+@@ -2459,18 +2452,16 @@
+         }
+ 
+         self.document.sections[section_idx].raw_stream = None;
+-        // Height-only changes retain text widths and paragraph ownership.
+-        // Remeasure the outer paragraph (including its entire nested table),
+-        // while pagination still reevaluates the whole dirty section.
+-        let same_layout_profile = previous_layout_profile == self.effective_layout_profile();
+-        if same_layout_profile && updates.iter().all(|update| update.width_delta == 0) {
+-            self.recompose_paragraph(section_idx, parent_para_idx);
+-        } else {
+-            self.recompose_section(section_idx);
+-        }
+-        if reuse_sibling_measurements && same_layout_profile {
++        let profile = self.effective_layout_profile();
++        if local_edit == Some(profile) {
++            self.recompose_paragraph_for_local_table_edit(section_idx, parent_para_idx);
+             self.paginate_with_table_measurement_scope(Some((section_idx, parent_para_idx, control_idx)));
+         } else {
++            if previous_layout_profile == profile && updates.iter().all(|update| update.width_delta == 0) {
++                self.recompose_paragraph(section_idx, parent_para_idx);
++            } else {
++                self.recompose_section(section_idx);
++            }
+             self.paginate_if_needed();
+         }
+ 
+diff --git a/src/document_core/commands/text_editing.rs b/src/document_core/commands/text_editing.rs
+--- a/src/document_core/commands/text_editing.rs
++++ b/src/document_core/commands/text_editing.rs
+@@ -5839,6 +5839,9 @@
+             );
+         }
+ 
++        let local_edit = self.begin_local_table_edit(
++            section_idx, parent_para_idx, path, path.last().map(|step| step.1),
++        );
+         let new_chars_count = text.chars().count();
+         let active_field = self.active_field.clone();
+         let cell_para = self.get_cell_paragraph_mut_by_path(section_idx, parent_para_idx, path)?;
+@@ -5882,7 +5885,11 @@
+         // 최내곽 실제 셀 폭으로 위에서 reflow한 뒤 section pagination을 갱신한다.
+         self.document.sections[section_idx].raw_stream = None;
+         self.mark_section_dirty(section_idx);
+-        self.paginate_if_needed();
++        if local_edit == Some(self.effective_layout_profile()) {
++            self.paginate_with_table_measurement_scope(Some((section_idx, parent_para_idx, outer_ctrl)));
++        } else {
++            self.paginate_if_needed();
++        }
+ 
+         let new_offset = char_offset + new_chars_count;
+         self.event_log.push(DocumentEvent::CellTextChanged {
+@@ -5922,6 +5929,9 @@
+             );
+         }
+ 
++        let local_edit = self.begin_local_table_edit(
++            section_idx, parent_para_idx, path, path.last().map(|step| step.1),
++        );
+         let cell_para = self.get_cell_paragraph_mut_by_path(section_idx, parent_para_idx, path)?;
+         cell_para.delete_text_at(char_offset, count);
+ 
+@@ -5941,7 +5951,11 @@
+         self.mark_cell_control_dirty(section_idx, parent_para_idx, outer_ctrl);
+         self.document.sections[section_idx].raw_stream = None;
+         self.mark_section_dirty(section_idx);
+-        self.paginate_if_needed();
++        if local_edit == Some(self.effective_layout_profile()) {
++            self.paginate_with_table_measurement_scope(Some((section_idx, parent_para_idx, outer_ctrl)));
++        } else {
++            self.paginate_if_needed();
++        }
+ 
+         self.event_log.push(DocumentEvent::CellTextChanged {
+             section: section_idx,
+diff --git a/src/document_core/mod.rs b/src/document_core/mod.rs
+--- a/src/document_core/mod.rs
++++ b/src/document_core/mod.rs
+@@ -41,7 +41,7 @@
+ use crate::model::table::TableTransposeData;
+ use crate::paint::PageLayerTree;
+ use crate::renderer::composer::ComposedParagraph;
+-use crate::renderer::height_measurer::{MeasuredSection, MeasuredTable};
++use crate::renderer::height_measurer::{MeasuredSection, MeasuredTable, NestedMeasurements};
+ use crate::renderer::layout::LayoutEngine;
+ use crate::renderer::pagination::PaginationResult;
+ use crate::renderer::render_normalization::{RenderNormalizationOverlay, RenderPath};
+@@ -228,6 +228,7 @@
+     pub(crate) dirty_sections: Vec<bool>,
+     /// 구역별 측정 캐시 (증분 측정용)
+     pub(crate) measured_sections: Vec<MeasuredSection>,
++    pub(crate) nested_measurements: NestedMeasurements,
+     /// 구역별 문단 dirty 비트맵.
+     /// None = 전체 dirty (초기 로드 또는 전체 재구성 시).
+     /// Some(vec) = vec[para_idx] = true이면 해당 문단만 재측정.
+@@ -534,6 +535,7 @@
+             measured_tables: Vec::new(),
+             dirty_sections: Vec::new(),
+             measured_sections: Vec::new(),
++            nested_measurements: NestedMeasurements::default(),
+             dirty_paragraphs: Vec::new(),
+             para_column_map: Vec::new(),
+             deferred_pagination_revision: 0,
+diff --git a/src/document_core/queries/rendering.rs b/src/document_core/queries/rendering.rs
+--- a/src/document_core/queries/rendering.rs
++++ b/src/document_core/queries/rendering.rs
+@@ -1021,6 +1021,56 @@
+             HeaderFooterApply::Even => *carry_master_even = Some(master_ref),
+         }
+     }
++}
++
++/// Compare complete page plans after numbering and section inheritance have
++/// been resolved. The edit's host and every continuation must precede the
++/// reusable suffix. Shape or text changes with the same page count still
++/// invalidate any page that depends on the changed host.
++fn reuse_local_table_page_suffix(
++    old: &mut PaginationResult,
++    new: &mut PaginationResult,
++    section: usize,
++    paragraph: usize,
++) -> Option<usize> {
++    use crate::renderer::pagination::PageItem;
++
++    if old.pages.len() != new.pages.len()
++        || !old.endnotes.is_empty()
++        || !new.endnotes.is_empty()
++        || old.wrap_around_paras != new.wrap_around_paras
++        || old.hidden_empty_paras != new.hidden_empty_paras
++        || old.pre_emitted_host_paras != new.pre_emitted_host_paras
++        || old.pre_emitted_host_heights != new.pre_emitted_host_heights
++        || old.pre_emitted_host_content_heights != new.pre_emitted_host_content_heights
++    {
++        return None;
++    }
++    // The renderer replays top-level numbering from preceding pages.
++    let replay_order = |result: &PaginationResult| {
++        let mut seen = std::collections::HashSet::new();
++        result.pages.iter().flat_map(|page| &page.column_contents)
++            .flat_map(|column| &column.items)
++            .filter_map(|item| match item {
++                PageItem::FullParagraph { para_index }
++                | PageItem::PartialParagraph { para_index, .. }
++                | PageItem::Table { para_index, .. } if seen.insert(*para_index) => Some(*para_index),
++                _ => None,
++            })
++            .collect::<Vec<_>>()
++    };
++    if replay_order(old) != replay_order(new) {
++        return None;
++    }
++    let start = old.pages.iter().zip(&new.pages).rposition(|(a, b)| {
++        a != b
++            || a.references_paragraph(section, paragraph)
++            || b.references_paragraph(section, paragraph)
++    }).map_or(0, |page| page + 1);
++    for (a, b) in old.pages[start..].iter_mut().zip(&mut new.pages[start..]) {
++        std::mem::swap(a, b);
++    }
++    Some(start)
+ }
+ 
+ fn apply_page_number_layouts_for_section(result: &mut PaginationResult, section: &Section) {
+@@ -4278,6 +4328,14 @@
+     /// 단일 문단만 재조판한다.
+     pub(crate) fn recompose_paragraph(&mut self, section_idx: usize, para_idx: usize) {
+         self.invalidate_page_tree_cache();
++        self.recompose_paragraph_for_local_table_edit(section_idx, para_idx);
++    }
++
++    pub(crate) fn recompose_paragraph_for_local_table_edit(
++        &mut self,
++        section_idx: usize,
++        para_idx: usize,
++    ) {
+         let para = &self.document.sections[section_idx].paragraphs[para_idx];
+         self.composed[section_idx][para_idx] =
+             compose_paragraph_with_horizontal_shaping(para, &self.styles);
+@@ -4909,9 +4967,38 @@
+         self.paginate_with_table_measurement_scope(None);
+     }
+ 
+-    /// An immediate, otherwise-clean height mutation may retain measurements
+-    /// of sibling table controls. The scope lives only for this pagination;
+-    /// snapshots, undo, batches and all other edits use the ordinary path.
++    /// Reuse source measurements only for a synchronous edit of stable table
++    /// paths. A subsequent full or deferred rebuild starts a fresh cache.
++    pub(crate) fn begin_local_table_edit(
++        &self,
++        section: usize,
++        paragraph: usize,
++        path: &[(usize, usize, usize)],
++        reflowed_cells: impl IntoIterator<Item = usize>,
++    ) -> Option<crate::model::provenance::LayoutCompatibilityProfile> {
++        if self.batch_mode
++            || self.pending_pagination_job.is_some()
++            || self.deferred_pagination_descriptor.is_some()
++            || self.dirty_sections.iter().any(|dirty| *dirty)
++        {
++            return None;
++        }
++        let mut affected = Vec::with_capacity(path.len());
++        for depth in 1..=path.len() {
++            let table = self.resolve_table_by_path(section, paragraph, &path[..depth]).ok()?;
++            affected.push(std::ptr::from_ref(table) as usize);
++        }
++        let owner = self.resolve_table_by_path(section, paragraph, path).ok()?;
++        let reflowed_paragraphs: Vec<_> = reflowed_cells.into_iter()
++            .filter_map(|index| owner.cells.get(index))
++            .flat_map(|cell| cell.paragraphs.iter().map(|p| std::ptr::from_ref(p) as usize))
++            .collect();
++        self.nested_measurements.invalidate_tables(&affected);
++        self.nested_measurements.invalidate_cell_lines(&reflowed_paragraphs);
++        Some(self.effective_layout_profile())
++    }
++
++    /// The path and style context are checked both before and after mutation.
+     pub(crate) fn paginate_with_table_measurement_scope(
+         &mut self,
+         table_scope: Option<(usize, usize, usize)>,
+@@ -4958,7 +5045,12 @@
+             .filter(|dirty| *dirty)
+             .count();
+         let issue2424_invalidate_started = issue2424_profile_enabled.then(std::time::Instant::now);
+-        self.invalidate_page_tree_cache();
++        if table_scope.is_none() {
++            self.invalidate_page_tree_cache();
++        } else {
++            self.layout_engine.clear_layout_caches();
++            self.header_footer_preview_tree_cache.borrow_mut().take();
++        }
+         let issue2424_invalidate_elapsed = issue2424_invalidate_started
+             .map(|started| started.elapsed())
+             .unwrap_or_default();
+@@ -4983,6 +5075,18 @@
+             .with_session_edited(profile.session_edited())
+             .with_hwp3_origin_flow_spacing_before(hwp3_origin_flow_spacing_before)
+             .with_render_normalization(std::sync::Arc::clone(&self.render_normalization.overlay));
++        let stable_source = self.render_normalization.overlay.nested_table_projection_count() == 0
++            && self.render_normalization.sections.iter().all(Option::is_none)
++            && self.styles.kerning_measurement_context.is_none()
++            && self.styles.horizontal_shaping_context.is_none();
++        let measurer = if stable_source {
++            measurer.with_nested_measurements(self.nested_measurements.clone())
++        } else {
++            // Render-only snapshots may replace the source tables or change
++            // descendants' frames, so their pointers must never outlive a walk.
++            self.nested_measurements.clear();
++            measurer
++        };
+ 
+         if self.document.sections.is_empty() {
+             self.pagination.clear();
+@@ -5268,6 +5372,11 @@
+                 let typesetter = TypesetEngine::new(self.dpi).with_render_normalization(
+                     std::sync::Arc::clone(&self.render_normalization.overlay),
+                 );
++                let typesetter = if stable_source {
++                    typesetter.with_nested_measurements(self.nested_measurements.clone())
++                } else {
++                    typesetter
++                };
+                 typesetter.typeset_section_with_variant(
+                     para_src,
+                     composed,
+@@ -5654,6 +5763,33 @@
+                 }
+                 if section.section_def.hide_footer {
+                     first_page.active_footer = None;
++                }
++            }
++            if let Some((scope_section, paragraph, _)) = table_scope {
++                let suffix = if scope_section == idx
++                    && stable_source
++                {
++                    reuse_local_table_page_suffix(&mut self.pagination[idx], &mut result, idx, paragraph)
++                } else {
++                    None
++                };
++                if let Some(suffix) = suffix {
++                    let offset: usize = self.pagination[..idx].iter().map(|p| p.pages.len()).sum();
++                    for page in offset..offset + suffix {
++                        self.invalidate_page_tree_cache_page(page as u32);
++                    }
++                    // Inherited headers/footers can refer to the edited host
++                    // even when a subsequent section keeps its own flow.
++                    for (page, content) in self.pagination[idx + 1..].iter()
++                        .flat_map(|section| &section.pages)
++                        .enumerate()
++                    {
++                        if content.references_paragraph(idx, paragraph) {
++                            self.invalidate_page_tree_cache_page((offset + result.pages.len() + page) as u32);
++                        }
++                    }
++                } else {
++                    self.clear_render_trees();
+                 }
+             }
+             self.pagination[idx] = result;
+@@ -7345,6 +7481,11 @@
+ 
+     /// 페이지 렌더 트리 캐시 전체 무효화.
+     pub(crate) fn invalidate_page_tree_cache(&self) {
++        self.nested_measurements.clear();
++        self.clear_render_trees();
++    }
++
++    fn clear_render_trees(&self) {
+         self.page_tree_cache.borrow_mut().clear();
+         self.header_footer_preview_tree_cache.borrow_mut().take();
+         self.layer_tree_json_cache.borrow_mut().clear();
+diff --git a/src/model/control.rs b/src/model/control.rs
+--- a/src/model/control.rs
++++ b/src/model/control.rs
+@@ -209,7 +209,7 @@
+ }
+ 
+ /// 쪽 번호 위치 ('pgnp' 컨트롤, HWP 스펙 표 149)
+-#[derive(Debug, Clone, Default, serde::Serialize)]
++#[derive(Debug, Clone, Default, PartialEq, serde::Serialize)]
+ pub struct PageNumberPos {
+     /// 번호 형식 (표 150 bit 0~7, 표 134 참조)
+     pub format: u8,
+@@ -360,7 +360,7 @@
+ }
+ 
+ /// 감추기 ('pghd' 컨트롤)
+-#[derive(Debug, Clone, Default, serde::Serialize)]
++#[derive(Debug, Clone, Default, PartialEq, serde::Serialize)]
+ pub struct PageHide {
+     /// 머리말 감추기
+     pub hide_header: bool,
+diff --git a/src/renderer/composer.rs b/src/renderer/composer.rs
+--- a/src/renderer/composer.rs
++++ b/src/renderer/composer.rs
+@@ -2718,6 +2718,42 @@
+             dpi,
+             Some(overflow_cache),
+         );
++    }
++}
++
++/// The source paragraph and exact cell frame are the inputs shared by
++/// measurement and row cutting. A cache is supplied only by an immutable walk
++/// whose owner invalidates edited paragraphs before another walk.
++#[allow(clippy::too_many_arguments)]
++pub(crate) fn compose_horizontal_cell_paragraph(
++    para: &Paragraph,
++    cell_inner_width_px: f64,
++    styles: &ResolvedStyleSet,
++    dpi: f64,
++    legacy_hwp3_stored_geometry: bool,
++    repair_stored_overflow: bool,
++    overflow_cache: &SingleLineOverflowCache,
++    cache: Option<&crate::renderer::height_measurer::NestedMeasurements>,
++) -> ComposedParagraph {
++    let compute = || {
++        let mut composed = compose_paragraph_in_context(para, styles);
++        recompose_horizontal_cell_lines_for_width(
++            &mut composed, para, cell_inner_width_px, styles, dpi,
++            legacy_hwp3_stored_geometry, repair_stored_overflow, overflow_cache,
++        );
++        composed
++    };
++    if let Some(cache) = cache.filter(|_| para.controls.is_empty()) {
++        let key = crate::renderer::height_measurer::CellLineKey {
++            owner: std::ptr::from_ref(para) as usize,
++            inner_width: cell_inner_width_px.to_bits(),
++            dpi: dpi.to_bits(),
++            legacy_geometry: legacy_hwp3_stored_geometry,
++            repair_overflow: repair_stored_overflow,
++        };
++        cache.cell_lines(key, compute)
++    } else {
++        compute()
+     }
+ }
+ 
+diff --git a/src/renderer/height_measurer.rs b/src/renderer/height_measurer.rs
+--- a/src/renderer/height_measurer.rs
++++ b/src/renderer/height_measurer.rs
+@@ -1548,6 +1548,91 @@
+ }
+ 
+ /// 높이 측정 엔진
++// Nested controls can be visited several times by one measurement pass: row
++// floors, wrapper tables and occupied-height checks all ask for the same data.
++type NestedMeasurementKey = (usize, usize, u64);
++
++#[derive(Clone, Copy, Eq, Hash, PartialEq)]
++pub(crate) struct TableRowGeometryKey {
++    pub(crate) owner: usize,
++    pub(crate) columns: usize,
++    pub(crate) rows: usize,
++    pub(crate) relaxed_padding: bool,
++    pub(crate) allow_declared_trust: bool,
++    pub(crate) frame: [u64; 6],
++}
++
++#[derive(Clone, Copy, Eq, Hash, PartialEq)]
++pub(crate) struct CellLineKey {
++    pub(crate) owner: usize,
++    pub(crate) inner_width: u64,
++    pub(crate) dpi: u64,
++    pub(crate) legacy_geometry: bool,
++    pub(crate) repair_overflow: bool,
++}
++
++#[derive(Default)]
++struct NestedMeasurementEntries {
++    cell_lines: std::collections::HashMap<CellLineKey, ComposedParagraph>,
++    measurements: std::collections::HashMap<NestedMeasurementKey, MeasuredTable>,
++    row_geometry: std::collections::HashMap<TableRowGeometryKey, std::sync::Arc<[f64]>>,
++}
++
++#[derive(Clone, Default)]
++pub(crate) struct NestedMeasurements(
++    std::sync::Arc<std::sync::Mutex<NestedMeasurementEntries>>,
++);
++
++impl NestedMeasurements {
++    pub(crate) fn clear(&self) {
++        *self.0.lock().unwrap() = NestedMeasurementEntries::default();
++    }
++
++    pub(crate) fn invalidate_tables(&self, tables: &[usize]) {
++        let mut entries = self.0.lock().unwrap();
++        entries.measurements.retain(|(owner, _, _), _| !tables.contains(owner));
++        entries.row_geometry.retain(|key, _| !tables.contains(&key.owner));
++    }
++
++    pub(crate) fn invalidate_cell_lines(&self, paragraphs: &[usize]) {
++        self.0.lock().unwrap().cell_lines.retain(|key, _| !paragraphs.contains(&key.owner));
++    }
++
++    pub(crate) fn cell_lines(
++        &self,
++        key: CellLineKey,
++        compute: impl FnOnce() -> ComposedParagraph,
++    ) -> ComposedParagraph {
++        let previous = self.0.lock().unwrap().cell_lines.get(&key).cloned();
++        if let Some(composed) = previous {
++            return composed;
++        }
++        let composed = compute();
++        let mut entries = self.0.lock().unwrap();
++        if entries.cell_lines.len() < 8192 {
++            entries.cell_lines.insert(key, composed.clone());
++        }
++        composed
++    }
++
++    pub(crate) fn row_geometry(
++        &self,
++        key: TableRowGeometryKey,
++        compute: impl FnOnce() -> Vec<f64>,
++    ) -> Vec<f64> {
++        let previous = self.0.lock().unwrap().row_geometry.get(&key).cloned();
++        if let Some(rows) = previous {
++            return rows.to_vec();
++        }
++        let rows = compute();
++        let mut entries = self.0.lock().unwrap();
++        if entries.row_geometry.len() < 4096 {
++            entries.row_geometry.insert(key, std::sync::Arc::from(rows.as_slice()));
++        }
++        rows
++    }
++}
++
+ pub struct HeightMeasurer {
+     dpi: f64,
+     is_hwp3_variant: bool,
+@@ -1564,6 +1649,8 @@
+     /// Measurement-session owner for the same derived probe used by layout.
+     /// A new measurer starts a new source/style revision scope.
+     single_line_overflow_cache: SingleLineOverflowCache,
++    nested_measurements: NestedMeasurements,
++    shared_nested_measurements: bool,
+ }
+ 
+ /// [#6299] 이 저장 seg 가 **앞 줄의 가로 조각**인가 — 같은 물리 줄의 오른쪽 조각.
+@@ -1664,6 +1751,8 @@
+             ),
+             float_carve_evidence: Vec::new(),
+             single_line_overflow_cache: SingleLineOverflowCache::default(),
++            nested_measurements: NestedMeasurements::default(),
++            shared_nested_measurements: false,
+         }
+     }
+ 
+@@ -2494,7 +2583,11 @@
+         control_index: usize,
+         styles: &ResolvedStyleSet,
+     ) -> MeasuredTable {
+-        self.measure_table_impl(table, para_index, control_index, styles, 0, 1.0)
++        let result = self.measure_table_impl(table, para_index, control_index, styles, 0, 1.0);
++        if !self.shared_nested_measurements {
++            self.nested_measurements.clear();
++        }
++        result
+     }
+ 
+     /// 재귀적 높이 제한
+@@ -2767,6 +2860,12 @@
+     }
+ 
+     /// 표의 높이를 측정한다 (depth 기반 재귀).
++    pub(crate) fn with_nested_measurements(mut self, measurements: NestedMeasurements) -> Self {
++        self.nested_measurements = measurements;
++        self.shared_nested_measurements = true;
++        self
++    }
++
+     fn measure_table_impl(
+         &self,
+         table: &Table,
+@@ -2782,6 +2881,38 @@
+     ) -> MeasuredTable {
+         let width_scale =
+             width_scale.max(self.render_normalization.nested_table_width_scale(table));
++        if depth == 0 {
++            return self.measure_table_uncached(
++                table, para_index, control_index, styles, depth, width_scale,
++            );
++        }
++
++        let key = (std::ptr::from_ref(table) as usize, depth, width_scale.to_bits());
++        if let Some(mut previous) = self.nested_measurements.0.lock().unwrap().measurements.get(&key).cloned() {
++            previous.para_index = para_index;
++            previous.control_index = control_index;
++            return previous;
++        }
++
++        let measured = self.measure_table_uncached(
++            table, para_index, control_index, styles, depth, width_scale,
++        );
++        let mut entries = self.nested_measurements.0.lock().unwrap();
++        if entries.measurements.len() < 4096 {
++            entries.measurements.insert(key, measured.clone());
++        }
++        measured
++    }
++
++    fn measure_table_uncached(
++        &self,
++        table: &Table,
++        para_index: usize,
++        control_index: usize,
++        styles: &ResolvedStyleSet,
++        depth: usize,
++        width_scale: f64,
++    ) -> MeasuredTable {
+         if depth >= Self::MAX_NESTED_DEPTH {
+             let rc = table.row_count as usize;
+             let (rbs, rbe) = compute_row_blocks(table, rc);
+@@ -2962,12 +3093,7 @@
+                         .iter()
+                         .enumerate()
+                         .map(|(pidx, p)| {
+-                            let mut comp = crate::renderer::composer::compose_paragraph_in_context(p, styles);
+-                            // [Task #671] line_segs 비어 있는 셀 paragraph 의 단일 ComposedLine
+-                            // 압축 결과를 셀 가용 너비에 맞춰 다중 ComposedLine 으로 재분할.
+-                            // 측정/렌더링 일관성 (layout 의 같은 프레임 호출과 동일).
+-                            crate::renderer::composer::recompose_horizontal_cell_lines_for_width(
+-                                &mut comp,
++                            let comp = crate::renderer::composer::compose_horizontal_cell_paragraph(
+                                 p,
+                                 cell_inner_width,
+                                 styles,
+@@ -2975,6 +3101,7 @@
+                                 self.legacy_hwp3_stored_geometry,
+                                 self.is_native_hwp5,
+                                 &self.single_line_overflow_cache,
++                                Some(&self.nested_measurements),
+                             );
+                             let reflow_nested_height = if cell.paragraphs.iter().all(
+                                 crate::renderer::para_has_no_stored_line_segs,
+@@ -3968,11 +4095,7 @@
+                         .iter()
+                         .enumerate()
+                         .map(|(pidx, p)| {
+-                            let mut comp = crate::renderer::composer::compose_paragraph_in_context(p, styles);
+-                            // [Task #671] line_segs 비어 있는 셀 paragraph 의 단일 ComposedLine
+-                            // 압축 결과를 셀 가용 너비에 맞춰 다중 ComposedLine 으로 재분할.
+-                            crate::renderer::composer::recompose_horizontal_cell_lines_for_width(
+-                                &mut comp,
++                            let comp = crate::renderer::composer::compose_horizontal_cell_paragraph(
+                                 p,
+                                 cell_inner_width,
+                                 styles,
+@@ -3980,6 +4103,7 @@
+                                 self.legacy_hwp3_stored_geometry,
+                                 self.is_native_hwp5,
+                                 &self.single_line_overflow_cache,
++                                Some(&self.nested_measurements),
+                             );
+                             let reflow_nested_height = if cell.paragraphs.iter().all(
+                                 crate::renderer::para_has_no_stored_line_segs,
+diff --git a/src/renderer/layout/table_layout.rs b/src/renderer/layout/table_layout.rs
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -4298,16 +4298,25 @@
+         allow_declared_trust: bool,
+     ) -> Vec<f64> {
+         self.declared_trust_allowed.set(allow_declared_trust);
+-        let out = self.resolve_row_heights_with_common_fit(
+-            table,
+-            col_count,
+-            row_count,
+-            measured_table,
+-            styles,
+-            true,
+-            relaxed_pad,
+-            false,
++        let compute = || self.resolve_row_heights_with_common_fit(
++            table, col_count, row_count, measured_table, styles, true, relaxed_pad, false,
+         );
++        let out = match (&self.typeset_nested_measurements, measured_table) {
++            (Some(cache), None) => {
++                let (x, y, width, height) = self.current_body_area.get();
++                let key = crate::renderer::height_measurer::TableRowGeometryKey {
++                    owner: std::ptr::from_ref(table) as usize,
++                    columns: col_count,
++                    rows: row_count,
++                    relaxed_padding: relaxed_pad,
++                    allow_declared_trust,
++                    frame: [self.current_paper_width.get(), self.current_page_height.get(),
++                            x, y, width, height].map(f64::to_bits),
++                };
++                cache.row_geometry(key, compute)
++            }
++            _ => compute(),
++        };
+         self.declared_trust_allowed.set(true);
+         out
+     }
+@@ -5115,12 +5124,7 @@
+         let composed_paras: Vec<_> = paragraphs
+             .iter()
+             .map(|p| {
+-                let mut comp = crate::renderer::composer::compose_paragraph_in_context(p, styles);
+-                // [Task #671] line_segs 비어 있는 셀 paragraph 의 단일 ComposedLine
+-                // 압축 결과를 셀 가용 너비에 맞춰 다중 ComposedLine 으로 재분할.
+-                // 측정/렌더링 일관성 보장 (table_layout.rs:1226 의 렌더링 경로와 동일).
+-                crate::renderer::composer::recompose_horizontal_cell_lines_for_width(
+-                    &mut comp,
++                crate::renderer::composer::compose_horizontal_cell_paragraph(
+                     p,
+                     cell_inner_width_px,
+                     styles,
+@@ -5128,8 +5132,8 @@
+                     self.profile.get().legacy_hwp3_stored_geometry(),
+                     self.profile.get().native_hwp5_layout(),
+                     &self.single_line_overflow_cache,
+-                );
+-                comp
++                    self.typeset_nested_measurements.as_ref(),
++                )
+             })
+             .collect();
+         let line_based_height =
+@@ -11809,10 +11813,8 @@
+         inner_width: f64,
+         styles: &ResolvedStyleSet,
+     ) -> ComposedParagraph {
+-        let mut comp = crate::renderer::composer::compose_paragraph_in_context(p, styles);
+         if text_direction == 0 {
+-            crate::renderer::composer::recompose_horizontal_cell_lines_for_width(
+-                &mut comp,
++            return crate::renderer::composer::compose_horizontal_cell_paragraph(
+                 p,
+                 inner_width,
+                 styles,
+@@ -11820,17 +11822,18 @@
+                 self.profile.get().legacy_hwp3_stored_geometry(),
+                 self.profile.get().native_hwp5_layout(),
+                 &self.single_line_overflow_cache,
++                self.typeset_nested_measurements.as_ref(),
+             );
+-        } else {
+-            crate::renderer::composer::recompose_cell_lines_in_frame(
+-                &mut comp,
+-                p,
+-                crate::renderer::composer::ParagraphBox::content_width_px(inner_width, self.dpi),
+-                styles,
+-                self.dpi,
+-                self.profile.get().legacy_hwp3_stored_geometry(),
+-            );
+-        }
++        }
++        let mut comp = crate::renderer::composer::compose_paragraph_in_context(p, styles);
++        crate::renderer::composer::recompose_cell_lines_in_frame(
++            &mut comp,
++            p,
++            crate::renderer::composer::ParagraphBox::content_width_px(inner_width, self.dpi),
++            styles,
++            self.dpi,
++            self.profile.get().legacy_hwp3_stored_geometry(),
++        );
+         comp
+     }
+ 
+diff --git a/src/renderer/layout.rs b/src/renderer/layout.rs
+--- a/src/renderer/layout.rs
++++ b/src/renderer/layout.rs
+@@ -3802,6 +3802,9 @@
+     /// `cell_units_uncached` 안에서 계산되어 52,694 셀 표에서 O(셀²)(≈28억) 로 폭증했다.
+     /// `cell_units_cache` 와 동일 조판 경계에서 clear 한다.
+     table_nested_text_flag_cache: std::cell::RefCell<std::collections::HashMap<usize, bool>>,
++    /// Only installed for an immutable typeset walk. Renderers may create
++    /// temporary table clones and therefore use their regular calculation.
++    typeset_nested_measurements: Option<crate::renderer::height_measurer::NestedMeasurements>,
+     /// [#4149] 셀 커서 fast path 프로브 차단 스캔(개요/번호 문단·AutoNumber 컨트롤
+     /// 보유 여부)의 표 포인터 키 메모 — 거대 표 서브트리 재스캔 방지.
+     /// `cell_units_cache` 와 동일 조판 경계에서 clear 한다.
+@@ -3928,6 +3931,7 @@
+             declared_trust_allowed: std::cell::Cell::new(true),
+             cell_units_cache: std::cell::RefCell::new(std::collections::HashMap::new()),
+             table_nested_text_flag_cache: std::cell::RefCell::new(std::collections::HashMap::new()),
++            typeset_nested_measurements: None,
+             cursor_probe_block_cache: std::cell::RefCell::new(std::collections::HashMap::new()),
+             single_line_overflow_cache: Default::default(),
+             #[cfg(test)]
+@@ -3937,6 +3941,14 @@
+ 
+     /// [Task #1949] 셀 단위 레이아웃 캐시를 비운다. 문서 재조판 등 IR 이 바뀌는
+     /// 경계에서 호출해 포인터 키 재사용으로 인한 오재사용을 방지한다.
++    pub(crate) fn with_typeset_nested_measurements(
++        mut self,
++        measurements: crate::renderer::height_measurer::NestedMeasurements,
++    ) -> Self {
++        self.typeset_nested_measurements = Some(measurements);
++        self
++    }
++
+     pub fn clear_layout_caches(&self) {
+         self.cell_units_cache.borrow_mut().clear();
+         self.table_nested_text_flag_cache.borrow_mut().clear();
+diff --git a/src/renderer/page_layout.rs b/src/renderer/page_layout.rs
+--- a/src/renderer/page_layout.rs
++++ b/src/renderer/page_layout.rs
+@@ -5,7 +5,7 @@
+ use crate::model::Rect;
+ 
+ /// 페이지 레이아웃 정보 (픽셀 단위로 변환된 영역)
+-#[derive(Debug, Clone)]
++#[derive(Debug, Clone, PartialEq)]
+ pub struct PageLayoutInfo {
+     /// 페이지 전체 크기 (px)
+     pub page_width: f64,
+@@ -35,7 +35,7 @@
+ }
+ 
+ /// 레이아웃 영역 (픽셀 단위)
+-#[derive(Debug, Clone, Copy, Default)]
++#[derive(Debug, Clone, Copy, Default, PartialEq)]
+ pub struct LayoutRect {
+     pub x: f64,
+     pub y: f64,
+diff --git a/src/renderer/pagination.rs b/src/renderer/pagination.rs
+--- a/src/renderer/pagination.rs
++++ b/src/renderer/pagination.rs
+@@ -178,7 +178,7 @@
+ }
+ 
+ /// 한 페이지에 배치될 콘텐츠
+-#[derive(Debug, Clone)]
++#[derive(Debug, Clone, PartialEq)]
+ pub struct PageContent {
+     /// 페이지 인덱스 (0-based)
+     pub page_index: u32,
+@@ -217,8 +217,40 @@
+     pub ladder_band_tables: Vec<(usize, usize)>,
+ }
+ 
++impl PageContent {
++    /// A page may depend on a table's host outside its ordinary body items.
++    pub(crate) fn references_paragraph(&self, section: usize, paragraph: usize) -> bool {
++        if self.active_header.iter().chain(self.active_footer.iter()).any(|reference| {
++            reference.source_section_index == section && reference.para_index == paragraph
++        }) {
++            return true;
++        }
++        self.section_index == section
++            && (self.ladder_band_tables.iter().any(|&(owner, _)| owner == paragraph)
++                || self.footnotes.iter().any(|note| match note.source {
++                    FootnoteSource::Body { para_index, .. }
++                    | FootnoteSource::TableCell { para_index, .. }
++                    | FootnoteSource::ShapeTextBox { para_index, .. } => para_index == paragraph,
++                })
++                || self.column_contents.iter().any(|column| {
++                    column.items.iter().any(|item| item.para_index() == paragraph)
++                        || column.paragraph_float_placements.keys().any(|&(owner, _)| owner == paragraph)
++                        || column.inline_placements.keys().any(|&(owner, _)| owner == paragraph)
++                        || column.inline_flow_plans.contains_key(&paragraph)
++                        || column.wrap_around_paras.iter().any(|wrap| {
++                            wrap.para_index == paragraph || wrap.table_para_index == paragraph
++                        })
++                        || column.wrap_anchors.iter().any(|(&owner, anchor)| {
++                            owner == paragraph || anchor.anchor_para_index == paragraph
++                        })
++                        || column.overlay_continuations.iter().any(|item| item.para_index == paragraph)
++                        || column.overlay_cuts.iter().any(|&(owner, _, _)| owner == paragraph)
++                }))
++    }
++}
++
+ /// 바탕쪽 참조
+-#[derive(Debug, Clone)]
++#[derive(Debug, Clone, PartialEq)]
+ pub struct MasterPageRef {
+     /// 구역 인덱스
+     pub section_index: usize,
+@@ -230,7 +262,7 @@
+ ///
+ /// 최상위 문단 → 표 → 셀 → 셀 문단 순으로 내려간다. 여러 단계가 쌓이면
+ /// 표 안의 표처럼 다중 중첩도 표현할 수 있다.
+-#[derive(Debug, Clone)]
++#[derive(Debug, Clone, PartialEq)]
+ pub struct HeaderFooterTableStep {
+     /// 바깥 controls 리스트에서 Table 컨트롤의 인덱스
+     pub table_control_index: usize,
+@@ -241,7 +273,7 @@
+ }
+ 
+ /// 머리말/꼬리말 참조
+-#[derive(Debug, Clone)]
++#[derive(Debug, Clone, PartialEq)]
+ pub struct HeaderFooterRef {
+     /// Header/Footer 컨트롤이 있는 (최상위) 문단 인덱스
+     pub para_index: usize,
+@@ -407,7 +439,7 @@
+ }
+ 
+ /// 각주 출처 (본문 문단 또는 표 셀 내)
+-#[derive(Debug, Clone)]
++#[derive(Debug, Clone, PartialEq)]
+ pub enum FootnoteSource {
+     /// 본문 문단 내 각주
+     Body {
+@@ -445,7 +477,7 @@
+ }
+ 
+ /// 페이지에 배치되는 각주 참조
+-#[derive(Debug, Clone)]
++#[derive(Debug, Clone, PartialEq)]
+ pub struct FootnoteRef {
+     /// 각주 번호 (1-based)
+     pub number: u16,
+@@ -456,7 +488,7 @@
+ }
+ 
+ /// 한 단(Column)에 배치될 콘텐츠
+-#[derive(Debug, Clone)]
++#[derive(Debug, Clone, PartialEq)]
+ pub struct ColumnContent {
+     /// 문단 텍스트 앞/뒤 관계로 확정한 자리차지 표 배치(단 상대 좌표).
+     pub paragraph_float_placements:
+@@ -511,7 +543,7 @@
+ }
+ 
+ /// [#4568] 쪽을 넘긴 overlay 표의 잔여 행 조각.
+-#[derive(Debug, Clone)]
++#[derive(Debug, Clone, PartialEq)]
+ pub struct OverlayContinuation {
+     /// 표 컨트롤이 있는 원본 문단 인덱스
+     pub para_index: usize,
+@@ -527,7 +559,7 @@
+ }
+ 
+ /// 어울림 배치 표 옆에 배치되는 빈 리턴 문단 정보
+-#[derive(Debug, Clone)]
++#[derive(Debug, Clone, PartialEq)]
+ pub struct WrapAroundPara {
+     /// 어울림 문단의 인덱스
+     pub para_index: usize,
+@@ -546,7 +578,7 @@
+ /// typeset.rs 의 wrap_around state machine 이 본 문단의 LineSeg cs/sw 가 anchor
+ /// 의 cs/sw 와 매칭됨을 검출 시 ColumnContent.wrap_anchors 에 등록. layout 단계가
+ /// 본 메타데이터로 wrap zone 정합 렌더 (LineSeg cs/sw 그대로 사용 — 현 보완6 효과).
+-#[derive(Debug, Clone)]
++#[derive(Debug, Clone, PartialEq)]
+ pub struct WrapAnchorRef {
+     /// anchor 문단 인덱스 (그림/표 보유)
+     pub anchor_para_index: usize,
+@@ -592,7 +624,7 @@
+     }
+ }
+ 
+-#[derive(Debug, Clone)]
++#[derive(Debug, Clone, PartialEq)]
+ pub enum PageItem {
+     /// 문단 전체가 배치됨
+     FullParagraph {
+diff --git a/src/renderer/typeset/table/block/prepare.rs b/src/renderer/typeset/table/block/prepare.rs
+--- a/src/renderer/typeset/table/block/prepare.rs
++++ b/src/renderer/typeset/table/block/prepare.rs
+@@ -74,7 +74,9 @@
+         // Cut projection also depends on the document's full body height.
+         // Prime it before filling CellUnit caches, as actual paint does, so a
+         // small page cannot cache the 900px fallback's different child ledger.
+-        let layout_engine = crate::renderer::layout::LayoutEngine::new(self.dpi);
++        let measurements = self.nested_measurements.clone().unwrap_or_default();
++        let layout_engine = crate::renderer::layout::LayoutEngine::new(self.dpi)
++            .with_typeset_nested_measurements(measurements);
+         layout_engine.set_layout_profile(st.profile);
+         layout_engine.prime_column_layout_env(&st.layout);
+         // 행 컷 측정도 같은 렌더링의 일부이므로 조판기와 동일한 표 출처를 사용한다.
+diff --git a/src/renderer/typeset.rs b/src/renderer/typeset.rs
+--- a/src/renderer/typeset.rs
++++ b/src/renderer/typeset.rs
+@@ -322,6 +322,7 @@
+         std::cell::RefCell<Vec<crate::renderer::float_placement::FloatCarveEvidence>>,
+     render_normalization:
+         std::sync::Arc<crate::renderer::render_normalization::RenderNormalizationOverlay>,
++    nested_measurements: Option<crate::renderer::height_measurer::NestedMeasurements>,
+ }
+ 
+ /// 조판 중 현재 페이지/단 상태
+@@ -3465,10 +3466,19 @@
+             profile: std::cell::Cell::new(Default::default()),
+             uniform_filler_ladder: std::cell::Cell::new(false),
+             float_carve_evidence: std::cell::RefCell::new(Vec::new()),
++            nested_measurements: None,
+             render_normalization: std::sync::Arc::new(
+                 crate::renderer::render_normalization::RenderNormalizationOverlay::default(),
+             ),
+         }
++    }
++
++    pub(crate) fn with_nested_measurements(
++        mut self,
++        measurements: crate::renderer::height_measurer::NestedMeasurements,
++    ) -> Self {
++        self.nested_measurements = Some(measurements);
++        self
+     }
+ 
+     pub(crate) fn with_render_normalization(
