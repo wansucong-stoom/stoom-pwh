@@ -17,7 +17,8 @@ test('trusted keys create and edit an inner table with one-step undo and intact 
   doc.setTableProperties(0,0,table.controlIdx,JSON.stringify({treatAsChar:true}));
   doc.insertTextInCell(0,0,table.controlIdx,0,0,0,'SOURCE TEXT');
   doc.insertTextInCell(0,0,table.controlIdx,3,0,0,'KEEP SIBLING');
-  const bytes=doc.exportHwpx();doc.free();
+  const bytes=Buffer.from(doc.exportHwpx());doc.free();
+  assert.equal(bytes.subarray(0,2).toString(),'PK','host receives a Node Buffer with an HWPX signature');
   const temp=await fs.mkdtemp(path.join(os.tmpdir(),'pwh-command-paths-'));
   process.env.PWH_STANDALONE_DATA=path.join(temp,'profile');
   const {createAppServer}=await import(pathToFileURL(path.join(process.env.PWH_DESKTOP_SOURCE_ROOT,'host.mjs')));
