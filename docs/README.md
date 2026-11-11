@@ -15,6 +15,7 @@
 - [검증 결과](LAYOUT-FIDELITY.md#test-document-update)에는 TEST 문서 A/B의 전후 수치와 버전별 결과가 있습니다.
 - [PDF 비교 및 쪽별 판정](RENDER-COMPARISON.md)에는 비교 명령, F1 해석, 쪽별 통과 조건과 SVG 글자 잘림 검사가 함께 있습니다.
 - [rhwp 원본 대비 차이](RHWP-DIFFERENCES.md)에는 원천 코어, 공통 편집기, Desktop의 변경이 계층별로 나뉘어 있습니다.
+- [rhwp 0.9.0 선택 반영](UPSTREAM-0.9-REVIEW.md)에는 반영한 결함·기존 보완·추가 검토 항목을 구분했습니다.
 - [공통 코어 패치](engine-patches/README.md)에서 각 패치의 변경 근거와 [표·문단 배치 규칙](engine-patches/LAYOUT-OWNERSHIP-RULES.md)을 확인할 수 있습니다.
 
 ## 개발과 유지보수

@@ -7,8 +7,8 @@ import {resolveTablePropertiesTarget} from './pwh-object-properties-target.mjs';
 export function openPwhTableProperties(services: CommandServices, mode: 'table' | 'cell' = 'table'): void {
   const target = resolveTablePropertiesTarget(services.getInputHandler(), mode);
   if (!target) return;
-  if ('unsupported' in target && target.unsupported) {
-    showToast({message: '중첩 표의 전체 속성 대화상자는 아직 지원하지 않습니다. 바깥 표는 변경하지 않았습니다.', durationMs: 7000});
+  if (target.tableCtx?.cellPath && !services.wasm.hasTablePropertyPaths()) {
+    showToast({message:'중첩 표 속성에는 새 공통 코어가 필요합니다. 편집기와 코어를 함께 업데이트해 주세요.',durationMs:7000});
     return;
   }
   if (!target.tableCtx || target.cellIdx === undefined || (target.mode !== 'table' && target.mode !== 'cell')) return;

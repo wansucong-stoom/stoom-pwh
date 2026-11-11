@@ -8,8 +8,26 @@
 <a id="cause-and-scope"></a>
 ## 원인과 적용 범위
 
+Studio의 선택적 upstream 반영은 코어 83개 패치와 분리합니다. [클립보드·교차 구역 선택 패치](studio/clipboard-safety.patch)와 [Pwh 적용 스크립트](../../scripts/patch-clipboard-safety.mjs)는 rhwp 0.9.0의 관련 수정 세 건을 가져오고, 취소 즉시 진행 상태 해제·포커스 이탈 기록·rich 복사 실패 시 원문 보존을 추가합니다. [검토표와 검증 범위](../UPSTREAM-0.9-REVIEW.md)
+
 한글 호환 단축키의 편집 상태 분기는 [Pwh 공통 Studio 빌드 패치](../../scripts/patch-hancom-key-contexts.mjs)에 있습니다. 고정 크기 표 조절과 행 삭제는 r22 코어 API를 사용합니다. [편집기 변경과 적용 범위](../RHWP-DIFFERENCES.md#한글-호환-단축키의-편집-상태-구분)
 
+
+<a id="format-property-preservation"></a>
+### 82번 부분 서식 병합과 83번 도형 줄 뒤 간격
+
+[82번 코어 패치](rhwp-0.8.7-partial-format-border-preservation.patch)는 BorderFill 부분 변경에서 생략된 속성을 현재 소유자의 값으로 보존합니다. 본문·셀·머리말·꼬리말·각주·미주 문단에 같은 병합을 적용하며 새 정의에 없는 선을 기본 실선으로 만들지 않습니다. 공통 Studio의 [속성 입력 패치](../../scripts/patch-format-properties.mjs)는 무편집 확인, 지원하지 않는 저장 무늬 코드와 문단 간격 단위를 다룹니다.
+
+[83번 코어 패치](rhwp-0.8.7-inline-shape-owned-tail-spacing.patch)는 같은 높이의 개체 프레임에서도 다음 원본 줄의 위치가 줄 뒤 간격을 증명하면 그 간격을 유지합니다. 기존 쪽 분할·점유 예산을 넓히지 않습니다. [발생 계층·영향·시험](../RHWP-DIFFERENCES.md#format-property-preservation)
+
+<a id="nested-table-properties"></a>
+### 80~81번 패치의 중첩 표 속성과 원본 경로
+
+배포 기준은 공통 코어 r25입니다. [80번 패치](rhwp-0.8.7-nested-table-properties.patch)는 평면·중첩 표의 속성 조회·설정 로직을 공유하고 전체 셀 경로로 대상 표만 변경합니다. 바깥 여백의 HWPX 필드를 함께 갱신합니다. [81번 패치](rhwp-0.8.7-table-control-path-ownership.patch)는 표시 표에 원본 경로를 전달하고 빈 중첩 표의 좌표도 자신의 TableNode에서 찾습니다.
+
+기존 79개 패치 뒤에 순서대로 적용합니다. 고정 upstream과 도구 버전은 유지하며, 세 개의 경로 기반 속성 API가 추가되어 JavaScript 연결부와 WASM을 함께 배포합니다. 정확한 패치·소스·산출물 해시는 BUILD-RECORD.json 및 runtime-lock.json으로 검증합니다.
+
+[합성 시험](../../tests/nested-table-properties.test.mjs)에서 깊이별 표·셀 속성, 빈 표, 잘못된 경로, 상위 표와 이웃 셀 불변, 저장·재열기와 원래 스냅샷을 확인합니다. 익명 TEST 문서 4개 총 167쪽의 글자 좌표·인쇄 SVG와 저장·재열기 결과는 직전 r24와 같습니다. 실제 포인터와 키보드 시험은 공통 편집기의 테두리 선택·속성 편집·실행 취소·다시 실행·셀 크기 조절을 확인합니다. [원인 계층과 범위](../RHWP-DIFFERENCES.md#nested-table-properties)
 
 <a id="continued-flow-picture-anchor"></a>
 ### 79번 패치의 연속 셀 자리차지 그림

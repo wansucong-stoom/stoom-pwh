@@ -45,6 +45,7 @@ test('Hancom editing and table shortcuts work through trusted input', {
   try{
     const page=await browser.newPage({viewport:{width:1280,height:900}});
     await page.goto(app.url);
+    await page.waitForFunction(()=>!!document.querySelector('#editor')?.contentWindow?.pwhRecoveryReady,null,{timeout:60000});
     const editor=page.frames().find(frame=>/\/editor\?/.test(frame.url()));
     await editor.waitForFunction(()=>window.pwhRecoveryReady?.()===true,null,{timeout:60000});
     const context={sec,para,ctrl};

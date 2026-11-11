@@ -81,6 +81,7 @@ for (const host of ['common', 'desktop']) {
       const page = await browser.newPage({viewport: {width: 1300, height: 1000}}), errors = [];
       page.on('pageerror', error => errors.push(error.message));
       await page.goto(app.url);
+      await page.waitForFunction(() => !!document.querySelector('#editor')?.contentWindow?.pwhRecoveryReady, null, {timeout: 90000});
       const frame = page.frames().find(item => /\/editor(?:\?|$)/.test(item.url()));
       await frame.waitForFunction(() => window.pwhRecoveryReady?.() === true, null, {timeout: 90000});
       const button = frame.locator('button[data-cmd="format:object-properties"]');
@@ -175,8 +176,9 @@ for (const host of ['common', 'desktop']) {
         ih.eventBus.emit('table-object-selection-changed', true); ih.eventBus.emit('command-state-changed');
       }, nestedRef);
       await button.click();
-      await frame.getByRole('status').filter({hasText: '중첩 표의 전체 속성 대화상자는 아직 지원하지 않습니다'}).waitFor({state: 'visible'});
-      assert.equal(await frame.locator('.tcp-dialog').count(), 0, 'nested table does not open the outer flat dialog');
+      await frame.locator('.tcp-dialog').waitFor({state: 'visible'});
+      assert.equal(await frame.locator('.tcp-dialog button[data-tab="table"]').isVisible(), true, 'nested table opens its own full dialog');
+      await frame.locator('.tcp-dialog .dialog-close').click();
       const after = await frame.evaluate(() => Array.from(window.pwhEditor.export().bytes));
       const reopened = new HwpDocument(Uint8Array.from(after)), original = new HwpDocument(data.bytes);
       try { assert.deepEqual(JSON.parse(reopened.getTableProperties(0, data.outer.paraIdx, data.outer.controlIdx)), JSON.parse(original.getTableProperties(0, data.outer.paraIdx, data.outer.controlIdx))); }
