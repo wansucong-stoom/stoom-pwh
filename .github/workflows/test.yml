@@ -1,10 +1,27 @@
 name: Test
 on:
   push:
+    branches: ['**']
   pull_request:
+  release:
+    types: [published]
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
+  runtime-inputs:
+    runs-on: ubuntu-latest
+    outputs:
+      available: ${{ steps.inputs.outputs.available }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - id: inputs
+        run: node scripts/check-ci-release-inputs.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
   test:
     strategy:
       matrix:
@@ -22,6 +39,8 @@ jobs:
       - run: node scripts/verify-editor-build.mjs --check-inputs
       - run: node desktop/verify-source.mjs
   wasm-table-regressions:
+    needs: runtime-inputs
+    if: needs.runtime-inputs.outputs.available == 'true'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -51,6 +70,8 @@ jobs:
           $env:RUSTC = $env:PWH_RUSTC
           node scripts/run-ci-tests.mjs core
   browser-regressions:
+    needs: runtime-inputs
+    if: needs.runtime-inputs.outputs.available == 'true'
     runs-on: windows-latest
     timeout-minutes: 25
     steps:
@@ -73,6 +94,8 @@ jobs:
           $env:PWH_RUNTIME_ROOT = Join-Path $env:RUNNER_TEMP 'pwh-browser-runtime'
           node scripts/run-ci-tests.mjs browser
   reproducible-editors:
+    needs: runtime-inputs
+    if: needs.runtime-inputs.outputs.available == 'true'
     runs-on: windows-latest
     timeout-minutes: 15
     steps:

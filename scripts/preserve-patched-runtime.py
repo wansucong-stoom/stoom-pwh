@@ -218,7 +218,7 @@ def main():
     core_inputs['scripts/preserve-patched-runtime.py'] = regular(project/'scripts/preserve-patched-runtime.py')
     core_inputs['scripts/prepare-core-regressions.mjs'] = regular(project/'scripts/prepare-core-regressions.mjs')
     core_inputs['scripts/check-layout-gates.mjs'] = regular(project/'scripts/check-layout-gates.mjs')
-    for name in ('scripts/setup.mjs','scripts/preserved-runtime.mjs','scripts/run-ci-tests.mjs','scripts/patch-pointer-hit-geometry.mjs','scripts/patch-cell-text-history.mjs','src/nested-table-paste.mjs','src/request-state.mjs','package.json'):
+    for name in ('scripts/setup.mjs','scripts/preserved-runtime.mjs','scripts/run-ci-tests.mjs','scripts/ci-test-files.mjs','scripts/patch-pointer-hit-geometry.mjs','scripts/patch-cell-text-history.mjs','src/nested-table-paste.mjs','src/request-state.mjs','package.json'):
         core_inputs[name] = regular(project/name)
     core_inputs.update(tree(project/'tests/engine-source-ownership', 'tests/engine-source-ownership/', frozenset({'__pycache__'})))
     fidelity_tests = ('tests/stored-float-frame.test.mjs', 'tests/stored-page-margin.test.mjs', 'tests/stored-nested-block-host.test.mjs', 'tests/shape-fill-transparency.test.mjs', 'tests/nested-declared-row-pagination.test.mjs', 'tests/mixed-block-source-order.test.mjs',
@@ -233,7 +233,7 @@ def main():
                       'tests/stored-inline-reset-suffix.test.mjs',
                       'docs/verification/r14-regression-inputs.json', 'tests/layout-gates.test.mjs', 'tests/ci-core-reference.test.mjs',
                       'tests/compare-pages.test.py', 'tests/fixtures/rowbreak-table/synthetic-rowbreak-single-line-control.hwpx')
-    fidelity_tests += ('tests/inline-picture-frame.check.mjs',
+    fidelity_tests += ('tests/inline-picture-frame.test.mjs',
                        'tests/incremental-table-layout.test.mjs',
                        'tests/cursor-layout-cache.test.mjs',
                        'tests/nested-capacity-rewind.test.mjs',

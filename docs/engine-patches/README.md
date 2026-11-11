@@ -39,7 +39,7 @@
 ~~~powershell
 $env:PWH_CORE_JS = '<candidate>/rhwp.js'
 $env:PWH_CORE_WASM = '<candidate>/rhwp_bg.wasm'
-node --test tests/incremental-table-layout.test.mjs tests/inline-picture-frame.check.mjs tests/nested-capacity-rewind.test.mjs
+node --test tests/incremental-table-layout.test.mjs tests/inline-picture-frame.test.mjs tests/nested-capacity-rewind.test.mjs
 ~~~
 
 [증분 회귀 시험](../../tests/incremental-table-layout.test.mjs)은 각 편집의 모든 쪽 글자 좌표·인쇄 SVG를 일괄 편집으로 강제한 전체 재계산과 대조합니다. 바깥 셀 폭 변경, 셀 문단 재할당, 일괄 편집 후 로컬 편집, 독립된 뒤쪽 쪽, 저장·재열기와 스냅샷 복원 뒤의 재입력을 포함합니다. 현재 배포 런타임은 r23입니다.
@@ -49,7 +49,7 @@ node --test tests/incremental-table-layout.test.mjs tests/inline-picture-frame.c
 
 [패치 소스](rhwp-0.8.7-inline-picture-frame-trailing-spacing.patch)는 한 셀이 쪽을 넘겨 이어지는 HWPX 표의 원본 줄을 검사합니다. 그림 하나가 글자처럼 놓여 저장 글줄 높이와 일치하고, 뒤 문단이 새 쪽 좌표에서 시작하며, 그림 끝과 셀 안 여백이 선언 프레임 안에 들어갈 때 다음 줄로 가는 간격을 현재 쪽의 그림 단위에서 제외합니다. 분할의 실제 가용 높이 검사와 그리기는 같은 셀 단위를 읽습니다. 현재 용지에 공간이 부족해 그림을 옮겨야 할 때도 그림 뒤의 확인된 쪽 경계를 유지합니다. [출력 검증 범위](../RHWP-DIFFERENCES.md#inline-picture-frame-trailing-spacing)
 
-후보의 `PWH_CORE_JS`와 `PWH_CORE_WASM` 경로를 지정하고 `node --test tests/inline-picture-frame.check.mjs`로 그림과 뒤 표의 쪽 배치, 저장·재열기를 검사할 수 있습니다.
+후보의 `PWH_CORE_JS`와 `PWH_CORE_WASM` 경로를 지정하고 `node --test tests/inline-picture-frame.test.mjs`로 그림과 뒤 표의 쪽 배치, 저장·재열기를 검사할 수 있습니다.
 
 <a id="nested-text-capacity-continuation"></a>
 ### 75번 패치의 중첩 표 연속 조각

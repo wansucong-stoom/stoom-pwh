@@ -4,6 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 import {spawn} from 'node:child_process';
+import {discoverCiTests} from './ci-test-files.mjs';
 
 const project=fileURLToPath(new URL('../',import.meta.url)),mode=process.argv[2];
 const files=process.argv.slice(3);
@@ -37,13 +38,18 @@ if(mode==='browser'){
   for(const key of ['PWH_BROWSER_TESTS','PWH_PLAYWRIGHT_MODULE','PWH_DESKTOP_SOURCE_ROOT','PWH_TEST_HWP'])delete env[key];
 }
 const report=path.join(work,'tests.tap');const log=await fs.open(report,'wx');let output='';
+const selectedFiles=files.length?files:await discoverCiTests(project,mode);
 const code=await new Promise((resolve,reject)=>{
-  const child=spawn(process.execPath,['--test','--test-concurrency=2','--test-reporter=tap',...files],{cwd:project,env,windowsHide:true,stdio:['ignore','pipe','pipe']});
+  const child=spawn(process.execPath,['--test','--test-concurrency=2','--test-reporter=tap',...selectedFiles],{cwd:project,env,windowsHide:true,stdio:['ignore','pipe','pipe']});
   for(const stream of [child.stdout,child.stderr])stream.on('data',bytes=>{output+=bytes;process.stdout.write(bytes);});
   child.on('error',reject);child.on('exit',resolve);
 });
 try{await log.writeFile(output);}finally{await log.close();}
 const skips=output.split(/\r?\n/).filter(line=>/ # SKIP\b/.test(line));
 const missing=skips.filter(line=>/PWH_CORE_JS|PWH_CORE_WASM/.test(line)||(mode==='browser'&&/PWH_BROWSER_TESTS|PWH_DESKTOP_SOURCE_ROOT|Requires browser module/.test(line))||(floatReferenceConfigured&&/PWH_FLOAT_FRAME_BASE|Requires an explicit prior-core fallback baseline/.test(line)));
-console.log(JSON.stringify({mode,report,skipped:skips.length,missingConfiguredPrerequisites:missing}));
-if(code!==0||missing.length)process.exitCode=code||1;
+const counts=Object.fromEntries([...output.matchAll(/^# (tests|pass|fail|cancelled) (\d+)$/gm)].map(([,key,value])=>[key,Number(value)]));
+if(process.env.GITHUB_STEP_SUMMARY)await fs.appendFile(process.env.GITHUB_STEP_SUMMARY,
+  '### '+mode+' tests\n\nFiles: '+selectedFiles.length+'; tests: '+(counts.tests??0)+'; passed: '+(counts.pass??0)
+  +'; failed: '+(counts.fail??0)+'; skipped: '+skips.length+'. Skipped tests are not passes.\n');
+console.log(JSON.stringify({mode,report,testFiles:selectedFiles.length,focused:files.length>0,total:counts.tests,passed:counts.pass,failed:counts.fail,cancelled:counts.cancelled,skipped:skips.length,missingConfiguredPrerequisites:missing}));
+if(code!==0||missing.length||!counts.tests)process.exitCode=code||1;

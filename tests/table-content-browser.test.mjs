@@ -168,7 +168,7 @@ test('full editor imports and fills a merged table through MCP queue, renders, a
   await frame.getByRole('textbox',{name:'문서 편집 입력'}).focus();await page.keyboard.press('Control+z');await pause(300);
   await page.mouse.move(box.x+point.x,box.y+point.y);await page.mouse.down();await page.mouse.move(box.x+second.x,box.y+second.y,{steps:12});await page.mouse.up();
   assert.equal((await frame.evaluate(()=>window.pwhEditor.context())).kind,'cell_block');
-  await page.keyboard.press('c');
+  await page.keyboard.press('p');
   const cellDialog=frame.locator('.modal-overlay .tcp-dialog');await cellDialog.waitFor({state:'visible',timeout:5000});
   await cellDialog.locator('.dialog-tab-panel.active').getByRole('button',{name:'아래쪽',exact:true}).click();
   await cellDialog.locator('.dialog-btn-primary').click();

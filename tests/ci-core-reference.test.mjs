@@ -23,6 +23,7 @@ for(const scenario of cases)test('core runner '+scenario.name,async t=>{
   await fs.mkdir(path.join(work,'scripts'));
   await fs.mkdir(path.join(work,'tests'));
   await fs.copyFile(new URL('../scripts/run-ci-tests.mjs',import.meta.url),path.join(work,'scripts/run-ci-tests.mjs'));
+  await fs.copyFile(new URL('../scripts/ci-test-files.mjs',import.meta.url),path.join(work,'scripts/ci-test-files.mjs'));
   const probe=`import test from 'node:test';import assert from 'node:assert/strict';
 const skip=!process.env.PWH_FLOAT_FRAME_BASE_JS||!process.env.PWH_FLOAT_FRAME_BASE_WASM?'Requires an explicit prior-core fallback baseline':false;
 test('configured float baseline reaches the actual core test',{skip},()=>{
@@ -33,6 +34,8 @@ test('configured float baseline reaches the actual core test',{skip},()=>{
   const env={...process.env,PWH_RUNTIME_ROOT:path.join(work,'unused-runtime')};
   // This fixture launches an independent test runner, not a nested node:test worker.
   delete env.NODE_TEST_CONTEXT;
+  delete env.GITHUB_STEP_SUMMARY;
+  delete env.GITHUB_OUTPUT;
   for(const name of names)delete env[name];
   if(scenario.reference||scenario.partialReference)env.PWH_REFERENCE_CORE_JS=path.join(work,'reference/rhwp.js');
   if(scenario.reference)env.PWH_REFERENCE_CORE_WASM=path.join(work,'reference/rhwp_bg.wasm');
@@ -49,6 +52,9 @@ test('configured float baseline reaches the actual core test',{skip},()=>{
   const summary=JSON.parse(result.stdout.trim().split(/\r?\n/).at(-1));
   assert.equal(summary.missingConfiguredPrerequisites.length,scenario.pass?0:1);
   assert.equal(summary.skipped,scenario.optional||!scenario.pass?1:0);
+  assert.equal(summary.total,1);
+  assert.equal(summary.passed,scenario.optional||!scenario.pass?0:1);
+  assert.equal(summary.failed,0);
   // The fixture exercises environment delivery and skip accounting only.
   await assert.rejects(fs.access(path.join(work,'unused-runtime')));
 });
