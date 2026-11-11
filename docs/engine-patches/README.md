@@ -10,6 +10,14 @@
 
 한글 호환 단축키의 편집 상태 분기는 [Pwh 공통 Studio 빌드 패치](../../scripts/patch-hancom-key-contexts.mjs)에 있습니다. 고정 크기 표 조절과 행 삭제는 r22 코어 API를 사용합니다. [편집기 변경과 적용 범위](../RHWP-DIFFERENCES.md#한글-호환-단축키의-편집-상태-구분)
 
+
+<a id="continued-flow-picture-anchor"></a>
+### 79번 패치의 연속 셀 자리차지 그림
+
+[공통 코어 패치](rhwp-0.8.7-continued-flow-picture-anchor.patch)는 현재 연속 조각이 소유한 문단 기준 TopAndBottom 흐름 그림을 그 조각의 문단 시작점에 배치합니다. 셀 세로 정렬을 다시 적용해 앞의 제목·문단 높이를 지우지 않습니다. 개체 첫 단위의 소유권을 기존 분할 원장에서 확인하며 용지 상대 그림이나 제한을 끈 그림의 배치를 바꾸지 않습니다.
+
+[합성 회귀 시험](../../tests/continued-flow-picture.test.mjs)은 그림 앞 제목 1~3개, 같은 문서의 저장·재열기, 편집 후 스냅샷 복원과 명시적 용지 상대 배치를 검사합니다. 익명 실제 TEST 문서에서는 17쪽 유지와 해당 쪽의 제목·그림 분리를 인쇄 PDF로 확인합니다. [전후 수치와 범위](../RHWP-DIFFERENCES.md#continued-flow-picture-anchor)
+
 <a id="source-owned-render-measurement-reuse"></a>
 ### 78번 패치의 커서·그리기 측정 재사용
 

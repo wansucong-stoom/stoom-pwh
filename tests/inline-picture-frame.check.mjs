@@ -6,7 +6,7 @@ import {zipEntries} from '../scripts/setup.mjs';
 import {textLinePictureCaretFixture} from './engine-cursor/text-line-caret-fixture.mjs';
 import {mapHwpxMember} from './engine-source-ownership/hwpx-fixture-utils.mjs';
 
-// The locked runtime remains r22. Run this gate on the new core before promotion.
+// Explicit core paths also allow checking a candidate before runtime promotion.
 const sectionName = 'Contents/section0.xml';
 const skip = !process.env.PWH_CORE_JS || !process.env.PWH_CORE_WASM
   ? 'Requires explicit PWH_CORE_JS and PWH_CORE_WASM paths'

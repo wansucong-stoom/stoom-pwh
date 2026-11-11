@@ -1,0 +1,19 @@
+diff --git a/src/renderer/layout/table_partial.rs b/src/renderer/layout/table_partial.rs
+--- a/src/renderer/layout/table_partial.rs
++++ b/src/renderer/layout/table_partial.rs
+@@ -3214,6 +3214,15 @@
+                                         picture_anchor_y
+                                     } else if top_and_bottom_para
+                                         && pic.common.flow_with_text
++                                        && cut_units.is_some_and(|(start, _)| start > 0)
++                                        && visible_non_inline_control
++                                    {
++                                        // A continuation owns this flow control at its local
++                                        // paragraph origin. Cell valign would discard preceding
++                                        // units (for example headings) in the same fragment.
++                                        picture_anchor_y
++                                    } else if top_and_bottom_para
++                                        && pic.common.flow_with_text
+                                         && !unrestricted_take_place_cell_float
+                                     {
+                                         let v_off = hwpunit_to_px(

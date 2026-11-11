@@ -236,7 +236,8 @@ def main():
     fidelity_tests += ('tests/inline-picture-frame.check.mjs',
                        'tests/incremental-table-layout.test.mjs',
                        'tests/cursor-layout-cache.test.mjs',
-                       'tests/nested-capacity-rewind.test.mjs')
+                       'tests/nested-capacity-rewind.test.mjs',
+                       'tests/continued-flow-picture.test.mjs')
     for name in fidelity_tests:
         core_inputs[name] = regular(project/name)
         build_inputs['pwh/'+name] = regular(project/name)

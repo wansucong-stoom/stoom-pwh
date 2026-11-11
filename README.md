@@ -22,7 +22,7 @@ HWP·HWPX 문서를 열고, 글과 표를 직접 편집하거나 선택한 부�
 | **Pwh Desktop** · Windows x64 | GitHub 릴리스에서 **MSI**를 내려받아 설치합니다. 업데이트할 때도 최신 MSI를 실행합니다. 앱에서 ChatGPT 계정을 연결할 수 있으며, 별도 Codex 설치 없이도 실행됩니다. [Desktop 설치와 사용](docs/PWH-DESKTOP.md#설치와-사용) |
 | **Pwh 플러그인** · Codex 데스크톱 | Codex 대화와 나란히 한글 편집기를 엽니다. GitHub에서 소스와 플러그인 **ZIP**을 받을 수 있습니다. [Codex 플러그인 설치](docs/USER-GUIDE.md#codex-plugin) |
 
-**최신 정식 릴리스**는 Pwh **0.6.50**, Desktop **0.1.31**, 공통 코어 **r23**입니다. 버전별 다운로드, 변경 이력, SHA-256과 MSI 검증 범위는 [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases/tag/v0.6.50)에서 확인할 수 있습니다.
+**최신 정식 릴리스**는 Pwh **0.6.51**, Desktop **0.1.32**, 공통 코어 **r24**입니다. 버전별 다운로드, 변경 이력, SHA-256과 MSI 검증 범위는 [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases/tag/v0.6.51)에서 확인할 수 있습니다.
 
 ## 할 수 있는 일
 
@@ -58,9 +58,11 @@ HWP·HWPX 문서를 열고, 글과 표를 직접 편집하거나 선택한 부�
 
 ## 조판 엔진과 검증
 
-Pwh와 Pwh Desktop은 [rhwp](https://github.com/edwardkim/rhwp) 0.8.7 기반 공통 WASM 코어를 사용합니다. r23의 [코어 변경 기록](docs/RHWP-DIFFERENCES.md)에서 표 편집, 쪽 나눔, 글꼴 계산의 수정 범위를 확인할 수 있습니다.
+Pwh와 Pwh Desktop은 [rhwp](https://github.com/edwardkim/rhwp) 0.8.7 기반 공통 WASM 코어를 사용합니다. r24의 [코어 변경 기록](docs/RHWP-DIFFERENCES.md)에서 표 편집, 쪽 나눔, 글꼴 계산의 수정 범위를 확인할 수 있습니다.
 
 r23 정식 빌드는 익명 시험 문서 3개의 150쪽과 그림 시험 문서 17쪽, 편집 사례 5건에서 검증용 빌드와 동일한 글자 좌표·SVG를 냈습니다. 아래 표는 앞선 공통 코어 개선에서 동일한 원본을 한컴 PDF와 비교한 결과입니다.
+
+r24는 쪽을 넘겨 이어지는 셀에서 문단에 속한 자리차지 그림을 현재 조각의 문단 시작점에 배치합니다. 그림 앞 제목들의 높이를 셀 상단 정렬로 덮어쓰던 문제를 보완했습니다. [연속 셀 그림의 시작점](docs/RHWP-DIFFERENCES.md#continued-flow-picture-anchor)
 
 r23 공통 코어는 여러 쪽에 걸친 셀에서 끝 그림의 높이와 다음 쪽의 시작 경계를 같은 분할 단위로 계산합니다. [그림 배치 수정과 검증 범위](docs/RHWP-DIFFERENCES.md#inline-picture-frame-trailing-spacing)
 

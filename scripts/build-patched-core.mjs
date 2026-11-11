@@ -1555,7 +1555,18 @@ const patches = [
       "patchedSha256": "2dc554ebc12b36413470c4112fab31ad76db47b5eb10f5e8f23595fcfcf4d9f2"
     }
   ]
-}
+},
+  {
+    "file": "rhwp-0.8.7-continued-flow-picture-anchor.patch",
+    "sha256": "6cacac963bc207e946bfc01746185b88760896e9d82f215916c30185ca706372",
+    "sources": [
+      {
+        "path": "src/renderer/layout/table_partial.rs",
+        "originalSha256": "85c38e35247a74f2d3c8966b273ef8d7aba302a0fb84dd1f1e483690b0e2439f",
+        "patchedSha256": "18de5a3856041cd2cf2b6f53576d89a21336b8948f9ddf17ec604258ced38464"
+      }
+    ]
+  },
 ];
 const help = `Usage: node scripts/build-patched-core.mjs
   --source-archive <fixed upstream source ZIP>

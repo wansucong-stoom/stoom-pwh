@@ -1,12 +1,12 @@
 {
   "sha256": "3f9b97b5949ef114ac2d5a8ee89f3da7698d9172fe827d83c709e2ee522c3a94",
-  "baseVersion": "0.6.50",
+  "baseVersion": "0.6.51",
   "baseEditorSha256": "5497d22a835f76d2f8560c99de48ef60ba5e32f9936138ed060ea670e18744fd",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "desktop",
-    "sha256": "bcfc6f99d7233d979505a3a40cc240342799e00610d9049274ce938a5d3cde56",
+    "sha256": "cd5ceaf340ffbfae0451da5b11fa35bc33af3cc71ecfee40f1b0c33d7859a4da",
     "files": [
       {
         "path": "desktop/standalone-pwh/build-desktop-editor.mjs",
@@ -22,7 +22,7 @@
       },
       {
         "path": "package.json",
-        "sha256": "1892c932fc78326fad9edd8917e6a4d518efeaab491b999f0714cd196117534e"
+        "sha256": "e9820cf957677f1c04e3389daff0b56a73cdc0553204b589c213b55933ae4049"
       },
       {
         "path": "scripts/build-inline.mjs",
