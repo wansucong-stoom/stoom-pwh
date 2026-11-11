@@ -1,6 +1,6 @@
 {
   "kind": "studio-inline",
-  "version": "0.6.52",
+  "version": "0.6.53",
   "upstreamVersion": "0.8.7",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "files": {
@@ -11,7 +11,7 @@
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "common",
-    "sha256": "57f5bb5954ac37146afa203b777b912b19cbcb7e95454026244ec3c1c8f67e1b",
+    "sha256": "aa868abaf4d25eafad6a87a7e7872c33e0a374385c1652e74da33fc8791b06f4",
     "files": [
       {
         "path": "docs/engine-patches/studio/clipboard-safety.patch",
@@ -19,7 +19,7 @@
       },
       {
         "path": "package.json",
-        "sha256": "f1a7926f3d152b89aa7c39d228b9981682ec83ca682e2a9c80bf99a2b5e7df4c"
+        "sha256": "68c17663cc11120fb7b59db48614e7871940d9217f0d2ba43b016cc3fd83c839"
       },
       {
         "path": "scripts/build-inline.mjs",

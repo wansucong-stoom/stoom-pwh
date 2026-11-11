@@ -8,10 +8,19 @@
 <a id="cause-and-scope"></a>
 ## 원인과 적용 범위
 
-Studio의 선택적 upstream 반영은 코어 83개 패치와 분리합니다. [클립보드·교차 구역 선택 패치](studio/clipboard-safety.patch)와 [Pwh 적용 스크립트](../../scripts/patch-clipboard-safety.mjs)는 rhwp 0.9.0의 관련 수정 세 건을 가져오고, 취소 즉시 진행 상태 해제·포커스 이탈 기록·rich 복사 실패 시 원문 보존을 추가합니다. [검토표와 검증 범위](../UPSTREAM-0.9-REVIEW.md)
+Studio의 선택적 upstream 반영은 코어 85개 패치와 분리합니다. [클립보드·교차 구역 선택 패치](studio/clipboard-safety.patch)와 [Pwh 적용 스크립트](../../scripts/patch-clipboard-safety.mjs)는 rhwp 0.9.0의 관련 수정 세 건을 가져오고, 취소 즉시 진행 상태 해제·포커스 이탈 기록·rich 복사 실패 시 원문 보존을 추가합니다. [검토표와 검증 범위](../UPSTREAM-0.9-REVIEW.md)
 
 한글 호환 단축키의 편집 상태 분기는 [Pwh 공통 Studio 빌드 패치](../../scripts/patch-hancom-key-contexts.mjs)에 있습니다. 고정 크기 표 조절과 행 삭제는 r22 코어 API를 사용합니다. [편집기 변경과 적용 범위](../RHWP-DIFFERENCES.md#한글-호환-단축키의-편집-상태-구분)
 
+
+<a id="symbol-metrics-and-stored-frame-budget"></a>
+### 84~85번 기호 폭·표 분할 내용 예산
+
+배포 기준은 공통 코어 r26입니다. [84번 패치](rhwp-0.8.7-legacy-symbol-metric-projection.patch)는 기호 폰트 원본 코드의 합성기 폭과 커서 전진량을 일치시킵니다. 표시 기호의 기존 치환과 다른 전용 문자 처리는 유지합니다.
+
+[85번 패치](rhwp-0.8.7-stored-frame-content-budget.patch)는 저장된 첫 프레임을 채택하기 전에 실제 내용 하단을 검사하고, 원본 재시작이 입증된 HWPX의 남은 행 최소 높이를 다음 조각으로 전달합니다. 끝난 단일 줄 표제가 있는 행의 후행 간격도 원본 표 프레임이 그 간격을 제외함을 증명할 때만 제외합니다. 기존 병합·평행 셀·편집 후 재조판 조건을 유지합니다.
+
+[기호 폭 검사](../../tests/legacy-symbol-run-advance.test.mjs), [표 연속 배치 보존](../../tests/stored-frame-visible-content-fit.test.mjs), [원본 프레임 증명 함수 검사](../../tests/stored-label-frame-source.test.mjs)를 추가했습니다. 실제 HWPX/PDF 비교 결과는 [익명 검증 보고서](../verification/CORE-R26.md)에 있으며, 사용자 문서는 배포하지 않습니다. 기존 83개 패치 뒤에 순서대로 적용합니다.
 
 <a id="format-property-preservation"></a>
 ### 82번 부분 서식 병합과 83번 도형 줄 뒤 간격

@@ -1671,6 +1671,38 @@ const patches = [
         "patchedSha256": "c7ebbc8e3e312f50449b9347665d8df678fab2d7bc5b0f68cbe0bcdcf17a2624"
       }
     ]
+  },
+  {
+    "file": "rhwp-0.8.7-legacy-symbol-metric-projection.patch",
+    "sha256": "b6061c67e906619945b0a82a7f485fe5de3e0144f90e6ac3eec618ff56e04fac",
+    "sources": [
+      {
+        "path": "src/renderer/composer.rs",
+        "originalSha256": "b9d85eec579e233cf386a72240c3ff1cff2e1a962db526d3ca234c818f4270a5",
+        "patchedSha256": "57287aa02f68ca9ddff7cbd799ab12b545c6352ba0bd7f703564cd006958320c"
+      }
+    ]
+  },
+  {
+    "file": "rhwp-0.8.7-stored-frame-content-budget.patch",
+    "sha256": "929a69dd2ad5165d4548fd28e83e085d8474ff7a6484a4316d1c8d89dc1a4900",
+    "sources": [
+      {
+        "path": "src/renderer/layout/table_layout.rs",
+        "originalSha256": "f073bd0a9d2a51eda56d3147520a46c27bcf9cf88b54130f1ddc53dbd24714db",
+        "patchedSha256": "04ed73436850ca9bf03047eff7ed31bbdaed8477988ccedfb85ab51afc9dac6c"
+      },
+      {
+        "path": "src/renderer/typeset/table/scan/source_frame.rs",
+        "originalSha256": "88a2b0afe7527179ca4b65bcbbe39ad77085c9e1bbb86e8f8bd55ee9de2e612e",
+        "patchedSha256": "32f7acced04b8f30581d29f3a4604b41b5c5fbe30ee6d3a99548205a3c82632e"
+      },
+      {
+        "path": "src/renderer/typeset/table/continuation/fragment/emit.rs",
+        "originalSha256": "ccf603b6b01ce03bd80021cfa350ec06572c60232f884cc0b3b74dc63e27f28e",
+        "patchedSha256": "ac4728ae2806ea36a5ae58d119a72a5f35ffa79b41623fd48a49259fd6b50b10"
+      }
+    ]
   }
 ];
 const help = `Usage: node scripts/build-patched-core.mjs
