@@ -26,4 +26,4 @@
 ## 릴리스와 보안
 
 - [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases)에서 배포 파일과 검증 기록을 받을 수 있습니다.
-- [보안 신고](../SECURITY.md) · [라이선스](../LICENSE) · [외부 구성 요소 고지](../THIRD_PARTY_NOTICES.md)
+- [개인정보 처리방침](PRIVACY.md) · [보안 신고](../SECURITY.md) · [라이선스](../LICENSE) · [외부 구성 요소 고지](../THIRD_PARTY_NOTICES.md)
