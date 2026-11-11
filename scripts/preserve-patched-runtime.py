@@ -237,7 +237,12 @@ def main():
                        'tests/incremental-table-layout.test.mjs',
                        'tests/cursor-layout-cache.test.mjs',
                        'tests/nested-capacity-rewind.test.mjs',
-                       'tests/continued-flow-picture.test.mjs')
+                       'tests/continued-flow-picture.test.mjs',
+                       'tests/nested-table-properties.test.mjs',
+                       'tests/helpers/nested-properties-fixture.mjs',
+                       'tests/partial-format-border-preservation.test.mjs',
+                       'tests/inline-shape-spacing.test.mjs',
+                       'tests/helpers/inline-shape-spacing-fixture.mjs')
     for name in fidelity_tests:
         core_inputs[name] = regular(project/name)
         build_inputs['pwh/'+name] = regular(project/name)

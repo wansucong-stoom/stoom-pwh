@@ -4,7 +4,9 @@ import {pathToFileURL} from 'node:url';
 import {patchBodyCursorContract} from './patch-body-cursor-contract.mjs';
 import {patchPointerHitGeometry} from './patch-pointer-hit-geometry.mjs';
 import {patchCellTextHistory} from './patch-cell-text-history.mjs';
-import {patchObjectProperties} from './patch-object-properties.mjs';
+import {patchFormatProperties} from './patch-format-properties.mjs';
+import {patchClipboardSafety} from './patch-clipboard-safety.mjs';
+import {patchObjectProperties,patchTablePropertyInteractions,patchTablePropertyChanges} from './patch-object-properties.mjs';
 import {patchViewportTableSelection} from './patch-viewport-table-selection.mjs';
 import {patchTableAndSymbolShortcuts} from './patch-table-and-symbol-shortcuts.mjs';
 import {patchHancomKeyAliases} from './patch-hancom-key-aliases.mjs';
@@ -34,6 +36,7 @@ ${anchor}`);
  await fs.writeFile(coreGluePath,coreGlue);
 }
 await patchObjectProperties(studio);
+await patchFormatProperties(studio);
 await patchViewportTableSelection(studio);
 await patchTableAndSymbolShortcuts(studio);
 await patchHancomKeyAliases(studio);
@@ -287,15 +290,19 @@ if(!cellProps.includes('pwh selected cell properties')){
     const blockHandler = this.services?.getInputHandler() as any;
     if (this.mode === 'cell' && blockHandler?.isInCellSelectionMode?.()) {
       const block = blockHandler.getSelectedCellBlock?.();
-      if (!block || !block.cellIndices?.length || block.cellPath) {
+      const nestedPath = this.tableCtx.cellPath;
+      const ownsBlock = block && block.sec === sec && block.ppi === ppi &&
+        (nestedPath ? block.cellPath && tablePropertiesPathKey(block.cellPath) === tablePropertiesPathKey(nestedPath)
+          : !block.cellPath && block.ci === ci);
+      if (!ownsBlock || !block.cellIndices?.length) {
         showToast({message:'이 셀 선택의 속성은 아직 변경할 수 없습니다.',durationMs:7000});
         return false;
       }
       const changed = Object.fromEntries(Object.entries(newCellProps).filter(([key,value]) => JSON.stringify(value) !== JSON.stringify(this.pwhInitialCellProps[key])));
       if (!Object.keys(changed).length) return true;
       const cursor = blockHandler.getCursorPosition();
-      blockHandler.executeOperation({kind:'snapshot',operationType:'objectProps',operation:(wasm: WasmBridge)=>{
-        wasm.runInBatch(()=>{for(const index of block.cellIndices){const result=wasm.setCellProperties(block.sec,block.ppi,block.ci,index,changed as Partial<CellProperties>);if(!result?.ok)throw Error('셀 속성을 적용하지 못했습니다.');}});
+      blockHandler.executeOperation({kind:'snapshot',operationType:'objectProps',operation:()=>{
+        this.wasm.runInBatch(()=>{for(const index of block.cellIndices){const result=this.wasm.setCellProperties(sec,ppi,ci,index,changed as Partial<CellProperties>);if(!result?.ok)throw Error('셀 속성을 적용하지 못했습니다.');}});
         return cursor;
       }});
       return true;
@@ -945,6 +952,9 @@ await patchBodyCursorContract(studio);
 await patchPointerHitGeometry(studio);
 await patchCellTextHistory(studio);
 await patchHancomKeyContexts(studio);
+await patchTablePropertyInteractions(studio);
+await patchTablePropertyChanges(studio);
+await patchClipboardSafety(studio);
 const glue=path.join(root,'pkg/rhwp.js');
 await fs.writeFile(glue,(await fs.readFile(glue,'utf8')).replace("new URL('rhwp_bg.wasm', import.meta.url)","(()=>{throw new Error('Host WASM bytes required')})()"));
 const {build}=await import(pathToFileURL(path.join(studio,'node_modules/vite/dist/node/index.js')));

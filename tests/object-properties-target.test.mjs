@@ -30,7 +30,7 @@ test('nested selection and caret never degrade to the outer flat address', () =>
       getSelectedTableRef: () => ref,
       getCellTableContext: () => ref,
       getCursorPosition: () => ({cellIndex: 3, cellPath}),
-    }), {unsupported: 'nested-table'});
+    }), {tableCtx:{sec:0,ppi:2,ci:2,cellPath},cellIdx:selected?0:3,mode:'table'});
   }
 });
 

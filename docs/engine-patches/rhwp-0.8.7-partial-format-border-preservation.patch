@@ -1,0 +1,121 @@
+--- a/src/document_core/html_table_import.rs
++++ b/src/document_core/html_table_import.rs
+@@ -797,8 +797,13 @@
+     /// JSON에서 border/fill 속성을 파싱하여 BorderFill을 생성/재사용한다.
+     /// 프론트엔드 글자 테두리/배경 대화상자에서 호출된다.
+     pub(crate) fn create_border_fill_from_json(&mut self, json: &str) -> u16 {
++        self.create_border_fill_from_json_with_base(json, 0)
++    }
++
++    // A partial edit starts from its owner; absent fields are not defaults.
++    pub(crate) fn create_border_fill_from_json_with_base(&mut self, json: &str, base_id: u16) -> u16 {
+         use crate::model::style::{
+-            BorderFill, BorderLine, CenterLine, DiagonalLine, Fill, FillType, SolidFill,
++            BorderFill, BorderLine, BorderLineType, CenterLine, DiagonalLine, Fill, FillType, SolidFill,
+         };
+ 
+         fn json_diag_bits(json: &str, key: &str) -> Option<u16> {
+@@ -820,6 +825,7 @@
+         }
+ 
+         let mut bf = json_u32(json, "borderFillId")
++            .or(Some(base_id as u32))
+             .and_then(|id| {
+                 if id == 0 {
+                     None
+@@ -834,7 +840,7 @@
+             .unwrap_or(BorderFill {
+                 raw_data: None,
+                 attr: 0,
+-                borders: [BorderLine::default(); 4],
++                borders: [BorderLine { line_type: BorderLineType::None, ..Default::default() }; 4],
+                 diagonal: DiagonalLine::default(),
+                 center_line: CenterLine::None,
+                 fill: Fill::default(),
+@@ -846,19 +852,19 @@
+         let dir_keys = ["borderLeft", "borderRight", "borderTop", "borderBottom"];
+         for (i, key) in dir_keys.iter().enumerate() {
+             if let Some(obj_str) = json_object(json, key) {
+-                let type_val = json_i32(&obj_str, "type").unwrap_or(0);
+-                bf.borders[i].line_type = u8_to_border_line_type(type_val as u8);
+-                bf.borders[i].width = json_i32(&obj_str, "width").unwrap_or(0) as u8;
+-                bf.borders[i].color = json_color(&obj_str, "color").unwrap_or(0);
++                if let Some(value) = json_i32(&obj_str, "type") { bf.borders[i].line_type = u8_to_border_line_type(value as u8); }
++                if let Some(value) = json_i32(&obj_str, "width") { bf.borders[i].width = value as u8; }
++                if let Some(value) = json_color(&obj_str, "color") { bf.borders[i].color = value; }
+             }
+         }
+ 
+         // 채우기 파싱
+         if let Some(fill_type_str) = json_str(json, "fillType") {
+             bf.fill = if fill_type_str == "solid" {
+-                let bg = json_color(json, "fillColor").unwrap_or(0xFFFFFF);
+-                let pat_c = json_color(json, "patternColor").unwrap_or(0);
+-                let pat_t = json_i32(json, "patternType").unwrap_or(0);
++                let existing = bf.fill.solid.as_ref();
++                let bg = json_color(json, "fillColor").unwrap_or_else(|| existing.map(|f| f.background_color).unwrap_or(0xFFFFFF));
++                let pat_c = json_color(json, "patternColor").unwrap_or_else(|| existing.map(|f| f.pattern_color).unwrap_or(0));
++                let pat_t = json_i32(json, "patternType").unwrap_or_else(|| existing.map(|f| f.pattern_type).unwrap_or(-1));
+                 Fill {
+                     fill_type: FillType::Solid,
+                     solid: Some(SolidFill {
+--- a/src/document_core/commands/formatting.rs
++++ b/src/document_core/commands/formatting.rs
+@@ -1026,6 +1026,12 @@
+         new_id as i32
+     }
+ 
++    // Paragraph formatting shares the same merge rule in body, cells, notes and headers.
++    pub(crate) fn create_para_border_fill_from_json(&mut self, json: &str, shape_id: u16) -> u16 {
++        let base_id = self.document.doc_info.para_shapes.get(shape_id as usize).map(|p| p.border_fill_id).unwrap_or(0);
++        self.create_border_fill_from_json_with_base(json, base_id)
++    }
++
+     /// 글자 서식 적용 (네이티브) — 본문 문단
+     pub fn apply_char_format_native(
+         &mut self,
+@@ -1559,7 +1565,8 @@
+ 
+         // 테두리/배경 변경 처리: BorderFill 생성 → border_fill_id 세팅
+         if json_has_border_keys(props_json) {
+-            let bf_id = self.create_border_fill_from_json(props_json);
++            let shape_id = self.document.sections[sec_idx].paragraphs[para_idx].para_shape_id;
++            let bf_id = self.create_para_border_fill_from_json(props_json, shape_id);
+             mods.border_fill_id = Some(bf_id);
+         }
+         if let Some(arr) = parse_json_i16_array(props_json, "borderSpacing", 4) {
+@@ -1709,7 +1716,9 @@
+ 
+         // 테두리/배경 변경 처리: BorderFill 생성 → border_fill_id 세팅
+         if json_has_border_keys(props_json) {
+-            let bf_id = self.create_border_fill_from_json(props_json);
++            let shape_id = self.get_cell_paragraph_ref(sec_idx, parent_para_idx, control_idx, cell_idx, cell_para_idx)
++                .ok_or_else(|| HwpError::RenderError("Cell paragraph missing".to_string()))?.para_shape_id;
++            let bf_id = self.create_para_border_fill_from_json(props_json, shape_id);
+             mods.border_fill_id = Some(bf_id);
+         }
+         if let Some(arr) = parse_json_i16_array(props_json, "borderSpacing", 4) {
+--- a/src/document_core/commands/header_footer_ops.rs
++++ b/src/document_core/commands/header_footer_ops.rs
+@@ -1207,7 +1207,7 @@
+ 
+         // 테두리/배경 변경 처리
+         if json_has_border_keys(props_json) {
+-            let bf_id = self.create_border_fill_from_json(props_json);
++            let bf_id = self.create_para_border_fill_from_json(props_json, base_id);
+             mods.border_fill_id = Some(bf_id);
+         }
+         if let Some(arr) = parse_json_i16_array(props_json, "borderSpacing", 4) {
+--- a/src/document_core/commands/footnote_ops.rs
++++ b/src/document_core/commands/footnote_ops.rs
+@@ -427,7 +427,9 @@
+         }
+ 
+         if json_has_border_keys(props_json) {
+-            let bf_id = self.create_border_fill_from_json(props_json);
++            let shape_id = self.get_footnote_paragraph_ref(section_idx, para_idx, control_idx, fn_para_idx)
++                .ok_or_else(|| HwpError::RenderError("Note paragraph missing".to_string()))?.para_shape_id;
++            let bf_id = self.create_para_border_fill_from_json(props_json, shape_id);
+             mods.border_fill_id = Some(bf_id);
+         }
+         if let Some(arr) = parse_json_i16_array(props_json, "borderSpacing", 4) {

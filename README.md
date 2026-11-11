@@ -23,7 +23,7 @@ HWP·HWPX 문서를 열고, 글과 표를 직접 편집하거나 선택한 부�
 | **Pwh Desktop** · Windows x64 | **[Microsoft Store에서 설치](https://apps.microsoft.com/detail/9NXGD60MHMT2)**하고 Store에서 업데이트합니다. 앱에서 선택적으로 AI를 연결하며 별도 Codex 설치 없이도 기본 편집을 사용할 수 있습니다. [Desktop 설치와 사용](docs/PWH-DESKTOP.md#설치와-사용) |
 | **Pwh 플러그인** · Codex 데스크톱 | Codex 대화와 나란히 한글 편집기를 엽니다. GitHub에서 소스와 플러그인 **ZIP**을 받을 수 있습니다. [Codex 플러그인 설치](docs/USER-GUIDE.md#codex-plugin) |
 
-**최신 정식 릴리스**는 Pwh **0.6.51**, Desktop **0.1.32**, 공통 코어 **r24**입니다. 버전별 다운로드, 변경 이력, SHA-256과 MSI 검증 범위는 [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases/tag/v0.6.51)에서 확인할 수 있습니다.
+**최신 정식 릴리스**는 Pwh **0.6.52**, Desktop **0.1.33**, 공통 코어 **r25**입니다. 버전별 다운로드, 변경 이력, SHA-256과 검증 범위는 [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases/tag/v0.6.52)에서 확인할 수 있습니다.
 
 Desktop의 신규 설치·업데이트는 **Microsoft Store**로 통일합니다. 기존 MSI 배포 파일은 보존하지만 이후 MSI 업데이트는 배포하지 않습니다. GitHub 릴리스는 **플러그인 ZIP·소스·고정 코어·검증 자료**를 계속 제공합니다. 기존 MSI 사용자는 [Store 이전 안내](docs/PWH-DESKTOP.md#설치와-사용)를 참고하세요.
 
@@ -44,6 +44,12 @@ Desktop의 신규 설치·업데이트는 **Microsoft Store**로 통일합니다
 
 ## 표 편집과 반응 속도
 
+- **안전한 잘라내기** — 복사와 클립보드 기록이 성공해야 원문을 삭제합니다. 지연 처리 중 문서·선택·포커스가 바뀌면 취소합니다. [rhwp 0.9.0에서 선택 반영한 오류 수정](docs/UPSTREAM-0.9-REVIEW.md)
+
+- **서식 보존** — 문단 간격·배경·테두리 중 바꾼 속성만 적용합니다. 속성 창을 확인만 했을 때 원래 수치와 서식을 보존하고, 문단 위·아래 간격의 pt를 실제 배치에 맞춥니다. [공통 코어 보완](docs/RHWP-DIFFERENCES.md#format-property-preservation)
+
+- **표 속성** — 중첩 표도 선택한 표의 속성을 엽니다. 표 바깥쪽 선택 범위를 넓히고, 테두리 더블클릭과 상단 개체 속성을 같은 경로에 연결합니다. 셀 크기 조절과 셀 안 단어 선택은 편집 상태에 따라 구분합니다. [적용 범위](docs/OBJECT-PROPERTIES.md)
+
 - **표 편집** — 셀 폭을 바꾸면 새 줄 높이와 문단 간격을 다시 계산해 글줄이 겹치지 않게 합니다. 긴 중첩 표를 편집할 때 줄 단위 나눔이 허용되면 현재 쪽의 남은 본문 공간을 사용합니다.
 - **편집 반응** — 셀 크기 변경에 필요한 행·열 정보를 문서 모델에서 읽고, 셀 선택 표시는 보이는 쪽만 갱신합니다. 같은 서식의 글자 폭 표도 재사용합니다. 큰 표에서 쪽을 다시 나누는 지연은 남아 있습니다.
 
@@ -61,7 +67,7 @@ Desktop의 신규 설치·업데이트는 **Microsoft Store**로 통일합니다
 
 ## 조판 엔진과 검증
 
-Pwh와 Pwh Desktop은 [rhwp](https://github.com/edwardkim/rhwp) 0.8.7 기반 공통 WASM 코어를 사용합니다. r24의 [코어 변경 기록](docs/RHWP-DIFFERENCES.md)에서 표 편집, 쪽 나눔, 글꼴 계산의 수정 범위를 확인할 수 있습니다.
+Pwh와 Pwh Desktop은 [rhwp](https://github.com/edwardkim/rhwp) 0.8.7 기반 공통 WASM 코어를 사용합니다. r25의 [코어 변경 기록](docs/RHWP-DIFFERENCES.md)에서 표 편집, 쪽 나눔, 글꼴 계산의 수정 범위를 확인할 수 있습니다.
 
 r23 정식 빌드는 익명 시험 문서 3개의 150쪽과 그림 시험 문서 17쪽, 편집 사례 5건에서 검증용 빌드와 동일한 글자 좌표·SVG를 냈습니다. 아래 표는 앞선 공통 코어 개선에서 동일한 원본을 한컴 PDF와 비교한 결과입니다.
 

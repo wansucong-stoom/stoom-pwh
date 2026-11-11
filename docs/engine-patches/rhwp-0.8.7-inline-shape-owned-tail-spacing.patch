@@ -1,0 +1,15 @@
+--- a/src/renderer/layout.rs
++++ b/src/renderer/layout.rs
+@@ -11120,8 +11120,11 @@
+                                             if stored_shape_line
+                                                 && seg.line_height > 0
+                                                 && seg.line_spacing > 0
++                                                // An equal object frame still owns its saved
++                                                // trailing gap when the next original row
++                                                // explicitly starts after height + spacing.
+                                                 && shape_max_h
+-                                                    < hwpunit_to_px(seg.line_height, self.dpi)
++                                                    <= hwpunit_to_px(seg.line_height, self.dpi) + 0.01
+                                                 && paragraphs
+                                                     .get(*para_index + 1)
+                                                     .and_then(|next| next.line_segs.first())

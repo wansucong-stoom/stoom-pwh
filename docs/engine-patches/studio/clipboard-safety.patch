@@ -1,0 +1,498 @@
+diff --git a/rhwp-studio/src/engine/input-handler-keyboard.ts b/rhwp-studio/src/engine/input-handler-keyboard.ts
+--- a/rhwp-studio/src/engine/input-handler-keyboard.ts
++++ b/rhwp-studio/src/engine/input-handler-keyboard.ts
+@@ -1796,6 +1796,7 @@ function copyHeaderFooterSelection(this: any, e: ClipboardEvent): boolean {
+   const selection = this.getNonEmptyHeaderFooterSelection();
+   if (!selection) return false;
+   e.preventDefault();
++  if (!e.clipboardData) return false;
+   try {
+     const result = this.wasm.copySelectionInHeaderFooter(
+       selection.start.sectionIdx,
+@@ -1806,90 +1807,91 @@ function copyHeaderFooterSelection(this: any, e: ClipboardEvent): boolean {
+       selection.end.paraIdx,
+       selection.end.charOffset,
+     );
+-    if (!result.ok) return false;
+-    if (e.clipboardData) {
+-      e.clipboardData.setData('text/plain', result.text);
+-      e.clipboardData.setData(
+-        'text/html',
+-        prepareRhwpInternalClipboardHtml(this, '', result.text),
+-      );
+-    }
++    if (result.ok !== true) return false;
++    e.clipboardData.setData('text/plain', result.text);
++    e.clipboardData.setData(
++      'text/html',
++      prepareRhwpInternalClipboardHtml(this, '', result.text),
++    );
+     return true;
+   } catch (err) {
+     console.warn('[InputHandler] HF 선택 복사 실패:', err);
+     return false;
+   }
+ }
+ 
+-export function onCopy(this: any, e: ClipboardEvent): void {
+-  if (!this.active) return;
++export function onCopy(this: any, e: ClipboardEvent): boolean {
++  if (!this.active) return false;
+ 
+   if (this.cursor.isInHeaderFooter() && this.getNonEmptyHeaderFooterSelection()) {
+-    copyHeaderFooterSelection.call(this, e);
+-    return;
++    return copyHeaderFooterSelection.call(this, e);
+   }
+ 
+   // 개체(글상자/그림) 선택 모드 → 개체 복사
+   if (this.cursor.isInPictureObjectSelection()) {
+     const ref = this.cursor.getSelectedPictureRef();
+     if (ref) {
+       e.preventDefault();
++      if (!e.clipboardData) return false;
+       try {
+         const cellPathJson = pictureCellPathJson(ref);
+-        this.wasm.copyControl(ref.sec, ref.ppi, ref.ci, cellPathJson);
++        const result = this.wasm.copyControl(ref.sec, ref.ppi, ref.ci, cellPathJson);
++        if (JSON.parse(result).ok !== true) return false;
+         const text = this.wasm.getClipboardText() || '[그림]';
+         let html = '';
+         try { html = this.wasm.exportControlHtml(ref.sec, ref.ppi, ref.ci, cellPathJson) || ''; } catch { /* HTML 내보내기 실패는 fallback */ }
+         const markedHtml = prepareRhwpInternalClipboardHtml(this, html, text);
+-        if (e.clipboardData) {
+-          if (text) e.clipboardData.setData('text/plain', text);
+-          e.clipboardData.setData('text/html', markedHtml);
+-        }
++        e.clipboardData.setData('text/plain', text);
++        e.clipboardData.setData('text/html', markedHtml);
+         // 이미지 컨트롤이면 image/png Blob 포함 클립보드 기록
+         if (ref.type === 'image') {
+           writeImageToClipboard(this.wasm, ref.sec, ref.ppi, ref.ci, text, markedHtml, cellPathJson)
+             .catch(() => {});
+         }
++        return true;
+       } catch (err) {
+         console.warn('[InputHandler] 개체 복사 실패:', err);
+       }
+     }
+-    return;
++    return false;
+   }
+ 
+-  if (!this.cursor.hasSelection()) return;
++  if (!this.cursor.hasSelection()) return false;
+   e.preventDefault();
++  if (!e.clipboardData) return false;
+ 
+   const sel = this.cursor.getSelectionOrdered();
+-  if (!sel) return;
++  if (!sel) return false;
+   const { start, end } = sel;
+ 
+   try {
+     // WASM 내부 클립보드에 복사 (서식 보존)
++    let result: string;
+     if (isNestedCellPosition(start)) {
+-      this.wasm.copySelectionInCellByPath(
++      result = this.wasm.copySelectionInCellByPath(
+         start.sectionIndex, start.parentParaIndex!, JSON.stringify(start.cellPath),
+         cellParaIndexOf(start), start.charOffset,
+         cellParaIndexOf(end), end.charOffset,
+       );
+     } else if (start.parentParaIndex !== undefined) {
+-      this.wasm.copySelectionInCell(
++      result = this.wasm.copySelectionInCell(
+         start.sectionIndex, start.parentParaIndex, start.controlIndex!, start.cellIndex!,
+         start.cellParaIndex!, start.charOffset,
+         end.cellParaIndex!, end.charOffset,
+       );
+     } else {
+-      this.wasm.copySelection(
++      result = this.wasm.copySelection(
+         start.sectionIndex,
+         start.paragraphIndex, start.charOffset,
+         end.paragraphIndex, end.charOffset,
+       );
+     }
++    if (JSON.parse(result).ok !== true) return false;
+ 
+     // 시스템 클립보드에 플레인 텍스트 + HTML 설정
+     const text = this.wasm.getClipboardText();
+     if (e.clipboardData) {
+-      if (text) e.clipboardData.setData('text/plain', text);
++      e.clipboardData.setData('text/plain', text);
+       // HTML 내보내기 (표/서식 보존)
+       let html = '';
+       try {
+@@ -1916,8 +1918,10 @@ export function onCopy(this: any, e: ClipboardEvent): void {
+       const markedHtml = prepareRhwpInternalClipboardHtml(this, html, text);
+       e.clipboardData.setData('text/html', markedHtml);
+     }
++    return true;
+   } catch (err) {
+     console.warn('[InputHandler] 복사 실패:', err);
++    return false;
+   }
+ }
+ 
+@@ -1937,7 +1941,7 @@ export function onCut(this: any, e: ClipboardEvent): void {
+   if (this.cursor.isInPictureObjectSelection()) {
+     const ref = this.cursor.getSelectedPictureRef();
+     if (ref) {
+-      this.onCopy(e); // 클립보드에 복사
++      if (!this.onCopy(e)) return;
+       this.cursor.moveOutOfSelectedPicture();
+       this.pictureObjectRenderer?.clear();
+       this.eventBus.emit('picture-object-selection-changed', false);
+@@ -1950,10 +1954,8 @@ export function onCut(this: any, e: ClipboardEvent): void {
+   }
+ 
+   if (!this.cursor.hasSelection()) return;
+-  // 먼저 복사
+-  this.onCopy(e);
+-  // 선택 영역 삭제
+-  this.deleteSelection();
++  // 복사 실패로 원문을 잃지 않도록 이번 클립보드 기록이 끝난 뒤에만 지운다.
++  if (this.onCopy(e)) this.deleteSelection();
+ }
+ 
+ 
+diff --git a/rhwp-studio/src/engine/input-handler.ts b/rhwp-studio/src/engine/input-handler.ts
+--- a/rhwp-studio/src/engine/input-handler.ts
++++ b/rhwp-studio/src/engine/input-handler.ts
+@@ -2006,8 +2006,8 @@ export class InputHandler {
+   // ─── 클립보드 이벤트 처리 ─────────────────────────────
+ 
+   /** 복사 이벤트 처리 */
+-  private onCopy(e: ClipboardEvent): void {
+-    _keyboard.onCopy.call(this, e);
++  private onCopy(e: ClipboardEvent): boolean {
++    return _keyboard.onCopy.call(this, e);
+   }
+ 
+   /** 잘라내기 이벤트 처리 */
+diff --git a/rhwp-studio/src/engine/input-handler-keyboard.ts b/rhwp-studio/src/engine/input-handler-keyboard.ts
+--- a/rhwp-studio/src/engine/input-handler-keyboard.ts
++++ b/rhwp-studio/src/engine/input-handler-keyboard.ts
+@@ -496,10 +496,12 @@ export function pictureCellPathJson(
+ export async function writeImageToClipboard(
+   wasm: WasmBridge, sec: number, ppi: number, ci: number,
+   text: string, html: string, cellPathJson = '',
++  isCurrent: () => boolean = () => true,
+ ): Promise<void> {
+   const imageData = wasm.getControlImageData(sec, ppi, ci, cellPathJson);
+   const mime = wasm.getControlImageMime(sec, ppi, ci, cellPathJson);
+   const pngBlob = await convertToPngBlob(imageData, mime);
++  if (!isCurrent()) return;
+   const item = new ClipboardItem({
+     'text/plain': new Blob([text], { type: 'text/plain' }),
+     'text/html': new Blob([html], { type: 'text/html' }),
+diff --git a/rhwp-studio/src/engine/input-handler.ts b/rhwp-studio/src/engine/input-handler.ts
+--- a/rhwp-studio/src/engine/input-handler.ts
++++ b/rhwp-studio/src/engine/input-handler.ts
+@@ -324,6 +324,7 @@ export class InputHandler {
+   private history: CommandHistory;
+   private textarea: HTMLTextAreaElement;
+   private active = false;
++  private cancelPendingObjectCut: (() => void) | null = null;
+   private insertMode = true;  // true=삽입, false=수정(덮어쓰기)
+   private editMode: EditorEditMode = 'normal';
+   /** 마지막 셀 키 (눈금자 셀 bbox 중복 조회 방지) */
+@@ -4432,6 +4433,8 @@ export class InputHandler {
+   }
+ 
+   deactivate(): void {
++    this.cancelPendingObjectCut?.();
++    this.cancelPendingObjectCut = null;
+     this.flushDeferredPaginationIfNeeded('before-deactivate', false);
+     this.active = false;
+     // 문서 교체와 mutation renderer 선택이 경합해 layout 완료 이벤트가 생략돼도
+@@ -4478,6 +4481,8 @@ export class InputHandler {
+   }
+ 
+   dispose(): void {
++    this.cancelPendingObjectCut?.();
++    this.cancelPendingObjectCut = null;
+     this.flushDeferredPaginationIfNeeded('before-dispose', false);
+     if (this.isResizeDragging) {
+       this.cleanupResizeDrag();
+@@ -5493,38 +5498,54 @@ export class InputHandler {
+ 
+   /** 복사 (커맨드 시스템용 — 컨텍스트 메뉴/도구 상자에서 호출) */
+   performCopy(): void {
++    if (this.cursor.isInPictureObjectSelection() || this.cursor.isInTableObjectSelection()) {
++      void this.copySelectedObject().catch((err) => {
++        console.warn('[InputHandler] 개체 복사 실패:', err);
++      });
++      return;
++    }
++    // 텍스트 선택 → textarea 포커스 후 execCommand
++    this.focusTextarea();
++    document.execCommand('copy');
++  }
++
++  private async copySelectedObject(isCurrent: () => boolean = () => true): Promise<boolean> {
+     // 개체 선택 모드 → 직접 클립보드 기록 (textarea 포커스 불필요)
+     if (this.cursor.isInPictureObjectSelection()) {
+       const ref = this.cursor.getSelectedPictureRef();
+       if (ref) {
+         try {
+           const cellPathJson = _keyboard.pictureCellPathJson(ref);
+-          this.wasm.copyControl(ref.sec, ref.ppi, ref.ci, cellPathJson);
++          const result = this.wasm.copyControl(ref.sec, ref.ppi, ref.ci, cellPathJson);
++          if (JSON.parse(result).ok !== true) return false;
+           const text = this.wasm.getClipboardText() || '[그림]';
+           let html = '';
+           try { html = this.wasm.exportControlHtml(ref.sec, ref.ppi, ref.ci, cellPathJson) || ''; } catch { /* 무시 */ }
+           const markedHtml = _keyboard.prepareRhwpInternalClipboardHtml(this, html, text);
++          if (!isCurrent()) return false;
+           if (ref.type === 'image') {
+-            _keyboard.writeImageToClipboard(this.wasm, ref.sec, ref.ppi, ref.ci, text, markedHtml, cellPathJson)
+-              .catch(() => navigator.clipboard.writeText(text).catch(() => {}));
++            await _keyboard.writeImageToClipboard(this.wasm, ref.sec, ref.ppi, ref.ci, text, markedHtml, cellPathJson, isCurrent)
++              .catch(() => { if (isCurrent()) return navigator.clipboard.writeText(text); });
+           } else {
+-            _keyboard.writeTextHtmlToClipboard(text, markedHtml)
+-              .catch(() => navigator.clipboard.writeText(text).catch(() => {}));
++            await _keyboard.writeTextHtmlToClipboard(text, markedHtml)
++              .catch(() => { if (isCurrent()) return navigator.clipboard.writeText(text); });
+           }
++          return isCurrent();
+         } catch (err) {
+           console.warn('[InputHandler] 개체 복사 실패:', err);
+         }
+       }
+-      return;
++      return false;
+     }
+     if (this.cursor.isInTableObjectSelection()) {
+       const ref = this.cursor.getSelectedTableRef();
+       if (ref) {
+         try {
+           const target = tableObjectClipboardTarget(ref);
+-          this.wasm.copyControl(
++          const result = this.wasm.copyControl(
+             ref.sec, ref.ppi, target.controlIndex, target.ownerCellPathJson,
+           );
++          if (JSON.parse(result).ok !== true) return false;
+           const text = this.wasm.getClipboardText() || '[표]';
+           let html = '';
+           try {
+@@ -5533,17 +5554,17 @@ export class InputHandler {
+             ) || '';
+           } catch { /* 무시 */ }
+           const markedHtml = _keyboard.prepareRhwpInternalClipboardHtml(this, html, text);
+-          _keyboard.writeTextHtmlToClipboard(text, markedHtml)
+-            .catch(() => navigator.clipboard.writeText(text).catch(() => {}));
++          if (!isCurrent()) return false;
++          await _keyboard.writeTextHtmlToClipboard(text, markedHtml)
++            .catch(() => { if (isCurrent()) return navigator.clipboard.writeText(text); });
++          return isCurrent();
+         } catch (err) {
+           console.warn('[InputHandler] 표 복사 실패:', err);
+         }
+       }
+-      return;
++      return false;
+     }
+-    // 텍스트 선택 → textarea 포커스 후 execCommand
+-    this.focusTextarea();
+-    document.execCommand('copy');
++    return false;
+   }
+ 
+   /** 붙이기 (커맨드 시스템용 — 컨텍스트 메뉴/도구 상자에서 호출) */
+@@ -5556,49 +5577,82 @@ export class InputHandler {
+   /** 잘라내기 (커맨드 시스템용 — 컨텍스트 메뉴/도구 상자에서 호출) */
+   performCut(): void {
+     if (this.editMode === 'form') return;
+-    // 개체 선택 모드 → 복사 + 삭제
+-    if (this.cursor.isInPictureObjectSelection()) {
+-      const ref = this.cursor.getSelectedPictureRef();
+-      if (ref) {
+-        // 클립보드에 복사
+-        this.performCopy();
+-        // 삭제
++    if (this.cursor.isInPictureObjectSelection() || this.cursor.isInTableObjectSelection()) {
++      void this.cutSelectedObject().catch((err) => {
++        console.warn('[InputHandler] 개체 잘라내기 실패:', err);
++      });
++      return;
++    }
++    // 텍스트 선택 → textarea 포커스 후 execCommand
++    this.focusTextarea();
++    document.execCommand('cut');
++  }
++
++  private async cutSelectedObject(): Promise<void> {
++    if (!this.active || this.editMode === 'form' || this.cancelPendingObjectCut) return;
++    const picture = this.cursor.isInPictureObjectSelection() ? this.cursor.getSelectedPictureRef() : null;
++    const table = !picture && this.cursor.isInTableObjectSelection() ? this.cursor.getSelectedTableRef() : null;
++    const ref = picture ?? table;
++    if (!ref) return;
++    // 중첩 표 잘라내기는 지원하지 않는다. keydown 경로도 같은 선택 상태를 유지한다.
++    if (table?.cellPath && table.cellPath.length > 1) return;
++    const handle = this.wasm.borrowDocumentHandle();
++    if (!handle) return;
++    const generation = this.wasm.documentGeneration;
++    const undoTop = this.history.peekUndoTop();
++    const section = ref.sec;
++    const paragraph = ref.ppi;
++    const type = picture?.type;
++    const target = picture
++      ? { controlIndex: picture.ci, ownerCellPathJson: _keyboard.pictureCellPathJson(picture) }
++      : tableObjectClipboardTarget(table!);
++    // 복사를 기다리는 동안 편집된 개체를 오래된 클립보드로 지우지 않는다.
++    let invalidated = false;
++    const stopMutation = this.eventBus.on('document-mutated', () => { invalidated = true; });
++    const stopChange = this.eventBus.on('document-changed', () => { invalidated = true; });
++    const cancel = () => {
++      invalidated = true;
++      stopMutation();
++      stopChange();
++    };
++    this.cancelPendingObjectCut = cancel;
++    const isCurrent = () => {
++      if (invalidated || this.cancelPendingObjectCut !== cancel
++        || !this.active || this.isFormMode()
++        || this.wasm.documentGeneration !== generation || this.wasm.borrowDocumentHandle() !== handle
++        || this.history.peekUndoTop() !== undoTop) return false;
++      if (picture
++        ? !this.cursor.isInPictureObjectSelection() || this.cursor.getSelectedPictureRef() !== picture
++        : !this.cursor.isInTableObjectSelection() || this.cursor.getSelectedTableRef() !== table) return false;
++      const currentTarget = picture
++        ? { controlIndex: picture.ci, ownerCellPathJson: _keyboard.pictureCellPathJson(picture) }
++        : tableObjectClipboardTarget(table!);
++      return ref.sec === section && ref.ppi === paragraph && picture?.type === type
++        && currentTarget.controlIndex === target.controlIndex
++        && currentTarget.ownerCellPathJson === target.ownerCellPathJson;
++    };
++    try {
++      if (!await this.copySelectedObject(isCurrent) || !isCurrent()) return;
++      if (picture) {
+         this.cursor.moveOutOfSelectedPicture();
+         this.pictureObjectRenderer?.clear();
+-        this.eventBus.emit('picture-object-selection-changed', false);
+-        this.executeOperation({ kind: 'snapshot', operationType: 'cutObject', operation: (wasm: WasmBridge) => {
+-          if (ref.type === 'image' && ref.cellPath && ref.cellPath.length > 0) {
+-            wasm.deleteCellPictureControlByPath(ref.sec, ref.ppi, ref.cellPath, ref.ci);
+-          } else if (ref.type === 'image') {
+-            wasm.deletePictureControl(ref.sec, ref.ppi, ref.ci);
+-          } else if (ref.type === 'equation') {
+-            wasm.deleteEquationControl(ref.sec, ref.ppi, ref.ci);
+-          } else {
+-            wasm.deleteShapeControl(ref.sec, ref.ppi, ref.ci);
+-          }
++        this.executeOperation({ kind: 'snapshot', operationType: 'cutObject', operation: () => {
++          this.deleteObjectControl(picture);
+           return this.cursor.getPosition();
+         }});
+-      }
+-      return;
+-    }
+-    if (this.cursor.isInTableObjectSelection()) {
+-      const ref = this.cursor.getSelectedTableRef();
+-      if (ref) {
+-        // 중첩 표 잘라내기는 지원하지 않는다. keydown 경로도 같은 선택 상태를 유지한다.
+-        if (ref.cellPath && ref.cellPath.length > 1) return;
+-        this.performCopy();
++        this.eventBus.emit('picture-object-selection-changed', false);
++      } else {
+         this.cursor.moveOutOfSelectedTable();
+-        this.eventBus.emit('table-object-selection-changed', false);
+         this.executeOperation({ kind: 'snapshot', operationType: 'cutTable', operation: (wasm: WasmBridge) => {
+           wasm.deleteTableControl(ref.sec, ref.ppi, ref.ci);
+           return this.cursor.getPosition();
+         }});
++        this.eventBus.emit('table-object-selection-changed', false);
+       }
+-      return;
++    } finally {
++      cancel();
++      if (this.cancelPendingObjectCut === cancel) this.cancelPendingObjectCut = null;
+     }
+-    // 텍스트 선택 → textarea 포커스 후 execCommand
+-    this.focusTextarea();
+-    document.execCommand('cut');
+   }
+ 
+   /** 선택 영역 삭제 (커맨드 시스템용 — 편집 > 지우기) */
+diff --git a/rhwp-studio/src/engine/command.ts b/rhwp-studio/src/engine/command.ts
+--- a/rhwp-studio/src/engine/command.ts
++++ b/rhwp-studio/src/engine/command.ts
+@@ -1106,6 +1106,9 @@ export class DeleteSelectionCommand implements EditCommand {
+   };
+ 
+   constructor(start: DocumentPosition, end: DocumentPosition, blockPhase: number | null = null) {
++    if (start.sectionIndex !== end.sectionIndex) {
++      throw new Error('구역을 걸친 선택 삭제는 아직 지원하지 않습니다.');
++    }
+     this.selection = { start: { ...start }, end: { ...end }, blockPhase };
+ 
+     if (isCell(start)) {
+@@ -1118,19 +1121,6 @@ export class DeleteSelectionCommand implements EditCommand {
+         );
+         return { ...start };
+       });
+-    } else if (start.sectionIndex !== end.sectionIndex) {
+-      // 교차 구역 선택 — 조각 캡처는 단일 구역 전제(start.sectionIndex 만 사용,
+-      // delete_fragment.rs)라 다른 구역의 문단 인덱스를 넘기면 캡처 단계에서
+-      // 오류가 나거나 잘못된 범위를 잡는다. 스냅샷은 통째 복원이라 어떤 선택
+-      // 모양이든 되돌릴 수 있다 — 방어적 폴백.
+-      this.fragment = null;
+-      this.snapshot = new SnapshotCommand('deleteSelection', end, start, (wasm) => {
+-        wasm.deleteRange(
+-          start.sectionIndex, start.paragraphIndex, start.charOffset,
+-          end.paragraphIndex, end.charOffset,
+-        );
+-        return { ...start };
+-      });
+     } else {
+       // 비셀 선택 — 조각 경로 (#5769)
+       this.snapshot = null;
+diff --git a/rhwp-studio/src/engine/input-handler-keyboard.ts b/rhwp-studio/src/engine/input-handler-keyboard.ts
+--- a/rhwp-studio/src/engine/input-handler-keyboard.ts
++++ b/rhwp-studio/src/engine/input-handler-keyboard.ts
+@@ -1929,6 +1936,10 @@ export function onCopy(this: any, e: ClipboardEvent): boolean {
+ 
+ export function onCut(this: any, e: ClipboardEvent): void {
+   if (!this.active) return;
++  if (this.cursor.hasSelection() && this.canDeleteSelectionInFormMode?.() === false) {
++    e.preventDefault();
++    return;
++  }
+   if (this.isFormMode?.()) {
+     e.preventDefault();
+     return;
+@@ -1966,6 +1977,7 @@ export function onCut(this: any, e: ClipboardEvent): void {
+ export function onPaste(this: any, e: ClipboardEvent): void {
+   if (!this.active) return;
+   e.preventDefault();
++  if (this.cursor.hasSelection() && this.canDeleteSelectionInFormMode?.() === false) return;
+   if (this.isFormMode?.()) return;
+ 
+   // 개체/표 선택 모드 해제 후 붙여넣기 진행
+diff --git a/rhwp-studio/src/engine/input-handler.ts b/rhwp-studio/src/engine/input-handler.ts
+--- a/rhwp-studio/src/engine/input-handler.ts
++++ b/rhwp-studio/src/engine/input-handler.ts
+@@ -1,4 +1,6 @@
+ import { isBodyControl } from './picture-hit-policy';
++import { showToast } from '@/ui/toast';
+ import { WasmBridge } from '@/core/wasm-bridge';
+ import { isCharFormatError, CharFormatRecoveryError } from '@/core/char-format-error';
+ import type { DeferredFocusedPagePatch } from '@/core/wasm-bridge';
+@@ -4634,8 +4636,12 @@ export class InputHandler {
+   }
+ 
+   canDeleteSelectionInFormMode(): boolean {
+-    if (this.editMode !== 'form') return true;
+     const sel = this.cursor.getSelectionOrdered();
++    if (sel && sel.start.sectionIndex !== sel.end.sectionIndex) {
++      showToast({ message: '구역을 걸친 선택 편집은 아직 지원하지 않습니다. 구역별로 선택해 편집하세요.' });
++      return false;
++    }
++    if (this.editMode !== 'form') return true;
+     if (!sel) return this.canEditCurrentFormField();
+     if (!this.isSameTextContainer(sel.start, sel.end)) return false;
+     const fi = this.getFormFieldInfoAt(sel.start);

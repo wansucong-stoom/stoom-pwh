@@ -37,7 +37,7 @@ test('a long document tab keeps its close button visible and working',{
    assert.ok(geometry,'active tab is available');
    assert.ok(geometry.button.width>=20,'close button keeps a usable width');
    assert.ok(geometry.button.right<=geometry.tab.right+1,'close stays inside the tab');
-   assert.ok(geometry.button.right<=geometry.list.right+1,'close is not clipped by the tab strip');
+   assert.ok(geometry.button.right<=geometry.list.right+1,'close is not clipped by the tab strip: '+JSON.stringify({width,...geometry}));
    assert.equal(geometry.overflow,true,'long file name is ellipsized');assert.ok(geometry.title.startsWith(filename),'full file name remains available');
   }
   await page.setViewportSize({width:1200,height:850});

@@ -14,7 +14,7 @@ import {brandElectron} from '../release-source/scripts/brand-electron.mjs';
 import {packageMsix} from '../release-source/scripts/msix-package.mjs';
 
 const app=path.dirname(fileURLToPath(import.meta.url)),workspace=path.dirname(app);
-const version=process.env.PWH_MSI_VERSION||'0.1.32';
+const version=process.env.PWH_MSI_VERSION||'0.1.33';
 if(!/^\d{1,3}\.\d{1,3}\.\d{1,5}$/.test(version)||version.split('.').some((n,i)=>Number(n)>(i===2?65535:255)))throw Error('MSI 버전이 올바르지 않습니다.');
 const output=path.resolve(process.argv[2]||path.join(workspace,'dist',`PwhDesktop-${version}.msi`));
 const wix=path.resolve(process.env.PWH_WIX_DIR||path.join(workspace,'pwh-test-temp','wix314-binaries'));

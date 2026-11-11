@@ -1,0 +1,120 @@
+--- a/src/document_core/queries/rendering.rs
++++ b/src/document_core/queries/rendering.rs
+@@ -3805,7 +3805,7 @@
+             match &node.node_type {
+                 RenderNodeType::Table(table_node) => {
+                     // 문서 좌표
+-                    let doc_coords = match (
++                    let mut doc_coords = match (
+                         public_section(table_node.section_index),
+                         table_node.para_index,
+                         table_node.control_index,
+@@ -3824,6 +3824,20 @@
+                             .map(|si| format!(",\"secIdx\":{si}"))
+                             .unwrap_or_default(),
+                     };
++
++                    // Editing owns the original path, independently of the paint sort key.
++                    if let Some(ctx) = table_node.cell_context.as_ref().filter(|ctx| ctx.path.len() > 1) {
++                        let cell_path: Vec<_> = ctx.path.iter().map(|entry| serde_json::json!({
++                            "controlIndex": entry.control_index,
++                            "cellIndex": entry.cell_index,
++                            "cellParaIndex": entry.cell_para_index,
++                        })).collect();
++                        doc_coords.push_str(&format!(
++                            ",\"parentParaIdx\":{},\"outerTableControlIdx\":{},\"cellPath\":{},\"isTextBox\":{}",
++                            ctx.parent_para_index, ctx.path[0].control_index,
++                            serde_json::to_string(&cell_path).unwrap_or_else(|_| "[]".to_string()), ctx.in_textbox
++                        ));
++                    }
+ 
+                     // 셀 정보 수집
+                     let mut cells = Vec::new();
+--- a/src/document_core/queries/cursor_rect.rs
++++ b/src/document_core/queries/cursor_rect.rs
+@@ -4393,54 +4393,26 @@
+ 
+         self.resolve_table_by_path(section_idx, parent_para_idx, path)?;
+ 
+-        // 렌더 트리에서 TextRun의 cell_context.path가 일치하는 TableCell의 부모 Table 노드를 찾는다
++        // A table owns its path even when every cell is empty or clipped.
+         fn find_nested_table_cells(
+             node: &RenderNode,
++            section: usize,
+             parent_para: usize,
+             path: &[(usize, usize, usize)],
+             page_idx: usize,
+             result: &mut Vec<String>,
+         ) -> bool {
+-            // Table 노드를 발견하면 자식 TableCell 중 TextRun의 cell_context가 경로와 일치하는지 확인
+-            if let RenderNodeType::Table(_) = node.node_type {
+-                // 이 테이블의 셀에서 TextRun을 찾아 경로 매칭 여부 확인
+-                fn check_table_match(
+-                    node: &RenderNode,
+-                    parent_para: usize,
+-                    path: &[(usize, usize, usize)],
+-                ) -> bool {
+-                    if let RenderNodeType::TextRun(ref tr) = node.node_type {
+-                        return tr.cell_context.as_ref().map_or(false, |ctx| {
+-                            ctx.parent_para_index == parent_para
+-                                && ctx.path.len() == path.len()
+-                                && ctx.path.iter().zip(path.iter()).enumerate().all(
+-                                    |(i, (a, b))| {
+-                                        if i < path.len() - 1 {
+-                                            // 중간 경로: 전체 매칭 (어떤 셀/문단을 경유하는지)
+-                                            a.control_index == b.0
+-                                                && a.cell_index == b.1
+-                                                && a.cell_para_index == b.2
+-                                        } else {
+-                                            // 마지막 경로: control_index만 매칭 (이 표의 모든 셀 포함)
+-                                            a.control_index == b.0
+-                                        }
+-                                    },
+-                                )
+-                        });
+-                    }
+-                    for child in &node.children {
+-                        // 중첩 Table 노드는 건너뛴다 — find_nested_table_cells가 별도로 처리
+-                        if matches!(child.node_type, RenderNodeType::Table(_)) {
+-                            continue;
+-                        }
+-                        if check_table_match(child, parent_para, path) {
+-                            return true;
+-                        }
+-                    }
+-                    false
+-                }
+-
+-                if check_table_match(node, parent_para, path) {
++            if let RenderNodeType::Table(ref table) = node.node_type {
++                let matches = table.section_index == Some(section) && match &table.cell_context {
++                    Some(ctx) => ctx.parent_para_index == parent_para && ctx.path.len() == path.len()
++                        && ctx.path.iter().zip(path).enumerate().all(|(index, (actual, expected))| {
++                            actual.control_index == expected.0 && (index + 1 == path.len()
++                                || actual.cell_index == expected.1 && actual.cell_para_index == expected.2)
++                        }),
++                    None => path.len() == 1 && table.para_index == Some(parent_para)
++                        && table.control_index == Some(path[0].0),
++                };
++                if matches {
+                     // 이 테이블의 직속 셀 bbox 수집
+                     for (cell_idx, child) in node.children.iter().enumerate() {
+                         if let RenderNodeType::TableCell(ref cn) = child.node_type {
+@@ -4457,7 +4429,7 @@
+             }
+ 
+             for child in &node.children {
+-                if find_nested_table_cells(child, parent_para, path, page_idx, result) {
++                if find_nested_table_cells(child, section, parent_para, path, page_idx, result) {
+                     return true;
+                 }
+             }
+@@ -4481,7 +4453,7 @@
+                 continue;
+             }
+             let found_here = self.with_page_tree_cached(page_num as u32, |tree| {
+-                Ok(find_nested_table_cells(&tree.root, parent_para_idx, path, page_num, &mut cells))
++                Ok(find_nested_table_cells(&tree.root, section_idx, parent_para_idx, path, page_num, &mut cells))
+             })?;
+             if found_here {
+                 found = true;

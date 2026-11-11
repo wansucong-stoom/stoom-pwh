@@ -41,7 +41,7 @@ test('split paragraph keyboard caret follows native path geometry after a fresh 
       const d=window.rhwpStudio.plugins.deps,ih=d.getInputHandler(),position=ih.cursor.getPosition(),rect=ih.cursor.getRect();
       const native=JSON.parse(d.wasm.doc.getCursorRectByPathNear(position.sectionIndex,position.parentParaIndex,JSON.stringify(position.cellPath),position.charOffset,1));
       const caret=[...document.querySelectorAll('.caret')].find(node=>getComputedStyle(node).display!=='none'&&node.getBoundingClientRect().height>0);
-      return{position,rect,native,dom:caret?.getBoundingClientRect().toJSON(),zoom:ih.viewportManager.getZoom(),focused:document.activeElement===ih.textarea};
+      return{position,rect,native,dom:caret?.getBoundingClientRect().toJSON(),zoom:ih.viewportManager.getZoom(),focused:document.activeElement===ih.textarea,selectedTable:ih.getSelectedTableRef()};
     });
     const click=async()=>{
       for(const point of initial.points){
@@ -54,10 +54,15 @@ test('split paragraph keyboard caret follows native path geometry after a fresh 
         const border=await editor.evaluate(pos=>{const ih=window.rhwpStudio.plugins.deps.getInputHandler();return ih.tableResizeRenderer?.hitTestBorder(pos.x,pos.y,(ih.cachedCellBboxes||[]).filter(cell=>cell.pageIndex===pos.pageIndex))||null;},point);
         if(border)continue;
         await page.mouse.click(box.x+located.x,box.y+located.y);await settle();
-        const hit=await state();assert.equal(hit.position.charOffset,5);assert.deepEqual(hit.position.cellPath,initial.cellPath);assert.equal(hit.rect.pageIndex,1);
+        const hit=await state();
+        // The expanded table-border affordance deliberately owns some former
+        // text hit points. Test keyboard caret navigation from a text target;
+        // object selection has its own keyboard contract.
+        if(hit.selectedTable)continue;
+        assert.equal(hit.position.charOffset,5);assert.deepEqual(hit.position.cellPath,initial.cellPath);assert.equal(hit.rect.pageIndex,1);
         return;
       }
-      assert.fail('All synthetic host hit points coincided with resize borders');
+      assert.fail('All synthetic host hit points coincided with resize or object-selection borders');
     };
     for(const [key,offset]of [['ArrowLeft',4],['Home',0],['End',0]]){
       await click();await page.keyboard.press(key);await settle();

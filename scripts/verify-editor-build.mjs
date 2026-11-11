@@ -74,7 +74,7 @@ for(let attempt=1;attempt<=2;attempt++){
   const stage=path.join(work,'run-'+attempt),build=path.join(stage,'pwh-build'),source=path.join(stage,'release-source');
   await fs.mkdir(stage);await extract(sourceEntries,build,name=>name.startsWith('rhwp-studio/')||name.startsWith('pkg/'));
   await fs.symlink(path.join(dependencyRoot,'rhwp-studio/node_modules'),path.join(build,'rhwp-studio/node_modules'),'junction');
-  for(const name of ['src','scripts','client','desktop'])await fs.cp(path.join(project,name),path.join(source,name),{recursive:true});
+  for(const name of ['src','scripts','client','desktop','docs'])await fs.cp(path.join(project,name),path.join(source,name),{recursive:true});
   for(const name of ['package.json','runtime-lock.json'])await fs.copyFile(path.join(project,name),path.join(source,name));
   await run(path.join(source,'scripts/build-inline.mjs'),[build]);
   if(options['--typecheck'])await run(path.join(project,'tools/quality/run.mjs'),['types','--studio',path.join(build,'rhwp-studio')]);
