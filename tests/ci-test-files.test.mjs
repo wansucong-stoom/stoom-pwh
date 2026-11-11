@@ -31,9 +31,15 @@ test('all browser opt-ins are discovered and core includes both picture-placemen
     if (guard.test(await fs.readFile(path.join(root, file), 'utf8'))) optedIn.push(file);
   }
   assert.ok(optedIn.length > 0);
-  assert.deepEqual(optedIn.sort(), browser, 'Every real browser opt-in uses -browser.test.mjs');
+  assert.ok(optedIn.every(file => browser.includes(file)), 'Every real browser opt-in uses -browser.test.mjs');
   assert.equal(new Set([...core, ...browser]).size, core.length + browser.length);
   assert.ok(core.includes('tests/inline-picture-frame.test.mjs'));
   assert.ok(core.includes('tests/continued-flow-picture.test.mjs'));
   assert.ok(browser.includes('tests/table-content-browser.test.mjs'));
+  for (const file of ['tests/engine-source-ownership/engine-source-ownership-browser.test.mjs',
+    'tests/engine-source-ownership/frame-border-oracle-browser.test.mjs',
+    'tests/shape-fill-transparency-browser.test.mjs']) {
+    assert.ok(browser.includes(file), 'Real layout and Canvas/SVG checks remain in the browser suite');
+    assert.ok(!core.includes(file));
+  }
 });

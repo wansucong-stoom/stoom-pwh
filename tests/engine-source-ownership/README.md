@@ -18,7 +18,7 @@
 Set `PWH_CORE_JS` and `PWH_CORE_WASM` to the exact engine build to test. Set `PWH_PLAYWRIGHT_MODULE` to the Playwright ESM entry URL. `PWH_BROWSER_EXECUTABLE` optionally selects a browser executable; otherwise Playwright uses its configured Chromium.
 
 ```powershell
-node --test tests/engine-source-ownership/engine-source-ownership.test.mjs
+node --test tests/engine-source-ownership/engine-source-ownership-browser.test.mjs
 ```
 
 The tests skip when the core or browser module environment is absent. Individual scripts also accept positional core paths:
@@ -54,7 +54,7 @@ The cases cover padding on every partial fragment, exact child RowCuts on stored
 
 `frame-border-oracle.mjs` measures actual horizontal SVG border strokes for a specified owned child-frame relation. A bbox or paint clip can be enlarged without moving the physical border; the helper deliberately checks the strokes and uses clipping depth to exclude lower descendant borders. It requires a visible complete parent horizontal edge and reports an unknown result otherwise. Intentionally oversized clipped objects must not automatically be classified as frame-containment defects.
 
-`frame-border-oracle.test.mjs` tests the oracle with synthetic SVGs: an expanded bbox with an escaping child stroke, merged row edges covering a narrower cell, and an incomplete visible frame that must remain unknown. A containing table frame can be supplied to identify its stroke scope before measuring the target cell, so a descendant border cannot become the parent's boundary.
+`frame-border-oracle-browser.test.mjs` tests the oracle with synthetic SVGs: an expanded bbox with an escaping child stroke, merged row edges covering a narrower cell, and an incomplete visible frame that must remain unknown. A containing table frame can be supplied to identify its stroke scope before measuring the target cell, so a descendant border cannot become the parent's boundary.
 
 ## Source predicate tests
 

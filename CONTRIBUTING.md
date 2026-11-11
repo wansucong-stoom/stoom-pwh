@@ -20,6 +20,8 @@ node scripts/run-ci-tests.mjs core
 
 브라우저 시험은 Playwright 1.62.1과 Chromium을 준비하고 `PWH_PLAYWRIGHT_MODULE`에 `playwright/index.mjs`의 file URL을 지정한 뒤 `node scripts/run-ci-tests.mjs browser`로 실행합니다. 정확한 설치 명령은 [CI 설정](.github/workflows/test.yml)에 있습니다. 실행기는 합성 HWP와 별도 Desktop 프로필을 만들고 `tests/**/*-browser.test.mjs`를 자동 발견합니다. `core`는 나머지 `*.test.mjs`를 실행해 브라우저 작업에서 일반·코어 시험을 반복하지 않습니다. 새 브라우저 시험도 같은 이름 규칙을 따르며 발견 범위는 별도 시험으로 확인합니다. 계정·실문서·운영체제 클립보드·네이티브 창 시험은 일괄 활성화하지 않으며, 그 시험의 제외 이유를 출력합니다. CI가 준비한 엔진·브라우저 조건이 빠져 시험을 건너뛰면 실패로 처리합니다. Actions Summary와 실행기 결과에는 통과·실패·건너뜀을 나누어 기록합니다.
 
+원본 프레임·실제 SVG 테두리의 브라우저 검사도 같은 발견 범위에 포함합니다. Canvas/SVG 비교는 일반 도형 속성 시험과 분리해 각 환경에서 필요한 검사만 실행합니다.
+
 ### CI와 릴리스 공개 순서
 
 GitHub Actions의 일반 시험·정적 검사·PDF 비교는 소스 push와 PR에서 실행합니다. 코어·브라우저·편집기 재현 빌드는 `runtime-inputs`가 `runtime-lock.json`에 고정된 공개 자산을 확인한 뒤 실행합니다. 이 검사는 릴리스 메타데이터의 파일명·크기·업로드 상태와 제공되는 SHA-256을 대조하며, 실제 다운로드와 바이트 해시 검증은 각 작업에서 다시 수행합니다.

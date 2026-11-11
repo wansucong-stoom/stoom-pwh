@@ -221,7 +221,7 @@ def main():
     for name in ('scripts/setup.mjs','scripts/preserved-runtime.mjs','scripts/run-ci-tests.mjs','scripts/ci-test-files.mjs','scripts/patch-pointer-hit-geometry.mjs','scripts/patch-cell-text-history.mjs','src/nested-table-paste.mjs','src/request-state.mjs','package.json'):
         core_inputs[name] = regular(project/name)
     core_inputs.update(tree(project/'tests/engine-source-ownership', 'tests/engine-source-ownership/', frozenset({'__pycache__'})))
-    fidelity_tests = ('tests/stored-float-frame.test.mjs', 'tests/stored-page-margin.test.mjs', 'tests/stored-nested-block-host.test.mjs', 'tests/shape-fill-transparency.test.mjs', 'tests/nested-declared-row-pagination.test.mjs', 'tests/mixed-block-source-order.test.mjs',
+    fidelity_tests = ('tests/stored-float-frame.test.mjs', 'tests/stored-page-margin.test.mjs', 'tests/stored-nested-block-host.test.mjs', 'tests/shape-fill-transparency.test.mjs', 'tests/shape-fill-transparency-browser.test.mjs', 'tests/nested-declared-row-pagination.test.mjs', 'tests/mixed-block-source-order.test.mjs',
                       'tests/nested-opening-frame.test.mjs', 'tests/stored-float-source.test.mjs', 'tests/stored-nested-tail.test.mjs', 'tests/stored-nested-forward-tail.test.mjs', 'tests/stored-cell-height-scope.test.mjs',
                       'tests/nested-opening-frame-browser.test.mjs', 'tests/sibling-table-offset.test.mjs', 'tests/stored-float-host-frame.test.mjs',
                       'tests/cell-caret-fragment.test.mjs', 'tests/engine-cursor/empty-cell-caret.mjs', 'tests/engine-cursor/empty-cell-fixture.mjs',

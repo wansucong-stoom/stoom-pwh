@@ -46,7 +46,7 @@ const code=await new Promise((resolve,reject)=>{
 });
 try{await log.writeFile(output);}finally{await log.close();}
 const skips=output.split(/\r?\n/).filter(line=>/ # SKIP\b/.test(line));
-const missing=skips.filter(line=>/PWH_CORE_JS|PWH_CORE_WASM/.test(line)||(mode==='browser'&&/PWH_BROWSER_TESTS|PWH_DESKTOP_SOURCE_ROOT|Requires browser module/.test(line))||(floatReferenceConfigured&&/PWH_FLOAT_FRAME_BASE|Requires an explicit prior-core fallback baseline/.test(line)));
+const missing=skips.filter(line=>/PWH_CORE_JS|PWH_CORE_WASM/.test(line)||(mode==='browser'&&/PWH_BROWSER_TESTS|PWH_DESKTOP_SOURCE_ROOT|PWH_PLAYWRIGHT_MODULE|Requires browser module/.test(line))||(floatReferenceConfigured&&/PWH_FLOAT_FRAME_BASE|Requires an explicit prior-core fallback baseline/.test(line)));
 const counts=Object.fromEntries([...output.matchAll(/^# (tests|pass|fail|cancelled) (\d+)$/gm)].map(([,key,value])=>[key,Number(value)]));
 if(process.env.GITHUB_STEP_SUMMARY)await fs.appendFile(process.env.GITHUB_STEP_SUMMARY,
   '### '+mode+' tests\n\nFiles: '+selectedFiles.length+'; tests: '+(counts.tests??0)+'; passed: '+(counts.pass??0)
