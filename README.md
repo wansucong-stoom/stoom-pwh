@@ -23,7 +23,7 @@ HWP·HWPX 문서를 열고, 글과 표를 직접 편집하거나 선택한 부�
 | **Pwh Desktop** · Windows x64 | **[Microsoft Store에서 설치](https://apps.microsoft.com/detail/9NXGD60MHMT2)**하고 Store에서 업데이트합니다. 앱에서 선택적으로 AI를 연결하며 별도 Codex 설치 없이도 기본 편집을 사용할 수 있습니다. [Desktop 설치와 사용](docs/PWH-DESKTOP.md#설치와-사용) |
 | **Pwh 플러그인** · Codex 데스크톱 | Codex 대화와 나란히 한글 편집기를 엽니다. GitHub에서 소스와 플러그인 **ZIP**을 받을 수 있습니다. [Codex 플러그인 설치](docs/USER-GUIDE.md#codex-plugin) |
 
-**최신 정식 릴리스**는 Pwh **0.6.53**, Desktop **0.1.34**, 공통 코어 **r26**입니다. 버전별 다운로드, 변경 이력, SHA-256과 검증 범위는 [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases/tag/v0.6.53)에서 확인할 수 있습니다.
+**GitHub 공개 버전**은 Pwh **0.6.54**, Desktop 소스 **0.1.35**, 공통 코어 **r27**입니다. 버전별 다운로드, 변경 이력, SHA-256과 검증 범위는 [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases/tag/v0.6.54)에서 확인할 수 있습니다. Store 앱에는 정기 업데이트 제출 후 반영됩니다.
 
 Desktop의 신규 설치·업데이트는 **Microsoft Store**로 통일합니다. 기존 MSI 배포 파일은 보존하지만 이후 MSI 업데이트는 배포하지 않습니다. GitHub 릴리스는 **플러그인 ZIP·소스·고정 코어·검증 자료**를 계속 제공합니다. 기존 MSI 사용자는 [Store 이전 안내](docs/PWH-DESKTOP.md#설치와-사용)를 참고하세요.
 
@@ -43,6 +43,8 @@ Desktop의 신규 설치·업데이트는 **Microsoft Store**로 통일합니다
 [요청 예시](docs/USER-GUIDE.md) · [기능 범위와 제한](docs/PWH-COMPATIBILITY-LIMITS.md)
 
 ## 표 편집과 반응 속도
+
+- **표 안의 명령** — `Ctrl+N,T`로 셀 안에 표를 넣고, 중첩 표의 행·열 추가/삭제, 셀 병합/분할, 테두리·배경과 숫자 표기를 해당 표에 적용합니다. [지원 범위와 남은 제한](docs/TABLE-COMMANDS.md)
 
 - **공통 조판** — 기호 글꼴의 문자 폭과 커서 전진량을 맞추고, 표가 쪽을 넘길 때 실제 내용 높이와 남은 셀 최소 높이를 보존합니다. [검증 결과와 범위](docs/verification/CORE-R26.md)
 
@@ -69,7 +71,7 @@ Desktop의 신규 설치·업데이트는 **Microsoft Store**로 통일합니다
 
 ## 조판 엔진과 검증
 
-Pwh와 Pwh Desktop은 [rhwp](https://github.com/edwardkim/rhwp) 0.8.7 기반 공통 WASM 코어를 사용합니다. r26의 [코어 변경 기록](docs/RHWP-DIFFERENCES.md)에서 표 편집, 쪽 나눔, 글꼴 계산의 수정 범위를 확인할 수 있습니다.
+Pwh와 Pwh Desktop은 [rhwp](https://github.com/edwardkim/rhwp) 0.8.7 기반 공통 WASM 코어를 사용합니다. r27의 [코어 변경 기록](docs/RHWP-DIFFERENCES.md)에서 표 편집, 쪽 나눔, 글꼴 계산의 수정 범위를 확인할 수 있습니다.
 
 r23 정식 빌드는 익명 시험 문서 3개의 150쪽과 그림 시험 문서 17쪽, 편집 사례 5건에서 검증용 빌드와 동일한 글자 좌표·SVG를 냈습니다. 아래 표는 앞선 공통 코어 개선에서 동일한 원본을 한컴 PDF와 비교한 결과입니다.
 

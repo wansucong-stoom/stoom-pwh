@@ -80,7 +80,7 @@ export function applyPwhBorderDialog(d:any):boolean{
  if(!hasBorders&&!state.bgDirty&&!state.diagDirty)return true;
  try{
   const ref=d.tableCtx, ih=d.services?.getInputHandler();if(!ih)throw Error('편집기를 다시 열고 시도해 주세요.');
-  if((ih.getCellTableContext?.()?.cellPath?.length??0)>1)throw Error('중첩 표의 셀 테두리는 아직 변경할 수 없습니다.');
+  if((ih.getCellTableContext?.()?.cellPath?.length??0)>1&&!d.wasm.pwhTablePropertiesPath)throw Error('선택한 중첩 표의 경로를 확인하지 못했습니다.');
   if(ih.hasExcludedCellSelection?.())throw Error('선택에서 제외된 셀이 있습니다. 이어진 셀 영역을 선택해 주세요.');
   const borderScope=scope(d,'border'),borderPlan=hasBorders&&d.applyMode!=='asOne'?planCellBorders(borderScope.boxes,borderScope.range,actions):[];
   const bgScope=state.bgDirty?scope(d,'bg'):null,diagScope=state.diagDirty?scope(d,'diag'):null;

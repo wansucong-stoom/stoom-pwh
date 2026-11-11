@@ -6,6 +6,7 @@ const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const buildScripts = ['build-inline.mjs', 'bundle-client.mjs', 'patch-body-cursor-contract.mjs', 'patch-pointer-hit-geometry.mjs', 'patch-cell-text-history.mjs', 'patch-object-properties.mjs', 'patch-viewport-table-selection.mjs', 'patch-table-and-symbol-shortcuts.mjs', 'patch-hancom-key-aliases.mjs', 'patch-hancom-key-contexts.mjs', 'editor-build-contract.mjs'];
 buildScripts.push('patch-format-properties.mjs');
 buildScripts.push('patch-clipboard-safety.mjs');
+buildScripts.push('patch-table-command-access.mjs');
 const desktopInputs = ['build-desktop-editor.mjs', 'table-plan.mjs', 'desktop-body-style.mjs'];
 
 // Rolldown's source-region labels are comments, but contain staging paths.

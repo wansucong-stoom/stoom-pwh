@@ -8,10 +8,19 @@
 <a id="cause-and-scope"></a>
 ## 원인과 적용 범위
 
-Studio의 선택적 upstream 반영은 코어 85개 패치와 분리합니다. [클립보드·교차 구역 선택 패치](studio/clipboard-safety.patch)와 [Pwh 적용 스크립트](../../scripts/patch-clipboard-safety.mjs)는 rhwp 0.9.0의 관련 수정 세 건을 가져오고, 취소 즉시 진행 상태 해제·포커스 이탈 기록·rich 복사 실패 시 원문 보존을 추가합니다. [검토표와 검증 범위](../UPSTREAM-0.9-REVIEW.md)
+Studio의 선택적 upstream 반영은 코어 86개 패치와 분리합니다. [클립보드·교차 구역 선택 패치](studio/clipboard-safety.patch)와 [Pwh 적용 스크립트](../../scripts/patch-clipboard-safety.mjs)는 rhwp 0.9.0의 관련 수정 세 건을 가져오고, 취소 즉시 진행 상태 해제·포커스 이탈 기록·rich 복사 실패 시 원문 보존을 추가합니다. [검토표와 검증 범위](../UPSTREAM-0.9-REVIEW.md)
 
 한글 호환 단축키의 편집 상태 분기는 [Pwh 공통 Studio 빌드 패치](../../scripts/patch-hancom-key-contexts.mjs)에 있습니다. 고정 크기 표 조절과 행 삭제는 r22 코어 API를 사용합니다. [편집기 변경과 적용 범위](../RHWP-DIFFERENCES.md#한글-호환-단축키의-편집-상태-구분)
 
+
+<a id="cell-command-paths"></a>
+### 86번 셀 표 명령의 전체 경로
+
+공통 코어 r27의 [패치](rhwp-0.8.7-cell-command-paths.patch)는 본문 표 생성 모델을 셀 생성과 공유하고, `createTableEx`에 `parentParaIdx`·`cellPath`를 추가합니다. `editTableStructureByPath`, `getCellOwnPropertiesByPath`, `setCellZonePropertiesByPath`는 안쪽 표의 구조·원래 테두리·영역 스타일을 직접 처리합니다. 기존 85개 패치를 보존하며 JavaScript 연결부와 WASM을 함께 배포합니다.
+
+경로와 구조를 검사한 대상 표만 교체하고, 그 셀의 문단과 상위 표를 갱신합니다. 대화상자 조회와 실행 취소 스냅샷은 [공통 Studio 명령 패치](../../scripts/patch-table-command-access.mjs)가 같은 경로에 연결합니다. 글줄·쪽 분할·그리기 계산은 바꾸지 않습니다.
+
+[코어 시험](../../tests/table-command-paths.test.mjs)은 여러 깊이·여러 문단·문자열 중간 삽입·치수·클립보드 유지, 병합·분할·행/열 변경, 잘못된 입력의 무변경, 원래 선과 영역 스타일, 저장·재열기를 확인합니다. [명령 서비스 시험](../../tests/table-command-services.test.mjs)은 대화상자와 스냅샷의 동일한 타깃 및 커서의 상위 경로 보존을 확인합니다. [브라우저 회귀 시험](../../tests/table-command-paths-browser.test.mjs)은 실제 키·버튼과 실행 취소를 검사합니다. [지원 목록과 검증 범위](../TABLE-COMMANDS.md)
 
 <a id="symbol-metrics-and-stored-frame-budget"></a>
 ### 84~85번 기호 폭·표 분할 내용 예산

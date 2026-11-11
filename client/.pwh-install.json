@@ -1,17 +1,17 @@
 {
   "kind": "studio-inline",
-  "version": "0.6.53",
+  "version": "0.6.54",
   "upstreamVersion": "0.8.7",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "files": {
-    "editor.js": "04e5aa2ecd9817e4733974f1a21f303b0041ac37b48afa4237ba11b7c2ed4aeb",
+    "editor.js": "7e9a5702a3a58f3a339e30ac02ef84d16ad636a10cdabb2453f467ea31aa708d",
     "rhwp-studio.css": "0c7f20ff8eb51405332746667bd032ec8dd59e97d592a78e438b30dee5e89859",
     "editor-body.html": "afc04317043d01ef99fb91eb9bce88723fac82491bf42473e4b30436e5066ceb"
   },
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "common",
-    "sha256": "aa868abaf4d25eafad6a87a7e7872c33e0a374385c1652e74da33fc8791b06f4",
+    "sha256": "7a4ea39d16b750eb4b7d89b5e4c591e50237442d62707c4c966686b30a841fde",
     "files": [
       {
         "path": "docs/engine-patches/studio/clipboard-safety.patch",
@@ -19,11 +19,11 @@
       },
       {
         "path": "package.json",
-        "sha256": "68c17663cc11120fb7b59db48614e7871940d9217f0d2ba43b016cc3fd83c839"
+        "sha256": "056cbad71f47f75ccbf5a3f964d314b27de503eefad24739567e3bedf694e89e"
       },
       {
         "path": "scripts/build-inline.mjs",
-        "sha256": "ebfc112c830fa786ecf41d429b07e8c9c923bd8eabe8a432b82cc54619ab1370"
+        "sha256": "42012a0040fb531eca6bd5b0c6e992f4cb05745e8695f330b35c272f4b2e8f55"
       },
       {
         "path": "scripts/bundle-client.mjs",
@@ -31,7 +31,7 @@
       },
       {
         "path": "scripts/editor-build-contract.mjs",
-        "sha256": "3da93864cf95d6ac8f652096cb0953336a2b2cfe937a7d69ffc3310d6ea09ddf"
+        "sha256": "ca584d4f69a2a48f53bdc051a5f6f74fb51da174830bf1addc7599d0a1c0c8e7"
       },
       {
         "path": "scripts/patch-body-cursor-contract.mjs",
@@ -68,6 +68,10 @@
       {
         "path": "scripts/patch-table-and-symbol-shortcuts.mjs",
         "sha256": "1cc46c6e523e644ba863d1f36cf4b690955eddb4cb0c0d00790bb8caecfe9184"
+      },
+      {
+        "path": "scripts/patch-table-command-access.mjs",
+        "sha256": "926646492198f5fec4bbfbc2df2438d7978ecd29bef3258cf3b30aee87d9b25d"
       },
       {
         "path": "scripts/patch-viewport-table-selection.mjs",
@@ -211,7 +215,7 @@
       },
       {
         "path": "src/path-table-properties.mjs",
-        "sha256": "2a79b0fb8c15e52e15f2d71e330bd421d2471bca95fc43b34e1eb8a266518e34"
+        "sha256": "5523b8e46328f40a4b9b37c5babbdc63ab177d4048201ec245bd07a3aca49a77"
       },
       {
         "path": "src/picture-replace.ts",
@@ -235,7 +239,7 @@
       },
       {
         "path": "src/pwh-cell-border-dialog.ts",
-        "sha256": "5320f5a86136c729d73b2a766e5975f9e862b14d3ec4d1974c3acd171dae2e0d"
+        "sha256": "b7feb45f9fbc4f611d247c87138781b789c2e7ceae3197150f83084a869be80a"
       },
       {
         "path": "src/pwh-color-palette.css",
@@ -252,6 +256,10 @@
       {
         "path": "src/pwh-page-margin-layout.ts",
         "sha256": "198bf605b25006a0494b12439fe518eac01e5ab7d34d43aa44f53a5b4b9ea0f4"
+      },
+      {
+        "path": "src/pwh-table-command-access.ts",
+        "sha256": "7a6c5663dbcd62c25c62f7c4b734a790580dc59422da73a35899cc3279b68123"
       },
       {
         "path": "src/render-fonts.mjs",
@@ -296,6 +304,10 @@
       {
         "path": "src/table-clipboard.mjs",
         "sha256": "6fc11f5fcfc62d5a90af32d8152cc67840d6a057962f6cf7df99999177f802e6"
+      },
+      {
+        "path": "src/table-command-services.mjs",
+        "sha256": "2dd154f22b8f2b78182e52a77cd7ca66de069a924e63ed8370ca16793c767c7e"
       },
       {
         "path": "src/table-content.mjs",
