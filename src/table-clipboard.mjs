@@ -174,7 +174,7 @@ export function installTableClipboard({wasm,read,getInput,mutate,notice,nativeRe
   if(!(event.ctrlKey||event.metaKey)||event.altKey)return;
   const input=getInput();
   if(key==='v'&&input?.isInCellSelectionMode()){event.stopImmediatePropagation();return;}
-  if(key!=='c'||!input?.isInCellSelectionMode()&&!input?.isInTableObjectSelection())return;
+  if(key!=='c'||event.shiftKey||!input?.isInCellSelectionMode()&&!input?.isInTableObjectSelection())return;
   event.preventDefault();event.stopImmediatePropagation();document.execCommand('copy');
  },true);
  const input=getInput();if(input){const original=input.performCopy.bind(input);input.performCopy=()=>input.isInCellSelectionMode()||input.isInTableObjectSelection()?document.execCommand('copy'):original();}

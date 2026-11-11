@@ -1,12 +1,12 @@
 {
-  "sha256": "b18e87e2e451b32db2a742c58c9553fa3aaf120c3cf563b89daf7353e1978267",
-  "baseVersion": "0.6.54",
-  "baseEditorSha256": "7e9a5702a3a58f3a339e30ac02ef84d16ad636a10cdabb2453f467ea31aa708d",
+  "sha256": "dc628be1d910219392261ac119f7902a1ec34abe8b5470c30f3e0b5c4a741fc7",
+  "baseVersion": "0.6.55",
+  "baseEditorSha256": "50b7f54a19b382cac03c75a543929891e74a3b17422c5821a4e8601da77659c6",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "desktop",
-    "sha256": "f5a170810b2f2244552c66a9f2ec16cb7b6cf0e013ba4c6d45c8365c543fe574",
+    "sha256": "e1b57996f9fe0faae0ad0d673531b83584efcc424a43cbab2935ffb427cd562a",
     "files": [
       {
         "path": "desktop/standalone-pwh/build-desktop-editor.mjs",
@@ -25,12 +25,16 @@
         "sha256": "d38309c6f4b4f640c7d67952927215ff360e1c3a6694e77edf6d623b162442b4"
       },
       {
+        "path": "docs/engine-patches/studio/nested-paragraph-format.patch",
+        "sha256": "68cc5d849dfb2c18d396b930d0f4c9cde64ca653bd37a4007c6db209b63bafbf"
+      },
+      {
         "path": "package.json",
-        "sha256": "056cbad71f47f75ccbf5a3f964d314b27de503eefad24739567e3bedf694e89e"
+        "sha256": "facd9c753f6583a9f607eac16323db8f52c435f081a6681fefb10b39ac7b3779"
       },
       {
         "path": "scripts/build-inline.mjs",
-        "sha256": "42012a0040fb531eca6bd5b0c6e992f4cb05745e8695f330b35c272f4b2e8f55"
+        "sha256": "6f2f4d5b6b52c7c81e74b921e3ff08f4c9ddeaeeaee19fc2bad9c2867abd81b2"
       },
       {
         "path": "scripts/bundle-client.mjs",
@@ -38,7 +42,7 @@
       },
       {
         "path": "scripts/editor-build-contract.mjs",
-        "sha256": "ca584d4f69a2a48f53bdc051a5f6f74fb51da174830bf1addc7599d0a1c0c8e7"
+        "sha256": "236d7c6902ec485a7a5d35e00cbb4a7cf191f7923ce09dada72e58d8de8f90b9"
       },
       {
         "path": "scripts/patch-body-cursor-contract.mjs",
@@ -65,6 +69,10 @@
         "sha256": "af100d1ab6e4d3be076f6cea4968f67f0f2c5c6ec9c44ce836b2fe4ff118c90f"
       },
       {
+        "path": "scripts/patch-nested-paragraph-format.mjs",
+        "sha256": "f732789420fc7f1fa01c67799a7dff6b46a2f335317199537b1c89e019d4d146"
+      },
+      {
         "path": "scripts/patch-object-properties.mjs",
         "sha256": "3b49504d09bd259412168c19ff586e3d4fa9a9245bd4a94e3d52345b249c9313"
       },
@@ -78,7 +86,7 @@
       },
       {
         "path": "scripts/patch-table-command-access.mjs",
-        "sha256": "926646492198f5fec4bbfbc2df2438d7978ecd29bef3258cf3b30aee87d9b25d"
+        "sha256": "f0b7f4378c6f66d935ded9aff966638721ada52b771ff3873441d705243a9bae"
       },
       {
         "path": "scripts/patch-viewport-table-selection.mjs",
@@ -310,7 +318,7 @@
       },
       {
         "path": "src/table-clipboard.mjs",
-        "sha256": "6fc11f5fcfc62d5a90af32d8152cc67840d6a057962f6cf7df99999177f802e6"
+        "sha256": "c15f5ad88d3fc3c60fc569eccc2ea334caa81a9b28d0ab3f115b0c242d355f9b"
       },
       {
         "path": "src/table-command-services.mjs",

@@ -14976,6 +14976,17 @@ var er = class e {
 			L.__wbindgen_free(o, s, 1);
 		}
 	}
+	applyParaFormatInCellByPath(e, t, n, r) {
+		let i, a;
+		try {
+			let c = P(n, L.__wbindgen_malloc, L.__wbindgen_realloc), l = I, u = P(r, L.__wbindgen_malloc, L.__wbindgen_realloc), d = I, f = L.hwpdocument_applyParaFormatInCellByPath(this.__wbg_ptr, e, t, c, l, u, d);
+			var o = f[0], s = f[1];
+			if (f[3]) throw o = 0, s = 0, F(f[2]);
+			return i = o, a = s, M(o, s);
+		} finally {
+			L.__wbindgen_free(i, a, 1);
+		}
+	}
 	applyParaFormatInFootnote(e, t, n, r, i) {
 		let a, o;
 		try {
@@ -16011,6 +16022,17 @@ var er = class e {
 			return a = s, o = c, M(s, c);
 		} finally {
 			L.__wbindgen_free(a, o, 1);
+		}
+	}
+	getCellParaPropertiesAtByPath(e, t, n) {
+		let r, i;
+		try {
+			let s = P(n, L.__wbindgen_malloc, L.__wbindgen_realloc), c = I, l = L.hwpdocument_getCellParaPropertiesAtByPath(this.__wbg_ptr, e, t, s, c);
+			var a = l[0], o = l[1];
+			if (l[3]) throw a = 0, o = 0, F(l[2]);
+			return r = a, i = o, M(a, o);
+		} finally {
+			L.__wbindgen_free(r, i, 1);
 		}
 	}
 	getCellParagraphCount(e, t, n, r) {
@@ -18569,6 +18591,17 @@ var er = class e {
 			return o = c, s = l, M(c, l);
 		} finally {
 			L.__wbindgen_free(o, s, 1);
+		}
+	}
+	setCellParaShapeIdByPath(e, t, n, r) {
+		let i, a;
+		try {
+			let c = P(n, L.__wbindgen_malloc, L.__wbindgen_realloc), l = I, u = L.hwpdocument_setCellParaShapeIdByPath(this.__wbg_ptr, e, t, c, l, r);
+			var o = u[0], s = u[1];
+			if (u[3]) throw o = 0, s = 0, F(u[2]);
+			return i = o, a = s, M(o, s);
+		} finally {
+			L.__wbindgen_free(i, a, 1);
 		}
 	}
 	setCellPicturePropertiesByPath(e, t, n, r, i) {
@@ -22775,6 +22808,18 @@ var fo = class {
 	setNumberingRestart(e, t, n, r) {
 		if (!this.doc) throw Error("문서가 로드되지 않았습니다");
 		return this.doc.setNumberingRestart(e, t, n, r);
+	}
+	getCellParaPropertiesAtByPath(e, t, n) {
+		if (!this.doc) throw Error("문서가 로드되지 않았습니다");
+		return JSON.parse(this.doc.getCellParaPropertiesAtByPath(e, t, n));
+	}
+	applyParaFormatInCellByPath(e, t, n, r) {
+		if (!this.doc) throw Error("문서가 로드되지 않았습니다");
+		return this.doc.applyParaFormatInCellByPath(e, t, n, r);
+	}
+	setCellParaShapeIdByPath(e, t, n, r) {
+		if (!this.doc) throw Error("문서가 로드되지 않았습니다");
+		return this.doc.setCellParaShapeIdByPath(e, t, n, r);
 	}
 	applyParaFormat(e, t, n) {
 		if (!this.doc) throw Error("문서가 로드되지 않았습니다");
@@ -32058,7 +32103,7 @@ var Ed = class e {
 	}
 };
 function Fd(e, t) {
-	let n = (t.kind === "body" ? e.getParaPropertiesAt(t.sec, t.para) : e.getCellParaPropertiesAt(t.sec, t.parentPara, t.controlIdx, t.cellIdx, t.cellParaIdx)).paraShapeId;
+	let n = (t.kind === "body" ? e.getParaPropertiesAt(t.sec, t.para) : t.kind === "cellPath" ? e.getCellParaPropertiesAtByPath(t.sec, t.parentPara, JSON.stringify(t.path)) : e.getCellParaPropertiesAt(t.sec, t.parentPara, t.controlIdx, t.cellIdx, t.cellParaIdx)).paraShapeId;
 	if (n === void 0) throw Error("문단 모양 ID를 조회할 수 없습니다");
 	return n;
 }
@@ -32067,11 +32112,19 @@ function Id(e, t, n) {
 		e.applyParaFormat(t.sec, t.para, n);
 		return;
 	}
+	if (t.kind === "cellPath") {
+		e.applyParaFormatInCellByPath(t.sec, t.parentPara, JSON.stringify(t.path), n);
+		return;
+	}
 	e.applyParaFormatInCell(t.sec, t.parentPara, t.controlIdx, t.cellIdx, t.cellParaIdx, n);
 }
 function Ld(e, t, n) {
 	if (t.kind === "body") {
 		e.setParaShapeId(t.sec, t.para, n);
+		return;
+	}
+	if (t.kind === "cellPath") {
+		e.setCellParaShapeIdByPath(t.sec, t.parentPara, JSON.stringify(t.path), n);
 		return;
 	}
 	e.setCellParaShapeId(t.sec, t.parentPara, t.controlIdx, t.cellIdx, t.cellParaIdx, n);
@@ -32087,10 +32140,9 @@ var Rd = class {
 		this.targets = e, this.props = t, this.cursorBefore = n;
 	}
 	execute(e) {
-		if (this.entries.length > 0 && this.entries.every((e) => e.afterParaShapeId !== void 0)) {
+		if (this.entries.length > 0 && this.entries.every((e) => e.afterParaShapeId !== void 0)) return e.runInBatch(() => {
 			for (let t of this.entries) Ld(e, t.target, t.afterParaShapeId);
-			return { ...this.cursorBefore };
-		}
+		}), { ...this.cursorBefore };
 		let t = JSON.stringify(this.props), n = this.targets.map((t) => ({
 			target: t,
 			beforeParaShapeId: Fd(e, t)
@@ -32102,8 +32154,9 @@ var Rd = class {
 		return this.entries = n, { ...this.cursorBefore };
 	}
 	undo(e) {
-		for (let t of this.entries) Ld(e, t.target, t.beforeParaShapeId);
-		return { ...this.cursorBefore };
+		return e.runInBatch(() => {
+			for (let t of this.entries) Ld(e, t.target, t.beforeParaShapeId);
+		}), { ...this.cursorBefore };
 	}
 	mergeWith() {
 		return null;
@@ -33009,7 +33062,7 @@ var sf = class e {
 //#region @rhwp/studio/src/engine/cell-block-format.ts
 function yf(e, t, n = 0) {
 	let r = e[e.length - 1];
-	return [...e.slice(0, -1), {
+	return [...e.slice(0, -1).map((e) => ({ ...e })), {
 		...r,
 		cellIndex: t,
 		cellParaIndex: n
@@ -33030,14 +33083,25 @@ function Sf(e, t) {
 	let n = [];
 	for (let r of e.cellIndices) {
 		let i = t(r);
-		for (let t = 0; t < i; t++) n.push({
-			kind: "cell",
-			sec: e.sec,
-			parentPara: e.ppi,
-			controlIdx: e.ci,
-			cellIdx: r,
-			cellParaIdx: t
-		});
+		for (let t = 0; t < i; t++) {
+			if (e.cellPath) {
+				n.push({
+					kind: "cellPath",
+					sec: e.sec,
+					parentPara: e.ppi,
+					path: yf(e.cellPath, r, t)
+				});
+				continue;
+			}
+			n.push({
+				kind: "cell",
+				sec: e.sec,
+				parentPara: e.ppi,
+				controlIdx: e.ci,
+				cellIdx: r,
+				cellParaIdx: t
+			});
+		}
 	}
 	return n;
 }
@@ -38959,6 +39023,11 @@ var lg = /<!--\s*rhwp-studio-clipboard:([A-Za-z0-9._:-]+)\s*-->/, ug = /* @__PUR
 	"edit:delete",
 	"edit:undo",
 	"edit:redo",
+	"format:align-left",
+	"format:align-center",
+	"format:align-right",
+	"format:align-justify",
+	"format:align-distribute",
 	"format:normal-char-shape",
 	"format:bold",
 	"format:italic",
@@ -42540,10 +42609,21 @@ var hv = class {
 		return this.getParaFormatTargetsForRange(n, n);
 	}
 	getParaFormatTargetsForCellBlock(e) {
-		return e.cellPath ? [] : Sf(e, (t) => this.wasm.getCellParagraphCount(e.sec, e.ppi, e.ci, t));
+		return Sf(e, (t) => e.cellPath ? this.wasm.getCellParagraphCountByPath(e.sec, e.ppi, JSON.stringify(yf(e.cellPath, t))) : this.wasm.getCellParagraphCount(e.sec, e.ppi, e.ci, t));
 	}
 	getParaFormatTargetsForRange(e, t) {
-		if (this.cursor.isInHeaderFooter() || this.cursor.isInFootnote() || e.isTextBox || t.isTextBox || (e.cellPath?.length ?? 0) > 1 || (t.cellPath?.length ?? 0) > 1) return [];
+		if (this.cursor.isInHeaderFooter() || this.cursor.isInFootnote() || e.isTextBox || t.isTextBox) return [];
+		if ((e.cellPath?.length ?? 0) > 1 || (t.cellPath?.length ?? 0) > 1) {
+			if (e.parentParaIndex === void 0 || !tv(e, t)) return [];
+			let n = e.cellPath, r = n[n.length - 1], i = t.cellPath[t.cellPath.length - 1], a = [];
+			for (let t = Math.min(r.cellParaIndex, i.cellParaIndex); t <= Math.max(r.cellParaIndex, i.cellParaIndex); t++) a.push({
+				kind: "cellPath",
+				sec: e.sectionIndex,
+				parentPara: e.parentParaIndex,
+				path: yf(n, r.cellIndex, t)
+			});
+			return a;
+		}
 		let n = e.parentParaIndex !== void 0, r = t.parentParaIndex !== void 0;
 		if (n || r) {
 			if (!n || !r || e.sectionIndex !== t.sectionIndex || e.parentParaIndex !== t.parentParaIndex) return [];
@@ -44174,7 +44254,7 @@ var hv = class {
 	applyStyle(e) {
 		try {
 			let t = this.getParaFormatTargetsAtCursor();
-			if (t.length === 0) return;
+			if (t.length === 0 || t.some((e) => e.kind === "cellPath")) return;
 			let n = this.cursor.getPosition();
 			this.executeOperation({
 				kind: "snapshot",
@@ -44185,7 +44265,7 @@ var hv = class {
 							r.applyStyle(n.sec, n.para, e);
 							continue;
 						}
-						r.applyCellStyle(n.sec, n.parentPara, n.controlIdx, n.cellIdx, n.cellParaIdx, e);
+						n.kind === "cell" && r.applyCellStyle(n.sec, n.parentPara, n.controlIdx, n.cellIdx, n.cellParaIdx, e);
 					}
 					return { ...n };
 				}
@@ -44280,7 +44360,7 @@ var hv = class {
 		}
 		if (this.cursor.isInFootnote()) return this.wasm.getParaPropertiesInFootnote(this.cursor.fnSectionIdx, this.cursor.fnParaIdx, this.cursor.fnControlIdx, this.cursor.fnInnerParaIdx);
 		let e = this.cursor.getPosition();
-		return e.parentParaIndex === void 0 ? this.wasm.getParaPropertiesAt(e.sectionIndex, e.paragraphIndex) : this.wasm.getCellParaPropertiesAt(e.sectionIndex, e.parentParaIndex, e.controlIndex, e.cellIndex, e.cellParaIndex);
+		return e.parentParaIndex === void 0 ? this.wasm.getParaPropertiesAt(e.sectionIndex, e.paragraphIndex) : (e.cellPath?.length ?? 0) > 1 ? this.wasm.getCellParaPropertiesAtByPath(e.sectionIndex, e.parentParaIndex, JSON.stringify(e.cellPath)) : this.wasm.getCellParaPropertiesAt(e.sectionIndex, e.parentParaIndex, e.controlIndex, e.cellIndex, e.cellParaIndex);
 	}
 	getCurrentStyleId() {
 		try {
@@ -70255,7 +70335,7 @@ function PI({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 			e.stopImmediatePropagation();
 			return;
 		}
-		t === "c" && (r?.isInCellSelectionMode() || r?.isInTableObjectSelection()) && (e.preventDefault(), e.stopImmediatePropagation(), document.execCommand("copy"));
+		t !== "c" || e.shiftKey || !r?.isInCellSelectionMode() && !r?.isInTableObjectSelection() || (e.preventDefault(), e.stopImmediatePropagation(), document.execCommand("copy"));
 	}, !0);
 	let p = n();
 	if (p) {

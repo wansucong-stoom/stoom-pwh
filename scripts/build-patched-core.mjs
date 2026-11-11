@@ -11,7 +11,7 @@ const pinned = {
   upstreamCommit: '1a76570e833917d15817415a53c09ad61ab3203f',
   sourceArchiveSha256: '067feefc25d36921ee41fea5df6fead00255ffa86441891fbaa202f96de202a2',
   blankTemplateSha256: '43f472751fafefb8c66b0f831660ebed51e443a46bebe44c75bba918154ce4c9',
-  expectedGlueSha256: 'd3eaf8f102d632c5d07707296ea379400aef65b4c09d15d6aa2d7e7cb5cb7b8b',
+  expectedGlueSha256: 'f3e38de97feb99f01238aaac601706cd813cb158cf6e197e59388e71dc32aa14',
 };
 const patches = [
   {
@@ -1723,6 +1723,79 @@ const patches = [
       "path": "src/wasm_api.rs",
       "originalSha256": "e0923c7b6e2b9eb523c33492a0d4ccc56f0304994f059adf4f324893f775168f",
       "patchedSha256": "5b7a2542ec69847a2a1c05c7805ec4598ce3f79f510541bb3a4470dd6213c76b"
+    }
+  ]
+}
+,
+{
+  "file": "rhwp-0.8.7-delete-control-metadata.patch",
+  "sha256": "7890662ffb658bfd354c489914fac7e51b94dc87f2c61caa5eb84193e3f685e4",
+  "sources": [
+    {
+      "path": "src/model/paragraph.rs",
+      "originalSha256": "9f2d4cf4558922bb259815cd3b14a2ee6271ed153283336190f685571a130ec4",
+      "patchedSha256": "f0d08a499e64de60a8bfab548ac5cb1e18c202e6784daf0fb19561b3bcb16244"
+    },
+    {
+      "path": "src/document_core/commands/object_ops/equation.rs",
+      "originalSha256": "3a2db00d0e79727f196909031face9efde540dcc41503b7cd2be7fc1212295f8",
+      "patchedSha256": "4999907c54ad32e1601f5ea1b3fad277fab8b8557026cad92faca0b5177c38c6"
+    },
+    {
+      "path": "src/document_core/commands/object_ops/picture.rs",
+      "originalSha256": "659722459d2bceefd2331d9fe4fe9d8acff0e2b738d59c5178f8c238a9551b2a",
+      "patchedSha256": "af8892f52e0a9cf104c4a339e6f492a0ca6f7c93e20ff7d4a935ba662c32c0a1"
+    },
+    {
+      "path": "src/document_core/commands/object_ops/shape.rs",
+      "originalSha256": "f9f8325f49eb3ddc918cd90a9710dfa0164ec010c9065e6280b7c804eed7b57d",
+      "patchedSha256": "e490e168048229a30e79ced066202d78d5e10eb180c70d7fcd08474c230e89b3"
+    },
+    {
+      "path": "src/document_core/commands/object_ops/table.rs",
+      "originalSha256": "348fb353d71c7b96e58e7567a09726c7b37cd6c8b9b1ba617917ba8f29c138f0",
+      "patchedSha256": "c3fec057cccd14a1af66241dd1ac4bf3db030d6295981d007f7e9f1c4b8d6365"
+    },
+    {
+      "path": "src/document_core/commands/table_ops.rs",
+      "originalSha256": "8e83c31f98c45d3382ec5887d45d3073108ba9a5bcc5609283fd2dbd86a40acb",
+      "patchedSha256": "2270792a6db38028ddcbf97b0e43a15f8e4b38d1f9b53648f21460eb660d2b4f"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-nested-paragraph-format.patch",
+  "sha256": "e69392c7a45e1b0265e6f92c33d013509e829f8462e8345e9702b8d8c7f6417c",
+  "sources": [
+    {
+      "path": "src/document_core/commands/mod.rs",
+      "originalSha256": "84aa91a950208a23ee9534e50d76e7164c166d9f85995229bf73f3d885d9e980",
+      "patchedSha256": "52fb6e117d1abfed4eaf4d537edf776c67fd3ffd283146a6d8aa8bf4c68242d3"
+    },
+    {
+      "path": "src/document_core/commands/formatting.rs",
+      "originalSha256": "199dc58ab773f6d61f4366d452b16b2c02f2229a0e07ffff7a440bdf75d5a1d2",
+      "patchedSha256": "97a6580123e7eabf4a6227a753baa9f7cc632e605c5de64c2ad207f2a526c9a1"
+    },
+    {
+      "path": "src/document_core/commands/text_editing.rs",
+      "originalSha256": "7b1d758c473c5ea507a88d02f44cacaa169f92e73b2446b2d29e68152d9da980",
+      "patchedSha256": "66763ddead54f5e4445f6b950e71f95b1a2ef7187e19643e7b56be534003a346"
+    },
+    {
+      "path": "src/document_core/commands/cell_format_origin.rs",
+      "originalSha256": null,
+      "patchedSha256": "19f9413f26466f0197681f8fb80c9ba51d259474e0c81f62ebde932b5e77fdd1"
+    },
+    {
+      "path": "src/document_core/commands/paragraph_format_path.rs",
+      "originalSha256": null,
+      "patchedSha256": "af2fc4c38a0808498aa10b537616297f94d900ac9deeddc1c9c87f8f65a1313b"
+    },
+    {
+      "path": "src/wasm_api.rs",
+      "originalSha256": "5b7a2542ec69847a2a1c05c7805ec4598ce3f79f510541bb3a4470dd6213c76b",
+      "patchedSha256": "6328be70a2f9b0244a07524b734830492575370a35d49e38d1a751b717ea763c"
     }
   ]
 }

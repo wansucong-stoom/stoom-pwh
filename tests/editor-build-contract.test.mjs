@@ -20,9 +20,15 @@ test('source changes, new source modules and Desktop-only changes invalidate the
   for(const dir of ['src','scripts','desktop/standalone-pwh'])await fs.mkdir(path.join(root,dir),{recursive:true});
   for(const name of ['package.json',...['build-inline.mjs','bundle-client.mjs','patch-body-cursor-contract.mjs','patch-pointer-hit-geometry.mjs','patch-cell-text-history.mjs','patch-object-properties.mjs', 'patch-viewport-table-selection.mjs', 'patch-table-and-symbol-shortcuts.mjs', 'patch-hancom-key-aliases.mjs', 'patch-hancom-key-contexts.mjs','editor-build-contract.mjs'].map(n=>'scripts/'+n),...['build-desktop-editor.mjs','table-plan.mjs','desktop-body-style.mjs'].map(n=>'desktop/standalone-pwh/'+n),'src/a.ts'])await fs.writeFile(path.join(root,name),'original\n');
   await fs.mkdir(path.join(root,'docs/engine-patches/studio'),{recursive:true});
-  for(const name of ['scripts/patch-format-properties.mjs','scripts/patch-clipboard-safety.mjs','scripts/patch-table-command-access.mjs','docs/engine-patches/studio/clipboard-safety.patch'])await fs.writeFile(path.join(root,name),'original\n');
+  for(const name of ['scripts/patch-format-properties.mjs','scripts/patch-clipboard-safety.mjs','scripts/patch-table-command-access.mjs','scripts/patch-nested-paragraph-format.mjs','docs/engine-patches/studio/clipboard-safety.patch','docs/engine-patches/studio/nested-paragraph-format.patch'])await fs.writeFile(path.join(root,name),'original\n');
   const common=await editorBuildInputs(root),desktop=await editorBuildInputs(root,'desktop');
   await assertEditorBuildInputs(root,common);await assertEditorBuildInputs(root,desktop,'desktop');
+  for(const name of ['scripts/patch-nested-paragraph-format.mjs','docs/engine-patches/studio/nested-paragraph-format.patch']) {
+    await fs.writeFile(path.join(root,name),'changed\n');
+    await assert.rejects(assertEditorBuildInputs(root,common),/sources changed/);
+    await assert.rejects(assertEditorBuildInputs(root,desktop,'desktop'),/sources changed/);
+    await fs.writeFile(path.join(root,name),'original\n');
+  }
   await fs.writeFile(path.join(root,'scripts/patch-pointer-hit-geometry.mjs'),'changed\n');
   await assert.rejects(assertEditorBuildInputs(root,common),/sources changed/);await assert.rejects(assertEditorBuildInputs(root,desktop,'desktop'),/sources changed/);
   await fs.writeFile(path.join(root,'scripts/patch-pointer-hit-geometry.mjs'),'original\n');

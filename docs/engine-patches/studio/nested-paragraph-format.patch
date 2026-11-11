@@ -1,0 +1,255 @@
+--- a/src/core/mutation-method-registry.ts
++++ b/src/core/mutation-method-registry.ts
+@@ -1,3 +1,4 @@
++// Pwh nested paragraph formatting
+ /**
+  * [Task #2327] 문서 변경 WasmBridge 메서드의 단일 권위 목록(레지스트리).
+  *
+@@ -39,6 +40,8 @@
+   'applyCellBorderFillIds', 'removeBorderFillTails',
+   'pasteTableCellsTransposed', 'transposeTableCellsInPlace', 'pasteTableCellsTransposedAsTable',
+   'evaluateTableFormula',
++  'editTableStructureByPath', 'setCellZonePropertiesByPath',
++  'setTablePropertiesByPath', 'setCellPropertiesByPath',
+   // 그림/도형/수식 개체
+   'insertPicture', 'assignPictureImage', 'setPictureProperties',
+   'setHeaderFooterPictureProperties', 'setCellPicturePropertiesByPath',
+@@ -61,6 +64,7 @@
+   'setCharShapeIdInCell', 'setCharShapeIdInCellByPath',
+   'setCharShapeRuns', 'setCharShapeRunsInCellByPath',
+   'applyParaFormat', 'setParaShapeId', 'applyParaFormatInCell', 'setCellParaShapeId',
++  'applyParaFormatInCellByPath', 'setCellParaShapeIdByPath',
+   // 스타일/번호 정의 (DocInfo 변이 포함)
+   'updateStyle', 'updateStyleShapes', 'createStyle', 'deleteStyle', 'applyStyle',
+   'applyCellStyle', 'createNumbering', 'ensureDefaultNumbering', 'ensureDefaultBullet',
+--- a/src/core/wasm-bridge.ts
++++ b/src/core/wasm-bridge.ts
+@@ -1,3 +1,4 @@
++// Pwh nested paragraph formatting
+ // Pwh table command access
+ // Pwh Hancom key contexts
+ // Pwh viewport table selection
+@@ -3105,6 +3106,21 @@
+     return (this.doc as any).setNumberingRestart(sec, para, mode, startNum);
+   }
+ 
++  getCellParaPropertiesAtByPath(sec: number, parentPara: number, pathJson: string): ParaProperties {
++    if (!this.doc) throw new Error('문서가 로드되지 않았습니다');
++    return JSON.parse(this.doc.getCellParaPropertiesAtByPath(sec, parentPara, pathJson));
++  }
++
++  applyParaFormatInCellByPath(sec: number, parentPara: number, pathJson: string, propsJson: string): string {
++    if (!this.doc) throw new Error('문서가 로드되지 않았습니다');
++    return this.doc.applyParaFormatInCellByPath(sec, parentPara, pathJson, propsJson);
++  }
++
++  setCellParaShapeIdByPath(sec: number, parentPara: number, pathJson: string, paraShapeId: number): string {
++    if (!this.doc) throw new Error('문서가 로드되지 않았습니다');
++    return this.doc.setCellParaShapeIdByPath(sec, parentPara, pathJson, paraShapeId);
++  }
++
+   applyParaFormat(sec: number, para: number, propsJson: string): string {
+     if (!this.doc) throw new Error('문서가 로드되지 않았습니다');
+     return this.doc.applyParaFormat(sec, para, propsJson);
+--- a/src/engine/cell-block-format.ts
++++ b/src/engine/cell-block-format.ts
+@@ -1,3 +1,4 @@
++// Pwh nested paragraph formatting
+ /**
+  * F5 셀 블록 선택을 서식 적용 대상으로 바꾸는 순수 로직.
+  *
+@@ -34,7 +35,7 @@
+   cellParaIndex = 0,
+ ): CellPathEntry[] {
+   const last = path[path.length - 1];
+-  return [...path.slice(0, -1), { ...last, cellIndex, cellParaIndex }];
++  return [...path.slice(0, -1).map(entry => ({ ...entry })), { ...last, cellIndex, cellParaIndex }];
+ }
+ 
+ /**
+@@ -81,6 +82,15 @@
+   for (const cellIdx of block.cellIndices) {
+     const paraCount = paraCountAt(cellIdx);
+     for (let cellParaIdx = 0; cellParaIdx < paraCount; cellParaIdx++) {
++      if (block.cellPath) {
++        targets.push({
++          kind: 'cellPath',
++          sec: block.sec,
++          parentPara: block.ppi,
++          path: withCellPathTarget(block.cellPath, cellIdx, cellParaIdx),
++        });
++        continue;
++      }
+       targets.push({
+         kind: 'cell',
+         sec: block.sec,
+--- a/src/engine/command.ts
++++ b/src/engine/command.ts
+@@ -1,3 +1,4 @@
++// Pwh nested paragraph formatting
+ // Pwh Hancom key aliases
+ // pwh exact cell text history
+ // pwh insert at exact body control side
+@@ -1398,6 +1399,7 @@
+ 
+ export type ParaFormatTarget =
+   | { kind: 'body'; sec: number; para: number }
++  | { kind: 'cellPath'; sec: number; parentPara: number; path: CellPathEntry[] }
+   | { kind: 'cell'; sec: number; parentPara: number; controlIdx: number; cellIdx: number; cellParaIdx: number };
+ 
+ interface ParaShapeHistoryEntry {
+@@ -1409,7 +1411,9 @@
+ function getParaShapeId(wasm: WasmBridge, target: ParaFormatTarget): number {
+   const props = target.kind === 'body'
+     ? wasm.getParaPropertiesAt(target.sec, target.para)
+-    : wasm.getCellParaPropertiesAt(
++    : target.kind === 'cellPath'
++      ? wasm.getCellParaPropertiesAtByPath(target.sec, target.parentPara, JSON.stringify(target.path))
++      : wasm.getCellParaPropertiesAt(
+         target.sec,
+         target.parentPara,
+         target.controlIdx,
+@@ -1428,6 +1432,10 @@
+     wasm.applyParaFormat(target.sec, target.para, propsJson);
+     return;
+   }
++  if (target.kind === 'cellPath') {
++    wasm.applyParaFormatInCellByPath(target.sec, target.parentPara, JSON.stringify(target.path), propsJson);
++    return;
++  }
+   wasm.applyParaFormatInCell(
+     target.sec,
+     target.parentPara,
+@@ -1443,6 +1451,10 @@
+     wasm.setParaShapeId(target.sec, target.para, paraShapeId);
+     return;
+   }
++  if (target.kind === 'cellPath') {
++    wasm.setCellParaShapeIdByPath(target.sec, target.parentPara, JSON.stringify(target.path), paraShapeId);
++    return;
++  }
+   wasm.setCellParaShapeId(
+     target.sec,
+     target.parentPara,
+@@ -1467,9 +1479,11 @@
+ 
+   execute(wasm: WasmBridge): DocumentPosition {
+     if (this.entries.length > 0 && this.entries.every(entry => entry.afterParaShapeId !== undefined)) {
+-      for (const entry of this.entries) {
+-        restoreParaShapeId(wasm, entry.target, entry.afterParaShapeId!);
+-      }
++      wasm.runInBatch(() => {
++        for (const entry of this.entries) {
++          restoreParaShapeId(wasm, entry.target, entry.afterParaShapeId!);
++        }
++      });
+       return { ...this.cursorBefore };
+     }
+ 
+@@ -1494,9 +1508,11 @@
+   }
+ 
+   undo(wasm: WasmBridge): DocumentPosition {
+-    for (const entry of this.entries) {
+-      restoreParaShapeId(wasm, entry.target, entry.beforeParaShapeId);
+-    }
++    wasm.runInBatch(() => {
++      for (const entry of this.entries) {
++        restoreParaShapeId(wasm, entry.target, entry.beforeParaShapeId);
++      }
++    });
+     return { ...this.cursorBefore };
+   }
+ 
+--- a/src/engine/input-handler.ts
++++ b/src/engine/input-handler.ts
+@@ -1,3 +1,4 @@
++// Pwh nested paragraph formatting
+ // Pwh table command access
+ import {confirmCellBlockDelete} from '@/pwh-cell-delete-dialog';
+ // pwh clipboard cut safety
+@@ -2526,18 +2527,34 @@
+ 
+   /** 셀 블록 안 모든 셀의 모든 문단을 문단 서식 대상으로 만든다 */
+   private getParaFormatTargetsForCellBlock(block: SelectedCellBlock): ParaFormatTarget[] {
+-    // 중첩 표 문단 서식은 목표 밖(getParaFormatTargetsForRange 도 동일 하계)이다.
+-    if (block.cellPath) return [];
+     return paraFormatTargetsForCellBlock(
+       block,
+-      (cellIdx) => this.wasm.getCellParagraphCount(block.sec, block.ppi, block.ci, cellIdx),
++      (cellIdx) => block.cellPath
++        ? this.wasm.getCellParagraphCountByPath(
++            block.sec, block.ppi, JSON.stringify(withCellPathTarget(block.cellPath, cellIdx)),
++          )
++        : this.wasm.getCellParagraphCount(block.sec, block.ppi, block.ci, cellIdx),
+     );
+   }
+ 
+   private getParaFormatTargetsForRange(start: DocumentPosition, end: DocumentPosition): ParaFormatTarget[] {
+     if (this.cursor.isInHeaderFooter() || this.cursor.isInFootnote()) return [];
+     if (start.isTextBox || end.isTextBox) return [];
+-    if ((start.cellPath?.length ?? 0) > 1 || (end.cellPath?.length ?? 0) > 1) return [];
++    if ((start.cellPath?.length ?? 0) > 1 || (end.cellPath?.length ?? 0) > 1) {
++      if (start.parentParaIndex === undefined || !isSameSelectionCellContainer(start, end)) return [];
++      const path = start.cellPath!;
++      const first = path[path.length - 1];
++      const last = end.cellPath![end.cellPath!.length - 1];
++      const targets: ParaFormatTarget[] = [];
++      for (let para = Math.min(first.cellParaIndex, last.cellParaIndex);
++        para <= Math.max(first.cellParaIndex, last.cellParaIndex); para++) {
++        targets.push({
++          kind: 'cellPath', sec: start.sectionIndex, parentPara: start.parentParaIndex,
++          path: withCellPathTarget(path, first.cellIndex, para),
++        });
++      }
++      return targets;
++    }
+ 
+     const startInCell = start.parentParaIndex !== undefined;
+     const endInCell = end.parentParaIndex !== undefined;
+@@ -5866,7 +5883,8 @@
+   applyStyle(styleId: number): void {
+     try {
+       const targets = this.getParaFormatTargetsAtCursor();
+-      if (targets.length === 0) return;
++      // 스타일에는 글자 모양도 포함된다. 중첩 셀 스타일은 별도 경로가 필요하다.
++      if (targets.length === 0 || targets.some(target => target.kind === 'cellPath')) return;
+       const cursorBefore = this.cursor.getPosition();
+       const operation = (wasm: WasmBridge): DocumentPosition => {
+         for (const target of targets) {
+@@ -5874,6 +5892,7 @@
+             wasm.applyStyle(target.sec, target.para, styleId);
+             continue;
+           }
++          if (target.kind !== 'cell') continue;
+           wasm.applyCellStyle(
+             target.sec,
+             target.parentPara,
+@@ -6022,6 +6041,11 @@
+     }
+     const pos = this.cursor.getPosition();
+     if (pos.parentParaIndex !== undefined) {
++      if ((pos.cellPath?.length ?? 0) > 1) {
++        return this.wasm.getCellParaPropertiesAtByPath(
++          pos.sectionIndex, pos.parentParaIndex, JSON.stringify(pos.cellPath),
++        );
++      }
+       return this.wasm.getCellParaPropertiesAt(
+         pos.sectionIndex, pos.parentParaIndex, pos.controlIndex!,
+         pos.cellIndex!, pos.cellParaIndex!,
+--- a/src/engine/input-handler-keyboard.ts
++++ b/src/engine/input-handler-keyboard.ts
+@@ -1,3 +1,4 @@
++// Pwh nested paragraph formatting
+ // Pwh table command access
+ // Pwh Hancom key contexts
+ // Pwh Hancom key aliases
+@@ -69,6 +70,8 @@
+   'edit:delete',
+   'edit:undo',
+   'edit:redo',
++  'format:align-left', 'format:align-center', 'format:align-right',
++  'format:align-justify', 'format:align-distribute',
+   'format:normal-char-shape', 'format:bold', 'format:italic', 'format:underline',
+   'format:superscript', 'format:subscript', 'format:char-shape', 'format:para-shape', 'format:style-dialog',
+ ]);

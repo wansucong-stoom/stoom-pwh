@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pluginVersion": "0.6.54",
+  "pluginVersion": "0.6.55",
   "copyPolicy": "Original bytes; .test.mjs filenames renamed to .check.mjs for staged-only discovery.",
   "files": [
     {
@@ -61,7 +61,7 @@
       "path": "standalone-pwh/build-msi.mjs",
       "source": "standalone-pwh/build-msi.mjs",
       "size": 16915,
-      "sha256": "7f111b1056bd3052cb4b77d203226f9f646064d341cd2812c15b54b9e4c3c203"
+      "sha256": "42d24cf3b290f478f5efc10d8913e6d38416121dd1f821f2890135328dc5f12c"
     },
     {
       "path": "standalone-pwh/build-native-launcher.mjs",
@@ -73,7 +73,7 @@
       "path": "standalone-pwh/build-offline.mjs",
       "source": "standalone-pwh/build-offline.mjs",
       "size": 8191,
-      "sha256": "d824fa87678848a045a902ccfcb48ba08601ccefb6b546f94170e7a604a1c0c8"
+      "sha256": "8ec8735fa798a229f8cfec6b4f9b0c6b73d6a76e6daa9f60a7321a15a0ef55f0"
     },
     {
       "path": "standalone-pwh/build-stoom-icon.mjs",
@@ -102,14 +102,14 @@
     {
       "path": "standalone-pwh/client/editor.js",
       "source": "standalone-pwh/client/editor.js",
-      "size": 2746903,
-      "sha256": "b18e87e2e451b32db2a742c58c9553fa3aaf120c3cf563b89daf7353e1978267"
+      "size": 2750006,
+      "sha256": "dc628be1d910219392261ac119f7902a1ec34abe8b5470c30f3e0b5c4a741fc7"
     },
     {
       "path": "standalone-pwh/client/manifest.json",
       "source": "standalone-pwh/client/manifest.json",
-      "size": 13041,
-      "sha256": "390cf01856c2cfa7aa2ba30b6fb2dd908a2539539ea43f01e9226fe00ea5ae79"
+      "size": 13382,
+      "sha256": "a88af1508304bf4fb0dc2598e34a7df790bd6b4ef5122e0f7e2c3f934fd5b90f"
     },
     {
       "path": "standalone-pwh/codex-agent.mjs",
@@ -499,7 +499,7 @@
       "path": "standalone-pwh/version.json",
       "source": "standalone-pwh/version.json",
       "size": 21,
-      "sha256": "66bc82de46ad926ae2fcacbea91f8d79c1440d6ed8d9e3e89818c44c30514491"
+      "sha256": "249927d1b92de44af95435fc9d7f6ff9655943e28c570a768be5861d3fd0ccba"
     },
     {
       "path": "standalone-pwh/window-close-controller.mjs",

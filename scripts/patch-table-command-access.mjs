@@ -11,7 +11,7 @@ export async function patchTableCommandAccess(studio) {
   async function edit(relative,transform) {
     const file=path.join(studio,'src',relative),marker='// Pwh table command access';
     const source=(await fs.readFile(file,'utf8')).replaceAll('\r\n','\n');
-    if(source.startsWith(marker+'\n'))return;
+    if(source.split('\n').includes(marker))return;
     const replace=(text,before,after)=>{
       if(text.split(before).length!==2)throw Error('Unsupported table command access: '+relative+' '+before.slice(0,100));
       return text.replace(before,()=>after);
