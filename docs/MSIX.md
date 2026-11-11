@@ -8,7 +8,7 @@ MSIX는 Desktop의 별도 포장 경로입니다. 조판 코어·공통 편집�
 
 | 채널 | 식별자와 서명 | 업데이트와 설정 |
 |---|---|---|
-| MSI | 기존 실행기·설치기 | 기존 GitHub MSI 업데이트 |
+| MSI | 기존 실행기·설치기 | 기존 파일 보존, 신규 MSI 업데이트 중단. Store판으로 별도 설치 |
 | MSIX 시험판 | 별도 `STOOM.PwhDesktop.Preview`, Windows 11 시험 전용 unsigned OID | MSI 업데이트 차단, 별도 시험 데이터 폴더 |
 | Store 제출용 MSIX | Partner Center의 정확한 제품 식별자, Store가 심사 과정에서 서명 | MSI 업데이트 차단, Store에서 업데이트 |
 
@@ -42,7 +42,7 @@ Windows SDK는 패키징 과정에서 manifest 스키마와 필요한 파일을 
 
 인증 정보는 소스·릴리스·로그에 넣지 않습니다. Entra 애플리케이션의 Store 관리 권한과 secret 만료를 관리해야 합니다. 연결 시험과 첫 공개 확인을 마친 뒤 저장소의 Actions **Variable** `MSSTORE_AUTOPUBLISH`를 `true`로 설정합니다. 설정 전에는 자동 제출이 활성화되지 않습니다.
 
-1. 같은 정식 소스에서 MSI와 Store용 MSIX를 생성하고 검증합니다. Store MSIX 파일명은 `PwhDesktop-<Desktop 버전>-store-x64.msix`입니다.
+1. 같은 정식 소스에서 플러그인과 Store용 MSIX를 생성하고 검증합니다. Store MSIX 파일명은 `PwhDesktop-<Desktop 버전>-store-x64.msix`입니다. 신규 MSI 배포는 유지하지 않습니다.
 2. GitHub의 `v<Pwh 버전>` 릴리스 **초안**에 MSIX 및 나머지 정식 배포물을 모두 올린 다음 공개합니다. 업로드 중에 먼저 공개하지 않습니다.
 3. 기존 `Test` 워크플로가 소스·브라우저·실엔진·편집기 재빌드·정적 검사·PDF 비교 도구 검사를 실행합니다. 어느 작업이든 실패하거나 건너뛰면 Store 제출도 진행하지 않습니다.
 4. `store-submit` 작업이 GitHub 자산 크기·SHA-256, Store 신원·버전·기능 선언, 배포 채널, 공통/전용 편집기·호스트, 고정 코어와 공식 AI 실행 파일을 확인합니다. 시험판이나 다른 소스의 번들을 제출하지 않습니다.

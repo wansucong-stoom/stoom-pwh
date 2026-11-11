@@ -6,15 +6,15 @@ Pwh Desktop은 AI 대화와 한글 문서 편집기를 한 창에서 사용하�
 
 ## 설치와 사용
 
-[GitHub Releases](https://github.com/wansucong-stoom/stoom-pwh/releases)에서 `PwhDesktop` MSI를 내려받아 설치합니다. 제어판의 프로그램 제거 또는 Windows 설정의 설치된 앱에서 제거할 수 있습니다. HWP·HWPX의 연결 프로그램에서도 Pwh Desktop을 선택할 수 있습니다.
+Windows 10/11 x64에서 **[Microsoft Store의 Pwh Desktop](https://apps.microsoft.com/detail/9NXGD60MHMT2)**을 설치합니다. 이후 업데이트는 Microsoft Store가 배포합니다. 기본 문서 편집에는 AI 로그인이나 별도 Codex 설치가 필요하지 않습니다. HWP·HWPX의 연결 프로그램에서도 Pwh Desktop을 선택할 수 있습니다.
 
-0.1.15부터 Electron 실행 환경을 포함합니다. 설치된 Edge나 브라우저 프로필을 사용하지 않으며, 문서를 편집하기 위해 별도 브라우저를 설치할 필요가 없습니다. OpenAI 계정 로그인 때만 시스템의 기본 브라우저를 엽니다. 이전 버전의 업데이트 파일 크기 제한으로 자동 업데이트가 표시되지 않는 경우 MSI를 직접 실행해 한 번 갱신해 주세요.
+Desktop 신규 배포는 Store로 통일합니다. GitHub 릴리스는 Codex 플러그인·소스·고정 코어·검증 자료를 계속 제공하며, 기존 MSI 설치 파일은 보존하되 이후 MSI 업데이트는 배포하지 않습니다.
 
-MSI는 기존 설치 경로를 찾아 갱신하고 동일 버전의 시험 설치도 교체합니다. Windows의 신뢰 경고는 설치 형식만으로 없앨 수 없습니다. 서명되지 않은 배포본은 경고가 표시될 수 있으며, 코드 서명 인증서를 포함하거나 임의의 자체 서명을 신뢰하도록 설정하지 않습니다.
+기존 MSI에서 이전하려면 먼저 문서를 저장하고 앱을 닫은 뒤 Store판을 설치하세요. MSI 설치본이 Store판으로 자동 전환되지는 않습니다. 문서는 원래 저장한 위치에서 다시 열 수 있습니다. 최근 문서·설정·AI 로그인 정보의 자동 이전은 보장하지 않으므로 필요한 AI 연결은 Store판에서 다시 설정합니다. 기존 MSI 제거는 사용자가 Windows 설정의 설치된 앱에서 진행할 수 있습니다.
 
-설치된 앱을 시작할 때 공개 GitHub 릴리스를 한 번 확인합니다. 새 Desktop 버전이 있으면 상단의 업데이트 버튼을 눌러 설치할 수 있습니다. 열린 문서를 저장하고 AI 작업을 마치면 설치 파일을 확인한 뒤 앱을 닫고 업데이트하며, 완료 후 다시 엽니다. 인터넷이 없으면 확인을 건너뛰고 문서를 계속 편집할 수 있습니다. 0.1.8 이하에는 이 알림 기능이 없으므로 0.1.9는 설치 파일을 한 번 직접 실행해야 합니다.
+Electron 실행 환경을 앱에 포함합니다. 설치된 Edge나 브라우저 프로필을 사용하지 않으며 별도 브라우저 설치도 필요하지 않습니다. OpenAI 계정 로그인 때는 시스템의 기본 브라우저를 엽니다. Store판은 GitHub MSI 업데이트를 실행하지 않습니다.
 
-MSI는 설치된 Codex가 있으면 Pwh 플러그인과 포함된 스킬도 연결합니다. 기존 GitHub Pwh는 원래 연결을 유지해 같은 버전으로 갱신하므로 인터넷이 필요합니다. 처음 설치하는 경우 내장된 Pwh와 엔진을 사용하며, Desktop을 제거해도 Codex에서 쓰는 런타임은 사용자 데이터에 남습니다. Codex가 없거나 연결에 실패해도 Desktop 설치는 계속됩니다.
+Codex 플러그인은 Desktop 설치와 별도로 [플러그인 설치 안내](USER-GUIDE.md#codex-plugin)에 따라 연결합니다.
 
 - 시작 화면에서 새 문서를 만들거나 PC의 HWP·HWPX를 엽니다. 이 버전부터 열거나 저장한 문서는 최근 문서에 표시되며, 목록에서 제거해도 원본 파일은 삭제되지 않습니다. 문서에서 시작 화면으로 돌아가도 열린 탭과 AI 대화는 유지됩니다.
 - 문서 편집과 HWPX 저장은 로컬에서 처리합니다. 파일 메뉴에 새 문서·열기·저장·다른 이름으로 저장이 있습니다.
@@ -64,7 +64,7 @@ node scripts/build-desktop.mjs --output C:\build\PwhDesktop.msi --runtime-archiv
 
 Windows 실행 파일의 제품 리소스에는 Electron의 공식 `rcedit` 2.0.0을 빌드 도구로 사용합니다. 고정된 배포 URL·크기·SHA256을 확인하며, 빌드할 때만 내려받고 설치기에는 넣지 않습니다. 인터넷 없는 빌드에서는 미리 받은 도구의 절대 경로를 `PWH_RCEDIT_PATH`로 지정합니다. 앱 창은 샌드박스와 context isolation을 사용하며 문서 프레임에 Node.js 권한을 제공하지 않습니다.
 
-업데이트 알림에 사용하려면 공개 릴리스에 `PwhDesktop-<버전>.msi` 이름의 설치 파일을 포함해야 합니다. GitHub에서 제공하는 파일 크기와 SHA-256을 확인하며, 미리보기 릴리스나 검증 정보가 없는 파일은 자동 설치 대상으로 사용하지 않습니다.
+이전 MSI의 GitHub 업데이트 코드는 과거 배포물 재현을 위해 보존합니다. 신규 Desktop 배포는 Store용 MSIX를 사용하며, [Store 빌드와 제출](MSIX.md)을 참고하세요. GitHub 릴리스에 올린 MSIX는 Store 제출용이며, Microsoft 인증을 거친 Store 설치와 구분합니다.
 
 ## 공개 소스 보존과 검사
 
@@ -78,4 +78,4 @@ node desktop/verify-source.mjs
 
 원본 개발 작업 공간과의 바이트 대조 및 빌드 작업 공간에 배치한 Desktop 검사 실행법은 [`desktop/README.md`](../desktop/README.md)에 있습니다. 공개 mirror에는 사용자 문서·복구본·로그·프로필·설정·로그인 정보나 `node_modules`를 포함하지 않습니다.
 
-GitHub 저장소와 GitHub 소스 아카이브는 이 Desktop 폴더를 포함합니다. 기본 MCP 플러그인 ZIP은 작은 설치 패키지로 유지하기 위해 Desktop 소스를 제외합니다. Desktop 재빌드는 전체 저장소를 내려받아 실행하며, 별도 Desktop 소스 ZIP과 MSI는 플러그인 ZIP과 구분합니다.
+GitHub 저장소와 GitHub 소스 아카이브는 이 Desktop 폴더를 포함합니다. 기본 MCP 플러그인 ZIP은 작은 설치 패키지로 유지하기 위해 Desktop 소스를 제외합니다. Desktop 재빌드는 전체 저장소를 내려받아 실행하며, Desktop용 Store MSIX와 플러그인 ZIP을 구분합니다.

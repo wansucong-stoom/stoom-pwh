@@ -4,9 +4,10 @@
 
 <h1 align="center">Pwh</h1>
 
-<p align="center"><strong>AI와 함께 작성하고 편집하는 한글 문서 도구</strong></p>
+<p align="center"><strong>한글에 익숙한 그대로, 오픈소스로 더 자유롭게.</strong><br>선택적으로 AI를 연결하는 오픈소스 한글 문서 편집기</p>
 
 <p align="center">
+  <a href="https://apps.microsoft.com/detail/9NXGD60MHMT2">Microsoft Store에서 설치</a> ·
   <a href="https://tools.stoom.win/pwh/">제품 소개</a> ·
   <a href="https://github.com/wansucong-stoom/stoom-pwh/releases/latest">최신 릴리스</a> ·
   <a href="docs/USER-GUIDE.md">사용 안내</a> ·
@@ -19,12 +20,12 @@ HWP·HWPX 문서를 열고, 글과 표를 직접 편집하거나 선택한 부�
 
 | 환경 | 사용 방법 |
 | --- | --- |
-| **Pwh Desktop** · Windows x64 | GitHub 릴리스에서 **MSI**를 내려받아 설치합니다. 업데이트할 때도 최신 MSI를 실행합니다. 앱에서 ChatGPT 계정을 연결할 수 있으며, 별도 Codex 설치 없이도 실행됩니다. [Desktop 설치와 사용](docs/PWH-DESKTOP.md#설치와-사용) |
+| **Pwh Desktop** · Windows x64 | **[Microsoft Store에서 설치](https://apps.microsoft.com/detail/9NXGD60MHMT2)**하고 Store에서 업데이트합니다. 앱에서 선택적으로 AI를 연결하며 별도 Codex 설치 없이도 기본 편집을 사용할 수 있습니다. [Desktop 설치와 사용](docs/PWH-DESKTOP.md#설치와-사용) |
 | **Pwh 플러그인** · Codex 데스크톱 | Codex 대화와 나란히 한글 편집기를 엽니다. GitHub에서 소스와 플러그인 **ZIP**을 받을 수 있습니다. [Codex 플러그인 설치](docs/USER-GUIDE.md#codex-plugin) |
 
 **최신 정식 릴리스**는 Pwh **0.6.51**, Desktop **0.1.32**, 공통 코어 **r24**입니다. 버전별 다운로드, 변경 이력, SHA-256과 MSI 검증 범위는 [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases/tag/v0.6.51)에서 확인할 수 있습니다.
 
-Microsoft Store용 MSIX는 첫 인증을 위해 제출했으며 아직 공개 전입니다. 정식 릴리스의 Store 업데이트 연결과 [빌드·검증 범위](docs/MSIX.md)를 별도로 안내합니다.
+Desktop의 신규 설치·업데이트는 **Microsoft Store**로 통일합니다. 기존 MSI 배포 파일은 보존하지만 이후 MSI 업데이트는 배포하지 않습니다. GitHub 릴리스는 **플러그인 ZIP·소스·고정 코어·검증 자료**를 계속 제공합니다. 기존 MSI 사용자는 [Store 이전 안내](docs/PWH-DESKTOP.md#설치와-사용)를 참고하세요.
 
 ## 할 수 있는 일
 
