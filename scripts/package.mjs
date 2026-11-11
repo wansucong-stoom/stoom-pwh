@@ -11,7 +11,7 @@ const PROJECT_ROOT = fileURLToPath(new URL('../', import.meta.url));
 const FILES = Object.freeze([
   'plugin.json', 'mcp.json', '.mcp.json', '.codex-plugin/plugin.json', 'package.json', 'assets/stoom.png',
   'engine.config.json', 'engine.config.example.json', 'runtime-lock.json', 'README.md', 'LICENSE', 'SECURITY.md', 'requirements-render-compare.txt', 'scripts/editor-build-contract.mjs', 'scripts/verify-editor-build.mjs', 'scripts/run-ci-tests.mjs', 'scripts/ci-test-files.mjs',
-  'THIRD_PARTY_NOTICES.md', 'CONTRIBUTING.md', 'scripts/setup.mjs', 'scripts/stage-electron.mjs', 'scripts/brand-electron.mjs',
+  'THIRD_PARTY_NOTICES.md', 'CONTRIBUTING.md', 'scripts/setup.mjs', 'scripts/stage-electron.mjs', 'scripts/brand-electron.mjs', 'scripts/msix-package.mjs', 'scripts/msix-assets.ps1',
   'scripts/inspect_template.py', 'scripts/fill_form.py', 'scripts/replace_image.py', 'scripts/inspect_image.py', 'scripts/compare-pages.py', 'scripts/build-studio.ps1',
   'scripts/package.mjs', 'scripts/build-inline.mjs', 'scripts/patch-body-cursor-contract.mjs', 'scripts/patch-pointer-hit-geometry.mjs', 'scripts/patch-cell-text-history.mjs', 'scripts/patch-object-properties.mjs', 'scripts/patch-viewport-table-selection.mjs', 'scripts/patch-table-and-symbol-shortcuts.mjs', 'scripts/patch-hancom-key-aliases.mjs', 'scripts/patch-hancom-key-contexts.mjs', 'scripts/bundle-client.mjs', 'scripts/read-clipboard.ps1', 'scripts/save-dialog.ps1', 'scripts/launch.mjs', 'scripts/preserved-runtime.mjs', 'scripts/preserve-engine.py', 'scripts/preserve-patched-runtime.py', 'scripts/build-patched-core.mjs',
 ]);

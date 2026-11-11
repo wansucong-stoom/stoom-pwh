@@ -5,9 +5,12 @@ import {spawn} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {randomBytes} from 'node:crypto';
 import {createElectronController} from './electron-controller.mjs';
+import {desktopDistribution} from './desktop-distribution.mjs';
 
 const appRoot=path.dirname(fileURLToPath(import.meta.url));
-const dataRoot=process.env.PWH_DESKTOP_DATA_ROOT||path.join(process.env.LOCALAPPDATA||os.homedir(),'PwhDesktop');
+const distribution=await desktopDistribution(appRoot);
+process.env.PWH_DESKTOP_DISTRIBUTION=distribution.channel;
+const dataRoot=process.env.PWH_DESKTOP_DATA_ROOT||path.join(process.env.LOCALAPPDATA||os.homedir(),distribution.channel==='msix-preview'?'PwhDesktopMsixPreview':'PwhDesktop');
 const programRoot=path.dirname(appRoot),runtime=path.join(programRoot,'electron','PwhDesktopShell.exe');
 for(const key of ['PWH_CONFIG','PWH_RHWP_PATH','PWH_STUDIO_PATH','PWH_EDITOR_SDK_PATH','PWH_HOP_PATH','PWH_STOOM_MODULE','PWH_DESKTOP_DEBUG','HWPXYZ_RHWP_PATH','HWPXYZ_OUTPUT_ROOT'])delete process.env[key];
 process.env.PWH_STANDALONE_DATA=dataRoot;

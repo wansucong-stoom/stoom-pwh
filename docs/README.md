@@ -6,6 +6,7 @@
 
 - [빠른 시작과 편집 안내](USER-GUIDE.md)에서 Desktop과 Codex 플러그인의 차이, 설치 방법, AI 요청 예시와 표 단축키를 확인할 수 있습니다.
 - [Pwh Desktop](PWH-DESKTOP.md)에는 Windows 설치·업데이트, AI 연결, 미리보기와 인쇄를 정리했습니다.
+- [MSIX와 Store 준비](MSIX.md)에는 시험 패키지, 정식 제출용 식별자와 설치 검증 범위를 정리했습니다.
 - [설정과 글꼴](CONFIGURATION.md)에는 런타임 위치, 환경 변수, 시스템·인쇄 글꼴을 정리했습니다.
 - [기능 범위와 제한](PWH-COMPATIBILITY-LIMITS.md)에는 붙여넣기, AI 편집, 서식과 화면 표시의 지원 범위를 정리했습니다.
 

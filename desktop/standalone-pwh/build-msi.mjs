@@ -11,6 +11,7 @@ import {stagePreviewCore} from './preview-core.mjs';
 import {copyOfficialRuntime} from './official-codex-runtime.mjs';
 import {stageElectron} from '../release-source/scripts/stage-electron.mjs';
 import {brandElectron} from '../release-source/scripts/brand-electron.mjs';
+import {packageMsix} from '../release-source/scripts/msix-package.mjs';
 
 const app=path.dirname(fileURLToPath(import.meta.url)),workspace=path.dirname(app);
 const version=process.env.PWH_MSI_VERSION||'0.1.32';
@@ -38,6 +39,7 @@ await stageElectron(process.env.PWH_ELECTRON_ARCHIVE,path.join(payload,'electron
 await brandElectron(path.join(payload,'electron'),path.join(app,'stoom.ico'),version);
 await fs.writeFile(path.join(payload,'standalone-pwh','version.json'),JSON.stringify({version})+'\n',{flag:'wx'});
 for(const name of ['image-export.mjs','image-convert.ps1'])await copy(path.join(app,name),path.join('standalone-pwh',name));
+await copy(path.join(app,'desktop-distribution.mjs'),'standalone-pwh/desktop-distribution.mjs');
 for(const name of ['electron-shell.cjs','electron-preload.cjs','electron-controller.mjs','print-options.cjs'])await copy(path.join(app,name),path.join('standalone-pwh',name));
 for(const name of ['editor.js','manifest.json'])await copy(path.join(app,'client',name),path.join('standalone-pwh','client',name));
 await copy(path.join(workspace,'bridge','hwp-codex-host.mjs'),'bridge/hwp-codex-host.mjs');
@@ -46,6 +48,11 @@ await copy(process.execPath,'node/node.exe');await copy(path.join(app,'NODE-LICE
 await run(process.execPath,[path.join(workspace,'release-source','scripts','setup.mjs'),'--runtime-root',path.join(payload,'engine'),'--runtime-archive',archive,'--skip-download']);
 const candidateDir=process.env.PWH_CORE_CANDIDATE_DIR;
 const coreCandidate=candidateDir?await stagePreviewCore({candidateDir:path.resolve(candidateDir),runtimeRoot:path.join(payload,'engine'),pluginRoot:pwhRoot,lock}):null;
+if(process.env.PWH_DESKTOP_FORMAT==='msix'){
+ const result=await packageMsix({payload,output,sdkDirectory:process.env.PWH_WINDOWS_SDK_DIR,
+  channel:process.env.PWH_MSIX_CHANNEL,version,identityFile:process.env.PWH_MSIX_IDENTITY_FILE,assetRoot:process.env.PWH_MSIX_ASSET_ROOT});
+ console.log(JSON.stringify({...result,stage,runtimeId:lock.id}));
+}else{
 const fragment=path.join(stage,'files.wxs'),obj=path.join(stage,'files.wixobj'),main=path.join(stage,'main.wxs'),mainObj=path.join(stage,'main.wixobj');
 await run(path.join(wix,'heat.exe'),['dir',payload,'-nologo','-cg','AppFiles','-dr','INSTALLDIR','-srd','-scom','-sreg','-ag','-var','var.SourceRoot','-out',fragment]);
 // Per-user MSI components need HKCU key paths and uninstall directory entries.
@@ -76,3 +83,4 @@ await run(path.join(wix,'candle.exe'),['-nologo','-arch','x64',`-dSourceRoot=${p
 await run(path.join(wix,'light.exe'),['-nologo','-ext','WixUIExtension','-out',output,mainObj,obj]);
 if((await fs.stat(output)).size>512*1024*1024)throw Error('설치 파일이 자동 업데이트의 512 MiB 제한을 넘습니다.');
 console.log(JSON.stringify({output,version,bytes:(await fs.stat(output)).size,sha256:hash(await fs.readFile(output)),stage,...(coreCandidate?{runtimeVariant:'local-candidate',coreCandidate}:{runtimeVariant:'preserved-runtime',runtimeId:lock.id})}));
+}

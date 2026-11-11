@@ -12,7 +12,7 @@ const ownedLocal=(value,print=false)=>{try{const u=new URL(value);return u.proto
 const failStartup=error=>{process.stderr.write('Pwh startup failed: '+String(error?.stack||error)+'\n');app.exit(1);};
 process.on('uncaughtException',failStartup);process.on('unhandledRejection',failStartup);
 if(!ownedLocal(url)||!dataRoot){process.stderr.write('Pwh 앱 시작 정보가 올바르지 않습니다.\n');app.exit(1);}
-app.setName('Pwh Desktop');app.setAppUserModelId('STOOM.PwhDesktop');
+app.setName('Pwh Desktop');app.setAppUserModelId(process.env.PWH_APP_USER_MODEL_ID||'STOOM.PwhDesktop');
 try{fs.mkdirSync(path.join(dataRoot,'electron-profile'),{recursive:true});app.setPath('userData',path.join(dataRoot,'electron-profile'));}catch(error){failStartup(error);}
 let win=null,approvedClose=false,debugAttached=false;const printWindows=new Map();
 const hostPipe=process.argv.find(arg=>arg.startsWith('--pwh-host-pipe='))?.slice('--pwh-host-pipe='.length);

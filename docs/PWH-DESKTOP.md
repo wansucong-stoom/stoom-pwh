@@ -50,6 +50,8 @@ AI에 보낸 내용은 선택한 제공자가 처리합니다. Codex 연결에�
 
 ## 소스와 빌드
 
+Microsoft Store용 MSIX 빌드도 지원합니다. 현재 시험 패키지 제작 단계이며 Store 공개·심사 완료를 의미하지 않습니다. [MSIX 배포 구분·빌드·검증](MSIX.md)을 참고하세요.
+
 저장소의 `desktop/standalone-pwh`는 Desktop 호스트·화면·Windows 실행 파일·설치기 소스입니다. `desktop/bridge`에는 STOOM이 작성한 공식 Codex app-server 연결 코드가 있습니다. 공통 편집기 코드는 저장소의 `src`, `client`, `runtime-lock.json`을 사용합니다. Desktop이 별도의 기본 rhwp 복사본에서 빌드되지 않도록 설치기 빌드가 Pwh 버전과 편집기 SHA256 일치를 검사합니다.
 
 Windows x64의 Node.js와 WiX 3.14 도구, 고정된 Pwh 보존 런타임 ZIP, [공식 Codex app-server Windows x64 패키지](https://github.com/openai/codex/releases/tag/rust-v0.165.0)와 [공식 Electron 45.1.0 Windows x64 ZIP](https://github.com/electron/electron/releases/tag/v45.1.0)을 준비한 뒤 실행합니다. `--codex-runtime`에는 공식 `codex-app-server-package-x86_64-pc-windows-msvc.tar.gz`를 안전하게 푼 디렉터리를 지정합니다. 빌드는 각 입력의 크기와 SHA256을 확인한 뒤 설치기에 복사합니다. Electron 실행 파일은 `PwhDesktopShell.exe`로 제품명과 아이콘을 적용하며 빌드 기록에 결과 해시를 남깁니다.

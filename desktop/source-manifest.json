@@ -60,8 +60,8 @@
     {
       "path": "standalone-pwh/build-msi.mjs",
       "source": "standalone-pwh/build-msi.mjs",
-      "size": 16391,
-      "sha256": "61f98628c2ec0276c03d1e3f0b41b67da09834ce8b83d4b823ec890b25cd53e0"
+      "size": 16915,
+      "sha256": "32232b3d81706141717604aecaff63f53074ec0da16daf5f6366e824117e9b65"
     },
     {
       "path": "standalone-pwh/build-native-launcher.mjs",
@@ -246,8 +246,8 @@
     {
       "path": "standalone-pwh/electron-shell.cjs",
       "source": "standalone-pwh/electron-shell.cjs",
-      "size": 8310,
-      "sha256": "01c78d291963ab751cb1c35349852431671853db5e2378c33ff90cc2befa36b8"
+      "size": 8345,
+      "sha256": "13af5dac5f3c980d6d9071b5e743fa99f75209a4afd03b56e7f13227fea45905"
     },
     {
       "path": "standalone-pwh/file-dialog.ps1",
@@ -306,8 +306,8 @@
     {
       "path": "standalone-pwh/launch.mjs",
       "source": "standalone-pwh/launch.mjs",
-      "size": 2922,
-      "sha256": "8fdd080fe7bcfa5d058059a07ac645bde664d41e857a22c22d42c6024b539ccc"
+      "size": 3162,
+      "sha256": "57a188d262e89df3735ab261920828319f6bf790dea64200f949662418d15e09"
     },
     {
       "path": "standalone-pwh/launch.vbs",
@@ -324,8 +324,8 @@
     {
       "path": "standalone-pwh/native-launcher.cs",
       "source": "standalone-pwh/native-launcher.cs",
-      "size": 10306,
-      "sha256": "e3345b389b4397eb1ad5127aeb52ebd40027ebaab94be9060e6b4d6a12b022aa"
+      "size": 11060,
+      "sha256": "e7d8762d75f4fdbe4732fcbeb9bdceece7504d67a70644de8c700146e604c655"
     },
     {
       "path": "standalone-pwh/native-launcher.test.cs",
@@ -522,8 +522,8 @@
     {
       "path": "standalone-pwh/workspace-shell.mjs",
       "source": "standalone-pwh/workspace-shell.mjs",
-      "size": 13516,
-      "sha256": "5b227d975810eb827b6e76a4aced95d0f89d5c1ca7aba49a3439dd0b3b012800"
+      "size": 13890,
+      "sha256": "ba1bf52a9a37f70a9de013baa83b48d2a82d8df7ca5c9142645d296ac0f4477a"
     },
     {
       "path": "standalone-pwh/workspace.css",
@@ -542,6 +542,12 @@
       "source": "standalone-pwh/workspace.js",
       "size": 19414,
       "sha256": "918c00f8c67a9f687b0ac1f6e24d1d4f5d65c46cd55d6ed36587316084fcbb85"
+    },
+    {
+      "path": "standalone-pwh/desktop-distribution.mjs",
+      "source": "standalone-pwh/desktop-distribution.mjs",
+      "size": 501,
+      "sha256": "24651d4461c3cdb09b02d4db9600d352819b9f8b798dbd2d95a2ebad4f0ba3b3"
     }
   ]
 }
