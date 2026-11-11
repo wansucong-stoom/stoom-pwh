@@ -24,7 +24,7 @@ HWP·HWPX 문서를 열고, 글과 표를 직접 편집하거나 선택한 부�
 
 **최신 정식 릴리스**는 Pwh **0.6.51**, Desktop **0.1.32**, 공통 코어 **r24**입니다. 버전별 다운로드, 변경 이력, SHA-256과 MSI 검증 범위는 [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases/tag/v0.6.51)에서 확인할 수 있습니다.
 
-Microsoft Store용 MSIX는 시험 패키지 제작 단계입니다. 아직 Store에 공개되지 않았으며, [빌드와 검증 범위](docs/MSIX.md)를 별도로 안내합니다.
+Microsoft Store용 MSIX는 첫 인증을 위해 제출했으며 아직 공개 전입니다. 정식 릴리스의 Store 업데이트 연결과 [빌드·검증 범위](docs/MSIX.md)를 별도로 안내합니다.
 
 ## 할 수 있는 일
 
