@@ -133,3 +133,67 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install -r requirements-render-compare.txt
       - run: python tests/compare-pages.test.py
+  store-submit:
+    needs: [runtime-inputs, test, wasm-table-regressions, browser-regressions, reproducible-editors, static-checks, render-comparison-tests]
+    if: github.event_name == 'release' && !github.event.release.prerelease && startsWith(github.event.release.tag_name, 'v') && vars.MSSTORE_AUTOPUBLISH == 'true'
+    runs-on: windows-latest
+    timeout-minutes: 30
+    environment: microsoft-store
+    concurrency:
+      group: pwh-microsoft-store
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Check Store connection
+        shell: pwsh
+        env:
+          MSSTORE_IDENTITY_JSON: ${{ secrets.MSSTORE_IDENTITY_JSON }}
+          MSSTORE_TENANT_ID: ${{ secrets.MSSTORE_TENANT_ID }}
+          MSSTORE_CLIENT_ID: ${{ secrets.MSSTORE_CLIENT_ID }}
+          MSSTORE_CLIENT_SECRET: ${{ secrets.MSSTORE_CLIENT_SECRET }}
+          MSSTORE_SELLER_ID: ${{ secrets.MSSTORE_SELLER_ID }}
+        run: |
+          foreach ($key in @('MSSTORE_IDENTITY_JSON','MSSTORE_TENANT_ID','MSSTORE_CLIENT_ID','MSSTORE_CLIENT_SECRET','MSSTORE_SELLER_ID')) {
+            if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($key))) { throw "Missing Store secret: $key" }
+          }
+      - run: node scripts/setup.mjs --runtime-root "$env:RUNNER_TEMP/pwh-store-runtime"
+      - name: Verify released Store package
+        id: package
+        shell: pwsh
+        env:
+          MSSTORE_IDENTITY_JSON: ${{ secrets.MSSTORE_IDENTITY_JSON }}
+        run: |
+          $sdkRoot = Join-Path ${env:ProgramFiles(x86)} 'Windows Kits/10/bin'
+          $sdk = Get-ChildItem -LiteralPath $sdkRoot -Directory | Where-Object { $_.Name -match '^10\.0\.\d+\.0$' } | Sort-Object { [Version]$_.Name } -Descending | Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName 'x64/makeappx.exe') } | Select-Object -First 1
+          if (!$sdk) { throw 'Windows SDK makeappx.exe is required' }
+          $env:PWH_WINDOWS_SDK_DIR = Join-Path $sdk.FullName 'x64'
+          $env:PWH_RUNTIME_ROOT = Join-Path $env:RUNNER_TEMP 'pwh-store-runtime'
+          node scripts/store-release.mjs
+          if ($LASTEXITCODE -ne 0) { throw 'Store release verification failed' }
+      - uses: microsoft/microsoft-store-apppublisher@cc9910a8d59f2eb55cbb83df0a3800cf3b5300e0 # v1.4
+      - name: Submit verified package to Microsoft Store
+        shell: pwsh
+        env:
+          MSSTORE_TENANT_ID: ${{ secrets.MSSTORE_TENANT_ID }}
+          MSSTORE_CLIENT_ID: ${{ secrets.MSSTORE_CLIENT_ID }}
+          MSSTORE_CLIENT_SECRET: ${{ secrets.MSSTORE_CLIENT_SECRET }}
+          MSSTORE_SELLER_ID: ${{ secrets.MSSTORE_SELLER_ID }}
+          PWH_STORE_PACKAGE: ${{ steps.package.outputs.package }}
+        run: |
+          msstore reconfigure --tenantId $env:MSSTORE_TENANT_ID --sellerId $env:MSSTORE_SELLER_ID --clientId $env:MSSTORE_CLIENT_ID --clientSecret $env:MSSTORE_CLIENT_SECRET
+          if ($LASTEXITCODE -ne 0) { throw 'Store authentication failed' }
+          msstore publish $env:PWH_STORE_PACKAGE --appId 9NXGD60MHMT2
+          if ($LASTEXITCODE -ne 0) { throw 'Store submission failed; inspect Partner Center before retrying' }
+          '### Store update submitted' | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
+          'Microsoft certification and publication remain separate from this upload.' | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: store-package-verification
+          path: ${{ runner.temp }}/pwh-store-release/verification.json
+          if-no-files-found: ignore

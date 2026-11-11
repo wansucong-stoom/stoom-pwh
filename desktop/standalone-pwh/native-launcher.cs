@@ -12,6 +12,15 @@ using System.Windows.Forms;
 internal static class PwhDesktopLauncher
 {
     private const string ApplicationId = "STOOM.PwhDesktop";
+    private static string currentApplicationId = ApplicationId;
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode)] private static extern int GetCurrentApplicationUserModelId(ref uint length, StringBuilder applicationId);
+    private static string PackageApplicationId()
+    {
+        uint length = 0;
+        if (GetCurrentApplicationUserModelId(ref length, null) != 122 || length == 0) return ApplicationId;
+        StringBuilder value = new StringBuilder((int)length);
+        return GetCurrentApplicationUserModelId(ref length, value) == 0 ? value.ToString() : ApplicationId;
+    }
     private const uint WmSetIcon = 0x0080;
     private const uint WmGetIcon = 0x007F;
     private delegate bool EnumWindowProc(IntPtr window, IntPtr parameter);
@@ -82,7 +91,7 @@ internal static class PwhDesktopLauncher
         {
             SetString(store, 2, Quote(executable));
             SetString(store, 3, Path.Combine(Path.GetDirectoryName(executable), "standalone-pwh", "stoom.ico") + ",0");
-            SetString(store, 5, ApplicationId);
+            SetString(store, 5, currentApplicationId);
             Marshal.ThrowExceptionForHR(store.Commit());
         }
         finally { Marshal.ReleaseComObject(store); }
@@ -166,7 +175,8 @@ internal static class PwhDesktopLauncher
     {
         try
         {
-            SetCurrentProcessExplicitAppUserModelID(ApplicationId);
+            currentApplicationId = PackageApplicationId();
+            SetCurrentProcessExplicitAppUserModelID(currentApplicationId);
             if (arguments.Length == 2 && arguments[0] == "--brand-window") return BrandWindow(arguments[1]);
             string root = Path.GetDirectoryName(Application.ExecutablePath);
             string node = Path.Combine(root, "node", "node.exe");
@@ -178,6 +188,7 @@ internal static class PwhDesktopLauncher
                 WorkingDirectory = root, UseShellExecute = false, CreateNoWindow = true
             };
             start.EnvironmentVariables["PWH_NATIVE_LAUNCHER"] = Application.ExecutablePath;
+            start.EnvironmentVariables["PWH_APP_USER_MODEL_ID"] = currentApplicationId;
             using (Process process = Process.Start(start)) { process.WaitForExit(); return process.ExitCode; }
         }
         catch

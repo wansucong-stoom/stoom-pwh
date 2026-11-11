@@ -4,7 +4,9 @@
 
 ## Pwh Desktop
 
-Windows x64에서 [제품 사이트](https://tools.stoom.win/pwh/) 또는 [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases)의 MSI를 사용합니다. 설치 후 **AI 설정 → ChatGPT로 계속**으로 계정을 연결하거나, 설치된 Codex 또는 준비한 로컬 AI 서버를 선택할 수 있습니다. 설치·업데이트와 Windows 인쇄는 [Desktop 안내](PWH-DESKTOP.md#설치와-사용)에 정리되어 있습니다.
+Windows x64에서는 **[Microsoft Store에서 Pwh Desktop을 설치](https://apps.microsoft.com/detail/9NXGD60MHMT2)**합니다. 업데이트도 Store에서 받습니다. 기본 문서 편집에는 AI 로그인이 필요하지 않습니다. AI를 사용하려면 **AI 설정 → ChatGPT로 계속**으로 계정을 연결하거나, 설치된 Codex 또는 준비한 로컬 AI 서버를 선택할 수 있습니다. 기존 MSI에서 Store로 이전하는 방법과 Windows 인쇄는 [Desktop 안내](PWH-DESKTOP.md#설치와-사용)에 정리했습니다.
+
+GitHub는 아래 Codex 플러그인과 소스·코어 배포에 계속 사용합니다. 신규 MSI 업데이트는 배포하지 않습니다.
 
 <a id="codex-plugin"></a>
 

@@ -24,6 +24,8 @@ node desktop/verify-source.mjs --source-root C:\work\pwh-development
 
 ## 설치기 빌드와 검사 배치
 
+MSIX 시험판과 Microsoft Store 제출용 경로는 [MSIX 빌드·검증 안내](../docs/MSIX.md)에 정리합니다. MSI와 같은 payload 준비를 사용하며, MSIX 채널에서는 MSI 자동 업데이트를 실행하지 않습니다. 시험판과 정식 Store 제출용 식별자를 구분합니다.
+
 Windows 설치기 빌드는 저장소의 [`scripts/build-desktop.mjs`](../scripts/build-desktop.mjs)를 사용합니다. 명령과 필요한 도구는 [`docs/PWH-DESKTOP.md`](../docs/PWH-DESKTOP.md)에 설명되어 있습니다. 빌드는 새 임시 작업 공간에 아래의 형제 폴더를 준비하여 원본 소스의 상대 import를 그대로 유지합니다.
 
 ```text
