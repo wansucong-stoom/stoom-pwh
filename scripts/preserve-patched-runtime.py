@@ -242,7 +242,10 @@ def main():
                        'tests/helpers/nested-properties-fixture.mjs',
                        'tests/partial-format-border-preservation.test.mjs',
                        'tests/inline-shape-spacing.test.mjs',
-                       'tests/helpers/inline-shape-spacing-fixture.mjs')
+                       'tests/helpers/inline-shape-spacing-fixture.mjs',
+                       'tests/legacy-symbol-run-advance.test.mjs',
+                       'tests/stored-frame-visible-content-fit.test.mjs',
+                       'tests/stored-label-frame-source.test.mjs')
     for name in fidelity_tests:
         core_inputs[name] = regular(project/name)
         build_inputs['pwh/'+name] = regular(project/name)

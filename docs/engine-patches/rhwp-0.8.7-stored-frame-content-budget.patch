@@ -1,0 +1,105 @@
+--- a/src/renderer/layout/table_layout.rs
++++ b/src/renderer/layout/table_layout.rs
+@@ -310,6 +310,47 @@
+                 && cell.paragraphs.iter().all(stored_float_frame_owner_is_original)),
+             _ => true,
+         })
++}
++
++/// A plain row with completed label siblings shares the original object's
++/// physical frame. Only spacing beyond that frame may be omitted at a cut;
++/// a local zero origin alone never authenticates this ownership.
++fn stored_label_row_frame_excludes_tail_spacing(
++    table: &crate::model::table::Table,
++    cell: &crate::model::table::Cell,
++    closing: &crate::model::paragraph::LineSeg,
++) -> bool {
++    if cell.dirty_flag || cell.row_span != 1 || table.common.height == 0
++        || table.common.height > i32::MAX as u32 || closing.vertical_pos < 0
++        || closing.line_height <= 0 || closing.line_spacing <= 0
++        || cell.paragraphs.iter().any(|p| !p.controls.is_empty()
++            || !stored_float_frame_owner_is_original(p))
++    { return false; }
++    let siblings = table.cells.iter().filter(|other|
++        usize::from(other.row) <= usize::from(cell.row)
++            && usize::from(cell.row) < usize::from(other.row) + usize::from(other.row_span));
++    for other in siblings {
++        if other.row != cell.row || other.row_span != 1 || other.dirty_flag {
++            return false;
++        }
++        if std::ptr::eq(other, cell) { continue; }
++        let [label] = other.paragraphs.as_slice() else { return false; };
++        let [line] = label.line_segs.as_slice() else { return false; };
++        if !label.controls.is_empty() || !stored_float_frame_owner_is_original(label)
++            || line.vertical_pos != 0 || line.line_height <= 0
++        { return false; }
++    }
++    let rows = table.get_raw_row_heights();
++    if rows.iter().take(usize::from(cell.row)).any(|&height| height == 0 || height > i32::MAX as u32) {
++        return false;
++    }
++    let prefix: i64 = rows.iter().take(usize::from(cell.row)).map(|&h| i64::from(h)).sum::<i64>()
++        + i64::from(table.cell_spacing) * i64::from(cell.row);
++    let padding = cell.effective_padding(&table.padding);
++    let ink = prefix + i64::from(closing.vertical_pos) + i64::from(closing.line_height)
++        + i64::from(padding.top) + i64::from(padding.bottom);
++    let frame = i64::from(table.common.height);
++    ink <= frame && frame < ink + i64::from(closing.line_spacing)
+ }
+ 
+ /// A closed frame is physical only if current measurement still agrees with
+@@ -15920,8 +15961,6 @@
+                 table.page_break,
+                 crate::model::table::TablePageBreak::RowBreak
+             )
+-            && table.row_count == 1
+-            && table.col_count == 1
+             && start_cut == 0
+             && end_cut > 0
+             && end_cut < units.len()
+@@ -15954,6 +15993,8 @@
+                                 == 0
+                             && before.vertical_pos > 0
+                             && after.vertical_pos == 0
++                            && ((table.row_count == 1 && table.col_count == 1)
++                                || stored_label_row_frame_excludes_tail_spacing(table, cell, before))
+                         {
+                             // reset은 다음 내용의 소유 경계이지 현재 물리 프레임의
+                             // 마지막 간격을 항상 버리라는 뜻이 아니다. 선언 첫 프레임이
+--- a/src/renderer/typeset/table/scan/source_frame.rs
++++ b/src/renderer/typeset/table/scan/source_frame.rs
+@@ -155,7 +155,16 @@
+             && source_first_fragment_overflow_allowance > 0.0
+             && source_first_fragment_row_end == Some(r + 1)
+             && consumed + cs_before + row_total
+-                <= avail_for_rows + source_first_fragment_overflow_allowance;
++                <= avail_for_rows + source_first_fragment_overflow_allowance
++            // A saved object frame can account for a blank/border tail, but
++            // cannot consume visible content belonging beyond the page band.
++            // Otherwise the emitter shortens the row box with an empty cut
++            // while paint still emits every paragraph in the original row.
++            && layout_engine.row_aligned_content_bottom(
++                table, r,
++                layout_engine.row_complete_cut_content_height(table, r, styles),
++                row_total, styles,
++            ) <= (avail_for_rows - consumed - cs_before).max(0.0) + 0.5;
+         // A direct HWPX row with one visible owner and a structural empty
+         // partner has an explicit source fragment boundary.  Let the
+         // row-cut walk retain it; ordinary and multi-owner rows keep the
+--- a/src/renderer/typeset/table/continuation/fragment/emit.rs
++++ b/src/renderer/typeset/table/continuation/fragment/emit.rs
+@@ -1209,7 +1209,13 @@
+                 // A stored opening frame owns blank space without consuming
+                 // the next frame's units. Its source row minimum is shared
+                 // with scan and paint through the continuation cursor.
+-                if !first_fragment_blank_band || !st.profile.hwp5_stored_pagination_layout() {
++                if !first_fragment_blank_band
++                    || !(st.profile.hwp5_stored_pagination_layout()
++                        || (st.profile.hwpx_stored_layout()
++                            && layout_engine.row_cut_ends_at_original_plain_text_reset(
++                                table, end_row - 1, start_cut, &next_cut, styles,
++                            )))
++                {
+                     return None;
+                 }
+                 let row = end_row.checked_sub(1)?;
