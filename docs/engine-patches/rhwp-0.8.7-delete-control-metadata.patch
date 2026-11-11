@@ -1,0 +1,508 @@
+--- a/src/model/paragraph.rs
++++ b/src/model/paragraph.rs
+@@ -933,6 +933,82 @@
+             }
+         }
+         self.shift_for_control_slot_insert(char_offset);
++    }
++
++    /// Remove one extended object slot and keep all stream-position metadata
++    /// on the same axis. Logical text indices remain unchanged.
++    pub(crate) fn remove_control(&mut self, control_idx: usize) -> Control {
++        assert!(control_idx < self.controls.len(), "control index out of bounds");
++        let chars: Vec<char> = self.text.chars().collect();
++        let mut control = 0usize;
++        let mut end = 0u32;
++        let mut slot = None;
++        'scan: for (index, &ch) in chars.iter().enumerate() {
++            let offset = self.char_offsets.get(index).copied().unwrap_or(end);
++            while end.checked_add(CTRL_CHAR_CODE_UNITS).is_some_and(|next| next <= offset)
++                && control < self.controls.len()
++            {
++                if control == control_idx { slot = Some(end); break 'scan; }
++                control += 1;
++                end += CTRL_CHAR_CODE_UNITS;
++            }
++            end = offset.saturating_add(Self::char_stream_len(ch));
++        }
++        if slot.is_none() && control_idx >= control {
++            slot = Some(end.saturating_add(
++                u32::try_from(control_idx - control).unwrap_or(u32::MAX)
++                    .saturating_mul(CTRL_CHAR_CODE_UNITS),
++            ));
++        }
++        if let Some(start) = slot { self.remove_stream_slot(start); }
++        let removed = self.controls.remove(control_idx);
++        if control_idx < self.ctrl_data_records.len() { self.ctrl_data_records.remove(control_idx); }
++        for range in &mut self.field_ranges {
++            // The source records the owned control interval even for an empty
++            // text field. Deleting its object must also shrink that interval.
++            if range.control_idx < control_idx
++                && control_idx <= range.control_idx.saturating_add(range.inner_slot_count)
++            { range.inner_slot_count = range.inner_slot_count.saturating_sub(1); }
++            if range.control_idx > control_idx { range.control_idx -= 1; }
++        }
++        self.char_count = self.char_count.saturating_sub(CTRL_CHAR_CODE_UNITS);
++        removed
++    }
++
++    fn remove_stream_slot(&mut self, slot_start: u32) {
++        let Some(slot_end) = slot_start.checked_add(CTRL_CHAR_CODE_UNITS) else { return; };
++        // This predicate uses the original offsets/count. Capture it before
++        // mutating the stream so HWPX source line starts keep their own axis.
++        let raw_hwpx_axis = self.hwpx_axis_shift != 0 && !self.stored_text_starts_on_hwp5_axis();
++        let shift = self.hwpx_axis_shift;
++        let pull = |position: &mut u32| {
++            if *position >= slot_end { *position -= CTRL_CHAR_CODE_UNITS; }
++            else if *position > slot_start { *position = slot_start; }
++        };
++        for offset in &mut self.char_offsets {
++            if *offset >= slot_end { *offset -= CTRL_CHAR_CODE_UNITS; }
++        }
++        for mark in &mut self.markpen_marks {
++            if let Some(position) = &mut mark.utf16_pos { pull(position); }
++        }
++        for shape in &mut self.char_shapes { pull(&mut shape.start_pos); }
++        let mut normalized: Vec<CharShapeRef> = Vec::with_capacity(self.char_shapes.len());
++        for shape in self.char_shapes.drain(..) {
++            if let Some(previous) = normalized.last_mut() {
++                if previous.start_pos == shape.start_pos { *previous = shape; continue; }
++            }
++            normalized.push(shape);
++        }
++        self.char_shapes = normalized;
++        for tag in &mut self.range_tags { pull(&mut tag.start); pull(&mut tag.end); }
++        let pull_line = |start: &mut u32| {
++            if *start == 0 { return; }
++            let mut position = if raw_hwpx_axis { start.saturating_add(shift) } else { *start };
++            pull(&mut position);
++            *start = if raw_hwpx_axis { position.saturating_sub(shift) } else { position };
++        };
++        for line in &mut self.line_segs { pull_line(&mut line.text_start); }
++        for (start, _) in &mut self.layout_space_metrics { pull_line(start); }
+     }
+ 
+     /// BEGIN/END 슬롯처럼 컨트롤 번호가 늘지 않는 8유닛 삽입에도 사용한다.
+--- a/src/document_core/commands/object_ops/equation.rs
++++ b/src/document_core/commands/object_ops/equation.rs
+@@ -440,60 +440,7 @@
+             return Err(not_an_equation_error(&para.controls[control_idx]));
+         }
+ 
+-        let text_chars: Vec<char> = para.text.chars().collect();
+-        let mut ci = 0usize;
+-        let mut prev_end: u32 = 0;
+-        let mut gap_start: Option<u32> = None;
+-        'outer: for i in 0..text_chars.len() {
+-            let offset = if i < para.char_offsets.len() {
+-                para.char_offsets[i]
+-            } else {
+-                prev_end
+-            };
+-            while prev_end + 8 <= offset && ci < para.controls.len() {
+-                if ci == control_idx {
+-                    gap_start = Some(prev_end);
+-                    break 'outer;
+-                }
+-                ci += 1;
+-                prev_end += 8;
+-            }
+-            let char_size: u32 = if text_chars[i] == '\t' {
+-                8
+-            } else if text_chars[i].len_utf16() == 2 {
+-                2
+-            } else {
+-                1
+-            };
+-            prev_end = offset + char_size;
+-        }
+-        if gap_start.is_none() {
+-            while ci < para.controls.len() {
+-                if ci == control_idx {
+-                    gap_start = Some(prev_end);
+-                    break;
+-                }
+-                ci += 1;
+-                prev_end += 8;
+-            }
+-        }
+-
+-        if let Some(gs) = gap_start {
+-            let threshold = gs + 8;
+-            for offset in para.char_offsets.iter_mut() {
+-                if *offset >= threshold {
+-                    *offset -= 8;
+-                }
+-            }
+-        }
+-
+-        para.controls.remove(control_idx);
+-        if control_idx < para.ctrl_data_records.len() {
+-            para.ctrl_data_records.remove(control_idx);
+-        }
+-        if para.char_count >= 8 {
+-            para.char_count -= 8;
+-        }
++        para.remove_control(control_idx);
+ 
+         Self::reflow_paragraph_line_segs_after_control_delete(para, &self.styles, self.dpi);
+         section.raw_stream = None;
+--- a/src/document_core/commands/object_ops/picture.rs
++++ b/src/document_core/commands/object_ops/picture.rs
+@@ -1323,66 +1323,8 @@
+             ));
+         }
+ 
+-        // 컨트롤이 차지하는 갭의 시작 위치를 찾아 char_offsets 조정
+-        let text_chars: Vec<char> = para.text.chars().collect();
+-        let mut ci = 0usize;
+-        let mut prev_end: u32 = 0;
+-        let mut gap_start: Option<u32> = None;
+-        'outer: for i in 0..text_chars.len() {
+-            let offset = if i < para.char_offsets.len() {
+-                para.char_offsets[i]
+-            } else {
+-                prev_end
+-            };
+-            while prev_end + 8 <= offset && ci < para.controls.len() {
+-                if ci == control_idx {
+-                    gap_start = Some(prev_end);
+-                    break 'outer;
+-                }
+-                ci += 1;
+-                prev_end += 8;
+-            }
+-            let char_size: u32 = if text_chars[i] == '\t' {
+-                8
+-            } else if text_chars[i].len_utf16() == 2 {
+-                2
+-            } else {
+-                1
+-            };
+-            prev_end = offset + char_size;
+-        }
+-        if gap_start.is_none() {
+-            while ci < para.controls.len() {
+-                if ci == control_idx {
+-                    gap_start = Some(prev_end);
+-                    break;
+-                }
+-                ci += 1;
+-                prev_end += 8;
+-            }
+-        }
+-
+-        // char_offsets 조정
+-        if let Some(gs) = gap_start {
+-            let threshold = gs + 8;
+-            for offset in para.char_offsets.iter_mut() {
+-                if *offset >= threshold {
+-                    *offset -= 8;
+-                }
+-            }
+-        }
+-
+-        // 컨트롤 및 ctrl_data_record 제거
+-        para.controls.remove(control_idx);
+-        if control_idx < para.ctrl_data_records.len() {
+-            para.ctrl_data_records.remove(control_idx);
+-        }
+-        // 컨트롤 배열이 줄어도 뒤 누름틀의 범위는 같은 필드를 가리켜야 한다.
+-        for range in &mut para.field_ranges {
+-            if range.control_idx > control_idx {
+-                range.control_idx -= 1;
+-            }
+-        }
++        para.remove_control(control_idx);
++        // 컨트롤 배열이 줄어도 활성 누름틀은 같은 필드를 가리켜야 한다.
+         if let Some(active) = self.active_field.as_mut() {
+             if active.section_idx == section_idx
+                 && active.para_idx == parent_para_idx
+@@ -1391,11 +1333,6 @@
+             {
+                 active.control_idx -= 1;
+             }
+-        }
+-
+-        // char_count 갱신
+-        if para.char_count >= 8 {
+-            para.char_count -= 8;
+         }
+ 
+         // line_segs 재계산: 그림 높이가 반영된 line_segs를 텍스트 기반으로 리셋
+--- a/src/document_core/commands/object_ops/shape.rs
++++ b/src/document_core/commands/object_ops/shape.rs
+@@ -1009,63 +1009,8 @@
+             ));
+         }
+ 
+-        // char_offsets 조정 (delete_picture_control_native와 동일)
+-        let text_chars: Vec<char> = para.text.chars().collect();
+-        let mut ci = 0usize;
+-        let mut prev_end: u32 = 0;
+-        let mut gap_start: Option<u32> = None;
+-        'outer: for i in 0..text_chars.len() {
+-            let offset = if i < para.char_offsets.len() {
+-                para.char_offsets[i]
+-            } else {
+-                prev_end
+-            };
+-            while prev_end + 8 <= offset && ci < para.controls.len() {
+-                if ci == control_idx {
+-                    gap_start = Some(prev_end);
+-                    break 'outer;
+-                }
+-                ci += 1;
+-                prev_end += 8;
+-            }
+-            let char_size: u32 = if text_chars[i] == '\t' {
+-                8
+-            } else if text_chars[i].len_utf16() == 2 {
+-                2
+-            } else {
+-                1
+-            };
+-            prev_end = offset + char_size;
+-        }
+-        if gap_start.is_none() {
+-            while ci < para.controls.len() {
+-                if ci == control_idx {
+-                    gap_start = Some(prev_end);
+-                    break;
+-                }
+-                ci += 1;
+-                prev_end += 8;
+-            }
+-        }
+-        if let Some(gs) = gap_start {
+-            let threshold = gs + 8;
+-            for offset in para.char_offsets.iter_mut() {
+-                if *offset >= threshold {
+-                    *offset -= 8;
+-                }
+-            }
+-        }
+-
+-        para.controls.remove(control_idx);
+-        if control_idx < para.ctrl_data_records.len() {
+-            para.ctrl_data_records.remove(control_idx);
+-        }
+-        // 컨트롤 배열이 줄어도 뒤 누름틀의 범위는 같은 필드를 가리켜야 한다.
+-        for range in &mut para.field_ranges {
+-            if range.control_idx > control_idx {
+-                range.control_idx -= 1;
+-            }
+-        }
++        para.remove_control(control_idx);
++        // 컨트롤 배열이 줄어도 활성 누름틀은 같은 필드를 가리켜야 한다.
+         if let Some(active) = self.active_field.as_mut() {
+             if active.section_idx == section_idx
+                 && active.para_idx == parent_para_idx
+@@ -1074,9 +1019,6 @@
+             {
+                 active.control_idx -= 1;
+             }
+-        }
+-        if para.char_count >= 8 {
+-            para.char_count -= 8;
+         }
+ 
+         // line_segs 재계산: 도형 높이가 반영된 line_segs를 텍스트 기반으로 리셋
+@@ -2111,60 +2053,7 @@
+         for &(pi, ci) in &sorted_targets {
+             let para = &mut self.document.sections[section_idx].paragraphs[pi];
+ 
+-            // char_offsets 조정
+-            let text_chars: Vec<char> = para.text.chars().collect();
+-            let mut ctrl_ci = 0usize;
+-            let mut prev_end: u32 = 0;
+-            let mut gap_start: Option<u32> = None;
+-            'outer: for i in 0..text_chars.len() {
+-                let offset = if i < para.char_offsets.len() {
+-                    para.char_offsets[i]
+-                } else {
+-                    prev_end
+-                };
+-                while prev_end + 8 <= offset && ctrl_ci < para.controls.len() {
+-                    if ctrl_ci == ci {
+-                        gap_start = Some(prev_end);
+-                        break 'outer;
+-                    }
+-                    ctrl_ci += 1;
+-                    prev_end += 8;
+-                }
+-                let char_size: u32 = if text_chars[i] == '\t' {
+-                    8
+-                } else if text_chars[i].len_utf16() == 2 {
+-                    2
+-                } else {
+-                    1
+-                };
+-                prev_end = offset + char_size;
+-            }
+-            if gap_start.is_none() {
+-                while ctrl_ci < para.controls.len() {
+-                    if ctrl_ci == ci {
+-                        gap_start = Some(prev_end);
+-                        break;
+-                    }
+-                    ctrl_ci += 1;
+-                    prev_end += 8;
+-                }
+-            }
+-            if let Some(gs) = gap_start {
+-                let threshold = gs + 8;
+-                for offset in para.char_offsets.iter_mut() {
+-                    if *offset >= threshold {
+-                        *offset -= 8;
+-                    }
+-                }
+-            }
+-
+-            para.controls.remove(ci);
+-            if ci < para.ctrl_data_records.len() {
+-                para.ctrl_data_records.remove(ci);
+-            }
+-            if para.char_count >= 8 {
+-                para.char_count -= 8;
+-            }
++            para.remove_control(ci);
+         }
+ 
+         // 5) 삽입 위치 인덱스 재계산 (제거 후 인덱스가 변했을 수 있음)
+--- a/src/document_core/commands/object_ops/table.rs
++++ b/src/document_core/commands/object_ops/table.rs
+@@ -1685,60 +1685,7 @@
+                 )));
+             }
+ 
+-            let text_chars: Vec<char> = para.text.chars().collect();
+-            let mut ci = 0usize;
+-            let mut prev_end: u32 = 0;
+-            let mut gap_start: Option<u32> = None;
+-            'outer: for i in 0..text_chars.len() {
+-                let offset = if i < para.char_offsets.len() {
+-                    para.char_offsets[i]
+-                } else {
+-                    prev_end
+-                };
+-                while prev_end + 8 <= offset && ci < para.controls.len() {
+-                    if ci == inner_control_idx {
+-                        gap_start = Some(prev_end);
+-                        break 'outer;
+-                    }
+-                    ci += 1;
+-                    prev_end += 8;
+-                }
+-                let char_size: u32 = if text_chars[i] == '\t' {
+-                    8
+-                } else if text_chars[i].len_utf16() == 2 {
+-                    2
+-                } else {
+-                    1
+-                };
+-                prev_end = offset + char_size;
+-            }
+-            if gap_start.is_none() {
+-                while ci < para.controls.len() {
+-                    if ci == inner_control_idx {
+-                        gap_start = Some(prev_end);
+-                        break;
+-                    }
+-                    ci += 1;
+-                    prev_end += 8;
+-                }
+-            }
+-
+-            if let Some(gs) = gap_start {
+-                let threshold = gs + 8;
+-                for offset in para.char_offsets.iter_mut() {
+-                    if *offset >= threshold {
+-                        *offset -= 8;
+-                    }
+-                }
+-            }
+-
+-            deleted_table = matches!(para.controls.remove(inner_control_idx), Control::Table(_));
+-            if inner_control_idx < para.ctrl_data_records.len() {
+-                para.ctrl_data_records.remove(inner_control_idx);
+-            }
+-            if para.char_count >= 8 {
+-                para.char_count -= 8;
+-            }
++            deleted_table = matches!(para.remove_control(inner_control_idx), Control::Table(_));
+             Self::reflow_paragraph_line_segs_after_control_delete(para, &self.styles, self.dpi);
+         }
+ 
+--- a/src/document_core/commands/table_ops.rs
++++ b/src/document_core/commands/table_ops.rs
+@@ -3574,68 +3574,7 @@
+                 ));
+             }
+ 
+-            // 컨트롤이 차지하는 갭의 시작 위치를 찾아 char_offsets 조정
+-            // serialize_para_text와 동일한 로직으로 control_idx번째 컨트롤의 위치를 찾는다
+-            let text_chars: Vec<char> = para.text.chars().collect();
+-            let mut ci = 0usize;
+-            let mut prev_end: u32 = 0;
+-            let mut gap_start: Option<u32> = None;
+-            'outer: for i in 0..text_chars.len() {
+-                let offset = if i < para.char_offsets.len() {
+-                    para.char_offsets[i]
+-                } else {
+-                    prev_end
+-                };
+-                while prev_end + 8 <= offset && ci < para.controls.len() {
+-                    if ci == control_idx {
+-                        gap_start = Some(prev_end);
+-                        break 'outer;
+-                    }
+-                    ci += 1;
+-                    prev_end += 8;
+-                }
+-                // 문자 크기 산정
+-                let char_size: u32 = if text_chars[i] == '\t' {
+-                    8
+-                } else if text_chars[i].len_utf16() == 2 {
+-                    2
+-                } else {
+-                    1
+-                };
+-                prev_end = offset + char_size;
+-            }
+-            // 텍스트 뒤에 배치된 컨트롤 (남은 컨트롤)
+-            if gap_start.is_none() {
+-                while ci < para.controls.len() {
+-                    if ci == control_idx {
+-                        gap_start = Some(prev_end);
+-                        break;
+-                    }
+-                    ci += 1;
+-                    prev_end += 8;
+-                }
+-            }
+-
+-            // char_offsets 조정: 컨트롤 이후의 모든 offset을 8 감소
+-            if let Some(gs) = gap_start {
+-                let threshold = gs + 8;
+-                for offset in para.char_offsets.iter_mut() {
+-                    if *offset >= threshold {
+-                        *offset -= 8;
+-                    }
+-                }
+-            }
+-
+-            // 컨트롤 및 대응하는 ctrl_data_record 제거
+-            let removed = para.controls.remove(control_idx);
+-            if control_idx < para.ctrl_data_records.len() {
+-                para.ctrl_data_records.remove(control_idx);
+-            }
+-
+-            // char_count 갱신 (확장 컨트롤 = 8 code unit)
+-            if para.char_count >= 8 {
+-                para.char_count -= 8;
+-            }
++            let removed = para.remove_control(control_idx);
+ 
+             section.raw_stream = None;
+             match removed {

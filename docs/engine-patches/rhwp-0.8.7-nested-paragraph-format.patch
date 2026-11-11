@@ -1,0 +1,324 @@
+--- a/src/document_core/commands/mod.rs
++++ b/src/document_core/commands/mod.rs
+@@ -11,6 +11,8 @@
+ mod foreign_paste;
+ mod formatting;
+ mod formatting_runs;
++mod paragraph_format_path;
++mod cell_format_origin;
+ mod header_footer_ops;
+ mod html_import;
+ mod object_ops;
+--- a/src/document_core/commands/formatting.rs
++++ b/src/document_core/commands/formatting.rs
+@@ -58,7 +58,7 @@
+ }
+ 
+ // ID 복원도 적용과 같은 흐름 속성 및 문단 간격만 비교한다.
+-fn cell_para_shape_affects_vpos(
++pub(super) fn cell_para_shape_affects_vpos(
+     before: &crate::model::style::ParaShape,
+     after: &crate::model::style::ParaShape,
+ ) -> bool {
+--- a/src/document_core/commands/text_editing.rs
++++ b/src/document_core/commands/text_editing.rs
+@@ -24,7 +24,7 @@
+ 
+ pub(crate) type CellReflowMetrics = (i32, i16, i16);
+ 
+-fn cell_vpos_resets(previous: &Paragraph, current: &Paragraph) -> bool {
++pub(super) fn cell_vpos_resets(previous: &Paragraph, current: &Paragraph) -> bool {
+     if let Some(reset) = current.cell_vpos_reset {
+         return reset;
+     }
+--- /dev/null
++++ b/src/document_core/commands/cell_format_origin.rs
+@@ -0,0 +1,105 @@
++//! 셀 서식 변경의 저장 조각 원점 갱신. 줄 측정과 배치는 같은 LineSeg를 소비한다.
++
++use super::text_editing::cell_vpos_resets;
++use crate::document_core::DocumentCore;
++use crate::error::HwpError;
++
++impl DocumentCore {
++    /// 첫 저장 줄에는 문단 앞 간격이 이미 포함돼 있다. 서식을 바꿀 때 그
++    /// 차이만 원점에 반영하고, 나머지 문단은 기존 vpos 사다리에서 재배치한다.
++    /// 조각 경계는 좌표를 바꾸기 전에 보존해 새 앞 간격을 분할 신호로 읽지 않는다.
++    pub(super) fn restamp_cell_format_origin(
++        &mut self,
++        location: (usize, usize, usize, usize, usize),
++        old_shape_id: u16,
++        new_shape_id: u16,
++    ) -> Result<(), HwpError> {
++        let (section, parent, control, cell, index) = location;
++        self.restamp_cell_format_origin_by_path(
++            section,
++            parent,
++            &[(control, cell, index)],
++            old_shape_id,
++            new_shape_id,
++        )
++    }
++
++    pub(super) fn restamp_cell_format_origin_by_path(
++        &mut self,
++        section: usize,
++        parent: usize,
++        path: &[(usize, usize, usize)],
++        old_shape_id: u16,
++        new_shape_id: u16,
++    ) -> Result<(), HwpError> {
++        let Some(&(_, _, index)) = path.last() else {
++            return Err(HwpError::RenderError("빈 셀 경로".into()));
++        };
++        let sibling_path = |index| {
++            let mut sibling = path.to_vec();
++            sibling.last_mut().unwrap().2 = index;
++            sibling
++        };
++        let before = |id: u16| {
++            self.document
++                .doc_info
++                .para_shapes
++                .get(id as usize)
++                .map_or(0, |shape| shape.spacing_before)
++        };
++        // 문단 모양의 간격은 2배 HWPUNIT이다. 셀 첫 문단의 lead는
++        // cell_first_para_stored_lead와 같은 스케일이며 문단 간 흐름 간격과 구분한다.
++        let old_spacing = crate::renderer::hwpunit_to_px(before(old_shape_id), self.dpi) / 2.0;
++        let new_spacing = crate::renderer::hwpunit_to_px(before(new_shape_id), self.dpi) / 2.0;
++        if old_spacing == new_spacing {
++            return Ok(());
++        }
++        // 평면 셀 API는 표/그림 캡션의 특수 셀 인덱스도 해석한다.
++        // 중첩 경로 resolver로 바꾸면 기존 캡션의 앞 간격 편집이 실패한다.
++        let resolve = |path: &[(usize, usize, usize)]| {
++            if let &[(control, cell, index)] = path {
++                self.get_cell_paragraph_ref(section, parent, control, cell, index)
++                    .ok_or_else(|| HwpError::RenderError("셀 문단을 찾을 수 없음".into()))
++            } else {
++                self.resolve_paragraph_by_path(section, parent, path)
++            }
++        };
++        let paragraph = resolve(path)?;
++        let resets = index.checked_sub(1).and_then(|previous| {
++            resolve(&sibling_path(previous))
++                .ok()
++                .map(|previous| cell_vpos_resets(previous, paragraph))
++        });
++        let next_reset = resolve(&sibling_path(index + 1))
++            .ok()
++            .map(|next| cell_vpos_resets(paragraph, next));
++        let stored = !crate::renderer::para_has_no_stored_line_segs(paragraph);
++        let old_lead =
++            crate::renderer::cell_first_para_stored_lead(paragraph, old_spacing, self.dpi);
++        let delta = crate::renderer::px_to_hwpunit(new_spacing - old_lead, self.dpi);
++        let paragraph = if let &[(control, cell, index)] = path {
++            self.get_cell_paragraph_mut(section, parent, control, cell, index)?
++        } else {
++            self.get_cell_paragraph_mut_by_path(section, parent, path)?
++        };
++        if let Some(reset) = resets {
++            paragraph.cell_vpos_reset = Some(reset);
++        }
++        // 이어받기 조각의 원점은 앞 간격을 새로 품는 셀 첫 문단이 아니다.
++        // 그 원점은 보존하고 이후 문단의 간격은 vpos 사다리에서 소비한다.
++        if stored && index == 0 {
++            for segment in &mut paragraph.line_segs {
++                segment.vertical_pos += delta;
++            }
++        }
++        if let Some(reset) = next_reset {
++            let next = if let &[(control, cell, index)] = path {
++                self.get_cell_paragraph_mut(section, parent, control, cell, index + 1)?
++            } else {
++                self.get_cell_paragraph_mut_by_path(section, parent, &sibling_path(index + 1))?
++            };
++            next.cell_vpos_reset = Some(reset);
++        }
++        Ok(())
++    }
++}
+--- /dev/null
++++ b/src/document_core/commands/paragraph_format_path.rs
+@@ -0,0 +1,119 @@
++//! 중첩 셀의 문단 모양 조회·적용·ID 복원. UI 좌표는 전체 셀 경로로 해석한다.
++
++use super::formatting::cell_para_shape_affects_vpos;
++use crate::document_core::helpers::{
++    build_tab_def_from_json, json_has_border_keys, json_has_tab_keys, parse_json_i16_array,
++    parse_para_shape_mods,
++};
++use crate::document_core::DocumentCore;
++use crate::error::HwpError;
++use crate::model::event::DocumentEvent;
++use crate::renderer::composer::restamp_indentation;
++
++impl DocumentCore {
++    pub fn get_cell_para_properties_at_by_path(
++        &self,
++        section: usize,
++        parent: usize,
++        path: &[(usize, usize, usize)],
++    ) -> Result<String, HwpError> {
++        if path.is_empty() {
++            return Err(HwpError::RenderError("빈 셀 경로".into()));
++        }
++        let paragraph = self.resolve_paragraph_by_path(section, parent, path)?;
++        Ok(self.build_para_properties_json(paragraph.para_shape_id, section))
++    }
++
++    pub fn apply_para_format_in_cell_by_path(
++        &mut self,
++        section: usize,
++        parent: usize,
++        path: &[(usize, usize, usize)],
++        props_json: &str,
++    ) -> Result<String, HwpError> {
++        if let [entry] = path {
++            return self.apply_para_format_in_cell_native(
++                section, parent, entry.0, entry.1, entry.2, props_json,
++            );
++        }
++        // 경로 검증을 서식표 변경보다 먼저 한다. 잘못된 대상은 문서를 바꾸지 않는다.
++        if path.is_empty() {
++            return Err(HwpError::RenderError("빈 셀 경로".into()));
++        }
++        let base_id = self
++            .resolve_paragraph_by_path(section, parent, path)?
++            .para_shape_id;
++        let mut mods = parse_para_shape_mods(props_json);
++        if json_has_tab_keys(props_json) {
++            let base_tab = self
++                .document
++                .doc_info
++                .para_shapes
++                .get(base_id as usize)
++                .map_or(0, |shape| shape.tab_def_id);
++            let tab =
++                build_tab_def_from_json(props_json, base_tab, &self.document.doc_info.tab_defs);
++            mods.tab_def_id = Some(self.document.find_or_create_tab_def(tab));
++        }
++        if json_has_border_keys(props_json) {
++            mods.border_fill_id = Some(self.create_para_border_fill_from_json(props_json, base_id));
++        }
++        if let Some(spacing) = parse_json_i16_array(props_json, "borderSpacing", 4) {
++            mods.border_spacing = Some([spacing[0], spacing[1], spacing[2], spacing[3]]);
++        }
++        let new_id = self.document.find_or_create_para_shape(base_id, &mods);
++        self.set_cell_para_shape_id_by_path(section, parent, path, new_id)
++    }
++
++    /// Undo/Redo는 UI용 px 값을 재적용하지 않고 기존 문단 모양 ID를 복원한다.
++    pub fn set_cell_para_shape_id_by_path(
++        &mut self,
++        section: usize,
++        parent: usize,
++        path: &[(usize, usize, usize)],
++        shape_id: u16,
++    ) -> Result<String, HwpError> {
++        if let [entry] = path {
++            return self.set_cell_para_shape_id_native(
++                section, parent, entry.0, entry.1, entry.2, shape_id,
++            );
++        }
++        let Some(&(outer_control, _, _)) = path.first() else {
++            return Err(HwpError::RenderError("빈 셀 경로".into()));
++        };
++        let new_shape = self
++            .document
++            .doc_info
++            .para_shapes
++            .get(shape_id as usize)
++            .ok_or_else(|| HwpError::RenderError(format!("문단 모양 ID {shape_id} 범위 초과")))?;
++        let old_id = self
++            .resolve_paragraph_by_path(section, parent, path)?
++            .para_shape_id;
++        let affects_vpos = self
++            .document
++            .doc_info
++            .para_shapes
++            .get(old_id as usize)
++            .is_none_or(|old| cell_para_shape_affects_vpos(old, new_shape));
++        let (old_indent, new_indent) = self.para_shape_indents(old_id, shape_id);
++        self.restamp_cell_format_origin_by_path(section, parent, path, old_id, shape_id)?;
++        let paragraph = self.get_cell_paragraph_mut_by_path(section, parent, path)?;
++        paragraph.para_shape_id = shape_id;
++        restamp_indentation(&mut paragraph.line_segs, old_indent, new_indent);
++        paragraph.cell_format_vpos_dirty |= affects_vpos;
++        if affects_vpos {
++            let inner_para = path.last().unwrap().2;
++            self.reflow_cell_paragraph_by_path(section, parent, path, inner_para);
++        }
++        self.pending_cell_format_vpos |= affects_vpos;
++        self.mark_cell_control_dirty(section, parent, outer_control);
++        self.document.sections[section].raw_stream = None;
++        self.rebuild_section_deferred_in_batch(section);
++        self.event_log.push(DocumentEvent::ParaFormatChanged {
++            section,
++            para: parent,
++        });
++        Ok("{\"ok\":true}".into())
++    }
++}
+--- a/src/wasm_api.rs
++++ b/src/wasm_api.rs
+@@ -8443,6 +8443,58 @@
+         .map_err(|e| e.into())
+     }
+ 
++    #[wasm_bindgen(js_name = getCellParaPropertiesAtByPath)]
++    pub fn get_cell_para_properties_at_by_path_api(
++        &self,
++        section_idx: u32,
++        parent_para_idx: u32,
++        path_json: &str,
++    ) -> Result<String, JsValue> {
++        let path = DocumentCore::parse_cell_path(path_json)?;
++        self.get_cell_para_properties_at_by_path(
++            section_idx as usize,
++            parent_para_idx as usize,
++            &path,
++        )
++        .map_err(|e| e.into())
++    }
++
++    #[wasm_bindgen(js_name = applyParaFormatInCellByPath)]
++    pub fn apply_para_format_in_cell_by_path_api(
++        &mut self,
++        section_idx: u32,
++        parent_para_idx: u32,
++        path_json: &str,
++        props_json: &str,
++    ) -> Result<String, JsValue> {
++        let path = DocumentCore::parse_cell_path(path_json)?;
++        self.apply_para_format_in_cell_by_path(
++            section_idx as usize,
++            parent_para_idx as usize,
++            &path,
++            props_json,
++        )
++        .map_err(|e| e.into())
++    }
++
++    #[wasm_bindgen(js_name = setCellParaShapeIdByPath)]
++    pub fn set_cell_para_shape_id_by_path_api(
++        &mut self,
++        section_idx: u32,
++        parent_para_idx: u32,
++        path_json: &str,
++        para_shape_id: u16,
++    ) -> Result<String, JsValue> {
++        let path = DocumentCore::parse_cell_path(path_json)?;
++        self.set_cell_para_shape_id_by_path(
++            section_idx as usize,
++            parent_para_idx as usize,
++            &path,
++            para_shape_id,
++        )
++        .map_err(|e| e.into())
++    }
++
+     /// 셀 내 문단의 paraShapeId를 직접 설정한다.
+     #[wasm_bindgen(js_name = setCellParaShapeId)]
+     pub fn set_cell_para_shape_id(

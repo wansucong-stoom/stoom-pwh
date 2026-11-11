@@ -7,6 +7,7 @@ const buildScripts = ['build-inline.mjs', 'bundle-client.mjs', 'patch-body-curso
 buildScripts.push('patch-format-properties.mjs');
 buildScripts.push('patch-clipboard-safety.mjs');
 buildScripts.push('patch-table-command-access.mjs');
+buildScripts.push('patch-nested-paragraph-format.mjs');
 const desktopInputs = ['build-desktop-editor.mjs', 'table-plan.mjs', 'desktop-body-style.mjs'];
 
 // Rolldown's source-region labels are comments, but contain staging paths.
@@ -34,7 +35,7 @@ export function assertPortableEditorBundle(text) {
 
 export async function editorBuildInputs(project, variant = 'common') {
   if (!['common', 'desktop'].includes(variant)) throw new Error('Unknown editor build variant');
-  const names = ['package.json', ...buildScripts.map(name => 'scripts/' + name), 'docs/engine-patches/studio/clipboard-safety.patch'];
+  const names = ['package.json', ...buildScripts.map(name => 'scripts/' + name), 'docs/engine-patches/studio/clipboard-safety.patch', 'docs/engine-patches/studio/nested-paragraph-format.patch'];
   async function collect(relative) {
     for (const entry of await fs.readdir(path.join(project, relative), {withFileTypes: true})) {
       const name = relative + '/' + entry.name;
