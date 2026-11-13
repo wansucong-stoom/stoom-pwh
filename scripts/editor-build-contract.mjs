@@ -9,6 +9,8 @@ buildScripts.push('patch-clipboard-safety.mjs');
 buildScripts.push('patch-table-command-access.mjs');
 buildScripts.push('patch-nested-paragraph-format.mjs');
 buildScripts.push('patch-inline-object-cursors.mjs');
+buildScripts.push('patch-context-ribbon.mjs');
+buildScripts.push('patch-format-copy-options.mjs','patch-control-marker-delete.mjs','patch-native-paste-command.mjs');
 const desktopInputs = ['build-desktop-editor.mjs', 'table-plan.mjs', 'desktop-body-style.mjs'];
 
 // Rolldown's source-region labels are comments, but contain staging paths.

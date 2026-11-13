@@ -100,7 +100,7 @@ export async function createAppServer({initialBytes,initialPath,imported=false,c
  // tab signs out or selects a different account, including while a turn runs.
  const accountWatcher=setInterval(async()=>{if(!codexSession||!codexSessionAccount||checkingCredential)return;checkingCredential=true;const session=codexSession,accountId=codexSessionAccount;try{const stamp=await currentCredentialStamp();if(stamp!==credentialStamp){const state=await chatgptAuth.status();if(session!==codexSession)return;if(state.active!==accountId||!state.accounts.some(account=>account.id===accountId&&account.connected)){cancelRequested=true;closeCodexSession();}else credentialStamp=stamp;}}catch{if(session===codexSession){cancelRequested=true;closeCodexSession();}}finally{checkingCredential=false;}},1500);accountWatcher.unref();
  let lastActivity=Date.now();
- const assets={'/':'app.html','/app.js':'app.js','/app.css':'app.css','/stoom-mark-original.css':'stoom-mark-original.css','/stoom-product-marks.css':'stoom-product-marks.css','/Inter-variable.ttf':'Inter-variable.ttf','/stoom-mark.svg':'stoom-mark.svg','/stoom.ico':'stoom.ico'};
+ const assets={'/':'app.html','/app.js':'app.js','/paste-bridge.mjs':'paste-bridge.mjs','/app.css':'app.css','/stoom-mark-original.css':'stoom-mark-original.css','/stoom-product-marks.css':'stoom-product-marks.css','/Inter-variable.ttf':'Inter-variable.ttf','/stoom-mark.svg':'stoom-mark.svg','/stoom.ico':'stoom.ico'};
  const server=createServer(async(req,res)=>{
   try{
    const address=server.address(),origin=`http://127.0.0.1:${address.port}`;

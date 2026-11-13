@@ -1,5 +1,12 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {wordRange,selectMulticlick} from '../src/multiclick-selection.mjs';
+import {wordRange,selectMulticlick,wordTextEndpoint} from '../src/multiclick-selection.mjs';
+
+test('word endpoints exclude adjacent zero-text inline slots and retain the measured affinity',()=>{
+ const wasm={textToLogicalOffset:(_s,_p,t)=>t===0?0:t+2,getInlineControlPositions:()=>[{offset:0},{offset:1},{offset:5}],bodyPositionFromLogical:p=>({...p,charOffset:Math.max(0,p.charOffset-2),bodyCursor:{textOffset:Math.max(0,p.charOffset-2),logicalOffset:p.charOffset}})};
+ const p={sectionIndex:0,paragraphIndex:1,charOffset:1,bodyCursor:{textOffset:1,logicalOffset:3},cursorRect:{x:9}};
+ const first=wordTextEndpoint(wasm,p,0,true),last=wordTextEndpoint(wasm,p,3,false);
+ assert.equal(first.charOffset,0);assert.equal(first.bodyCursor.logicalOffset,2);assert.equal(first.cursorRect,undefined);assert.equal(last.bodyCursor.logicalOffset,5);
+});
 
 test('word bounds use document Unicode offsets, including astral characters',()=>{
  const text='첫째 😀 second 단어';

@@ -10,6 +10,7 @@
 - [설정과 글꼴](CONFIGURATION.md)에는 런타임 위치, 환경 변수, 시스템·인쇄 글꼴을 정리했습니다.
 - [기능 범위와 제한](PWH-COMPATIBILITY-LIMITS.md)에는 붙여넣기, AI 편집, 서식과 화면 표시의 지원 범위를 정리했습니다.
 - [표 안의 명령](TABLE-COMMANDS.md)에는 셀·중첩 표의 단축키와 편집 지원, 남은 제한과 검증 범위를 정리했습니다.
+- [탭별 그래픽 메뉴](USER-GUIDE.md#contextual-ribbon)에는 메뉴 전환·좁은 창의 » 탐색과 키보드 사용법을 정리했습니다. [검증 범위](verification/CONTEXTUAL-RIBBON.md)
 
 ## 조판과 검증
 

@@ -56,7 +56,7 @@ test('pictures open properties on double click and return a blinking caret to te
     const click = point => page.mouse.click(box.x + point.x, box.y + point.y);
     await click(points.image);
     assert.equal((await frame.evaluate(() => window.pwhEditor.context())).kind, 'object');
-    await frame.locator('button[data-cmd="format:object-properties"]').click();
+    await frame.locator('.pwh-ribbon-panel[data-active="true"] button[data-cmd="format:object-properties"]').click();
     await frame.locator('.pp-dialog').waitFor({state: 'visible'});
     await frame.locator('.pp-dialog .dialog-close').click();
     await click(points.text);

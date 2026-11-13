@@ -74,6 +74,12 @@ test('Hancom editing and table shortcuts work through trusted input', {
     await page.keyboard.press('Escape');
     for(let i=0;i<3;i++)await page.keyboard.press('F5');
     await editor.waitForFunction(()=>document.querySelectorAll('.cell-selection-highlight').length===4);
+    await editor.locator('[data-menu="table"] .menu-title').click();
+    const widthButton=editor.locator('.pwh-ribbon-panel[data-active="true"] [data-cmd="table:cell-width-equal"]');
+    const heightButton=editor.locator('.pwh-ribbon-panel[data-active="true"] [data-cmd="table:cell-height-equal"]');
+    await widthButton.waitFor({state:'visible'});
+    await editor.waitForFunction(()=>!document.querySelector('.pwh-ribbon-panel[data-active="true"] [data-cmd="table:cell-width-equal"]').disabled);
+    assert.equal(await heightButton.isEnabled(),true,'F5 updates both graphic size commands');
     await page.keyboard.press('w');
     const wide=await dims();
     assert.ok(Math.abs(wide[0].width-wide[1].width)<=1);

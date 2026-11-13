@@ -59,7 +59,7 @@ AI에 보낸 내용은 선택한 제공자가 처리합니다. Codex 연결에�
 
 ## 소스와 빌드
 
-Microsoft Store용 MSIX 빌드도 지원합니다. 현재 시험 패키지 제작 단계이며 Store 공개·심사 완료를 의미하지 않습니다. [MSIX 배포 구분·빌드·검증](MSIX.md)을 참고하세요.
+Microsoft Store용 MSIX를 빌드해 정식 배포합니다. GitHub의 제출용 패키지 생성·공개와 Store의 심사·게시 완료는 각각 구분합니다. [MSIX 배포 구분·빌드·검증](MSIX.md)을 참고하세요.
 
 저장소의 `desktop/standalone-pwh`는 Desktop 호스트·화면·Windows 실행 파일·설치기 소스입니다. `desktop/bridge`에는 STOOM이 작성한 공식 Codex app-server 연결 코드가 있습니다. 공통 편집기 코드는 저장소의 `src`, `client`, `runtime-lock.json`을 사용합니다. Desktop이 별도의 기본 rhwp 복사본에서 빌드되지 않도록 설치기 빌드가 Pwh 버전과 편집기 SHA256 일치를 검사합니다.
 

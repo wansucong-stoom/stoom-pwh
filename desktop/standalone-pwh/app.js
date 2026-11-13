@@ -4,6 +4,13 @@
  const workspaceOrigin=(()=>{try{const value=new URL(location.href).searchParams.get('workspaceOrigin');const u=new URL(value);return u.protocol==='http:'&&u.hostname==='127.0.0.1'?u.origin:null;}catch{return null;}})();
  let workspaceView=null;
  const workspaceAction=(action,id)=>{if(workspaceOrigin&&window.parent!==window)window.parent.postMessage({type:'pwh-workspace-ui',action,...id?{id}:{}},workspaceOrigin);};
+ const nativePasteRequests=new Map();
+ const nativePaste=request=>{
+  if(!workspaceOrigin)return window.pwhNative?.paste?window.pwhNative.paste(request):Promise.reject(Error('Desktop 앱에서 붙여넣거나 Ctrl+V를 사용해 주세요.'));
+  return new Promise((resolve,reject)=>{const requestId=crypto.randomUUID(),timer=setTimeout(()=>{nativePasteRequests.delete(requestId);reject(Error('붙여넣기 응답 시간이 초과되었습니다.'));},10000);nativePasteRequests.set(requestId,{resolve,reject,timer});window.parent.postMessage({type:'pwh-workspace-paste',requestId,request},workspaceOrigin);});
+ };
+ const pasteBridge=import('./paste-bridge.mjs');
+ frame.addEventListener('load',()=>{void pasteBridge.then(module=>module.installPasteBridge(frame.contentWindow,nativePaste,message=>{status.textContent=message;})).catch(()=>{status.textContent='붙이기 연결을 준비하지 못했습니다. Ctrl+V를 사용해 주세요.';});});
  function revealActiveTab(list){const active=list?.querySelector('.pwh-desktop-tab[aria-selected="true"]');if(!active)return;const a=active.getBoundingClientRect(),b=list.getBoundingClientRect();if(a.right>b.right)list.scrollLeft+=a.right-b.right;else if(a.left<b.left)list.scrollLeft-=b.left-a.left;}
  function renderWorkspaceView(){
   if(!workspaceView)return;const view=workspaceView,doc=frame.contentDocument,bar=doc?.getElementById('pwh-desktop-tabbar');
@@ -51,6 +58,9 @@
  let workspaceCommandQueue=Promise.resolve();
  window.addEventListener('message',async event=>{
   if(event.source!==window.parent||event.origin!==workspaceOrigin)return;
+  if(event.data?.type==='pwh-workspace-paste-result'){
+   const request=nativePasteRequests.get(event.data.requestId);if(!request)return;clearTimeout(request.timer);nativePasteRequests.delete(event.data.requestId);event.data.ok?request.resolve({ok:true}):request.reject(Error(event.data.error||'붙여넣지 못했습니다.'));return;
+  }
   if(event.data?.type==='pwh-workspace-view'){workspaceView=event.data;if(event.data.aiUserChoice)aiUserChoice=true;if(typeof event.data.aiOpen==='boolean')setAiOpen(event.data.aiOpen);renderWorkspaceView();return;}
   if(event.data?.type==='pwh-workspace-focus-editor'){restoreInitialEditorFocus(true);return;}
   if(event.data?.type==='pwh-workspace-inspect'){reportWorkspace(event.data.requestId);return;}

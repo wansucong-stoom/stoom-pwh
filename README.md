@@ -23,7 +23,7 @@ HWP·HWPX 문서를 열고, 글과 표를 직접 편집하거나 선택한 부�
 | **Pwh Desktop** · Windows x64 | **[Microsoft Store에서 설치](https://apps.microsoft.com/detail/9NXGD60MHMT2)**하고 Store에서 업데이트합니다. 앱에서 선택적으로 AI를 연결하며 별도 Codex 설치 없이도 기본 편집을 사용할 수 있습니다. [Desktop 설치와 사용](docs/PWH-DESKTOP.md#설치와-사용) |
 | **Pwh 플러그인** · Codex 데스크톱 | Codex 대화와 나란히 한글 편집기를 엽니다. GitHub에서 소스와 플러그인 **ZIP**을 받을 수 있습니다. [Codex 플러그인 설치](docs/USER-GUIDE.md#codex-plugin) |
 
-**소스 기준**은 Pwh **0.6.56**, Desktop **0.1.37**, 공통 코어 **r29**입니다. 버전별 배포물, SHA-256과 검증 범위는 [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases)에서 확인할 수 있습니다. Windows 설치판에는 Microsoft Store의 심사·게시 이후 반영됩니다.
+**소스 기준**은 Pwh **0.6.57**, Desktop **0.1.38**, 공통 코어 **r29**입니다. 버전별 배포물, SHA-256과 검증 범위는 [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases)에서 확인할 수 있습니다. Windows 설치판에는 Microsoft Store의 심사·게시 이후 반영됩니다.
 
 Desktop의 신규 설치·업데이트는 **Microsoft Store**로 통일합니다. 기존 MSI 배포 파일은 보존하지만 이후 MSI 업데이트는 배포하지 않습니다. GitHub 릴리스는 **플러그인 ZIP·소스·고정 코어·검증 자료**를 계속 제공합니다. 기존 MSI 사용자는 [Store 이전 안내](docs/PWH-DESKTOP.md#설치와-사용)를 참고하세요.
 
@@ -38,6 +38,7 @@ Desktop 0.1.37부터 앱 상단에 **Store 업데이트 버튼**을 제공합니
 | **용지와 인쇄** | 용지 그림에서 여백 위치 확인, 인쇄 미리보기 확대·축소, 쪽 범위 인쇄 및 그림 저장 |
 | **Desktop 작업 공간** | 최근 문서, 여러 문서 탭과 문서별 AI 대화 |
 | **큰 문서 전송** | 문서 열기·저장의 64MiB 제한을 제거하고 파일 크기와 연결 환경에 맞춰 나눠 전송 |
+| **탭별 그래픽 메뉴** | 편집·보기·입력·서식·쪽·표·도구를 선택해 관련 명령을 표시하고, 좁은 창에서는 »로 이동 |
 
 1. 새 문서를 만들거나 HWP·HWPX 파일을 엽니다.
 2. 글이나 셀을 선택한 뒤 **AI 수정 요청**을 누르거나 편집기에서 직접 고칩니다.
@@ -79,6 +80,10 @@ Desktop 0.1.37부터 앱 상단에 **Store 업데이트 버튼**을 제공합니
 셀 안에 글자 커서가 있을 때는 `Ctrl+Tab`으로 탭 문자를 넣습니다. [편집 상태별 한글 호환 단축키](docs/USER-GUIDE.md#한글-호환-단축키)
 
 ## 조판 엔진과 검증
+
+공통 편집기의 탭별 그래픽 메뉴는 rhwp Studio 유래 메뉴·명령 처리에 연결됩니다. 한글에 익숙한 분류를 따르며 자체 SVG 아이콘을 사용합니다. 공통 코어 r29의 조판 계산과는 별도 변경입니다. [메뉴 사용법](docs/USER-GUIDE.md#contextual-ribbon) · [적용 계층과 검증](docs/RHWP-DIFFERENCES.md#contextual-ribbon)
+
+상단 우클릭으로 기본·서식 도구 상자를 다시 펼칠 수 있습니다. 스타일 전체 목록과 글머리표 미리보기, 모양 복사의 글자·문단·셀 범위 선택을 기존 편집 명령에 연결합니다. 인라인 그림 뒤 단어 선택의 시작 위치와 표시된 `[감추기]` 앞 Delete 처리도 보완합니다. Desktop의 상단 붙이기는 네이티브 편집 명령을 사용하고 문서·선택·포커스가 바뀌면 취소합니다. [확인한 동작과 제한](docs/verification/CONTEXTUAL-RIBBON.md)
 
 Pwh와 Pwh Desktop은 [rhwp](https://github.com/edwardkim/rhwp) 0.8.7 기반 공통 WASM 코어를 사용합니다. r29의 [코어 변경 기록](docs/RHWP-DIFFERENCES.md)에서 수정 범위를 확인할 수 있습니다. r28 대비 익명 TEST 문서 5개 **245쪽**의 쪽 수·글자 좌표·인쇄 SVG와 저장·재열기 결과를 유지했습니다. 이번 편집 경로 수정은 새 한컴 PDF 일치도 개선 수치와 구분합니다. [전후 검증과 제한](docs/verification/CORE-R29.md)
 

@@ -126,9 +126,13 @@
  }
  window.addEventListener('pwh-native-close-request',()=>void closeWindow());
  window.addEventListener('message',event=>{
-  if(!event.data||!['pwh-workspace-state','pwh-workspace-command-result','pwh-workspace-tabs-ready','pwh-workspace-ui','pwh-workspace-drop','pwh-workspace-focus-needed'].includes(event.data.type))return;
+  if(!event.data||!['pwh-workspace-state','pwh-workspace-command-result','pwh-workspace-tabs-ready','pwh-workspace-ui','pwh-workspace-drop','pwh-workspace-focus-needed','pwh-workspace-paste'].includes(event.data.type))return;
   const tab=[...tabs.values()].find(item=>item.frame.contentWindow===event.source&&item.origin===event.origin);if(!tab)return;
   const state=event.data;
+  if(state.type==='pwh-workspace-paste'){
+   if(typeof state.requestId!=='string')return;
+   void(async()=>{let result;try{if(active!==tab.id||closeLocked||updateLocked||!window.pwhNative?.paste)throw Error('현재 Pwh Desktop 앱의 문서에서 붙여넣어 주세요.');result=await window.pwhNative.paste(state.request);}catch(error){result={ok:false,error:error.message};}tab.frame.contentWindow?.postMessage({type:'pwh-workspace-paste-result',requestId:state.requestId,...result},tab.origin);})();return;
+  }
   if(state.type==='pwh-workspace-focus-needed'){
    if(active===tab.id&&document.hasFocus()&&(document.activeElement===document.body||document.activeElement===tab.frame))tab.frame.contentWindow.postMessage({type:'pwh-workspace-focus-editor'},tab.origin);
    return;

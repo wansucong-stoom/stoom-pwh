@@ -84,7 +84,7 @@ for (const host of ['common', 'desktop']) {
       await page.waitForFunction(() => !!document.querySelector('#editor')?.contentWindow?.pwhRecoveryReady, null, {timeout: 90000});
       const frame = page.frames().find(item => /\/editor(?:\?|$)/.test(item.url()));
       await frame.waitForFunction(() => window.pwhRecoveryReady?.() === true, null, {timeout: 90000});
-      const button = frame.locator('button[data-cmd="format:object-properties"]');
+      const button = frame.locator('.pwh-ribbon-panel[data-active="true"] button[data-cmd="format:object-properties"]');
       const outerBox = await page.locator('#editor').boundingBox();
       const click = point => page.mouse.click(outerBox.x + point.x, outerBox.y + point.y);
       const points = await frame.evaluate(() => {
