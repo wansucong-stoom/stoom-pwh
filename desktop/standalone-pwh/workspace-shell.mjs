@@ -5,19 +5,21 @@ import {promises as fs} from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {desktopVersion} from './version-info.mjs';
+import {checkForStoreUpdate} from './store-update-check.mjs';
 import {checkForDesktopUpdate,downloadInstaller,scheduleDesktopUpdate} from './update-check.mjs';
 import {recordCodexPluginSetup} from './codex-plugin-setup.mjs';
 import {chooseDesktopFile} from './desktop-files.mjs';
 import {createRecentDocuments} from './recent-documents.mjs';
 
 const root=path.dirname(fileURLToPath(import.meta.url));
-export async function createWorkspaceServer({initialPath,nativeBranding,port=0,spawnImpl=spawn,updateServices,chooseFile=chooseDesktopFile,dataRoot:providedDataRoot}={}){
+export async function createWorkspaceServer({initialPath,nativeBranding,port=0,spawnImpl=spawn,updateServices,storeUpdateServices,distribution=process.env.PWH_DESKTOP_DISTRIBUTION,chooseFile=chooseDesktopFile,dataRoot:providedDataRoot}={}){
  const token=randomBytes(24).toString('hex'),tabs=new Map();let closing=false,generation=0;
  const dataRoot=providedDataRoot||process.env.PWH_STANDALONE_DATA||path.join(process.env.LOCALAPPDATA||process.env.HOME||root,'PwhDesktop');
  const services=updateServices||{check:checkForDesktopUpdate,download:downloadInstaller,schedule:scheduleDesktopUpdate};
  const recent=createRecentDocuments(dataRoot);let fileDialogBusy=false;
  // One nonblocking GitHub lookup per app start; offline operation is normal.
- const storeManaged=['msix-preview','microsoft-store'].includes(process.env.PWH_DESKTOP_DISTRIBUTION);
+ const storeManaged=['msix-preview','microsoft-store'].includes(distribution);
+ const storeServices=storeUpdateServices||{check:()=>checkForStoreUpdate({channel:distribution}),open:()=>nativeBranding?.openStoreUpdate?.()};
  const updateCheck=nativeBranding&&!storeManaged?desktopVersion(root).then(v=>v?services.check(v):null).catch(()=>null):Promise.resolve(null);
  let preparedUpdate=null,preparingUpdate=null,installingUpdate=false,codexSetup=null;
  const makeTab=async (file,imported=false)=>{
@@ -65,7 +67,7 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
   if(route==='native/drop-open'){
    let body='';for await(const chunk of req){body+=chunk;if(body.length>1024)throw Error('파일 요청이 너무 큽니다.');}const {id,count}=JSON.parse(body);
    const paths=await nativeBranding?.resolveDroppedFiles?.(id,count);if(!Array.isArray(paths)||paths.length!==count)throw Error('원본 파일 경로를 확인하지 못했습니다.');
-   for(const file of paths){if(typeof file!=='string'||!path.isAbsolute(file)||!/\.hwpx?$/i.test(file))throw Error('HWP 또는 HWPX 파일만 열 수 있습니다.');const stat=await fs.lstat(file);if(!stat.isFile()||stat.isSymbolicLink()||stat.size>64*1024*1024)throw Error('64 MiB 이하의 일반 문서 파일을 선택하세요.');}
+   for(const file of paths){if(typeof file!=='string'||!path.isAbsolute(file)||!/\.hwpx?$/i.test(file))throw Error('HWP 또는 HWPX 파일만 열 수 있습니다.');const stat=await fs.lstat(file);if(!stat.isFile()||stat.isSymbolicLink())throw Error('일반 문서 파일을 선택하세요.');}
    if(tabs.size+paths.length>12)throw Error('문서는 최대 12개까지 열 수 있습니다.');
    const opened=[],errors=[];for(const file of paths){try{opened.push(await makeTab(file));}catch(error){errors.push(path.basename(file)+': '+error.message);}}
    return send(res,{opened,errors});
@@ -75,16 +77,24 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
   if(route==='recent/open'){let body='';for await(const chunk of req){body+=chunk;if(body.length>1024)throw Error('최근 문서 요청이 너무 큽니다.');}const file=await recent.open(JSON.parse(body).id);return send(res,await makeTab(file));}
   if(route==='tabs/open'){
    if(fileDialogBusy)throw Error('파일 선택창이 이미 열려 있습니다.');if(tabs.size>=12)throw Error('문서는 최대 12개까지 열 수 있습니다.');fileDialogBusy=true;
-   try{const picked=await chooseFile({mode:'Open'});if(picked?.cancelled)return send(res,{cancelled:true});const file=picked?.path;if(typeof file!=='string'||!path.isAbsolute(file)||!/\.hwpx?$/i.test(file))throw Error('HWP 또는 HWPX 문서를 선택하세요.');const stat=await fs.lstat(file);if(!stat.isFile()||stat.isSymbolicLink()||stat.size>64*1024*1024)throw Error('64 MiB 이하의 일반 문서를 선택하세요.');return send(res,await makeTab(file));}finally{fileDialogBusy=false;}
+   try{const picked=await chooseFile({mode:'Open'});if(picked?.cancelled)return send(res,{cancelled:true});const file=picked?.path;if(typeof file!=='string'||!path.isAbsolute(file)||!/\.hwpx?$/i.test(file))throw Error('HWP 또는 HWPX 문서를 선택하세요.');const stat=await fs.lstat(file);if(!stat.isFile()||stat.isSymbolicLink())throw Error('일반 문서를 선택하세요.');return send(res,await makeTab(file));}finally{fileDialogBusy=false;}
   }
   if(route==='tabs/import'){
    let name;try{name=decodeURIComponent(String(req.headers['x-pwh-filename']||''));}catch{throw Error('파일 이름을 확인하지 못했습니다.');}
    if(!name||name!==path.basename(name)||!/\.hwpx?$/i.test(name)||name.length>200)throw Error('HWP 또는 HWPX 파일만 열 수 있습니다.');
-   let size=0;const chunks=[];for await(const chunk of req){size+=chunk.length;if(size>64*1024*1024)throw Error('64 MiB 이하의 문서를 선택하세요.');chunks.push(chunk);}const bytes=Buffer.concat(chunks);
+   let size=0;const chunks=[];for await(const chunk of req){size+=chunk.length;chunks.push(chunk);}const bytes=Buffer.concat(chunks);
    if(bytes.length<8||(bytes.subarray(0,2).toString()!=='PK'&&bytes.subarray(0,8).toString('hex')!=='d0cf11e0a1b11ae1'))throw Error('HWP 또는 HWPX 문서가 아닙니다.');
    const dir=path.join(dataRoot,'documents','import-'+randomUUID());await fs.mkdir(dir,{recursive:true});const file=path.join(dir,name);await fs.writeFile(file,bytes,{flag:'wx'});return send(res,await makeTab(file,true));
   }
-  if(route==='update/status'){const available=await updateCheck;return send(res,{version:available?.version||null});}
+  if(route==='update/status'){
+   if(distribution==='microsoft-store')return send(res,{version:null,...await storeServices.check()});
+   const available=await updateCheck;return send(res,{channel:distribution||'msi',version:available?.version||null});
+  }
+  if(route==='update/store'){
+   if(distribution!=='microsoft-store'||!nativeBranding?.complete)throw Error('Store 설치판에서 업데이트해 주세요.');
+   const result=await storeServices.open();if(result?.ok!==true)throw Error('Microsoft Store를 열지 못했습니다. Store에서 Pwh Desktop을 검색해 주세요.');
+   return send(res,{opened:true});
+  }
   if(route==='codex-plugin/status'){
    try{return send(res,JSON.parse(await fs.readFile(path.join(dataRoot,'codex-setup-result.json'),'utf8')));}catch(error){if(error.code==='ENOENT')return send(res,nativeBranding?{status:'not-configured',message:'Codex Pwh 연결을 확인해 주세요.'}:{});throw error;}
   }

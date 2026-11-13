@@ -9,7 +9,7 @@ export async function chooseDesktopFile({mode,suggestedName='문서.hwpx'}){
  const {stdout}=await exec('powershell.exe',['-NoProfile','-STA','-ExecutionPolicy','RemoteSigned','-File',fileURLToPath(new URL('./file-dialog.ps1',import.meta.url)),'-Mode',mode,'-SuggestedName',suggestedName],{windowsHide:true,timeout:300000,maxBuffer:65536,encoding:'utf8'});
  return JSON.parse(stdout.trim());
 }
-async function state(file){try{const stat=await fs.lstat(file);if(!stat.isFile()||stat.isSymbolicLink())throw Error('일반 파일을 선택하세요.');if(stat.size>64*1024*1024)throw Error('64 MiB 이하의 문서를 선택하세요.');return hash(await fs.readFile(file));}catch(error){if(error.code==='ENOENT')return null;throw error;}}
+async function state(file){try{const stat=await fs.lstat(file);if(!stat.isFile()||stat.isSymbolicLink())throw Error('일반 파일을 선택하세요.');return hash(await fs.readFile(file));}catch(error){if(error.code==='ENOENT')return null;throw error;}}
 export function createDesktopFileManager({choose=chooseDesktopFile,verify,register}){
  const tickets=new Map();let target=null,dialogBusy=false;
  async function select(options){if(dialogBusy)throw Error('파일 선택창이 이미 열려 있습니다.');dialogBusy=true;try{return await choose(options);}finally{dialogBusy=false;}}
@@ -24,7 +24,7 @@ export function createDesktopFileManager({choose=chooseDesktopFile,verify,regist
   },
   async write({ticket,documentId,bytes}){
    const t=tickets.get(ticket);tickets.delete(ticket);if(!t||t.documentId!==documentId||Date.now()-t.createdAt>600000)throw Error('저장 요청이 만료되었습니다. 다시 저장하세요.');
-   if(bytes.length<8||bytes.length>64*1024*1024||bytes.subarray(0,2).toString()!=='PK')throw Error('HWPX 문서 데이터가 올바르지 않습니다.');
+   if(bytes.length<8||bytes.subarray(0,2).toString()!=='PK')throw Error('HWPX 문서 데이터가 올바르지 않습니다.');
    const temporary=path.join(path.dirname(t.file),`.pwh-save-${randomUUID()}.hwpx`);let created=false;
    try{await fs.writeFile(temporary,bytes,{flag:'wx'});created=true;const info=await verify(temporary);if(info?.format!=='hwpx')throw Error('저장할 문서를 검증하지 못했습니다.');if(await state(t.file)!==t.sha256)throw Error('파일이 다른 곳에서 변경되었습니다. 다른 이름으로 저장하세요.');
     if(t.sha256===null){await fs.link(temporary,t.file);await fs.unlink(temporary);created=false;}else{await fs.rename(temporary,t.file);created=false;}

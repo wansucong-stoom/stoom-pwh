@@ -36,11 +36,24 @@ export async function selectClientSaveDestination(args,meta={},choose=chooseSave
   return {cancelled:false,saveTicket,path:filename};
 }
 import {runEngine} from './engine.mjs';
+import {createReadStream} from 'node:fs';
+import {DEFAULT_DOCUMENT_CHUNK,documentChunkBytes} from './document-transfer.mjs';
 
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
-export const CHUNK=512*1024, MAX_DOCUMENT=64*1024*1024;
+export const CHUNK=DEFAULT_DOCUMENT_CHUNK, MAX_DOCUMENT=Number.MAX_SAFE_INTEGER;
 const assetCache=new Map();let cachedBytes=0;
+const documentMetadata=new Map();
+const statKey=stat=>[stat.dev,stat.ino,stat.size,stat.mtimeMs,stat.ctimeMs].join(':');
+async function documentSnapshot(file){
+ const stat=await fs.stat(file);if(!stat.isFile()||!Number.isSafeInteger(stat.size))throw Error('Invalid document file');
+ const key=statKey(stat),old=documentMetadata.get(file);if(old?.key===key)return old;
+ const digest=createHash('sha256');for await(const part of createReadStream(file))digest.update(part);
+ if(statKey(await fs.stat(file))!==key)throw Error('Source changed during read');
+ const record={size:stat.size,hash:digest.digest('hex'),key};documentMetadata.delete(file);documentMetadata.set(file,record);
+ if(documentMetadata.size>64)documentMetadata.delete(documentMetadata.keys().next().value);return record;
+}
 async function cachedAsset(file,kind){
+ if(kind==='document')return documentSnapshot(file);
  const stat=await fs.stat(file);if(!stat.isFile()||stat.size>(kind==='wasm'?32*1024*1024:MAX_DOCUMENT))throw Error('Client asset too large');
  const marker=kind==='wasm'?await fs.readFile(path.join(config.runtimeRoot,'core','.pwh-install.json'),'utf8'):'';
  const key=`${stat.dev}:${stat.ino}:${stat.size}:${stat.mtimeMs}:${stat.ctimeMs}:${marker}`;
@@ -60,22 +73,23 @@ async function cleanUploads(){for(const [id,t]of uploads)if(!t.busy&&Date.now()-
 const uploadCleanup=setInterval(()=>{void cleanUploads().catch(()=>{});},60000);uploadCleanup.unref();
 export async function beginClientSave(args,meta={}){
  await cleanUploads();const source=documentPath(meta,args.documentId);
- if(!Number.isSafeInteger(args.totalBytes)||args.totalBytes<2||args.totalBytes>MAX_DOCUMENT||!hashPattern.test(args.documentSha256||'')||!hashPattern.test(args.expectedSourceSha256||''))throw Error('Invalid save size or digest; maximum is 64 MiB');
+ if(!Number.isSafeInteger(args.totalBytes)||args.totalBytes<2||args.totalBytes>MAX_DOCUMENT||!hashPattern.test(args.documentSha256||'')||!hashPattern.test(args.expectedSourceSha256||''))throw Error('Invalid save size or digest');
  if(sha(await fs.readFile(source))!==args.expectedSourceSha256)throw Error('Source changed; reopen the document');
  const ticket=saveTickets.get(args.saveTicket);
  if(!ticket||ticket.source!==source||ticket.sha256!==args.expectedSourceSha256||Date.now()-ticket.createdAt>600000)throw Error('Choose a save destination again');
  if(uploads.size>=4)throw Error('Too many pending saves');
+ const chunkBytes=documentChunkBytes(args.totalBytes,args.maxChunkBytes);
  const transferId=randomUUID(),temporary=path.join(path.dirname(ticket.filename),`.pwh-upload-${transferId}.hwpx`);
  await fs.writeFile(temporary,Buffer.alloc(0),{flag:'wx'});
- uploads.set(transferId,{source,filename:ticket.filename,temporary,totalBytes:args.totalBytes,documentSha256:args.documentSha256,sourceSha256:args.expectedSourceSha256,offset:0,updatedAt:Date.now(),busy:false});
- saveTickets.delete(args.saveTicket);return {transferId,chunkBytes:CHUNK,totalBytes:args.totalBytes,nextOffset:0};
+ uploads.set(transferId,{source,filename:ticket.filename,temporary,totalBytes:args.totalBytes,documentSha256:args.documentSha256,sourceSha256:args.expectedSourceSha256,offset:0,chunkBytes,updatedAt:Date.now(),busy:false});
+ saveTickets.delete(args.saveTicket);return {transferId,chunkBytes,totalBytes:args.totalBytes,nextOffset:0};
 }
 function getUpload(id){const transfer=uploads.get(id);if(!transfer||Date.now()-transfer.updatedAt>UPLOAD_TTL)throw Error('Save transfer expired; choose the destination again');if(transfer.busy)throw Error('Save transfer is busy');return transfer;}
 export async function uploadClientChunk(args){
  const t=getUpload(args.transferId);
- if(!Number.isSafeInteger(args.offset)||args.offset<0||typeof args.base64!=='string'||!args.base64.length||args.base64.length>Math.ceil(CHUNK*4/3)+4||args.base64.length%4||!/^[A-Za-z0-9+/]*={0,2}$/.test(args.base64))throw Error('Invalid save chunk');
+ if(!Number.isSafeInteger(args.offset)||args.offset<0||typeof args.base64!=='string'||!args.base64.length||args.base64.length>Math.ceil(t.chunkBytes*4/3)+4||args.base64.length%4||!/^[A-Za-z0-9+/]*={0,2}$/.test(args.base64))throw Error('Invalid save chunk');
  const bytes=Buffer.from(args.base64,'base64'),hash=sha(bytes);
- if(!bytes.length||bytes.length>CHUNK||bytes.toString('base64')!==args.base64||args.offset+bytes.length>t.totalBytes)throw Error('Invalid save chunk size/encoding');
+ if(!bytes.length||bytes.length>t.chunkBytes||bytes.toString('base64')!==args.base64||args.offset+bytes.length>t.totalBytes)throw Error('Invalid save chunk size/encoding');
  if(t.last?.offset===args.offset&&t.last.hash===hash){t.updatedAt=Date.now();return {transferId:args.transferId,nextOffset:t.offset,totalBytes:t.totalBytes};}
  if(args.offset!==t.offset)throw Error('Save chunk offset mismatch');
  if(args.offset===0&&bytes.subarray(0,2).toString()!=='PK')throw Error('HWPX signature is missing');
@@ -106,13 +120,12 @@ export async function commitClientSave(args,verify=async file=>(await runEngine(
 export async function registerClientDocument(filename) {
   if(!path.isAbsolute(filename)||!/\.hwpx$/i.test(filename)) throw new Error('Client viewer requires an absolute HWPX path');
   const real=await fs.realpath(filename), stat=await fs.stat(real);
-  if(!stat.isFile()||stat.size>MAX_DOCUMENT) throw new Error('Client HWPX must be at most 64 MiB');
-  const bytes=await fs.readFile(real);
-  if(bytes.length>MAX_DOCUMENT) throw new Error('Client HWPX changed or exceeds 64 MiB');
-  if(bytes.subarray(0,2).toString()!=='PK') throw new Error('HWPX ZIP signature is missing');
-  const id=randomUUID(); documents.set(id,{path:real,sha256:sha(bytes)});
+  if(!stat.isFile())throw new Error('Client HWPX must be a regular file');
+  const handle=await fs.open(real,'r');try{const signature=Buffer.alloc(2);await handle.read(signature,0,2,0);if(signature.toString()!=='PK')throw Error('HWPX ZIP signature is missing');}finally{await handle.close();}
+  const snapshot=await documentSnapshot(real);
+  const id=randomUUID(); documents.set(id,{path:real,sha256:snapshot.hash});
   if(documents.size>64) documents.delete(documents.keys().next().value);
-  return {documentId:id,source:real,sourceSha256:sha(bytes),name:path.basename(real)};
+  return {documentId:id,source:real,sourceSha256:snapshot.hash,name:path.basename(real)};
 }
 export function normalizeHostDocumentPath(filename){
  if(typeof filename!=='string')return filename;
@@ -136,15 +149,25 @@ export async function readClientAsset(args,meta={}) {
   if(args.kind==='wasm') file=path.join(config.runtimeRoot,'core','rhwp_bg.wasm');
   else if(args.kind==='document') file=documentPath(meta,args.documentId);
   else throw new Error('Unknown client asset');
-  const {bytes,hash}=await cachedAsset(file,args.kind);
+  const record=await cachedAsset(file,args.kind),hash=record.hash,total=record.size??record.bytes.length;
+  const chunkBytes=args.kind==='document'?documentChunkBytes(total,args.maxChunkBytes):CHUNK;
   if(args.expectedSha256!==undefined&&args.expectedSha256!==hash) throw new Error('Asset changed during transfer; reopen the document');
   if(args.documentId&&args.kind==='document'&&documents.get(args.documentId)?.sha256!==hash) throw new Error('Source document changed; reopen it');
-  if(args.offset>bytes.length) throw new Error('Asset offset out of range');
-  const end=Math.min(bytes.length,args.offset+CHUNK);
-  const summary={kind:args.kind,offset:args.offset,totalBytes:bytes.length,sha256:hash,nextOffset:end<bytes.length?end:null,
+  if(args.offset>total)throw Error('Asset offset out of range');
+  const end=Math.min(total,args.offset+chunkBytes);let part;
+  if(record.bytes)part=record.bytes.subarray(args.offset,end);
+  else{
+   const handle=await fs.open(file,'r');try{
+    if(statKey(await handle.stat())!==record.key)throw Error('Source changed during transfer');
+    part=Buffer.alloc(end-args.offset);let read=0;
+    while(read<part.length){const result=await handle.read(part,read,part.length-read,args.offset+read);if(!result.bytesRead)throw Error('Unexpected end of document');read+=result.bytesRead;}
+    if(statKey(await handle.stat())!==record.key)throw Error('Source changed during transfer');
+   }finally{await handle.close();}
+  }
+  const summary={kind:args.kind,offset:args.offset,totalBytes:total,chunkBytes,sha256:hash,nextOffset:end<total?end:null,
     ...(args.kind==='document'?{source:file,name:path.basename(file)}:{})};
   return {content:[{type:'text',text:'Client asset chunk'}],structuredContent:summary,
-    _meta:{'pwh/client-bytes':bytes.subarray(args.offset,end).toString('base64')}};
+    _meta:{'pwh/client-bytes':part.toString('base64')}};
 }
 async function checkCoreFile(name,bytes) {
   const marker=JSON.parse(await fs.readFile(path.join(config.runtimeRoot,'core','.pwh-install.json'),'utf8'));
@@ -160,7 +183,7 @@ export async function clientViewerHtml() {
   const marker=JSON.parse(await fs.readFile(path.join(root,'.pwh-install.json'),'utf8'));
   if(marker.kind!=='studio-inline'||Object.entries({'editor-body.html':body,'rhwp-studio.css':css,'editor.js':editor}).some(([name,value])=>marker.files?.[name]!==sha(Buffer.from(value))))throw new Error('Inline editor integrity mismatch; rebuild it with pwh setup');
   const inlineEditor=inlineEditorImageUrls(editor);
-  const recovery=await fs.readFile(new URL('./inline-recovery.js',import.meta.url),'utf8')+'\n'+await fs.readFile(new URL('./font-transfer.mjs',import.meta.url),'utf8')+'\n'+await fs.readFile(new URL('./request-state.mjs',import.meta.url),'utf8');
+  const recovery=await fs.readFile(new URL('./inline-recovery.js',import.meta.url),'utf8')+'\n'+await fs.readFile(new URL('./font-transfer.mjs',import.meta.url),'utf8')+'\n'+await fs.readFile(new URL('./request-state.mjs',import.meta.url),'utf8')+'\n'+await fs.readFile(new URL('./base64-bytes.mjs',import.meta.url),'utf8');
   const escapeScript=s=>s.replace(/<\/script/gi,'<\\/script');
   return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pwh HWPX 편집기</title><style>${css}\nhtml,body{height:100%;overflow:hidden}body{display:flex;flex-direction:column}#pwh-header{box-sizing:border-box;font:12px/1.4 "Segoe UI","Malgun Gothic",sans-serif;background:var(--toolbar-bg,#f5f5f5);color:var(--text-color,#333);padding:0 12px;display:flex;flex:0 0 38px;height:38px;min-height:38px;max-height:38px;overflow:hidden;gap:12px;align-items:center;border-bottom:1px solid var(--border-color,#d0d0d0)}#pwh-title{flex:0 1 28%;min-width:0;font-weight:600;color:inherit}#pwh-task{flex:0 1 25%;min-width:0;color:#42607d!important;font-size:11px}#pwh-task:empty{display:none}#pwh-status{flex:1 1 0;min-width:0;font-size:11px;color:#68717c}#pwh-title,#pwh-task,#pwh-status{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#pwh-header button{box-sizing:border-box;flex:0 0 auto;white-space:nowrap;font:inherit;line-height:24px;height:26px;padding:0 10px;border:1px solid #c3c8ce;border-radius:4px;background:linear-gradient(#fff,#ededed);color:#333;cursor:pointer}#pwh-header button:hover{background:#e7eef7;border-color:#96abc5}#pwh-header button:focus-visible{outline:2px solid #638bb8;outline-offset:2px}#pwh-header button:disabled{opacity:.5;cursor:wait}#pwh-retry[hidden]{display:none}#pwh-save{margin-left:auto}#studio-root{flex:1 1 0;min-height:0;height:calc(100vh - 38px)!important}@media(max-width:650px){#pwh-title{flex-basis:32%}#pwh-status{display:none}#pwh-task{flex:1 1 0}}@media(prefers-color-scheme:dark){#pwh-header{background:#292b2e;color:#e2e5e9;border-color:#44484e}#pwh-status{color:#abb2be}#pwh-task{color:#a7bfdc!important}#pwh-header button{background:#373b41;border-color:#5a626c;color:#e2e5e9}#pwh-header button:hover{background:#444d5b}}</style><script>${escapeScript(recovery.replace(/export /g,''))}\n${escapeScript(host)}</script></head><body><div id="pwh-header"><span id="pwh-title">HWPX 편집기</span><small id="pwh-version" style="white-space:nowrap">Pwh ${editorVersion}</small><span id="pwh-task" style="color:#375c92;font-size:11px"></span><span id="pwh-status" role="status">편집기를 불러오고 있습니다.</span><button id="pwh-retry" hidden>다시 연결</button><button id="pwh-import-table" title="Windows 클립보드의 한글 표·셀을 가져옵니다">한글 표·셀 가져오기</button><button id="pwh-save">새 수정본 저장</button></div>${body}<script type="module">${escapeScript(inlineEditor)}</script></body></html>`;
 }

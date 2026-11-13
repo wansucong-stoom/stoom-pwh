@@ -11,7 +11,7 @@ const pinned = {
   upstreamCommit: '1a76570e833917d15817415a53c09ad61ab3203f',
   sourceArchiveSha256: '067feefc25d36921ee41fea5df6fead00255ffa86441891fbaa202f96de202a2',
   blankTemplateSha256: '43f472751fafefb8c66b0f831660ebed51e443a46bebe44c75bba918154ce4c9',
-  expectedGlueSha256: 'f3e38de97feb99f01238aaac601706cd813cb158cf6e197e59388e71dc32aa14',
+  expectedGlueSha256: '012e7d160748510542dd8677ea6bbc1d178ce8e3faa7725a0ddca7600d0b986b',
 };
 const patches = [
   {
@@ -1796,6 +1796,44 @@ const patches = [
       "path": "src/wasm_api.rs",
       "originalSha256": "5b7a2542ec69847a2a1c05c7805ec4598ce3f79f510541bb3a4470dd6213c76b",
       "patchedSha256": "6328be70a2f9b0244a07524b734830492575370a35d49e38d1a751b717ea763c"
+    }
+  ]
+}
+,
+{
+  "file": "rhwp-0.8.7-unique-grouped-textbox-editing.patch",
+  "sha256": "73f2b82b52d0609edd654a6d658e658443ab14b2663e197253819827a7e05a3e",
+  "sources": [
+    {
+      "path": "src/document_core/helpers.rs",
+      "originalSha256": "274fa2b1ae174267a7071104358ef8d51bda9a9b7d0dec3fa43b8f317e9971b3",
+      "patchedSha256": "06cea15b1bf7989f38cdab67f5f20da23b8a8cb157b228dde09e6f960c97282e"
+    },
+    {
+      "path": "src/document_core/queries/cursor_rect.rs",
+      "originalSha256": "e90de808a212ae8ada8cbffc962fe4bbdd3327d41e03ce3a9e07ff6e4dfc952a",
+      "patchedSha256": "d1e3aa09b264469d87b7fca0c752d4801a4ba2512b5ffc572855033cb3a3b170"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-body-inline-object-range.patch",
+  "sha256": "1c54c5e77654115f07019086f0ea4424c5a974937630b962a28d48a9fa6b63db",
+  "sources": [
+    {
+      "path": "src/document_core/commands/mod.rs",
+      "originalSha256": "52fb6e117d1abfed4eaf4d537edf776c67fd3ffd283146a6d8aa8bf4c68242d3",
+      "patchedSha256": "f9bac1b93b51efe12ee645a1f0d23fd36e3e11f58eeefe37638ad658cd4aa789"
+    },
+    {
+      "path": "src/document_core/commands/body_inline.rs",
+      "originalSha256": null,
+      "patchedSha256": "7cd5db6c2ad538f5eb907a039318cee9bfbdc73162108df360ffdfb6c92d689c"
+    },
+    {
+      "path": "src/wasm_api.rs",
+      "originalSha256": "6328be70a2f9b0244a07524b734830492575370a35d49e38d1a751b717ea763c",
+      "patchedSha256": "026d4d6d63b08a3b91314d33f0bac1ffdd62caf466c467c4baa5f9d3512c40ba"
     }
   ]
 }

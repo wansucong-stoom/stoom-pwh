@@ -1,3 +1,4 @@
+import {buildStoreUpdateCheck} from './build-store-update-check.mjs';
 import {promises as fs} from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
@@ -14,7 +15,7 @@ import {brandElectron} from '../release-source/scripts/brand-electron.mjs';
 import {packageMsix} from '../release-source/scripts/msix-package.mjs';
 
 const app=path.dirname(fileURLToPath(import.meta.url)),workspace=path.dirname(app);
-const version=process.env.PWH_MSI_VERSION||'0.1.36';
+const version=process.env.PWH_MSI_VERSION||'0.1.37';
 if(!/^\d{1,3}\.\d{1,3}\.\d{1,5}$/.test(version)||version.split('.').some((n,i)=>Number(n)>(i===2?65535:255)))throw Error('MSI 버전이 올바르지 않습니다.');
 const output=path.resolve(process.argv[2]||path.join(workspace,'dist',`PwhDesktop-${version}.msi`));
 const wix=path.resolve(process.env.PWH_WIX_DIR||path.join(workspace,'pwh-test-temp','wix314-binaries'));
@@ -27,11 +28,12 @@ try{await fs.access(output);throw Error('출력 파일이 이미 있습니다.')
 await fs.mkdir(path.dirname(output),{recursive:true});
 const stage=path.join(path.dirname(output),`.pwh-msi-${randomUUID()}`),payload=path.join(stage,'payload');await fs.mkdir(payload,{recursive:true});
 await buildNativeLauncher(path.join(payload,'PwhDesktop.exe'));
+await buildStoreUpdateCheck(path.join(payload,'standalone-pwh','store-update-check.exe'));
 const run=(exe,args,cwd=stage)=>new Promise((resolve,reject)=>{const p=spawn(exe,args,{cwd,windowsHide:true,stdio:['ignore','pipe','pipe']});let output='';for(const s of [p.stdout,p.stderr])s.on('data',b=>{if(output.length<100000)output+=b;});p.on('error',reject);p.on('close',code=>code===0?resolve(output):reject(Error(`${path.basename(exe)} (${code}): ${output}`)));});
 const pwhZip=path.join(stage,'pwh.zip');await packagePlugin({output:pwhZip});
 for(const entry of zipEntries(await fs.readFile(pwhZip))){const rel=entry.name.replace(/\/$/,'');if(!rel||!rel.startsWith('pwh')||rel.split('/').includes('..'))throw Error('패키지 경로가 잘못됐습니다.');const target=path.join(payload,'release-source',...rel.split('/').slice(1));if(entry.name.endsWith('/'))await fs.mkdir(target,{recursive:true});else{await fs.mkdir(path.dirname(target),{recursive:true});await fs.writeFile(target,entry.read(),{flag:'wx'});}}
 async function copy(src,rel){const out=path.join(payload,rel);await fs.mkdir(path.dirname(out),{recursive:true});await fs.copyFile(src,out,fs.constants.COPYFILE_EXCL);}
-for(const name of ['ai-providers.mjs','generated-image.mjs','recent-documents.mjs','codex-agent.mjs','codex-session.mjs','codex-native-host.mjs','codex-plugin-setup.mjs','chatgpt-auth.mjs','chatgpt-store.mjs','chatgpt-credentials.ps1','official-codex-runtime.mjs','CODEX-APACHE-LICENSE.txt','CODEX-NOTICE.txt','CODEX-RATATUI-MIT.txt','CODEX-RIPGREP-MIT.txt','CODEX-PCRE2-LICENSE.txt','rewrite.mjs','settings.mjs','convert-hwp.mjs','desktop-files.mjs','document-scan.mjs','editor-result-wait.mjs','steer-turn.mjs','version-info.mjs','update-check.mjs','update-helper.mjs','workspace-child.mjs','workspace-shell.mjs','window-close-controller.mjs','workspace.html','workspace.css','workspace.js','file-dialog.ps1','host.mjs','launch.mjs','app.html','app.css','app.js','stoom-mark-original.css','stoom-product-marks.css','Inter-variable.ttf','OFL-Inter.txt','font-provenance.json','stoom-mark.svg','stoom.ico'])await copy(path.join(app,name),path.join('standalone-pwh',name));
+for(const name of ['ai-providers.mjs','generated-image.mjs','recent-documents.mjs','codex-agent.mjs','codex-session.mjs','codex-native-host.mjs','codex-plugin-setup.mjs','chatgpt-auth.mjs','chatgpt-store.mjs','chatgpt-credentials.ps1','official-codex-runtime.mjs','CODEX-APACHE-LICENSE.txt','CODEX-NOTICE.txt','CODEX-RATATUI-MIT.txt','CODEX-RIPGREP-MIT.txt','CODEX-PCRE2-LICENSE.txt','rewrite.mjs','settings.mjs','convert-hwp.mjs','desktop-files.mjs','document-scan.mjs','editor-result-wait.mjs','steer-turn.mjs','version-info.mjs','update-check.mjs','store-update-check.mjs','update-helper.mjs','workspace-child.mjs','workspace-shell.mjs','window-close-controller.mjs','workspace.html','workspace.css','workspace.js','file-dialog.ps1','host.mjs','launch.mjs','app.html','app.css','app.js','stoom-mark-original.css','stoom-product-marks.css','Inter-variable.ttf','OFL-Inter.txt','font-provenance.json','stoom-mark.svg','stoom.ico'])await copy(path.join(app,name),path.join('standalone-pwh',name));
 if(!process.env.PWH_CODEX_RUNTIME_DIR||!path.isAbsolute(process.env.PWH_CODEX_RUNTIME_DIR))throw Error('검증할 공식 Codex 앱 서버 패키지 경로를 지정해 주세요.');
 await copyOfficialRuntime(process.env.PWH_CODEX_RUNTIME_DIR,path.join(payload,'standalone-pwh','codex-runtime'));
 if(!process.env.PWH_ELECTRON_ARCHIVE||!path.isAbsolute(process.env.PWH_ELECTRON_ARCHIVE))throw Error('검증할 Electron 런타임 ZIP 경로를 지정해 주세요.');

@@ -85,6 +85,10 @@ const input=readline.createInterface({input:host,crlfDelay:Infinity});
 input.on('line',async line=>{let message;try{message=JSON.parse(line);}catch{return;}if(!Number.isSafeInteger(message.id))return;
  try{let result;if(message.method==='close'){approvedClose=true;win?.close();result={ok:true};}
   else if(message.method==='resolve-drop')result=await droppedPaths(message.params?.id,message.params?.count);
+  else if(message.method==='open-store-update'){
+   if(process.env.PWH_DESKTOP_DISTRIBUTION!=='microsoft-store')throw Error('Store 설치판에서 업데이트해 주세요.');
+   await shell.openExternal('ms-windows-store://pdp/?ProductId=9NXGD60MHMT2');result={ok:true};
+  }
   else throw Error('지원하지 않는 요청입니다.');emit({id:message.id,result});
  }catch(error){emit({id:message.id,error:error?.message||cleanError()});}
 });

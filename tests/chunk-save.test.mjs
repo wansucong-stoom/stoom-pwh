@@ -30,6 +30,6 @@ test('stale source, digest mismatch, occupied destination and abort publish no p
   await fs.writeFile(f.source,'PKsource');t=await start(f,bytes);await upload(t,bytes);await fs.writeFile(path.join(f.dir,'saved.hwpx'),'keep');await assert.rejects(commitClientSave({transferId:t.transferId},async()=>({format:'hwpx'})));assert.equal(await fs.readFile(path.join(f.dir,'saved.hwpx'),'utf8'),'keep');
   t=await start(f,bytes,'aborted.hwpx');await uploadClientChunk({transferId:t.transferId,offset:0,base64:bytes.toString('base64')});assert.equal((await abortClientSave({transferId:t.transferId})).aborted,true);await assert.rejects(commitClientSave({transferId:t.transferId}),/expired/);
   assert.equal((await fs.readdir(f.dir)).some(n=>n.startsWith('.pwh-upload-')),false);
-  assert.equal(MAX_DOCUMENT,64*1024*1024);
+  assert.equal(MAX_DOCUMENT,Number.MAX_SAFE_INTEGER);
  }finally{await fs.rm(f.dir,{recursive:true,force:true});}
 });

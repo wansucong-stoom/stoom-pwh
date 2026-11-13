@@ -11,7 +11,7 @@ const repository = 'wansucong-stoom/stoom-pwh';
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 const requiredDesktop = ['host.mjs','app.js','app.html','workspace-shell.mjs','workspace.js',
   'electron-shell.cjs','electron-preload.cjs','electron-controller.mjs','official-codex-runtime.mjs',
-  'chatgpt-store.mjs','desktop-distribution.mjs','stoom.ico','client/editor.js','client/manifest.json'];
+  'chatgpt-store.mjs','desktop-distribution.mjs','store-update-check.mjs','stoom.ico','client/editor.js','client/manifest.json'];
 
 export function storeReleaseAsset(release, {pwhVersion, desktopVersion}) {
   if (!release || release.draft !== false || release.prerelease !== false

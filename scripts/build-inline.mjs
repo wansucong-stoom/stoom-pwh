@@ -13,6 +13,7 @@ import {patchHancomKeyAliases} from './patch-hancom-key-aliases.mjs';
 import {patchHancomKeyContexts} from './patch-hancom-key-contexts.mjs';
 import {patchTableCommandAccess} from './patch-table-command-access.mjs';
 import {patchNestedParagraphFormat} from './patch-nested-paragraph-format.mjs';
+import {patchInlineObjectCursors} from './patch-inline-object-cursors.mjs';
 const root=path.resolve(process.argv[2]);
 const studio=path.join(root,'rhwp-studio');
 // The pinned editor includes its WASM glue. Old runtime cores keep the default
@@ -959,6 +960,7 @@ await patchTablePropertyChanges(studio);
 await patchClipboardSafety(studio);
 await patchTableCommandAccess(studio);
 await patchNestedParagraphFormat(studio);
+await patchInlineObjectCursors(studio);
 const glue=path.join(root,'pkg/rhwp.js');
 await fs.writeFile(glue,(await fs.readFile(glue,'utf8')).replace("new URL('rhwp_bg.wasm', import.meta.url)","(()=>{throw new Error('Host WASM bytes required')})()"));
 const {build}=await import(pathToFileURL(path.join(studio,'node_modules/vite/dist/node/index.js')));

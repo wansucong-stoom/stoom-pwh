@@ -1,0 +1,92 @@
+--- a/src/document_core/helpers.rs
++++ b/src/document_core/helpers.rs
+@@ -147,12 +147,45 @@
+     para.logical_control_positions()
+ }
+ 
++/// A group can reuse the existing textbox address only when that address is
++/// unambiguous. Count every descendant (including ambiguous nested groups);
++/// never let traversal order select one of several text stories.
++fn grouped_textbox_count(shape: &crate::model::shape::ShapeObject, depth: usize) -> usize {
++    use crate::model::shape::ShapeObject;
++    if depth > 64 { return 2; }
++    match shape {
++        ShapeObject::Group(group) => group.children.iter()
++            .map(|child| grouped_textbox_count(child, depth + 1))
++            .fold(0usize, |count, next| (count + next).min(2)),
++        ShapeObject::Rectangle(s) => usize::from(s.drawing.text_box.is_some()),
++        ShapeObject::Ellipse(s) => usize::from(s.drawing.text_box.is_some()),
++        ShapeObject::Polygon(s) => usize::from(s.drawing.text_box.is_some()),
++        ShapeObject::Arc(s) => usize::from(s.drawing.text_box.is_some()),
++        ShapeObject::Curve(s) => usize::from(s.drawing.text_box.is_some()),
++        _ => 0,
++    }
++}
++
++fn unique_grouped_textbox_child(group: &crate::model::shape::GroupShape) -> Option<usize> {
++    let mut selected = None;
++    for (index, child) in group.children.iter().enumerate() {
++        match grouped_textbox_count(child, 1) {
++            0 => {},
++            1 if selected.is_none() => selected = Some(index),
++            _ => return None,
++        }
++    }
++    selected
++}
++
+ /// ShapeObject에서 TextBox를 추출하는 헬퍼
+ pub(crate) fn get_textbox_from_shape(
+     shape: &crate::model::shape::ShapeObject,
+ ) -> Option<&crate::model::shape::TextBox> {
+     use crate::model::shape::ShapeObject;
+     let drawing = match shape {
++        ShapeObject::Group(group) => return get_textbox_from_shape(&group.children[unique_grouped_textbox_child(group)?]),
++        ShapeObject::Arc(s) => &s.drawing,
+         ShapeObject::Rectangle(s) => &s.drawing,
+         ShapeObject::Ellipse(s) => &s.drawing,
+         ShapeObject::Polygon(s) => &s.drawing,
+@@ -168,6 +201,11 @@
+ ) -> Option<&mut crate::model::shape::TextBox> {
+     use crate::model::shape::ShapeObject;
+     let drawing = match shape {
++        ShapeObject::Group(group) => {
++            let index = unique_grouped_textbox_child(group)?;
++            return get_textbox_from_shape_mut(&mut group.children[index]);
++        },
++        ShapeObject::Arc(s) => &mut s.drawing,
+         ShapeObject::Rectangle(s) => &mut s.drawing,
+         ShapeObject::Ellipse(s) => &mut s.drawing,
+         ShapeObject::Polygon(s) => &mut s.drawing,
+--- a/src/document_core/queries/cursor_rect.rs
++++ b/src/document_core/queries/cursor_rect.rs
+@@ -2503,27 +2503,8 @@
+                             // 메인 매칭 (cell hit / textbox hit / body hit) 이 글상자
+                             // 안 표 셀 / 글상자 빈 영역 / 본문 우선순위로 처리.
+                             // (이 분기에서 글상자 안 표 셀을 가로채면 안 됨)
+-                            let shape_has_textbox = match ctrl {
+-                                Control::Shape(s) => match s.as_ref() {
+-                                    crate::model::shape::ShapeObject::Rectangle(r) => {
+-                                        r.drawing.text_box.is_some()
+-                                    }
+-                                    crate::model::shape::ShapeObject::Ellipse(e) => {
+-                                        e.drawing.text_box.is_some()
+-                                    }
+-                                    crate::model::shape::ShapeObject::Polygon(p) => {
+-                                        p.drawing.text_box.is_some()
+-                                    }
+-                                    crate::model::shape::ShapeObject::Arc(a) => {
+-                                        a.drawing.text_box.is_some()
+-                                    }
+-                                    crate::model::shape::ShapeObject::Curve(c) => {
+-                                        c.drawing.text_box.is_some()
+-                                    }
+-                                    _ => false,
+-                                },
+-                                _ => false,
+-                            };
++                            let shape_has_textbox = matches!(ctrl, Control::Shape(shape)
++                                if crate::document_core::helpers::get_textbox_from_shape(shape).is_some());
+                             if shape_has_textbox {
+                                 // 글상자는 메인 매칭에서 처리 — 0.5 분기 break.
+                                 break;

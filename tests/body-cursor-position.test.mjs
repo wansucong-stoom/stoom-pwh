@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {bodyPositionFromLogical,bodyPositionToLogical,hasBodyCursorAffinity} from '../src/body-cursor-position.mjs';
+import {bodyPositionFromLogical,bodyPositionToLogical,hasBodyCursorAffinity,compareBodyCursorAffinity} from '../src/body-cursor-position.mjs';
 
 const doc={
  logicalToTextOffset(_s,_p,offset){return offset>0?offset-1:0;},
@@ -14,6 +14,18 @@ test('note geometry retains before/after affinity without changing text offsets'
  assert.equal(bodyPositionToLogical(doc,before),0);assert.equal(bodyPositionToLogical(doc,after),1);
  const text=bodyPositionFromLogical(doc,{sectionIndex:0,paragraphIndex:0,charOffset:3});
  assert.equal(text.charOffset,2);assert.equal(bodyPositionToLogical(doc,text),3);
+});
+
+test('an inline object with no text preserves both sides without treating normal paragraph ends as objects',()=>{
+ const table={logicalToTextOffset(_s,_p,x){return Math.max(0,x-1);},textToLogicalOffset(_s,_p,x){return x===0?0:x+1;},getLogicalLength(){return 1;}};
+ const before=bodyPositionFromLogical(table,{sectionIndex:0,paragraphIndex:0,charOffset:0});
+ const after=bodyPositionFromLogical(table,{sectionIndex:0,paragraphIndex:0,charOffset:1});
+ assert.equal(before.charOffset,0);assert.equal(after.charOffset,0);
+ assert.equal(bodyPositionToLogical(table,before),0);assert.equal(bodyPositionToLogical(table,after),1);
+ assert.equal(compareBodyCursorAffinity(before,after),-1);assert.equal(compareBodyCursorAffinity(after,before),1);
+ const plain={...before};delete plain.bodyCursor;assert.equal(compareBodyCursorAffinity(plain,before),0);assert.equal(compareBodyCursorAffinity(plain,after),-1);
+ const ordinary={logicalToTextOffset:(_s,_p,x)=>Math.min(3,x),textToLogicalOffset:(_s,_p,x)=>x,getLogicalLength:()=>3};
+ assert.equal(hasBodyCursorAffinity(bodyPositionFromLogical(ordinary,{sectionIndex:0,paragraphIndex:0,charOffset:3})),false);
 });
 test('typing or changing a paragraph invalidates the previous boundary affinity',()=>{
  const after=bodyPositionFromLogical(doc,{sectionIndex:0,paragraphIndex:0,charOffset:1});

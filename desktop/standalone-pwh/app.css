@@ -51,3 +51,5 @@ main{grid-template-columns:minmax(200px,var(--chat-width,19.333333%)) 6px minmax
 .document-notification{margin:12px 0;padding:9px 12px;border:1px solid #e1e9eb;border-radius:7px;color:#627d88;font-size:12px;line-height:1.6;background:#f8fafb}
 
 #conversation-status{flex:none;color:#71848d;font-size:11px;line-height:1.6;margin:8px 4px;overflow-wrap:anywhere}#desktop-host-controls{display:none}
+
+#workspace-update,#desktop-update{white-space:nowrap;flex:none}#workspace-update[data-available=true],#desktop-update[data-available=true]{background:#17394c;color:#fff;border-color:#17394c}#workspace-update[data-available=true]::before,#desktop-update[data-available=true]::before{content:"";display:inline-block;width:6px;height:6px;margin-right:6px;border-radius:50%;background:#8ee8ed}

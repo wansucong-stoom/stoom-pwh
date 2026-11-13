@@ -1,0 +1,72 @@
+--- a/src/document_core/commands/mod.rs
++++ b/src/document_core/commands/mod.rs
+@@ -1,3 +1,4 @@
++mod body_inline;
+ // [#6840] 발췌 산출물에서 참조 없는 BinData 를 버린다 — 쪽을 잘라도 파일이 줄지 않던 문제.
+ pub(crate) mod bin_data_prune;
+ mod clipboard;
+--- /dev/null
++++ b/src/document_core/commands/body_inline.rs
+@@ -0,0 +1,43 @@
++use crate::document_core::DocumentCore;
++use crate::document_core::helpers::{find_logical_control_positions,logical_to_text_offset,logical_paragraph_length};
++use crate::error::HwpError;
++
++impl DocumentCore {
++    /// Source-owned logical slots; structural controls never become deletable text.
++    pub fn inline_control_positions_native(&self, sec: usize, pi: usize) -> Result<String,HwpError> {
++        let para=self.document.sections.get(sec).and_then(|s|s.paragraphs.get(pi))
++            .ok_or_else(||HwpError::RenderError("Invalid body paragraph".into()))?;
++        let positions=find_logical_control_positions(para);
++        let entries=para.controls.iter().enumerate().filter(|(_,c)|c.is_logical_inline())
++            .filter_map(|(ci,_)|positions.get(ci).map(|offset|format!("{{\"controlIndex\":{},\"offset\":{}}}",ci,offset)))
++            .collect::<Vec<_>>();
++        Ok(format!("[{}]",entries.join(",")))
++    }
++
++    /// Delete a body range on the same logical axis used by hit testing and copy.
++    /// Capture/restore remains owned by the editor's existing fragment command.
++    pub fn delete_range_logical_native(&mut self,sec:usize,sp:usize,so:usize,ep:usize,eo:usize)->Result<String,HwpError>{
++        let section=self.document.sections.get(sec).ok_or_else(||HwpError::RenderError("Invalid section".into()))?;
++        if sp>ep || ep>=section.paragraphs.len() || (sp==ep&&so>eo)
++            ||so>logical_paragraph_length(&section.paragraphs[sp])||eo>logical_paragraph_length(&section.paragraphs[ep]) {
++            return Err(HwpError::RenderError("Invalid logical body range".into()));
++        }
++        let start_text=logical_to_text_offset(&section.paragraphs[sp],so).0;
++        let end_text=logical_to_text_offset(&section.paragraphs[ep],eo).0;
++        let mut removals=Vec::new();
++        for pi in sp..=ep {
++            let p=&section.paragraphs[pi];let positions=find_logical_control_positions(p);
++            let from=if pi==sp{so}else{0};let to=if pi==ep{eo}else{logical_paragraph_length(p)};
++            let indices=p.controls.iter().enumerate().filter(|(_,c)|c.is_logical_inline())
++                .filter_map(|(ci,_)|positions.get(ci).filter(|pos|**pos>=from&&**pos<to).map(|_|ci))
++                .collect::<Vec<_>>();
++            if !indices.is_empty(){removals.push((pi,indices));}
++        }
++        for (pi,indices) in removals {
++            for ci in indices.into_iter().rev(){self.document.sections[sec].paragraphs[pi].remove_control(ci);}
++            self.reflow_paragraph(sec,pi);
++            self.recompose_paragraph(sec,pi);
++        }
++        self.delete_range_native(sec,sp,start_text,ep,end_text,None)
++    }
++}
+--- a/src/wasm_api.rs
++++ b/src/wasm_api.rs
+@@ -2664,6 +2664,16 @@
+     }
+ 
+     /// 문단 내 컨트롤의 텍스트 위치 배열을 반환한다.
++    #[wasm_bindgen(js_name = getInlineControlPositions)]
++    pub fn inline_control_positions(&self,section_idx:u32,para_idx:u32)->Result<String,JsValue>{
++        self.inline_control_positions_native(section_idx as usize,para_idx as usize).map_err(Into::into)
++    }
++
++    #[wasm_bindgen(js_name = deleteRangeLogical)]
++    pub fn delete_range_logical(&mut self,section_idx:u32,start_para:u32,start_offset:u32,end_para:u32,end_offset:u32)->Result<String,JsValue>{
++        self.delete_range_logical_native(section_idx as usize,start_para as usize,start_offset as usize,end_para as usize,end_offset as usize).map_err(Into::into)
++    }
++
+     #[wasm_bindgen(js_name = getControlTextPositions)]
+     pub fn get_control_text_positions(&self, section_idx: u32, para_idx: u32) -> String {
+         let sections = &self.document.sections;
