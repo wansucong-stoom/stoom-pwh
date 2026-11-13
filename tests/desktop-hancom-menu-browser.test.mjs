@@ -19,6 +19,19 @@ test('Desktop contextual menus preserve command routes and narrow-window access'
   const editor=page.frameLocator('#documents iframe').first().frameLocator('#editor');
   await editor.locator('textarea[aria-label="문서 편집 입력"]').waitFor({state:'attached',timeout:60000});
   await editor.locator('body').evaluate(async()=>{for(let i=0;i<600;i++){if(window.pwhRecoveryReady?.()===true)return;await new Promise(resolve=>setTimeout(resolve,100));}throw Error('editor did not finish loading');});
+  // An open menu owns editing keys even when its mouse trigger retains textarea focus.
+  const input=editor.locator('textarea[aria-label="문서 편집 입력"]');
+  await input.fill('Menu keyboard safety');await input.press('Home');await input.press('Shift+End');
+  const original=await editor.locator('body').evaluate(()=>window.pwhEditor.context().paragraph.text);
+  assert.equal(original,'Menu keyboard safety');
+  await editor.getByRole('button',{name:'편집 메뉴 펼치기',exact:true}).click();
+  await page.keyboard.press('Delete');await page.keyboard.press('Escape');
+  assert.equal(await editor.locator('body').evaluate(()=>window.pwhEditor.context().paragraph.text),original);
+  assert.equal(await input.evaluate(el=>el===document.activeElement),true);
+  // The document selection remains usable after closing the menu.
+  await input.press('Delete');
+  assert.equal(await editor.locator('body').evaluate(()=>window.pwhEditor.context().paragraph.text),'');
+  await input.press('Control+z');await input.press('ArrowRight');
   for(const id of ['edit','view','insert','format','page','table','tool']){
    await editor.locator(`[data-menu="${id}"] .menu-title`).click();
    assert.equal(await editor.locator('#icon-toolbar').getAttribute('data-ribbon-tab'),id);

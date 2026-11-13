@@ -23,7 +23,7 @@ HWP·HWPX 문서를 열고, 글과 표를 직접 편집하거나 선택한 부�
 | **Pwh Desktop** · Windows x64 | **[Microsoft Store에서 설치](https://apps.microsoft.com/detail/9NXGD60MHMT2)**하고 Store에서 업데이트합니다. 앱에서 선택적으로 AI를 연결하며 별도 Codex 설치 없이도 기본 편집을 사용할 수 있습니다. [Desktop 설치와 사용](docs/PWH-DESKTOP.md#설치와-사용) |
 | **Pwh 플러그인** · Codex 데스크톱 | Codex 대화와 나란히 한글 편집기를 엽니다. GitHub에서 소스와 플러그인 **ZIP**을 받을 수 있습니다. [Codex 플러그인 설치](docs/USER-GUIDE.md#codex-plugin) |
 
-**소스 기준**은 Pwh **0.6.58**, Desktop **0.1.39**, 공통 코어 **r29**입니다. 버전별 배포물, SHA-256과 검증 범위는 [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases)에서 확인할 수 있습니다. Windows 설치판에는 Microsoft Store의 심사·게시 이후 반영됩니다.
+**소스 기준**은 Pwh **0.6.59**, Desktop **0.1.40**, 공통 코어 **r29**입니다. 버전별 배포물, SHA-256과 검증 범위는 [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases)에서 확인할 수 있습니다. Windows 설치판에는 Microsoft Store의 심사·게시 이후 반영됩니다.
 
 Desktop의 신규 설치·업데이트는 **Microsoft Store**로 통일합니다. 기존 MSI 배포 파일은 보존하지만 이후 MSI 업데이트는 배포하지 않습니다. GitHub 릴리스는 **플러그인 ZIP·소스·고정 코어·검증 자료**를 계속 제공합니다. 기존 MSI 사용자는 [Store 이전 안내](docs/PWH-DESKTOP.md#설치와-사용)를 참고하세요.
 
@@ -73,6 +73,8 @@ Desktop 0.1.37부터 앱 상단에 **Store 업데이트 버튼**을 제공합니
 | --- | --- |
 | 글자 모양 / 문단 모양 | `Alt+L` / `Alt+T` |
 | 문자표 / 편집 용지 | `Ctrl+F10` / `F7` |
+| 문단·조판 부호 / 투명 선 | `Ctrl+G,T` · `Ctrl+G,C` / `Ctrl+G,B` |
+| 쪽 맞춤 / 폭 맞춤 / 100% | `Ctrl+G,P` / `Ctrl+G,W` / `Ctrl+G,Q` |
 | 셀 블록 선택 / 너비·높이 맞추기 | `F5` / 셀 블록에서 `W`·`H` |
 | 되돌리기 / 다시 실행 | `Ctrl+Z` / `Ctrl+Shift+Z` |
 | 인쇄 / 문서 탭 전환 (Desktop) | `Alt+P` / `Ctrl+Tab` |
@@ -82,6 +84,8 @@ Desktop 0.1.37부터 앱 상단에 **Store 업데이트 버튼**을 제공합니
 ## 조판 엔진과 검증
 
 공통 편집기의 탭별 그래픽 메뉴는 rhwp Studio 유래 메뉴·명령 처리에 연결됩니다. 한글에 익숙한 분류를 따르며 자체 SVG 아이콘을 사용합니다. 공통 코어 r29의 조판 계산과는 별도 변경입니다. [메뉴 사용법](docs/USER-GUIDE.md#contextual-ribbon) · [적용 계층과 검증](docs/RHWP-DIFFERENCES.md#contextual-ribbon)
+
+목록 메뉴는 문서 입력보다 먼저 키를 처리해 기존 선택을 보존합니다. 한글 IME·포커스 전환에서 겹글쇠가 잘못 이어지지 않도록 처리합니다. 공통·Desktop 빌드와 실제 입력의 검증 범위는 [메뉴·단축키 검증](docs/verification/MENU-SHORTCUTS.md)에 정리했습니다.
 
 상단 우클릭으로 기본·서식 도구 상자를 다시 펼칠 수 있습니다. 스타일 전체 목록과 글머리표 미리보기, 모양 복사의 글자·문단·셀 범위 선택을 기존 편집 명령에 연결합니다. 인라인 그림 뒤 단어 선택의 시작 위치와 표시된 `[감추기]` 앞 Delete 처리도 보완합니다. Desktop의 상단 붙이기는 네이티브 편집 명령을 사용하고 문서·선택·포커스가 바뀌면 취소합니다. 제품 정보창은 작은 창에서도 닫기 버튼을 유지하고 긴 본문만 스크롤합니다. [확인한 동작과 제한](docs/verification/CONTEXTUAL-RIBBON.md)
 

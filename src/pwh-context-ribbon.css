@@ -40,3 +40,4 @@
 .dialog-wrap.pwh-about-dialog{display:flex;flex-direction:column;max-width:calc(100vw - 32px);max-height:calc(100dvh - 32px);overflow:hidden}
 .pwh-about-dialog>.dialog-title,.pwh-about-dialog>.dialog-footer{flex:0 0 auto}
 .pwh-about-dialog>.dialog-body{min-height:0;overflow:auto;overscroll-behavior:contain}
+.menu-dropdown .md-item:focus-visible{outline:2px solid #426ec5;outline-offset:-2px;background:#e8effb}

@@ -336,4 +336,29 @@ export async function patchHancomKeyContexts(studio) {
      "      e.preventDefault();\n" +
      "      if ((this.cursor.getPosition().cellPath?.length ?? 0) <= 1) this.dispatcher.dispatch('table:insert-row-below');"],
   ]);
+  await edit('command/commands/view.ts', [["shortcutLabel: 'Alt+V,T'", "shortcutLabel: 'Ctrl+G,B'"]]);
+  await patchEditorChordRouting(studio);
+}
+
+// The shared input prologue owns all two-stroke shortcuts before IME and
+// cell-block routing. Remove the older parallel owners to prevent a second
+// dispatch, stale prefix flags and language-specific command paths.
+export async function patchEditorChordRouting(studio) {
+  const file=path.join(studio,'src/engine/input-handler-keyboard.ts');
+  let source=(await fs.readFile(file,'utf8')).replaceAll('\r\n','\n');
+  const marker='// Pwh unified editor chords';
+  if(source.includes(marker))return;
+  if(source.split('  if (handleTableCreateChord(this, e)) return;').length!==2)throw Error('Missing shared editor chord owner');
+  function remove(start,end){
+    const at=source.indexOf(start),until=source.indexOf(end,at+start.length);
+    if(at<0||until<at||source.indexOf(start,at+start.length)!==-1)throw Error('Unsupported legacy chord routing: '+start);
+    source=source.slice(0,at)+source.slice(until);
+  }
+  remove('/** 코드 단축키 → 커맨드 ID 매핑 (Ctrl+K,? 형태) */','/**\n * PgUp/PgDn 처리');
+  remove('  // ─── 1. 코드 단축키 2번째 키 처리','  // 연결선 드로잉 모드');
+  remove('    // [PR #786 후속] Ctrl+M chord 1번째/2번째 키','    // 조합 중에도 e.code로 판별 가능한 기본 Ctrl/Meta');
+  remove('    // Alt+V → Chord 대기','    const cmdId = matchShortcut(e, defaultShortcuts);');
+  remove('  // ─── 코드 단축키 1번째 키 (Ctrl+K / Ctrl+M)','  // 커맨드 시스템에 없는 직접 처리');
+  if(/_pendingChord[KMGV]|chordMap[KMGV]/.test(source))throw Error('Legacy editor chord owner remains');
+  await fs.writeFile(file,marker+'\n'+source);
 }
