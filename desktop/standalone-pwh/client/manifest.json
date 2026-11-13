@@ -6,7 +6,7 @@
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "desktop",
-    "sha256": "b7808597244151c006b4f84b21e53f701b5fbd5fae05919bd97090610e3487c8",
+    "sha256": "0320bf46ad6ebe80be3a00e96daf68dae5bb5c672fe5826ea381628ccceaead3",
     "files": [
       {
         "path": "desktop/standalone-pwh/build-desktop-editor.mjs",
@@ -30,7 +30,7 @@
       },
       {
         "path": "package.json",
-        "sha256": "e5179e5447d3e8c4c23c4bb15018e1a7576260cd6d366e2a65958f8a0e3a7ed4"
+        "sha256": "ea420ceb4bb18f90d0c1d00e02ed04acc5184842ed5f48ab9d3475f82296b292"
       },
       {
         "path": "scripts/build-inline.mjs",

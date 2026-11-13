@@ -11,7 +11,7 @@
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "common",
-    "sha256": "2a65c383db5cce4928696b11cc98df45d181f652a8f7ce6275e621165b3102f6",
+    "sha256": "61510ec9bb62d47ccd710db9bead51277d793b4e0c7e75cf78b9cfd860b8de1d",
     "files": [
       {
         "path": "docs/engine-patches/studio/clipboard-safety.patch",
@@ -23,7 +23,7 @@
       },
       {
         "path": "package.json",
-        "sha256": "e5179e5447d3e8c4c23c4bb15018e1a7576260cd6d366e2a65958f8a0e3a7ed4"
+        "sha256": "ea420ceb4bb18f90d0c1d00e02ed04acc5184842ed5f48ab9d3475f82296b292"
       },
       {
         "path": "scripts/build-inline.mjs",

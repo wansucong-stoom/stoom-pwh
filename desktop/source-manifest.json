@@ -115,7 +115,7 @@
       "path": "standalone-pwh/client/manifest.json",
       "source": "standalone-pwh/client/manifest.json",
       "size": 16247,
-      "sha256": "43ccf20058d443b9bbafe3050f9c7a3425a3cbe670e4c1b1d23097fdbb012629"
+      "sha256": "6d1fe4625fde8d997594626a4eecb0d704d6f1f095f2ac4716e3737bda134521"
     },
     {
       "path": "standalone-pwh/codex-agent.mjs",
