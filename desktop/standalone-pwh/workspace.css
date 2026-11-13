@@ -12,3 +12,5 @@
 /* Show the original light mark on a restrained dark backing. */
 .stoom-badge{display:inline-block;position:relative;flex:none;width:40px;height:40px;border-radius:8px;background:#071019;overflow:visible}
 .stoom-badge .stoom-mark{position:absolute;left:3px;top:5.5px}
+
+#workspace-update,#desktop-update{white-space:nowrap;flex:none}#workspace-update[data-available=true],#desktop-update[data-available=true]{background:#17394c;color:#fff;border-color:#17394c}#workspace-update[data-available=true]::before,#desktop-update[data-available=true]::before{content:"";display:inline-block;width:6px;height:6px;margin-right:6px;border-radius:50%;background:#8ee8ed}

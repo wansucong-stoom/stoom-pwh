@@ -16,6 +16,12 @@ MSIX는 Desktop의 별도 포장 경로입니다. 조판 코어·공통 편집�
 
 MSIX의 시작 메뉴·작업 표시줄·문서 연결은 Windows 패키지 식별자를 사용합니다. 실행기가 OS에서 실제 AppUserModelID를 읽어 자식 Electron 창으로 전달합니다. 아이콘은 저장소에 복사한 승인된 STOOM Pwh 제품 자산에서 생성합니다.
 
+## 앱 안의 업데이트 확인
+
+Desktop 0.1.37부터 정식 Store 패키지의 신원으로 Windows Store API를 조회합니다. 결과가 실제로 제공되는 업데이트일 때만 알림을 표시하고 버튼으로 해당 제품의 Store 페이지를 엽니다. GitHub 공개 버전과 Store 설치 가능 버전은 구분합니다. 조회 실패는 최신 상태로 표시하지 않으며 시험 MSIX와 MSI의 채널 차단을 유지합니다. [사용 안내](PWH-DESKTOP.md#store-update-notice) · [실제 패키지 조회와 모형 UI 시험의 구분](verification/CORE-R29.md)
+
+보조 실행 파일은 저장소의 C# 소스로 .NET Framework 컴파일러에서 빌드해 패키지에 포함합니다. 런타임에 PowerShell 실행 정책을 완화하지 않습니다. Store 서명과 게시 완료는 별도 심사 단계이며, 기능이 없는 이전 설치판은 Store에서 한 번 갱신해야 합니다.
+
 ## 빌드
 
 MSI 빌드와 같은 Windows x64 입력에 Windows SDK의 `makeappx.exe`를 추가로 준비합니다. 자산 변환에는 Windows PowerShell/System.Drawing을 사용하며, 실행 정책 옵션은 해당 빌드 자식 프로세스에만 적용하고 시스템 설정을 바꾸지 않습니다.

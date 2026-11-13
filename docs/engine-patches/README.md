@@ -8,10 +8,17 @@
 <a id="cause-and-scope"></a>
 ## 원인과 적용 범위
 
-Studio의 선택적 upstream 반영은 코어 88개 패치와 분리합니다. [클립보드·교차 구역 선택 패치](studio/clipboard-safety.patch)와 [Pwh 적용 스크립트](../../scripts/patch-clipboard-safety.mjs)는 rhwp 0.9.0의 관련 수정 세 건을 가져오고, 취소 즉시 진행 상태 해제·포커스 이탈 기록·rich 복사 실패 시 원문 보존을 추가합니다. [검토표와 검증 범위](../UPSTREAM-0.9-REVIEW.md)
+Studio의 선택적 upstream 반영은 코어 90개 패치와 분리합니다. [클립보드·교차 구역 선택 패치](studio/clipboard-safety.patch)와 [Pwh 적용 스크립트](../../scripts/patch-clipboard-safety.mjs)는 rhwp 0.9.0의 관련 수정 세 건을 가져오고, 취소 즉시 진행 상태 해제·포커스 이탈 기록·rich 복사 실패 시 원문 보존을 추가합니다. [검토표와 검증 범위](../UPSTREAM-0.9-REVIEW.md)
 
 한글 호환 단축키의 편집 상태 분기는 [Pwh 공통 Studio 빌드 패치](../../scripts/patch-hancom-key-contexts.mjs)에 있습니다. 고정 크기 표 조절과 행 삭제는 r22 코어 API를 사용합니다. [편집기 변경과 적용 범위](../RHWP-DIFFERENCES.md#한글-호환-단축키의-편집-상태-구분)
 
+
+<a id="inline-object-cursor-and-grouped-textbox"></a>
+### 89~90번 묶음 글상자와 본문 인라인 개체
+
+r29의 [89번 패치](rhwp-0.8.7-unique-grouped-textbox-editing.patch)는 묶음 안에 글상자가 하나인 경우 조회·수정·커서 적중이 같은 원본을 사용하게 합니다. 여러 이야기가 있는 묶음은 추정하지 않습니다. [90번 패치](rhwp-0.8.7-body-inline-object-range.patch)는 인라인 개체 슬롯 조회와 논리 범위 삭제를 추가하며 기존 메타데이터 갱신·조각 복원을 사용합니다. 기존 88개 패치를 앞에 유지합니다.
+
+[공통 Studio 연결](../../scripts/patch-inline-object-cursors.mjs)은 본문 커서의 개체 앞뒤 정보, 줄 선택, 복사·삭제·드래그와 표 좌우 바깥의 적중 판정을 함께 처리합니다. 이 빌드 스크립트는 고정 입력의 앵커가 달라지면 실패하며 공통·Desktop 번들 모두에 적용합니다. 문서·쪽·표 번호 조건이나 조판부호 클릭 기능은 추가하지 않습니다. [검증과 남은 제한](../verification/CORE-R29.md)
 
 <a id="nested-paragraph-and-delete-metadata"></a>
 ### 87~88번 개체 삭제 메타데이터와 중첩 문단 서식

@@ -10,12 +10,13 @@
  window.pwhRecentColors=async color=>(await tool('pwh_client_recent_colors',color?{color}:{})).structuredContent?.colors||[];
  window.addEventListener('pwh-status',event=>status(String(event.detail)));
  window.pwhReadNativeClipboard=async()=>{const result=await tool('pwh_client_clipboard',{});return result._meta?.['pwh/clipboard']||{html:'',text:''};};
+ const documentChunkCap=()=>window.__PWH_DESKTOP__===true?2*1024*1024:512*1024;
  const sha=async bytes=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),x=>x.toString(16).padStart(2,'0')).join('');
- async function asset(kind,documentId=state.documentId,updateState=true){let offset=0,hash,buffer;do{const r=await tool('pwh_client_asset',{kind,offset,...(hash?{expectedSha256:hash}:{}),...(documentId?{documentId}:{})}),m=r.structuredContent;
- if(!m||m.offset!==offset||!Number.isSafeInteger(m.totalBytes)||m.totalBytes<1||m.totalBytes>(kind==='document'?64:32)*1024*1024)throw Error('문서 자산 전송 오류');
+ async function asset(kind,documentId=state.documentId,updateState=true){let offset=0,hash,buffer;do{const r=await tool('pwh_client_asset',{kind,offset,...(kind==='document'?{maxChunkBytes:documentChunkCap()}:{}),...(hash?{expectedSha256:hash}:{}),...(documentId?{documentId}:{})}),m=r.structuredContent;
+ if(!m||m.offset!==offset||!Number.isSafeInteger(m.totalBytes)||m.totalBytes<1||(kind==='wasm'&&m.totalBytes>32*1024*1024))throw Error('문서 자산 전송 오류');
  if(!buffer){hash=m.sha256;buffer=new Uint8Array(m.totalBytes);}if(hash!==m.sha256||buffer.length!==m.totalBytes)throw Error('문서가 전송 중 변경되었습니다.');
  if(kind==='document'&&updateState){state.source=m.source;state.sourceSha256=m.sha256;state.recoveryEligible=m.totalBytes<=8*1024*1024;document.getElementById('pwh-title').textContent=state.displayName||m.name;}
- const bytes=Uint8Array.from(atob(r._meta?.['pwh/client-bytes']||''),x=>x.charCodeAt(0));if(!bytes.length||bytes.length>512*1024||offset+bytes.length>buffer.length)throw Error('문서 청크 오류');buffer.set(bytes,offset);offset+=bytes.length;
+ const bytes=base64ToBytes(r._meta?.['pwh/client-bytes']||'');if(!bytes.length||bytes.length>(kind==='document'?documentChunkCap():512*1024)||offset+bytes.length>buffer.length)throw Error('문서 청크 오류');buffer.set(bytes,offset);offset+=bytes.length;
  }while(offset<buffer.length);if(await sha(buffer)!==hash)throw Error('문서 지문 검증 실패');return buffer;}
  let fontInstall;
  const readFontFace=createVerifiedFontReader();
@@ -110,7 +111,7 @@
   let offset=0;const bytes=new Uint8Array(image.totalBytes);if(bytes.length>8*1024*1024)throw Error('교체 이미지가 너무 큽니다.');
   while(offset<bytes.length){const r=await tool('pwh_client_image_asset',{assetId:image.assetId,sessionId:state.sessionId,offset}),m=r.structuredContent;
    if(m.offset!==offset||m.sha256!==image.sha256||m.totalBytes!==bytes.length)throw Error('이미지 전송 정보 오류');
-   const part=Uint8Array.from(atob(r._meta?.['pwh/image-bytes']||''),x=>x.charCodeAt(0));if(!part.length||part.length>512*1024||offset+part.length>bytes.length)throw Error('이미지 청크 오류');bytes.set(part,offset);offset+=part.length;
+   const part=base64ToBytes(r._meta?.['pwh/image-bytes']||'');if(!part.length||part.length>512*1024||offset+part.length>bytes.length)throw Error('이미지 청크 오류');bytes.set(part,offset);offset+=part.length;
   }
   if(await sha(bytes)!==image.sha256)throw Error('이미지 SHA 검증 실패');
   const bitmap=await createImageBitmap(new Blob([bytes],{type:image.mediaType}));try{if(bitmap.width!==image.width||bitmap.height!==image.height)throw Error('이미지 실제 크기 불일치');}finally{bitmap.close();}return bytes;
@@ -136,12 +137,12 @@
    if(choice.cancelled){status('저장을 취소했습니다.');return;}
    const artifact=window.pwhEditor.export(),exportSeq=window.pwhEditor.context().documentState.changeSeq;
    if(artifact.contentLoss.count)throw Error('내용 손실이 보고되어 저장하지 않았습니다.');
-   const bytes=artifact.bytes;if(bytes.length>64*1024*1024)throw Error('현재 문서 저장 한도는 64 MiB입니다.');
-   const started=(await tool('pwh_client_save_begin',{documentId:state.documentId,saveTicket:choice.saveTicket,totalBytes:bytes.length,expectedSourceSha256:state.sourceSha256,documentSha256:await sha(bytes)})).structuredContent;
+   const bytes=artifact.bytes;
+   const started=(await tool('pwh_client_save_begin',{documentId:state.documentId,saveTicket:choice.saveTicket,totalBytes:bytes.length,maxChunkBytes:documentChunkCap(),expectedSourceSha256:state.sourceSha256,documentSha256:await sha(bytes)})).structuredContent;
    transferId=started.transferId;
    for(let offset=0;offset<bytes.length;){
-    const part=bytes.subarray(offset,Math.min(offset+started.chunkBytes,bytes.length));let encoded='';for(let i=0;i<part.length;i+=8192)encoded+=String.fromCharCode(...part.subarray(i,i+8192));
-    const result=(await tool('pwh_client_save_chunk',{transferId,offset,base64:btoa(encoded)})).structuredContent;
+    const part=bytes.subarray(offset,Math.min(offset+started.chunkBytes,bytes.length));
+    const result=(await tool('pwh_client_save_chunk',{transferId,offset,base64:bytesToBase64(part)})).structuredContent;
     if(result.nextOffset!==offset+part.length)throw Error('저장 전송 순서가 일치하지 않습니다.');offset=result.nextOffset;
     status('문서 저장 중 '+Math.round(offset/bytes.length*100)+'%');
    }

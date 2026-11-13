@@ -23,8 +23,12 @@ export function bodyPositionFromLogical(doc,pos) {
   const textOffset=doc.logicalToTextOffset(pos.sectionIndex,pos.paragraphIndex,logicalOffset);
   const {bodyCursor:_old,...plain}=pos;
   const result={...plain,charOffset:textOffset};
-  if(noteAt(doc,pos,logicalOffset,'forward')||noteAt(doc,pos,logicalOffset,'backward'))
-    result.bodyCursor={sectionIndex:pos.sectionIndex,paragraphIndex:pos.paragraphIndex,textOffset,logicalOffset};
+  const canonicalOffset=doc.textToLogicalOffset(pos.sectionIndex,pos.paragraphIndex,textOffset);
+  const beforeSlot=typeof doc.getLogicalLength==='function'
+    &&logicalOffset<doc.getLogicalLength(pos.sectionIndex,pos.paragraphIndex)
+    &&doc.logicalToTextOffset(pos.sectionIndex,pos.paragraphIndex,logicalOffset+1)===textOffset;
+  if(canonicalOffset!==logicalOffset||beforeSlot||noteAt(doc,pos,logicalOffset,'forward')||noteAt(doc,pos,logicalOffset,'backward'))
+    result.bodyCursor={sectionIndex:pos.sectionIndex,paragraphIndex:pos.paragraphIndex,textOffset,logicalOffset,canonicalOffset};
   return result;
 }
 
@@ -41,4 +45,12 @@ export function bodyPositionToLogical(doc,pos) {
 
 export function bodyPositionFromText(doc,pos){
   return isBodyPosition(pos)?bodyPositionFromLogical(doc,{...pos,charOffset:bodyPositionToLogical(doc,pos)}):pos;
+}
+
+export function compareBodyCursorAffinity(a,b){
+  if(!isBodyPosition(a)||!isBodyPosition(b)||a.sectionIndex!==b.sectionIndex||a.paragraphIndex!==b.paragraphIndex||a.charOffset!==b.charOffset)return 0;
+  const x=hasBodyCursorAffinity(a)?a.bodyCursor:null,y=hasBodyCursorAffinity(b)?b.bodyCursor:null;
+  if(!x&&!y)return 0;
+  const base=x?.canonicalOffset??y?.canonicalOffset??a.charOffset;
+  return Math.sign((x?.logicalOffset??base)-(y?.logicalOffset??base));
 }

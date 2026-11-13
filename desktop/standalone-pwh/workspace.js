@@ -4,7 +4,7 @@
  window.__pwhWorkspaceCloseProtocol=true;
  window.__pwhDropFiles=new Map();
  function publishWorkspace(){
-  const view={type:'pwh-workspace-view',tabs:[...tabs.values()].map(t=>({id:t.id,name:t.title||'새 문서',dirty:t.dirty,active:t.id===active})),aiOpen,aiUserChoice,locked:updateLocked||closeLocked||starting,status:$('workspace-status').textContent,update:{hidden:$('workspace-update').hidden,disabled:$('workspace-update').disabled,text:$('workspace-update').textContent},codex:{hidden:$('codex-plugin-retry').hidden,disabled:$('codex-plugin-retry').disabled}};
+  const view={type:'pwh-workspace-view',tabs:[...tabs.values()].map(t=>({id:t.id,name:t.title||'새 문서',dirty:t.dirty,active:t.id===active})),aiOpen,aiUserChoice,locked:updateLocked||closeLocked||starting,status:$('workspace-status').textContent,update:{hidden:$('workspace-update').hidden,disabled:$('workspace-update').disabled,text:$('workspace-update').textContent,title:$('workspace-update').title,available:$('workspace-update').dataset.available==='true'},codex:{hidden:$('codex-plugin-retry').hidden,disabled:$('codex-plugin-retry').disabled}};
   for(const tab of tabs.values())tab.frame.contentWindow?.postMessage(view,tab.origin);
  }
 
@@ -163,7 +163,7 @@
  window.addEventListener('pagehide',()=>navigator.sendBeacon('tabs/closing'));
  async function openDroppedFiles(input){
   if(starting||updateLocked||closeLocked){$('workspace-status').textContent='현재 작업을 마친 뒤 파일을 열어 주세요.';return;}
-  const files=Array.from(input||[]);if(!files.length)return;if(files.length>12||files.some(file=>!(file instanceof File)||!/\.hwpx?$/i.test(file.name)||file.size<8||file.size>64*1024*1024)){$('workspace-status').textContent='64 MiB 이하의 HWP 또는 HWPX 파일을 놓아 주세요.';return;}
+  const files=Array.from(input||[]);if(!files.length)return;if(files.length>12||files.some(file=>!(file instanceof File)||!/\.hwpx?$/i.test(file.name)||file.size<8)){$('workspace-status').textContent='HWP 또는 HWPX 파일을 놓아 주세요.';return;}
   if(tabs.size+files.length>12){$('workspace-status').textContent='문서는 최대 12개까지 열 수 있습니다.';return;}
   starting=true;setFrozen();const id=crypto.randomUUID();window.__pwhDropFiles.set(id,files);
   try{
@@ -191,8 +191,37 @@
  $('home-open').onclick=()=>void openFromHome('tabs/open');
  $('new-tab').onclick=async()=>{if(starting||updateLocked||closeLocked)return;starting=true;setFrozen();try{add(await api('tabs/new'));$('workspace-status').textContent='';}catch(e){$('workspace-status').textContent=e.message;}finally{starting=false;setFrozen();}};
  async function documentsReady(){if(starting||closingTabs||closingWindow)return false;const states=await Promise.all([...tabs.values()].map(inspect));return !starting&&!closingTabs&&!closingWindow&&states.every(state=>state&&state.ready===true&&!state.dirty&&!state.busy);}
+ let updateChannel=null,checkingUpdate=null,lastUpdateCheck=0,storeOpening=false;
+ const updateButton=$('workspace-update');
+ updateButton.setAttribute('aria-live','polite');
+ async function refreshUpdate(force=false){
+  if(checkingUpdate||storeOpening||updateLocked)return;
+  if(!force&&Date.now()-lastUpdateCheck<60000)return;
+  lastUpdateCheck=Date.now();
+  checkingUpdate=(async()=>{
+   try{
+    const available=await api('update/status');updateChannel=available.channel||'msi';
+    if(updateChannel==='microsoft-store'){
+     const hasUpdate=available.status==='available'&&available.available===true;
+     updateButton.hidden=false;updateButton.dataset.available=String(hasUpdate);
+     updateButton.textContent=hasUpdate?'새 업데이트 · Store에서 업데이트':'Store에서 업데이트 확인';
+     updateButton.title=hasUpdate?'Microsoft Store에서 새 버전을 받을 수 있습니다.':'Microsoft Store에서 Pwh Desktop의 업데이트를 확인합니다.';
+    }else if(available.version){
+     updateButton.textContent='업데이트 '+available.version;updateButton.title='새 버전 설치';updateButton.hidden=false;
+    }
+   }catch{}finally{checkingUpdate=null;}
+  })();
+  await checkingUpdate;
+ }
  $('workspace-update').onclick=async()=>{
-  const button=$('workspace-update');button.disabled=true;
+  const button=$('workspace-update');if(button.disabled)return;button.disabled=true;
+  if(updateChannel==='microsoft-store'){
+   storeOpening=true;
+   try{await api('update/store');}
+   catch(error){$('workspace-status').textContent=error.message;}
+   finally{storeOpening=false;button.disabled=false;}
+   return;
+  }
   try{
    if(!await documentsReady())throw Error('열린 문서를 저장하고 진행 중인 AI 작업을 마친 뒤 업데이트해 주세요.');
    $('workspace-status').textContent='업데이트를 내려받고 확인하고 있습니다.';await api('update/download');
@@ -202,5 +231,9 @@
   }catch(e){freeze(false);button.disabled=false;$('workspace-status').textContent=e.message;}
  };
  (async()=>{try{const initial=await api('tabs/initial');if(initial.home)showHome({focus:true});else add(initial);}catch(e){$('workspace-status').textContent=e.message;}})();
- (async()=>{try{const result=await api('update/result');if(result.message)$('workspace-status').textContent=result.message;const available=await api('update/status');if(available.version){const button=$('workspace-update');button.textContent='업데이트 '+available.version;button.title='새 버전 설치';button.hidden=false;}}catch{}})();
+ (async()=>{try{const result=await api('update/result');if(result.message)$('workspace-status').textContent=result.message;}catch{}await refreshUpdate(true);})();
+ const updatePoll=setInterval(()=>{if(!document.hidden)void refreshUpdate();},4*60*60*1000);
+ addEventListener('focus',()=>void refreshUpdate());
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refreshUpdate();});
+ addEventListener('pagehide',()=>clearInterval(updatePoll),{once:true});
 })();

@@ -1,3 +1,4 @@
+import {buildStoreUpdateCheck} from './build-store-update-check.mjs';
 import {promises as fs} from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
@@ -13,7 +14,7 @@ import {stageElectron} from '../release-source/scripts/stage-electron.mjs';
 import {brandElectron} from '../release-source/scripts/brand-electron.mjs';
 
 const root=path.dirname(fileURLToPath(import.meta.url)),workspace=path.dirname(root);
-const version=process.env.PWH_ZIP_VERSION||'0.1.36';
+const version=process.env.PWH_ZIP_VERSION||'0.1.37';
 if(!/^\d{1,3}\.\d{1,3}\.\d{1,5}$/.test(version)||version.split('.').some((n,i)=>Number(n)>(i===2?65535:255)))throw Error('ZIP 버전이 올바르지 않습니다.');
 const output=path.resolve(process.argv[2]||path.join(workspace,'dist',`PwhDesktop-${version}-offline.zip`));
 const runtimeArchive=process.env.PWH_OFFLINE_RUNTIME_ARCHIVE||path.join(os.homedir(),'.stoom-pwh','downloads',JSON.parse(await fs.readFile(new URL('../release-source/runtime-lock.json',import.meta.url),'utf8')).runtime.file);
@@ -33,7 +34,7 @@ const run=(program,args)=>new Promise((resolve,reject)=>{const p=spawn(program,a
 const unpack=path.join(stage,'unpack');await fs.mkdir(unpack);
 for(const entry of zipEntries(await fs.readFile(pwhZip))){const rel=entry.name.replace(/\/$/,'');if(!rel||path.isAbsolute(rel)||rel.split('/').includes('..'))throw Error('패키지 경로가 올바르지 않습니다.');const target=path.join(unpack,...rel.split('/'));if(entry.name.endsWith('/'))await fs.mkdir(target,{recursive:true});else{await fs.mkdir(path.dirname(target),{recursive:true});await fs.writeFile(target,entry.read(),{flag:'wx'});}}
 await fs.rename(path.join(unpack,'pwh'),path.join(pkg,'release-source'));
-for(const name of ['ai-providers.mjs','generated-image.mjs','recent-documents.mjs','codex-agent.mjs','codex-session.mjs','codex-native-host.mjs','codex-plugin-setup.mjs','chatgpt-auth.mjs','chatgpt-store.mjs','chatgpt-credentials.ps1','official-codex-runtime.mjs','CODEX-APACHE-LICENSE.txt','CODEX-NOTICE.txt','CODEX-RATATUI-MIT.txt','CODEX-RIPGREP-MIT.txt','CODEX-PCRE2-LICENSE.txt','rewrite.mjs','settings.mjs','convert-hwp.mjs','desktop-files.mjs','document-scan.mjs','editor-result-wait.mjs','steer-turn.mjs','version-info.mjs','update-check.mjs','update-helper.mjs','workspace-child.mjs','workspace-shell.mjs','window-close-controller.mjs','workspace.html','workspace.css','workspace.js','file-dialog.ps1','host.mjs','launch.mjs','app.html','app.css','app.js','stoom-mark-original.css','stoom-product-marks.css','Inter-variable.ttf','OFL-Inter.txt','font-provenance.json','stoom-mark.svg','stoom.ico'])await copy(path.join(root,name),path.join('standalone-pwh',name));
+for(const name of ['ai-providers.mjs','generated-image.mjs','recent-documents.mjs','codex-agent.mjs','codex-session.mjs','codex-native-host.mjs','codex-plugin-setup.mjs','chatgpt-auth.mjs','chatgpt-store.mjs','chatgpt-credentials.ps1','official-codex-runtime.mjs','CODEX-APACHE-LICENSE.txt','CODEX-NOTICE.txt','CODEX-RATATUI-MIT.txt','CODEX-RIPGREP-MIT.txt','CODEX-PCRE2-LICENSE.txt','rewrite.mjs','settings.mjs','convert-hwp.mjs','desktop-files.mjs','document-scan.mjs','editor-result-wait.mjs','steer-turn.mjs','version-info.mjs','update-check.mjs','store-update-check.mjs','update-helper.mjs','workspace-child.mjs','workspace-shell.mjs','window-close-controller.mjs','workspace.html','workspace.css','workspace.js','file-dialog.ps1','host.mjs','launch.mjs','app.html','app.css','app.js','stoom-mark-original.css','stoom-product-marks.css','Inter-variable.ttf','OFL-Inter.txt','font-provenance.json','stoom-mark.svg','stoom.ico'])await copy(path.join(root,name),path.join('standalone-pwh',name));
 if(!process.env.PWH_CODEX_RUNTIME_DIR||!path.isAbsolute(process.env.PWH_CODEX_RUNTIME_DIR))throw Error('검증할 공식 Codex 앱 서버 패키지 경로를 지정해 주세요.');
 await copyOfficialRuntime(process.env.PWH_CODEX_RUNTIME_DIR,path.join(pkg,'standalone-pwh','codex-runtime'));
 if(!process.env.PWH_ELECTRON_ARCHIVE||!path.isAbsolute(process.env.PWH_ELECTRON_ARCHIVE))throw Error('검증할 Electron 런타임 ZIP 경로를 지정해 주세요.');
@@ -48,6 +49,7 @@ await copy(path.join(workspace,'bridge','codex-image-host.mjs'),path.join('bridg
 await copy(process.execPath,path.join('node','node.exe'));
 await copy(path.join(root,'NODE-LICENSE.txt'),path.join('node','LICENSE.txt'));
 await buildNativeLauncher(path.join(pkg,'PwhDesktop.exe'));
+await buildStoreUpdateCheck(path.join(pkg,'standalone-pwh','store-update-check.exe'));
 await run(process.execPath,[path.join(pwhRoot,'scripts','setup.mjs'),'--runtime-root',path.join(pkg,'engine'),'--runtime-archive',runtimeArchive,'--skip-download']);
 const candidateDir=process.env.PWH_CORE_CANDIDATE_DIR;
 const coreCandidate=candidateDir?await stagePreviewCore({candidateDir:path.resolve(candidateDir),runtimeRoot:path.join(pkg,'engine'),pluginRoot:pwhRoot,lock}):null;

@@ -11,7 +11,7 @@ export async function convertHwp({executable,source,output,exec=execute}){
  const differences=String(stderr).split(/\r?\n/).filter(line=>/^\s*\[차이\]/.test(line));
  const layoutOnly=code===3&&Number.isInteger(result.verify?.diffCount)&&result.verify.diffCount>0&&differences.length===result.verify.diffCount&&differences.every(line=>/ linesegs: /.test(line));
  if(result.format!=='hwpx'||(code===0&&!result.verify?.identical)||(code===3&&!layoutOnly))throw Error('HWP 변환 시 문서 구조 차이가 확인되어 열기를 중단했습니다. 원본은 변경되지 않았습니다.');
- const st=await fs.lstat(output);if(!st.isFile()||st.isSymbolicLink()||st.size>64*1024*1024)throw Error('변환된 HWPX를 확인하지 못했습니다.');
+ const st=await fs.lstat(output);if(!st.isFile()||st.isSymbolicLink())throw Error('변환된 HWPX를 확인하지 못했습니다.');
  const bytes=await fs.readFile(output);if(bytes.subarray(0,2).toString()!=='PK')throw Error('변환된 HWPX 형식이 올바르지 않습니다.');
  return {layoutWarning:layoutOnly};
 }

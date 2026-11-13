@@ -1,12 +1,12 @@
 {
-  "sha256": "dc628be1d910219392261ac119f7902a1ec34abe8b5470c30f3e0b5c4a741fc7",
-  "baseVersion": "0.6.55",
-  "baseEditorSha256": "50b7f54a19b382cac03c75a543929891e74a3b17422c5821a4e8601da77659c6",
+  "sha256": "bda1608f065a9535ffd526481792e29f3b9eb66bb1aeea289a75bc58f5716d9d",
+  "baseVersion": "0.6.56",
+  "baseEditorSha256": "63bf28619a3fcba318fdc017d195d895be38f061a8262d148bf1df4e4063c10c",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "desktop",
-    "sha256": "e1b57996f9fe0faae0ad0d673531b83584efcc424a43cbab2935ffb427cd562a",
+    "sha256": "8751581d9528b126282c3a117fc1693f7160253fcafdda0f517973e085943210",
     "files": [
       {
         "path": "desktop/standalone-pwh/build-desktop-editor.mjs",
@@ -30,11 +30,11 @@
       },
       {
         "path": "package.json",
-        "sha256": "facd9c753f6583a9f607eac16323db8f52c435f081a6681fefb10b39ac7b3779"
+        "sha256": "af5eea4234559147c9b08cd78075ece96e8ae54a0984725fa2a2b18a996486d3"
       },
       {
         "path": "scripts/build-inline.mjs",
-        "sha256": "6f2f4d5b6b52c7c81e74b921e3ff08f4c9ddeaeeaee19fc2bad9c2867abd81b2"
+        "sha256": "b2e27e79f11f5f8594ed2c2e8746776096716a9b336df0c03983aeb9eec1e2f9"
       },
       {
         "path": "scripts/bundle-client.mjs",
@@ -42,7 +42,7 @@
       },
       {
         "path": "scripts/editor-build-contract.mjs",
-        "sha256": "236d7c6902ec485a7a5d35e00cbb4a7cf191f7923ce09dada72e58d8de8f90b9"
+        "sha256": "f2b01a8a10f8d5a4753d8e77ba738d72a2d04c2a2eafbcb6ad0e91a500c8b7d9"
       },
       {
         "path": "scripts/patch-body-cursor-contract.mjs",
@@ -69,6 +69,10 @@
         "sha256": "af100d1ab6e4d3be076f6cea4968f67f0f2c5c6ec9c44ce836b2fe4ff118c90f"
       },
       {
+        "path": "scripts/patch-inline-object-cursors.mjs",
+        "sha256": "e1661d65d6c90b03fc99742cee4559e14dc3d9da86921c3b4f97205cb889da28"
+      },
+      {
         "path": "scripts/patch-nested-paragraph-format.mjs",
         "sha256": "f732789420fc7f1fa01c67799a7dff6b46a2f335317199537b1c89e019d4d146"
       },
@@ -93,12 +97,16 @@
         "sha256": "8b09180ddee928667f597323695183eb34d0683133dc13502755b8ac304cc106"
       },
       {
+        "path": "src/base64-bytes.mjs",
+        "sha256": "a6a3225468b46d0ed2a787013a5bbc210b341300c59d7f69dc818d9bf34f3c5d"
+      },
+      {
         "path": "src/blank-compose.ts",
         "sha256": "9061717e712a0b4de7681c6903c15d84b97774fe9e8c760c01ab13efa68b76a6"
       },
       {
         "path": "src/body-cursor-position.mjs",
-        "sha256": "f2ba5a8d0be2594aded1a42cc8a2b743e6e5555f4bf8b04401050f563042e352"
+        "sha256": "110f341f27d7424d9e2f680890b8c6937ac0254dfcc97420582cfdd18905ad56"
       },
       {
         "path": "src/cell-border-grid.mjs",
@@ -118,7 +126,7 @@
       },
       {
         "path": "src/client-assets.mjs",
-        "sha256": "f4bb00117385bbb3b1695c9125c79a66a29d40a37a182e728fad12a8beb231a6"
+        "sha256": "e191390c7e77096608d83676835e280c371fda6c7ae8807957abf4e365fadafc"
       },
       {
         "path": "src/clipboard-structure.mjs",
@@ -147,6 +155,10 @@
       {
         "path": "src/document-state-cache.mjs",
         "sha256": "ebbf0ab3fdbc29927720de48b0f2c0a0a3664da7cbdecb14e6fd37fe66415bf6"
+      },
+      {
+        "path": "src/document-transfer.mjs",
+        "sha256": "bc041632c1125101354ad1aacfa255e7cfe5309008f6589c6e14515116dad72a"
       },
       {
         "path": "src/editor-client.mjs",
@@ -186,7 +198,7 @@
       },
       {
         "path": "src/inline-host.js",
-        "sha256": "d11eced1be50e464d8be8bbbb867c65effcfbb508cfb9d2408a26d51cf863ba1"
+        "sha256": "bc2f398785b5c6eb0b3dcbe3a8cdbc8e245c20136e4ef6f1755fda314064563f"
       },
       {
         "path": "src/inline-image-urls.mjs",
@@ -195,6 +207,10 @@
       {
         "path": "src/inline-recovery.js",
         "sha256": "03c8b1c1973d05b3744a2d0e82c16c0ca250a0986743a1b6f474c5e51a71cc63"
+      },
+      {
+        "path": "src/inline-table-boundary.mjs",
+        "sha256": "ca74cf08b0b7fc4b617be6da98a2939d5dba1d82e38808e2dc1300274357bc52"
       },
       {
         "path": "src/live.mjs",
@@ -298,7 +314,7 @@
       },
       {
         "path": "src/server.mjs",
-        "sha256": "4bad4be784fe135c5db27e3fce2ed0a970dce493065337af96ae180eb25398ed"
+        "sha256": "33f069ede0e931ecefd4bd4727f2dd8fcf7a55597d09dbbba0ea4e4002adc88f"
       },
       {
         "path": "src/studio-inline-adapter.ts",

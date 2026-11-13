@@ -27,5 +27,5 @@ export async function createElectronController({onReady=()=>{},onFailure=()=>{}}
   socket.write(JSON.stringify({id,method,params})+'\n',error=>{if(error&&pending.has(id)){clearTimeout(timer);pending.delete(id);reject(error);}});
  });
  const close=()=>{if(closed)return;closed=true;fail(Error('Pwh 앱 창 연결이 종료되었습니다.'));socket?.end();server.close();};
- return {pipe,token,close,attachProcess(child){child.once('error',fail);child.once('exit',close);},requestClose:()=>void send('close').catch(onFailure),resolveDroppedFiles:(_url,id,count)=>send('resolve-drop',{id,count})};
+ return {pipe,token,close,attachProcess(child){child.once('error',fail);child.once('exit',close);},requestClose:()=>void send('close').catch(onFailure),openStoreUpdate:()=>send('open-store-update'),resolveDroppedFiles:(_url,id,count)=>send('resolve-drop',{id,count})};
 }

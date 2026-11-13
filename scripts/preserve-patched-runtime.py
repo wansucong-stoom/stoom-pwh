@@ -247,6 +247,11 @@ def main():
                        'tests/legacy-symbol-run-advance.test.mjs',
                        'tests/stored-frame-visible-content-fit.test.mjs',
                        'tests/stored-label-frame-source.test.mjs')
+    fidelity_tests += ('tests/body-inline-range.test.mjs', 'tests/grouped-textbox.test.mjs',
+                       'tests/inline-object-cursors-browser.test.mjs', 'tests/base64-bytes.test.mjs',
+                       'tests/helpers/grouped-textbox-fixture.mjs',
+                       'tests/nested-paragraph-format.test.mjs', 'tests/deleted-control-format-boundaries.test.mjs',
+                       'tests/deleted-control-source-metadata.test.mjs')
     for name in fidelity_tests:
         core_inputs[name] = regular(project/name)
         build_inputs['pwh/'+name] = regular(project/name)

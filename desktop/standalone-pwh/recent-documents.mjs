@@ -2,7 +2,6 @@ import {promises as fs} from 'node:fs';
 import path from 'node:path';
 import {createHash, randomUUID} from 'node:crypto';
 
-const maximumFileBytes = 64 * 1024 * 1024;
 const maximumRecent = 30;
 const validId = id => typeof id === 'string' && /^[a-f0-9]{64}$/.test(id);
 const validFile = file => typeof file === 'string' && path.isAbsolute(file) && file.length <= 32767 && /\.hwpx?$/i.test(file);
@@ -27,7 +26,7 @@ export function createRecentDocuments(dataRoot) {
   async function available(file) {
     try {
       const stat = await fs.lstat(file);
-      return stat.isFile() && !stat.isSymbolicLink() && stat.size <= maximumFileBytes;
+      return stat.isFile() && !stat.isSymbolicLink();
     } catch {return false;}
   }
   return {
