@@ -1,12 +1,12 @@
 {
-  "sha256": "c651317b5d532a17aa3f1844905a8c1bc1230a8dc97727bbf3aada4d1d144a85",
-  "baseVersion": "0.6.57",
-  "baseEditorSha256": "d8df730a8ac6cbe1146f6fb9739615257f613c632a99d4c90b962821ee9b2ebf",
+  "sha256": "958b755bc1e39671fed696182f66ccb1080b57c4d87c4b92a66ba74eb1a8ff99",
+  "baseVersion": "0.6.58",
+  "baseEditorSha256": "c5765017a23986dedd1ec9afb971eb2aeae5c2844d5c03afa551b628e9766f0f",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "desktop",
-    "sha256": "37d3cfb6fc7087911568ca6d1972ef34b19701efa729579ddb914035a209cef5",
+    "sha256": "b7808597244151c006b4f84b21e53f701b5fbd5fae05919bd97090610e3487c8",
     "files": [
       {
         "path": "desktop/standalone-pwh/build-desktop-editor.mjs",
@@ -30,7 +30,7 @@
       },
       {
         "path": "package.json",
-        "sha256": "bf868df5005a486d7c1358ee7a37d625acd7d94f35279dc0ca9283f762aaf36c"
+        "sha256": "e5179e5447d3e8c4c23c4bb15018e1a7576260cd6d366e2a65958f8a0e3a7ed4"
       },
       {
         "path": "scripts/build-inline.mjs",
@@ -58,7 +58,7 @@
       },
       {
         "path": "scripts/patch-context-ribbon.mjs",
-        "sha256": "93f8ad331936ae25b5065a608b1ec2f5b6f9c28a5b513e3c1519e85d362aa208"
+        "sha256": "e8c22ea94a2f447e55b82aaee8afc10c912e166d125f103ab5e7ee3ce3ea10d7"
       },
       {
         "path": "scripts/patch-control-marker-delete.mjs",
@@ -314,7 +314,7 @@
       },
       {
         "path": "src/pwh-context-ribbon.css",
-        "sha256": "7d0fc26949a8b45bf32cc1b879dfa25ce455b12487c77967d03da6a55828c81b"
+        "sha256": "61faa2c28c0d49196fb148ebb70757f11e22f1a12daf08befdbd72f4b2d9ece6"
       },
       {
         "path": "src/pwh-context-ribbon.ts",

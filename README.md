@@ -23,7 +23,7 @@ HWP·HWPX 문서를 열고, 글과 표를 직접 편집하거나 선택한 부�
 | **Pwh Desktop** · Windows x64 | **[Microsoft Store에서 설치](https://apps.microsoft.com/detail/9NXGD60MHMT2)**하고 Store에서 업데이트합니다. 앱에서 선택적으로 AI를 연결하며 별도 Codex 설치 없이도 기본 편집을 사용할 수 있습니다. [Desktop 설치와 사용](docs/PWH-DESKTOP.md#설치와-사용) |
 | **Pwh 플러그인** · Codex 데스크톱 | Codex 대화와 나란히 한글 편집기를 엽니다. GitHub에서 소스와 플러그인 **ZIP**을 받을 수 있습니다. [Codex 플러그인 설치](docs/USER-GUIDE.md#codex-plugin) |
 
-**소스 기준**은 Pwh **0.6.57**, Desktop **0.1.38**, 공통 코어 **r29**입니다. 버전별 배포물, SHA-256과 검증 범위는 [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases)에서 확인할 수 있습니다. Windows 설치판에는 Microsoft Store의 심사·게시 이후 반영됩니다.
+**소스 기준**은 Pwh **0.6.58**, Desktop **0.1.39**, 공통 코어 **r29**입니다. 버전별 배포물, SHA-256과 검증 범위는 [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases)에서 확인할 수 있습니다. Windows 설치판에는 Microsoft Store의 심사·게시 이후 반영됩니다.
 
 Desktop의 신규 설치·업데이트는 **Microsoft Store**로 통일합니다. 기존 MSI 배포 파일은 보존하지만 이후 MSI 업데이트는 배포하지 않습니다. GitHub 릴리스는 **플러그인 ZIP·소스·고정 코어·검증 자료**를 계속 제공합니다. 기존 MSI 사용자는 [Store 이전 안내](docs/PWH-DESKTOP.md#설치와-사용)를 참고하세요.
 
@@ -83,7 +83,7 @@ Desktop 0.1.37부터 앱 상단에 **Store 업데이트 버튼**을 제공합니
 
 공통 편집기의 탭별 그래픽 메뉴는 rhwp Studio 유래 메뉴·명령 처리에 연결됩니다. 한글에 익숙한 분류를 따르며 자체 SVG 아이콘을 사용합니다. 공통 코어 r29의 조판 계산과는 별도 변경입니다. [메뉴 사용법](docs/USER-GUIDE.md#contextual-ribbon) · [적용 계층과 검증](docs/RHWP-DIFFERENCES.md#contextual-ribbon)
 
-상단 우클릭으로 기본·서식 도구 상자를 다시 펼칠 수 있습니다. 스타일 전체 목록과 글머리표 미리보기, 모양 복사의 글자·문단·셀 범위 선택을 기존 편집 명령에 연결합니다. 인라인 그림 뒤 단어 선택의 시작 위치와 표시된 `[감추기]` 앞 Delete 처리도 보완합니다. Desktop의 상단 붙이기는 네이티브 편집 명령을 사용하고 문서·선택·포커스가 바뀌면 취소합니다. [확인한 동작과 제한](docs/verification/CONTEXTUAL-RIBBON.md)
+상단 우클릭으로 기본·서식 도구 상자를 다시 펼칠 수 있습니다. 스타일 전체 목록과 글머리표 미리보기, 모양 복사의 글자·문단·셀 범위 선택을 기존 편집 명령에 연결합니다. 인라인 그림 뒤 단어 선택의 시작 위치와 표시된 `[감추기]` 앞 Delete 처리도 보완합니다. Desktop의 상단 붙이기는 네이티브 편집 명령을 사용하고 문서·선택·포커스가 바뀌면 취소합니다. 제품 정보창은 작은 창에서도 닫기 버튼을 유지하고 긴 본문만 스크롤합니다. [확인한 동작과 제한](docs/verification/CONTEXTUAL-RIBBON.md)
 
 Pwh와 Pwh Desktop은 [rhwp](https://github.com/edwardkim/rhwp) 0.8.7 기반 공통 WASM 코어를 사용합니다. r29의 [코어 변경 기록](docs/RHWP-DIFFERENCES.md)에서 수정 범위를 확인할 수 있습니다. r28 대비 익명 TEST 문서 5개 **245쪽**의 쪽 수·글자 좌표·인쇄 SVG와 저장·재열기 결과를 유지했습니다. 이번 편집 경로 수정은 새 한컴 PDF 일치도 개선 수치와 구분합니다. [전후 검증과 제한](docs/verification/CORE-R29.md)
 

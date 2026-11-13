@@ -5,12 +5,12 @@ import {createServer} from 'node:http';
 
 test('ChatGPT settings require a user click, show plan disclosure and support account controls', {skip:process.env.PWH_BROWSER_TESTS!=='1',timeout:60000},async()=>{
  const {chromium}=await import(process.env.PWH_PLAYWRIGHT_MODULE||'playwright');const root=new URL('../desktop/standalone-pwh/',import.meta.url);
- const files=Object.fromEntries(await Promise.all(['app.html','app.js','app.css','stoom-mark.svg','stoom.ico'].map(async name=>[name,await fs.readFile(new URL(name,root))])));
+ const files=Object.fromEntries(await Promise.all(['app.html','app.js','app.css','paste-bridge.mjs','stoom-mark.svg','stoom.ico'].map(async name=>[name,await fs.readFile(new URL(name,root))])));
  let begins=0,welcomed=false,active=false;const settings={provider:'chatgpt',localBaseUrl:'http://127.0.0.1:11434/v1',localModel:'',codexModel:'',codexReasoningEffort:''};
  const server=createServer(async(req,res)=>{const u=new URL(req.url,'http://localhost');const send=data=>{res.setHeader('content-type','application/json');res.end(JSON.stringify(data));};
   if(req.method==='GET'&&u.pathname==='/'){res.setHeader('content-type','text/html');return res.end(files['app.html']);}
   if(req.method==='GET'&&u.pathname==='/editor'){res.setHeader('content-type','text/html');return res.end('<div id="editor-area"></div>');}
-  if(req.method==='GET'&&files[u.pathname.slice(1)]){res.setHeader('content-type',u.pathname.endsWith('.js')?'text/javascript':u.pathname.endsWith('.css')?'text/css':u.pathname.endsWith('.svg')?'image/svg+xml':'image/x-icon');return res.end(files[u.pathname.slice(1)]);}
+  if(req.method==='GET'&&files[u.pathname.slice(1)]){res.setHeader('content-type',/\.m?js$/.test(u.pathname)?'text/javascript':u.pathname.endsWith('.css')?'text/css':u.pathname.endsWith('.svg')?'image/svg+xml':'image/x-icon');return res.end(files[u.pathname.slice(1)]);}
   let text='';for await(const part of req)text+=part;const body=JSON.parse(text||'{}');
   if(u.pathname==='/initialize')return send({document:{name:'document.hwpx'}});
   if(u.pathname==='/settings/read')return send(settings);

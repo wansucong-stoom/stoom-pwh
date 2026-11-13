@@ -10,7 +10,7 @@
 
 [탭별 그래픽 메뉴 패치](../../scripts/patch-context-ribbon.mjs)는 rhwp Studio 유래 메뉴 입력·도구 상자·명령 상태 조회를 Pwh 공통 편집기에서 보완합니다. 공통과 Desktop 번들에 함께 적용하며 코어 r29의 90개 패치와 WASM은 유지합니다. [소스·검증·지원 제한](../RHWP-DIFFERENCES.md#contextual-ribbon)
 
-같은 빌드에서 [모양 복사 범위](../../scripts/patch-format-copy-options.mjs), [표시된 감추기 부호 삭제](../../scripts/patch-control-marker-delete.mjs), [상단 붙이기 연결](../../scripts/patch-native-paste-command.mjs)을 별도로 적용합니다. 원본 앵커가 맞지 않으면 빌드를 중단하고, 스크립트와 새 UI 소스는 공통·Desktop 입력 해시에 포함합니다. 인라인 그림 뒤 단어 선택은 공통 편집기의 끝점 변환만 보완하며 기존 r29 코어를 사용합니다.
+같은 빌드에서 [모양 복사 범위](../../scripts/patch-format-copy-options.mjs), [표시된 감추기 부호 삭제](../../scripts/patch-control-marker-delete.mjs), [상단 붙이기 연결](../../scripts/patch-native-paste-command.mjs)을 별도로 적용합니다. 원본 앵커가 맞지 않으면 빌드를 중단하고, 스크립트와 새 UI 소스는 공통·Desktop 입력 해시에 포함합니다. 인라인 그림 뒤 단어 선택은 공통 편집기의 끝점 변환만 보완하며 기존 r29 코어를 사용합니다. 제품 정보창에는 뷰포트 높이 제한과 본문 스크롤을 적용하며, 보존 입력에 이미 패치된 창에도 중복 없이 반영합니다.
 
 Studio의 선택적 upstream 반영은 코어 90개 패치와 분리합니다. [클립보드·교차 구역 선택 패치](studio/clipboard-safety.patch)와 [Pwh 적용 스크립트](../../scripts/patch-clipboard-safety.mjs)는 rhwp 0.9.0의 관련 수정 세 건을 가져오고, 취소 즉시 진행 상태 해제·포커스 이탈 기록·rich 복사 실패 시 원문 보존을 추가합니다. [검토표와 검증 범위](../UPSTREAM-0.9-REVIEW.md)
 

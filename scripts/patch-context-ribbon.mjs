@@ -80,8 +80,8 @@ export async function patchContextRibbon(studio){
   scroller=once(scroller,"const DIVIDER_SELECTOR = ':scope > .tb-sep';","const DIVIDER_SELECTOR = ':scope > .tb-sep, :scope > .pwh-ribbon-panel[data-active=\"true\"] > .pwh-ribbon-section';",'group navigation');await fs.writeFile(scrollerPath,scroller);
  }
  const aboutPath=path.join(studio,'src/ui/about-dialog.ts');let about=await fs.readFile(aboutPath,'utf8');
+ const version=JSON.parse(await fs.readFile(new URL('../package.json',import.meta.url),'utf8')).version;
  if(!about.includes('// Pwh product information')){
-  const version=JSON.parse(await fs.readFile(new URL('../package.json',import.meta.url),'utf8')).version;
   about=once(about,"titleEn.textContent = 'HWP/HWPX Compatible Module for Rust';","titleEn.textContent = document.getElementById('pwh-version')?.textContent?.includes('Desktop') ? 'Pwh Desktop' : 'Pwh';",'product title');
   about=once(about,"titleKo.textContent = t('dialog.about.titleKo.text');","titleKo.textContent = '한글에 익숙한 오픈소스 한글 문서 편집기';",'product subtitle');
   about=once(about,'version.textContent = `Version ${__APP_VERSION__}`;',`version.textContent = document.getElementById('pwh-version')?.textContent || 'Pwh ${version}';`,'product version');
@@ -92,8 +92,13 @@ export async function patchContextRibbon(studio){
     // HWP 스펙 고지 문구 (필수)`,'Pwh features');
   about=once(about,'const THIRD_PARTY_LICENSES = [',"const THIRD_PARTY_LICENSES = [\n  {name:'Pwh — STOOM Lab',license:'MIT'},\n  {name:'rhwp — Edward Kim (기반 엔진)',license:'MIT'},",'engine attribution');
   about=once(about,"copyright.textContent = '\\u00A9 2026 rhwp: Edward Kim';","copyright.textContent = '© 2026 STOOM Lab · Pwh | 기반 엔진 rhwp © Edward Kim';",'product copyright');
-  await fs.writeFile(aboutPath,'// Pwh product information\n'+about);
+  about='// Pwh product information\n'+about;
  }
+ if(!about.includes("this.dialog.classList.add('pwh-about-dialog')")){
+  about=once(about,'  protected createBody(): HTMLElement {',"  protected createBody(): HTMLElement {\n    this.dialog.classList.add('pwh-about-dialog');",'responsive product dialog');
+ }
+ about=about.replace(/(version\.textContent = document\.getElementById\('pwh-version'\)\?\.textContent \|\| )'Pwh [^']+';/,`$1'Pwh ${version}';`);
+ await fs.writeFile(aboutPath,about);
  const formatPath=path.join(studio,'src/command/commands/format.ts');let format=await fs.readFile(formatPath,'utf8');
  if(!format.includes('// Pwh anchored bullet gallery')){
   const start=format.indexOf("    id: 'format:bullet-shape',"),end=format.indexOf('\n  },',start);if(start<0||end<start)throw Error('Unsupported bullet command');

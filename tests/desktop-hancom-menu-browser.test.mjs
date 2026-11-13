@@ -47,7 +47,18 @@ test('Desktop contextual menus preserve command routes and narrow-window access'
   assert.equal(await editor.locator('.pwh-format-copy-dialog').count(),0);
   await editor.locator('[data-menu="tool"] .menu-title').click();await editor.getByRole('button',{name:'제품 정보',exact:true}).click();
   assert.ok(await editor.locator('.dialog-wrap').innerText().then(text=>text.includes('Pwh Desktop')&&text.includes('rhwp — Edward Kim')));
+  const about=editor.locator('.pwh-about-dialog');
+  const assertAboutFits=async()=>assert.ok(await about.evaluate(el=>{
+   const inViewport=node=>{const r=node.getBoundingClientRect();return r.top>=0&&r.left>=0&&r.bottom<=innerHeight&&r.right<=innerWidth;};
+   return inViewport(el)&&inViewport(el.querySelector('.dialog-title'))&&inViewport(el.querySelector('.dialog-footer'));
+  }),'Product title, close button and footer remain within the editor viewport');
+  await assertAboutFits();
+  await page.setViewportSize({width:900,height:600});await assertAboutFits();
+  assert.ok(await about.locator('.dialog-body').evaluate(el=>el.scrollHeight>el.clientHeight&&getComputedStyle(el).overflowY==='auto'),'Long product information scrolls inside the dialog');
+  await about.locator('.dialog-body').evaluate(el=>{el.scrollTop=el.scrollHeight;});
+  await assertAboutFits();
   await editor.locator('.dialog-wrap .dialog-close').click();
+  await page.setViewportSize({width:1200,height:850});
   // Keyboard activation must execute once and retain the active panel.
   await editor.locator('[data-menu="insert"] .menu-title').click();
   const symbols=editor.locator('.pwh-ribbon-panel[data-active="true"] [data-cmd="insert:symbols"]');
