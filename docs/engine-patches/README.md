@@ -16,6 +16,8 @@ Studio의 선택적 upstream 반영은 코어 90개 패치와 분리합니다. [
 
 한글 호환 단축키의 편집 상태 분기는 [Pwh 공통 Studio 빌드 패치](../../scripts/patch-hancom-key-contexts.mjs)에 있습니다. 고정 크기 표 조절과 행 삭제는 r22 코어 API를 사용합니다. [편집기 변경과 적용 범위](../RHWP-DIFFERENCES.md#한글-호환-단축키의-편집-상태-구분)
 
+Pwh 0.6.59에서는 같은 스크립트가 Studio의 중복 겹글쇠 대기 맵을 제거하고 [공통 입력 모듈](../../src/table-create-shortcut.mjs)에 연결합니다. [메뉴 패치](../../scripts/patch-context-ribbon.mjs)는 열린 목록의 키를 캡처 단계에서 처리해 문서 선택·삭제에 새지 않도록 합니다. 기존 명령과 클릭 경로, WASM 코어 r29 및 기록 복원 정책은 유지하며 공통·Desktop 빌드 모두에 적용합니다. [사전·사후 시험과 제한](../verification/MENU-SHORTCUTS.md)
+
 
 <a id="inline-object-cursor-and-grouped-textbox"></a>
 ### 89~90번 묶음 글상자와 본문 인라인 개체

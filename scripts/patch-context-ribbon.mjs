@@ -59,6 +59,49 @@ export async function patchContextRibbon(studio){
   menu=once(menu,"          this.openMenu.classList.remove('open');","          this.openMenu.querySelector('.pwh-menu-more')?.setAttribute('aria-expanded','false');\n          this.openMenu.classList.remove('open');",'hover expanded state');
   await fs.writeFile(menuPath,menu);
  }
+ if(!menu.includes('// Pwh menu keyboard ownership')){
+  menu=once(menu,'  private openMenu: HTMLElement | null = null;','  private openMenu: HTMLElement | null = null;\n  private keyboardReturnFocus: HTMLElement | null = null;','menu return focus');
+  menu=once(menu,"        this.closeAll();item.classList.add('open');this.openMenu=item;","        const previousFocus=document.activeElement;\n        this.closeAll();\n        this.keyboardReturnFocus=previousFocus instanceof HTMLElement?previousFocus:null;\n        item.classList.add('open');this.openMenu=item;",'remember menu focus');
+  const start=menu.indexOf('  private setupKeyboardClose(): void {'),end=menu.indexOf('  /** 드롭다운 열릴 때',start);
+  if(start<0||end<start)throw Error('Unsupported menu keyboard handlers');
+  menu=menu.slice(0,start)+`  // Pwh menu keyboard ownership: consume menu input before the document textarea.
+  private setupKeyboardClose(): void {
+    document.addEventListener('keydown', (event) => {
+      if(!this.openMenu)return;
+      const target=event.target;
+      if(target instanceof HTMLElement&&this.openMenu.contains(target)&&target.closest('input,textarea,select,[contenteditable="true"]'))return;
+      if(['Control','Meta','Alt','Shift'].includes(event.key))return;
+      if(event.ctrlKey||event.altKey||event.metaKey)return;
+      event.preventDefault();event.stopPropagation();
+      if(event.key==='Escape'||event.key==='Tab'){
+        const previous=this.keyboardReturnFocus;this.closeAll();
+        if(previous?.isConnected)previous.focus({preventScroll:true});
+        return;
+      }
+      const items=Array.from(this.openMenu.querySelectorAll<HTMLElement>('.md-item[data-cmd],.md-item[data-pwh-file]'))
+        .filter(item=>!item.classList.contains('disabled')&&item.getAttribute('aria-disabled')!=='true'&&item.getClientRects().length>0&&getComputedStyle(item).visibility!=='hidden');
+      const current=items.indexOf(document.activeElement as HTMLElement);
+      if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){
+        if(!items.length)return;
+        const next=event.key==='Home'?0:event.key==='End'?items.length-1:
+          current<0?(event.key==='ArrowUp'?items.length-1:0):(current+(event.key==='ArrowUp'?-1:1)+items.length)%items.length;
+        items[next].tabIndex=-1;items[next].focus({preventScroll:true});return;
+      }
+      if(event.key==='Enter'||event.key===' '){
+        if(current>=0){items[current].click();this.closeAll();}
+        return;
+      }
+      const key=/^Key[A-Z]$/.test(event.code)?event.code.slice(3):event.key.toUpperCase();
+      if(key.length!==1)return;
+      const item=items.find(item=>item.querySelector('.md-shortcut')?.textContent?.trim().toUpperCase()===key);
+      // Reuse the click route, including Desktop file commands and command parameters.
+      if(item){item.click();this.closeAll();}
+    },true);
+  }
+
+`+menu.slice(end);
+  await fs.writeFile(menuPath,menu);
+ }
  const dispatcherPath=path.join(studio,'src/command/dispatcher.ts');let dispatcher=(await fs.readFile(dispatcherPath,'utf8')).replaceAll('\r\n','\n');
  if(!dispatcher.includes('// pwh shared enabled-state snapshot')){
   const start=dispatcher.indexOf('  isEnabled(commandId: string): boolean {');const end=dispatcher.indexOf('\n  }',start);

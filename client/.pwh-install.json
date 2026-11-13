@@ -1,17 +1,17 @@
 {
   "kind": "studio-inline",
-  "version": "0.6.58",
+  "version": "0.6.59",
   "upstreamVersion": "0.8.7",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "files": {
-    "editor.js": "c5765017a23986dedd1ec9afb971eb2aeae5c2844d5c03afa551b628e9766f0f",
-    "rhwp-studio.css": "7298616699b7c394b28bb5c08ca9b8415d1657b49e70f6231e7f31f16897a066",
+    "editor.js": "baafe98c0b35099bfb775d89900818f0db538e9ebc783f0f0413b67a3c5bd9a3",
+    "rhwp-studio.css": "38d4e0caa8b83e6e0868fd6f5f41f3d26ff90a619222f6a107b6c41517ee822c",
     "editor-body.html": "afc04317043d01ef99fb91eb9bce88723fac82491bf42473e4b30436e5066ceb"
   },
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "common",
-    "sha256": "61510ec9bb62d47ccd710db9bead51277d793b4e0c7e75cf78b9cfd860b8de1d",
+    "sha256": "d3de9593b5f37dd5b7d73ed5c65c8468c0e2cbdc56a3e3581b387ee17e5ecdf3",
     "files": [
       {
         "path": "docs/engine-patches/studio/clipboard-safety.patch",
@@ -23,7 +23,7 @@
       },
       {
         "path": "package.json",
-        "sha256": "ea420ceb4bb18f90d0c1d00e02ed04acc5184842ed5f48ab9d3475f82296b292"
+        "sha256": "48455e5353b81d96b676f000184be4d70bb9ccfc070ff85b895d408cd43724e7"
       },
       {
         "path": "scripts/build-inline.mjs",
@@ -51,7 +51,7 @@
       },
       {
         "path": "scripts/patch-context-ribbon.mjs",
-        "sha256": "e8c22ea94a2f447e55b82aaee8afc10c912e166d125f103ab5e7ee3ce3ea10d7"
+        "sha256": "8f7de2988ff71ec75108e94524656174f44521c38b78a9358e19776e00908cbb"
       },
       {
         "path": "scripts/patch-control-marker-delete.mjs",
@@ -71,7 +71,7 @@
       },
       {
         "path": "scripts/patch-hancom-key-contexts.mjs",
-        "sha256": "af100d1ab6e4d3be076f6cea4968f67f0f2c5c6ec9c44ce836b2fe4ff118c90f"
+        "sha256": "8face254d07ef8ec882643b37cd7c5a213b8674bbf7e3171f5f0cd7a8e009cbf"
       },
       {
         "path": "scripts/patch-inline-object-cursors.mjs",
@@ -307,7 +307,7 @@
       },
       {
         "path": "src/pwh-context-ribbon.css",
-        "sha256": "61faa2c28c0d49196fb148ebb70757f11e22f1a12daf08befdbd72f4b2d9ece6"
+        "sha256": "c6808422c7513e35fe85f38b7e372c8db855ffbcec193d89433453b256502089"
       },
       {
         "path": "src/pwh-context-ribbon.ts",
@@ -399,7 +399,7 @@
       },
       {
         "path": "src/table-create-shortcut.mjs",
-        "sha256": "0b9409372c0568845d0b7809fe8ce030dccb9a67f68330fde123cbffc07cffcd"
+        "sha256": "5ab50c26bdf0e37203f1eba32f349784700121c8b7eb9def25aa338387864319"
       },
       {
         "path": "src/table-equal-size.ts",

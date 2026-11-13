@@ -442,6 +442,10 @@ HWP·HWPX의 중첩 표 사례, 합성 문서의 가시성·저장·실행 취�
 
 ### 탭별 그래픽 메뉴와 명령 상태
 
+Pwh 0.6.59의 [메뉴 패치](../scripts/patch-context-ribbon.mjs)는 키를 문서 입력 전 캡처 단계에서 처리합니다. 기존에는 메뉴를 마우스로 열어도 textarea가 초점을 유지해 Esc가 셀 선택까지 풀고 Delete가 선택 원문을 지울 수 있었습니다. 메뉴 취소는 초점을 돌려주고 선택은 보존하며, 방향키·Enter·단일 메뉴 키는 기존 클릭 경로를 사용해 Desktop 파일 명령도 중복 실행하지 않습니다. 메뉴 안의 별도 입력 필드는 원래 키 처리를 유지합니다.
+
+[겹글쇠 연결](../src/table-create-shortcut.mjs)은 N/Q/K/M/G와 기존 Alt+V 대체 경로를 한 곳에서 처리합니다. [키 패치](../scripts/patch-hancom-key-contexts.mjs)가 Studio 유래의 중복 대기 맵을 제거하며, IME 물리 키·한글 자모 대응·수정 키 유지·2.5초 만료·초점 이탈·개체 배치 상태를 같은 기준으로 검사합니다. Alt+V를 파일 저장에 쓰는 Desktop은 투명 선 표시를 Ctrl+G,B로 통일합니다. 코어 r29의 계산과 실행 취소 정책은 변경하지 않습니다. [검증과 제한](verification/MENU-SHORTCUTS.md)
+
 제품 정보창은 Pwh 기능·버전과 rhwp 저작권·라이선스를 함께 표시합니다. 긴 내용이 작은 편집기 창 밖으로 잘리지 않도록 본문만 스크롤하며 제목·닫기·하단 버튼은 유지합니다. 이 제한은 Pwh 공통 편집기 UI에 적용하며 WASM 조판에는 영향을 주지 않습니다.
 
 Pwh 공통 편집기는 rhwp Studio 유래의 고정 도구 상자를 **편집·보기·입력·서식·쪽·표·도구**별 패널로 나눕니다. [메뉴 정의](../src/pwh-ribbon-model.mjs), [컨트롤러](../src/pwh-context-ribbon.ts), [자체 SVG 아이콘](../src/pwh-ribbon-icons.ts)을 공통·Desktop 빌드에 같은 방식으로 넣습니다. 한글 이미지 자산은 사용하지 않습니다.
