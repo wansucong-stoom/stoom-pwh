@@ -5,6 +5,7 @@ const readline=require('node:readline');
 const fs=require('node:fs');
 const net=require('node:net');
 const {printOptions}=require('./print-options.cjs');
+const {installNativePaste}=require('./native-paste.cjs');
 
 const urlArgument=process.argv.find(arg=>arg.startsWith('--pwh-url='));
 const url=urlArgument?.slice('--pwh-url='.length),dataRoot=process.env.PWH_STANDALONE_DATA;
@@ -15,6 +16,7 @@ if(!ownedLocal(url)||!dataRoot){process.stderr.write('Pwh 앱 시작 정보가 �
 app.setName('Pwh Desktop');app.setAppUserModelId(process.env.PWH_APP_USER_MODEL_ID||'STOOM.PwhDesktop');
 try{fs.mkdirSync(path.join(dataRoot,'electron-profile'),{recursive:true});app.setPath('userData',path.join(dataRoot,'electron-profile'));}catch(error){failStartup(error);}
 let win=null,approvedClose=false,debugAttached=false;const printWindows=new Map();
+installNativePaste(ipcMain,()=>win,ownedLocal);
 const hostPipe=process.argv.find(arg=>arg.startsWith('--pwh-host-pipe='))?.slice('--pwh-host-pipe='.length);
 const hostToken=process.argv.find(arg=>arg.startsWith('--pwh-host-token='))?.slice('--pwh-host-token='.length);
 if(hostPipe&&(!/^\\\\\.\\pipe\\stoom-pwh-[0-9]+-[a-f0-9]{32}$/.test(hostPipe)||!/^[a-f0-9]{64}$/.test(hostToken||''))){process.stderr.write('Pwh 창 연결 정보가 올바르지 않습니다.\n');app.exit(1);}

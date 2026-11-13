@@ -25,6 +25,29 @@ test('Desktop contextual menus preserve command routes and narrow-window access'
    assert.equal(await editor.locator('.pwh-ribbon-panel:visible').count(),1);
    assert.equal(await editor.locator('#style-bar').isVisible(),true);
   }
+  await editor.locator('[data-menu="format"] .menu-title').click();
+  await editor.getByRole('button',{name:'스타일 전체 펼치기',exact:true}).click();
+  assert.equal(await editor.locator('.pwh-ribbon-style-option').count(),await editor.locator('#style-name option').count());
+  assert.ok(await editor.locator('.pwh-style-list').evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').length===2));
+  await editor.locator('.pwh-style-list button').first().press('Escape');
+  await editor.getByRole('button',{name:'글머리표',exact:true}).click();
+  assert.ok(await editor.locator('.pwh-bullet-gallery').evaluate(el=>el.getBoundingClientRect().top>=document.querySelector('.pwh-ribbon-panel[data-active="true"] [data-cmd="format:bullet-shape"]').getBoundingClientRect().bottom));
+  await editor.locator('.pwh-bullet-choice').first().press('Escape');
+  for(const label of ['기본 도구 상자','서식 도구 상자','기본 도구 상자','서식 도구 상자']){
+   await editor.locator('#menu-bar').click({button:'right',position:{x:8,y:14}});
+   await editor.locator('.pwh-tools-popup').getByRole('menuitemcheckbox',{name:label,exact:false}).click();
+  }
+  assert.equal(await editor.locator('#icon-toolbar').isVisible(),true);assert.equal(await editor.locator('#style-bar').isVisible(),true);
+  await editor.locator('[data-menu="edit"] .menu-title').click();
+  const findArrow=editor.getByRole('button',{name:'찾기 메뉴 펼치기',exact:true});
+  assert.ok(await findArrow.evaluate(el=>{const r=el.getBoundingClientRect(),main=el.parentElement.querySelector('.tb-split-main').getBoundingClientRect();return r.top>=main.bottom-1&&r.height<16;}));
+  await editor.getByRole('button',{name:'모양 복사',exact:true}).click();
+  await editor.locator('.pwh-format-copy-dialog input[value="paragraph"]').check();
+  await editor.locator('.pwh-format-copy-dialog .dialog-btn').last().click();
+  assert.equal(await editor.locator('.pwh-format-copy-dialog').count(),0);
+  await editor.locator('[data-menu="tool"] .menu-title').click();await editor.getByRole('button',{name:'제품 정보',exact:true}).click();
+  assert.ok(await editor.locator('.dialog-wrap').innerText().then(text=>text.includes('Pwh Desktop')&&text.includes('rhwp — Edward Kim')));
+  await editor.locator('.dialog-wrap .dialog-close').click();
   // Keyboard activation must execute once and retain the active panel.
   await editor.locator('[data-menu="insert"] .menu-title').click();
   const symbols=editor.locator('.pwh-ribbon-panel[data-active="true"] [data-cmd="insert:symbols"]');

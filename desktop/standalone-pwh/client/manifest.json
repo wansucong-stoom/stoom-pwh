@@ -1,12 +1,12 @@
 {
-  "sha256": "f85e307fd61ddd73b94357408c5ef5ed3ff5d14a0c2d2132e7b4e2e4d938c478",
+  "sha256": "d26500fe8e644fee8f335536b4dd634687ca51c0073894111f2fc881f00e8fda",
   "baseVersion": "0.6.56",
-  "baseEditorSha256": "bdd464897d9fe63fbe7db4e287b6750a7bf9d056bab2bc76c2c60355bebcb614",
+  "baseEditorSha256": "02bb3dba098c10e61003545795fb45ea829abcd7842baf25378cad2a060b01d5",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "desktop",
-    "sha256": "e10d3995188c423abc5edadc45d1a755cae5801197fca239ab45a4e9521ed47a",
+    "sha256": "98784338f43ebbb2be4b9a8441ff10034746e9bda285c686bacd67daa99d3b14",
     "files": [
       {
         "path": "desktop/standalone-pwh/build-desktop-editor.mjs",
@@ -34,7 +34,7 @@
       },
       {
         "path": "scripts/build-inline.mjs",
-        "sha256": "888e7884d31bb6f8958d3a467813bcc3db5438ffc9692fe047776e44db69d617"
+        "sha256": "f33cecd75611fe85c590b9647d611f4303c1e5beec3633c930138cfdcfe92179"
       },
       {
         "path": "scripts/bundle-client.mjs",
@@ -42,7 +42,7 @@
       },
       {
         "path": "scripts/editor-build-contract.mjs",
-        "sha256": "4b4ae0e7addd849d99f118ffacf247c7d1af98d705b0d37617089aa72631b976"
+        "sha256": "d654339056ccdff15d78a385c8fb43f18cde63218cf9c24e6e8be47595c79a97"
       },
       {
         "path": "scripts/patch-body-cursor-contract.mjs",
@@ -58,7 +58,15 @@
       },
       {
         "path": "scripts/patch-context-ribbon.mjs",
-        "sha256": "50c0d9578821e7ceeb1d820ce69798942cacdb1fc02dcd6029c7d740e8b73ccc"
+        "sha256": "93f8ad331936ae25b5065a608b1ec2f5b6f9c28a5b513e3c1519e85d362aa208"
+      },
+      {
+        "path": "scripts/patch-control-marker-delete.mjs",
+        "sha256": "6a0cf9153c24995828ee95a6e23fd9bc45c35a87f1362ce5a85f8b27ecfef53b"
+      },
+      {
+        "path": "scripts/patch-format-copy-options.mjs",
+        "sha256": "8d25120c0ba261b9a59aaa31d06c6915d2ee5d25b1ec21feeaf0807d6d034fb0"
       },
       {
         "path": "scripts/patch-format-properties.mjs",
@@ -75,6 +83,10 @@
       {
         "path": "scripts/patch-inline-object-cursors.mjs",
         "sha256": "e1661d65d6c90b03fc99742cee4559e14dc3d9da86921c3b4f97205cb889da28"
+      },
+      {
+        "path": "scripts/patch-native-paste-command.mjs",
+        "sha256": "3b01ff4366553ab3269449afb26b1795ea7511484313c1b595feda37bc4c91d6"
       },
       {
         "path": "scripts/patch-nested-paragraph-format.mjs",
@@ -149,6 +161,10 @@
         "sha256": "19decfd50d7d4ec527688409052f6fee5adc0ab21a2bc932dc8b4a1f717e3bce"
       },
       {
+        "path": "src/control-marker-delete.mjs",
+        "sha256": "1a1b2208707d72d08bc59b05bc9b923f24a2bd125a11f234512c786db78de3ae"
+      },
+      {
         "path": "src/desktop-print-preview.mjs",
         "sha256": "733bde9283ceab4e5eef86001cab94fb8bf0a6e22706c4eeab674eff35f68af6"
       },
@@ -193,6 +209,10 @@
         "sha256": "5cc52ddef78ebb1da9bd376d6831f9f556f12de8ad23a618fcc764469e3af5d1"
       },
       {
+        "path": "src/format-copy-options.mjs",
+        "sha256": "ea467dfa31179635d4197fc7d2603c411f0978164cba3afff7e44cee0be53021"
+      },
+      {
         "path": "src/format-property-changes.mjs",
         "sha256": "3348f8a526546504e0121e42fb8c27278103960ebf269473843ccb95988cdb89"
       },
@@ -226,7 +246,7 @@
       },
       {
         "path": "src/multiclick-selection.mjs",
-        "sha256": "dd07ced84a08afe0b0234fe779932070a81b98664731ba33e1b66bb3594fdefd"
+        "sha256": "b057131db8f7a9256e3b4117bb1cc6462c609f64e27b214705865dbc60d5a994"
       },
       {
         "path": "src/native-clipboard.mjs",
@@ -269,6 +289,14 @@
         "sha256": "58b508004f01352da0aa8d7cd844bed32987f4bae8c90f61e08a1c1ea067ceca"
       },
       {
+        "path": "src/pwh-bullet-gallery.css",
+        "sha256": "d97d0bf230f8c4257bfe472b7179b14f39947658bdd4da4e899b6015b8a90694"
+      },
+      {
+        "path": "src/pwh-bullet-gallery.ts",
+        "sha256": "3ca367dbb648c07da80d612a2b15cb57c947104266fcc7ddb4a6b310f6bca054"
+      },
+      {
         "path": "src/pwh-cell-border-dialog.css",
         "sha256": "4ecf560a57600faa3241f78a485308573a54a40ee58bcb737eeca0b1a7287613"
       },
@@ -286,11 +314,19 @@
       },
       {
         "path": "src/pwh-context-ribbon.css",
-        "sha256": "02b82cacb7c3b9c3519d8cb1d94d3d63759fdb573e017d311523ed61ea84bb45"
+        "sha256": "7d0fc26949a8b45bf32cc1b879dfa25ce455b12487c77967d03da6a55828c81b"
       },
       {
         "path": "src/pwh-context-ribbon.ts",
-        "sha256": "91c785f7ee8bdac90e8fd7c1fa015ca08655cc52fbd8246d47cb965a77585510"
+        "sha256": "57f37cf3f84df4cef72aff73b345dd330ef294a32901bf34eef6309243e7a7fa"
+      },
+      {
+        "path": "src/pwh-format-copy-dialog.css",
+        "sha256": "b02a851afd917e2e7c5c2f167612299e0ea81c194d21643e25346e8fa9c7afcf"
+      },
+      {
+        "path": "src/pwh-format-copy-dialog.ts",
+        "sha256": "03e09f4379d8c6dae76e057afa628fd325a0f4e356af5666ae3f5703cbac0499"
       },
       {
         "path": "src/pwh-object-properties.ts",
@@ -307,6 +343,10 @@
       {
         "path": "src/pwh-ribbon-model.mjs",
         "sha256": "ecdfc3df768ced6de9d36f40f615d08687648147b05b6e05c500f45688d91a82"
+      },
+      {
+        "path": "src/pwh-ribbon-styles.ts",
+        "sha256": "53d2ab6987b1c7c6e89bc2d231fbf678775de5b42915c5b314f88f74c3048721"
       },
       {
         "path": "src/pwh-table-command-access.ts",

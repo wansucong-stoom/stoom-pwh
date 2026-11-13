@@ -3,6 +3,7 @@ import type { CommandDispatcher } from '@/command/dispatcher';
 import type { EventBus } from '@/core/event-bus';
 import { ribbonTabs, availableRibbonGroups } from './pwh-ribbon-model.mjs';
 import { createRibbonIcon } from './pwh-ribbon-icons';
+import { createRibbonStyles } from './pwh-ribbon-styles';
 import './pwh-context-ribbon.css';
 
 type Entry = {command?:string;label:string;icon:string;special?:string;toggle?:boolean};
@@ -24,7 +25,7 @@ export function installContextRibbon({menu,toolbar,registry,dispatcher,eventBus,
  track.prepend(bank);
  const panels=new Map<string,HTMLElement>();
  const titles=new Map<string,HTMLElement>();
- const styleGalleries:HTMLElement[]=[];
+ const styleGalleries:Array<{sync:()=>void}>=[];
  let active='edit';let pending=0;
  const fileItem=menu.querySelector<HTMLElement>('[data-menu="file"]');
  const tablist=document.createElement('div');tablist.className='pwh-ribbon-tabs';tablist.setAttribute('role','tablist');tablist.setAttribute('aria-label','문서 메뉴');
@@ -48,30 +49,17 @@ export function installContextRibbon({menu,toolbar,registry,dispatcher,eventBus,
   const existing=reusable.get(entry.command!)?.shift();
   const button=existing||document.createElement('button');button.type='button';button.classList.add('tb-btn');button.dataset.cmd=entry.command!;
   decorate(button,entry);
-  return existing?.closest<HTMLElement>('.tb-split')||button;
+  const split=existing?.closest<HTMLElement>('.tb-split');
+  const arrow=split?.querySelector<HTMLButtonElement>('.tb-split-arrow');
+  if(arrow){arrow.setAttribute('aria-label',entry.label+' 메뉴 펼치기');arrow.setAttribute('aria-haspopup','menu');}
+  return split||button;
  }
  function styles():HTMLElement {
-  const gallery=document.createElement('div');gallery.className='pwh-ribbon-style-gallery';gallery.setAttribute('role','group');gallery.setAttribute('aria-label','문서 스타일');
-  const source=document.querySelector<HTMLSelectElement>('#style-name');
-  const refresh=()=>{
-   gallery.replaceChildren();
-   for(const option of [...(source?.options||[])].slice(0,4)) {
-    const button=document.createElement('button');button.type='button';button.className='pwh-ribbon-style';button.dataset.styleValue=option.value;button.textContent=option.textContent;button.title=option.textContent+' 스타일 적용';
-    button.addEventListener('mousedown',e=>e.preventDefault());
-    button.addEventListener('click',()=>{if(!source||source.disabled)return;source.value=option.value;source.dispatchEvent(new Event('change',{bubbles:true}));syncStyles();});
-    gallery.append(button);
-   }
-   syncStyles();
-  };
-  styleGalleries.push(gallery);
-  if(source){new MutationObserver(refresh).observe(source,{childList:true,subtree:true});source.addEventListener('change',syncStyles);new MutationObserver(syncStyles).observe(source,{attributes:true,attributeFilter:['disabled']});}
-  refresh();return gallery;
+  const gallery=createRibbonStyles(document.querySelector<HTMLSelectElement>('#style-name'),()=>dispatcher.dispatch('format:style-dialog'));
+  styleGalleries.push(gallery);return gallery.element;
  }
  function syncStyles(){
-  const source=document.querySelector<HTMLSelectElement>('#style-name');
-  for(const gallery of styleGalleries)for(const button of gallery.querySelectorAll<HTMLButtonElement>('button')){
-   button.disabled=!source||source.disabled;button.setAttribute('aria-pressed',String(source?.value===button.dataset.styleValue));
-  }
+  for(const gallery of styleGalleries)gallery.sync();
  }
  for(const tab of ribbonTabs) {
   const item=menu.querySelector<HTMLElement>('[data-menu="'+tab.id+'"]');
@@ -141,6 +129,17 @@ export function installContextRibbon({menu,toolbar,registry,dispatcher,eventBus,
   const index=e.key==='Home'?0:e.key==='End'?choices.length-1:(at+(e.key==='ArrowDown'?1:-1)+choices.length)%choices.length;choices[index]?.focus();
  });
  new ResizeObserver(()=>{overflow.hidden=tablist.scrollWidth<=tablist.clientWidth+1;}).observe(tablist);
+ let toolsPopup:HTMLElement|null=null;
+ const closeTools=()=>{toolsPopup?.remove();toolsPopup=null;};
+ for(const area of [menu,toolbar,document.getElementById('style-bar')])area?.addEventListener('contextmenu',event=>{
+  event.preventDefault();event.stopPropagation();closeTools();const popup=document.createElement('div');popup.className='pwh-tools-popup';popup.setAttribute('role','menu');popup.setAttribute('aria-label','도구 상자 설정');
+  for(const [command,label,key]of [['view:toolbox-basic','기본 도구 상자','toolboxBasic'],['view:toolbox-format','서식 도구 상자','toolboxFormat'],['tool:options','환경 설정…',''],['view:theme-system','시스템 테마 사용','']]){
+   if(!registry.has(command))continue;const button=document.createElement('button');button.type='button';const checked=key&&document.documentElement.dataset[key]!=='hidden';button.textContent=(key?(checked?'✓  ':'　 '):'　 ')+label;button.setAttribute('role',key?'menuitemcheckbox':'menuitem');if(key)button.setAttribute('aria-checked',String(checked));button.addEventListener('mousedown',e=>e.preventDefault());button.addEventListener('click',()=>{closeTools();dispatcher.dispatch(command);});popup.append(button);
+  }
+  document.body.append(popup);toolsPopup=popup;popup.style.left=Math.max(8,Math.min(event.clientX,innerWidth-popup.offsetWidth-8))+'px';popup.style.top=Math.max(8,Math.min(event.clientY,innerHeight-popup.offsetHeight-8))+'px';popup.querySelector<HTMLElement>('button')?.focus({preventScroll:true});
+  popup.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closeTools();return;}if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();e.stopPropagation();const buttons=[...popup.querySelectorAll<HTMLButtonElement>('button')],at=buttons.indexOf(document.activeElement as HTMLButtonElement);buttons[(at+(e.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length]?.focus();}});
+ });
+ document.addEventListener('mousedown',event=>{if(toolsPopup&&!toolsPopup.contains(event.target as Node))closeTools();});
  select(active);
  return {select,get active(){return active;}};
 }

@@ -4,6 +4,7 @@
 const {contextBridge,ipcRenderer}=require('electron');
 if(process.isMainFrame){
  contextBridge.exposeInMainWorld('pwhNative',Object.freeze({
+  paste:request=>ipcRenderer.invoke('pwh:paste',request),
   getPrinters:()=>ipcRenderer.invoke('pwh:printers'),
   showPrintWindow:()=>ipcRenderer.invoke('pwh:show-print'),
   printDocument:options=>ipcRenderer.invoke('pwh:print-document',options),

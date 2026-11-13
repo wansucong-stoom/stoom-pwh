@@ -83,6 +83,8 @@ Desktop 0.1.37부터 앱 상단에 **Store 업데이트 버튼**을 제공합니
 
 공통 편집기의 탭별 그래픽 메뉴는 rhwp Studio 유래 메뉴·명령 처리에 연결됩니다. 한글에 익숙한 분류를 따르며 자체 SVG 아이콘을 사용합니다. 공통 코어 r29의 조판 계산과는 별도 변경입니다. [메뉴 사용법](docs/USER-GUIDE.md#contextual-ribbon) · [적용 계층과 검증](docs/RHWP-DIFFERENCES.md#contextual-ribbon)
 
+상단 우클릭으로 기본·서식 도구 상자를 다시 펼칠 수 있습니다. 스타일 전체 목록과 글머리표 미리보기, 모양 복사의 글자·문단·셀 범위 선택을 기존 편집 명령에 연결합니다. 인라인 그림 뒤 단어 선택의 시작 위치와 표시된 `[감추기]` 앞 Delete 처리도 보완합니다. Desktop의 상단 붙이기는 네이티브 편집 명령을 사용하고 문서·선택·포커스가 바뀌면 취소합니다. [확인한 동작과 제한](docs/verification/CONTEXTUAL-RIBBON.md)
+
 Pwh와 Pwh Desktop은 [rhwp](https://github.com/edwardkim/rhwp) 0.8.7 기반 공통 WASM 코어를 사용합니다. r29의 [코어 변경 기록](docs/RHWP-DIFFERENCES.md)에서 수정 범위를 확인할 수 있습니다. r28 대비 익명 TEST 문서 5개 **245쪽**의 쪽 수·글자 좌표·인쇄 SVG와 저장·재열기 결과를 유지했습니다. 이번 편집 경로 수정은 새 한컴 PDF 일치도 개선 수치와 구분합니다. [전후 검증과 제한](docs/verification/CORE-R29.md)
 
 r23 정식 빌드는 익명 시험 문서 3개의 150쪽과 그림 시험 문서 17쪽, 편집 사례 5건에서 검증용 빌드와 동일한 글자 좌표·SVG를 냈습니다. 아래 표는 앞선 공통 코어 개선에서 동일한 원본을 한컴 PDF와 비교한 결과입니다.
