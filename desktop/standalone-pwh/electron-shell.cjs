@@ -63,7 +63,7 @@ ipcMain.handle('pwh:print-document',async(event,value)=>{
 
 app.whenReady().then(async()=>{
  const prefs={nodeIntegration:false,contextIsolation:true,sandbox:true,preload:path.join(__dirname,'electron-preload.cjs'),backgroundThrottling:false};
- win=new BrowserWindow({width:1440,height:900,minWidth:700,minHeight:500,title:'Pwh Desktop',icon:path.join(__dirname,'stoom.ico'),backgroundColor:'#ffffff',autoHideMenuBar:true,show:false,webPreferences:prefs});
+ win=new BrowserWindow({width:1440,height:900,minWidth:360,minHeight:500,title:'Pwh Desktop',icon:path.join(__dirname,'stoom.ico'),backgroundColor:'#ffffff',autoHideMenuBar:true,show:false,webPreferences:prefs});
  win.setAppDetails({appId:'STOOM.PwhDesktop',appIconPath:path.join(__dirname,'stoom.ico'),appIconIndex:0,relaunchCommand:'"'+path.join(__dirname,'..','PwhDesktop.exe')+'"',relaunchDisplayName:'Pwh Desktop'});
  win.removeMenu();
  session.defaultSession.setPermissionRequestHandler((contents,permission,callback,details)=>callback(['clipboard-read','clipboard-sanitized-write'].includes(permission)&&ownedLocal(details.requestingUrl||contents.getURL())));

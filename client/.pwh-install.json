@@ -4,14 +4,14 @@
   "upstreamVersion": "0.8.7",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "files": {
-    "editor.js": "63bf28619a3fcba318fdc017d195d895be38f061a8262d148bf1df4e4063c10c",
-    "rhwp-studio.css": "0c7f20ff8eb51405332746667bd032ec8dd59e97d592a78e438b30dee5e89859",
+    "editor.js": "bdd464897d9fe63fbe7db4e287b6750a7bf9d056bab2bc76c2c60355bebcb614",
+    "rhwp-studio.css": "878147f3a144cce32681f1d50befc0447067f7d09a6106bf92d2af3507d06a6a",
     "editor-body.html": "afc04317043d01ef99fb91eb9bce88723fac82491bf42473e4b30436e5066ceb"
   },
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "common",
-    "sha256": "5cd7afcf6b365a22b3c29e121c19ae3ee80e109a5a2cc9cd0ac3a3af2189a3f2",
+    "sha256": "38a1ac491791641395806593f92a9dcd50bdcce5d790b6d7294286a3c73cd36f",
     "files": [
       {
         "path": "docs/engine-patches/studio/clipboard-safety.patch",
@@ -27,7 +27,7 @@
       },
       {
         "path": "scripts/build-inline.mjs",
-        "sha256": "b2e27e79f11f5f8594ed2c2e8746776096716a9b336df0c03983aeb9eec1e2f9"
+        "sha256": "888e7884d31bb6f8958d3a467813bcc3db5438ffc9692fe047776e44db69d617"
       },
       {
         "path": "scripts/bundle-client.mjs",
@@ -35,7 +35,7 @@
       },
       {
         "path": "scripts/editor-build-contract.mjs",
-        "sha256": "f2b01a8a10f8d5a4753d8e77ba738d72a2d04c2a2eafbcb6ad0e91a500c8b7d9"
+        "sha256": "4b4ae0e7addd849d99f118ffacf247c7d1af98d705b0d37617089aa72631b976"
       },
       {
         "path": "scripts/patch-body-cursor-contract.mjs",
@@ -48,6 +48,10 @@
       {
         "path": "scripts/patch-clipboard-safety.mjs",
         "sha256": "8f0f536760f8339eef4d2c54ed209a23e92078c94e377af879e4d080df8b50f6"
+      },
+      {
+        "path": "scripts/patch-context-ribbon.mjs",
+        "sha256": "50c0d9578821e7ceeb1d820ce69798942cacdb1fc02dcd6029c7d740e8b73ccc"
       },
       {
         "path": "scripts/patch-format-properties.mjs",
@@ -274,12 +278,28 @@
         "sha256": "fe5fc6ff05bd449e059f8202ed30ade3fa58165c6ed63dc260fdd578b8362024"
       },
       {
+        "path": "src/pwh-context-ribbon.css",
+        "sha256": "02b82cacb7c3b9c3519d8cb1d94d3d63759fdb573e017d311523ed61ea84bb45"
+      },
+      {
+        "path": "src/pwh-context-ribbon.ts",
+        "sha256": "91c785f7ee8bdac90e8fd7c1fa015ca08655cc52fbd8246d47cb965a77585510"
+      },
+      {
         "path": "src/pwh-object-properties.ts",
         "sha256": "a8278a7d1c5328adc64f18aec5b165f784e38158537b48e179029bb92e034bd1"
       },
       {
         "path": "src/pwh-page-margin-layout.ts",
         "sha256": "198bf605b25006a0494b12439fe518eac01e5ab7d34d43aa44f53a5b4b9ea0f4"
+      },
+      {
+        "path": "src/pwh-ribbon-icons.ts",
+        "sha256": "77cb08572663b64ef5a48e47e1e2f2b99b68138be75da886fbf92d337df20f6d"
+      },
+      {
+        "path": "src/pwh-ribbon-model.mjs",
+        "sha256": "ecdfc3df768ced6de9d36f40f615d08687648147b05b6e05c500f45688d91a82"
       },
       {
         "path": "src/pwh-table-command-access.ts",

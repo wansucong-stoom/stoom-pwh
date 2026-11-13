@@ -1,12 +1,12 @@
 {
-  "sha256": "bda1608f065a9535ffd526481792e29f3b9eb66bb1aeea289a75bc58f5716d9d",
+  "sha256": "f85e307fd61ddd73b94357408c5ef5ed3ff5d14a0c2d2132e7b4e2e4d938c478",
   "baseVersion": "0.6.56",
-  "baseEditorSha256": "63bf28619a3fcba318fdc017d195d895be38f061a8262d148bf1df4e4063c10c",
+  "baseEditorSha256": "bdd464897d9fe63fbe7db4e287b6750a7bf9d056bab2bc76c2c60355bebcb614",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "desktop",
-    "sha256": "8751581d9528b126282c3a117fc1693f7160253fcafdda0f517973e085943210",
+    "sha256": "e10d3995188c423abc5edadc45d1a755cae5801197fca239ab45a4e9521ed47a",
     "files": [
       {
         "path": "desktop/standalone-pwh/build-desktop-editor.mjs",
@@ -34,7 +34,7 @@
       },
       {
         "path": "scripts/build-inline.mjs",
-        "sha256": "b2e27e79f11f5f8594ed2c2e8746776096716a9b336df0c03983aeb9eec1e2f9"
+        "sha256": "888e7884d31bb6f8958d3a467813bcc3db5438ffc9692fe047776e44db69d617"
       },
       {
         "path": "scripts/bundle-client.mjs",
@@ -42,7 +42,7 @@
       },
       {
         "path": "scripts/editor-build-contract.mjs",
-        "sha256": "f2b01a8a10f8d5a4753d8e77ba738d72a2d04c2a2eafbcb6ad0e91a500c8b7d9"
+        "sha256": "4b4ae0e7addd849d99f118ffacf247c7d1af98d705b0d37617089aa72631b976"
       },
       {
         "path": "scripts/patch-body-cursor-contract.mjs",
@@ -55,6 +55,10 @@
       {
         "path": "scripts/patch-clipboard-safety.mjs",
         "sha256": "8f0f536760f8339eef4d2c54ed209a23e92078c94e377af879e4d080df8b50f6"
+      },
+      {
+        "path": "scripts/patch-context-ribbon.mjs",
+        "sha256": "50c0d9578821e7ceeb1d820ce69798942cacdb1fc02dcd6029c7d740e8b73ccc"
       },
       {
         "path": "scripts/patch-format-properties.mjs",
@@ -281,12 +285,28 @@
         "sha256": "fe5fc6ff05bd449e059f8202ed30ade3fa58165c6ed63dc260fdd578b8362024"
       },
       {
+        "path": "src/pwh-context-ribbon.css",
+        "sha256": "02b82cacb7c3b9c3519d8cb1d94d3d63759fdb573e017d311523ed61ea84bb45"
+      },
+      {
+        "path": "src/pwh-context-ribbon.ts",
+        "sha256": "91c785f7ee8bdac90e8fd7c1fa015ca08655cc52fbd8246d47cb965a77585510"
+      },
+      {
         "path": "src/pwh-object-properties.ts",
         "sha256": "a8278a7d1c5328adc64f18aec5b165f784e38158537b48e179029bb92e034bd1"
       },
       {
         "path": "src/pwh-page-margin-layout.ts",
         "sha256": "198bf605b25006a0494b12439fe518eac01e5ab7d34d43aa44f53a5b4b9ea0f4"
+      },
+      {
+        "path": "src/pwh-ribbon-icons.ts",
+        "sha256": "77cb08572663b64ef5a48e47e1e2f2b99b68138be75da886fbf92d337df20f6d"
+      },
+      {
+        "path": "src/pwh-ribbon-model.mjs",
+        "sha256": "ecdfc3df768ced6de9d36f40f615d08687648147b05b6e05c500f45688d91a82"
       },
       {
         "path": "src/pwh-table-command-access.ts",

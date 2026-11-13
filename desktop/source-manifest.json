@@ -108,14 +108,14 @@
     {
       "path": "standalone-pwh/client/editor.js",
       "source": "standalone-pwh/client/editor.js",
-      "size": 2756119,
-      "sha256": "bda1608f065a9535ffd526481792e29f3b9eb66bb1aeea289a75bc58f5716d9d"
+      "size": 2780406,
+      "sha256": "f85e307fd61ddd73b94357408c5ef5ed3ff5d14a0c2d2132e7b4e2e4d938c478"
     },
     {
       "path": "standalone-pwh/client/manifest.json",
       "source": "standalone-pwh/client/manifest.json",
-      "size": 13983,
-      "sha256": "a2318ebebd44c4bd4da8a1001c7b040e0cc78e0ee41f90033768a81070099b06"
+      "size": 14723,
+      "sha256": "bd3cf9c15efa711232ab829497c5ab9573864fdd1ebebe08e705a3c811280007"
     },
     {
       "path": "standalone-pwh/codex-agent.mjs",
@@ -259,7 +259,7 @@
       "path": "standalone-pwh/electron-shell.cjs",
       "source": "standalone-pwh/electron-shell.cjs",
       "size": 8622,
-      "sha256": "aecdfc169b2051d14675d36d41bce0acf4aadb400646b4441b6d917fb958c7e8"
+      "sha256": "948d141a25712302175670ecdafc4b5754973b3a179437b355166bea6cf1a391"
     },
     {
       "path": "standalone-pwh/file-dialog.ps1",

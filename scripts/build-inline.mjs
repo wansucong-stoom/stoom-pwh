@@ -14,6 +14,7 @@ import {patchHancomKeyContexts} from './patch-hancom-key-contexts.mjs';
 import {patchTableCommandAccess} from './patch-table-command-access.mjs';
 import {patchNestedParagraphFormat} from './patch-nested-paragraph-format.mjs';
 import {patchInlineObjectCursors} from './patch-inline-object-cursors.mjs';
+import {patchContextRibbon} from './patch-context-ribbon.mjs';
 const root=path.resolve(process.argv[2]);
 const studio=path.join(root,'rhwp-studio');
 // The pinned editor includes its WASM glue. Old runtime cores keep the default
@@ -43,6 +44,7 @@ await patchFormatProperties(studio);
 await patchViewportTableSelection(studio);
 await patchTableAndSymbolShortcuts(studio);
 await patchHancomKeyAliases(studio);
+await patchContextRibbon(studio);
 await fs.copyFile(new URL('../src/pwh-page-margin-layout.ts',import.meta.url),path.join(studio,'src/ui/pwh-page-margin-layout.ts'));
 await fs.copyFile(new URL('../src/print-preview-view.mjs',import.meta.url),path.join(studio,'src/command/commands/pwh-print-preview-view.mjs'));
 const pageSetupPath=path.join(studio,'src/ui/page-setup-dialog.ts');

@@ -16,7 +16,10 @@ test('note cursor keeps text input, arrow movement, cancel, deletion and undo in
  const {createAppServer}=await import(pathToFileURL(path.join(process.env.PWH_DESKTOP_SOURCE_ROOT,'host.mjs')));const app=await createAppServer({initialPath:file});const browser=await chromium.launch({headless:true,executablePath:process.env.PWH_BROWSER_EXECUTABLE});
  try{
   const page=await browser.newPage({viewport:{width:1300,height:950}});await page.goto(app.url);const editor=page.frames().find(f=>/\/editor\?/.test(f.url()));await editor.waitForFunction(()=>window.pwhRecoveryReady?.()===true,null,{timeout:120000});
-  if(!await editor.evaluate(()=>window.rhwpStudio.plugins.deps.wasm.getShowControlCodes()))await editor.locator('button[data-cmd="view:ctrl-mark"]').click();
+  if(!await editor.evaluate(()=>window.rhwpStudio.plugins.deps.wasm.getShowControlCodes())){
+   await editor.locator('[data-menu="view"] .menu-title').click();
+   await editor.locator('.pwh-ribbon-panel[data-active="true"] button[data-cmd="view:ctrl-mark"]').click();
+  }
   const box=await page.locator('#editor').boundingBox();
   for(const target of targets){
    const before=await editor.evaluate(t=>{const w=window.rhwpStudio.plugins.deps.wasm;return w.getCharShapeRuns(0,t.para,0,4);},target);

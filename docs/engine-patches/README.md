@@ -8,6 +8,8 @@
 <a id="cause-and-scope"></a>
 ## 원인과 적용 범위
 
+[탭별 그래픽 메뉴 패치](../../scripts/patch-context-ribbon.mjs)는 rhwp Studio 유래 메뉴 입력·도구 상자·명령 상태 조회를 Pwh 공통 편집기에서 보완합니다. 공통과 Desktop 번들에 함께 적용하며 코어 r29의 90개 패치와 WASM은 유지합니다. [소스·검증·지원 제한](../RHWP-DIFFERENCES.md#contextual-ribbon)
+
 Studio의 선택적 upstream 반영은 코어 90개 패치와 분리합니다. [클립보드·교차 구역 선택 패치](studio/clipboard-safety.patch)와 [Pwh 적용 스크립트](../../scripts/patch-clipboard-safety.mjs)는 rhwp 0.9.0의 관련 수정 세 건을 가져오고, 취소 즉시 진행 상태 해제·포커스 이탈 기록·rich 복사 실패 시 원문 보존을 추가합니다. [검토표와 검증 범위](../UPSTREAM-0.9-REVIEW.md)
 
 한글 호환 단축키의 편집 상태 분기는 [Pwh 공통 Studio 빌드 패치](../../scripts/patch-hancom-key-contexts.mjs)에 있습니다. 고정 크기 표 조절과 행 삭제는 r22 코어 API를 사용합니다. [편집기 변경과 적용 범위](../RHWP-DIFFERENCES.md#한글-호환-단축키의-편집-상태-구분)

@@ -70,7 +70,8 @@ if (mode === 'lint' && !args.length) {
     const checked = new Set(lines.map(key));
     const owned = ['pwh-blank-compose.ts', 'pwh-cell-delete-dialog.ts', 'pwh-collaboration-target.ts', 'pwh-inline-adapter.ts',
       'pwh-page-layout.ts', 'pwh-picture-replace.ts', 'collaboration-selection.ts', 'pwh-table-paste-dialog.ts',
-      'ui/pwh-cell-border-dialog.ts', 'ui/pwh-color-palette.ts', 'ui/pwh-page-margin-layout.ts'];
+      'ui/pwh-cell-border-dialog.ts', 'ui/pwh-color-palette.ts', 'ui/pwh-page-margin-layout.ts',
+      'ui/pwh-context-ribbon.ts', 'ui/pwh-ribbon-icons.ts'];
     for (const name of ['main.ts', ...owned]) {
       if (!checked.has(key(path.join(studio, 'src', name)))) throw new Error('Studio source missing from type-check program: ' + name);
     }
