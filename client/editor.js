@@ -47925,7 +47925,7 @@ var Wb = [
 		let n = document.createElement("div");
 		n.className = "about-product-name-ko", n.textContent = "한글에 익숙한 오픈소스 한글 문서 편집기", e.appendChild(n);
 		let r = document.createElement("div");
-		r.className = "about-version", r.textContent = document.getElementById("pwh-version")?.textContent || "Pwh 0.6.56", e.appendChild(r);
+		r.className = "about-version", r.textContent = document.getElementById("pwh-version")?.textContent || "Pwh 0.6.57", e.appendChild(r);
 		let i = document.createElement("div");
 		i.className = "about-tech", i.textContent = "기반 엔진 rhwp 0.8.7 · Pwh 공통 코어 r29", e.appendChild(i);
 		let a = document.createElement("div");

@@ -23,7 +23,7 @@ HWP·HWPX 문서를 열고, 글과 표를 직접 편집하거나 선택한 부�
 | **Pwh Desktop** · Windows x64 | **[Microsoft Store에서 설치](https://apps.microsoft.com/detail/9NXGD60MHMT2)**하고 Store에서 업데이트합니다. 앱에서 선택적으로 AI를 연결하며 별도 Codex 설치 없이도 기본 편집을 사용할 수 있습니다. [Desktop 설치와 사용](docs/PWH-DESKTOP.md#설치와-사용) |
 | **Pwh 플러그인** · Codex 데스크톱 | Codex 대화와 나란히 한글 편집기를 엽니다. GitHub에서 소스와 플러그인 **ZIP**을 받을 수 있습니다. [Codex 플러그인 설치](docs/USER-GUIDE.md#codex-plugin) |
 
-**소스 기준**은 Pwh **0.6.56**, Desktop **0.1.37**, 공통 코어 **r29**입니다. 버전별 배포물, SHA-256과 검증 범위는 [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases)에서 확인할 수 있습니다. Windows 설치판에는 Microsoft Store의 심사·게시 이후 반영됩니다.
+**소스 기준**은 Pwh **0.6.57**, Desktop **0.1.38**, 공통 코어 **r29**입니다. 버전별 배포물, SHA-256과 검증 범위는 [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases)에서 확인할 수 있습니다. Windows 설치판에는 Microsoft Store의 심사·게시 이후 반영됩니다.
 
 Desktop의 신규 설치·업데이트는 **Microsoft Store**로 통일합니다. 기존 MSI 배포 파일은 보존하지만 이후 MSI 업데이트는 배포하지 않습니다. GitHub 릴리스는 **플러그인 ZIP·소스·고정 코어·검증 자료**를 계속 제공합니다. 기존 MSI 사용자는 [Store 이전 안내](docs/PWH-DESKTOP.md#설치와-사용)를 참고하세요.
 

@@ -6,7 +6,7 @@ export async function patchControlMarkerDelete(studio){
   const anchor='export function handleDelete(this: any, pos: DocumentPosition, inCell: boolean): void {';
   if(text.split(anchor).length!==2)throw Error('Unsupported visible control delete handler');
   text=text.replace(anchor,anchor+'\n  if(tryDeletePageHiding(this,pos,inCell))return;');
-  await fs.writeFile(textPath,"// Pwh visible page-hiding deletion\nimport {tryDeletePageHiding} from '../control-marker-delete.mjs';\n"+text);
+  await fs.writeFile(textPath,"// Pwh visible page-hiding deletion\nimport {tryDeletePageHiding} from "+JSON.stringify('../control-marker-delete.mjs')+";\n"+text);
  }
  const bridgePath=path.join(studio,'src/core/wasm-bridge.ts');let bridge=await fs.readFile(bridgePath,'utf8');
  if(!bridge.includes('  deleteControlAt(')){

@@ -1,12 +1,12 @@
 {
-  "sha256": "d26500fe8e644fee8f335536b4dd634687ca51c0073894111f2fc881f00e8fda",
-  "baseVersion": "0.6.56",
-  "baseEditorSha256": "02bb3dba098c10e61003545795fb45ea829abcd7842baf25378cad2a060b01d5",
+  "sha256": "c651317b5d532a17aa3f1844905a8c1bc1230a8dc97727bbf3aada4d1d144a85",
+  "baseVersion": "0.6.57",
+  "baseEditorSha256": "d8df730a8ac6cbe1146f6fb9739615257f613c632a99d4c90b962821ee9b2ebf",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "desktop",
-    "sha256": "98784338f43ebbb2be4b9a8441ff10034746e9bda285c686bacd67daa99d3b14",
+    "sha256": "37d3cfb6fc7087911568ca6d1972ef34b19701efa729579ddb914035a209cef5",
     "files": [
       {
         "path": "desktop/standalone-pwh/build-desktop-editor.mjs",
@@ -30,7 +30,7 @@
       },
       {
         "path": "package.json",
-        "sha256": "af5eea4234559147c9b08cd78075ece96e8ae54a0984725fa2a2b18a996486d3"
+        "sha256": "bf868df5005a486d7c1358ee7a37d625acd7d94f35279dc0ca9283f762aaf36c"
       },
       {
         "path": "scripts/build-inline.mjs",
@@ -62,11 +62,11 @@
       },
       {
         "path": "scripts/patch-control-marker-delete.mjs",
-        "sha256": "6a0cf9153c24995828ee95a6e23fd9bc45c35a87f1362ce5a85f8b27ecfef53b"
+        "sha256": "3aa2e1b241aae43b1ec88a0af55c7189296b2d293bf8ecab218bd96b7fc48f1e"
       },
       {
         "path": "scripts/patch-format-copy-options.mjs",
-        "sha256": "8d25120c0ba261b9a59aaa31d06c6915d2ee5d25b1ec21feeaf0807d6d034fb0"
+        "sha256": "ceeb0f628728d4623c841810b7bbf46c60790d43161e0c84bc6f2453310a9bc8"
       },
       {
         "path": "scripts/patch-format-properties.mjs",

@@ -57,6 +57,6 @@ export async function patchFormatCopyOptions(studio){
  source=source.slice(0,cellStart)+`const FORMAT_COPY_CELL_KEYS: Array<keyof CellProperties> = [...cellAttributeKeys,...cellBorderKeys,...cellFillKeys] as Array<keyof CellProperties>;`+source.slice(cellEnd+3);
  const unused=source.indexOf('  private applyCopiedCellPropsToSelection('),afterUnused=source.indexOf('  /** 서식 토글',unused);
  if(unused<0||afterUnused<unused)throw Error('Unsupported legacy cell format copy boundary');source=source.slice(0,unused)+source.slice(afterUnused);
- source="// Pwh format copy choices\nimport {PwhFormatCopyDialog} from '../pwh-format-copy-dialog';\nimport {chooseCopiedFormat,cellAttributeKeys,cellBorderKeys,cellFillKeys} from '../format-copy-options.mjs';\n"+source;
+ source="// Pwh format copy choices\nimport {PwhFormatCopyDialog} from '../pwh-format-copy-dialog';\nimport {chooseCopiedFormat,cellAttributeKeys,cellBorderKeys,cellFillKeys} from "+JSON.stringify('../format-copy-options.mjs')+";\n"+source;
  await fs.writeFile(file,source);
 }
