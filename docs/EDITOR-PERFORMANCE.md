@@ -1,6 +1,6 @@
 # 편집 성능과 지원 범위
 
-[문서 모음](README.md) · [조판 검증](LAYOUT-FIDELITY.md) · [그림 이동 검증](verification/PICTURE-MOTION.md)
+[문서 모음](README.md) · **[초기 버전부터의 속도 개선 이력](PERFORMANCE-HISTORY.md)** · [조판 검증](LAYOUT-FIDELITY.md) · [그림 이동 검증](verification/PICTURE-MOTION.md)
 
 표와 중첩 개체가 많은 문서에서도 입력·선택·크기 조절의 반복 계산을 줄입니다. 편집 반응과 조판 정확성은 함께 확인합니다.
 
@@ -37,4 +37,4 @@
 [조판 소유권 규칙](engine-patches/LAYOUT-OWNERSHIP-RULES.md)과 [정적 검사](STATIC-CHECKS.md)를 함께 사용합니다. 변경한 기능은 입력·실행 취소·저장·재열기로 확인하며, 기존 조판과의 차이를 별도로 검토합니다.
 
 <a id="editor-performance-history"></a>
-이전 구현 변경은 [변경 이력](CHANGELOG.md)과 [코어 패치](engine-patches/README.md)에서 확인할 수 있습니다.
+초기 문서 로딩·글꼴부터 선택·셀 입력·실행 취소·전송·저장까지의 구현 변경과 과거 측정값은 [속도 개선 이력](PERFORMANCE-HISTORY.md)에 모았습니다. 당시 조건과 현재 지원 범위, 미배포 후보를 구분하며 [변경 이력](CHANGELOG.md)과 [코어 패치](engine-patches/README.md)에 연결합니다.

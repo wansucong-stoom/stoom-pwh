@@ -14,6 +14,15 @@
 
 Pwh는 **무료·오픈소스 HWP/HWPX 문서 편집기**입니다. 익숙한 메뉴와 한글 호환 단축키로 글·표·그림을 편집하고, 작업한 문서를 **HWPX**로 저장합니다. 필요할 때 AI를 연결해 문서 수정을 요청할 수 있습니다.
 
+## Pwh가 지향하는 세 가지
+
+| **가장 한글같은 한글** | **가장 빠른 한글** | **가장 정확한 한글** |
+| --- | --- | --- |
+| 익숙한 메뉴와 단축키, 글·표·그림을 다루는 편집 경험을 이어갑니다. | 바뀐 부분을 중심으로 계산하고 반복 조회·전송·저장 비용을 줄입니다. | 표·그림·문단의 배치 기준을 맞추고 한글 출력과 저장·실행 취소 결과를 검증합니다. |
+| [메뉴와 한글 호환 단축키](docs/USER-GUIDE.md) | **[지금까지의 속도 개선 이력](docs/PERFORMANCE-HISTORY.md)** | [조판 비교 결과와 검증 범위](docs/LAYOUT-FIDELITY.md) |
+
+세 가지는 Pwh가 계속 발전시켜 갈 목표입니다. 상세 페이지에는 실제 지원 범위, 측정 조건, 남은 차이를 함께 공개합니다.
+
 ## 설치와 업데이트
 
 | 환경 | 받는 곳 | 업데이트 |
@@ -61,12 +70,14 @@ Pwh는 **무료·오픈소스 HWP/HWPX 문서 편집기**입니다. 익숙한 �
 
 표의 쪽 나눔, 중첩 표와 그림 배치, 커서·선택이 같은 문서 구조를 따르도록 공통 편집기를 보완합니다. 변경된 셀과 상위 표의 계산 결과를 재사용하고, 그림 이동 중 불필요한 전체 문서 재생성을 줄입니다. 그림 이동의 실행 취소는 표 높이와 글줄 배치도 함께 복원합니다.
 
+초기 문서 로딩·글꼴 전송부터 큰 표 선택, 중첩 셀 입력, 커서 조회, 큰 문서 전송, 그림 드래그와 반복 저장까지의 개선은 **[속도 개선 이력](docs/PERFORMANCE-HISTORY.md)**에 모았습니다. 적용 버전·변경 계층·전후 측정과 미배포 개발 후보를 구분합니다.
+
 Pwh와 Desktop은 같은 공통 편집기와 **rhwp 기반 WASM 코어**를 사용합니다. 지원 범위와 검증 조건은 아래 문서에서 확인할 수 있습니다.
 
 | 찾는 내용 | 안내 |
 | --- | --- |
 | **사용과 지원 범위** | [사용 안내](docs/USER-GUIDE.md) · [표 안의 명령](docs/TABLE-COMMANDS.md) · [기능 범위와 제한](docs/PWH-COMPATIBILITY-LIMITS.md) |
-| **검증 결과** | [조판 비교 요약](docs/LAYOUT-FIDELITY.md) · [편집 성능](docs/EDITOR-PERFORMANCE.md) · [그림 이동·실행 취소](docs/verification/PICTURE-MOTION.md) |
+| **검증 결과** | [속도 개선 이력](docs/PERFORMANCE-HISTORY.md) · [현재 편집 성능](docs/EDITOR-PERFORMANCE.md) · [조판 비교 요약](docs/LAYOUT-FIDELITY.md) · [그림 이동·실행 취소](docs/verification/PICTURE-MOTION.md) |
 | **개발과 기여** | [문서 모음](docs/README.md) · [아키텍처](docs/ARCHITECTURE.md) · [rhwp 원본 대비 변경](docs/RHWP-DIFFERENCES.md) · [기여 안내](CONTRIBUTING.md) · [변경 이력](docs/CHANGELOG.md) |
 
 ## 데이터와 오픈소스

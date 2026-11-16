@@ -16,6 +16,7 @@
 
 ## 조판과 검증
 
+- [속도 개선 이력](PERFORMANCE-HISTORY.md)에는 초기 문서 로딩·글꼴부터 선택·입력·셀 크기·커서·전송·그림 이동·저장까지의 누적 개선과 측정 조건, 배포 상태를 정리했습니다.
 - [검증 결과](LAYOUT-FIDELITY.md#test-document-update)에는 TEST 문서 A/B의 전후 수치와 버전별 결과가 있습니다.
 - [PDF 비교 및 쪽별 판정](RENDER-COMPARISON.md)에는 비교 명령, F1 해석, 쪽별 통과 조건과 SVG 글자 잘림 검사가 함께 있습니다.
 - [r29 편집·전송·업데이트 검증](verification/CORE-R29.md)은 표 앞뒤 커서, 묶음 글상자, 64MiB 제한 제거와 Store 알림의 적용 계층과 시험 범위를 정리합니다.
