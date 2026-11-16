@@ -8,11 +8,11 @@
 <a id="cause-and-scope"></a>
 ## 원인과 적용 범위
 
-다음 배포를 위한 [자동 채우기](../../scripts/patch-auto-fill.mjs)와 [대화상자 키보드](../../scripts/patch-dialog-focus.mjs)는 **Studio 공통 편집기 빌드 패치**입니다. 상하좌우 셀 내용 계산과 모달 초점·Tab 이동을 연결하며 기존 코어 r29의 90개 패치·WASM·쪽 분할 규칙은 유지합니다. 공통·Desktop 산출물과 입력 해시를 함께 갱신합니다. [지원·시험 범위](../AUTO-FILL.md)
+Pwh 0.6.61의 [자동 채우기](../../scripts/patch-auto-fill.mjs)와 [대화상자 키보드](../../scripts/patch-dialog-focus.mjs)는 **Studio 공통 편집기 빌드 패치**입니다. 상하좌우 셀 내용 계산과 모달 초점·Tab 이동을 연결하며, 아래 r30 코어 보완과 함께 배포합니다. 공통·Desktop 산출물과 입력 해시를 함께 갱신합니다. [지원·시험 범위](../AUTO-FILL.md)
 
-### 후속 후보: 91~96번 셀 그림 높이·빈 앵커·자원 재사용
+### r30: 91~96번 셀 그림 높이·빈 앵커·자원 재사용
 
-현재 배포 고정값은 r29이며, 아래 여섯 패치는 후속 후보입니다. 기존 90개를 앞에 유지해 재빌드합니다. 공통 편집기와 Desktop은 같은 후보 코어를 사용하며 문서·쪽·표 번호에 따른 예외를 추가하지 않습니다.
+현재 배포 고정값은 r30이며, 기존 90개 뒤에 아래 여섯 패치를 적용합니다. 공통 편집기와 Desktop은 같은 코어를 사용하며 문서·쪽·표 번호에 따른 예외를 추가하지 않습니다.
 
 - [91번](rhwp-0.8.7-cell-picture-size-floor.patch): 전체 경로의 그림 소유 셀을 찾아 기존 셀·표 높이를 최소값으로 보존하고 공통 컨트롤의 원시 높이도 함께 갱신합니다. 명시적 셀 크기 축소는 유지합니다.
 - [92번](rhwp-0.8.7-table-border-frame-ownership.patch): 일부 머리선에서 레거시 외곽선을 추론하려면 이미 존재하는 선의 종류·굵기·색이 표 기본선과 같아야 합니다. 의도한 `NONE` 변을 복원하지 않습니다.
@@ -25,9 +25,9 @@
 
 [그림 이동 빌드 패치](../../scripts/patch-picture-drag.mjs)는 Studio 마우스 입력의 최신 좌표와 mouseup을 연결하고, 이동 전 문서 체크포인트를 기존 실행 취소 기록으로 이관합니다. 공통 상태 조회와 Desktop의 반복 탭 상태 보고를 분리해 드래그 도중 불필요한 HWPX 내보내기를 없앱니다. 원천 조판 코어 패치는 추가하지 않으며, 공통·Desktop 번들과 입력 해시를 함께 생성합니다. [구현 계층과 검증](../verification/PICTURE-MOTION.md)
 
-[탭별 그래픽 메뉴 패치](../../scripts/patch-context-ribbon.mjs)는 rhwp Studio 유래 메뉴 입력·도구 상자·명령 상태 조회를 Pwh 공통 편집기에서 보완합니다. 공통과 Desktop 번들에 함께 적용하며 코어 r29의 90개 패치와 WASM은 유지합니다. [소스·검증·지원 제한](../RHWP-DIFFERENCES.md#contextual-ribbon)
+[탭별 그래픽 메뉴 패치](../../scripts/patch-context-ribbon.mjs)는 rhwp Studio 유래 메뉴 입력·도구 상자·명령 상태 조회를 Pwh 공통 편집기에서 보완합니다. 공통과 Desktop 번들에 함께 적용하며 메뉴 자체는 WASM 조판 규칙을 변경하지 않습니다. [소스·검증·지원 제한](../RHWP-DIFFERENCES.md#contextual-ribbon)
 
-같은 빌드에서 [모양 복사 범위](../../scripts/patch-format-copy-options.mjs), [표시된 감추기 부호 삭제](../../scripts/patch-control-marker-delete.mjs), [상단 붙이기 연결](../../scripts/patch-native-paste-command.mjs)을 별도로 적용합니다. 원본 앵커가 맞지 않으면 빌드를 중단하고, 스크립트와 새 UI 소스는 공통·Desktop 입력 해시에 포함합니다. 인라인 그림 뒤 단어 선택은 공통 편집기의 끝점 변환만 보완하며 기존 r29 코어를 사용합니다. 제품 정보창에는 뷰포트 높이 제한과 본문 스크롤을 적용하며, 보존 입력에 이미 패치된 창에도 중복 없이 반영합니다.
+같은 빌드에서 [모양 복사 범위](../../scripts/patch-format-copy-options.mjs), [표시된 감추기 부호 삭제](../../scripts/patch-control-marker-delete.mjs), [상단 붙이기 연결](../../scripts/patch-native-paste-command.mjs)을 별도로 적용합니다. 원본 앵커가 맞지 않으면 빌드를 중단하고, 스크립트와 새 UI 소스는 공통·Desktop 입력 해시에 포함합니다. 인라인 그림 뒤 단어 선택은 공통 편집기의 끝점 변환만 보완하며 공통 코어의 기존 개체 API를 사용합니다. 제품 정보창에는 뷰포트 높이 제한과 본문 스크롤을 적용하며, 보존 입력에 이미 패치된 창에도 중복 없이 반영합니다.
 
 Studio의 선택적 upstream 반영은 코어 90개 패치와 분리합니다. [클립보드·교차 구역 선택 패치](studio/clipboard-safety.patch)와 [Pwh 적용 스크립트](../../scripts/patch-clipboard-safety.mjs)는 rhwp 0.9.0의 관련 수정 세 건을 가져오고, 취소 즉시 진행 상태 해제·포커스 이탈 기록·rich 복사 실패 시 원문 보존을 추가합니다. [검토표와 검증 범위](../UPSTREAM-0.9-REVIEW.md)
 

@@ -48476,7 +48476,7 @@ var Nx = [
 		let n = document.createElement("div");
 		n.className = "about-product-name-ko", n.textContent = "한글에 익숙한 오픈소스 한글 문서 편집기", e.appendChild(n);
 		let r = document.createElement("div");
-		r.className = "about-version", r.textContent = document.getElementById("pwh-version")?.textContent || "Pwh 0.6.60", e.appendChild(r);
+		r.className = "about-version", r.textContent = document.getElementById("pwh-version")?.textContent || "Pwh 0.6.61", e.appendChild(r);
 		let i = document.createElement("div");
 		i.className = "about-tech", i.textContent = "기반 엔진 rhwp 0.8.7 · Pwh 공통 코어 r29", e.appendChild(i);
 		let a = document.createElement("div");
@@ -67913,6 +67913,14 @@ var aP = class {
 				});
 				return;
 			}
+			if (globalThis.pwhEditor?.interacting?.()) {
+				this.schedule(e);
+				return;
+			}
+			if (globalThis.pwhRecoveryCheckpointCurrent?.()) {
+				this.cancelTimers();
+				return;
+			}
 			if (this.saving) {
 				this.pendingReason = e;
 				return;
@@ -69903,8 +69911,8 @@ function $F(e, t = {}) {
 //#endregion
 //#region @rhwp/studio/src/document-agent/pwh-document-state-cache.mjs
 function eI() {
-	let e = null, t = 0;
-	function n(e) {
+	let e = null, t = null, n = 0;
+	function r(e) {
 		if (!e || !["hwp", "hwpx"].includes(e.format) || typeof e.dirty != "boolean" || ![
 			"documentEpoch",
 			"changeSeq",
@@ -69920,19 +69928,40 @@ function eI() {
 	}
 	return Object.freeze({
 		invalidate() {
-			t++, e = null;
+			n++, e = null, t = null;
 		},
-		read(r, i, { fresh: a = !1 } = {}) {
-			let o = n(r);
-			if (!a && e?.key === o) return e.digest;
-			let s = ++t;
-			e = null;
-			let c = i();
-			if (typeof c != "string" || !/^[a-f0-9]{64}$/.test(c)) throw Error("Invalid document export digest");
-			return t === s && (e = {
-				key: o,
-				digest: c
-			}), c;
+		readArtifact(i, a, o, { fresh: s = !1 } = {}) {
+			let c = r(i);
+			if (!s && t?.key === c) return t.value;
+			let l = ++n;
+			e = null, t = null;
+			let u = a();
+			if (!(u?.bytes instanceof Uint8Array)) throw Error("Invalid document export artifact");
+			let d = o(u.bytes);
+			if (typeof d != "string" || !/^[a-f0-9]{64}$/.test(d)) throw Error("Invalid document export digest");
+			let f = {
+				artifact: u,
+				digest: d
+			};
+			return n === l && (e = {
+				key: c,
+				digest: d
+			}, u.bytes.byteLength <= 8388608 && (t = {
+				key: c,
+				value: f
+			})), f;
+		},
+		read(i, a, { fresh: o = !1 } = {}) {
+			let s = r(i);
+			if (!o && e?.key === s) return e.digest;
+			let c = ++n;
+			e = null, t = null;
+			let l = a();
+			if (typeof l != "string" || !/^[a-f0-9]{64}$/.test(l)) throw Error("Invalid document export digest");
+			return n === c && (e = {
+				key: s,
+				digest: l
+			}), l;
 		}
 	});
 }
@@ -70067,6 +70096,17 @@ var bI = class {
 			dirty: this.deps.isDirty()
 		};
 	}
+	getPresentationRecoveryExport() {
+		let e = this.getPresentationDocumentRevision();
+		if (e.format !== "hwpx") {
+			let e = this.deps.wasm.exportHwpxWithReport();
+			return {
+				artifact: e,
+				digest: iI(e.bytes)
+			};
+		}
+		return this.pwhStateCache.readArtifact(e, () => this.deps.wasm.exportHwpxWithReport(), iI);
+	}
 	getPresentationDocumentState() {
 		if (this.syncGeneration(), !this.pwhStateCacheOff) {
 			let e = ["document-mutated", "document-changed"].map((e) => this.deps.eventBus.on(e, () => this.pwhStateCache.invalidate()));
@@ -70082,7 +70122,7 @@ var bI = class {
 		return {
 			schemaVersion: 1,
 			...e,
-			documentSha256: this.pwhStateCache.read(e, () => hI(this.deps.wasm, e.format))
+			documentSha256: this.pwhStateCache.read(e, () => e.format === "hwpx" ? this.getPresentationRecoveryExport().digest : hI(this.deps.wasm, e.format))
 		};
 	}
 	deps;
@@ -72718,6 +72758,13 @@ function uR(e) {
 			return t.target = await UI(e.wasm, t), t;
 		},
 		export: () => e.wasm.exportHwpxWithReport(),
+		recoveryExport: () => {
+			let t = e.getDocumentAgent().getPresentationRecoveryExport().artifact;
+			return {
+				...t,
+				bytes: t.bytes.slice()
+			};
+		},
 		saved: (t) => e.saved(t),
 		recovered: () => e.recovered(),
 		legacyDrafts: () => e.legacyDrafts(),

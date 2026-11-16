@@ -20,6 +20,7 @@ const FILES = Object.freeze([
 ]);
 const DIRECTORIES = Object.freeze(['docs', 'licenses', 'skills', 'src', 'examples', 'client']);
 const SOURCE_EXTENSIONS = new Set(['.md', '.txt', '.json', '.mjs', '.js', '.ts', '.html', '.css', '.svg', '.patch']);
+const GUIDE_IMAGES = new Set(['docs/images/guide-edit.png', 'docs/images/guide-styles.png', 'docs/images/guide-autofill.png']);
 const MAX_SOURCE_BYTES = 64 * 1024 * 1024;
 const REQUIRED = ['scripts/launch.mjs','scripts/build-inline.mjs','src/inline-host.js', 'src/table-equal-size.ts','src/studio-inline-adapter.ts','src/editor-session.mjs','src/server.mjs', 'src/native-mcp.mjs', 'src/cli.mjs', 'src/engine.mjs',
   'src/config.mjs', 'src/live.mjs', 'src/editor.html', 'src/editor-client.mjs', 'src/viewer.html',
@@ -73,7 +74,7 @@ async function collect(root) {
       return;
     }
     if (!stat.isFile()) throw new Error(`Not a regular source file: ${relative}`);
-    if (directoryAllowed && !SOURCE_EXTENSIONS.has(path.posix.extname(relative).toLowerCase()))
+    if (directoryAllowed && !SOURCE_EXTENSIONS.has(path.posix.extname(relative).toLowerCase()) && !GUIDE_IMAGES.has(relative))
       throw new Error(`Public directories may contain only source/text assets: ${relative}`);
     if (!inside(root, await fs.realpath(filename))) throw new Error(`Source is outside the project: ${relative}`);
     if ((total += stat.size) > MAX_SOURCE_BYTES) throw new Error('Public source bundle exceeds 64 MiB. Runtime assets must stay outside the package.');
