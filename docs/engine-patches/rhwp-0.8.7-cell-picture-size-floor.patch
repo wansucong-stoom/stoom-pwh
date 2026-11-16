@@ -1,0 +1,93 @@
+--- a/src/document_core/commands/object_ops/table.rs
++++ b/src/document_core/commands/object_ops/table.rs
+@@ -153,20 +153,16 @@
+             .saturating_add(padding_top.max(0) as u32)
+             .saturating_add(padding_bottom.max(0) as u32)
+     }
+-    fn sync_direct_owner_cell_for_picture(
++    fn sync_owner_cell_for_picture(
+         section: &mut crate::model::document::Section,
+         parent_para_idx: usize,
+         path: &[(usize, usize, usize)],
+         inner_control_idx: usize,
+     ) -> Result<(), HwpError> {
+-        if path.len() != 1 {
++        let Some((&(table_ctrl_idx, cell_idx, cell_para_idx), ancestors)) = path.split_last() else {
+             return Ok(());
+-        }
+-
+-        let (table_ctrl_idx, cell_idx, cell_para_idx) = path[0];
+-        let para = section.paragraphs.get_mut(parent_para_idx).ok_or_else(|| {
+-            HwpError::RenderError(format!("문단 인덱스 {} 범위 초과", parent_para_idx))
+-        })?;
++        };
++        let para = Self::resolve_cell_paragraph_mut(section, parent_para_idx, ancestors)?;
+         let existing_line_height = para
+             .line_segs
+             .first()
+@@ -211,12 +207,17 @@
+         if let (Some(required_height), Some(cell)) =
+             (required_height, table.cells.get_mut(cell_idx))
+         {
+-            let synced_height = required_height.max(MIN_SHAPE_SIZE);
++            // A picture edit supplies a content floor, not a new authored cell size.
++            // Keep deliberate space below the object and any expansion already made.
++            // Explicit table/cell resizing has its own command and can still shrink.
++            let synced_height = cell.height.max(required_height).max(MIN_SHAPE_SIZE);
+             if cell.height != synced_height {
+                 cell.height = synced_height;
+             }
+         }
++        let previous_table_height = table.common.height;
+         table.update_ctrl_dimensions();
++        table.sync_ctrl_height(table.common.height.max(previous_table_height));
+         let new_table_height = table.common.height as i32;
+         if let Some((vertical_pos, line_height_extra)) = line_seg_update {
+             if let Some(seg) = para.line_segs.first_mut() {
+@@ -232,7 +233,7 @@
+         }
+         Ok(())
+     }
+-    fn clamp_direct_owner_cell_picture_offsets(
++    fn clamp_owner_cell_picture_offsets(
+         section: &mut crate::model::document::Section,
+         parent_para_idx: usize,
+         path: &[(usize, usize, usize)],
+@@ -240,14 +241,13 @@
+         clamp_horz: bool,
+         clamp_vert: bool,
+     ) -> Result<(), HwpError> {
+-        if path.len() != 1 || (!clamp_horz && !clamp_vert) {
++        if !clamp_horz && !clamp_vert {
+             return Ok(());
+         }
+-
+-        let (table_ctrl_idx, cell_idx, cell_para_idx) = path[0];
+-        let para = section.paragraphs.get_mut(parent_para_idx).ok_or_else(|| {
+-            HwpError::RenderError(format!("문단 인덱스 {} 범위 초과", parent_para_idx))
+-        })?;
++        let Some((&(table_ctrl_idx, cell_idx, cell_para_idx), ancestors)) = path.split_last() else {
++            return Ok(());
++        };
++        let para = Self::resolve_cell_paragraph_mut(section, parent_para_idx, ancestors)?;
+         let table = match para.controls.get_mut(table_ctrl_idx) {
+             Some(Control::Table(table)) => table,
+             _ => return Ok(()),
+@@ -1574,7 +1574,7 @@
+             crate::parser::assign_auto_numbers(&mut self.document);
+         }
+         let section = &mut self.document.sections[section_idx];
+-        Self::clamp_direct_owner_cell_picture_offsets(
++        Self::clamp_owner_cell_picture_offsets(
+             section,
+             parent_para_idx,
+             &path,
+@@ -1582,7 +1582,7 @@
+             clamp_horz,
+             clamp_vert,
+         )?;
+-        Self::sync_direct_owner_cell_for_picture(
++        Self::sync_owner_cell_for_picture(
+             section,
+             parent_para_idx,
+             &path,

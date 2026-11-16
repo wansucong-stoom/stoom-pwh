@@ -21,6 +21,7 @@ import {patchNativePasteCommand} from './patch-native-paste-command.mjs';
 import {patchPictureDrag} from './patch-picture-drag.mjs';
 import {patchDialogFocus} from './patch-dialog-focus.mjs';
 import {patchAutoFill} from './patch-auto-fill.mjs';
+import {patchBackgroundRecovery} from './patch-background-recovery.mjs';
 const root=path.resolve(process.argv[2]);
 const studio=path.join(root,'rhwp-studio');
 // The pinned editor includes its WASM glue. Old runtime cores keep the default
@@ -975,6 +976,7 @@ await patchInlineObjectCursors(studio);
 await patchPictureDrag(studio);
 await patchDialogFocus(studio);
 await patchAutoFill(studio);
+await patchBackgroundRecovery(studio);
 const glue=path.join(root,'pkg/rhwp.js');
 await fs.writeFile(glue,(await fs.readFile(glue,'utf8')).replace("new URL('rhwp_bg.wasm', import.meta.url)","(()=>{throw new Error('Host WASM bytes required')})()"));
 const {build}=await import(pathToFileURL(path.join(studio,'node_modules/vite/dist/node/index.js')));

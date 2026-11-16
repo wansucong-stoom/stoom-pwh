@@ -86,6 +86,7 @@ export function installInlineEditor(d:any) {
   interacting:()=>pointerActive||performance.now()-lastInputAt<1200,
   capture:async()=>{const c:any=structuredClone(read());c.target=await captureTarget(d.wasm,c);return c;},
   export:()=>d.wasm.exportHwpxWithReport(),
+  recoveryExport:()=>{const value=d.getDocumentAgent().getPresentationRecoveryExport().artifact;return {...value,bytes:value.bytes.slice()};},
   saved:(name:string)=>d.saved(name),
   recovered:()=>d.recovered(),
   legacyDrafts:()=>d.legacyDrafts(),

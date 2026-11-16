@@ -41,3 +41,17 @@ test('invalid keys never compute and reentrant invalidation never publishes an o
  cache.read(revision,()=>{cache.read(newer,()=>changed);return digest;},{fresh:true});
  assert.equal(cache.read(newer,()=>{throw Error('newer entry should remain');}),changed);
 });
+
+test('presentation digest and recovery bytes share one export for the same tracked revision',()=>{
+ const cache=createDocumentStateDigestCache();let exports=0;const artifact={bytes:new Uint8Array([1,2,3]),contentLoss:{count:0}};
+ const compute=()=>{exports++;return artifact;};
+ assert.equal(cache.read(revision,()=>cache.readArtifact(revision,compute,()=>digest).digest),digest);
+ assert.equal(cache.readArtifact(revision,compute,()=>digest).artifact,artifact);assert.equal(exports,1);
+ cache.invalidate();cache.readArtifact(revision,compute,()=>changed);assert.equal(exports,2);assert.equal(cache.read(revision,()=>{throw Error('digest should already be cached');}),changed);
+});
+
+test('recovery artifact retention is bounded and fresh verification clears stale bytes',()=>{
+ const cache=createDocumentStateDigestCache();let exports=0;const small=()=>{exports++;return {bytes:new Uint8Array([1]),contentLoss:{count:0}};};
+ cache.readArtifact(revision,small,()=>digest);assert.throws(()=>cache.readArtifact(revision,()=>{throw Error('export failed');},()=>digest,{fresh:true}),/export failed/);cache.readArtifact(revision,small,()=>changed);assert.equal(exports,2);
+ const big=()=>{exports++;return {bytes:new Uint8Array(8*1024*1024+1),contentLoss:{count:0}};};cache.invalidate();cache.readArtifact(revision,big,()=>digest);cache.readArtifact(revision,big,()=>digest);assert.equal(exports,4,'large exports are not retained');
+});

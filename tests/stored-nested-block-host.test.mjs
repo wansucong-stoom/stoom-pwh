@@ -8,15 +8,15 @@ import {zipEntries} from '../scripts/setup.mjs';
 const skip = !process.env.PWH_CORE_JS || !process.env.PWH_CORE_WASM
   ? 'Requires explicit candidate core paths' : false;
 const seed = await fs.readFile(new URL('./fixtures/rowbreak-table/synthetic-rowbreak-single-line-control.hwpx', import.meta.url));
-const line = (height = 1100) => `<hp:linesegarray><hp:lineseg textpos="0" vertpos="0" vertsize="${height}" textheight="${height}" baseline="${Math.round(height * .85)}" spacing="500" horzpos="0" horzsize="18000" flags="393216"/></hp:linesegarray>`;
-const para = (text, extra = '', height = 1100) => `<hp:p id="0" paraPrIDRef="0" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0"><hp:run charPrIDRef="0">${extra}<hp:t>${text}</hp:t></hp:run>${line(height)}</hp:p>`;
+const line = (height = 1100,vpos=0) => `<hp:linesegarray><hp:lineseg textpos="0" vertpos="${vpos}" vertsize="${height}" textheight="${height}" baseline="${Math.round(height * .85)}" spacing="500" horzpos="0" horzsize="18000" flags="393216"/></hp:linesegarray>`;
+const para = (text, extra = '', height = 1100,vpos=0) => `<hp:p id="0" paraPrIDRef="0" styleIDRef="0" pageBreak="0" columnBreak="0" merged="0"><hp:run charPrIDRef="0">${extra}<hp:t>${text}</hp:t></hp:run>${line(height,vpos)}</hp:p>`;
 const cell = (row, width, height, body, align = 'CENTER') => `<hp:tc hasMargin="1" borderFillIDRef="1"><hp:subList textDirection="HORIZONTAL" lineWrap="BREAK" vertAlign="${align}">${body}</hp:subList><hp:cellAddr colAddr="0" rowAddr="${row}"/><hp:cellSpan colSpan="1" rowSpan="1"/><hp:cellSz width="${width}" height="${height}"/><hp:cellMargin left="100" right="100" top="100" bottom="100"/></hp:tc>`;
 function table(id, width, height, rows, inline) {
   return `<hp:tbl id="${id}" zOrder="0" numberingType="TABLE" textWrap="TOP_AND_BOTTOM" textFlow="BOTH_SIDES" pageBreak="CELL" rowCnt="2" colCnt="1" cellSpacing="0" borderFillIDRef="1"><hp:sz width="${width}" height="${height}" widthRelTo="ABSOLUTE" heightRelTo="ABSOLUTE"/><hp:pos treatAsChar="${Number(inline)}" affectLSpacing="0" flowWithText="1" allowOverlap="0" vertRelTo="PARA" horzRelTo="COLUMN" vertAlign="TOP" horzAlign="LEFT" vertOffset="0" horzOffset="0"/><hp:outMargin left="100" right="100" top="100" bottom="100"/><hp:inMargin left="100" right="100" top="100" bottom="100"/>${rows.map(r => '<hp:tr>' + r + '</hp:tr>').join('')}</hp:tbl>`;
 }
-function fixture({childHeight = 6000, placeholder = 1100, text = '', trailing = false, align = 'CENTER', pageHeight = 30000} = {}) {
+function fixture({childHeight = 6000, placeholder = 1100, text = '', trailing = false, leading=false, align = 'CENTER', pageHeight = 30000} = {}) {
   const nested = table(2, 12000, childHeight, [0, 1].map(row => cell(row, 12000, childHeight / 2, para(`CHILD ${row}`))), false);
-  const host = para(text, nested, placeholder) + (trailing ? para('') : '');
+  const host = (leading?para('LEAD'): '')+para(text, nested, placeholder,leading?1600:0) + (trailing ? para('') : '');
   const outer = table(1, 18000, 3800, [cell(0, 18000, 2000, para('HEADER')), cell(1, 18000, 1800, host, align)], true);
   return mapHwpxMember(seed, 'Contents/section0.xml', xml => {
     const section = `<hp:secPr id="0"><hp:pagePr width="30000" height="${pageHeight}" landscape="WIDELY"><hp:margin left="0" right="0" top="0" bottom="0" header="0" footer="0" gutter="0"/></hp:pagePr></hp:secPr>`;
@@ -78,3 +78,8 @@ for (const options of [{text: 'HOST'}, {trailing: true}]) {
     try { assert.ok(geometry(doc).parent.height > 6400 / 75 + 1); } finally { doc.free(); }
   });
 }
+
+for(const align of ['TOP','CENTER','BOTTOM'])test(`a nonzero nested anchor after text shares its placeholder box: ${align}`,{skip},async()=>{
+ const core=await loadCore(),bytes=fixture({leading:true,align,pageHeight:10500}),doc=new core.HwpDocument(bytes);
+ try{assert.equal(doc.pageCount(),1,'the stored anchor line must not force an extra page');const g=geometry(doc);assert.ok(Math.abs(g.parent.height-8000/75)<.1,`parent height ${g.parent.height}`);assert.ok(Math.abs(g.child.y-g.parent.y-1800/75)<.1,'the preceding real text keeps its own space');const before=doc.renderPageSvgWithProfile(0,'print'),snapshot=doc.saveSnapshot(),lead=JSON.parse(doc.getPageTextLayout(0)).runs.find(r=>r.text==='LEAD');assert.ok(lead);doc.insertTextInCellByPath(lead.secIdx,lead.parentParaIdx,JSON.stringify(lead.cellPath),lead.charStart,'EDIT_');doc.restoreSnapshot(snapshot);doc.discardSnapshot(snapshot);assert.equal(doc.renderPageSvgWithProfile(0,'print'),before);const reopened=new core.HwpDocument(doc.exportHwpx());try{assert.equal(reopened.pageCount(),1);assert.deepEqual(geometry(reopened),g);}finally{reopened.free();}}finally{doc.free();}
+});

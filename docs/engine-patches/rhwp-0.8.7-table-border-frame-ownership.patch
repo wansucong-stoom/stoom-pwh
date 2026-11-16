@@ -1,0 +1,40 @@
+--- a/src/renderer/layout/border_rendering.rs
++++ b/src/renderer/layout/border_rendering.rs
+@@ -517,7 +517,7 @@
+         }
+     }
+ 
+-    let fill_occupied = is_callout_partial_frame(h_edges, v_edges, &h_occupied);
++    let fill_occupied = is_callout_partial_frame(h_edges, v_edges, &h_occupied, table_borders);
+ 
+     let fill = |slot: &mut Option<BorderLine>, border: &BorderLine, occupied: bool| {
+         if slot.is_none()
+@@ -557,10 +557,28 @@
+     h_edges: &[Vec<Option<BorderLine>>],
+     v_edges: &[Vec<Option<BorderLine>>],
+     h_occupied: &[Vec<bool>],
++    table_borders: &[BorderLine; 4],
+ ) -> bool {
+     let col_count = h_edges[0].len();
+     let row_count = v_edges[0].len();
+     if row_count < 2 || col_count < 2 {
++        return false;
++    }
++
++    // A decorative cell edge is not evidence for an inherited table frame.
++    // Only the legacy partial frame that already paints its own table style
++    // may complete occupied empty slots. Preserve explicit NONE alongside a
++    // cell-specific color, width or line type rather than inventing a box.
++    let agrees = |edge: &Option<BorderLine>, side: usize| {
++        edge.as_ref().is_none_or(|line| {
++            line.line_type == BorderLineType::None || *line == table_borders[side]
++        })
++    };
++    if !(0..col_count).all(|c| {
++        agrees(&h_edges[0][c], 2) && agrees(&h_edges[row_count][c], 3)
++    }) || !(0..row_count).all(|r| {
++        agrees(&v_edges[0][r], 0) && agrees(&v_edges[col_count][r], 1)
++    }) {
+         return false;
+     }
+ 

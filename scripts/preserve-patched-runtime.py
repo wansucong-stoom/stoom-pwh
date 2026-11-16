@@ -252,6 +252,11 @@ def main():
                        'tests/helpers/grouped-textbox-fixture.mjs',
                        'tests/nested-paragraph-format.test.mjs', 'tests/deleted-control-format-boundaries.test.mjs',
                        'tests/deleted-control-source-metadata.test.mjs')
+    fidelity_tests += ('tests/cell-picture-height-floor.test.mjs',
+                       'tests/picture-move-layout-history.test.mjs',
+                       'tests/table-border-frame-ownership.test.mjs',
+                       'tests/folded-empty-host-float.test.mjs',
+                       'tests/bin-data-resource-reuse.test.mjs')
     for name in fidelity_tests:
         core_inputs[name] = regular(project/name)
         build_inputs['pwh/'+name] = regular(project/name)

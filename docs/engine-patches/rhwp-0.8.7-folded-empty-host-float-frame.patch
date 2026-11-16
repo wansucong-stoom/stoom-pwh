@@ -1,0 +1,89 @@
+--- a/src/renderer/typeset/controls/empty_float.rs
++++ b/src/renderer/typeset/controls/empty_float.rs
+@@ -170,6 +170,86 @@
+             reserved_height: frame.occupied_bottom - frame.anchor_y,
+             resolved: Some(frame),
+         });
++    }
++
++    // An empty host can retain a logical text-line ladder shorter than the
++    // floating table. That line is an anchor, not another block before/after
++    // the table. Charge the actual outer object box once and publish the same
++    // placement to paint; the ordinary block path still owns overflow/splits.
++    let folded_logical_host = page.profile.hwpx_stored_layout()
++        && !page.profile.session_edited()
++        && !table_reflowed
++        && is_topbottom_para_float
++        && topbottom_float_count == 1
++        && table.common.flow_with_text
++        && !table.common.allow_overlap
++        && table.common.vertical_offset == 0
++        && matches!(table.common.vert_align, crate::model::shape::VertAlign::Top)
++        && table.caption.is_none()
++        && page.layout.column_areas.len() == 1
++        && (column_area.y - page.layout.body_area.y).abs() <= 0.5
++        && para_style.is_some_and(|style| style.spacing_before > 0.0)
++        && !para.stored_text_partition_is_dirty()
++        && !para.cell_format_vpos_dirty
++        && para.line_segs.len() == 1
++        && next_para.is_some_and(|next| {
++            !para_has_visible_text(next)
++                && !next.stored_text_partition_is_dirty()
++                && !next.cell_format_vpos_dirty
++                && next.line_segs.len() == 1
++                && next.controls.iter().any(|control| matches!(control, Control::Table(_)))
++                && {
++                    let current = &para.line_segs[0];
++                    let following = &next.line_segs[0];
++                    let advance = i64::from(following.vertical_pos) - i64::from(current.vertical_pos);
++                    let text_advance = i64::from(current.line_height) + i64::from(current.line_spacing);
++                    !is_synthetic_line_seg(current)
++                        && !is_synthetic_line_seg(following)
++                        && current.vertical_pos >= 0
++                        && current.line_height > 0
++                        && text_advance > 0
++                        && advance >= text_advance
++                        && advance < i64::from(table.common.height)
++                }
++        })
++        && ft.effective_height <= hwpunit_to_px(table.common.height as i32, dpi) + 0.5;
++    if folded_logical_host {
++        let anchor = page.current_height.max(lanes.max_bottom());
++        let top = anchor + hwpunit_to_px(i32::from(table.outer_margin_top), dpi);
++        let object_bottom = top + ft.effective_height
++            + hwpunit_to_px(i32::from(table.outer_margin_bottom), dpi);
++        // A following inline table can independently own its complete saved
++        // line. Its source origin closes the preceding float's flow frame and
++        // already includes the successor's leading paragraph spacing.
++        let successor_origin = next_para.and_then(|next| {
++            let [Control::Table(inline)] = next.controls.as_slice() else { return None; };
++            let [line] = next.line_segs.as_slice() else { return None; };
++            let frame = i64::from(inline.common.height)
++                + i64::from(inline.outer_margin_top) + i64::from(inline.outer_margin_bottom);
++            let origin = hwpunit_to_px(line.vertical_pos, dpi);
++            (inline.common.treat_as_char && inline.caption.is_none()
++                && !table_reflowed && !is_synthetic_line_seg(line)
++                && i64::from(line.line_height) == frame && frame > 0
++                && origin + 0.5 >= object_bottom
++                && origin + hwpunit_to_px(frame as i32, dpi) <= available + 0.5)
++                .then_some(origin)
++        });
++        let bottom = successor_origin.unwrap_or(object_bottom);
++        if bottom <= available + 0.5 {
++            let resolved = crate::renderer::float_placement::ParagraphFloatPlacement {
++                flow: crate::renderer::float_placement::ParagraphFloatFlow::NextLine,
++                anchor_y: anchor,
++                stored_host_origin: None,
++                stored_successor_line_origin: successor_origin,
++                table_left: None,
++                table_top: top,
++                occupied_bottom: bottom,
++            };
++            return Some(EmptyFloatPlacement {
++                x_start, x_end, raw_top: anchor, reserved_height: bottom - anchor,
++                resolved: Some(resolved),
++            });
++        }
+     }
+ 
+     let v_offset_px = hwpunit_to_px(signed_hwpunit(table.common.vertical_offset), dpi);

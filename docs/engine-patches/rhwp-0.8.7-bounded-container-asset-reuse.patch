@@ -1,0 +1,148 @@
+--- a/src/model/bin_data.rs
++++ b/src/model/bin_data.rs
+@@ -111,6 +111,11 @@
+     /// (파싱 시점의 placeholder 의미를 그대로 유지한다).
+     fn resolve(&self, key: &str) -> Vec<u8>;
+ 
++    /// Opt in only when this owner/key always returns the same container bytes.
++    /// Custom mutable resolvers keep their original read behavior by default.
++    fn cache_immutable_bytes(&self) -> bool { false }
++
++
+     /// 공유 가능한 바이트를 반환한다.
+     ///
+     /// 컨테이너 리졸버의 기존 `Vec` 계약은 유지한다. 같은 할당을 이미 공유하는
+@@ -195,6 +200,68 @@
+         self.bytes.is_empty()
+     }
+ }
++
++// Pwh bounded container resource cache. Geometry edits do not change the
++// immutable resolver or its resource key; document snapshots share that owner.
++// Weak ownership prevents a closed container from being kept alive by the LRU.
++const BIN_CACHE_BYTES: usize = 64 * 1024 * 1024;
++const BIN_CACHE_ENTRIES: usize = 64;
++struct CachedBinData {
++    owner: std::sync::Weak<dyn BinDataResolver>,
++    key: String,
++    bytes: std::sync::Arc<[u8]>,
++}
++thread_local! {
++    static BIN_RESOURCE_CACHE: std::cell::RefCell<Vec<CachedBinData>> = const {
++        std::cell::RefCell::new(Vec::new())
++    };
++}
++fn cached_resolve_shared(
++    resolver: &std::sync::Arc<dyn BinDataResolver>, key: &str, limit: Option<usize>,
++) -> Option<std::sync::Arc<[u8]>> {
++    // External resolvers may read mutable data. Only container implementations
++    // that explicitly guarantee immutable bytes participate in this cache.
++    if !resolver.cache_immutable_bytes() {
++        return match limit {
++            Some(max) => resolver.resolve_limited_shared(key, max).filter(|bytes| bytes.len() <= max),
++            None => Some(resolver.resolve_shared(key)),
++        };
++    }
++    let owner = std::sync::Arc::downgrade(resolver);
++    if let Some(bytes) = BIN_RESOURCE_CACHE.with(|cache| {
++        let mut entries = cache.borrow_mut();
++        entries.retain(|entry| entry.owner.strong_count() > 0);
++        let index = entries.iter().position(|entry| entry.owner.ptr_eq(&owner) && entry.key == key)?;
++        let entry = entries.remove(index);
++        let bytes = std::sync::Arc::clone(&entry.bytes);
++        entries.push(entry);
++        Some(bytes)
++    }) {
++        return limit.is_none_or(|max| bytes.len() <= max).then_some(bytes);
++    }
++    // Never hold a cache borrow while a resolver reads/decompresses a container.
++    // A failed small bounded read cannot poison a later, larger valid request.
++    let bytes = match limit {
++        Some(max) => resolver.resolve_limited_shared(key, max)
++            .filter(|bytes| bytes.len() <= max)?,
++        None => resolver.resolve_shared(key),
++    };
++    if !bytes.is_empty() && bytes.len() <= BIN_CACHE_BYTES {
++        BIN_RESOURCE_CACHE.with(|cache| {
++            let mut entries = cache.borrow_mut();
++            entries.retain(|entry| entry.owner.strong_count() > 0);
++            let mut size: usize = entries.iter().map(|entry| entry.bytes.len()).sum();
++            while !entries.is_empty()
++                && (size + bytes.len() > BIN_CACHE_BYTES || entries.len() >= BIN_CACHE_ENTRIES)
++            {
++                size -= entries.remove(0).bytes.len();
++            }
++            entries.push(CachedBinData { owner, key: key.to_string(), bytes: std::sync::Arc::clone(&bytes) });
++        });
++    }
++    Some(bytes)
++}
++// End Pwh bounded container resource cache.
+ 
+ /// BinData 바이트의 보관 방식.
+ ///
+@@ -231,7 +298,8 @@
+     pub fn load(&self) -> Vec<u8> {
+         match self {
+             BinDataBytes::Loaded(v) => v.clone(),
+-            BinDataBytes::Lazy { resolver, key } => resolver.resolve(key),
++            BinDataBytes::Lazy { resolver, key } => cached_resolve_shared(resolver, key, None)
++                .expect("unbounded resolver result").to_vec(),
+         }
+     }
+ 
+@@ -242,7 +310,8 @@
+     pub fn load_shared(&self) -> std::sync::Arc<[u8]> {
+         match self {
+             BinDataBytes::Loaded(v) => std::sync::Arc::from(v.as_slice()),
+-            BinDataBytes::Lazy { resolver, key } => resolver.resolve_shared(key),
++            BinDataBytes::Lazy { resolver, key } => cached_resolve_shared(resolver, key, None)
++                .expect("unbounded resolver result"),
+         }
+     }
+ 
+@@ -254,9 +323,8 @@
+         match self {
+             BinDataBytes::Loaded(v) if v.len() <= max_bytes => Some(v.clone()),
+             BinDataBytes::Loaded(_) => None,
+-            BinDataBytes::Lazy { resolver, key } => resolver
+-                .resolve_limited(key, max_bytes)
+-                .filter(|bytes| bytes.len() <= max_bytes),
++            BinDataBytes::Lazy { resolver, key } => cached_resolve_shared(resolver, key, Some(max_bytes))
++                .map(|bytes| bytes.to_vec()),
+         }
+     }
+ 
+@@ -267,9 +335,7 @@
+                 Some(std::sync::Arc::from(v.as_slice()))
+             }
+             BinDataBytes::Loaded(_) => None,
+-            BinDataBytes::Lazy { resolver, key } => resolver
+-                .resolve_limited_shared(key, max_bytes)
+-                .filter(|bytes| bytes.len() <= max_bytes),
++            BinDataBytes::Lazy { resolver, key } => cached_resolve_shared(resolver, key, Some(max_bytes)),
+         }
+     }
+ 
+--- a/src/parser/mod.rs
++++ b/src/parser/mod.rs
+@@ -1989,6 +1989,8 @@
+ }
+ 
+ impl crate::model::bin_data::BinDataResolver for Hwp5BinResolver {
++    fn cache_immutable_bytes(&self) -> bool { true }
++
+     fn resolve(&self, key: &str) -> Vec<u8> {
+         let mut cfb = match self.cfb.lock() {
+             Ok(c) => c,
+--- a/src/parser/hwpx/mod.rs
++++ b/src/parser/hwpx/mod.rs
+@@ -86,6 +86,8 @@
+ }
+ 
+ impl crate::model::bin_data::BinDataResolver for HwpxBinResolver {
++    fn cache_immutable_bytes(&self) -> bool { true }
++
+     fn resolve(&self, key: &str) -> Vec<u8> {
+         let mut reader = match self.reader.lock() {
+             Ok(r) => r,

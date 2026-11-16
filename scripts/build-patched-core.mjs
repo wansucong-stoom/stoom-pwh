@@ -1836,6 +1836,76 @@ const patches = [
       "patchedSha256": "026d4d6d63b08a3b91314d33f0bac1ffdd62caf466c467c4baa5f9d3512c40ba"
     }
   ]
+},
+{
+  "file": "rhwp-0.8.7-cell-picture-size-floor.patch",
+  "sha256": "15d268ff8171dc6075e2c0c101755456030e3e9e561f721b652e0701b918112e",
+  "sources": [
+    {
+      "path": "src/document_core/commands/object_ops/table.rs",
+      "originalSha256": "c3fec057cccd14a1af66241dd1ac4bf3db030d6295981d007f7e9f1c4b8d6365",
+      "patchedSha256": "dbcc043ad1e5d61fe1f055f38048761c28d966cbdd912e578a852de03a540810"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-table-border-frame-ownership.patch",
+  "sha256": "cbbc4f6bc9370015d8e2a1877f36fe367573395c9fc927f663ffcc3c29356ce6",
+  "sources": [
+    {
+      "path": "src/renderer/layout/border_rendering.rs",
+      "originalSha256": "1207be94d1b3ca2fbcd266d64a98c03e387b01456498d134df3d36498d3ba805",
+      "patchedSha256": "90e0b68f39618b4524392f3a830a22eb3832c02157b7965c52da290618874f25"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-folded-empty-host-float-frame.patch",
+  "sha256": "ae7c327406af7b73f438c0a263be5415788431920987ef887334850552f39da4",
+  "sources": [
+    {
+      "path": "src/renderer/typeset/controls/empty_float.rs",
+      "originalSha256": "75cb6cea26aa495c55f0f783d6cc5dfecfc3c3c3978ee7c28df34ad077050bff",
+      "patchedSha256": "0965d249e92a91f8010830a6674169f4f1cbb73cf668fe8693bd64e1a606d69d"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-bounded-container-asset-reuse.patch",
+  "sha256": "975a00d031feb655a8327ceefc35b543849db82946e44d373c9af8aa546233ba",
+  "sources": [
+    {
+      "path": "src/model/bin_data.rs",
+      "originalSha256": "8194980b6883769e52a557ddfe4c45f7262d2b84ced3500271bfc33521d9c375",
+      "patchedSha256": "ae61c25ee3214a8022d35b1884de56490876f557b2749b94e288ad6814a92fc7"
+    },
+    {
+      "path": "src/parser/mod.rs",
+      "originalSha256": "9f454b82087a3c4775e0994bb8e75f22ba23d4b5cc685f11b997eac15e954dc8",
+      "patchedSha256": "3d6f8d879decebf0f769a7319e6987a9a0f45471fe45ed4892461751745946e3"
+    },
+    {
+      "path": "src/parser/hwpx/mod.rs",
+      "originalSha256": "2cae589e622d9af2d3eecdfa06b35511a90a340887ca6512ff2e5e0ed7e71935",
+      "patchedSha256": "fcc15db57edbfc2237750753e6f6ab7e76dfa80e8e3dfefe84aba1523303bcc4"
+    }
+  ]
+},
+{
+  "file": "rhwp-0.8.7-stored-nested-anchor-height-ownership.patch",
+  "sha256": "8c8f4d177118fd283cf4304644e19d7acf3d4e14f4f81596b136d53f00dd6b8d",
+  "sources": [
+    {
+      "path": "src/renderer/float_placement.rs",
+      "originalSha256": "5be7cfd022d5c0028c43a67975b87ff2ef8db80a63548142975003461a5498fb",
+      "patchedSha256": "98216bceaf7eedd3d129cf5e0f4cb0f28fb71902b314e55c8b5a565f4d6bcc18"
+    },
+    {
+      "path": "src/renderer/height_measurer.rs",
+      "originalSha256": "824049450b9febd76d4d1a396f53363b07084f51017dda5ec28c57a793630dcc",
+      "patchedSha256": "762d78f97735ebb2358820161774dacf74022c28655b0e95ba5f3fc4bf83aad2"
+    }
+  ]
 }
 ];
 const help = `Usage: node scripts/build-patched-core.mjs

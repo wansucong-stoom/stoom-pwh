@@ -39,11 +39,12 @@
  async function undismissRecovery(key){const items=await dismissedRecoveries();if(items.includes(key))await recoveryStore('put',dismissalKey,{items:items.filter(x=>x!==key)});}
  async function checkpoint(context){
   if(state.recoveryClosing||!state.recoveryEligible||state.protectedRecoveryKey===recoveryKey()||!context.documentState.dirty||state.checkpointSha===context.documentState.documentSha256)return;
-  const task=(async()=>{const artifact=window.pwhEditor.export();if(artifact.bytes.length>8*1024*1024){state.recoveryEligible=false;return;}if(artifact.contentLoss.count)return;
+  const task=(async()=>{const artifact=window.pwhEditor.recoveryExport?.()??window.pwhEditor.export();if(artifact.bytes.length>8*1024*1024){state.recoveryEligible=false;return;}if(artifact.contentLoss.count)return;
    const digest=await sha(artifact.bytes),key=recoveryKey();await undismissRecovery('exact|'+key+'|'+digest);
-   await recoveryStore('put',key,{bytes:artifact.bytes.buffer.slice(artifact.bytes.byteOffset,artifact.bytes.byteOffset+artifact.bytes.byteLength),sha256:digest,savedAt:Date.now(),source:state.source});state.checkpointSha=context.documentState.documentSha256;})();
+   await recoveryStore('put',key,{bytes:artifact.bytes.buffer.slice(artifact.bytes.byteOffset,artifact.bytes.byteOffset+artifact.bytes.byteLength),sha256:digest,savedAt:Date.now(),source:state.source});state.checkpointSha=context.documentState.documentSha256;state.checkpointRevision={documentEpoch:context.documentState.documentEpoch,changeSeq:context.documentState.changeSeq};})();
   state.checkpointTask=task;try{await task;}finally{if(state.checkpointTask===task)state.checkpointTask=null;}
  }
+ window.pwhRecoveryCheckpointCurrent=()=>{const saved=state.checkpointRevision,current=window.pwhEditor?.status?.()?.documentState;return !!(state.loaded&&!state.loading&&saved&&current&&saved.documentEpoch===current.documentEpoch&&saved.changeSeq===current.changeSeq);};
  async function offerRecovery(includeDismissed=false){
   try{const dismissed=includeDismissed?[]:await dismissedRecoveries();let draft=await recoveryStore('get',recoveryKey()),legacy=false,ack=draft?.sha256?'exact|'+recoveryKey()+'|'+draft.sha256:null;
    if(ack&&dismissed.includes(ack))draft=null;

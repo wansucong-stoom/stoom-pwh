@@ -19,16 +19,17 @@ for(const fixture of [{name:'flat cell across pages',bytes:()=>emptyCellCaretFix
    const bytes=mapHwpxMember(seed.exportHwpx(),'Contents/section0.xml',xml=>{const pictures=xml.match(/<hp:pic\b[\s\S]*?<\/hp:pic>/g);assert.equal(pictures?.length,1);const anchor='<hp:t>'+fixture.marker+'</hp:t>';assert.equal(xml.split(anchor).length,2);return xml.replace(pictures[0],'').replace(anchor,pictures[0]+anchor);});
    doc=new core.HwpDocument(bytes);
    const picture=Array.from({length:doc.pageCount()},(_,p)=>JSON.parse(doc.getPageControlLayout(p)).controls).flat().find(control=>control.type==='image');assert.ok(picture?.cellPath?.length);
-   const args=[picture.secIdx,picture.paraIdx,JSON.stringify(picture.cellPath),picture.controlIdx];ok(doc.setCellPicturePropertiesByPath(...args,JSON.stringify({treatAsChar:false,flowWithText:true,vertOffset:1000,horzOffset:2000})));
+   const args=[picture.secIdx,picture.paraIdx,JSON.stringify(picture.cellPath),picture.controlIdx];ok(doc.setCellPicturePropertiesByPath(...args,JSON.stringify({treatAsChar:false,restrictInPage:true,vertOffset:1000,horzOffset:2000})));
    let preserved=doc.exportHwpx();doc.free();doc=null;
    if(fixture.name==='flat cell across pages')preserved=mapHwpxMember(preserved,'Contents/section0.xml',xml=>{let changed=0;const result=xml.replace(/<hp:tc\b(?:(?!<hp:tc\b)[\s\S])*?<\/hp:tc>/g,cell=>{if(!cell.includes('<hp:pic'))return cell;changed++;return cell.replace(/(<hp:cellSz\b[^>]*\bheight=")(\d+)(")/,(_all,start,height,end)=>start+(Number(height)+30000)+end);});assert.equal(changed,1);return result;});
    doc=new core.HwpDocument(preserved);const before=state(doc),beforeBytes=doc.exportHwpx(),beforeId=doc.saveSnapshot();let afterId=null;
    try{
     if(fixture.name==='flat cell across pages'){
      const original=JSON.parse(doc.getCellPicturePropertiesByPath(...args));
-     ok(doc.setCellPicturePropertiesByPath(...args,JSON.stringify({vertOffset:original.vertOffset+3000})));
+     const cell=JSON.parse(doc.getCellOwnPropertiesByPath(picture.secIdx,picture.paraIdx,args[2],picture.cellPath.at(-1).cellIndex));
+     ok(doc.setCellPicturePropertiesByPath(...args,JSON.stringify({vertOffset:cell.height+3000})));
      ok(doc.setCellPicturePropertiesByPath(...args,JSON.stringify({vertOffset:original.vertOffset,horzOffset:original.horzOffset})));
-     assert.notDeepEqual(state(doc),before,'Coordinate-only Undo loses the source cell height');
+     assert.notDeepEqual(state(doc),before,'Coordinate-only Undo does not restore the complete cell expansion state');
      doc.restoreSnapshot(beforeId);assert.deepEqual(state(doc),before);
     }
     for(const patch of [{vertOffset:-7000},{vertOffset:18000,horzOffset:4500},{vertOffset:7000}])ok(doc.setCellPicturePropertiesByPath(...args,JSON.stringify(patch)));

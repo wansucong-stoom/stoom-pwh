@@ -1,0 +1,89 @@
+--- a/src/renderer/float_placement.rs
++++ b/src/renderer/float_placement.rs
+@@ -118,7 +118,7 @@
+     let [Control::Table(table)] = para.controls.as_slice() else { return None; };
+     if !para.text.is_empty() || para.stored_text_partition_is_dirty() || para.cell_format_vpos_dirty
+         || line.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0
+-        || line.vertical_pos != 0 || line.line_height <= 0
++        || line.vertical_pos < 0 || line.line_height <= 0
+         || table.common.treat_as_char || !table.common.flow_with_text || table.common.allow_overlap
+         || table.common.text_wrap != TextWrap::TopAndBottom
+         || table.common.vert_rel_to != VertRelTo::Para || table.common.vert_align != VertAlign::Top
+--- a/src/renderer/height_measurer.rs
++++ b/src/renderer/height_measurer.rs
+@@ -3143,9 +3143,13 @@
+                                 &self.single_line_overflow_cache,
+                                 Some(&self.nested_measurements),
+                             );
+-                            let reflow_nested_height = if cell.paragraphs.iter().all(
++                            let reflow_host = cell.paragraphs.iter().all(
+                                 crate::renderer::para_has_no_stored_line_segs,
+-                            ) && crate::renderer::float_placement::reflow_block_table_host_occupied_height(p, 0.0, 0.0).is_some() {
++                            ) && crate::renderer::float_placement::reflow_block_table_host_occupied_height(p, 0.0, 0.0).is_some();
++                            let stored_host = !self.session_edited
++                                && (self.is_native_hwp5 || self.hwpx_stored_layout)
++                                && crate::renderer::float_placement::stored_empty_block_table_host_occupied_height(p, 0.0, f64::MAX).is_some();
++                            let reflow_nested_height = if reflow_host || stored_host {
+                                 self.unabsorbed_nested_table_paragraph_height(p, styles, depth)
+                             } else { 0.0 };
+                             let para_style = styles.para_styles.get(p.para_shape_id as usize);
+@@ -3259,7 +3263,9 @@
+                                 spacing_before + if reflow_nested_height > 0.0 {
+                                     crate::renderer::float_placement::reflow_block_table_host_occupied_height(
+                                         p, h, reflow_nested_height,
+-                                    ).unwrap_or(h) - reflow_nested_height
++                                    ).or_else(|| crate::renderer::float_placement::stored_empty_block_table_host_occupied_height(
++                                        p, h, reflow_nested_height,
++                                    )).unwrap_or(h + reflow_nested_height) - reflow_nested_height
+                                 } else { h } + spacing_after
+                             } else {
+                                 let cell_ls_val =
+@@ -3392,7 +3398,9 @@
+                                 spacing_before + if reflow_nested_height > 0.0 {
+                                     crate::renderer::float_placement::reflow_block_table_host_occupied_height(
+                                         p, lines_total, reflow_nested_height,
+-                                    ).unwrap_or(lines_total) - reflow_nested_height
++                                    ).or_else(|| crate::renderer::float_placement::stored_empty_block_table_host_occupied_height(
++                                        p, lines_total, reflow_nested_height,
++                                    )).unwrap_or(lines_total + reflow_nested_height) - reflow_nested_height
+                                 } else { lines_total } + spacing_after
+                             }
+                         })
+@@ -4145,9 +4153,13 @@
+                                 &self.single_line_overflow_cache,
+                                 Some(&self.nested_measurements),
+                             );
+-                            let reflow_nested_height = if cell.paragraphs.iter().all(
++                            let reflow_host = cell.paragraphs.iter().all(
+                                 crate::renderer::para_has_no_stored_line_segs,
+-                            ) && crate::renderer::float_placement::reflow_block_table_host_occupied_height(p, 0.0, 0.0).is_some() {
++                            ) && crate::renderer::float_placement::reflow_block_table_host_occupied_height(p, 0.0, 0.0).is_some();
++                            let stored_host = !self.session_edited
++                                && (self.is_native_hwp5 || self.hwpx_stored_layout)
++                                && crate::renderer::float_placement::stored_empty_block_table_host_occupied_height(p, 0.0, f64::MAX).is_some();
++                            let reflow_nested_height = if reflow_host || stored_host {
+                                 self.unabsorbed_nested_table_paragraph_height(p, styles, depth)
+                             } else { 0.0 };
+                             let para_style = styles.para_styles.get(p.para_shape_id as usize);
+@@ -4242,7 +4254,9 @@
+                                 spacing_before + if reflow_nested_height > 0.0 {
+                                     crate::renderer::float_placement::reflow_block_table_host_occupied_height(
+                                         p, h, reflow_nested_height,
+-                                    ).unwrap_or(h) - reflow_nested_height
++                                    ).or_else(|| crate::renderer::float_placement::stored_empty_block_table_host_occupied_height(
++                                        p, h, reflow_nested_height,
++                                    )).unwrap_or(h + reflow_nested_height) - reflow_nested_height
+                                 } else { h } + spacing_after
+                             } else {
+                                 let cell_ls_val =
+@@ -4372,7 +4386,9 @@
+                                 spacing_before + if reflow_nested_height > 0.0 {
+                                     crate::renderer::float_placement::reflow_block_table_host_occupied_height(
+                                         p, lines_total, reflow_nested_height,
+-                                    ).unwrap_or(lines_total) - reflow_nested_height
++                                    ).or_else(|| crate::renderer::float_placement::stored_empty_block_table_host_occupied_height(
++                                        p, lines_total, reflow_nested_height,
++                                    )).unwrap_or(lines_total + reflow_nested_height) - reflow_nested_height
+                                 } else { lines_total } + spacing_after
+                             }
+                         })

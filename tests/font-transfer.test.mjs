@@ -31,3 +31,26 @@ test('another TTC face reuses verified file bytes after a fresh identity check a
  const second=await read(async offset=>{const r=await request(offset);r.structuredContent.faceIndex=3;return r;},new AbortController().signal,sha);
  assert.equal(calls,1);assert.equal(second.faceIndex,3);assert.deepEqual(Buffer.from(second.bytes),bytes);
 });
+
+test('concurrent TTC faces share one verified file transfer and retain distinct face indexes',async()=>{
+ const read=createVerifiedFontReader();const offsets=[];let digests=0;
+ const request=face=>async offset=>{offsets.push(offset);await new Promise(r=>setImmediate(r));const r=reply(offset);r.structuredContent.faceIndex=face;return r;};
+ const [a,b]=await Promise.all([read(request(2),new AbortController().signal,b=>{digests++;return sha(b);}),read(request(3),new AbortController().signal,sha)]);
+ assert.equal(offsets.filter(x=>x===0).length,2,'both face identities are checked');assert.equal(offsets.length,7,'two identity chunks and five shared remaining chunks');assert.equal(digests,1);
+ assert.equal(a.faceIndex,2);assert.equal(b.faceIndex,3);new Uint8Array(a.bytes).fill(0);assert.deepEqual(Buffer.from(b.bytes),bytes,'consumers own independent buffers');
+});
+
+test('cancelling one concurrent face does not cancel the other face',async()=>{
+ const read=createVerifiedFontReader(),a=new AbortController(),b=new AbortController();let release;const blocked=new Promise(r=>release=r);
+ const request=face=>async offset=>{if(offset)await blocked;const r=reply(offset);r.structuredContent.faceIndex=face;return r;};
+ const one=read(request(2),a.signal,sha),two=read(request(3),b.signal,sha);const cancelled=assert.rejects(one,/취소/);
+ await new Promise(r=>setImmediate(r));a.abort();release();await cancelled;assert.deepEqual(Buffer.from((await two).bytes),bytes);
+});
+
+test('cancelled or failed shared transfers are never retained and a fresh request can retry',async()=>{
+ const read=createVerifiedFontReader(),a=new AbortController();let release;const blocked=new Promise(r=>release=r);
+ const one=read(async offset=>{if(offset)await blocked;return reply(offset);},a.signal,sha);const cancelled=assert.rejects(one,/취소/);await new Promise(r=>setImmediate(r));a.abort();release();await cancelled;
+ const good=await read(async offset=>reply(offset),new AbortController().signal,sha);assert.deepEqual(Buffer.from(good.bytes),bytes);
+ const fail=createVerifiedFontReader();await assert.rejects(fail(async offset=>reply(offset),new AbortController().signal,()=> 'b'.repeat(64)),/SHA/);
+ let calls=0;await fail(async offset=>{calls++;return reply(offset);},new AbortController().signal,sha);assert.equal(calls,6,'a failed digest must not populate the cache');
+});
