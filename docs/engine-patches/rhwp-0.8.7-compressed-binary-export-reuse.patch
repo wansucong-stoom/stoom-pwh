@@ -1,0 +1,108 @@
+--- a/src/serializer/hwpx/writer.rs
++++ b/src/serializer/hwpx/writer.rs
+@@ -12,8 +12,52 @@
+ 
+ use zip::write::SimpleFileOptions;
+ use zip::{CompressionMethod, DateTime, System, ZipWriter};
++use sha2::{Digest, Sha256};
++use std::sync::Arc;
+ 
+ use super::SerializeError;
++
++// Pwh bounded compressed-entry reuse. Keys cover the complete, normalized
++// payload (including restored OLE prefixes), never document-local image IDs.
++// Only archives produced by this writer are raw-copied: source ZIP metadata,
++// CRCs, resource limits and content-loss checks are never bypassed.
++const COMPRESSED_CACHE_BYTES: usize = 32 * 1024 * 1024;
++const COMPRESSED_CACHE_ENTRIES: usize = 64;
++const COMPRESSED_CACHE_INPUT_BYTES: usize = 32 * 1024 * 1024;
++#[derive(PartialEq, Eq)]
++struct CompressedEntryKey { digest: [u8; 32], len: usize, name: String }
++struct CompressedEntry { key: CompressedEntryKey, archive: Arc<[u8]> }
++thread_local! {
++    static COMPRESSED_ENTRY_CACHE: std::cell::RefCell<Vec<CompressedEntry>> = const {
++        std::cell::RefCell::new(Vec::new())
++    };
++}
++fn compressed_entry(key: &CompressedEntryKey) -> Option<Arc<[u8]>> {
++    COMPRESSED_ENTRY_CACHE.with(|cache| {
++        let mut entries = cache.borrow_mut();
++        let index = entries.iter().position(|entry| &entry.key == key)?;
++        let entry = entries.remove(index);
++        let result = Arc::clone(&entry.archive);
++        entries.push(entry);
++        Some(result)
++    })
++}
++fn retain_compressed_entry(key: CompressedEntryKey, archive: Arc<[u8]>) {
++    if archive.len() > COMPRESSED_CACHE_BYTES { return; }
++    COMPRESSED_ENTRY_CACHE.with(|cache| {
++        let mut entries = cache.borrow_mut();
++        entries.retain(|entry| entry.key != key);
++        let mut size: usize = entries.iter().map(|entry| entry.archive.len()).sum();
++        while !entries.is_empty()
++            && (size + archive.len() > COMPRESSED_CACHE_BYTES
++                || entries.len() >= COMPRESSED_CACHE_ENTRIES)
++        {
++            size -= entries.remove(0).archive.len();
++        }
++        entries.push(CompressedEntry { key, archive });
++    });
++}
++// End Pwh bounded compressed-entry reuse.
+ 
+ /// HWPX ZIP 쓰기 래퍼
+ pub struct HwpxZipWriter {
+@@ -78,6 +122,32 @@
+         Ok(())
+     }
+ 
++    /// Reuse this writer's canonical DEFLATE output for unchanged binary data.
++    /// XML remains on the ordinary path. Small and oversized payloads avoid
++    /// hashing/temporary archives; the cache retains compressed bytes only.
++    pub fn write_binary_deflated(&mut self, name: &str, data: &[u8]) -> Result<(), SerializeError> {
++        if data.len() < 1024 || data.len() > COMPRESSED_CACHE_INPUT_BYTES {
++            return self.write_deflated(name, data);
++        }
++        let key = CompressedEntryKey { digest: Sha256::digest(data).into(), len: data.len(), name: name.to_string() };
++        let archive = match compressed_entry(&key) {
++            Some(archive) => archive,
++            None => {
++                let mut one = Self::new();
++                one.write_deflated(name, data)?;
++                let archive: Arc<[u8]> = one.finish()?.into();
++                retain_compressed_entry(key, Arc::clone(&archive));
++                archive
++            }
++        };
++        // Reading our one-entry archive does not inflate its contents. The
++        // canonical options and names are preserved; offsets are rewritten.
++        let source = zip::ZipArchive::new(Cursor::new(archive.as_ref()))
++            .map_err(|e| SerializeError::ZipError(e.to_string()))?;
++        self.inner.merge_archive(source)
++            .map_err(|e| SerializeError::ZipError(e.to_string()))
++    }
++
+     /// ZIP을 마감하고 바이트를 반환한다.
+     pub fn finish(self) -> Result<Vec<u8>, SerializeError> {
+         let cursor = self
+--- a/src/serializer/hwpx/mod.rs
++++ b/src/serializer/hwpx/mod.rs
+@@ -205,7 +205,7 @@
+         } else {
+             bytes
+         };
+-        z.write_deflated(&entry.href, &payload)?;
++        z.write_binary_deflated(&entry.href, &payload)?;
+         zip_bin_entries.insert(entry.href.clone());
+     }
+ 
+@@ -239,7 +239,7 @@
+                 Vec::new()
+             }
+         };
+-        z.write_deflated(&entry.href, &chart_bytes)?;
++        z.write_binary_deflated(&entry.href, &chart_bytes)?;
+     }
+     for loss in chart_losses {
+         ctx.content_loss.record(loss);

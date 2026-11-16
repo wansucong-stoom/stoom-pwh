@@ -256,7 +256,9 @@ def main():
                        'tests/picture-move-layout-history.test.mjs',
                        'tests/table-border-frame-ownership.test.mjs',
                        'tests/folded-empty-host-float.test.mjs',
-                       'tests/bin-data-resource-reuse.test.mjs')
+                       'tests/bin-data-resource-reuse.test.mjs',
+                       'tests/compressed-binary-cache-source.test.mjs',
+                       'tests/compressed-binary-export.test.mjs')
     for name in fidelity_tests:
         core_inputs[name] = regular(project/name)
         build_inputs['pwh/'+name] = regular(project/name)

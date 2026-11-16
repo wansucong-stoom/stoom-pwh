@@ -1906,6 +1906,22 @@ const patches = [
       "patchedSha256": "762d78f97735ebb2358820161774dacf74022c28655b0e95ba5f3fc4bf83aad2"
     }
   ]
+},
+{
+  "file": "rhwp-0.8.7-compressed-binary-export-reuse.patch",
+  "sha256": "eae7ad83498ce5240c8a945720979b3193eed55c70310be68e38908ba1dbcf3a",
+  "sources": [
+    {
+      "path": "src/serializer/hwpx/writer.rs",
+      "originalSha256": "aebde2c448a1ba283609512d8837065e0a73ff5ec23b1e769ff16e4cfb02084f",
+      "patchedSha256": "b485c982cdaa51c6909a26899da24b46218158f3f129d73022361714b473529b"
+    },
+    {
+      "path": "src/serializer/hwpx/mod.rs",
+      "originalSha256": "a229497d2ff10f2adaca6b72faa7a413e4ab4bbdb681eb39ba53bafe8172a0c4",
+      "patchedSha256": "2fc9d99f2fd0d0188b0c382292c6a87d69a59cfb504d76463d3a2d6974e4a2e5"
+    }
+  ]
 }
 ];
 const help = `Usage: node scripts/build-patched-core.mjs
