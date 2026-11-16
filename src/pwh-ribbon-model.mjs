@@ -43,6 +43,7 @@ export const ribbonTabs=[
   group('표',[item('table:create','표 만들기','table'),item('table:cell-props','표/셀 속성','table-settings'),item('format:object-properties','개체 속성','object')]),
   group('줄·칸',[item('table:insert-row-col','줄/칸 추가','row-plus'),item('table:delete-row-col','줄/칸 지우기','row-minus'),item('table:cell-merge','셀 합치기','merge'),item('table:cell-split','셀 나누기','split')]),
   group('셀 크기',[item('table:cell-width-equal','너비를 같게','equal-width'),item('table:cell-height-equal','높이를 같게','equal-height')]),
+  group('채우기',[item('table:auto-fill','자동 채우기','table'),item('table:auto-fill-list','채우기 목록','styles')]),
   group('테두리',[item('table:border-each','각 셀 테두리','grid'),item('table:border-one','하나의 셀처럼','border')]),
   group('계산',[item('table:block-formula','블록 계산식','equation'),item('table:block-sum','합계','sum'),item('table:block-avg','평균','average'),item('table:block-product','곱','product')]),
   group('행/열 바꿈',[item('table:transpose-copy','바꿈 복사','transpose'),item('table:transpose-paste','바꿈 붙이기','paste')])

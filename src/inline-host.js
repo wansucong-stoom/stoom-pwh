@@ -8,6 +8,7 @@
  const rpc=(method,params,timeout=45000)=>new Promise((resolve,reject)=>{const id=`pwh-inline-${++state.id}`,timer=setTimeout(()=>{pending.delete(id);reject(Error('편집기 연결 응답 시간이 초과되었습니다.'));},timeout);pending.set(id,{resolve,reject,timer});post({jsonrpc:'2.0',id,method,params});});
  const tool=async(name,args,timeout)=>{let r=await rpc('tools/call',{name,arguments:args},timeout);if(r?.isError)throw Error(r.content?.map(c=>c.text||'').join('\n')||'도구 실행 실패');return r;};
  window.pwhRecentColors=async color=>(await tool('pwh_client_recent_colors',color?{color}:{})).structuredContent?.colors||[];
+ window.pwhAutoFillLists=async args=>(await tool('pwh_client_autofill_lists',args||{})).structuredContent?.lists||[];
  window.addEventListener('pwh-status',event=>status(String(event.detail)));
  window.pwhReadNativeClipboard=async()=>{const result=await tool('pwh_client_clipboard',{});return result._meta?.['pwh/clipboard']||{html:'',text:''};};
  const documentChunkCap=()=>window.__PWH_DESKTOP__===true?2*1024*1024:512*1024;

@@ -1,0 +1,16 @@
+.pwh-autofill-dialog{max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);display:flex;flex-direction:column}
+.pwh-autofill-dialog>.dialog-body{min-height:0;overflow:auto}
+.pwh-autofill-dialog p{margin:0 0 10px;line-height:1.6}
+.pwh-autofill-tabs{display:flex;gap:6px;border-bottom:1px solid var(--ui-border-light);margin-bottom:10px}
+.pwh-autofill-tabs button{background:transparent;border:0;border-bottom:2px solid transparent;padding:7px 12px;color:var(--ui-text);font:inherit}
+.pwh-autofill-tabs button[aria-selected=true]{border-bottom-color:var(--ui-link);color:var(--ui-link)}
+.pwh-autofill-lists{width:100%;min-height:190px;border:1px solid var(--ui-border-light);background:var(--ui-surface);color:var(--ui-text);font:inherit;padding:4px}
+.pwh-autofill-lists option{padding:5px}
+.pwh-autofill-custom{display:grid;gap:7px;margin-top:10px}
+.pwh-autofill-custom[hidden]{display:none}
+.pwh-autofill-custom input,.pwh-autofill-custom textarea{font:inherit;color:var(--ui-text);background:var(--ui-surface);border:1px solid var(--ui-border-light);padding:6px;box-sizing:border-box}
+.pwh-autofill-actions{display:flex;gap:6px}
+.pwh-autofill-actions button{font:inherit;padding:4px 12px}
+.pwh-autofill-dialog .pwh-autofill-preview{padding:10px;background:var(--ui-bg-light);border:1px solid var(--ui-border-light);overflow-wrap:anywhere}
+.pwh-autofill-error{color:var(--ui-danger,#b43131)}
+.pwh-autofill-dialog :is(button,input,textarea,select):focus-visible{outline:2px solid var(--ui-link);outline-offset:2px}

@@ -84,6 +84,13 @@ test('Desktop contextual menus preserve command routes and narrow-window access'
   await more.click();await editor.locator('.pwh-ribbon-tabs-popup [data-tab="tool"]').click();
   assert.equal(await editor.locator('#icon-toolbar').getAttribute('data-ribbon-tab'),'tool');
   assert.equal(await editor.locator('.pwh-ribbon-tabs-popup').isVisible(),false);
+  const toolArrow=editor.getByRole('button',{name:'도구 메뉴 펼치기',exact:true});
+  assert.ok(await toolArrow.evaluate(el=>{
+   const arrow=el.getBoundingClientRect(),view=document.querySelector('.pwh-ribbon-tabs').getBoundingClientRect();
+   return arrow.left>=view.left-1&&arrow.right<=view.right+1;
+  }),'Selected menu includes its arrow within the narrow tab strip');
+  await toolArrow.click();await editor.locator('[data-menu="tool"]>.menu-dropdown').waitFor({state:'visible'});
+  await page.keyboard.press('Escape');
   assert.ok(await editor.locator('#icon-toolbar').evaluate(el=>el.getBoundingClientRect().height<=80),'Ribbon stays one row high');
   await page.setViewportSize({width:1200,height:850});
   // Observe the menu route without reading or changing the OS clipboard.

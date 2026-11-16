@@ -111,12 +111,18 @@ export function installContextRibbon({menu,toolbar,registry,dispatcher,eventBus,
  const schedule=()=>{if(!pending)pending=requestAnimationFrame(updateState);};
  for(const event of ['command-state-changed','document-loaded','selection-changed','cell-selection-phase-changed','cursor-cell-changed','cursor-format-changed','cursor-para-changed','table-object-selection-changed','picture-object-selection-changed'])eventBus.on(event,schedule);
  function closeOverflow(){overflowMenu.hidden=true;overflow.setAttribute('aria-expanded','false');}
+ function revealSelectedTab(){
+  const item=titles.get(active)?.parentElement;if(!item)return;
+  const rect=item.getBoundingClientRect(),view=tablist.getBoundingClientRect();
+  if(rect.left<view.left)tablist.scrollLeft-=view.left-rect.left;
+  else if(rect.right>view.right)tablist.scrollLeft+=rect.right-view.right;
+ }
  function select(id:string){
   if(!panels.has(id))return;active=id;
   for(const [name,panel]of panels){panel.dataset.active=String(name===id);panel.setAttribute('aria-hidden',String(name!==id));}
   for(const [name,title]of titles){title.setAttribute('aria-selected',String(name===id));title.tabIndex=name===id?0:-1;title.parentElement?.classList.toggle('pwh-ribbon-selected',name===id);}
   for(const choice of overflowMenu.querySelectorAll<HTMLElement>('[data-tab]'))choice.setAttribute('aria-checked',String(choice.dataset.tab===id));
-  const title=titles.get(id);if(title){const rect=title.getBoundingClientRect(),view=tablist.getBoundingClientRect();if(rect.left<view.left)tablist.scrollLeft-=view.left-rect.left;if(rect.right>view.right)tablist.scrollLeft+=rect.right-view.right;}
+  revealSelectedTab();
   toolbar.dataset.ribbonTab=id;updateState();onChange?.();
  }
  overflow.addEventListener('mousedown',e=>e.preventDefault());
@@ -128,7 +134,7 @@ export function installContextRibbon({menu,toolbar,registry,dispatcher,eventBus,
   e.preventDefault();e.stopPropagation();const choices=[...overflowMenu.querySelectorAll<HTMLButtonElement>('button')];const at=choices.indexOf(document.activeElement as HTMLButtonElement);
   const index=e.key==='Home'?0:e.key==='End'?choices.length-1:(at+(e.key==='ArrowDown'?1:-1)+choices.length)%choices.length;choices[index]?.focus();
  });
- new ResizeObserver(()=>{overflow.hidden=tablist.scrollWidth<=tablist.clientWidth+1;}).observe(tablist);
+ new ResizeObserver(()=>{overflow.hidden=tablist.scrollWidth<=tablist.clientWidth+1;revealSelectedTab();}).observe(tablist);
  let toolsPopup:HTMLElement|null=null;
  const closeTools=()=>{toolsPopup?.remove();toolsPopup=null;};
  for(const area of [menu,toolbar,document.getElementById('style-bar')])area?.addEventListener('contextmenu',event=>{

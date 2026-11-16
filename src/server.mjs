@@ -78,6 +78,7 @@ const liveOperationSchema = {
 };
 
 export const TOOLS = [
+ {name:'pwh_client_autofill_lists',title:'자동 채우기 사용자 정의 목록',description:'편집기에서 만든 자동 채우기 목록을 이 PC에 저장하거나 읽습니다.',inputSchema:objectSchema({upsert:objectSchema({id:{type:'string',maxLength:80},label:{type:'string',maxLength:80},values:{type:'array',minItems:2,maxItems:500,items:{type:'string',maxLength:200}}},['id','label','values']),remove:{type:'string',maxLength:80}},[]),annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false},_meta:{ui:{visibility:['app']}}},
  {name:'pwh_client_recent_colors',title:'최근 선택한 색상',description:'편집기의 공통 색상표에서 사용한 색상 코드만 이 PC에 저장하거나 읽습니다.',inputSchema:objectSchema({color:{type:'string',pattern:'^#[0-9A-Fa-f]{6}$'}},[]),annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false},_meta:{ui:{visibility:['app']}}},
  {name:'pwh_editor_table_title',title:'기존 표 위에 병합 제목 행 추가',description:'선택 표 맨 위에 병합 제목 행을 추가하며 기존 첫 행을 보존합니다. 선택사항 borders에 Left/Right/Top/Bottom별 {type:0없음/1실선/2파선/3점선,width:0~6,color:#RRGGBB}를 지정하면 제목 셀의 선도 함께 적용합니다. planId/tableIndex 또는 선택 표 target을 사용하고 결과를 확인하세요.',inputSchema:objectSchema({sessionId:{type:'string'},expected:{type:'object',additionalProperties:true},requestId:{type:'string'},planId:{type:'string'},tableIndex:{type:'integer',minimum:0},title:{type:'string',minLength:1,maxLength:500},borders:{type:'object',additionalProperties:true}},['sessionId','expected','title']),annotations:writeDocument},
  {name:'pwh_client_clipboard',title:'사용자가 붙여넣은 Windows 표 클립보드 읽기',description:'사용자가 표 붙여넣기를 실행할 때만 네이티브 HTML Format/UnicodeText를 읽는 앱 전용 경로입니다. 클립보드 기록·한글 원본 앱·다른 문서를 읽거나 클립보드를 변경하지 않습니다. 내용은 앱 전용 meta로만 반환합니다.',inputSchema:objectSchema(),annotations:readOnly,_meta:{ui:{visibility:['app']}}},
@@ -337,6 +338,7 @@ export async function callTool(name, args = {}, requestMeta = {}) {
     const module=await import('./editor-session.mjs');const fn={pwh_editor_text_search:'editorTextSearch',pwh_editor_text_edit:'editorTextEdit',pwh_editor_table_title:'editorTableTitle',pwh_editor_table_fill:'editorTableFill',pwh_editor_table_insert:'editorTableInsert',pwh_editor_tables:'editorTables',pwh_editor_table_style:'editorTableStyle',pwh_editor_replace_picture:'editorReplacePicture',pwh_editor_layout:'editorLayout',pwh_editor_compose:'editorCompose',pwh_editor_capture:'editorCapture',pwh_editor_request:'editorRequest',pwh_editor_poll:'editorPoll',pwh_editor_state:'editorState',pwh_editor_rewrite:'editorRewrite',pwh_editor_result:'editorResult'}[name];return textResult(await module[fn](args));
   }
   if(name==='pwh_client_recent_colors') return textResult(await (await import('./color-preferences.mjs')).recentColors(args));
+  if(name==='pwh_client_autofill_lists') return textResult(await (await import('./auto-fill-preferences.mjs')).autoFillPreferences(args));
   if(name==='pwh_client_fonts') return textResult(await (await import('./system-fonts.mjs')).systemFontSnapshot());
   if(name==='pwh_client_clipboard') return (await import('./native-clipboard.mjs')).readNativeClipboard();
   if(name==='pwh_client_font_asset') return (await import('./system-fonts.mjs')).systemFontChunk(args);

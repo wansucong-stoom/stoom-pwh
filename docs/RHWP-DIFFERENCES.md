@@ -423,6 +423,14 @@ HWP·HWPX의 중첩 표 사례, 합성 문서의 가시성·저장·실행 취�
 
 ## 2. rhwp Studio 편집기 변경
 
+### 다음 배포: 셀 자동 채우기와 모달 키보드 처리
+
+[자동 채우기 빌드 패치](../scripts/patch-auto-fill.mjs)는 공통 명령 registry, 셀 블록 A, 우클릭·상단 표 메뉴를 같은 구현에 연결합니다. [패턴 계산](../src/auto-fill-pattern.mjs)과 [셀 접근](../src/auto-fill-table.mjs)을 분리하고 전체 셀 경로·대상 서식·한 번의 스냅샷을 사용합니다. 사용자 목록은 공통 호스트의 로컬 설정에 저장합니다. [사용법·검증·제한](AUTO-FILL.md)
+
+[대화상자 패치](../scripts/patch-dialog-focus.mjs)는 rhwp Studio 유래 ModalDialog의 키 가로채기를 보완하고 [공통 초점 관리](../src/modal-focus.mjs)를 적용합니다. 최상위 모달이 Tab·Shift+Tab을 소유하고 컨트롤의 Space·Enter를 보존합니다. 감시 범위는 body 직계 모달이며 문서의 페이지 하위 트리를 관찰하지 않습니다. 선택 메뉴의 밑줄은 화살표를 포함한 전체 항목에 그리고 제품 정보의 목록 들여쓰기를 수정합니다.
+
+공통·Desktop 번들과 입력 해시를 함께 생성하며 WASM r29는 변경하지 않습니다. 정식 0.6.60 / Desktop 0.1.41 이후를 위한 개발 소스입니다.
+
 <a id="picture-motion-and-layout-history"></a>
 Pwh 0.6.60의 그림 이동 변경은 **rhwp Studio 유래 Pwh 공통 편집기**의 마우스 처리와 실행 취소 기록, **Pwh Desktop 호스트**의 탭 상태 조회에 있습니다. [빌드 패치](../scripts/patch-picture-drag.mjs)는 최신 포인터를 프레임별로 모으고 놓는 위치를 즉시 반영하며, 첫 실제 이동 전에 보관한 조판 상태를 기존 SnapshotCommand·히스토리 예산으로 넘깁니다. 공통 `status()`는 해시 없는 상태만 반환하고, Desktop의 반복 상태 보고는 이 경로를 사용합니다. 충돌 검증용 전체 문서 해시와 명시적 저장 경로는 유지합니다. 코어 r29의 계산과 WASM은 변경하지 않습니다. [시험과 제한](verification/PICTURE-MOTION.md)
 

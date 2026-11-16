@@ -8,6 +8,8 @@
 <a id="cause-and-scope"></a>
 ## 원인과 적용 범위
 
+다음 배포를 위한 [자동 채우기](../../scripts/patch-auto-fill.mjs)와 [대화상자 키보드](../../scripts/patch-dialog-focus.mjs)는 **Studio 공통 편집기 빌드 패치**입니다. 상하좌우 셀 내용 계산과 모달 초점·Tab 이동을 연결하며 기존 코어 r29의 90개 패치·WASM·쪽 분할 규칙은 유지합니다. 공통·Desktop 산출물과 입력 해시를 함께 갱신합니다. [지원·시험 범위](../AUTO-FILL.md)
+
 [그림 이동 빌드 패치](../../scripts/patch-picture-drag.mjs)는 Studio 마우스 입력의 최신 좌표와 mouseup을 연결하고, 이동 전 문서 체크포인트를 기존 실행 취소 기록으로 이관합니다. 공통 상태 조회와 Desktop의 반복 탭 상태 보고를 분리해 드래그 도중 불필요한 HWPX 내보내기를 없앱니다. 원천 조판 코어 패치는 추가하지 않으며, 공통·Desktop 번들과 입력 해시를 함께 생성합니다. [구현 계층과 검증](../verification/PICTURE-MOTION.md)
 
 [탭별 그래픽 메뉴 패치](../../scripts/patch-context-ribbon.mjs)는 rhwp Studio 유래 메뉴 입력·도구 상자·명령 상태 조회를 Pwh 공통 편집기에서 보완합니다. 공통과 Desktop 번들에 함께 적용하며 코어 r29의 90개 패치와 WASM은 유지합니다. [소스·검증·지원 제한](../RHWP-DIFFERENCES.md#contextual-ribbon)

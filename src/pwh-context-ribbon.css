@@ -3,7 +3,9 @@
 .pwh-ribbon-tabs>.menu-item{display:flex;flex:none;position:relative;align-items:stretch;margin:0}
 .pwh-ribbon-menubar .menu-title{display:flex;align-items:center;min-height:30px;padding:0 10px;cursor:default;border-bottom:2px solid transparent;box-sizing:border-box;white-space:nowrap}
 .pwh-ribbon-tabs .menu-title{padding-right:2px}
-.pwh-ribbon-menubar .pwh-ribbon-selected>.menu-title{color:var(--ui-link);border-bottom-color:currentColor;font-weight:600;background:transparent}
+.pwh-ribbon-menubar .pwh-ribbon-selected>.menu-title{color:var(--ui-link);font-weight:600;background:transparent}
+.pwh-ribbon-tabs>.pwh-ribbon-selected::after{content:"";position:absolute;inset-inline:0;bottom:0;height:2px;background:var(--ui-link);pointer-events:none}
+.pwh-ribbon-menubar .pwh-ribbon-selected>.pwh-menu-more{color:var(--ui-link)}
 .pwh-ribbon-menubar .menu-title:focus-visible,.pwh-ribbon-menubar button:focus-visible,.pwh-context-ribbon button:focus-visible{outline:2px solid #458fa9;outline-offset:-2px;border-radius:3px}
 .pwh-menu-more,.pwh-ribbon-more-tabs{border:0;background:transparent;color:var(--ui-text-secondary);padding:0 5px;min-height:30px;min-width:18px;font:inherit;cursor:default;flex:none}
 .pwh-ribbon-more-tabs{font-size:20px;min-width:29px}
@@ -40,4 +42,6 @@
 .dialog-wrap.pwh-about-dialog{display:flex;flex-direction:column;max-width:calc(100vw - 32px);max-height:calc(100dvh - 32px);overflow:hidden}
 .pwh-about-dialog>.dialog-title,.pwh-about-dialog>.dialog-footer{flex:0 0 auto}
 .pwh-about-dialog>.dialog-body{min-height:0;overflow:auto;overscroll-behavior:contain}
+.pwh-about-dialog .about-notice ul{margin:7px 0 0;padding-inline-start:18px;list-style:disc outside;text-align:left}
+.pwh-about-dialog .about-notice li{padding:0;margin:3px 0;line-height:1.6}
 .menu-dropdown .md-item:focus-visible{outline:2px solid #426ec5;outline-offset:-2px;background:#e8effb}

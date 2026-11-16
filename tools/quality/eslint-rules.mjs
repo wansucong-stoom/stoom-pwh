@@ -2,7 +2,7 @@ import js from '@eslint/js';
 import globals from 'globals';
 
 const nodeSources = [
-  'cli', 'client-assets', 'color-preferences', 'config', 'editor-session',
+  'auto-fill-preferences', 'cli', 'client-assets', 'color-preferences', 'config', 'editor-session',
   'engine', 'font-files', 'form', 'images', 'live', 'native-clipboard',
   'native-mcp', 'render-fonts', 'replacement-image', 'server', 'system-fonts',
   'template',
