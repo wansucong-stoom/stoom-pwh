@@ -58,6 +58,7 @@ export function installInlineEditor(d:any) {
    return {ok:true};
   },
   context:()=>read(false),
+  status:()=>({...availability(),documentState:d.getDocumentAgent?.()?.getPresentationDocumentRevision?.()??null}),
   outputInfo:()=>{
    const context:any=read(false),input=d.getInputHandler();
    if(!context.ready||!context.documentState)throw Error('문서를 준비한 뒤 출력해 주세요.');

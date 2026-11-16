@@ -1,140 +1,93 @@
-# pwh 아키텍처
+# Pwh 아키텍처
 
-Pwh는 rhwp를 사용하는 로컬 AI 문서 작업 플러그인이다. 독립적인 조판 엔진이나 AI 모델을 포함하지 않는다. 주요 작업은 **주석으로 협업**하고 **기관의 한글 양식을 최대한 보존·활용**하는 것이다.
+[문서 모음](README.md) · [공통 코어 변경](RHWP-DIFFERENCES.md) · [Desktop](PWH-DESKTOP.md)
 
-[문서 모음](README.md) · [0.6.14 내장 그림 기록](#embedded-image-history)
+Pwh는 **Windows Desktop과 Codex 플러그인에서 사용하는 무료·오픈소스 한글 문서 편집기**입니다. 두 제품은 같은 공통 편집기와 rhwp 기반 WASM 코어를 사용합니다. AI는 선택적으로 연결하며 모델 가중치를 앱에 포함하지 않습니다.
 
-## 구성과 데이터 흐름
+## 전체 구성
 
-```text
-사용자: 기관 양식 + 작성 자료 / 미리보기 주석
-                     ↓
-AI 호스트 + pwh 스킬
-                     ↓ MCP stdio
-pwh server.mjs ───────┬─ template.mjs → inspect_template.py (ZIP/XML 조회)
-                     ├─ form.mjs → fill_form.py (제한된 XML 원문 패치)
-                     ├─ engine.mjs → rhwp CLI (읽기·쓰기·조판)
-                     └─ live.mjs → localhost Studio + editor SDK
-                                           ↓
-                                 같은 편집 문서 / 실제 선택
-```
+~~~mermaid
+flowchart LR
+  D["Pwh Desktop<br/>Electron · 문서 탭 · 로컬 호스트"] --> E["Pwh 공통 편집기<br/>메뉴 · 선택 · 편집 명령 · 실행 취소"]
+  P["Codex 플러그인<br/>MCP 서버 · 문서 편집 패널"] --> E
+  E <--> C["rhwp 기반 WASM r29<br/>문서 모델 · 조판 · 렌더링"]
+  C --> S["HWPX 내보내기<br/>손실 검사 · 저장 · 재열기"]
+  D <--> A["선택적 AI 연결"]
+  P <--> A
+~~~
 
-브라우저 영역 주석은 호스트가 AI 채팅에 전달한다. AI는 요청을 수신한 뒤 저장 파일의 해시, 실제 화면과 문서 구조를 대조한다. pwh 서버가 독립적으로 AI를 호출하거나 사용자 입력만으로 새 대화를 시작하지 않는다. 모든 좌표를 HWPX 개체로 자동 대응하는 기능은 없다.
+| 계층 | 책임 | 주요 소스 |
+| --- | --- | --- |
+| **공통 코어** | HWP/HWPX 해석, 문서 모델, 글줄·표·그림 배치, 쪽 분할, 기하와 렌더링 | [코어 패치](engine-patches/README.md), [런타임 고정값](../runtime-lock.json) |
+| **공통 편집기** | rhwp Studio 기반 메뉴·선택·커서·편집 명령, 실행 취소와 상태 연결 | [빌드 연결](../scripts/build-inline.mjs), [편집기 어댑터](../src/studio-inline-adapter.ts) |
+| **Desktop 호스트** | Electron 창, 문서별 탭·세션, 파일 대화상자, AI 연결과 Store 확인 | [작업 공간](../desktop/standalone-pwh/workspace-shell.mjs), [문서 호스트](../desktop/standalone-pwh/host.mjs) |
+| **Codex 플러그인** | MCP 도구·자산 제공, 선택 문맥과 AI 수정 요청 전달 | [MCP 서버](../src/server.mjs), [편집 세션](../src/editor-session.mjs) |
+| **파일 도구** | ZIP/XML 조사·제한된 원문 수정, 고정 CLI를 이용한 별도 파일 작업 | [양식 도구](../src/form.mjs), [엔진 연결](../src/engine.mjs) |
 
-## 클라이언트 조판 경로
+공통 WASM 편집 경로와 파일 도구의 CLI·XML 처리 경로는 구분합니다. 서로 다른 경로의 출력이나 보존 특성을 동일하다고 가정하지 않습니다.
 
-파일 패널의 HWPX entrypoint는 MCP 자산 청크로 공식 rhwp WASM과 원본 바이트를 전달받는다. SHA256 검증 후 HwpDocument를 만들고 renderPageToCanvas로 직접 조판한다. 위치 선택은 hitTest의 실제 문서 주소를 요청에 포함하며, 직접 본문 치환 후 reflowLinesegs로 다시 조판한다. 손실 보고서가 빈 내보내기만 새 파일 저장을 허용하고 네이티브 info로 재열기를 확인한다. 이 경로는 HTTP 서버나 PNG 미리보기를 사용하지 않는다.
+## 문서의 수명주기
 
-호스트가 실행 중인 MCP 서버를 이전 버전으로 유지하면 플러그인 설치만으로 이미 열린 패널이 갱신되지 않을 수 있다. 호스트 재연결 후 WASM CSP, 화면 글꼴, 위치 선택과 저장을 실제 패널에서 검증해야 한다. Codex 기본 PDF 내부 메시지와 Pwh의 ui/message를 혼동하지 않는다.
+1. **열기:** 원본 바이트와 형식을 확인해 공통 코어의 문서 모델을 만듭니다. 전송이 필요한 호스트는 파일 크기와 수신 상한에 맞춰 청크를 나누고 무결성을 확인합니다.
+2. **편집:** 사용자 입력과 AI의 승인된 수정은 같은 편집기 메모리 문서에 적용됩니다. 대상 셀 경로·선택·문서 상태를 확인한 뒤 기존 명령·실행 취소 경로를 사용합니다.
+3. **조판:** 바뀐 원문과 속성으로 글줄·행 높이·개체 배치·쪽 경계를 계산합니다. 유효한 측정값과 뒤쪽 경계가 같을 때 기존 결과를 재사용합니다.
+4. **저장:** 내보내기 손실 보고, 저장 대상과 원본 변경 여부를 확인합니다. HWP를 열었을 때는 HWPX 작업본을 사용하며, 저장 결과는 재열기로 검증합니다.
 
-## 별도 편집 경로
+화면 좌표, XML 경로와 문서 모델의 커서 주소는 서로 다릅니다. 셀·중첩 표는 전체 경로를 사용하고, 표시된 조판부호나 저장 당시의 줄 좌표를 현재 개체 주소로 대신 사용하지 않습니다.
 
-### 기관 양식의 XML 보존 편집
+## 편집 상태와 실행 취소
 
-원본 ZIP에서 분석한 sectionIndex·xmlPath와 sourceSha256으로 대상을 지정한다. 문단·셀의 평문을 바꾸되 원본 서식 참조와 주변 XML을 유지한다. 구역·단·표·그림 같은 개체가 들어 있는 영역의 전체 교체는 거절한다. 개체 옆의 안전한 run/t 말단만 고칠 수 있다. 여러 글자 서식이 섞인 텍스트의 의미와 수정 범위를 AI가 판단해야 한다.
+| 경로 | 사용하는 정보 | 목적 |
+| --- | --- | --- |
+| **가벼운 상태 조회** | 준비 상태, 문서 세대, 수정 순서, 쪽 수, dirty | Desktop 탭 표시와 반복 상태 확인 |
+| **전체 편집 문맥** | 문서 상태·선택·원문 대상과 필요한 해시 | AI 수정·저장 시 오래된 요청 거절 |
+| **명령 기록** | 편집 전후 위치와 원문 조각 또는 체크포인트 | 실행 취소·다시 실행 |
+| **그림 이동** | 첫 실제 이동 전 체크포인트, 최신 포인터와 놓는 위치 | 표 높이·글줄 배치를 포함한 복원 |
 
-기존 글자 서식을 사용하거나 색만 바꾼 새 서식을 추가할 수 있다. 기존 서식 정의를 일괄 덮어쓰지 않는다. 빈 문단에도 구역·단·쪽 번호·앵커가 있으므로 텍스트가 없다는 이유로 제거하지 않는다. 저장된 줄 배치 캐시 제거는 재조판을 요구하는 옵션이며 품질 보증이 아니다.
+가벼운 상태 조회는 문서 전체를 HWPX로 직렬화하지 않습니다. 이 값은 충돌 검증용 전체 해시를 대체하지 않습니다. 그림 이동 체크포인트도 매 프레임 만들지 않고, 기존 실행 취소 이력의 자원 예산과 해제 정책에 연결합니다. [관련 구현과 검사](verification/PICTURE-MOTION.md)
 
-### 실제 편집기와 네이티브 파일 편집
+## 두 제품의 호스트 경계
 
-Studio는 rhwp의 실제 편집기이고 SDK로 명령을 실행한다. 현재 사용자와 AI는 같은 메모리 문서를 사용한다. epoch·changeSeq·SHA256이 바뀌면 오래된 수정·저장을 거절한다. 메뉴 명령은 선택 fingerprint도 대조한다. 원본과 기존 출력 파일은 덮어쓰지 않고 새 파일로 저장한다.
+**Desktop**은 작업 공간과 문서 탭별 로컬 호스트를 사용합니다. Electron의 창·인쇄·파일 연결과 공통 편집기의 문서 모델을 분리하며, AI 대화도 문서 세션에 연결합니다.
 
-네이티브 CLI나 Studio의 전체 문서 내보내기는 포맷을 다시 직렬화한다. XML 원문 패치와 같은 보존 특성을 가진다고 가정하지 않는다. 미저장 편집은 디스크 분석에 포함되지 않으므로 최신 상태를 읽거나 새 파일로 저장해야 한다.
+**Codex 플러그인**은 MCP의 stdio 도구·자산과 문서 편집 패널을 사용합니다. 화면의 선택 문맥과 요청을 호스트 채팅에 전달하고 결과를 같은 편집기에 적용합니다. 별도의 네이티브 파일 편집 결과가 미저장 메모리 문서에 자동 반영되지는 않습니다.
 
-## 문서 개체와 조판
+두 경로 모두 전송 크기·오프셋·SHA-256과 문서·선택의 유효성을 검사합니다. 원본이 바뀌거나 문서·선택이 달라진 요청은 최신 상태로 다시 확인합니다.
 
-### 생성한 그림의 교체
+## AI와 데이터
 
-AI 호스트가 이미지 생성 도구 또는 데이터에 따른 도식 생성 코드로 새 자산을 준비한다. pwh_replace_image는 원본 지문과 manifest를 대조하고, 같은 PNG/JPEG/BMP 형식의 기존 BinData만 교체한다. 모든 다른 ZIP 항목과 XML의 바이트 불변을 확인하며, 공유 자원의 여러 참조와 종횡비 변화를 보고한다. 사진이나 새 도식을 만드는 모델은 pwh 자체에 포함되지 않는다.
+Desktop은 공식 Codex app-server 런타임을 이용한 ChatGPT 연결과 로컬 AI 연결을 제공합니다. Codex 플러그인에서는 호스트가 AI 요청을 처리합니다. 문서의 기본 편집은 AI 연결과 독립적입니다.
 
-이미지 자원과 배치 프레임은 별개다. 원본 자르기·offset·내부 matrix·GRAY_SCALE 효과도 그대로 유지되므로, 자산 바이트 교체만으로 새 그림이 올바르게 표시된다고 판단하지 않는다. 프레임에 맞춘 자산 준비와 필요 범위의 내부 기하 조정, 시각 검수를 함께 수행해야 한다.
-
-HWPX의 run/tbl은 표 개체로 파싱된다. 셀·병합 grid·treatAsChar·앵커 기준과 오프셋·쪽 나눔 규칙을 거쳐 렌더 트리에 배치된다. 화면의 [표]는 그 개체의 조판부호 표시다. XML 문단 ID, 분석 도구의 표 순번, 편집기의 커서 인덱스는 서로 다르다. 저장 당시 줄 좌표를 현재 화면 좌표로 취급하지 않는다.
-
-배치·렌더링 알고리즘은 rhwp의 것이다. Pwh의 분석은 양식을 안전하게 수정하는 범위와 검수 필요성을 파악하기 위한 것으로, 한컴의 전체 조판 알고리즘을 복원한 작업은 아니다.
-
-## 로컬 서비스와 글꼴
-
-편집 서버는 127.0.0.1의 임의 포트에 바인딩한다. API는 세션 토큰, Host·Origin 확인과 편집 탭 소유권으로 보호한다. 토큰이 든 URL과 live-session.json은 공유하지 않는다. 글꼴 파일은 명시적으로 설정한 목록만 제공하며, 요청 URL에서 파일 시스템 경로를 받지 않는다.
-
-font-provider는 같은 origin의 Studio 공개 API에 catalog를 등록한다. SHA256을 확인한 글꼴 바이트를 iframe의 ArrayBuffer로 복사해 화면과 측정에 사용한다. 정적 Bold 폰트의 실제 usWeightClass가 600인 경우, 문서의 Bold 요청용 CSS 슬롯 700에 명시적으로 등록할 수 있다. intrinsicWeight는 원래 값을 기록하며 TTF를 변조하지 않는다. TTC는 원본 전체 해시를 확인한 뒤 지정 faceIndex를 사용한다.
-
-글꼴 catalog 준비와 실제 glyph 사용은 다르다. Canvas2D는 실제 사용 glyph face를 완전히 관측할 수 없는 경우가 있으므로 진단의 certainty·unknown을 존중한다. 네이티브 PNG/PDF와 Canvas2D는 별도 경로이고, rhwp의 지원 한계가 pwh에도 적용된다.
-
-## 고정한 외부 구성요소
-
-- rhwp / Studio 소스: v0.8.7, commit `1a76570e833917d15817415a53c09ad61ab3203f`
-- Windows x64 공식 ZIP SHA256: `f7ac326e98f595ae8fecd8da7a614ee9a37db77bdf938782a8e07c9da473ec6f`
-- 공식 npm @rhwp/core 및 @rhwp/editor: 0.8.7, 설치 스크립트의 SRI 검증
-- Studio의 추가 selection bridge: 읽기 전용이며 upstream을 지정 버전에서 빌드할 때 추가
-
-설치 스크립트는 필요한 구성요소와 라이선스를 런타임 폴더에 준비한다. 해당 버전의 엔진·SDK·Studio 조합을 함께 검수해야 한다. 새 버전으로 바꾸면서 그대로 호환된다고 가정하지 않는다.
-
-## 검증의 범위
-
-기본 시험은 합성 HWPX의 원본 서식·앵커·병합 셀 보존, 충돌·부적절한 수정 거절, MCP discovery, font provider 계약과 설치 계획을 검증한다. 선택 통합시험은 실제 엔진의 생성·편집·PNG·PDF·재열기 동작을 확인한다.
-
-테스트 통과는 한컴 화면과의 동일성, 임의 기관 서식의 완벽한 보존이나 내용의 적절성을 보증하지 않는다. 최종 제출 문서는 사용자가 한컴 환경에서 다시 확인하는 과정이 필요할 수 있다.
+문서 편집과 저장은 로컬에서 처리합니다. AI 요청에 포함한 본문·문맥은 연결한 제공자에게 전달될 수 있으므로, 실제 전송 범위와 계정·복구 데이터 정책은 [개인정보 처리방침](PRIVACY.md)을 따릅니다. 로컬 AI 주소를 사용하더라도 그 서버가 외부 서비스를 중계할 수 있으므로 주소만으로 데이터가 PC 밖으로 나가지 않는다고 판단하지 않습니다.
 
 <a id="embedded-image-history"></a>
+## 그림·글꼴과 출력
 
-## 0.6.14 내장 그림 표시 기록
+그림의 자산 바이트와 배치 프레임은 별도입니다. 자산 교체는 크기·자르기·회전·효과와 실제 표시를 함께 확인합니다. 내장 그림의 전달에는 인라인 자산의 크기·정책과 개체 URL의 수명도 관리합니다.
 
-### Trigger and cause
+화면 조판은 글꼴 목록과 검증한 글꼴 자원을 사용합니다. 글꼴 이름·파일·TTC face와 인쇄 환경에 따라 측정과 출력이 달라질 수 있습니다. Canvas 화면, 별도 CLI 출력, PDF 비교 결과는 경로와 조건을 명시합니다. [글꼴 설정](CONFIGURATION.md) · [비교 기준](RENDER-COMPARISON.md)
 
-A valid HWPX can display its embedded PNGs in Hancom and native rhwp output
-while showing broken image elements in the embedded editor. The preserved
-Studio flow-image cache creates `blob:` object URLs. A host sandbox whose
-image policy permits `data:` but not `blob:` blocks those URLs, even though
-WASM returns the complete, valid PNG bytes. This does not depend on Google Drive
-or external image references.
+## 로컬 서비스와 보안
 
-The failure was reproduced with the complete inline editor in an opaque-origin
-iframe under `img-src data:`. Browser policy errors named the rejected object
-URLs. The same four images decoded correctly after the compatibility change.
+로컬 호스트는 127.0.0.1에 바인딩하며 세션 토큰, Host·Origin 검사와 탭 소유권을 확인합니다. 파일 경로와 자산 요청은 허용된 범위에서 처리하며, 토큰이 포함된 주소·계정 정보·복구본은 공개 배포물에 포함하지 않습니다.
 
-### Scope of the fix
+ZIP/XML 원문 수정 도구는 안전한 말단 텍스트와 명시한 서식 범위를 대상으로 합니다. 문단이 비어 보이더라도 구역·단·쪽 번호·표·그림 앵커를 지우는 근거로 사용하지 않습니다.
 
-`client-assets.mjs` still verifies the preserved Studio files against their
-installation hashes first. `inline-image-urls.mjs` then adapts only the known
-flow-image cache in the response HTML to use cached `data:` URLs. It leaves the
-engine files, HWPX bytes, layout, crop, image MIME and decoded bytes unchanged.
-Other object URLs and the existing document-generation cache invalidation are
-preserved. No external resource domains or connection permissions are added.
+## 빌드와 배포
 
-The compatibility adapter requires one recognized cache region and one known
-URL factory. A different or ambiguous bundle fails explicitly rather than
-silently applying a broad source replacement. An engine upgrade must review
-this adapter as well as the normal preservation checks.
+| 항목 | 기준 |
+| --- | --- |
+| **코어** | rhwp 0.8.7 기반 r29 패치와 고정 런타임을 해시로 확인 |
+| **편집기** | 공통·Desktop을 같은 소스에서 생성하고 번들·입력 manifest 대조 |
+| **Desktop 실행 환경** | 고정 Electron·공식 AI 실행 파일·승인된 STOOM 제품 자산 검증 |
+| **Windows 배포** | Microsoft Store용 MSIX. 설치판 업데이트는 Store에서 관리 |
+| **GitHub 배포** | 플러그인 ZIP, 소스, Store 제출용 MSIX와 검증 자료 |
+| **CI** | 기본 시험, 실제 코어·브라우저 회귀, 재현 빌드, 정적 검사, PDF 비교 도구 검사 |
 
-Base64 strings add memory compared with binary blobs; the existing cache keeps
-encoding to once per image identity and is cleared with document generations.
-The module is served with the plugin source and does not require republishing
-the unchanged preserved runtime archive.
+GitHub 공개와 Store 제출·인증·게시는 별도 상태입니다. Store 설치판은 GitHub의 다른 설치기로 자체 교체하지 않습니다. 세부 재현·패키지 검사는 [런타임 보존](engine-preservation.md), [MSIX 배포](MSIX.md), [정적 검사](STATIC-CHECKS.md)에 정리합니다.
 
-### Verification
+## 검증 원칙
 
-- Unit tests compare exact image bytes across encoding chunk boundaries, check
-  one-read cache reuse, preserve unrelated object URLs and reject changed bundles.
-- The optional real-browser test decodes the same synthetic PNG through both
-  routes under the restricted image policy: old route fails, new route succeeds.
-- A local 15-page HWPX with four PNG charts was opened in the complete editor.
-  All four old image elements failed, and all four patched elements decoded at
-  their original dimensions. The private document and screenshots are excluded
-  from this public repository and package.
-- The plugin version and fresh file resource are 0.6.14. Previous resource
-  identities remain readable, including 0.6.13. Existing unsaved frames are not
-  silently replaced: save and reopen them after installing the update.
+합성 문서와 보존한 시험 사본으로 입력·선택·실행 취소·저장·재열기를 확인합니다. 기존 조판의 회귀 검사와 한글 PDF와의 일치도 측정은 구분하고, 제외된 시험이나 서로 다른 환경의 수치를 합산하지 않습니다.
 
-The iframe browser reproduction is distinct from confirming display in a newly
-updated Codex desktop session. A loaded document or increased state counter
-alone is not evidence that an image appeared.
-
-To run the optional browser regression with an existing Playwright installation:
-
-```text
-PWH_BROWSER_TESTS=1
-PWH_PLAYWRIGHT_MODULE=<module specifier or file URL for Playwright>
-PWH_BROWSER_EXECUTABLE=<optional installed Chromium executable>
-node --test tests/inline-image-browser.test.mjs
-```
+[조판 비교 요약](LAYOUT-FIDELITY.md) · [편집 성능](EDITOR-PERFORMANCE.md) · [기능 범위와 제한](PWH-COMPATIBILITY-LIMITS.md)
