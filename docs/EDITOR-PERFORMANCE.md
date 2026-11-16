@@ -1,183 +1,40 @@
-# 편집기 성능과 오류 발생 위치
+# 편집 성능과 지원 범위
 
-**Pwh 0.6.43 · Pwh Desktop 0.1.24 / r16 검증 기록입니다.** 이 문서는 편집 지연의 발생 계층, 처리량을 줄이는 조건, 실제 측정 결과를 구분해 기록합니다. 조판 품질이나 원문 정보를 생략해 속도를 높이지 않습니다. 공식 22개 패치 코어의 재빌드·전체 코어 및 브라우저 시험·PDF 검증을 완료했습니다. 설치 파일의 별도 검증은 릴리스의 [DESKTOP-VERIFICATION.json](https://github.com/wansucong-stoom/stoom-pwh/releases/download/v0.6.43/DESKTOP-VERIFICATION.json)을 참조하세요. 아래 Chrome 성능 후보의 수치를 최종 설치판의 측정값으로 사용하지 않습니다.
+[문서 모음](README.md) · [조판 검증](LAYOUT-FIDELITY.md) · [그림 이동 검증](verification/PICTURE-MOTION.md)
 
-## r16: 셀 높이 변경과 커서·표 경계 조회
+표와 중첩 개체가 많은 문서에서도 입력·선택·크기 조절의 반복 계산을 줄입니다. 편집 반응과 조판 정확성은 함께 확인합니다.
 
-| 증상 | 확인된 발생 계층 | 보완 |
+## 공통 처리 기준
+
+| 작업 | 보완한 경로 | 유지하는 조건 |
 | --- | --- | --- |
-| 작은 용지에서 중첩 표 내용이 중복되거나 빠짐 | Pwh가 rhwp 코어에 추가한 17번 패치의 소비 조건 불일치 | 20번 패치에서 행 투영·예약·그리기가 같은 전체 프레임 검증을 사용. 검증 실패 시 기존 분할 경로 유지 |
-| 이어진 셀의 빈 부분을 누르면 커서가 셀 높이만큼 커짐 | 고정 rhwp 0.8.7 코어의 커서 기하 계산 | 21번 패치에서 같은 구역·같은 셀 경로의 실제 글줄 경계 사용. 진짜 빈 셀은 글자 모양·DPI·여백으로 계산 |
-| 셀 높이 하나를 바꿀 때 같은 문단의 형제 표를 모두 재측정 | rhwp 코어의 문단 단위 변경·측정 경로 | 22번 패치에서 조건이 맞는 한 번의 높이 변경에 한해 바뀌지 않은 형제 표의 측정 결과 재사용 |
-| 높이 변경·선택 뒤 표 경계를 반복해서 찾느라 대기 | rhwp 코어의 표 경계 조회 경로 | 22번 패치에서 필요한 소유 표의 경계를 직접 조회해 불필요한 전체 조사 감소 |
+| 셀 입력·크기 조절 | 바뀐 셀 문단과 상위 표를 다시 계산하고 유효한 측정값 재사용 | 문서·폭·용지·글꼴 조건이 맞아야 재사용 |
+| 뒤쪽 조판 | 경계와 배치 정보가 같아지면 기존 결과 재사용 | 쪽 분할 판단 자체를 생략하지 않음 |
+| 셀 선택·커서 | 보이는 쪽과 원본 셀 경로의 기하 사용 | 중첩·병합 셀과 쪽 경계를 구분 |
+| 그림 이동 | 프레임의 최신 입력과 놓는 위치 반영 | 표 높이와 그림 배치는 공통 조판 경로로 갱신 |
+| 실행 취소 | 그림 이동 전 조판 상태를 한 번 보관 | 표·셀 높이와 글줄 배치를 함께 복원 |
+| Desktop 탭 상태 | 해시 없는 가벼운 상태 조회 | 저장과 편집 충돌 검증은 별도 경로 유지 |
 
-20번은 Pwh의 기존 추가 패치에서 생긴 회귀이며 upstream 전체의 결함으로 부르지 않습니다. 21·22번은 고정 원본의 공통 코어 경로를 보완합니다. 세 변경 모두 Desktop 창이나 AI 연결에서만 처리하는 수정이 아니며 Pwh와 Desktop이 공유하는 WASM에 포함됩니다. 현재 최신 upstream에서의 상태까지 확인한 것은 아닙니다. [패치별 조건](engine-patches/README.md#r16-interaction-and-fallback)
+## 확인한 개선
 
-### 높이 측정 재사용의 조건
+| 항목 | 비교 결과 |
+| --- | --- |
+| 그림 이동 중 전체 HWPX 재생성 | 반복 호출에서 0회로 감소 |
+| 제거한 동기 작업 | 시험 환경에서 호출당 약 200~700ms |
+| 이동 전 체크포인트 | 매 프레임이 아닌 첫 실제 이동 전에 한 번 생성 |
+| 복원 검사 | 표 높이·화면·원문 XML·저장·재열기 확인 |
 
-높이만 바꾸는 독립 명령이고, 변경 전 조판이 정리된 상태이며, 미완료 지연 조판·배치 작업이 없고, 변경 전후 조판 프로필이 같을 때만 적용합니다. 바뀐 최상위 표와 그 하위 표는 다시 측정합니다. 같은 문단의 바뀌지 않은 형제 표만 이전 측정값을 사용하며 구역 정규화와 전체 쪽 나눔은 계속 수행합니다.
+위 시간은 특정 시험 환경에서 제거한 작업의 측정값입니다. 전체 드래그의 FPS나 모든 문서의 응답 시간으로 환산하지 않습니다. [측정 조건과 회귀 시험](verification/PICTURE-MOTION.md)
 
-폭·높이를 함께 바꾸는 작업, 앞선 글·서식·용지 변경, 배치 작업, 캐시가 없는 경우는 기존 전체 처리로 돌아갑니다. 특히 원본 HWP를 처음 편집하면서 조판 프로필이 바뀌는 경우에도 이전 측정값을 재사용하지 않습니다. 재사용 범위는 그 호출에만 전달하며 문서나 실행 취소 스냅샷에 남는 영구 상태를 추가하지 않습니다.
+## 남은 제한
 
-### 최종 Electron 셸의 통제 비교
-
-최종 공통 편집기와 공식 22개 패치 WASM을 **실제 Electron 45.1.0 셸**에서 측정했습니다. 같은 PC·39쪽 문서 사본·표시된 비활성 창을 사용하고, 새 격리 프로필에서 기준 실행과 최종 실행을 번갈아 세 쌍 수행했습니다. 사용자가 설치한 앱이나 기존 프로필을 변경한 시험이 아닙니다.
-
-비교 기준은 성능 수정 전 후보 코어와 같은 최종 UI이며, 기준 실행에서만 일반 셀 Undo를 종전의 선행 조판 완료 경로로 되돌리는 시험용 응답 변환을 사용했습니다. **이전 정식 설치판과의 직접 비교가 아니라 코어·Undo 경계의 통제 비교**입니다. 최종 실행에는 이 변환을 적용하지 않았습니다. 최종 WASM은 `b9a96ac2bbe5171e20ef86b398f781b76bd53438ae33bcf28cd1f6a4da8f8fd1`, 편집기 번들 파일은 `2c2f37f67c381db0528b6e5942f4fe0fb4235216f163161c9031fb4b02f101f1`입니다.
-
-| 측정 항목 | 기준 중앙값 | 최종 중앙값 | 변화 | 각 조건의 측정 수 |
-| --- | ---: | ---: | ---: | ---: |
-| 셀 높이 변경 1회 | 714.1ms | 299.5ms | 소요 시간 58.1% 감소 | 9회 |
-| 높이 변경 키 5회 연속 | 3,321.3ms | 1,393.7ms | 소요 시간 58.0% 감소 | 3묶음 |
-| 일반 셀 글자 입력의 실행 취소 | 922.3ms | 528.3ms | 소요 시간 42.7% 감소 | 9회 |
-| 글자 입력 | 101.6ms | 98.4ms | 작은 차이로 개선을 주장하지 않음 | 9회 |
-| 높이 변경의 실행 취소 | 523.0ms | 472.9ms | 소요 시간 9.6% 감소 | 3회 |
-
-시간은 신뢰된 키 입력부터 두 번의 `requestAnimationFrame` 뒤까지이며 시작 시간이나 물리 화면 표시 지연을 재지 않았습니다. 유효한 여섯 세션에서는 셀 선택과 실행 취소 후 원문 복원을 확인했습니다. 한 PC·한 문서에서의 통제 결과이며 모든 문서의 응답 시간을 보장하지 않습니다.
-
-**모든 시도가 통과한 것은 아닙니다.** 기록기 배열 처리 오류 1회, 숨긴 창의 프레임 콜백 지연 1회, 최초 표시 후보에서 반복 키 뒤 셀 선택이 사라진 1회를 통계에서 제외했습니다. 마지막 선택 유실은 상세 키·포커스 추적을 남기기 전에 종료되어 **원인이 미확정**입니다. 이후 같은 설정의 세 후보 세션이 통과했어도 이 실패가 해결됐다고 판단하지 않습니다. 제외 이유와 범위는 [공개 검증 기록](verification/editor-performance-0.6.43.json)에 남깁니다.
-
-후속 기능 검사에서는 같은 최종 Electron·편집기·WASM으로 5키씩 10묶음, **신뢰된 Ctrl+방향키 50회**를 입력했습니다. 실제 코어 높이 변경 호출도 50회였고 모든 키 뒤 셀 선택과 본문이 유지됐습니다. 명시적인 Ctrl+Z 뒤 39쪽 SVG·텍스트 배치·원문은 직전 상태와 같았고, 스냅샷 복원도 초기 상태와 일치했습니다. 실행 취소 자체의 기존 선택 해제와 방향키 입력 중 선택 유실은 구분했습니다. 이는 기능 스트레스 검사로 시간 측정에 합치지 않습니다. **최초 선택 유실은 이번 50키 검사에서 재현되지 않았으며 원인은 여전히 미확정입니다.**
-
-### 앞선 Chrome 성능 후보의 측정
-
-
-동일 PC·문서·프런트엔드·브라우저에서 이전 코어와 성능 후보를 번갈아 새 세션으로 세 번씩 실행했습니다. 신뢰된 실제 키 입력 경로를 사용했고 선택 범위와 원본 파일 보존을 확인했습니다. 문서에는 39쪽과 많은 형제·중첩 표가 있습니다. 문서 이름·본문·원본 경로·화면·프로파일 원본은 공개하지 않습니다.
-
-| 측정 항목 | 이전 코어 중앙값 | 성능 후보 중앙값 | 소요 시간 감소 |
-| --- | ---: | ---: | ---: |
-| 높이 변경 1회와 뒤따른 화면 프레임 | 782.7ms | 383.0ms | 51.1% |
-| 높이 변경 5회 연속 | 3,646.2ms | 1,544.9ms | 57.6% |
-| 내부 높이 변경 호출 | 429.0ms | 210.2ms | 51.0% |
-| 내부 표 경계 조회 | 205.9ms | 20.5ms | 90.0% |
-
-이는 **격리 Chrome 호스트의 특정 작업 측정**이며 설치된 Pwh Desktop의 Electron 체감 속도나 모든 문서의 향상률이 아닙니다. 화면 프레임 시간은 두 번의 `requestAnimationFrame` 뒤까지 측정했으며 물리 모니터의 표시 완료를 재지 않았습니다. 세 번째 세션 쌍에서는 운영체제 스케줄링에 따른 변동이 있었고 절대 지연시간을 보장하지 않습니다. 내부 호출 시간과 전체 동작 시간은 겹치므로 더해서 계산하지 않습니다.
-
-수치 측정은 WASM `552394a7571d696af7d285cc2eddb1f56a4b96f8c4716ba51f8897873998c2e7`에서 수행했습니다. 이후 커서 경계의 추가 반례를 보완한 최종 통합 후보는 `b60692bc6c63d7fc2d5e0428f5ac7d5ba1e92c028d347028ae2401cef171f41e`입니다. 이 둘을 같은 바이너리라고 표기하거나 앞 수치를 최종 설치판의 재측정값으로 사용하지 않습니다. [공개 계측 요약](verification/editor-performance-0.6.43.json)
-
-### 정확성 검사의 범위
-
-최종 통합 후보는 성능 변경 전 코어와 비교해 39쪽 전체의 인쇄 SVG·텍스트 배치·원문 조사 결과·내보낸 XML이 일치했습니다. 열기, 높이 변경, 스냅샷 실행 취소, 저장·재열기를 각각 확인했습니다. 이는 **성능 수정이 기존 조판 결과를 바꾸지 않았다는 검사**이며 한컴과 39쪽 전체가 같다는 품질 승인은 아닙니다.
-
-공개 합성 시험 [`stored-cell-height-scope.test.mjs`](../tests/stored-cell-height-scope.test.mjs)는 형제 표, 깊은 중첩 표, HWP 첫 편집, 폭·높이 혼합, 앞선 본문·서식·용지 수정과 실행 취소를 포함한 8가지 조건을 검사합니다. 같은 코어의 조건부 재사용 결과를 배치 안의 전체 처리 결과와 대조하고, 페이지 수·전체 SVG·텍스트 배치·원문·XML·재열기를 비교합니다. 캐시가 사용됐는지만 확인하는 시험이 아닙니다. 커서와 작은 용지의 제외 경로는 [커서 시험](../tests/cell-caret-fragment.test.mjs), [float 프레임 시험](../tests/stored-float-host-frame.test.mjs)에서 별도로 검사합니다.
-
-공식 22개 패치의 소스 재생은 최종 후보와 일치함을 확인했습니다. 최종 공식 WASM은 `b9a96ac2bbe5171e20ef86b398f781b76bd53438ae33bcf28cd1f6a4da8f8fd1`이며, 이 산출물의 전체 코어 시험은 **468건 중 407건 통과·61건 환경별 제외·실패 0건**입니다. 높이 변경의 독립 대조 8건·공개 합성 커서 17건·표 경계 소유권 1건·셀 입력 역연산 14건을 실제 실행했습니다. 최종 전체 브라우저 검사는 **474건 중 460건 통과·14건 환경별 제외·실패 0건**입니다. 코어 검사 이후 추가한 Desktop 설치 시험 6건도 포함했으며, 두 집합은 겹치므로 합산하지 않습니다. 설치 파일의 검증 범위는 위 릴리스 검증 기록에서 별도로 확인합니다. [공식 코어·PDF 연결 기록](verification/fidelity-weekly-0.6.43.json)
-
-### 단순 셀 입력 실행 취소의 중복 조판
-
-발생 위치는 **rhwp Studio의 입력 이력·지연 조판 연결 경로**입니다. 평문을 입력한 셀에서 실행 취소하면 먼저 남은 미리보기 조판을 끝내고, 곧바로 코어의 삭제 역연산이 전체 조판을 다시 수행할 수 있었습니다. Pwh 공통 편집기는 이 역연산이 전체 조판의 완료를 소유하는 좁은 경우를 명시해, 앞선 미리보기 작업은 취소하고 코어의 정상 삭제·조판을 한 번 수행하도록 연결합니다. 새로운 WASM 패치를 추가하거나 쪽 나눔 자체를 건너뛰지 않습니다.
-
-대상은 **일반 셀 깊이 1의 평문 삽입**이며, 줄바꿈·탭이 없고 예약 글자 서식·치환 원문·복원할 문단 조각이 없는 경우입니다. 연속 타이핑이 하나의 입력 이력으로 합쳐진 경우도 같은 조건을 만족해야 합니다. 본문, 깊은 중첩 셀, 캡션, 치환·서식·조각 복원 등은 기존 선행 완료 경계를 유지합니다. 취소 뒤 역연산이 실패하면 미완료 상태를 숨기지 않고 다음 이동·편집에서 정상 완료하도록 합니다.
-
-코어의 합성 14건은 미완료 조판 시작·일부 실행, 원본 HWP의 첫 편집, 한글·보조 평면 문자, 여러 구역, 중첩 경로 및 잘못된 대상 이후 복구를 전체 재조판과 대조합니다. 실제 Ctrl+Z·다시 실행·포커스·실패 뒤 입력을 확인하는 별도 브라우저 시험도 최종 전체 실행에서 통과했습니다. 코어와 브라우저의 결과는 위 연결 기록에서 구분합니다. 위 실제 Electron 통제 비교에서 일반 셀 입력 실행 취소를 별도로 측정했습니다. 이 수치를 모든 실행 취소나 설치판 전체의 향상률로 확대하지 않으며, 원인 미확정 선택 유실 1회도 함께 보존합니다.
-
-## 하드웨어 가속과 병렬화
-
-격리한 실제 Pwh Electron 셸에서 GPU Canvas·합성·래스터와 다중 raster thread가 이미 활성화되어 있음을 확인했습니다. Worker 안에서 OffscreenCanvas로 작은 그림을 그리고 픽셀을 반환하는 시험도 통과했습니다. 이 검사는 새로운 별도 프로필의 빈 홈 화면에서 수행했으며 설치 프로필이나 실문서는 사용하지 않았습니다.
-
-현재 Pwh 편집기는 Canvas2D를 사용하고, WASM API는 DOM Canvas를 직접 받습니다. 원본 Studio의 CanvasKit 경로는 Pwh 빌드에 포함되지 않습니다. 런타임에서 GPU·Worker를 지원하는 것과 편집기의 조판 계산이 그 기능을 사용하는 것은 다릅니다. GPU를 켜는 설정만으로 CPU의 표 높이 계산·쪽 나눔·커서 탐색이 빨라진다고 설명하지 않습니다.
-
-기존 페이지 그리기 스케줄러는 보이는 쪽을 우선하고 나머지는 유휴 시간에 처리합니다. 지연 조판도 일부 큰 표에 적용하지만, 현재 허용 조건은 단일 구역·단일 본문 문단의 유일한 RowBreak 표 등으로 제한됩니다. 많은 형제 표를 가진 문서는 이 대상이 아니며, 한 번의 WASM 측정·한 페이지 그리기는 여전히 메인 스레드를 오래 사용할 수 있습니다.
-
-다음 단계는 입력, 조판, 경계 조회, 픽셀 그리기의 시간을 따로 측정해 긴 작업을 줄이는 것입니다. Worker 도입은 확정된 문서 사본의 읽기 전용 내보내기부터 검토할 수 있습니다. 편집 자체를 옮길 때는 문서별 명령 순서, revision, 글꼴·DPI, 선택·IME, 실행 취소와 저장·인쇄의 완료 경계를 유지해야 합니다. 앞 쪽의 내용이 뒤 쪽에 영향을 주는 조판을 페이지별로 무조건 병렬화하지 않습니다. Codex iframe에서도 같은 기능과 안전한 대체 경로를 유지하며 Node 접근이나 호스트 보안 설정을 완화하지 않습니다. 이는 후속 설계 방향으로 아직 구현 완료된 기능이 아닙니다.
-
-## 이전 개선: Pwh 0.6.35 / Desktop 0.1.16
-
-당시 공통 편집기는 대형 표 문서의 단어 선택과 글자 입력 때 발생하던 불필요한 전체 페이지 처리를 줄였습니다. 아래 수치는 r8 기반의 과거 시험이며 위 r16 성능 후보의 측정값과 합치지 않습니다.
-
-### 원인 구분
-
-| 증상 | 확인된 발생 위치 | 수정 |
-| --- | --- | --- |
-| 셀 안의 단어를 두 번 클릭하면 수 초 지연 | Pwh가 추가한 다중 클릭 선택과 선택 문맥 연결 | 양 끝의 실제 커서 좌표에서 쪽 정보를 유지하고, 코어의 쪽 범위 지정 선택 API에 전달 |
-| 한 글자 입력·실행 취소 뒤 긴 대기 | rhwp Studio에서 이어받은 글꼴 준비 경로 | 매 수정마다 모든 쪽의 렌더 트리로 글꼴을 찾는 대신 문서의 글꼴 목록·대체 정보 사용 |
-| 선택 없이 글자 모양 버튼을 눌러도 창이 열리지 않음 | rhwp Studio 명령의 선택 필수 조건 | 기존 서식 창과 공통 입력 서식 적용 경로를 연결해 커서만 있어도 사용 |
-| 각주·미주 뒤에서 다른 본문이 삭제됨 | rhwp 원천 코어의 표시·논리·원본 스트림 주소 불일치 | 주석 컨트롤의 실제 주소를 표시·클릭·커서·삭제에서 공유. 자세한 내용은 엔진 패치 README 참조 |
-| 주석 뒤 입력·선택 위치 불일치 | rhwp Studio의 본문 글자 좌표와 코어의 인라인 컨트롤 좌표 연결 | 공통 편집기 경계에서 좌표를 변환하고, 같은 본문 위치에 있는 주석 앞·뒤의 커서 방향을 별도로 보존 |
-| 인쇄 취소 뒤 탭마다 상단 높이가 다름 | Pwh Desktop의 상태 헤더 | 별도 헤더 행을 제거하고 인쇄 결과를 대화 영역의 작업 알림으로 표시 |
-
-원본 유래 판단은 보존된 고정 버전과 Pwh 빌드 입력을 기준으로 합니다. 이 문서는 현재 최신 rhwp의 수정 여부를 주장하지 않습니다. 발생 위치와 이를 사용하는 제품은 구분해야 합니다. 공통 편집기에서 보완한 부분은 플러그인과 Desktop에 함께 적용하며, 코어 변경은 새 WASM 리비전에 포함합니다.
-
-### 선택과 글꼴 처리
-
-클릭한 위치의 좌표는 선택의 시작·끝 좌표가 아닙니다. 각 끝점에서 새로 구한 좌표를 사용하고, 두 쪽 정보가 모두 유효할 때만 범위를 전달합니다. 중첩 셀의 전체 경로를 유지합니다. 오래된 클릭 좌표를 복사해 성능만 개선하지 않습니다.
-
-글꼴은 문서의 글꼴 이름·대체 이름·기본 글꼴을 기존 해석기로 확인합니다. 기존 렌더러와 같은 굵기·기울기 조합을 준비하며, 설치 글꼴 전체를 무조건 불러오지 않습니다. 다음 수정 때 원본 글꼴 목록을 다시 읽으므로 새 글꼴을 놓치는 영구 캐시는 만들지 않습니다. 메타데이터가 불완전하면 기존 렌더 트리 조사 경로를 유지합니다. 글꼴 파일 검증, 로딩 및 Canvas 측정 경로는 유지합니다.
-
-### 검증 범위
-
-본문 텍스트 API의 오프셋은 Unicode scalar 글자 수이고 화면 커서는 인라인 컨트롤도 한 칸으로 셉니다. 둘을 같은 값으로 전달하지 않습니다. `body-cursor-position.mjs`와 Studio 빌드 패치는 코어의 기존 변환 API를 사용해 화면 좌표를 본문 글자 위치로 바꾸고, 주석 바로 앞·뒤는 같은 본문 오프셋에서도 구분합니다. 입력·서식·선택·실행 취소는 기존 본문 좌표를 사용하고, 주석 경계 입력과 방향키·삭제는 정확한 논리 위치를 사용합니다. 셀·중첩 셀·글상자·주석 내부의 주소 공간은 본문 변환에 포함하지 않습니다.
-
-43쪽 시험 문서의 사본을 별도 Electron 시험 앱에서 열고, 같은 위치를 클릭한 뒤 한 글자 입력과 실행 취소를 수행했습니다. 원본 파일의 해시가 바뀌지 않았음을 확인했습니다. 시험 입력은 실제 브라우저 입력 경로를 사용하며 Windows 전역 키보드 훅을 거치지 않습니다. 따라서 이 시험에서 재현한 지연을 설명하는 데 SST 개입은 필요하지 않습니다. 다른 번역·클립보드 증상의 원인을 모두 배제했다는 뜻은 아닙니다.
-
-정식 r8 코어를 적용한 후보에서 측정한 같은 셀의 결과는 다음과 같습니다. 단일 PC의 해당 위치에서 측정한 값이며 모든 문서의 보장 수치는 아닙니다.
-
-| 동작 | 이전 배포본 | 수정 후보 |
-| --- | ---: | ---: |
-| 단어 더블클릭과 선택 문맥 확인 | 5,141ms | 15ms |
-| 선택 해제 방향키 | 2,708ms | 9ms |
-| 한 글자 입력과 상태 확인 | 3,130ms | 246ms |
-| 실행 취소와 상태 확인 | 3,515ms | 980ms |
-
-같은 원문 주소에서 시험했으며 두 버전 모두 43쪽을 유지했습니다. 수정 전후 첫 페이지의 PNG 해시도 일치했습니다. 이는 첫 페이지의 표시가 유지됐다는 검증이며 모든 쪽의 조판이 한컴 한글과 같다는 뜻은 아닙니다.
-
-계측에서 셀 선택 사각형 계산은 합계 약 7.8초에서 1ms 미만으로 줄었고, 글자 입력·실행 취소의 글꼴 준비에 사용되던 86회 페이지 렌더 트리 조회는 제거됐습니다. 실행 취소·전체 저장·복잡한 조판의 비용은 남아 있습니다. 실제 사용자가 느끼는 모든 지연이 해결됐다고 단정하지 않습니다.
-
-회귀 검사는 합성 다중 페이지 표에서 쪽 범위 전달, 전체 페이지 글꼴 조사 제거, 텍스트 보존과 실행 취소를 확인합니다. 본문·일반 셀·중첩 셀에서 단어·문단 선택, 글자 모양 창과 새 입력 서식도 브라우저로 검사합니다. 주석은 별도의 실제 WASM 주소·서식 검사와 브라우저 입력·방향키·앞 Delete·뒤 Backspace·취소·실행 취소 검사로 구분합니다. 바로 옆 본문을 지우고 새로 입력하는 경우도 확인합니다. 사용자 문서·본문·화면·프로파일은 저장소나 릴리스에 포함하지 않습니다.
+- 큰 표의 폭·높이 변경, 복잡한 줄바꿈과 쪽 분할은 여전히 계산 비용이 듭니다.
+- 문서 구조·글꼴·용지 조건이 달라지면 관련 캐시를 버리고 다시 계산합니다.
+- 하드웨어 가속과 병렬 처리는 모든 편집 작업의 무지연을 보장하지 않습니다.
 
 ## 유지관리
 
-rhwp 기준 버전을 바꿀 때는 코어 쪽 범위 지정 API, Studio 커서 좌표의 수명, 문서 글꼴 목록과 해석기의 호환성을 다시 확인합니다. 기능을 되살리는 업데이트와 Pwh에서 추가한 보완을 구분하고, README·원본 대비 차이·엔진 패치 문서·변경 이력을 함께 갱신합니다. 세부 배포 해시는 릴리스의 검증 자료와 `runtime-lock.json`을 기준으로 합니다.
+[조판 소유권 규칙](engine-patches/LAYOUT-OWNERSHIP-RULES.md)과 [정적 검사](STATIC-CHECKS.md)를 함께 사용합니다. 변경한 기능은 입력·실행 취소·저장·재열기로 확인하며, 기존 조판과의 차이를 별도로 검토합니다.
 
 <a id="editor-performance-history"></a>
-
-## 0.6.13 대형 문서·글꼴 계측 기록
-
-The 0.6.13 candidate removes full context/export work from the 750 ms AI button
-availability update. Presentation/poll state uses a digest cache invalidated by
-document mutation/change events and keyed by epoch, sequence, format, page count
-and dirty state. The authoritative `getDocumentState()` and mutation guards stay
-fresh; the cached method is separate. Polling yields during pointer interaction
-and recent keyboard/wheel input. Files above the 8 MiB recovery limit skip the
-repeated full export used only to discover that they are too large for recovery.
-
-Selection line wrapping still uses the renderer's actual text runs. During one
-pointer gesture, a bounded 32-page cache reuses parsed text layouts. End/cancel,
-document identity, edits and font/layout invalidation discard the cache. Source
-text and selection bounds are checked on every request. Selection rectangles
-themselves are not cached.
-
-Canvas font preparation first attempts exact, unambiguous installed full/PostScript
-face names with the real weight/slant. A failed/unsupported local load has a one
-second bound and falls back to the verified font-byte path. This local path does
-not verify font bytes and never searches a broad family name. The server's byte
-fallback caches file bytes/SHA with a 64 MiB limit, shares concurrent reads and
-checks the authorized catalog stamp on every chunk.
-
-### Evidence and limits
-
-On the reported 13-page, approximately 10.4 MiB document, original full export/hash
-state reads averaged 849 ms in a local engine probe. Thirty unchanged presentation
-reads required one export; `document-changed` invalidated that cache, and two
-authoritative reads still performed two fresh exports. Existing controller
-apply/revert/conflict/rollback tests passed (11 tests).
-
-With cursor/hit-test warmed, the original wrapped-selection correction measured
-22.32 ms median on one body paragraph, versus 0.29 ms with the gesture cache
-(10 reads). These are local query measurements, not end-to-end drag latency or a
-guarantee for every document. Browser local-font availability, final rendering,
-selection/undo/save behavior and perceived latency must also be checked in the
-real Codex editor before calling the UI change verified.
-
-The native CLI/WASM remain unchanged. Engine revision 2 retains the new client
-source, overlay and build dependencies separately from revision 1.
-
-### Observed in the Codex editor
-
-The real document reopened with 13 pages and active editing controls. The DOM
-reported four local font loads and one byte-transfer fallback. The user confirmed
-that opening became visibly faster. The frame used the r2 client engine with an
-existing 0.6.12 host bridge; therefore the newest host-only idle-poll/recovery-size
-guards have not been verified in that frame. Do not equate this opening result
-with a complete end-to-end drag/typing latency measurement. The current automation
-can inspect this MCP App but cannot perform a native canvas drag.
+이전 구현 변경은 [변경 이력](CHANGELOG.md)과 [코어 패치](engine-patches/README.md)에서 확인할 수 있습니다.

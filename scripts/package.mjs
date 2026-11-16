@@ -9,6 +9,7 @@ import {assertEditorBuildInputs,assertPortableEditorBundle} from './editor-build
 
 const PROJECT_ROOT = fileURLToPath(new URL('../', import.meta.url));
 const FILES = Object.freeze([
+  'scripts/patch-picture-drag.mjs',
   'scripts/patch-context-ribbon.mjs', 'scripts/patch-format-copy-options.mjs', 'scripts/patch-control-marker-delete.mjs', 'scripts/patch-native-paste-command.mjs',
   'plugin.json', 'mcp.json', '.mcp.json', '.codex-plugin/plugin.json', 'package.json', 'assets/stoom.png', 'scripts/patch-table-command-access.mjs', 'scripts/patch-nested-paragraph-format.mjs', 'scripts/patch-inline-object-cursors.mjs',
   'engine.config.json', 'engine.config.example.json', 'runtime-lock.json', 'README.md', 'LICENSE', 'SECURITY.md', 'requirements-render-compare.txt', 'scripts/editor-build-contract.mjs', 'scripts/verify-editor-build.mjs', 'scripts/run-ci-tests.mjs', 'scripts/ci-test-files.mjs',

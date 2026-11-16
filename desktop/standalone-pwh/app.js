@@ -45,7 +45,7 @@
   if(document.activeElement!==document.body&&document.activeElement!==frame)return;
   try{
    const win=frame.contentWindow,doc=frame.contentDocument,input=doc?.querySelector('[aria-label="문서 편집 입력"]');
-   if(!input||!win.pwhEditor?.context?.().ready||win.pwhRecoveryReady?.()!==true||doc.querySelector('dialog[open],.modal-overlay'))return;
+   if(!input||!win.pwhEditor?.status?.().ready||win.pwhRecoveryReady?.()!==true||doc.querySelector('dialog[open],.modal-overlay'))return;
    if(doc.activeElement!==doc.body&&doc.activeElement!==input)return;
    if(!document.hasFocus()&&!granted){if(workspaceOrigin)window.parent.postMessage({type:'pwh-workspace-focus-needed'},workspaceOrigin);return;}
    input.focus({preventScroll:true});
@@ -54,7 +54,7 @@
  }
  frame.addEventListener('load',()=>{clearInterval(initialEditorFocusTimer);initialEditorFocusPending=true;initialEditorFocusTimer=setInterval(restoreInitialEditorFocus,150);restoreInitialEditorFocus();});
  window.addEventListener('focus',()=>restoreInitialEditorFocus());
- function reportWorkspace(requestId){if(!workspaceOrigin||window.parent===window)return;let state,recoveryReady=false;try{state=frame.contentWindow?.pwhEditor?.context?.();recoveryReady=frame.contentWindow?.pwhRecoveryReady?.()===true;}catch{}const documentState=state?.documentState;window.parent.postMessage({type:'pwh-workspace-state',requestId,name:documentInfo?.name||'새 문서',ready:!!state?.ready&&recoveryReady,dirty:documentState?.dirty!==false,busy:busy||saving,documentState:documentState?{documentEpoch:documentState.documentEpoch,changeSeq:documentState.changeSeq,dirty:documentState.dirty}:null},workspaceOrigin);}
+ function reportWorkspace(requestId){if(!workspaceOrigin||window.parent===window)return;let state,recoveryReady=false;try{state=frame.contentWindow?.pwhEditor?.status?.();recoveryReady=frame.contentWindow?.pwhRecoveryReady?.()===true;}catch{}const documentState=state?.documentState;window.parent.postMessage({type:'pwh-workspace-state',requestId,name:documentInfo?.name||'새 문서',ready:!!state?.ready&&recoveryReady,dirty:documentState?.dirty!==false,busy:busy||saving,documentState:documentState?{documentEpoch:documentState.documentEpoch,changeSeq:documentState.changeSeq,dirty:documentState.dirty}:null},workspaceOrigin);}
  let workspaceCommandQueue=Promise.resolve();
  window.addEventListener('message',async event=>{
   if(event.source!==window.parent||event.origin!==workspaceOrigin)return;
