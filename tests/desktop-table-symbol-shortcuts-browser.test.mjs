@@ -52,13 +52,20 @@ test('Hancom editing and table shortcuts work through trusted input', {
     const dims=()=>editor.evaluate(({sec,para,ctrl})=>{
       const d=window.rhwpStudio.plugins.deps.wasm.doc;
       return [0,1,2,3].map(i=>{
-        const {width,height}=JSON.parse(d.getCellProperties(sec,para,ctrl,i));
-        return {width,height};
+        const {width,height,resizeHeight}=JSON.parse(d.getCellProperties(sec,para,ctrl,i));
+        return {width,height,resizeHeight};
       });
     },context);
+    const boxes=()=>editor.evaluate(({sec,para,ctrl})=>JSON.parse(
+      window.rhwpStudio.plugins.deps.wasm.doc.getTableCellBboxesByPath(sec,para,
+        JSON.stringify([{controlIndex:ctrl,cellIndex:0,cellParaIndex:0}]))),context);
     const start=await dims();
+    const startBoxes=await boxes();
     assert.notEqual(start[0].width,start[1].width);
     assert.notEqual(start[0].height,start[2].height);
+    assert.ok(start[0].resizeHeight>start[0].height,'nested content exceeds the authored cell minimum');
+    for(const box of startBoxes)assert.ok(Math.abs(start[box.cellIdx].resizeHeight/75-box.h)<0.11,
+      'resize height represents the displayed, unfragmented row');
     await editor.evaluate(({sec,para,ctrl})=>{
       const ih=window.rhwpStudio.plugins.deps.getInputHandler();
       ih.cursor.moveTo({sectionIndex:sec,paragraphIndex:para,parentParaIndex:para,
@@ -82,17 +89,23 @@ test('Hancom editing and table shortcuts work through trusted input', {
     assert.equal(await heightButton.isEnabled(),true,'F5 updates both graphic size commands');
     await page.keyboard.press('w');
     const wide=await dims();
+    const wideBoxes=await boxes();
     assert.ok(Math.abs(wide[0].width-wide[1].width)<=1);
     assert.equal(wide[0].width+wide[1].width,start[0].width+start[1].width);
     await page.keyboard.press('h');
     const even=await dims();
     assert.ok(Math.abs(even[0].height-even[2].height)<=1);
-    assert.equal(even[0].height+even[2].height,start[0].height+start[2].height);
+    assert.equal(even[0].height+even[2].height,wide[0].resizeHeight+wide[2].resizeHeight,
+      'equal height distributes the allocated rows instead of obsolete authored minima');
+    const evenBoxes=await boxes();
+    assert.ok(evenBoxes[0].h>=wideBoxes[0].h,'nested content keeps its minimum visible height');
     await page.keyboard.press('Escape');
     await page.keyboard.press('Control+z');
     assert.deepEqual(await dims(),wide);
+    assert.deepEqual(await boxes(),wideBoxes);
     await page.keyboard.press('Control+z');
     assert.deepEqual(await dims(),start);
+    assert.deepEqual(await boxes(),startBoxes);
 
     await page.keyboard.press('F5');
     await page.keyboard.press('p');
@@ -112,10 +125,12 @@ test('Hancom editing and table shortcuts work through trusted input', {
     await page.keyboard.press('Alt+ArrowDown');
     const fixedHeight=await dims();
     assert.ok(fixedHeight[0].height>fixedAfter[0].height);
-    assert.equal(fixedHeight[0].height+fixedHeight[2].height,fixedBefore[0].height+fixedBefore[2].height);
+    assert.equal(fixedHeight[0].height+fixedHeight[2].height,fixedAfter[0].resizeHeight+fixedAfter[2].resizeHeight,
+      'fixed-table height movement preserves the allocated row total');
     await page.keyboard.press('Control+z');
     await page.keyboard.press('Control+z');
     assert.deepEqual(await dims(),start);
+    assert.deepEqual(await boxes(),startBoxes);
     if (await range()) await page.keyboard.press('Escape');
 
     await page.keyboard.press('Control+F10');
