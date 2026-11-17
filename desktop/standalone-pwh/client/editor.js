@@ -39164,10 +39164,10 @@ function gg(e, t, n, r, i) {
 	if (i === 0) return 0;
 	let a = [], o = (n) => t.path && t.path.length > 1 ? e.getCellPropertiesByPath(t.sec, t.ppi, JSON.stringify(t.path), n) : e.getCellProperties(t.sec, t.ppi, t.ci, n);
 	for (let e of r) try {
-		let t = o(e.targetCellIdx), r = n.type === "col" ? t.width : t.height;
+		let t = o(e.targetCellIdx), r = n.type === "col" ? t.width : t.resizeHeight ?? t.height;
 		i < 0 && Number.isFinite(r) && a.push(Math.max(0, Math.round(r - lg)));
 		for (let t of e.neighborCellIdxs) {
-			let e = o(t), r = n.type === "col" ? e.width : e.height;
+			let e = o(t), r = n.type === "col" ? e.width : e.resizeHeight ?? e.height;
 			i > 0 && Number.isFinite(r) && a.push(Math.max(0, Math.round(r - lg)));
 		}
 	} catch {}
@@ -39495,7 +39495,10 @@ function Ag(e) {
 	if (!t || !n || this.cursor.isProtectedCellSelectionMode() || this.cursor.getExcludedCells().size) return;
 	let r = t.cellPath?.length > 1 ? JSON.stringify(t.cellPath) : void 0;
 	try {
-		let i = cg(kg.call(this, t, r), n, e, (n) => (r ? this.wasm.getCellPropertiesByPath(t.sec, t.ppi, r, n) : this.wasm.getCellProperties(t.sec, t.ppi, t.ci, n))[e] ?? NaN);
+		let i = cg(kg.call(this, t, r), n, e, (n) => {
+			let i = r ? this.wasm.getCellPropertiesByPath(t.sec, t.ppi, r, n) : this.wasm.getCellProperties(t.sec, t.ppi, t.ci, n);
+			return (e === "height" ? i.resizeHeight ?? i.height : i.width) ?? NaN;
+		});
 		if (!i.length) return;
 		this.executeOperation({
 			kind: "snapshot",
@@ -39516,7 +39519,10 @@ function jg(e, t, n) {
 		return;
 	}
 	try {
-		let a = n(s, i, e, (e, t) => (o ? this.wasm.getCellPropertiesByPath(r.sec, r.ppi, o, e) : this.wasm.getCellProperties(r.sec, r.ppi, r.ci, e))[t]);
+		let a = n(s, i, e, (e, t) => {
+			let n = o ? this.wasm.getCellPropertiesByPath(r.sec, r.ppi, o, e) : this.wasm.getCellProperties(r.sec, r.ppi, r.ci, e);
+			return t === "height" ? n.resizeHeight ?? n.height : n.width;
+		});
 		if (a.length === 0) return;
 		this.executeOperation({
 			kind: "snapshot",
@@ -48476,9 +48482,9 @@ var Nx = [
 		let n = document.createElement("div");
 		n.className = "about-product-name-ko", n.textContent = "한글에 익숙한 오픈소스 한글 문서 편집기", e.appendChild(n);
 		let r = document.createElement("div");
-		r.className = "about-version", r.textContent = document.getElementById("pwh-version")?.textContent || "Pwh 0.6.61", e.appendChild(r);
+		r.className = "about-version", r.textContent = document.getElementById("pwh-version")?.textContent || "Pwh 0.6.62", e.appendChild(r);
 		let i = document.createElement("div");
-		i.className = "about-tech", i.textContent = "기반 엔진 rhwp 0.8.7 · Pwh 공통 코어 r29", e.appendChild(i);
+		i.className = "about-tech", i.textContent = "기반 엔진 rhwp 0.8.7 · Pwh 공통 코어 r31", e.appendChild(i);
 		let a = document.createElement("div");
 		a.className = "about-notice";
 		let o = document.createElement("strong");

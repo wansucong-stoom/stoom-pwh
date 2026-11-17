@@ -1,12 +1,12 @@
 {
-  "sha256": "c3d9715e73e3074a5e52aefb360609ef6a1c31c38761601e903cb93d1477a72a",
-  "baseVersion": "0.6.61",
-  "baseEditorSha256": "9a2a84d12dde209dfb184e0d897c70aab7b706459378b8ea4555841a0a9438e8",
+  "sha256": "7d7884838775839925d384150205710b09685ffa17b3957eedf06f547f523d82",
+  "baseVersion": "0.6.62",
+  "baseEditorSha256": "8b898336d257bdc444bcabb1ce7e381532830454f570ffa329e8b3a0dbcbc683",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "desktop",
-    "sha256": "aee7700fc2f929ac754ff83eb66a75d07839990606f94093c5dff24054f1fa02",
+    "sha256": "2310b3f32a627c654770bf52a6006a324cf2a5c8d721b77d2ee62944a0af40f3",
     "files": [
       {
         "path": "desktop/standalone-pwh/build-desktop-editor.mjs",
@@ -30,11 +30,11 @@
       },
       {
         "path": "package.json",
-        "sha256": "4f659b11f7565e8382e44d36556a88bc8c0bc06e5da9b6b966cb1f75fc3a7815"
+        "sha256": "a72c2d8b50812b1c78919590d9e466f4d8d7b7cf46868aa423e9a560baf63f45"
       },
       {
         "path": "scripts/build-inline.mjs",
-        "sha256": "e56a5acebb06d6f49bf2c4cf88904810d58abf18e06f1ff466fa6aeefbf9f524"
+        "sha256": "5ffb63332a5266c3c821e968b5f151756eccd28876f0be2c126de732243c1076"
       },
       {
         "path": "scripts/bundle-client.mjs",
@@ -42,7 +42,7 @@
       },
       {
         "path": "scripts/editor-build-contract.mjs",
-        "sha256": "5d148421ac9997c6bc0aef83c68c0c48c27c4c84de51da0549a5a373c4149b4d"
+        "sha256": "05786588c80986bf03bea3cffd8c9cbfafbc5aa8e4a523eefcf12993668af98f"
       },
       {
         "path": "scripts/patch-auto-fill.mjs",
@@ -66,7 +66,7 @@
       },
       {
         "path": "scripts/patch-context-ribbon.mjs",
-        "sha256": "8f7de2988ff71ec75108e94524656174f44521c38b78a9358e19776e00908cbb"
+        "sha256": "42f39400da82c204cbc93892d88c8d97f994d3506b53e640e955ad8630b9f33f"
       },
       {
         "path": "scripts/patch-control-marker-delete.mjs",
@@ -123,6 +123,10 @@
       {
         "path": "scripts/patch-table-command-access.mjs",
         "sha256": "f0b7f4378c6f66d935ded9aff966638721ada52b771ff3873441d705243a9bae"
+      },
+      {
+        "path": "scripts/patch-table-resize-grid.mjs",
+        "sha256": "5a79ebdd9b2406c6acca979d7979b4ce07ab15ef7cc66fae540c4c57a4a24a7b"
       },
       {
         "path": "scripts/patch-viewport-table-selection.mjs",

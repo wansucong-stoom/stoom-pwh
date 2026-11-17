@@ -10,7 +10,13 @@ test('table and cell properties share flat and nested rules without modifying an
   const core=await import(pathToFileURL(process.env.PWH_CORE_JS));await core.default({module_or_path:await fs.readFile(process.env.PWH_CORE_WASM)});
   const {HwpDocument}=core,{doc,outer,rootPath,innerPath,deepPath}=nestedPropertiesFixture(HwpDocument);
   const props=(document,path)=>JSON.parse(document.getTablePropertiesByPath(0,outer.paraIdx,JSON.stringify(path)));
-  const cell=(document,path,index)=>JSON.parse(document.getCellPropertiesByPath(0,outer.paraIdx,JSON.stringify(path),index));
+  const cell=(document,path,index)=>{
+    // Derived allocation can change with a sibling's content or padding. This
+    // test protects authored properties, not the shared rendered row height.
+    const properties=JSON.parse(document.getCellPropertiesByPath(0,outer.paraIdx,JSON.stringify(path),index));
+    delete properties.resizeHeight;
+    return properties;
+  };
   try{
     for(const method of ['getTablePropertiesByPath','setTablePropertiesByPath','setCellPropertiesByPath'])assert.equal(typeof doc[method],'function',method);
     assert.deepEqual(props(doc,rootPath),JSON.parse(doc.getTableProperties(0,outer.paraIdx,outer.controlIdx)));

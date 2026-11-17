@@ -128,7 +128,7 @@ export async function patchContextRibbon(studio){
   about=once(about,"titleEn.textContent = 'HWP/HWPX Compatible Module for Rust';","titleEn.textContent = document.getElementById('pwh-version')?.textContent?.includes('Desktop') ? 'Pwh Desktop' : 'Pwh';",'product title');
   about=once(about,"titleKo.textContent = t('dialog.about.titleKo.text');","titleKo.textContent = '한글에 익숙한 오픈소스 한글 문서 편집기';",'product subtitle');
   about=once(about,'version.textContent = `Version ${__APP_VERSION__}`;',`version.textContent = document.getElementById('pwh-version')?.textContent || 'Pwh ${version}';`,'product version');
-  about=once(about,"tech.textContent = 'Rust + WebAssembly + TypeScript';","tech.textContent = '기반 엔진 rhwp 0.8.7 · Pwh 공통 코어 r29';",'engine version');
+  about=once(about,"tech.textContent = 'Rust + WebAssembly + TypeScript';","tech.textContent = '기반 엔진 rhwp 0.8.7 · Pwh 공통 코어 r31';",'engine version');
   about=once(about,'    // HWP 스펙 고지 문구 (필수)',`    const features=document.createElement('div');features.className='about-notice';
     const heading=document.createElement('strong');heading.textContent='Pwh가 제공하는 기능';features.append(heading);
     const list=document.createElement('ul');for(const text of ['한글 호환 메뉴·단축키와 본문·중첩 표·그림 편집','표 분할·그림 배치 보완과 셀 편집의 증분 계산','선택 영역의 AI 수정과 선택적인 ChatGPT·로컬 AI 연결','여러 문서 탭, HWPX 저장, 인쇄 미리보기와 출력']){const item=document.createElement('li');item.textContent=text;list.append(item);}features.append(list);body.append(features);
@@ -141,6 +141,7 @@ export async function patchContextRibbon(studio){
   about=once(about,'  protected createBody(): HTMLElement {',"  protected createBody(): HTMLElement {\n    this.dialog.classList.add('pwh-about-dialog');",'responsive product dialog');
  }
  about=about.replace(/(version\.textContent = document\.getElementById\('pwh-version'\)\?\.textContent \|\| )'Pwh [^']+';/,`$1'Pwh ${version}';`);
+ about=about.replace(/기반 엔진 rhwp 0\.8\.7 · Pwh 공통 코어 r\d+/g,'기반 엔진 rhwp 0.8.7 · Pwh 공통 코어 r31');
  await fs.writeFile(aboutPath,about);
  const formatPath=path.join(studio,'src/command/commands/format.ts');let format=await fs.readFile(formatPath,'utf8');
  if(!format.includes('// Pwh anchored bullet gallery')){

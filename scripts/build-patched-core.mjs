@@ -1922,6 +1922,22 @@ const patches = [
       "patchedSha256": "2fc9d99f2fd0d0188b0c382292c6a87d69a59cfb504d76463d3a2d6974e4a2e5"
     }
   ]
+},
+{
+  "file": "rhwp-0.8.7-table-resize-allocated-grid.patch",
+  "sha256": "84a64da30fcc7955e450199162c3d47fa8704beacdb8dca18142cadc0f5e6a8f",
+  "sources": [
+    {
+      "path": "src/document_core/commands/table_ops.rs",
+      "originalSha256": "2270792a6db38028ddcbf97b0e43a15f8e4b38d1f9b53648f21460eb660d2b4f",
+      "patchedSha256": "5a2dae49893c180a4e5cb9d68971d9b61831095f8ff6412079cede193540df40"
+    },
+    {
+      "path": "src/renderer/height_measurer.rs",
+      "originalSha256": "762d78f97735ebb2358820161774dacf74022c28655b0e95ba5f3fc4bf83aad2",
+      "patchedSha256": "1d50093e8864806d08a1d7742177be348727806b8e623bc92d18946ae5e0b111"
+    }
+  ]
 }
 ];
 const help = `Usage: node scripts/build-patched-core.mjs

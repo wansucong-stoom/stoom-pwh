@@ -259,6 +259,7 @@ def main():
                        'tests/bin-data-resource-reuse.test.mjs',
                        'tests/compressed-binary-cache-source.test.mjs',
                        'tests/compressed-binary-export.test.mjs')
+    fidelity_tests += ('tests/table-resize-allocated-grid.test.mjs',)
     for name in fidelity_tests:
         core_inputs[name] = regular(project/name)
         build_inputs['pwh/'+name] = regular(project/name)

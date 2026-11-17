@@ -1,0 +1,203 @@
+--- a/src/document_core/commands/table_ops.rs
++++ b/src/document_core/commands/table_ops.rs
+@@ -1210,7 +1210,9 @@
+             }
+         };
+ 
+-        self.cell_properties_json(table, cell_idx, use_effective_border_fill)
++        let json = self.cell_properties_json(table, cell_idx, use_effective_border_fill)?;
++        if !use_effective_border_fill { return Ok(json); }
++        self.with_cell_resize_height(json, table, section_idx, parent_para_idx, control_idx, 0, cell_idx)
+     }
+ 
+     /// 크기 변경과 같은 cellPath의 표에서 셀 속성을 읽는다.
+@@ -1222,7 +1224,9 @@
+         cell_idx: usize,
+     ) -> Result<String, HwpError> {
+         let table = self.resolve_table_by_path(section_idx, parent_para_idx, path)?;
+-        self.cell_properties_json(table, cell_idx, true)
++        let json = self.cell_properties_json(table, cell_idx, true)?;
++        self.with_cell_resize_height(json, table, section_idx, parent_para_idx,
++            path.last().unwrap().0, path.len() - 1, cell_idx)
+     }
+ 
+     pub fn get_cell_own_properties_by_cell_path_native(
+@@ -2288,9 +2292,76 @@
+     /// 크기 조절이 아예 닿지 못했다. 본문을 `&mut Table` 기준으로 떼어 내 경로 변형과 공유한다.
+     ///
+     /// 반환값은 폭이 바뀐 셀의 `(셀 번호, 문단 수)` — 호출부가 평면/경로에 맞는 리플로우를 건다.
++    /// Resize operates on the logical grid before pagination. A source cell's
++    /// minimum height can be much smaller than its allocated row; page-fragment
++    /// bboxes (including repeated headers) cannot serve as that allocation.
++    fn table_resize_cell_heights(
++        &self, table: &crate::model::table::Table,
++        section: usize, paragraph: usize, control: usize, depth: usize,
++    ) -> std::sync::Arc<[u32]> {
++        use crate::renderer::height_measurer::HeightMeasurer;
++        let clean = !self.dirty_sections.get(section).copied().unwrap_or(true)
++            && self.pending_pagination_job.is_none()
++            && self.deferred_pagination_descriptor.is_none();
++        let compute = || {
++        let cached = (depth == 0 && clean).then(|| self.measured_tables.get(section)
++            .and_then(|tables| tables.iter().find(|m| m.para_index == paragraph && m.control_index == control)))
++            .flatten();
++        let profile = self.effective_layout_profile();
++        self.layout_engine.set_layout_profile(profile);
++        let measured;
++        let root_measurement = if depth != 0 { None } else if let Some(cached) = cached {
++            Some(cached)
++        } else {
++            measured = HeightMeasurer::new(self.dpi)
++                .with_hwp3_variant(profile.hwp3_layout())
++                .with_legacy_hwp3_stored_geometry(profile.legacy_hwp3_stored_geometry())
++                .with_native_hwp5(profile.native_hwp5_layout())
++                .with_hwpx_stored_layout(profile.hwpx_stored_layout())
++                .with_session_edited(profile.session_edited())
++                .with_hwp3_origin_flow_spacing_before(
++                    crate::document_core::queries::rendering::uses_hwp3_origin_flow_spacing_before(&self.document))
++                .with_render_normalization(std::sync::Arc::clone(&self.render_normalization.overlay))
++                .measure_table(table, paragraph, control, &self.styles);
++            Some(&measured)
++        };
++        let rows = self.layout_engine.resolve_row_heights(table, table.col_count as usize,
++            table.row_count as usize, root_measurement, &self.styles, false);
++        let mut boundaries = vec![0.0];
++        for height in rows { boundaries.push(boundaries.last().unwrap() + height); }
++        table.cells.iter().map(|cell| {
++            let start = cell.row as usize;
++            let end = start + cell.row_span as usize;
++            match (boundaries.get(start), boundaries.get(end)) {
++                (Some(&a), Some(&b)) => ((b * 7200.0 / self.dpi).round()
++                    - (a * 7200.0 / self.dpi).round()
++                    + f64::from(table.cell_spacing) * f64::from(cell.row_span.saturating_sub(1)))
++                    .clamp(200.0, i32::MAX as f64) as u32,
++                _ => cell.height.max(200),
++            }
++        }).collect()
++        };
++        if clean && self.nested_measurements.owns_table(table) {
++            self.nested_measurements.resize_heights(table, compute)
++        } else { compute().into() }
++    }
++
++    #[allow(clippy::too_many_arguments)]
++    fn with_cell_resize_height(&self, json: String, table: &crate::model::table::Table,
++        section: usize, paragraph: usize, control: usize, depth: usize, cell: usize,
++    ) -> Result<String, HwpError> {
++        let height = self.table_resize_cell_heights(table, section, paragraph, control, depth)[cell];
++        let mut value: serde_json::Value = serde_json::from_str(&json)
++            .map_err(|error| HwpError::RenderError(error.to_string()))?;
++        // Keep the authored height intact for property editing, export and undo.
++        value["resizeHeight"] = height.into();
++        Ok(value.to_string())
++    }
++
+     fn apply_cell_resize_updates(
+         table: &mut crate::model::table::Table,
+         updates: &[CellResizeUpdate],
++        resize_heights: Option<&[u32]>,
+     ) -> Vec<(usize, usize)> {
+         const MIN_CELL_SIZE: u32 = 200; // 최소 셀 크기 (HWPUNIT)
+ 
+@@ -2300,6 +2371,12 @@
+         let mut applied_width_delta: i64 = 0;
+         let mut applied_height_delta: i64 = 0;
+         let mut original_cell_widths = std::collections::BTreeMap::new();
++        // Materialize this table's allocated grid only for an explicit height
++        // gesture. Otherwise unchanged rows lose their share of common.height
++        // when update_ctrl_dimensions derives a new frame from stored minima.
++        if let Some(heights) = resize_heights {
++            for (cell, &height) in table.cells.iter_mut().zip(heights) { cell.height = height; }
++        }
+         for update in updates {
+             let Some(cell) = table.cells.get_mut(update.cell_idx) else {
+                 continue;
+@@ -2319,7 +2396,7 @@
+             }
+         }
+         table.update_ctrl_dimensions();
+-        if updates.iter().any(|u| u.height_delta != 0)
++        if resize_heights.is_none() && updates.iter().any(|u| u.height_delta != 0)
+             && original_height > original_row_height_sum
+             && table.row_count > 1
+         {
+@@ -2346,7 +2423,7 @@
+                     .copy_from_slice(&original_width.to_le_bytes());
+             }
+         }
+-        if applied_height_delta == 0 {
++        if applied_height_delta == 0 && resize_heights.is_none() {
+             table.common.height = original_height;
+             if table.raw_ctrl_data.len() >= common_obj_offsets::HEIGHT.end {
+                 table.raw_ctrl_data[common_obj_offsets::HEIGHT]
+@@ -2464,6 +2541,11 @@
+             return Err(HwpError::RenderError(LOCAL_RESIZE_UNSUPPORTED.to_string()));
+         }
+ 
++        let resize_heights = if updates.iter().any(|u| u.height_delta != 0) {
++            let table = self.resolve_table_by_path(section_idx, parent_para_idx, path)?;
++            updates.iter().any(|u| u.height_delta != 0 && u.cell_idx < table.cells.len())
++                .then(|| self.table_resize_cell_heights(table, section_idx, parent_para_idx, control_idx, path.len() - 1))
++        } else { None };
+         let previous_layout_profile = self.effective_layout_profile();
+         let local_edit = self.begin_local_table_edit(
+             section_idx, parent_para_idx, path,
+@@ -2472,7 +2554,7 @@
+ 
+ 
+         let table = self.resolve_table_mut_by_cell_path(section_idx, parent_para_idx, path)?;
+-        let reflow_cells = Self::apply_cell_resize_updates(table, &updates);
++        let reflow_cells = Self::apply_cell_resize_updates(table, &updates, resize_heights.as_deref());
+ 
+         // 리플로우는 **안쪽 셀 폭**을 기준으로 해야 한다 — 바깥 표의 셀 폭이나 본문 폭으로
+         // 다시 재면 중첩 표 글줄이 제 칸을 넘는다. `reflow_cell_paragraph_by_path` 가
+@@ -2530,6 +2612,11 @@
+             return Err(HwpError::RenderError(LOCAL_RESIZE_UNSUPPORTED.to_string()));
+         }
+ 
++        let resize_heights = if updates.iter().any(|u| u.height_delta != 0) {
++            let table = self.resolve_table_by_path(section_idx, parent_para_idx, &[(control_idx, 0, 0)])?;
++            updates.iter().any(|u| u.height_delta != 0 && u.cell_idx < table.cells.len())
++                .then(|| self.table_resize_cell_heights(table, section_idx, parent_para_idx, control_idx, 0))
++        } else { None };
+         let previous_layout_profile = self.effective_layout_profile();
+         let local_edit = self.begin_local_table_edit(
+             section_idx, parent_para_idx, &[(control_idx, 0, 0)],
+@@ -2538,7 +2625,7 @@
+ 
+ 
+         let table = self.get_table_mut(section_idx, parent_para_idx, control_idx)?;
+-        let reflow_cells = Self::apply_cell_resize_updates(table, &updates);
++        let reflow_cells = Self::apply_cell_resize_updates(table, &updates, resize_heights.as_deref());
+ 
+         // 너비가 변경된 셀의 모든 문단에 대해 line_segs 재계산 (텍스트 리플로우)
+         self.reflow_table_cell_paragraphs(section_idx, parent_para_idx, control_idx, &reflow_cells);
+--- a/src/renderer/height_measurer.rs
++++ b/src/renderer/height_measurer.rs
+@@ -1579,6 +1579,7 @@
+     cell_lines: std::collections::HashMap<CellLineKey, ComposedParagraph>,
+     measurements: std::collections::HashMap<NestedMeasurementKey, MeasuredTable>,
+     row_geometry: std::collections::HashMap<TableRowGeometryKey, std::sync::Arc<[f64]>>,
++    resize_heights: std::collections::HashMap<usize, std::sync::Arc<[u32]>>,
+ }
+ 
+ #[derive(Clone, Default)]
+@@ -1632,6 +1633,18 @@
+         let mut entries = self.0.lock().unwrap();
+         entries.measurements.retain(|(owner, _, _), _| !tables.contains(owner));
+         entries.row_geometry.retain(|key, _| !tables.contains(&key.owner));
++        entries.resize_heights.retain(|owner, _| !tables.contains(owner));
++    }
++
++    /// A stable source revision owns resize geometry just like measured rows.
++    /// Multiple selected-cell queries share one allocation, with no page scan.
++    pub(crate) fn resize_heights(&self, table: &Table, compute: impl FnOnce() -> Vec<u32>) -> std::sync::Arc<[u32]> {
++        let owner = std::ptr::from_ref(table) as usize;
++        if let Some(heights) = self.0.lock().unwrap().resize_heights.get(&owner).cloned() { return heights; }
++        let heights: std::sync::Arc<[u32]> = compute().into();
++        let mut entries = self.0.lock().unwrap();
++        if entries.resize_heights.len() < 4096 { entries.resize_heights.insert(owner, heights.clone()); }
++        heights
+     }
+ 
+     pub(crate) fn invalidate_cell_lines(&self, paragraphs: &[usize]) {

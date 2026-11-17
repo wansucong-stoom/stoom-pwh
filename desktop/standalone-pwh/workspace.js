@@ -208,7 +208,7 @@
     if(updateChannel==='microsoft-store'){
      const hasUpdate=available.status==='available'&&available.available===true;
      updateButton.hidden=false;updateButton.dataset.available=String(hasUpdate);
-     updateButton.textContent=hasUpdate?'새 업데이트 · Store에서 업데이트':'Store에서 업데이트 확인';
+     updateButton.textContent=hasUpdate?'새 업데이트가 있습니다.':'Store에서 업데이트 확인';
      updateButton.title=hasUpdate?'Microsoft Store에서 새 버전을 받을 수 있습니다.':'Microsoft Store에서 Pwh Desktop의 업데이트를 확인합니다.';
     }else if(available.version){
      updateButton.textContent='업데이트 '+available.version;updateButton.title='새 버전 설치';updateButton.hidden=false;

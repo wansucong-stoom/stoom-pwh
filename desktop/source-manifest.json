@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pluginVersion": "0.6.61",
+  "pluginVersion": "0.6.62",
   "copyPolicy": "Original bytes; .test.mjs filenames renamed to .check.mjs for staged-only discovery.",
   "files": [
     {
@@ -61,7 +61,7 @@
       "path": "standalone-pwh/build-msi.mjs",
       "source": "standalone-pwh/build-msi.mjs",
       "size": 17139,
-      "sha256": "413ca6abbfa80d044d42723839c4ddcce8942fe588a39bace04a6b053d5a4fea"
+      "sha256": "7343b8dd7eae8523158ef5bee68c3e1a13ffb7fb777b7857f0e153b604135f29"
     },
     {
       "path": "standalone-pwh/build-native-launcher.mjs",
@@ -73,7 +73,7 @@
       "path": "standalone-pwh/build-offline.mjs",
       "source": "standalone-pwh/build-offline.mjs",
       "size": 8411,
-      "sha256": "2f602ca514e61501757beae74f8246ef9a4a8ef46911aa3f7487d439a340ae05"
+      "sha256": "718968bd2599e9bdb57930e36752b87339948d17ccfd7017a9dbbd179c34ea7a"
     },
     {
       "path": "standalone-pwh/build-stoom-icon.mjs",
@@ -108,14 +108,14 @@
     {
       "path": "standalone-pwh/client/editor.js",
       "source": "standalone-pwh/client/editor.js",
-      "size": 2826581,
-      "sha256": "c3d9715e73e3074a5e52aefb360609ef6a1c31c38761601e903cb93d1477a72a"
+      "size": 2826775,
+      "sha256": "7d7884838775839925d384150205710b09685ffa17b3957eedf06f547f523d82"
     },
     {
       "path": "standalone-pwh/client/manifest.json",
       "source": "standalone-pwh/client/manifest.json",
-      "size": 18172,
-      "sha256": "9a261d5cdfbf8c1ff15bbdd6dcc3251030583729bee9849ffa0d3407c25cc87b"
+      "size": 18329,
+      "sha256": "36aab98a205aac6f112ade5299ea9e1bf7a6d8b9868274c2ea568d20e92c2500"
     },
     {
       "path": "standalone-pwh/codex-agent.mjs",
@@ -535,7 +535,7 @@
       "path": "standalone-pwh/version.json",
       "source": "standalone-pwh/version.json",
       "size": 21,
-      "sha256": "8ca4504a969ce303ecd61c1953c2b6c2ede2894ad89bfb820a1ba6db3fad7767"
+      "sha256": "c39c5d6e195663d0cd64d90482710bd795e33edf5b9cdfae22b7a9743ec30a9e"
     },
     {
       "path": "standalone-pwh/window-close-controller.mjs",
@@ -576,8 +576,8 @@
     {
       "path": "standalone-pwh/workspace.js",
       "source": "standalone-pwh/workspace.js",
-      "size": 21621,
-      "sha256": "99443a925ff777a16e8049fb0e9f5fc60e3cfd4b8b5eced314565915cf1e654b"
+      "size": 21610,
+      "sha256": "b3278105a8de91f22a5d3a81c4d32836e3130784237fe8fcdcd41a78b73c1593"
     }
   ]
 }

@@ -15,6 +15,7 @@ buildScripts.push('patch-picture-drag.mjs');
 buildScripts.push('patch-dialog-focus.mjs');
 buildScripts.push('patch-auto-fill.mjs');
 buildScripts.push('patch-background-recovery.mjs');
+buildScripts.push('patch-table-resize-grid.mjs');
 const desktopInputs = ['build-desktop-editor.mjs', 'table-plan.mjs', 'desktop-body-style.mjs'];
 
 // Rolldown's source-region labels are comments, but contain staging paths.
