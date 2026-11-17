@@ -48,7 +48,7 @@ the runtime mirror.
 
 ## OpenAI Codex app-server (Pwh Desktop)
 
-Pwh Desktop은 ChatGPT 연결에 OpenAI가 공개한 Codex app-server `rust-v0.165.0`의 Windows x64 배포본을 사용합니다. Codex는 Apache License 2.0이며, 원본 [LICENSE](https://github.com/wansucong-stoom/stoom-pwh/blob/main/desktop/standalone-pwh/CODEX-APACHE-LICENSE.txt)와 [NOTICE](https://github.com/wansucong-stoom/stoom-pwh/blob/main/desktop/standalone-pwh/CODEX-NOTICE.txt)를 설치 파일에 포함합니다. 이 배포본에 포함된 ripgrep 15.2.0 및 PCRE2 10.45, 원본 NOTICE에 명시된 Ratatui의 라이선스도 `desktop/standalone-pwh/CODEX-*.txt`에 보존합니다. 바이너리는 공개 저장소에 커밋하지 않습니다.
+Pwh Desktop은 ChatGPT 연결에 OpenAI가 공개한 Codex app-server `rust-v0.165.0`의 Windows·Linux x64 배포본을 사용합니다. Codex는 Apache License 2.0이며, 원본 [LICENSE](https://github.com/wansucong-stoom/stoom-pwh/blob/main/desktop/standalone-pwh/CODEX-APACHE-LICENSE.txt)와 [NOTICE](https://github.com/wansucong-stoom/stoom-pwh/blob/main/desktop/standalone-pwh/CODEX-NOTICE.txt)를 설치 파일에 포함합니다. 이 배포본에 포함된 ripgrep 15.2.0 및 PCRE2 10.45, 원본 NOTICE에 명시된 Ratatui의 라이선스도 `desktop/standalone-pwh/CODEX-*.txt`에 보존합니다. Linux 보조 실행 파일 bubblewrap의 [원본 소스와 빌드 파일](https://github.com/openai/codex/tree/rust-v0.165.0/codex-rs/vendor/bubblewrap), LGPL 2.0 고지도 `CODEX-BUBBLEWRAP-LGPL-2.0.txt`에 보존합니다. 바이너리는 공개 저장소에 커밋하지 않습니다.
 
 ## Inter (STOOM product mark)
 

@@ -20,7 +20,9 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
  // One nonblocking GitHub lookup per app start; offline operation is normal.
  const storeManaged=['msix-preview','microsoft-store'].includes(distribution);
  const storeServices=storeUpdateServices||{check:()=>checkForStoreUpdate({channel:distribution}),open:()=>nativeBranding?.openStoreUpdate?.()};
- const updateCheck=nativeBranding&&!storeManaged?desktopVersion(root).then(v=>v?services.check(v):null).catch(()=>null):Promise.resolve(null);
+ let updateCheck=null,checkedAt=0;
+ const checkUpdate=()=>{if(!nativeBranding||storeManaged)return Promise.resolve(null);if(!updateCheck||Date.now()-checkedAt>60000){checkedAt=Date.now();updateCheck=desktopVersion(root).then(v=>v?services.check(v):null).catch(()=>null);}return updateCheck;};
+ void checkUpdate();
  let preparedUpdate=null,preparingUpdate=null,installingUpdate=false,codexSetup=null;
  const makeTab=async (file,imported=false)=>{
   if(closing||tabs.size>=12)throw Error('문서는 최대 12개까지 열 수 있습니다.');
@@ -88,7 +90,7 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
   }
   if(route==='update/status'){
    if(distribution==='microsoft-store')return send(res,{version:null,...await storeServices.check()});
-   const available=await updateCheck;return send(res,{channel:distribution||'msi',version:available?.version||null});
+   const available=await checkUpdate();return send(res,{channel:distribution||'msi',version:available?.version||null});
   }
   if(route==='update/store'){
    if(distribution!=='microsoft-store'||!nativeBranding?.complete)throw Error('Store 설치판에서 업데이트해 주세요.');
@@ -108,7 +110,7 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
   }
   if(route==='update/download'){
    if(storeManaged)throw Error('이 MSIX 배포는 MSI 자동 업데이트를 사용하지 않습니다.');
-   if(installingUpdate)throw Error('이미 업데이트를 시작했습니다.');const asset=await updateCheck;if(!asset)throw Error('설치할 업데이트가 없습니다.');
+   if(installingUpdate)throw Error('이미 업데이트를 시작했습니다.');const asset=await checkUpdate();if(!asset)throw Error('설치할 업데이트가 없습니다.');
    if(!preparedUpdate){const controller=new AbortController();res.once('close',()=>controller.abort());preparingUpdate??=services.download(asset,path.join(dataRoot,'updates'),{signal:controller.signal}).then(installer=>{preparedUpdate={asset,installer};}).finally(()=>{preparingUpdate=null;});await preparingUpdate;}return send(res,{version:asset.version});
   }
   if(route==='update/install'){
@@ -117,7 +119,7 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
    if(!nativeBranding?.complete||typeof nativeBranding.requestClose!=='function')throw Error('앱 창을 확인하지 못했습니다. 설치 파일을 직접 실행해 주세요.');
    installingUpdate=true;
    try{const pids=[process.pid,process.ppid,nativeBranding.helperPid,...[...tabs.values()].map(t=>t.child.pid)].filter(pid=>Number.isSafeInteger(pid)&&pid>0);
-    await services.schedule({installer:preparedUpdate.installer,asset:preparedUpdate.asset,dataRoot,appExe:path.join(path.dirname(root),'PwhDesktop.exe'),pids});
+    await services.schedule({installer:preparedUpdate.installer,asset:preparedUpdate.asset,dataRoot,appExe:path.join(path.dirname(root),process.platform==='linux'?'pwh-desktop':'PwhDesktop.exe'),pids});
    }catch(error){installingUpdate=false;throw error;}
    setTimeout(()=>nativeBranding.requestClose(),250);return send(res,{started:true});
   }

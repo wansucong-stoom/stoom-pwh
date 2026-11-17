@@ -2,7 +2,9 @@
 
 [문서 모음](README.md) · [공통 코어 변경](RHWP-DIFFERENCES.md) · [Desktop](PWH-DESKTOP.md)
 
-Pwh는 **Windows Desktop과 Codex 플러그인에서 사용하는 무료·오픈소스 한글 문서 편집기**입니다. 두 제품은 같은 공통 편집기와 rhwp 기반 WASM 코어를 사용합니다. AI는 선택적으로 연결하며 모델 가중치를 앱에 포함하지 않습니다.
+Pwh는 **Windows·Linux Desktop과 Codex 플러그인에서 사용하는 무료·오픈소스 한글 문서 편집기**입니다. 같은 공통 편집기와 rhwp 기반 WASM 코어를 사용합니다. AI는 선택적으로 연결하며 모델 가중치를 앱에 포함하지 않습니다.
+
+Linux 시험판도 Windows판의 WASM과 편집기 번들을 그대로 사용합니다. 파일 대화상자·Unix 소켓·키 모음·앱 등록과 업데이트 설치는 운영체제 연결 계층에서 처리합니다. Windows Store판은 Store에서, Linux 사용자 설치판은 같은 GitHub 릴리스의 Linux 패키지로 업데이트합니다. [Linux 구성과 설치](LINUX.md)
 
 ## 전체 구성
 

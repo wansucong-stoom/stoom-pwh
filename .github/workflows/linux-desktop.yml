@@ -1,0 +1,47 @@
+name: Linux Desktop
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing stable Pwh release tag
+        required: true
+permissions:
+  contents: write
+concurrency:
+  group: linux-desktop-${{ github.event.release.tag_name || inputs.release_tag }}
+  cancel-in-progress: false
+jobs:
+  package:
+    if: github.event_name == 'workflow_dispatch' || (!github.event.release.draft && !github.event.release.prerelease)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify shared release version
+        id: versions
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs/promises';
+          const pkg=JSON.parse(await fs.readFile('package.json'));
+          const desktop=JSON.parse(await fs.readFile('desktop/standalone-pwh/version.json'));
+          if(process.env.RELEASE_TAG!=='v'+pkg.version)throw Error('Checkout and requested release differ');
+          await fs.appendFile(process.env.GITHUB_OUTPUT,'desktop='+desktop.version+'\n');
+          JS
+      - run: node desktop/verify-source.mjs
+      - run: node --test tests/linux-desktop.test.mjs
+      - name: Build pinned Linux package
+        id: build
+        run: node scripts/build-desktop-linux.mjs --output "$RUNNER_TEMP/PwhDesktop-${{ steps.versions.outputs.desktop }}-linux-x64.tar.gz" --cache "$RUNNER_TEMP/pwh-cache"
+      - name: Attach Linux package to the same release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
+          PACKAGE: ${{ steps.build.outputs.package }}
+          VERIFICATION: ${{ steps.build.outputs.verification }}
+        run: gh release upload "$RELEASE_TAG" "$PACKAGE" "$VERIFICATION"

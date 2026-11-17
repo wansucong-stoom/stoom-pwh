@@ -27,6 +27,7 @@ import {sameRequestContext} from '../release-source/src/request-state.mjs';
 import {scanDocumentText} from './document-scan.mjs';
 import {waitForEditorResult} from './editor-result-wait.mjs';
 import {desktopVersion,addDesktopVersion} from './version-info.mjs';
+import {discoverCodex} from './codex-native-host.mjs';
 
 const appRoot=path.dirname(fileURLToPath(import.meta.url));
 const appData=process.env.PWH_STANDALONE_DATA||path.join(os.homedir(),'.stoom-pwh-standalone');
@@ -126,6 +127,7 @@ export async function createAppServer({initialBytes,initialPath,imported=false,c
    if(req.method==='GET'&&assets[route]){
     const type=route==='/'?'text/html':route.endsWith('.css')?'text/css':route.endsWith('.ttf')?'font/ttf':route.endsWith('.svg')?'image/svg+xml':route.endsWith('.ico')?'image/x-icon':'text/javascript';
     let content=await fs.readFile(path.join(appRoot,assets[route]));
+    if(route==='/'&&process.platform==='linux'&&(await readSettings(settingsPath)).provider!=='codex'&&!await discoverCodex())content=Buffer.from(content.toString('utf8').replace('</head>','<style>[data-provider-card="codex"]{display:none!important}</style></head>'));
     if(route==='/'&&nativeBranding){
      const title=`Pwh Desktop [${nativeBranding.token}]`;
      const generation=++nativePageGeneration;

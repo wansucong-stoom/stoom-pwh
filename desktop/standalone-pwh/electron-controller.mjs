@@ -1,11 +1,16 @@
 import {createServer} from 'node:net';
 import {randomBytes} from 'node:crypto';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
 
 // Windows GUI processes do not reliably retain console stdin. Use a private,
 // authenticated local named pipe for this app's own window lifecycle instead.
 export async function createElectronController({onReady=()=>{},onFailure=()=>{}}={}){
- if(process.platform!=='win32')throw Error('Pwh Desktop은 Windows x64에서 실행됩니다.');
- const pipe='\\\\.\\pipe\\stoom-pwh-'+process.pid+'-'+randomBytes(16).toString('hex'),token=randomBytes(32).toString('hex');
+ if(!['win32','linux'].includes(process.platform))throw Error('지원하지 않는 Desktop 운영체제입니다.');
+ const socketRoot=process.platform==='linux'?await fs.mkdtemp(path.join(os.tmpdir(),'stoom-pwh-')):null;
+ if(socketRoot)await fs.chmod(socketRoot,0o700);
+ const pipe=socketRoot?path.join(socketRoot,'control.sock'):'\\\\.\\pipe\\stoom-pwh-'+process.pid+'-'+randomBytes(16).toString('hex'),token=randomBytes(32).toString('hex');
  let socket=null,sequence=0,closed=false;const pending=new Map();
  const fail=error=>{for(const p of pending.values()){clearTimeout(p.timer);p.reject(error);}pending.clear();if(!closed)onFailure(error);};
  const server=createServer(connection=>{
@@ -26,6 +31,6 @@ export async function createElectronController({onReady=()=>{},onFailure=()=>{}}
   const id=++sequence,timer=setTimeout(()=>{pending.delete(id);reject(Error('Pwh 앱 창 응답 시간이 초과되었습니다.'));},10000);timer.unref?.();pending.set(id,{resolve,reject,timer});
   socket.write(JSON.stringify({id,method,params})+'\n',error=>{if(error&&pending.has(id)){clearTimeout(timer);pending.delete(id);reject(error);}});
  });
- const close=()=>{if(closed)return;closed=true;fail(Error('Pwh 앱 창 연결이 종료되었습니다.'));socket?.end();server.close();};
+ const close=()=>{if(closed)return;closed=true;fail(Error('Pwh 앱 창 연결이 종료되었습니다.'));socket?.end();server.close(()=>{if(socketRoot)void fs.rm(socketRoot,{recursive:true,force:true});});};
  return {pipe,token,close,attachProcess(child){child.once('error',fail);child.once('exit',close);},requestClose:()=>void send('close').catch(onFailure),openStoreUpdate:()=>send('open-store-update'),resolveDroppedFiles:(_url,id,count)=>send('resolve-drop',{id,count})};
 }

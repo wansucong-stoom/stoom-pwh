@@ -42,14 +42,15 @@ function validateTokenSet(data,{requireId=false,previousRefresh}={}){
  return {accessToken:data.access_token,refreshToken:data.refresh_token||previousRefresh,idToken:data.id_token||null,scopes:[...new Set(scopes)],expiresIn:data.expires_in};
 }
 function openSystemBrowser(url){
- if(process.platform!=='win32')throw Error('이 로그인 연결은 Windows Desktop에서 사용할 수 있습니다.');
+ if(process.platform==='linux')return new Promise((resolve,reject)=>{const child=spawn('xdg-open',[url],{stdio:'ignore',shell:false});child.once('error',()=>reject(Error('기본 브라우저를 열지 못했습니다.')));child.once('spawn',()=>{child.unref();resolve();});});
+ if(process.platform!=='win32')throw Error('이 운영체제에서는 로그인 연결을 지원하지 않습니다.');
  return new Promise((resolve,reject)=>{const system=process.env.SystemRoot||'C:\\Windows',child=spawn(system+'\\System32\\rundll32.exe',['url.dll,FileProtocolHandler',url],{windowsHide:true,stdio:'ignore',shell:false});child.once('error',()=>reject(Error('기본 브라우저를 열지 못했습니다.')));child.once('spawn',()=>{child.unref();resolve();});});
 }
 
 export function createChatgptAuth({dataRoot,store=createCredentialStore({root:dataRoot}),fetchImpl=fetch,openBrowser=openSystemBrowser,now=Date.now,endpoints=ENDPOINTS}={}){
  let pending=null,starting=false,lastError='',issuedForRetry=null;
  const summary=state=>({active:state.active,accounts:state.accounts.map(a=>({id:a.id,email:a.email||'',name:a.name||'',connected:!!a.refreshToken&&!a.signingOut,active:a.id===state.active})),needsWelcome:!!state.active&&!state.planWelcomeAcknowledged,pending:!!pending||starting,error:lastError});
- const status=()=>store.transaction(async state=>({value:summary(state)}));
+ const status=async()=>process.platform==='linux'&&store.exists&&!await store.exists()?summary({active:null,accounts:[]}):store.transaction(async state=>({value:summary(state)}));
  async function begin(accountIdToUse=null){
   if(pending||starting)throw Error('이미 ChatGPT 로그인 창이 열려 있습니다.');starting=true;
   try{

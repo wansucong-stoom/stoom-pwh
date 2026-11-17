@@ -4,7 +4,8 @@ import {createWorkspaceServer} from '../desktop/standalone-pwh/workspace-shell.m
 import {runUpdate} from '../desktop/standalone-pwh/update-helper.mjs';
 
 const bytes=Buffer.from('synthetic installer'),digest=createHash('sha256').update(bytes).digest('hex');
-const asset=(version='0.1.10')=>({name:`PwhDesktop-${version}.msi`,size:bytes.length,digest:`sha256:${digest}`,browser_download_url:`https://github.com/wansucong-stoom/stoom-pwh/releases/download/v0.6.31/PwhDesktop-${version}.msi`});
+const suffix=process.platform==='linux'?'-linux-x64.tar.gz':'.msi';
+const asset=(version='0.1.10')=>({name:`PwhDesktop-${version}${suffix}`,size:bytes.length,digest:`sha256:${digest}`,browser_download_url:`https://github.com/wansucong-stoom/stoom-pwh/releases/download/v0.6.31/PwhDesktop-${version}${suffix}`});
 const release={tag_name:'v0.6.31',draft:false,prerelease:false,assets:[asset('0.1.8'),asset()]};
 test('only a newer versioned installer from the expected GitHub release with a digest is offered',async()=>{
  assert.equal(compareVersions('0.1.10','0.1.9'),1);assert.equal(compareVersions('0.2.0','0.1.99'),1);assert.throws(()=>compareVersions('1.2','1.2.0'));

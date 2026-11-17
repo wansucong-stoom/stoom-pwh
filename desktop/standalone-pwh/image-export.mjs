@@ -12,6 +12,7 @@ const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const exec = promisify(execFile);
 const convert = async (source, destination, format) => {
   if (format === 'png') return fs.copyFile(source, destination, constants.COPYFILE_EXCL);
+  if(process.platform==='linux'){await exec('convert',[source,format+':'+destination],{timeout:120000,maxBuffer:65536});return;}
   await exec('powershell.exe', ['-NoProfile','-NonInteractive','-ExecutionPolicy','RemoteSigned','-File',fileURLToPath(new URL('./image-convert.ps1',import.meta.url)),'-InputPath',source,'-OutputPath',destination,'-Format',format], {windowsHide:true,timeout:120000,maxBuffer:65536});
 };
 

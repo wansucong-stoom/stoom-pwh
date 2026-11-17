@@ -211,7 +211,7 @@
      updateButton.textContent=hasUpdate?'새 업데이트가 있습니다.':'Store에서 업데이트 확인';
      updateButton.title=hasUpdate?'Microsoft Store에서 새 버전을 받을 수 있습니다.':'Microsoft Store에서 Pwh Desktop의 업데이트를 확인합니다.';
     }else if(available.version){
-     updateButton.textContent='업데이트 '+available.version;updateButton.title='새 버전 설치';updateButton.hidden=false;
+     updateButton.textContent='새 업데이트가 있습니다.';updateButton.title='새 버전 '+available.version+' 설치';updateButton.dataset.available='true';updateButton.hidden=false;
     }
    }catch{}finally{checkingUpdate=null;}
   })();

@@ -1,6 +1,6 @@
 # Pwh Desktop
 
-Pwh Desktop은 AI 대화와 한글 문서 편집기를 한 창에서 사용하는 Windows 앱입니다. 문서 조판 코어와 텍스트·표 편집 코드는 Pwh 플러그인과 공유합니다. Desktop 호스트는 파일 창, AI 연결 설정, 설치·제거와 Windows 아이콘을 담당합니다.
+Pwh Desktop은 AI 대화와 한글 문서 편집기를 한 창에서 사용하는 앱입니다. Windows 정식판과 Linux 시험판은 같은 문서 조판 코어와 편집기를 사용하며 Pwh 플러그인과도 공유합니다. Desktop 호스트는 파일 창, AI 연결 설정, 설치·제거와 운영체제의 앱 등록·아이콘을 담당합니다. [Linux 설치와 업데이트](LINUX.md)
 
 [문서 모음](README.md) · [설치와 업데이트](#설치와-사용) · [편집과 인쇄](#공통-편집-기능) · [빌드](#소스와-빌드)
 
@@ -8,7 +8,7 @@ Pwh Desktop은 AI 대화와 한글 문서 편집기를 한 창에서 사용하�
 
 Windows 10/11 x64에서 **[Microsoft Store의 Pwh Desktop](https://apps.microsoft.com/detail/9NXGD60MHMT2)**을 설치합니다. 이후 업데이트는 Microsoft Store가 배포합니다. 기본 문서 편집에는 AI 로그인이나 별도 Codex 설치가 필요하지 않습니다. HWP·HWPX의 연결 프로그램에서도 Pwh Desktop을 선택할 수 있습니다.
 
-Desktop 신규 배포는 Store로 통일합니다. GitHub 릴리스는 Codex 플러그인·소스·고정 코어·검증 자료를 계속 제공하며, 기존 MSI 설치 파일은 보존하되 이후 MSI 업데이트는 배포하지 않습니다.
+Windows Desktop 신규 배포는 Store로 통일합니다. GitHub 릴리스는 Linux 시험판·Codex 플러그인·소스·고정 코어·검증 자료를 제공하며, 기존 MSI 설치 파일은 보존하되 이후 MSI 업데이트는 배포하지 않습니다.
 
 기존 MSI에서 이전하려면 먼저 문서를 저장하고 앱을 닫은 뒤 Store판을 설치하세요. MSI 설치본이 Store판으로 자동 전환되지는 않습니다. 문서는 원래 저장한 위치에서 다시 열 수 있습니다. 최근 문서·설정·AI 로그인 정보의 자동 이전은 보장하지 않으므로 필요한 AI 연결은 Store판에서 다시 설정합니다. 기존 MSI 제거는 사용자가 Windows 설정의 설치된 앱에서 진행할 수 있습니다.
 

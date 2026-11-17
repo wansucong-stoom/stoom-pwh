@@ -16,10 +16,10 @@ async function fixture(t){
  const mcp={mcpServers:{pwh:{type:'stdio',command:'node',args:['${PLUGIN_ROOT}/scripts/launch.mjs','pwh'],cwd:'${PLUGIN_ROOT}'},'rhwp-core':{type:'stdio',command:'node',args:['${PLUGIN_ROOT}/scripts/launch.mjs','rhwp-core'],cwd:'${PLUGIN_ROOT}'}}};
  await fs.writeFile(path.join(installRoot,'release-source/.mcp.json'),JSON.stringify(mcp));
  await fs.writeFile(path.join(installRoot,'release-source/mcp.json'),JSON.stringify(mcp));
- await fs.writeFile(path.join(installRoot,'node/node.exe'),'node fixture');
+ await fs.writeFile(path.join(installRoot,'node',process.platform==='linux'?'node':'node.exe'),'node fixture');
  await fs.writeFile(path.join(installRoot,'engine/.preserved-runtime.json'),JSON.stringify({id:'test',archiveSha256:'a'.repeat(64)}));
  await fs.writeFile(path.join(installRoot,'engine/core/rhwp_bg.wasm'),'wasm fixture');
- await fs.writeFile(path.join(installRoot,'engine/rhwp/rhwp.exe'),'engine fixture');
+ await fs.writeFile(path.join(installRoot,'engine/rhwp',process.platform==='linux'?'rhwp':'rhwp.exe'),'engine fixture');
  // Never inherit a developer's PWH_RUNTIME_ROOT or PWH_CONFIG into an
  // isolated install fixture. Explicit-override behavior is tested below.
  return {dir,installRoot,dataRoot,home:path.join(dir,'user-home'),env:{}};

@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "platform": "linux-x64",
+  "artifacts": {
+    "electron": {"name":"electron-v45.1.0-linux-x64.zip","url":"https://github.com/electron/electron/releases/download/v45.1.0/electron-v45.1.0-linux-x64.zip","size":123917468,"sha256":"9dafab2c57ce209f8f716f8f3e4fddd8ffe0820e2455bfbbfc00b0fc13e03a3b"},
+    "node": {"name":"node-v24.22.3-linux-x64.tar.xz","url":"https://nodejs.org/dist/v24.22.3/node-v24.22.3-linux-x64.tar.xz","size":32064292,"sha256":"4f2b175a6d53a5c617a80dba2676238a0688cef28c6da4eba35c7d844e66fcfb"},
+    "rhwp": {"name":"rhwp-v0.8.7-linux-x86_64.tar.gz","url":"https://github.com/edwardkim/rhwp/releases/download/v0.8.7/rhwp-v0.8.7-linux-x86_64.tar.gz","size":14678662,"sha256":"f1e541a25cfe76b6bc1daf18bf9c1f9a5ac5e03e2c01b188daaf54107214f631"},
+    "codex": {"name":"codex-app-server-package-x86_64-unknown-linux-musl.tar.gz","url":"https://github.com/openai/codex/releases/download/rust-v0.165.0/codex-app-server-package-x86_64-unknown-linux-musl.tar.gz","size":120636305,"sha256":"0c2c2e151c08a13dc751ab579e5132b3b0dc6afbf25b945509b64b3fa1b02632"}
+  }
+}

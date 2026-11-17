@@ -75,17 +75,18 @@ async function prepareBundledMarketplace(installRoot,dataRoot){
 // The Codex plugin keeps its own immutable runtime so uninstalling Desktop does
 // not leave an installed plugin pointing at deleted application files.
 async function preservePluginRuntime(installRoot,dataRoot){
- const source=path.join(installRoot,'engine'),nodeSource=path.join(installRoot,'node','node.exe');
+ const nodeName=process.platform==='linux'?'node':'node.exe',engineName=process.platform==='linux'?'rhwp':'rhwp.exe';
+ const source=path.join(installRoot,'engine'),nodeSource=path.join(installRoot,'node',nodeName);
  const [manifest,nodeBytes]=await Promise.all([fs.readFile(path.join(source,'.preserved-runtime.json')),fs.readFile(nodeSource)]);
  const pin=JSON.parse(manifest);if(!/^[a-f0-9]{64}$/.test(pin.archiveSha256||''))throw Error('Pwh 엔진 정보를 확인하지 못했습니다.');
  const nodeHash=createHash('sha256').update(nodeBytes).digest('hex');
  const identity=createHash('sha256').update(manifest).update(nodeHash).digest('hex').slice(0,24);
  const parent=path.join(dataRoot,'codex-runtimes'),destination=path.join(parent,identity),stage=path.join(parent,`.stage-${randomUUID()}`);
- const verify=async()=>{const marker=JSON.parse(await fs.readFile(path.join(destination,'.pwh-runtime.json'),'utf8'));if(marker.identity!==identity||marker.archiveSha256!==pin.archiveSha256||marker.nodeSha256!==nodeHash)throw Error('Codex Pwh 런타임 정보를 확인하지 못했습니다.');await Promise.all([fs.access(path.join(destination,'node.exe')),fs.access(path.join(destination,'engine','core','rhwp_bg.wasm')),fs.access(path.join(destination,'engine','rhwp','rhwp.exe'))]);return {node:path.join(destination,'node.exe'),runtime:path.join(destination,'engine')};};
+ const verify=async()=>{const marker=JSON.parse(await fs.readFile(path.join(destination,'.pwh-runtime.json'),'utf8'));if(marker.identity!==identity||marker.archiveSha256!==pin.archiveSha256||marker.nodeSha256!==nodeHash)throw Error('Codex Pwh 런타임 정보를 확인하지 못했습니다.');await Promise.all([fs.access(path.join(destination,nodeName)),fs.access(path.join(destination,'engine','core','rhwp_bg.wasm')),fs.access(path.join(destination,'engine','rhwp',engineName))]);return {node:path.join(destination,nodeName),runtime:path.join(destination,'engine')};};
  try{return await verify();}catch(error){if(error.code!=='ENOENT')throw error;}
  await fs.mkdir(parent,{recursive:true});await fs.mkdir(stage);
  try{
-  await fs.cp(source,path.join(stage,'engine'),{recursive:true,errorOnExist:true,force:false});await fs.writeFile(path.join(stage,'node.exe'),nodeBytes,{flag:'wx'});
+  await fs.cp(source,path.join(stage,'engine'),{recursive:true,errorOnExist:true,force:false});await fs.writeFile(path.join(stage,nodeName),nodeBytes,{flag:'wx',mode:0o755});
   await fs.writeFile(path.join(stage,'.pwh-runtime.json'),JSON.stringify({identity,archiveSha256:pin.archiveSha256,nodeSha256:nodeHash})+'\n',{flag:'wx'});
   await publishDirectory(stage,destination,verify);
   return await verify();

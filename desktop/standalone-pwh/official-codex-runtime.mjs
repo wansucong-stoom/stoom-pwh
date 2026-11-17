@@ -13,18 +13,25 @@ export const officialRuntimeFiles=Object.freeze({
  'codex-resources/codex-command-runner.exe':[8748848,'8f1a9d4217a34d6b44df81c25999ff9b98bb8d0e3c179aa070fcd84b3ce7a9d3'],
  'codex-resources/codex-windows-sandbox-setup.exe':[18794288,'a39f42dc697919e650cd24f82daaecd6121e41e3f4d56373fef4f4177f8eee02']
 });
+export const linuxRuntimeFiles=Object.freeze({
+ 'codex-package.json':[227,'74b6c75e7e2c606ebbdf1e314fbe276dc1e3bb3b8617ba1429025be8029646a8'],
+ 'bin/codex-app-server':[239920024,'5e874c18162cf492481cef6e5dff5e88c91d3dc70bd0558738116b8723e1fb7c'],
+ 'bin/codex-code-mode-host':[77002000,'0288e565a758e43d9603afb295c3e74d66f9b82113040caddb06e3f3c6eddd1d'],
+ 'codex-path/rg':[5408904,'e62198eb19b136b88c330af83647b5a962cb99b6b1f066758568f12de1974849'],
+ 'codex-resources/bwrap':[513520,'755c8d6a9b893905a4aabab058bd6c02c453e5e8653adb84fc08e570607f3f36']
+});
 async function hashFile(file){const hash=createHash('sha256');for await(const chunk of createReadStream(file))hash.update(chunk);return hash.digest('hex');}
-export async function verifyOfficialRuntime(root){
+export async function verifyOfficialRuntime(root,{platform=process.platform}={}){
  if(!path.isAbsolute(root))throw Error('공식 AI 실행 파일의 경로를 확인하지 못했습니다.');
- for(const [relative,[size,digest]] of Object.entries(officialRuntimeFiles)){
+ for(const [relative,[size,digest]] of Object.entries(platform==='linux'?linuxRuntimeFiles:officialRuntimeFiles)){
   const file=path.join(root,...relative.split('/'));let stat;try{stat=await fs.lstat(file);}catch{throw Error('공식 AI 실행 파일이 없습니다. Pwh Desktop을 다시 설치해 주세요.');}
   if(!stat.isFile()||stat.isSymbolicLink()||stat.size!==size||await hashFile(file)!==digest)throw Error('공식 AI 실행 파일이 올바르지 않습니다. Pwh Desktop을 다시 설치해 주세요.');
  }
- return path.join(root,'bin','codex-app-server.exe');
+ return path.join(root,'bin',platform==='linux'?'codex-app-server':'codex-app-server.exe');
 }
 export async function copyOfficialRuntime(source,target){
  await verifyOfficialRuntime(source);
- for(const relative of Object.keys(officialRuntimeFiles)){const out=path.join(target,...relative.split('/'));await fs.mkdir(path.dirname(out),{recursive:true});await fs.copyFile(path.join(source,...relative.split('/')),out,fs.constants.COPYFILE_EXCL);}
+ for(const relative of Object.keys(process.platform==='linux'?linuxRuntimeFiles:officialRuntimeFiles)){const out=path.join(target,...relative.split('/'));await fs.mkdir(path.dirname(out),{recursive:true});await fs.copyFile(path.join(source,...relative.split('/')),out,fs.constants.COPYFILE_EXCL);}
  await verifyOfficialRuntime(target);
 }
 const directSettings=[

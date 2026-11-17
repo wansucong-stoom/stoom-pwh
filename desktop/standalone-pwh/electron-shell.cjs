@@ -4,6 +4,7 @@ const path=require('node:path');
 const readline=require('node:readline');
 const fs=require('node:fs');
 const net=require('node:net');
+const os=require('node:os');
 const {printOptions}=require('./print-options.cjs');
 const {installNativePaste}=require('./native-paste.cjs');
 
@@ -14,12 +15,15 @@ const failStartup=error=>{process.stderr.write('Pwh startup failed: '+String(err
 process.on('uncaughtException',failStartup);process.on('unhandledRejection',failStartup);
 if(!ownedLocal(url)||!dataRoot){process.stderr.write('Pwh 앱 시작 정보가 올바르지 않습니다.\n');app.exit(1);}
 app.setName('Pwh Desktop');app.setAppUserModelId(process.env.PWH_APP_USER_MODEL_ID||'STOOM.PwhDesktop');
+if(process.platform==='linux'){app.setDesktopName('stoom-pwh-desktop.desktop');app.commandLine.appendSwitch('class','stoom-pwh-desktop');}
+const appIcon=path.join(__dirname,process.platform==='linux'?'stoom.png':'stoom.ico');
 try{fs.mkdirSync(path.join(dataRoot,'electron-profile'),{recursive:true});app.setPath('userData',path.join(dataRoot,'electron-profile'));}catch(error){failStartup(error);}
 let win=null,approvedClose=false,debugAttached=false;const printWindows=new Map();
 installNativePaste(ipcMain,()=>win,ownedLocal);
 const hostPipe=process.argv.find(arg=>arg.startsWith('--pwh-host-pipe='))?.slice('--pwh-host-pipe='.length);
 const hostToken=process.argv.find(arg=>arg.startsWith('--pwh-host-token='))?.slice('--pwh-host-token='.length);
-if(hostPipe&&(!/^\\\\\.\\pipe\\stoom-pwh-[0-9]+-[a-f0-9]{32}$/.test(hostPipe)||!/^[a-f0-9]{64}$/.test(hostToken||''))){process.stderr.write('Pwh 창 연결 정보가 올바르지 않습니다.\n');app.exit(1);}
+const validPipe=process.platform==='linux'?path.basename(hostPipe||'')==='control.sock'&&path.dirname(path.dirname(hostPipe||''))===os.tmpdir()&&/^stoom-pwh-[A-Za-z0-9]+$/.test(path.basename(path.dirname(hostPipe||''))):/^\\\\\.\\pipe\\stoom-pwh-[0-9]+-[a-f0-9]{32}$/.test(hostPipe||'');
+if(hostPipe&&(!validPipe||!/^[a-f0-9]{64}$/.test(hostToken||''))){process.stderr.write('Pwh 창 연결 정보가 올바르지 않습니다.\n');app.exit(1);}
 const host=hostPipe?net.createConnection(hostPipe):null;
 const emit=value=>{const message=JSON.stringify(value)+'\n';if(host)host.write(message);else process.stdout.write(message);};
 if(host){host.once('connect',()=>emit({type:'hello',token:hostToken}));host.on('error',failStartup);}
@@ -65,17 +69,17 @@ ipcMain.handle('pwh:print-document',async(event,value)=>{
 
 app.whenReady().then(async()=>{
  const prefs={nodeIntegration:false,contextIsolation:true,sandbox:true,preload:path.join(__dirname,'electron-preload.cjs'),backgroundThrottling:false};
- win=new BrowserWindow({width:1440,height:900,minWidth:360,minHeight:500,title:'Pwh Desktop',icon:path.join(__dirname,'stoom.ico'),backgroundColor:'#ffffff',autoHideMenuBar:true,show:false,webPreferences:prefs});
- win.setAppDetails({appId:'STOOM.PwhDesktop',appIconPath:path.join(__dirname,'stoom.ico'),appIconIndex:0,relaunchCommand:'"'+path.join(__dirname,'..','PwhDesktop.exe')+'"',relaunchDisplayName:'Pwh Desktop'});
+ win=new BrowserWindow({width:1440,height:900,minWidth:360,minHeight:500,title:'Pwh Desktop',icon:appIcon,backgroundColor:'#ffffff',autoHideMenuBar:true,show:false,webPreferences:prefs});
+ if(process.platform==='win32')win.setAppDetails({appId:'STOOM.PwhDesktop',appIconPath:path.join(__dirname,'stoom.ico'),appIconIndex:0,relaunchCommand:'"'+path.join(__dirname,'..','PwhDesktop.exe')+'"',relaunchDisplayName:'Pwh Desktop'});
  win.removeMenu();
  session.defaultSession.setPermissionRequestHandler((contents,permission,callback,details)=>callback(['clipboard-read','clipboard-sanitized-write'].includes(permission)&&ownedLocal(details.requestingUrl||contents.getURL())));
  win.webContents.setWindowOpenHandler(({url:target})=>{
   const printOwner=ownedLocal(target,true)&&win.webContents.mainFrame.framesInSubtree.some(frame=>{try{const a=new URL(frame.url),b=new URL(target);return a.origin===b.origin&&a.pathname.split('/')[1]===b.pathname.split('/')[1];}catch{return false;}});
-  if(printOwner)return {action:'allow',overrideBrowserWindowOptions:{parent:win,title:'인쇄',width:1080,height:820,minWidth:760,minHeight:500,icon:path.join(__dirname,'stoom.ico'),show:process.env.PWH_ELECTRON_TEST_HIDDEN!=='1'&&new URL(target).searchParams.get('pwhDirect')!=='1',autoHideMenuBar:true,webPreferences:prefs}};
+  if(printOwner)return {action:'allow',overrideBrowserWindowOptions:{parent:win,title:'인쇄',width:1080,height:820,minWidth:760,minHeight:500,icon:appIcon,show:process.env.PWH_ELECTRON_TEST_HIDDEN!=='1'&&new URL(target).searchParams.get('pwhDirect')!=='1',autoHideMenuBar:true,webPreferences:prefs}};
   try{const u=new URL(target);if(u.protocol==='https:')void shell.openExternal(u.href);}catch{}
   return {action:'deny'};
  });
- win.webContents.on('did-create-window',(popup,details)=>{if(ownedLocal(details.url,true)){const id=popup.webContents.id;printWindows.set(id,{window:popup,printing:false});popup.removeMenu();popup.setAppDetails({appId:'STOOM.PwhDesktop',appIconPath:path.join(__dirname,'stoom.ico'),appIconIndex:0});popup.on('page-title-updated',event=>{event.preventDefault();popup.setTitle('인쇄');});popup.webContents.setWindowOpenHandler(()=>({action:'deny'}));popup.webContents.on('will-navigate',(event,target)=>{if(!ownedLocal(target,true))event.preventDefault();});popup.on('close',event=>{if(printWindows.get(id)?.printing)event.preventDefault();});popup.once('closed',()=>printWindows.delete(id));}});
+ win.webContents.on('did-create-window',(popup,details)=>{if(ownedLocal(details.url,true)){const id=popup.webContents.id;printWindows.set(id,{window:popup,printing:false});popup.removeMenu();if(process.platform==='win32')popup.setAppDetails({appId:'STOOM.PwhDesktop',appIconPath:path.join(__dirname,'stoom.ico'),appIconIndex:0});popup.on('page-title-updated',event=>{event.preventDefault();popup.setTitle('인쇄');});popup.webContents.setWindowOpenHandler(()=>({action:'deny'}));popup.webContents.on('will-navigate',(event,target)=>{if(!ownedLocal(target,true))event.preventDefault();});popup.on('close',event=>{if(printWindows.get(id)?.printing)event.preventDefault();});popup.once('closed',()=>printWindows.delete(id));}});
  win.webContents.on('will-navigate',(event,target)=>{if(!ownedLocal(target))event.preventDefault();});
  win.on('close',event=>{if(approvedClose)return;event.preventDefault();void win.webContents.executeJavaScript("window.dispatchEvent(new Event('pwh-native-close-request'))",true).catch(()=>{});});
  win.once('closed',()=>{win=null;app.quit();});

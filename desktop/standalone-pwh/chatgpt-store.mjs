@@ -3,6 +3,7 @@ import {promises as fs} from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {randomUUID} from 'node:crypto';
+import {linuxCredentialCodec,withLinuxCredentialLock} from './linux-credentials.mjs';
 
 const helper=fileURLToPath(new URL('./chatgpt-credentials.ps1',import.meta.url));
 const powershell=()=>path.join(process.env.SystemRoot||'C:\\Windows','System32','WindowsPowerShell','v1.0','powershell.exe');
@@ -36,10 +37,10 @@ export async function withWindowsCredentialLock(root,operation,{spawnImpl=spawn,
  try{guard();return await operation(guard);}finally{child.stdin.end();if(child.exitCode===null)await new Promise(resolve=>{const timer=setTimeout(()=>{try{child.kill();}catch{}resolve();},3000);timer.unref?.();child.once('exit',()=>{clearTimeout(timer);resolve();});});}
 }
 
-export function createCredentialStore({root,codec=windowsCredentialCodec(),lock=withWindowsCredentialLock}={}){
+export function createCredentialStore({root,codec=process.platform==='linux'?linuxCredentialCodec():windowsCredentialCodec(),lock=process.platform==='linux'?withLinuxCredentialLock:withWindowsCredentialLock}={}){
  if(!root||!path.isAbsolute(root))throw Error('계정 저장 경로가 올바르지 않습니다.');
  const file=path.join(root,'credentials.dat');
- return {async transaction(fn){return lock(root,async guard=>{
+ return {async exists(){try{await fs.access(file);return true;}catch(error){if(error.code==='ENOENT')return false;throw error;}},async transaction(fn){return lock(root,async guard=>{
   let state,created=false;try{const encrypted=await fs.readFile(file);if(encrypted.length>512*1024)throw Error('계정 저장소 크기가 올바르지 않습니다.');state=JSON.parse((await codec.unprotect(encrypted)).toString('utf8'));}
   catch(error){if(error.code==='ENOENT'){created=true;state={schemaVersion:1,hostId:'urn:uuid:'+randomUUID(),active:null,accounts:[]};}else throw error;}
   if(state?.schemaVersion!==1||typeof state.hostId!=='string'||!/^urn:uuid:[0-9a-f-]{36}$/i.test(state.hostId)||!Array.isArray(state.accounts))throw Error('저장된 계정 정보를 확인하지 못했습니다.');

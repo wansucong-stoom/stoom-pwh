@@ -16,7 +16,7 @@ const sharedPackage=JSON.parse(await fs.readFile(path.join(root,'..','package.js
 assert.equal(manifest.pluginVersion,sharedPackage.version,'Desktop source manifest must match the shared Pwh version');
 const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 const safeRelative=value=>typeof value==='string'&&value.length>0&&!path.isAbsolute(value)&&!value.includes('\\')&&!value.split('/').some(part=>!part||part==='.'||part==='..');
-const allowed=new Set(['.mjs','.cjs','.js','.css','.html','.svg','.ico','.ttf','.cs','.ps1','.cmd','.vbs','.txt']);
+const allowed=new Set(['.mjs','.cjs','.js','.css','.html','.svg','.ico','.png','.ttf','.cs','.ps1','.cmd','.vbs','.txt']);
 const generated=new Set(['README.md','verify-source.mjs','source-manifest.json']);
 const listed=new Map();
 for(const file of manifest.files){
@@ -40,7 +40,7 @@ for(const rel of files){
  assert.ok(allowed.has(path.extname(rel).toLowerCase())||generated.has(rel)||rel==='standalone-pwh/client/manifest.json'||rel==='standalone-pwh/version.json'||rel==='standalone-pwh/font-provenance.json',`File type is outside the public source allowlist: ${rel}`);
  const bytes=await fs.readFile(path.join(root,...rel.split('/'))),record=listed.get(rel);
  if(record){assert.equal(bytes.length,record.size,`${rel}: size mismatch`);assert.equal(hash(bytes),record.sha256,`${rel}: SHA256 mismatch`);}
- if(!['.ico','.ttf'].includes(path.extname(rel).toLowerCase())){
+ if(!['.ico','.png','.ttf'].includes(path.extname(rel).toLowerCase())){
   const text=bytes.toString('utf8');
   assert.ok(!/[a-z]:[\\/]+Users[\\/]+[^\s'"`<>]+/i.test(text),`${rel}: a Windows user-home path was embedded`);
   assert.ok(!/(?:\/home\/|\/Users\/)[a-z0-9_.-]+\//i.test(text),`${rel}: a user-home path was embedded`);

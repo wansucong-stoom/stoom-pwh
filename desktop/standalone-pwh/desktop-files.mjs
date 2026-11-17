@@ -6,6 +6,14 @@ import path from 'node:path';
 import {randomUUID,createHash} from 'node:crypto';
 const exec=promisify(execFile),hash=data=>createHash('sha256').update(data).digest('hex');
 export async function chooseDesktopFile({mode,suggestedName='문서.hwpx'}){
+ if(process.platform==='linux'){
+  if(!['Open','Save','Image'].includes(mode))throw Error('파일 선택 방식이 올바르지 않습니다.');
+  const args=['--file-selection','--title=Pwh Desktop'];
+  if(mode!=='Open')args.push('--save','--confirm-overwrite','--filename='+path.basename(suggestedName));
+  args.push(mode==='Image'?'--file-filter=그림 | *.png *.jpg *.jpeg *.gif *.webp *.bmp':'--file-filter=문서 | *.hwpx *.hwp','--file-filter=모든 파일 | *');
+  try{const {stdout}=await exec('zenity',args,{timeout:300000,maxBuffer:65536,encoding:'utf8'});const file=stdout.trimEnd();if(!path.isAbsolute(file)||file.includes('\n'))throw Error('파일 경로가 올바르지 않습니다.');return {cancelled:false,path:file};}
+  catch(error){if(error.code===1)return {cancelled:true};throw error;}
+ }
  const {stdout}=await exec('powershell.exe',['-NoProfile','-STA','-ExecutionPolicy','RemoteSigned','-File',fileURLToPath(new URL('./file-dialog.ps1',import.meta.url)),'-Mode',mode,'-SuggestedName',suggestedName],{windowsHide:true,timeout:300000,maxBuffer:65536,encoding:'utf8'});
  return JSON.parse(stdout.trim());
 }
