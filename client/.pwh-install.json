@@ -1,17 +1,17 @@
 {
   "kind": "studio-inline",
-  "version": "0.6.64",
+  "version": "0.6.65",
   "upstreamVersion": "0.8.7",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "files": {
-    "editor.js": "0e1a0ce32bf4f8d84cab770e117706a55ba3c280e5c47c30c7cabd9b8c293961",
+    "editor.js": "5bdf0a924f1bc5810aa9bc941f36990696bc2a5651d16ca91f165181489be87a",
     "rhwp-studio.css": "10875c5542232767cc250c64623f545b4fb07a292bba2c2c4c0b08db92aff0f9",
     "editor-body.html": "098dfd61cfbe9146261ebd4293bd6047402c735f7a22c54ca7f754170d56df8d"
   },
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "common",
-    "sha256": "72639cbac9dd55cf6433c9d056eca82f9201cbd582f7fec816a8ef294ccc7af1",
+    "sha256": "37d00709fb4302fe95d7e84922652c23f6681f900dc8850829a1b6af0efa1343",
     "files": [
       {
         "path": "docs/engine-patches/studio/clipboard-safety.patch",
@@ -23,7 +23,7 @@
       },
       {
         "path": "package.json",
-        "sha256": "788de46ab9da21b9d773ecccfd62ca0ec0de95cd9be2579e9ff94fe2eaceebe6"
+        "sha256": "683a501668b12e7847c2e30c87a55bb9d48d428da3b78c1fe900962fd629c624"
       },
       {
         "path": "scripts/build-inline.mjs",
@@ -467,7 +467,7 @@
       },
       {
         "path": "src/server.mjs",
-        "sha256": "00c581c2c81ecdf1b4e2792dbb34a9a0d3d925dc1e27fee632c666a48e20058d"
+        "sha256": "124b834f9e37a0a53fccad74791b2d0573488cf2067664da07a742ccfdfe6cc8"
       },
       {
         "path": "src/studio-inline-adapter.ts",

@@ -410,13 +410,10 @@ export async function handleRequest(message) {
           instructions: '문서 작성·수정의 기본 흐름은 초안 HWPX 저장·검증 후 open_in_codex의 file target과 placement:right로 우측 Pwh 편집기에 표시하는 것입니다. 별도 열기 요청을 기다리지 말고 실제 로드 여부를 확인하세요. 선택 수정은 같은 열린 편집기에 반영하고 전체 문서를 다시 만들지 마세요. 기본 협업은 pwh_editor_state/request와 작업별 pwh_editor_* 도구를 사용하고 pwh_editor_result의 applied를 확인하세요. pwh_live_*는 사용자가 별도 로컬 Studio 서버를 명시한 경우에만 사용하는 호환 경로이며 기본 파일 편집기와 다른 세션입니다. pwh_info·pwh_edit_template·pwh_preview는 디스크 파일을 처리하며 현재 편집기의 미저장 내용과 구분해야 합니다.',
         };
         break;
-      case 'server/discover':
-        result = {
-          resultType: 'complete', supportedVersions: ['2025-11-25'],
-          capabilities: { tools: {}, resources: {} },
-          _meta: { 'io.modelcontextprotocol/serverInfo': { name: 'pwh', version: VERSION } },
-        };
-        break;
+      // This server implements legacy, single-result MCP. A successful modern
+      // discovery response would select 2026-07-28 semantics that we do not serve.
+      // Dual-era stdio clients must receive MethodNotFound and use initialize.
+      case 'server/discover': throw new RpcError(-32601, 'Use initialize; supported MCP protocol: 2025-11-25');
       case 'ping': result = {}; break;
       case 'tools/list': result = { tools: TOOLS }; break;
       case 'tools/call':

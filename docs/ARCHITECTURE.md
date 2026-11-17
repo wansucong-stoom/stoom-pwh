@@ -6,6 +6,10 @@ Pwh는 **Windows·Linux Desktop과 Codex 플러그인에서 사용하는 무료�
 
 Linux 시험판도 Windows판의 WASM과 편집기 번들을 그대로 사용합니다. 파일 대화상자·Unix 소켓·키 모음·앱 등록과 업데이트 설치는 운영체제 연결 계층에서 처리합니다. Windows Store판은 Store에서, Linux 사용자 설치판은 같은 GitHub 릴리스의 Linux 패키지로 업데이트합니다. [Linux 구성과 설치](LINUX.md)
 
+## Codex 파일 열기 연결
+
+Pwh MCP 서버는 2025-11-25까지의 초기화 방식과 단일 응답 계약을 사용합니다. 지원하지 않는 최신 탐색 요청에는 MethodNotFound를 반환해 호스트가 기존 초기화로 복귀하도록 합니다. 구현하지 않은 최신 계약을 성공 응답으로 광고하지 않습니다. 연결 뒤 도구 목록의 파일 진입점이 .hwpx를 Pwh 편집기 리소스로 연결하며, 파일 경로는 호스트가 권한 메타데이터로 전달합니다. 네이티브 rhwp-core의 메모리 문서 핸들과 UI 편집 세션은 별개입니다. [연결 검증](verification/PLUGIN-FILE-OPEN.md)
+
 ## 전체 구성
 
 ~~~mermaid
