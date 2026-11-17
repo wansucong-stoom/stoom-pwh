@@ -5,13 +5,16 @@ import os from 'node:os';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 
-const names=['PWH_REFERENCE_CORE_JS','PWH_REFERENCE_CORE_WASM','PWH_FLOAT_FRAME_BASE_JS','PWH_FLOAT_FRAME_BASE_WASM'];
+const names=['PWH_REFERENCE_CORE_JS','PWH_REFERENCE_CORE_WASM','PWH_FLOAT_FRAME_BASE_JS','PWH_FLOAT_FRAME_BASE_WASM','PWH_PAGE_FRAME_REFERENCE_JS','PWH_PAGE_FRAME_REFERENCE_WASM'];
 const cases=[
   {name:'uses the independent reference when no float baseline was supplied',reference:true,pass:true},
   {name:'preserves an explicit float baseline pair',reference:true,explicit:true,pass:true},
   {name:'rejects a partial explicit baseline instead of mixing reference versions',reference:true,partial:true,pass:false},
   {name:'rejects a partially configured independent reference',partialReference:true,pass:false},
   {name:'allows optional baseline tests to skip when no reference was configured',pass:true,optional:true},
+  {name:'preserves the distinct page-frame reference pair',pageFramesProbe:true,pageFrames:true,pass:true},
+  {name:'rejects a partial page-frame reference pair',pageFramesProbe:true,partialPageFrames:true,pass:false},
+  {name:'allows optional page-frame checks to skip without a configured pair',pageFramesProbe:true,pass:true,optional:true},
 ];
 for(const scenario of cases)test('core runner '+scenario.name,async t=>{
   const work=await fs.mkdtemp(path.join(os.tmpdir(),'pwh-core-reference-test-'));
@@ -24,7 +27,12 @@ for(const scenario of cases)test('core runner '+scenario.name,async t=>{
   await fs.mkdir(path.join(work,'tests'));
   await fs.copyFile(new URL('../scripts/run-ci-tests.mjs',import.meta.url),path.join(work,'scripts/run-ci-tests.mjs'));
   await fs.copyFile(new URL('../scripts/ci-test-files.mjs',import.meta.url),path.join(work,'scripts/ci-test-files.mjs'));
-  const probe=`import test from 'node:test';import assert from 'node:assert/strict';
+  const probe=scenario.pageFramesProbe?`import test from 'node:test';import assert from 'node:assert/strict';
+const skip=!process.env.PWH_PAGE_FRAME_REFERENCE_JS||!process.env.PWH_PAGE_FRAME_REFERENCE_WASM?'Requires PWH_PAGE_FRAME_REFERENCE_JS and PWH_PAGE_FRAME_REFERENCE_WASM':false;
+test('configured page-frame baseline reaches the actual core test',{skip},()=>{
+ assert.equal(process.env.PWH_PAGE_FRAME_REFERENCE_JS,process.env.PWH_EXPECT_PAGE_FRAME_JS);
+ assert.equal(process.env.PWH_PAGE_FRAME_REFERENCE_WASM,process.env.PWH_EXPECT_PAGE_FRAME_WASM);
+});\n`:`import test from 'node:test';import assert from 'node:assert/strict';
 const skip=!process.env.PWH_FLOAT_FRAME_BASE_JS||!process.env.PWH_FLOAT_FRAME_BASE_WASM?'Requires an explicit prior-core fallback baseline':false;
 test('configured float baseline reaches the actual core test',{skip},()=>{
  assert.equal(process.env.PWH_FLOAT_FRAME_BASE_JS,process.env.PWH_EXPECT_FLOAT_JS);
@@ -41,6 +49,10 @@ test('configured float baseline reaches the actual core test',{skip},()=>{
   if(scenario.reference)env.PWH_REFERENCE_CORE_WASM=path.join(work,'reference/rhwp_bg.wasm');
   if(scenario.explicit||scenario.partial)env.PWH_FLOAT_FRAME_BASE_JS=path.join(work,'explicit/rhwp.js');
   if(scenario.explicit)env.PWH_FLOAT_FRAME_BASE_WASM=path.join(work,'explicit/rhwp_bg.wasm');
+  if(scenario.pageFrames||scenario.partialPageFrames)env.PWH_PAGE_FRAME_REFERENCE_JS=path.join(work,'page-frame/rhwp.js');
+  if(scenario.pageFrames)env.PWH_PAGE_FRAME_REFERENCE_WASM=path.join(work,'page-frame/rhwp_bg.wasm');
+  env.PWH_EXPECT_PAGE_FRAME_JS=env.PWH_PAGE_FRAME_REFERENCE_JS;
+  env.PWH_EXPECT_PAGE_FRAME_WASM=env.PWH_PAGE_FRAME_REFERENCE_WASM;
   env.PWH_EXPECT_FLOAT_JS=scenario.explicit?env.PWH_FLOAT_FRAME_BASE_JS:env.PWH_REFERENCE_CORE_JS;
   env.PWH_EXPECT_FLOAT_WASM=scenario.explicit?env.PWH_FLOAT_FRAME_BASE_WASM:env.PWH_REFERENCE_CORE_WASM;
   const result=spawnSync(process.execPath,[path.join(work,'scripts/run-ci-tests.mjs'),'core','tests/probe.test.mjs'],{

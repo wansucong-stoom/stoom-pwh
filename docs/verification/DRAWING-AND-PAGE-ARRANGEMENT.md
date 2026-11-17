@@ -1,6 +1,6 @@
 # 도형 도구와 자동 쪽 배치 검증
 
-상태: **개발판**. 현재 정식 배포는 Pwh 0.6.62 / Desktop 0.1.43 / 공통 코어 r31입니다. 이 문서의 변경은 98번 코어 패치와 공통·Desktop 편집기 후보에 적용하며, 정식 런타임 잠금·설치판·Store는 아직 갱신하지 않았습니다.
+적용 버전: **Pwh 0.6.63 / Desktop 0.1.44 / 공통 코어 r32**. 아래 표는 98번 도형 패치의 도입 검증입니다. r32는 99·100번 공통 프레임 보완도 포함하며 최종 코어 검사는 [저장 프레임 검증](STORED-PAGE-FRAMES.md)에 기록합니다. Store 설치판은 심사·게시 이후 반영됩니다.
 
 ## 변경과 원인
 
@@ -24,7 +24,7 @@
 
 ## 검증
 
-최종 후보의 검사 결과는 아래 표에 기록합니다. 사용자 원문은 시험 사본으로만 읽고 변경하지 않습니다.
+도형 패치의 도입 검사 결과는 아래 표에 기록합니다. 사용자 원문은 시험 사본으로만 읽고 변경하지 않습니다.
 
 | 검사 | 범위와 결과 |
 | --- | --- |
@@ -41,7 +41,7 @@
 
 ```text
 98번 패치 SHA-256: 1ddd297bd3a094289bc91bca8c56cda25d1ace2b9d163f49a7e0d945909a92aa
-후보 WASM SHA-256: 9947cb9592d4445b0516d746250a5b73bfd2987c724e209113a3552303ac63fe
+98번 도입 검증 WASM SHA-256: 9947cb9592d4445b0516d746250a5b73bfd2987c724e209113a3552303ac63fe
 ```
 
 일반 재현 명령은 `node scripts/verify-editor-build.mjs --typecheck`, `node tools/quality/run.mjs lint`, `node desktop/verify-source.mjs`입니다. 코어 검사는 `PWH_RUNTIME_ROOT`를 후보 런타임, `PWH_ENGINE_SOURCE`를 패치한 소스로 지정하고 `node scripts/run-ci-tests.mjs core`를 실행합니다. 생략된 코어 경로나 건너뛴 검사는 후보의 통과로 집계하지 않습니다.

@@ -63,6 +63,24 @@ for (const name of ['rhwp.js', 'rhwp_bg.wasm']) {
   await fs.writeFile(path.join(referenceRoot, name), bytes, {flag: 'wx'});
 }
 await fs.writeFile(path.join(referenceRoot, 'package.json'), '{"type":"module"}\n', {flag: 'wx'});
+// Different regressions require different pre-feature engines. The original
+// r13 ordinary-reflow oracle must not be replaced by the later page-frame
+// fallback baseline merely because both are independent of the candidate.
+let pageFrameReferenceRoot;
+if (pins.pageFrameReference) {
+  const {bytes} = await download(pins.pageFrameReference);
+  const {id: pageFrameId, ...pageFrameRuntime} = pins.pageFrameReference;
+  const pageFrameArchive = readRuntimeArchive(bytes,
+    {schemaVersion: 1, id: pageFrameId, platform: 'win32-x64', upstreamCommit: lock.upstreamCommit, runtime: pageFrameRuntime}, zipEntries);
+  pageFrameReferenceRoot = path.join(work, 'page-frame-reference');
+  await fs.mkdir(pageFrameReferenceRoot);
+  for (const name of ['rhwp.js', 'rhwp_bg.wasm']) {
+    const data = pageFrameArchive.files.get('core/' + name);
+    if (!data) throw Error('Incomplete page-frame reference core');
+    await fs.writeFile(path.join(pageFrameReferenceRoot, name), data, {flag: 'wx'});
+  }
+  await fs.writeFile(path.join(pageFrameReferenceRoot, 'package.json'), '{"type":"module"}\n', {flag: 'wx'});
+}
 const sourceRoot = path.join(work, 'source');
 await new Promise((resolve, reject) => {
   const child = spawn(process.execPath, [path.join(project, 'scripts/build-patched-core.mjs'),
@@ -79,6 +97,10 @@ const environment = {
   // The smaller-paper preservation tests use this same independent r13 core.
   PWH_FLOAT_FRAME_BASE_JS: path.join(referenceRoot, 'rhwp.js'),
   PWH_FLOAT_FRAME_BASE_WASM: path.join(referenceRoot, 'rhwp_bg.wasm'),
+  ...(pageFrameReferenceRoot ? {
+    PWH_PAGE_FRAME_REFERENCE_JS: path.join(pageFrameReferenceRoot, 'rhwp.js'),
+    PWH_PAGE_FRAME_REFERENCE_WASM: path.join(pageFrameReferenceRoot, 'rhwp_bg.wasm'),
+  } : {}),
 };
 await fs.writeFile(path.join(work, 'environment.json'), JSON.stringify(environment, null, 2) + '\n', {flag: 'wx'});
 console.log(JSON.stringify({ok: true, patchedSourcePrepared: true, referenceRuntime: id, installed: false}));

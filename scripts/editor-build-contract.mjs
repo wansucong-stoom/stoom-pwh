@@ -18,6 +18,7 @@ buildScripts.push('patch-background-recovery.mjs');
 buildScripts.push('patch-table-resize-grid.mjs');
 buildScripts.push('patch-shape-tools.mjs');
 buildScripts.push('patch-auto-page-arrangement.mjs');
+buildScripts.push('patch-host-font-settings.mjs');
 const desktopInputs = ['build-desktop-editor.mjs', 'table-plan.mjs', 'desktop-body-style.mjs'];
 
 // Rolldown's source-region labels are comments, but contain staging paths.

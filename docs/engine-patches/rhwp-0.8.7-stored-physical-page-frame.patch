@@ -1,0 +1,279 @@
+diff --git a/src/document_core/commands/document.rs b/src/document_core/commands/document.rs
+--- a/src/document_core/commands/document.rs
++++ b/src/document_core/commands/document.rs
+@@ -775,6 +775,21 @@ impl DocumentCore {
+                 // 합성 내용이 자랐으면 이미 소비한 끝점을 유지하여 되감지 않는다.
+                 let mut source_anchor_end: Option<(i32, i32)> = None;
+                 let body_height_hu = (layout.body_area.height * 7200.0 / dpi).round() as i32;
++                // Missing-line interpolation must not erase independently proved
++                // physical frames. Freeze the source witnesses before rewriting
++                // any paragraph's render-only coordinate ladder.
++                let block_page_restarts: Vec<bool> = (0..section.paragraphs.len())
++                    .map(|index| crate::renderer::float_placement::stored_block_page_restart(
++                        &section.paragraphs, index, body_height_hu, dpi))
++                    .collect();
++                let deferred_picture_frames: Vec<_> = section.paragraphs.iter().enumerate()
++                    .map(|(index, para)| crate::renderer::float_placement::stored_deferred_picture_frame(
++                        para, &section.paragraphs[index + 1..], body_height_hu, styles, dpi))
++                    .collect();
++                let picture_restarts: HashMap<_, _> = deferred_picture_frames.iter().enumerate()
++                    .filter_map(|(index, frame)| frame.map(|frame| (
++                        (index + frame.resume_paragraph_offset, frame.resume_line), frame.height_hu)))
++                    .collect();
+                 for (pi, para) in section.paragraphs.iter_mut().enumerate() {
+                     let was_reflowed = reflowed_paras.contains(&pi);
+                     // 필드는 저장 글줄 안의 텍스트 범위를 표시할 뿐 별도 높이를
+@@ -888,7 +903,9 @@ impl DocumentCore {
+                                         first_source.expect("저장 첫 줄").line_height,
+                                     ) > body_height_hu
+                             });
+-                    if source_page_break || source_tac_reset || source_plain_reset {
++                    if source_page_break || source_tac_reset || source_plain_reset
++                        || (!was_reflowed && block_page_restarts[pi])
++                    {
+                         running_vpos = first_source.expect("저장 프레임 원점").vertical_pos;
+                     } else if !was_reflowed
+                         && hosts_bottom_fixed_frame
+@@ -1013,10 +1030,9 @@ impl DocumentCore {
+                         let source_vpos = source_positions[line_index];
+                         if preserve_source_frames
+                             && line_index > 0
+-                            && source_vpos == 0
+-                            && previous_source_end.is_some_and(|end: i32| {
++                            && ((source_vpos == 0 && previous_source_end.is_some_and(|end: i32| {
+                                 end > 0 && end.saturating_add(seg.line_height) > body_height_hu
+-                            })
++                            })) || picture_restarts.get(&(pi, line_index)) == Some(&source_vpos))
+                         {
+                             // 정상 저장 줄의 물리 경계를 합성 줄의 연속 축으로 지우지 않는다.
+                             inner_vpos = source_vpos;
+@@ -1037,6 +1053,12 @@ impl DocumentCore {
+                     }
+                     // 비-TAC TopAndBottom Picture/Table: 개체 높이를 vpos에 반영
+                     for ctrl in para.controls.iter() {
++                        // The same proved picture box is queued by typesetting
++                        // for the next page. Its host text consumes only text on
++                        // this page, rather than also paying for the remote box.
++                        if matches!(ctrl, Control::Picture(_)) && deferred_picture_frames[pi].is_some() {
++                            continue;
++                        }
+                         let (obj_height, obj_v_offset, obj_margin_top, obj_margin_bottom) =
+                             match ctrl {
+                                 Control::Picture(p)
+diff --git a/src/renderer/float_placement.rs b/src/renderer/float_placement.rs
+--- a/src/renderer/float_placement.rs
++++ b/src/renderer/float_placement.rs
+@@ -2263,6 +2263,164 @@ pub(crate) fn stored_picture_next_page_placement(
+     None
+ }
+ 
++/// A stored page boundary is independent of the continuous coordinate ladder
++/// synthesized for missing lines. Read the original coordinates when present.
++fn source_line_vpos(para: &Paragraph, index: usize) -> Option<i32> {
++    let line = para.line_segs.get(index)?;
++    (line.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY == 0)
++        .then(|| para.source_line_seg_vertical_pos.as_ref()
++            .and_then(|positions| positions.get(index)).copied().unwrap_or(line.vertical_pos))
++}
++
++fn source_frame_is_original(para: &Paragraph) -> bool {
++    !para.stored_text_partition_is_dirty() && !para.cell_format_vpos_dirty
++        && !para.source_frame_reflowed && para.layout_space_metrics.is_empty()
++        && para.controls.iter().all(|control| match control {
++            Control::Table(table) => table.cells.iter().all(|cell| !cell.dirty_flag
++                && cell.paragraphs.iter().all(source_frame_is_original)),
++            Control::Picture(picture) => picture.caption.as_ref().is_none_or(|caption|
++                caption.paragraphs.iter().all(source_frame_is_original)),
++            _ => true,
++        })
++}
++
++#[derive(Clone, Copy)]
++pub(crate) struct StoredDeferredPictureFrame {
++    pub resume_paragraph_offset: usize,
++    pub resume_line: usize,
++    pub height_hu: i32,
++    offset_hu: i32,
++}
++
++impl StoredDeferredPictureFrame {
++    pub(crate) fn placement(self, dpi: f64) -> ParagraphFloatPlacement {
++        let bottom = hwpunit_to_px(self.height_hu, dpi);
++        ParagraphFloatPlacement {
++            flow: ParagraphFloatFlow::StoredPicture { next_flow_y: bottom },
++            anchor_y: -hwpunit_to_px(self.offset_hu, dpi),
++            stored_host_origin: None,
++            stored_successor_line_origin: None,
++            table_left: None,
++            table_top: 0.0,
++            occupied_bottom: bottom,
++        }
++    }
++}
++
++/// Prove the next-page owner from the complete picture/caption box and the
++/// original text restart. The host's visible text stays in the preceding frame.
++/// Missing-line prose may occur between the host and restart, but cannot itself
++/// supply a reset witness. A local rewind or another object ends the proof.
++pub(crate) fn stored_deferred_picture_frame(
++    host: &Paragraph,
++    following: &[Paragraph],
++    body_height_hu: i32,
++    styles: &super::style_resolver::ResolvedStyleSet,
++    dpi: f64,
++) -> Option<StoredDeferredPictureFrame> {
++    use crate::model::shape::CaptionDirection;
++    let [Control::Picture(picture)] = host.controls.as_slice() else { return None; };
++    let common = &picture.common;
++    if !source_frame_is_original(host) || !para_has_non_whitespace_text(host)
++        || common.treat_as_char || !common.flow_with_text || common.allow_overlap
++        || common.text_wrap != TextWrap::TopAndBottom || common.vert_rel_to != VertRelTo::Para
++        || common.vert_align != VertAlign::Top || body_height_hu <= 0
++        || !dpi.is_finite() || dpi <= 0.0
++        || host.line_segs.iter().any(|line| line.line_height <= 0)
++    { return None; }
++    let first = source_line_vpos(host, 0)?;
++    let mut previous = source_line_vpos(host, host.line_segs.len().checked_sub(1)?)?;
++    let offset = signed_hwpunit(common.vertical_offset);
++    let (_, picture_height) = picture_flow_frame_size_hu(picture);
++    let caption_height = if let Some(caption) = &picture.caption {
++        if caption.direction != CaptionDirection::Bottom || caption.spacing < 0
++            || caption.paragraphs.is_empty() || caption.paragraphs.iter().any(|para| {
++                para.stored_text_partition_is_dirty() || para.source_frame_reflowed
++                    || para.controls.iter().any(|control| !matches!(control,
++                        Control::AutoNumber(_) | Control::Field(_) | Control::Hyperlink(_)))
++                    || para.line_segs.is_empty()
++                    || para.line_segs.iter().any(|line| line.line_height <= 0
++                        || line.tag & crate::model::paragraph::LineSeg::TAG_IMPLEMENTATION_PROPERTY != 0)
++            }) { return None; }
++        let measured = super::layout::LayoutEngine::new(dpi)
++            .calculate_caption_height(&picture.caption, styles);
++        if !measured.is_finite() || measured <= 0.0 { return None; }
++        ((measured * 7200.0 / dpi).round() as i32).checked_add(i32::from(caption.spacing))?
++    } else { 0 };
++    let height = picture_height.checked_add(i32::from(common.margin.top))?
++        .checked_add(i32::from(common.margin.bottom))?.checked_add(caption_height)?;
++    if first < 0 || previous < first || previous >= body_height_hu || offset < 0
++        || height <= 0 || height > body_height_hu
++        || first.checked_add(offset)?.checked_add(height)? <= body_height_hu
++    { return None; }
++    for (paragraph_offset, para) in following.iter().enumerate() {
++        if !para.controls.is_empty() || para.stored_text_partition_is_dirty()
++            || para.cell_format_vpos_dirty || para.source_frame_reflowed
++        { return None; }
++        for (line_index, line) in para.line_segs.iter().enumerate() {
++            let Some(vpos) = source_line_vpos(para, line_index) else { continue; };
++            if line.line_height <= 0 { return None; }
++            if vpos < previous {
++                if vpos != height || !para_has_non_whitespace_text(para) { return None; }
++                return Some(StoredDeferredPictureFrame {
++                    resume_paragraph_offset: paragraph_offset + 1,
++                    resume_line: line_index, height_hu: height, offset_hu: offset,
++                });
++            }
++            if vpos >= body_height_hu { return None; }
++            previous = vpos;
++        }
++    }
++    None
++}
++
++/// An original zero restart before a complete flow-table frame is a page
++/// boundary even when the placeholder line alone still fits the preceding page.
++/// Require a source-closed object and a real body budget; arbitrary zero/local
++/// coordinates, overlapping/page-relative objects and edited frames stay out.
++pub(crate) fn stored_block_page_restart(
++    paragraphs: &[Paragraph], index: usize, body_height_hu: i32, dpi: f64,
++) -> bool {
++    let Some(current) = paragraphs.get(index) else { return false; };
++    let Some(previous) = index.checked_sub(1).and_then(|i| paragraphs.get(i)) else { return false; };
++    let Some(prev_index) = previous.line_segs.len().checked_sub(1) else { return false; };
++    let Some(prev_y) = source_line_vpos(previous, prev_index) else { return false; };
++    let Some(first) = source_line_vpos(current, 0) else { return false; };
++    let prev_line = &previous.line_segs[prev_index];
++    let prev_end = i64::from(prev_y) + i64::from(prev_line.line_height)
++        + i64::from(prev_line.line_spacing.max(0));
++    if first != 0 || prev_y <= 0 || prev_line.line_height <= 0
++        || prev_end > i64::from(body_height_hu) || !previous.controls.is_empty()
++        || !source_frame_is_original(previous) || !source_frame_is_original(current)
++    { return false; }
++    let mut host_index = index;
++    let mut prefix_end = 0;
++    while let Some(guide) = paragraphs.get(host_index) {
++        if !guide.controls.is_empty() { break; }
++        if guide.line_segs.is_empty() || guide.stored_text_partition_is_dirty() || guide.source_frame_reflowed
++        { return false; }
++        for (line_index, line) in guide.line_segs.iter().enumerate() {
++            let Some(y) = source_line_vpos(guide, line_index) else { return false; };
++            if y < prefix_end || line.line_height <= 0 { return false; }
++            prefix_end = y.saturating_add(line.line_height);
++        }
++        host_index += 1;
++    }
++    let Some(host) = paragraphs.get(host_index) else { return false; };
++    let [Control::Table(table)] = host.controls.as_slice() else { return false; };
++    let Some(next) = paragraphs.get(host_index + 1) else { return false; };
++    if table.common.treat_as_char || table.common.allow_overlap || table.caption.is_some()
++        || !source_frame_is_original(host) || !source_frame_is_original(next)
++        || source_line_vpos(host, 0).is_none_or(|y| y < prefix_end)
++    { return false; }
++    let Some(frame) = stored_empty_control_table_frame(host, next, table,
++        hwpunit_to_px(signed_hwpunit(table.common.height), dpi), 0.0, 0, dpi)
++    else { return false; };
++    let end = (frame.occupied_bottom * 7200.0 / dpi).round() as i64;
++    end > 0 && end <= i64::from(body_height_hu)
++        && prev_end + end > i64::from(body_height_hu)
++}
++
+ /// 앞쪽에서 프레임이 넘친 배경 그림은 다음 원점의 겹침 허용 레이블과 같은
+ /// 쪽을 소유한다. 배경은 보이지만 글줄을 전진시키지 않으므로 예약 높이는 0이다.
+ pub(crate) fn stored_background_picture_next_page_placement(
+diff --git a/src/renderer/layout/paragraph_layout.rs b/src/renderer/layout/paragraph_layout.rs
+--- a/src/renderer/layout/paragraph_layout.rs
++++ b/src/renderer/layout/paragraph_layout.rs
+@@ -6542,7 +6542,8 @@ impl LayoutEngine {
+             // 좌측 이탈, 한글 PDF x=229.56pt 는 공백 제외 중심). 반례 셋으로
+             // 한정한다: ① 셀 내부는 한글이 말미 공백을 포함해 정렬(issue_1285
+             // 수험번호 TAC 우단 = 셀 inner 우단 오라클 앵커) — cell_ctx 부재.
+-            // ② soft-wrap 지점의 줄끝 공백은 포함 — 문단 마지막 줄 한정.
++            // ② 셀의 soft-wrap 지점은 저장 셀 줄 폭을 유지한다. 본문 문단은
++            // 모든 줄에서 가시 글자를 가운데 맞춘다.
+             // ③ TAC 컨트롤이 있는 줄은 공백이 시각적 말미가 아니다 —
+             // line_tac_offsets_for_width 비어 있을 때 한정. ④ 전부 공백인
+             // 줄(밑줄 친 서명란)과 밑줄 스타일 말미 공백은 보이는 콘텐츠라
+@@ -6553,7 +6554,7 @@ impl LayoutEngine {
+             // 한/글도 칸 안에서 말미 공백을 빼고 정렬한다(3079571 취소신청서 1쪽,
+             // '신청하는' + 공백 5칸 — 한/글 대비 -15.02px = 5 × 6.008 ÷ 2).
+             let center_excludes_trailing_ws = alignment == Alignment::Center
+-                && is_last_line_of_para
++                && (is_last_line_of_para || cell_ctx.is_none())
+                 && line_tac_offsets_for_width.is_empty()
+                 && comp_line
+                     .runs
+diff --git a/src/renderer/typeset/section/controls.rs b/src/renderer/typeset/section/controls.rs
+--- a/src/renderer/typeset/section/controls.rs
++++ b/src/renderer/typeset/section/controls.rs
+@@ -146,6 +146,12 @@ impl TypesetEngine {
+                                     st.available_height(),
+                                     self.dpi,
+                                 )
++                                .or_else(|| crate::renderer::float_placement::stored_deferred_picture_frame(
++                                    para, &paragraphs[para_idx + 1..],
++                                    crate::renderer::px_to_hwpunit(st.available_height(), self.dpi),
++                                    styles, self.dpi,
++                                ).filter(|frame| picture_host_origin.2 + hwpunit_to_px(frame.height_hu, self.dpi)
++                                    > st.available_height() + 0.5).map(|frame| frame.placement(self.dpi)))
+                                 .or_else(|| crate::renderer::float_placement::stored_background_picture_next_page_placement(
+                                     para, &paragraphs[para_idx + 1..],
+                                     st.vpos_page_base.unwrap_or(0), picture_host_origin.2,
+diff --git a/src/renderer/typeset/state.rs b/src/renderer/typeset/state.rs
+--- a/src/renderer/typeset/state.rs
++++ b/src/renderer/typeset/state.rs
+@@ -802,7 +802,6 @@ impl TypesetState {
+                 .data
+                 .deferred_next_page_stored_frames
+                 .iter()
+-                .filter(|frame| matches!(frame.kind, super::DeferredStoredFrameKind::Table))
+                 .map(|frame| frame.placement.occupied_bottom)
+                 .reduce(f64::max),
+         }

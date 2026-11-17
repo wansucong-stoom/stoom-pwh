@@ -1,0 +1,301 @@
+diff --git a/src/document_core/commands/document.rs b/src/document_core/commands/document.rs
+--- a/src/document_core/commands/document.rs
++++ b/src/document_core/commands/document.rs
+@@ -778,17 +778,14 @@ impl DocumentCore {
+                 // Missing-line interpolation must not erase independently proved
+                 // physical frames. Freeze the source witnesses before rewriting
+                 // any paragraph's render-only coordinate ladder.
+-                let block_page_restarts: Vec<bool> = (0..section.paragraphs.len())
+-                    .map(|index| crate::renderer::float_placement::stored_block_page_restart(
+-                        &section.paragraphs, index, body_height_hu, dpi))
++                let frame_plans: Vec<_> = (0..section.paragraphs.len())
++                    .map(|index| crate::renderer::float_placement::stored_page_frame_plan(
++                        &section.paragraphs, index, body_height_hu, styles, dpi))
+                     .collect();
+-                let deferred_picture_frames: Vec<_> = section.paragraphs.iter().enumerate()
+-                    .map(|(index, para)| crate::renderer::float_placement::stored_deferred_picture_frame(
+-                        para, &section.paragraphs[index + 1..], body_height_hu, styles, dpi))
+-                    .collect();
+-                let picture_restarts: HashMap<_, _> = deferred_picture_frames.iter().enumerate()
+-                    .filter_map(|(index, frame)| frame.map(|frame| (
+-                        (index + frame.resume_paragraph_offset, frame.resume_line), frame.height_hu)))
++                let picture_restarts: HashMap<_, _> = frame_plans.iter().enumerate()
++                    .filter_map(|(index, plan)| plan.picture_frame()
++                        .filter(|(_, standalone)| !standalone)
++                        .map(|(frame, _)| ((index + frame.resume_paragraph_offset, frame.resume_line), frame.height_hu)))
+                     .collect();
+                 for (pi, para) in section.paragraphs.iter_mut().enumerate() {
+                     let was_reflowed = reflowed_paras.contains(&pi);
+@@ -904,7 +901,7 @@ impl DocumentCore {
+                                     ) > body_height_hu
+                             });
+                     if source_page_break || source_tac_reset || source_plain_reset
+-                        || (!was_reflowed && block_page_restarts[pi])
++                        || (!was_reflowed && frame_plans[pi].restart_before_host)
+                     {
+                         running_vpos = first_source.expect("저장 프레임 원점").vertical_pos;
+                     } else if !was_reflowed
+@@ -1056,7 +1053,8 @@ impl DocumentCore {
+                         // The same proved picture box is queued by typesetting
+                         // for the next page. Its host text consumes only text on
+                         // this page, rather than also paying for the remote box.
+-                        if matches!(ctrl, Control::Picture(_)) && deferred_picture_frames[pi].is_some() {
++                        if !matches!(frame_plans[pi].reservation,
++                            crate::renderer::float_placement::StoredFrameReservation::HostFlow) {
+                             continue;
+                         }
+                         let (obj_height, obj_v_offset, obj_margin_top, obj_margin_bottom) =
+diff --git a/src/renderer/float_placement.rs b/src/renderer/float_placement.rs
+--- a/src/renderer/float_placement.rs
++++ b/src/renderer/float_placement.rs
+@@ -2284,6 +2284,21 @@ fn source_frame_is_original(para: &Paragraph) -> bool {
+         })
+ }
+ 
++fn original_para_top_flow_block(host: &Paragraph, common: &CommonObjAttr) -> bool {
++    source_frame_is_original(host) && is_para_topbottom_float(common)
++        && common.flow_with_text && !common.allow_overlap && common.vert_align == VertAlign::Top
++}
++
++/// A stored box smaller than an original text line is not a closed frame:
++/// normal measurement must grow it before assigning any reservation owner.
++fn source_table_box_contains_text(table: &Table) -> bool {
++    table.cells.iter().all(|cell| cell.paragraphs.iter().all(|para|
++        para.line_segs.iter().all(|line| {
++            let painted = i64::from(line.vertical_pos.max(0)) + i64::from(line.line_height.max(0));
++            painted <= i64::from(cell.height)
++        })))
++}
++
+ #[derive(Clone, Copy)]
+ pub(crate) struct StoredDeferredPictureFrame {
+     pub resume_paragraph_offset: usize,
+@@ -2292,6 +2307,78 @@ pub(crate) struct StoredDeferredPictureFrame {
+     offset_hu: i32,
+ }
+ 
++/// A source page-start paragraph may place its visible text below a leading
++/// table. Its positive first origin owns the entire table reservation already.
++/// Require the outer box and the successor text to close that original frame;
++/// edited, local, overlapping and unclosed coordinates are not evidence.
++pub(crate) fn stored_leading_table_host_frame(
++    host: &Paragraph, next: &Paragraph, body_height_hu: i32,
++) -> bool {
++    use crate::model::paragraph::ColumnBreakType;
++    let [Control::Table(table)] = host.controls.as_slice() else { return false; };
++    let common = &table.common;
++    if !matches!(host.column_type, ColumnBreakType::Page | ColumnBreakType::Section)
++        || !original_para_top_flow_block(host, common) || !source_frame_is_original(next)
++        || !source_table_box_contains_text(table)
++        || !para_has_non_whitespace_text(host) || !next.controls.is_empty()
++        || table.caption.is_some()
++        || common.height == 0 || common.height > i32::MAX as u32
++        || body_height_hu <= 0 || host.line_segs.is_empty()
++    { return false; }
++    let offset = signed_hwpunit(common.vertical_offset);
++    let bottom = i64::from(offset) + i64::from(common.height)
++        + i64::from(table.outer_margin_top) + i64::from(table.outer_margin_bottom);
++    if offset < 0 || bottom <= 0 || bottom > i64::from(body_height_hu)
++        || source_line_vpos(host, 0).map(i64::from) != Some(bottom)
++    { return false; }
++    let mut end = bottom;
++    for (index, line) in host.line_segs.iter().enumerate() {
++        if line.line_height <= 0 || source_line_vpos(host, index).map(i64::from) != Some(end) {
++            return false;
++        }
++        end += i64::from(line.line_height) + i64::from(line.line_spacing.max(0));
++    }
++    end <= i64::from(body_height_hu)
++        && source_line_vpos(next, 0).map(i64::from) == Some(end)
++}
++
++/// An empty flow-picture host at the physical tail cannot pull its picture
++/// upward to fit. A following explicit page break closes this frame without a
++/// text restart below the picture: emit its own fresh page before that break.
++fn stored_standalone_picture_page(
++    previous: &Paragraph, host: &Paragraph, next: &Paragraph,
++    body_height_hu: i32, dpi: f64,
++) -> Option<StoredDeferredPictureFrame> {
++    use crate::model::paragraph::ColumnBreakType;
++    let [Control::Picture(picture)] = host.controls.as_slice() else { return None; };
++    let [line] = host.line_segs.as_slice() else { return None; };
++    let common = &picture.common;
++    if !source_frame_is_original(previous) || !original_para_top_flow_block(host, common)
++        || !source_frame_is_original(next) || !previous.controls.is_empty()
++        || para_has_non_whitespace_text(host) || host.column_type != ColumnBreakType::None
++        || !matches!(next.column_type, ColumnBreakType::Page | ColumnBreakType::Section)
++        || !next.controls.is_empty() || source_line_vpos(next, 0) != Some(0)
++        || picture.caption.is_some()
++        || line.line_height <= 0 || body_height_hu <= 0 || !dpi.is_finite() || dpi <= 0.0
++    { return None; }
++    let previous_index = previous.line_segs.len().checked_sub(1)?;
++    let previous_line = previous.line_segs.get(previous_index)?;
++    let previous_end = source_line_vpos(previous, previous_index)?
++        .checked_add(previous_line.line_height)?.checked_add(previous_line.line_spacing.max(0))?;
++    let origin = source_line_vpos(host, 0)?;
++    let offset = signed_hwpunit(common.vertical_offset);
++    let (_, height) = picture_flow_frame_size_hu(picture);
++    let total = height.checked_add(i32::from(common.margin.top))?
++        .checked_add(i32::from(common.margin.bottom))?;
++    if previous_end != origin || origin <= 0 || origin >= body_height_hu || offset < 0
++        || total <= 0 || total > body_height_hu
++        || origin.checked_add(offset)?.checked_add(total)? <= body_height_hu
++    { return None; }
++    Some(StoredDeferredPictureFrame {
++        resume_paragraph_offset: 0, resume_line: 0, height_hu: total, offset_hu: offset,
++    })
++}
++
+ impl StoredDeferredPictureFrame {
+     pub(crate) fn placement(self, dpi: f64) -> ParagraphFloatPlacement {
+         let bottom = hwpunit_to_px(self.height_hu, dpi);
+@@ -2307,6 +2394,52 @@ impl StoredDeferredPictureFrame {
+     }
+ }
+ 
++/// Normalized ownership of an original paragraph frame. Import repairs text
++/// metrics; this plan alone assigns the object reservation and page owner.
++#[derive(Clone, Copy)]
++pub(crate) enum StoredFrameReservation {
++    HostFlow,
++    IncludedInHostOrigin,
++    RemotePicture { frame: StoredDeferredPictureFrame, standalone: bool },
++}
++
++#[derive(Clone, Copy)]
++pub(crate) struct StoredPageFramePlan {
++    pub restart_before_host: bool,
++    pub reservation: StoredFrameReservation,
++}
++
++impl StoredPageFramePlan {
++    pub(crate) fn picture_frame(self) -> Option<(StoredDeferredPictureFrame, bool)> {
++        match self.reservation {
++            StoredFrameReservation::RemotePicture { frame, standalone } => Some((frame, standalone)),
++            _ => None,
++        }
++    }
++}
++
++pub(crate) fn stored_page_frame_plan(
++    paragraphs: &[Paragraph], index: usize, body_height_hu: i32,
++    styles: &super::style_resolver::ResolvedStyleSet, dpi: f64,
++) -> StoredPageFramePlan {
++    let mut plan = StoredPageFramePlan {
++        restart_before_host: stored_block_page_restart(paragraphs, index, body_height_hu, dpi),
++        reservation: StoredFrameReservation::HostFlow,
++    };
++    let Some(host) = paragraphs.get(index) else { return plan; };
++    let Some(next) = paragraphs.get(index + 1) else { return plan; };
++    if stored_leading_table_host_frame(host, next, body_height_hu) {
++        plan.reservation = StoredFrameReservation::IncludedInHostOrigin;
++    } else if let Some(frame) = stored_deferred_picture_frame(
++        host, &paragraphs[index + 1..], body_height_hu, styles, dpi) {
++        plan.reservation = StoredFrameReservation::RemotePicture { frame, standalone: false };
++    } else if let Some(frame) = index.checked_sub(1).and_then(|i| paragraphs.get(i))
++        .and_then(|previous| stored_standalone_picture_page(previous, host, next, body_height_hu, dpi)) {
++        plan.reservation = StoredFrameReservation::RemotePicture { frame, standalone: true };
++    }
++    plan
++}
++
+ /// Prove the next-page owner from the complete picture/caption box and the
+ /// original text restart. The host's visible text stays in the preceding frame.
+ /// Missing-line prose may occur between the host and restart, but cannot itself
+@@ -2321,10 +2454,8 @@ pub(crate) fn stored_deferred_picture_frame(
+     use crate::model::shape::CaptionDirection;
+     let [Control::Picture(picture)] = host.controls.as_slice() else { return None; };
+     let common = &picture.common;
+-    if !source_frame_is_original(host) || !para_has_non_whitespace_text(host)
+-        || common.treat_as_char || !common.flow_with_text || common.allow_overlap
+-        || common.text_wrap != TextWrap::TopAndBottom || common.vert_rel_to != VertRelTo::Para
+-        || common.vert_align != VertAlign::Top || body_height_hu <= 0
++    if !original_para_top_flow_block(host, common) || !para_has_non_whitespace_text(host)
++        || body_height_hu <= 0
+         || !dpi.is_finite() || dpi <= 0.0
+         || host.line_segs.iter().any(|line| line.line_height <= 0)
+     { return None; }
+diff --git a/src/renderer/typeset/section/controls.rs b/src/renderer/typeset/section/controls.rs
+--- a/src/renderer/typeset/section/controls.rs
++++ b/src/renderer/typeset/section/controls.rs
+@@ -137,21 +137,22 @@ impl TypesetEngine {
+                             && (st.pages.len(), st.current_column)
+                                 == (picture_host_origin.0, picture_host_origin.1)
+                         {
++                            let frame_plan = crate::renderer::float_placement::stored_page_frame_plan(
++                                paragraphs, para_idx,
++                                crate::renderer::px_to_hwpunit(st.available_height(), self.dpi), styles, self.dpi);
++                            let remote = frame_plan.picture_frame().filter(|(frame, _)|
++                                picture_host_origin.2 + hwpunit_to_px(frame.height_hu, self.dpi)
++                                    > st.available_height() + 0.5);
+                             if let Some(placement) =
+-                                crate::renderer::float_placement::stored_picture_next_page_placement(
++                                remote.map(|(frame, _)| frame.placement(self.dpi))
++                                .or_else(|| crate::renderer::float_placement::stored_picture_next_page_placement(
+                                     para,
+                                     &paragraphs[para_idx + 1..],
+                                     st.vpos_page_base.unwrap_or(0),
+                                     picture_host_origin.2,
+                                     st.available_height(),
+                                     self.dpi,
+-                                )
+-                                .or_else(|| crate::renderer::float_placement::stored_deferred_picture_frame(
+-                                    para, &paragraphs[para_idx + 1..],
+-                                    crate::renderer::px_to_hwpunit(st.available_height(), self.dpi),
+-                                    styles, self.dpi,
+-                                ).filter(|frame| picture_host_origin.2 + hwpunit_to_px(frame.height_hu, self.dpi)
+-                                    > st.available_height() + 0.5).map(|frame| frame.placement(self.dpi)))
++                                ))
+                                 .or_else(|| crate::renderer::float_placement::stored_background_picture_next_page_placement(
+                                     para, &paragraphs[para_idx + 1..],
+                                     st.vpos_page_base.unwrap_or(0), picture_host_origin.2,
+@@ -165,6 +166,9 @@ impl TypesetEngine {
+                                         placement,
+                                     },
+                                 );
++                                if remote.is_some_and(|(_, standalone)| standalone) {
++                                    st.force_new_page();
++                                }
+                                 continue;
+                             }
+                         }
+diff --git a/src/renderer/typeset/state.rs b/src/renderer/typeset/state.rs
+--- a/src/renderer/typeset/state.rs
++++ b/src/renderer/typeset/state.rs
+@@ -785,6 +785,15 @@ impl TypesetState {
+         }
+     }
+ 
++    /// Visible body objects materialized at column flush still make a page
++    /// nonempty. Explicit breaks cannot discard their physical page ownership.
++    pub(super) fn has_current_body_content(&self) -> bool {
++        !self.data.current_items.is_empty()
++            || !self.data.page_start_stored_frames.is_empty()
++            || !self.data.page_start_square_pictures.is_empty()
++            || !self.data.current_column_overlay_continuations.is_empty()
++    }
++
+     /// 줄 후보 계산에 필요한 값만 관측한다. 페이지 전환 뒤 다시 호출해야 한다.
+     pub(super) fn paragraph_line_scan_page(&self) -> LineScanPage {
+         LineScanPage {
+diff --git a/src/renderer/typeset/section/entry.rs b/src/renderer/typeset/section/entry.rs
+--- a/src/renderer/typeset/section/entry.rs
++++ b/src/renderer/typeset/section/entry.rs
+@@ -243,7 +243,7 @@ impl TypesetEngine {
+         }
+ 
+         if (force_page_break || para_style_break || variant_vpos_reset_break)
+-            && !st.current_items.is_empty()
++            && st.has_current_body_content()
+         {
+             st.force_new_page();
+             // [Task #702] 쪽나누기 + 새 ColumnDef = 새 페이지에서 col 정의 적용
+@@ -280,7 +280,7 @@ impl TypesetEngine {
+         // 현재 페이지에 렌더링하지 않고 다음 페이지로 넘긴다. force_break_before 에 등록된
+         // para_idx 가 현재 페이지에 이미 항목이 있으면 새 페이지를 강제 (force_page_break 등가).
+         // 빈 셋(reflow hint 없음)이면 무동작 → 기존 출력 불변.
+-        if force_break_before.contains(&para_idx) && !st.current_items.is_empty() {
++        if force_break_before.contains(&para_idx) && st.has_current_body_content() {
+             st.force_new_page();
+         }
+ 

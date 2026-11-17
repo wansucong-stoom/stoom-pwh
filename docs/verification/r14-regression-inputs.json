@@ -1,5 +1,12 @@
 {
   "schemaVersion": 1,
+  "pageFrameReference": {
+    "id": "rhwp-0.8.7-pwh-r31",
+    "file": "pwh-runtime-rhwp-0.8.7-pwh-r31-windows-x64.zip",
+    "size": 41798177,
+    "sha256": "1d7ef818febad7772e98135727ca061eafd3257c63319d410d97d15f88fa7c7f",
+    "url": "https://github.com/wansucong-stoom/stoom-pwh/releases/download/v0.6.62/pwh-runtime-rhwp-0.8.7-pwh-r31-windows-x64.zip"
+  },
   "reference": {
     "id": "rhwp-0.8.7-pwh-r13",
     "file": "pwh-runtime-rhwp-0.8.7-pwh-r13-windows-x64.zip",

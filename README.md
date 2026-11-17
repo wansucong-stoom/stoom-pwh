@@ -30,11 +30,13 @@ Pwh는 **무료·오픈소스 HWP/HWPX 문서 편집기**입니다. 익숙한 �
 | **Pwh Desktop · Windows x64** | **[Microsoft Store](https://apps.microsoft.com/detail/9NXGD60MHMT2)** | Store에서 업데이트. 앱 상단에서도 새 Store 버전을 확인 |
 | **Pwh 플러그인 · Codex 데스크톱** | [GitHub 릴리스의 플러그인 ZIP](https://github.com/wansucong-stoom/stoom-pwh/releases/latest) | 최신 플러그인으로 갱신 |
 
-최근 정식 배포 기준은 **Pwh 0.6.62 · Desktop 0.1.43 · 공통 코어 r31**입니다. GitHub 배포와 Store 심사·게시 시점은 다르며, Store 설치판은 게시된 버전으로 업데이트됩니다. 이전 MSI 사용자는 [Store 이전 안내](docs/PWH-DESKTOP.md#설치와-사용)를 참고하세요.
+최근 정식 배포 기준은 **Pwh 0.6.63 · Desktop 0.1.44 · 공통 코어 r32**입니다. GitHub 배포와 Store 심사·게시 시점은 다르며, Store 설치판은 게시된 버전으로 업데이트됩니다. 이전 MSI 사용자는 [Store 이전 안내](docs/PWH-DESKTOP.md#설치와-사용)를 참고하세요.
 
 이번 버전에는 [표의 상하좌우 자동 채우기](docs/AUTO-FILL.md), 대화상자 키보드 이동과 메뉴·제품 정보 정렬 보완이 포함됩니다. 설치판 반영 여부는 [변경 이력](docs/CHANGELOG.md)을 확인하세요.
 
-다음 개발판에서는 **도형·연결선·글상자 그리기**와 **화면 폭·배율에 맞춘 자동 쪽 배치**를 보완합니다. 공통 편집기와 Desktop에 같은 변경을 적용하며, 현재 정식 설치판과 [개발판 검증 범위](docs/verification/DRAWING-AND-PAGE-ARRANGEMENT.md)는 구분합니다.
+**도형·연결선·글상자 그리기**와 **화면 폭·배율에 맞춘 자동 쪽 배치**를 공통 편집기와 Desktop에 제공합니다. [지원 및 검증 범위](docs/verification/DRAWING-AND-PAGE-ARRANGEMENT.md)
+
+공통 조판 코어에서는 **저장된 쪽 경계와 그림·표의 공간 예약**을 함께 보완합니다. 누락된 글줄 정보를 보충할 때 유효한 쪽 시작점을 유지하고, 다음 쪽에 배치할 그림의 높이를 앞쪽 본문에 중복 부과하지 않습니다. [적용 조건과 검증 범위](docs/verification/STORED-PAGE-FRAMES.md)
 
 **운영 사이트:** [STOOM Tools](https://tools.stoom.win/) · [Pwh 제품 소개](https://tools.stoom.win/pwh/) · [STOOM](https://stoom.win/)
 
@@ -82,9 +84,9 @@ Pwh는 **무료·오픈소스 HWP/HWPX 문서 편집기**입니다. 익숙한 �
 
 Pwh와 Desktop은 같은 공통 편집기와 **rhwp 기반 WASM 코어**를 사용합니다. 지원 범위와 검증 조건은 아래 문서에서 확인할 수 있습니다.
 
-자동 채우기와 대화상자 개선은 공통 편집기의 명령·입력 처리에 적용합니다. 일반 표와 중첩 표가 같은 셀 경로와 실행 취소 체계를 사용하며, 같은 r31 조판 코어를 사용합니다.
+자동 채우기와 대화상자 개선은 공통 편집기의 명령·입력 처리에 적용합니다. 일반 표와 중첩 표가 같은 셀 경로와 실행 취소 체계를 사용하며, 같은 r32 조판 코어를 사용합니다.
 
-도형 개발판의 98번 코어 패치는 기본 도형·글상자·곡선의 생성과 셀 경로 삽입, 연결선의 화살표 속성 보존을 담당합니다. 자동 쪽 배치는 문서의 조판을 바꾸지 않는 화면 표시 기능이며, rhwp Studio의 기존 다중 쪽 배치에 기본값·설정 이전을 연결합니다.
+98번 코어 패치는 기본 도형·글상자·곡선의 생성과 셀 경로 삽입, 연결선의 화살표 속성 보존을 담당합니다. 자동 쪽 배치는 문서의 조판을 바꾸지 않는 화면 표시 기능이며, rhwp Studio의 기존 다중 쪽 배치에 기본값·설정 이전을 연결합니다.
 
 | 찾는 내용 | 안내 |
 | --- | --- |

@@ -1,12 +1,12 @@
 {
-  "sha256": "30dc78a25a224495ac68ee582fba7026d00197405d4c222fec52faaa08feb319",
-  "baseVersion": "0.6.62",
-  "baseEditorSha256": "342c028b454aad09f1e1dd6c00db35ea8860e7ec23ec3004baa114b10d1f2015",
+  "sha256": "42d60424d384f19728b7c115e4b8ce4769c8aa4e76ca40ddb277c11f9f000b7b",
+  "baseVersion": "0.6.63",
+  "baseEditorSha256": "e9595435d707f67cd3171cfba1bdba47436bd91f0dcacc3f6833ef3297c873e3",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "desktop",
-    "sha256": "f26d1d7293b464d0af606ac1334a8ba0d37740719b90835a41f5b0be840cc86e",
+    "sha256": "60bd231a3bfbeb4c80cdd6a1a83603f7224f3f52fab0a03df320c96c3db5ad03",
     "files": [
       {
         "path": "desktop/standalone-pwh/build-desktop-editor.mjs",
@@ -30,11 +30,11 @@
       },
       {
         "path": "package.json",
-        "sha256": "a72c2d8b50812b1c78919590d9e466f4d8d7b7cf46868aa423e9a560baf63f45"
+        "sha256": "eb16eec3aa81c3104b6e2bf2e6f47e5f014668f07d591d4c314006e38b909d3c"
       },
       {
         "path": "scripts/build-inline.mjs",
-        "sha256": "53196802bb12c4cd047ed2737b1a591dd8dc7c955702b8fc30867f6c18a466e4"
+        "sha256": "81637d6eeb3ff794bf49d331854e3372909b67cfeaad1c15f3a745f2249d1972"
       },
       {
         "path": "scripts/bundle-client.mjs",
@@ -42,7 +42,7 @@
       },
       {
         "path": "scripts/editor-build-contract.mjs",
-        "sha256": "931d32d673da9daf83b9126d578096c1301af6dba489fac2d39e01d40897b842"
+        "sha256": "68f20ba757ce0617bdfc6e5545510e0617dd89f97b6b550ef2182e68b8d643fc"
       },
       {
         "path": "scripts/patch-auto-fill.mjs",
@@ -70,7 +70,7 @@
       },
       {
         "path": "scripts/patch-context-ribbon.mjs",
-        "sha256": "42f39400da82c204cbc93892d88c8d97f994d3506b53e640e955ad8630b9f33f"
+        "sha256": "887e7b0f797badffc1eb3ab99610c29a2250dcf1c3d168c19e5b9027e35f5eef"
       },
       {
         "path": "scripts/patch-control-marker-delete.mjs",
@@ -95,6 +95,10 @@
       {
         "path": "scripts/patch-hancom-key-contexts.mjs",
         "sha256": "8face254d07ef8ec882643b37cd7c5a213b8674bbf7e3171f5f0cd7a8e009cbf"
+      },
+      {
+        "path": "scripts/patch-host-font-settings.mjs",
+        "sha256": "a12e949f50257831e8513928a2c0ccd1577c8e7a4754905704dda7aeba097772"
       },
       {
         "path": "scripts/patch-inline-object-cursors.mjs",
@@ -267,6 +271,10 @@
       {
         "path": "src/format-property-changes.mjs",
         "sha256": "3348f8a526546504e0121e42fb8c27278103960ebf269473843ccb95988cdb89"
+      },
+      {
+        "path": "src/host-font-settings.mjs",
+        "sha256": "94344756a98e6ad49cb04f6e0ceb7c1d9c6579a647f81922c33a350be65ecfe6"
       },
       {
         "path": "src/images.mjs",

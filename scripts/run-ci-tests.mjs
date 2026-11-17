@@ -19,6 +19,7 @@ if(env.PWH_REFERENCE_CORE_JS&&env.PWH_REFERENCE_CORE_WASM&&!env.PWH_FLOAT_FRAME_
   env.PWH_FLOAT_FRAME_BASE_WASM=env.PWH_REFERENCE_CORE_WASM;
 }
 const floatReferenceConfigured=Boolean(env.PWH_REFERENCE_CORE_JS||env.PWH_REFERENCE_CORE_WASM||env.PWH_FLOAT_FRAME_BASE_JS||env.PWH_FLOAT_FRAME_BASE_WASM);
+const pageFrameReferenceConfigured=Boolean(env.PWH_PAGE_FRAME_REFERENCE_JS||env.PWH_PAGE_FRAME_REFERENCE_WASM);
 // Account-, clipboard- and native-window tests require separate authorization.
 for(const key of ['PWH_CHATGPT_LIVE','PWH_CODEX_LIVE','PWH_HANCOM_CLIPBOARD','PWH_HANCOM_TARGET','PWH_TEST_CHATGPT_DATA','PWH_TEST_CODEX_RUNTIME','PWH_CODEX_TEST_EXE','PWH_NATIVE_TEST_LAUNCHER','PWH_ELECTRON_EXE','PWH_TEST_DESKTOP_PAYLOAD','PWH_ENGINE_TESTS','PWH_TEMPLATE_TEST_FILE'])delete env[key];
 if(mode==='browser'){
@@ -46,7 +47,7 @@ const code=await new Promise((resolve,reject)=>{
 });
 try{await log.writeFile(output);}finally{await log.close();}
 const skips=output.split(/\r?\n/).filter(line=>/ # SKIP\b/.test(line));
-const missing=skips.filter(line=>/PWH_CORE_JS|PWH_CORE_WASM/.test(line)||(mode==='browser'&&/PWH_BROWSER_TESTS|PWH_DESKTOP_SOURCE_ROOT|PWH_PLAYWRIGHT_MODULE|Requires browser module/.test(line))||(floatReferenceConfigured&&/PWH_FLOAT_FRAME_BASE|Requires an explicit prior-core fallback baseline/.test(line)));
+const missing=skips.filter(line=>/PWH_CORE_JS|PWH_CORE_WASM/.test(line)||(mode==='browser'&&/PWH_BROWSER_TESTS|PWH_DESKTOP_SOURCE_ROOT|PWH_PLAYWRIGHT_MODULE|Requires browser module/.test(line))||(floatReferenceConfigured&&/PWH_FLOAT_FRAME_BASE|Requires an explicit prior-core fallback baseline/.test(line))||(pageFrameReferenceConfigured&&/PWH_PAGE_FRAME_REFERENCE/.test(line)));
 const counts=Object.fromEntries([...output.matchAll(/^# (tests|pass|fail|cancelled) (\d+)$/gm)].map(([,key,value])=>[key,Number(value)]));
 if(process.env.GITHUB_STEP_SUMMARY)await fs.appendFile(process.env.GITHUB_STEP_SUMMARY,
   '### '+mode+' tests\n\nFiles: '+selectedFiles.length+'; tests: '+(counts.tests??0)+'; passed: '+(counts.pass??0)

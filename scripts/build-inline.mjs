@@ -25,6 +25,7 @@ import {patchBackgroundRecovery} from './patch-background-recovery.mjs';
 import {patchTableResizeGrid} from './patch-table-resize-grid.mjs';
 import {patchShapeTools} from './patch-shape-tools.mjs';
 import {patchAutoPageArrangement} from './patch-auto-page-arrangement.mjs';
+import {patchHostFontSettings} from './patch-host-font-settings.mjs';
 const root=path.resolve(process.argv[2]);
 const studio=path.join(root,'rhwp-studio');
 // The pinned editor includes its WASM glue. Old runtime cores keep the default
@@ -902,6 +903,7 @@ if(!localFonts.includes('pwh host fonts in menu'))localFonts=localFonts.replace(
   // pwh host fonts in menu: system inventory and renderer share the same source.
   if (hostFontSource.active) return currentHostRecords().filter(record => options.includeRegistered || !record.aliases.some(name => REGISTERED_FONTS.has(name)));`);
 await fs.writeFile(localFontsPath,localFonts);
+await patchHostFontSettings(studio);
 const wasmPath=path.join(studio,'src/core/wasm-bridge.ts');
 let wasm=await fs.readFile(wasmPath,'utf8');
 if(!wasm.includes('createPwhPrintFontJob()')){

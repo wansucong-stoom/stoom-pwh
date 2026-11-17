@@ -259,7 +259,10 @@ def main():
                        'tests/bin-data-resource-reuse.test.mjs',
                        'tests/compressed-binary-cache-source.test.mjs',
                        'tests/compressed-binary-export.test.mjs')
-    fidelity_tests += ('tests/table-resize-allocated-grid.test.mjs',)
+    fidelity_tests += ('tests/table-resize-allocated-grid.test.mjs', 'tests/page-frame-ownership.test.mjs',
+                       'tests/drawing-core.test.mjs', 'tests/host-font-settings.test.mjs')
+    core_inputs['src/drawing-tools.mjs'] = regular(project/'src/drawing-tools.mjs')
+    core_inputs['src/host-font-settings.mjs'] = regular(project/'src/host-font-settings.mjs')
     for name in fidelity_tests:
         core_inputs[name] = regular(project/name)
         build_inputs['pwh/'+name] = regular(project/name)
