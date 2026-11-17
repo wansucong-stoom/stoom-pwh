@@ -5,6 +5,10 @@
 
 개별 패치를 설계·검증할 때 따르는 [공통 조판 소유권 규칙](LAYOUT-OWNERSHIP-RULES.md)을 별도로 관리합니다. 원문 앵커와 표시 순서, 물리 프레임과 내용 커서, 여백·편집 상태의 기준을 설명하며, 각 규칙의 실제 적용 범위와 배포 상태는 아래 패치별 기록을 따릅니다.
 
+## 공통 편집기의 줄 간격 측정 재사용
+
+scripts/patch-canvas-metric-reuse.mjs는 코어 패치와 별개로 rhwp Studio 유래의 Canvas 측정 준비를 보완합니다. src/canvas-metric-mutations.mjs가 줄 간격 변경을 분류하고, 기존 변이 메서드 레지스트리·복원 경로·변경 이벤트가 나머지 목록 갱신을 담당합니다. 글꼴 세대 변경·문서 교체·준비 실패에는 이전 결과를 사용하지 않습니다. 기존 글자별 폭 캐시와 비동기 세대 검사를 유지하며 공통·Desktop을 같은 입력으로 재현 빌드합니다. [검증 범위](../verification/PARAGRAPH-SPACING-PERFORMANCE.md)
+
 <a id="cause-and-scope"></a>
 ## 원인과 적용 범위
 

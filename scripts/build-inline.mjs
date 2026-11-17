@@ -26,6 +26,7 @@ import {patchTableResizeGrid} from './patch-table-resize-grid.mjs';
 import {patchShapeTools} from './patch-shape-tools.mjs';
 import {patchAutoPageArrangement} from './patch-auto-page-arrangement.mjs';
 import {patchHostFontSettings} from './patch-host-font-settings.mjs';
+import {patchCanvasMetricReuse} from './patch-canvas-metric-reuse.mjs';
 const root=path.resolve(process.argv[2]);
 const studio=path.join(root,'rhwp-studio');
 // The pinned editor includes its WASM glue. Old runtime cores keep the default
@@ -985,6 +986,7 @@ await patchBackgroundRecovery(studio);
 await patchTableResizeGrid(studio);
 await patchShapeTools(studio);
 await patchAutoPageArrangement(studio);
+await patchCanvasMetricReuse(studio);
 const glue=path.join(root,'pkg/rhwp.js');
 await fs.writeFile(glue,(await fs.readFile(glue,'utf8')).replace("new URL('rhwp_bg.wasm', import.meta.url)","(()=>{throw new Error('Host WASM bytes required')})()"));
 const {build}=await import(pathToFileURL(path.join(studio,'node_modules/vite/dist/node/index.js')));

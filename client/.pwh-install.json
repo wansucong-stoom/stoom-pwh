@@ -1,17 +1,17 @@
 {
   "kind": "studio-inline",
-  "version": "0.6.63",
+  "version": "0.6.64",
   "upstreamVersion": "0.8.7",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "files": {
-    "editor.js": "e9595435d707f67cd3171cfba1bdba47436bd91f0dcacc3f6833ef3297c873e3",
+    "editor.js": "0e1a0ce32bf4f8d84cab770e117706a55ba3c280e5c47c30c7cabd9b8c293961",
     "rhwp-studio.css": "10875c5542232767cc250c64623f545b4fb07a292bba2c2c4c0b08db92aff0f9",
     "editor-body.html": "098dfd61cfbe9146261ebd4293bd6047402c735f7a22c54ca7f754170d56df8d"
   },
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "common",
-    "sha256": "34bc224d103a9d90fddd85c8b1afcf308bbc725e2e2adf551a97eeef9d55ff83",
+    "sha256": "72639cbac9dd55cf6433c9d056eca82f9201cbd582f7fec816a8ef294ccc7af1",
     "files": [
       {
         "path": "docs/engine-patches/studio/clipboard-safety.patch",
@@ -23,11 +23,11 @@
       },
       {
         "path": "package.json",
-        "sha256": "eb16eec3aa81c3104b6e2bf2e6f47e5f014668f07d591d4c314006e38b909d3c"
+        "sha256": "788de46ab9da21b9d773ecccfd62ca0ec0de95cd9be2579e9ff94fe2eaceebe6"
       },
       {
         "path": "scripts/build-inline.mjs",
-        "sha256": "81637d6eeb3ff794bf49d331854e3372909b67cfeaad1c15f3a745f2249d1972"
+        "sha256": "e12d45ef987376d863e3d42305c36030c533a2b88c542d40386c2f441c4fa97d"
       },
       {
         "path": "scripts/bundle-client.mjs",
@@ -35,7 +35,7 @@
       },
       {
         "path": "scripts/editor-build-contract.mjs",
-        "sha256": "68f20ba757ce0617bdfc6e5545510e0617dd89f97b6b550ef2182e68b8d643fc"
+        "sha256": "1cfcfda3bcd69be9895e31a1182f7d87e5b1450d92ec63431e59ac8be1fe3bfe"
       },
       {
         "path": "scripts/patch-auto-fill.mjs",
@@ -52,6 +52,10 @@
       {
         "path": "scripts/patch-body-cursor-contract.mjs",
         "sha256": "6f81b1ea37a28280481c45319ba63a071dcd2377ae2c092d78adf34286601f0f"
+      },
+      {
+        "path": "scripts/patch-canvas-metric-reuse.mjs",
+        "sha256": "23f0647750fa6b7d592c2b77b54b9b9ab716ab7ab4027aac2645a8118220c6dd"
       },
       {
         "path": "scripts/patch-cell-text-history.mjs",
@@ -168,6 +172,10 @@
       {
         "path": "src/body-cursor-position.mjs",
         "sha256": "110f341f27d7424d9e2f680890b8c6937ac0254dfcc97420582cfdd18905ad56"
+      },
+      {
+        "path": "src/canvas-metric-mutations.mjs",
+        "sha256": "b5017060e03a2c5aa0c9cd400add734d70de670cb2c9e5f57a393f9061b0e039"
       },
       {
         "path": "src/cell-border-grid.mjs",

@@ -31,7 +31,7 @@ Pwh는 **무료·오픈소스 HWP/HWPX 문서 편집기**입니다. 익숙한 �
 | **Pwh Desktop · Linux x64 시험판** | [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases/latest) · [설치 안내](docs/LINUX.md) | 같은 정식 릴리스의 Linux 패키지를 확인하고 앱에서 업데이트 |
 | **Pwh 플러그인 · Codex 데스크톱** | [GitHub 릴리스의 플러그인 ZIP](https://github.com/wansucong-stoom/stoom-pwh/releases/latest) | 최신 플러그인으로 갱신 |
 
-최근 정식 배포 기준은 **Pwh 0.6.63 · Desktop 0.1.44 · 공통 코어 r32**입니다. GitHub 배포와 Store 심사·게시 시점은 다르며, Store 설치판은 게시된 버전으로 업데이트됩니다. 이전 MSI 사용자는 [Store 이전 안내](docs/PWH-DESKTOP.md#설치와-사용)를 참고하세요.
+최근 정식 배포 기준은 **Pwh 0.6.64 · Desktop 0.1.45 · 공통 코어 r32**입니다. GitHub 배포와 Store 심사·게시 시점은 다르며, Store 설치판은 게시된 버전으로 업데이트됩니다. 이전 MSI 사용자는 [Store 이전 안내](docs/PWH-DESKTOP.md#설치와-사용)를 참고하세요.
 
 이번 버전에는 [표의 상하좌우 자동 채우기](docs/AUTO-FILL.md), 대화상자 키보드 이동과 메뉴·제품 정보 정렬 보완이 포함됩니다. 설치판 반영 여부는 [변경 이력](docs/CHANGELOG.md)을 확인하세요.
 
@@ -76,6 +76,8 @@ Pwh는 **무료·오픈소스 HWP/HWPX 문서 편집기**입니다. 익숙한 �
 ## 편집 품질과 지원 범위
 
 표의 쪽 나눔, 중첩 표와 그림 배치, 커서·선택이 같은 문서 구조를 따르도록 공통 편집기를 보완합니다. 변경된 셀과 상위 표의 계산 결과를 재사용하고, 그림 이동 중 불필요한 전체 문서 재생성을 줄입니다. 그림 이동의 실행 취소는 표 높이와 글줄 배치도 함께 복원합니다.
+
+줄 간격만 바꾸는 동안에는 준비된 글자 폭 측정 목록을 재사용합니다. 본문·일반 표·중첩 표의 단축키와 실행 취소를 같은 기준으로 처리하며 Windows·Linux에 함께 적용합니다. [검증과 측정 조건](docs/verification/PARAGRAPH-SPACING-PERFORMANCE.md)
 
 초기 문서 로딩·글꼴 전송부터 큰 표 선택, 중첩 셀 입력, 커서 조회, 큰 문서 전송, 그림 드래그와 반복 저장까지의 개선은 **[속도 개선 이력](docs/PERFORMANCE-HISTORY.md)**에 모았습니다. 적용 버전·변경 계층·전후 측정과 남는 비용을 구분합니다.
 
