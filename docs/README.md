@@ -14,6 +14,7 @@
 - [탭별 그래픽 메뉴](USER-GUIDE.md#contextual-ribbon)에는 메뉴 전환·좁은 창의 » 탐색과 키보드 사용법을 정리했습니다. [검증 범위](verification/CONTEXTUAL-RIBBON.md)
 - [메뉴·단축키 검증](verification/MENU-SHORTCUTS.md)에는 메뉴와 문서 키 입력의 분리, 겹글쇠 처리와 실제 입력 시험의 범위를 정리했습니다.
 - [그림 이동·실행 취소 검증](verification/PICTURE-MOTION.md)에는 표 안 그림 이동의 지연 원인과 표 높이 복원, 공통·Desktop의 보완을 정리했습니다.
+- [도형과 자동 쪽 배치 개발판 검증](verification/DRAWING-AND-PAGE-ARRANGEMENT.md)에는 도형·연결선·글상자의 입력·속성과 화면 폭에 따른 쪽 배치의 지원 범위를 정리했습니다.
 
 ## 조판과 검증
 

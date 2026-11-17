@@ -1703,242 +1703,265 @@ const patches = [
         "patchedSha256": "ac4728ae2806ea36a5ae58d119a72a5f35ffa79b41623fd48a49259fd6b50b10"
       }
     ]
+  },
+  {
+    "file": "rhwp-0.8.7-cell-command-paths.patch",
+    "sha256": "05acd790a2d0e41a53e1bfbcb84c13c5030f12b166d54ae6e873a91dd9bcc9c6",
+    "sources": [
+      {
+        "path": "src/document_core/commands/object_ops/table.rs",
+        "originalSha256": "75ed6240c3d4d9e0e40eaab2bb43a72a17be7bccc6ce146be62e290c2ac05c09",
+        "patchedSha256": "348fb353d71c7b96e58e7567a09726c7b37cd6c8b9b1ba617917ba8f29c138f0"
+      },
+      {
+        "path": "src/document_core/commands/table_ops.rs",
+        "originalSha256": "02fcb1aa425e2bc3e7964231480e34956e38289648779c553d4dc135851749c5",
+        "patchedSha256": "8e83c31f98c45d3382ec5887d45d3073108ba9a5bcc5609283fd2dbd86a40acb"
+      },
+      {
+        "path": "src/wasm_api.rs",
+        "originalSha256": "e0923c7b6e2b9eb523c33492a0d4ccc56f0304994f059adf4f324893f775168f",
+        "patchedSha256": "5b7a2542ec69847a2a1c05c7805ec4598ce3f79f510541bb3a4470dd6213c76b"
+      }
+    ]
+  },
+  {
+    "file": "rhwp-0.8.7-delete-control-metadata.patch",
+    "sha256": "7890662ffb658bfd354c489914fac7e51b94dc87f2c61caa5eb84193e3f685e4",
+    "sources": [
+      {
+        "path": "src/model/paragraph.rs",
+        "originalSha256": "9f2d4cf4558922bb259815cd3b14a2ee6271ed153283336190f685571a130ec4",
+        "patchedSha256": "f0d08a499e64de60a8bfab548ac5cb1e18c202e6784daf0fb19561b3bcb16244"
+      },
+      {
+        "path": "src/document_core/commands/object_ops/equation.rs",
+        "originalSha256": "3a2db00d0e79727f196909031face9efde540dcc41503b7cd2be7fc1212295f8",
+        "patchedSha256": "4999907c54ad32e1601f5ea1b3fad277fab8b8557026cad92faca0b5177c38c6"
+      },
+      {
+        "path": "src/document_core/commands/object_ops/picture.rs",
+        "originalSha256": "659722459d2bceefd2331d9fe4fe9d8acff0e2b738d59c5178f8c238a9551b2a",
+        "patchedSha256": "af8892f52e0a9cf104c4a339e6f492a0ca6f7c93e20ff7d4a935ba662c32c0a1"
+      },
+      {
+        "path": "src/document_core/commands/object_ops/shape.rs",
+        "originalSha256": "f9f8325f49eb3ddc918cd90a9710dfa0164ec010c9065e6280b7c804eed7b57d",
+        "patchedSha256": "e490e168048229a30e79ced066202d78d5e10eb180c70d7fcd08474c230e89b3"
+      },
+      {
+        "path": "src/document_core/commands/object_ops/table.rs",
+        "originalSha256": "348fb353d71c7b96e58e7567a09726c7b37cd6c8b9b1ba617917ba8f29c138f0",
+        "patchedSha256": "c3fec057cccd14a1af66241dd1ac4bf3db030d6295981d007f7e9f1c4b8d6365"
+      },
+      {
+        "path": "src/document_core/commands/table_ops.rs",
+        "originalSha256": "8e83c31f98c45d3382ec5887d45d3073108ba9a5bcc5609283fd2dbd86a40acb",
+        "patchedSha256": "2270792a6db38028ddcbf97b0e43a15f8e4b38d1f9b53648f21460eb660d2b4f"
+      }
+    ]
+  },
+  {
+    "file": "rhwp-0.8.7-nested-paragraph-format.patch",
+    "sha256": "e69392c7a45e1b0265e6f92c33d013509e829f8462e8345e9702b8d8c7f6417c",
+    "sources": [
+      {
+        "path": "src/document_core/commands/mod.rs",
+        "originalSha256": "84aa91a950208a23ee9534e50d76e7164c166d9f85995229bf73f3d885d9e980",
+        "patchedSha256": "52fb6e117d1abfed4eaf4d537edf776c67fd3ffd283146a6d8aa8bf4c68242d3"
+      },
+      {
+        "path": "src/document_core/commands/formatting.rs",
+        "originalSha256": "199dc58ab773f6d61f4366d452b16b2c02f2229a0e07ffff7a440bdf75d5a1d2",
+        "patchedSha256": "97a6580123e7eabf4a6227a753baa9f7cc632e605c5de64c2ad207f2a526c9a1"
+      },
+      {
+        "path": "src/document_core/commands/text_editing.rs",
+        "originalSha256": "7b1d758c473c5ea507a88d02f44cacaa169f92e73b2446b2d29e68152d9da980",
+        "patchedSha256": "66763ddead54f5e4445f6b950e71f95b1a2ef7187e19643e7b56be534003a346"
+      },
+      {
+        "path": "src/document_core/commands/cell_format_origin.rs",
+        "originalSha256": null,
+        "patchedSha256": "19f9413f26466f0197681f8fb80c9ba51d259474e0c81f62ebde932b5e77fdd1"
+      },
+      {
+        "path": "src/document_core/commands/paragraph_format_path.rs",
+        "originalSha256": null,
+        "patchedSha256": "af2fc4c38a0808498aa10b537616297f94d900ac9deeddc1c9c87f8f65a1313b"
+      },
+      {
+        "path": "src/wasm_api.rs",
+        "originalSha256": "5b7a2542ec69847a2a1c05c7805ec4598ce3f79f510541bb3a4470dd6213c76b",
+        "patchedSha256": "6328be70a2f9b0244a07524b734830492575370a35d49e38d1a751b717ea763c"
+      }
+    ]
+  },
+  {
+    "file": "rhwp-0.8.7-unique-grouped-textbox-editing.patch",
+    "sha256": "73f2b82b52d0609edd654a6d658e658443ab14b2663e197253819827a7e05a3e",
+    "sources": [
+      {
+        "path": "src/document_core/helpers.rs",
+        "originalSha256": "274fa2b1ae174267a7071104358ef8d51bda9a9b7d0dec3fa43b8f317e9971b3",
+        "patchedSha256": "06cea15b1bf7989f38cdab67f5f20da23b8a8cb157b228dde09e6f960c97282e"
+      },
+      {
+        "path": "src/document_core/queries/cursor_rect.rs",
+        "originalSha256": "e90de808a212ae8ada8cbffc962fe4bbdd3327d41e03ce3a9e07ff6e4dfc952a",
+        "patchedSha256": "d1e3aa09b264469d87b7fca0c752d4801a4ba2512b5ffc572855033cb3a3b170"
+      }
+    ]
+  },
+  {
+    "file": "rhwp-0.8.7-body-inline-object-range.patch",
+    "sha256": "1c54c5e77654115f07019086f0ea4424c5a974937630b962a28d48a9fa6b63db",
+    "sources": [
+      {
+        "path": "src/document_core/commands/mod.rs",
+        "originalSha256": "52fb6e117d1abfed4eaf4d537edf776c67fd3ffd283146a6d8aa8bf4c68242d3",
+        "patchedSha256": "f9bac1b93b51efe12ee645a1f0d23fd36e3e11f58eeefe37638ad658cd4aa789"
+      },
+      {
+        "path": "src/document_core/commands/body_inline.rs",
+        "originalSha256": null,
+        "patchedSha256": "7cd5db6c2ad538f5eb907a039318cee9bfbdc73162108df360ffdfb6c92d689c"
+      },
+      {
+        "path": "src/wasm_api.rs",
+        "originalSha256": "6328be70a2f9b0244a07524b734830492575370a35d49e38d1a751b717ea763c",
+        "patchedSha256": "026d4d6d63b08a3b91314d33f0bac1ffdd62caf466c467c4baa5f9d3512c40ba"
+      }
+    ]
+  },
+  {
+    "file": "rhwp-0.8.7-cell-picture-size-floor.patch",
+    "sha256": "15d268ff8171dc6075e2c0c101755456030e3e9e561f721b652e0701b918112e",
+    "sources": [
+      {
+        "path": "src/document_core/commands/object_ops/table.rs",
+        "originalSha256": "c3fec057cccd14a1af66241dd1ac4bf3db030d6295981d007f7e9f1c4b8d6365",
+        "patchedSha256": "dbcc043ad1e5d61fe1f055f38048761c28d966cbdd912e578a852de03a540810"
+      }
+    ]
+  },
+  {
+    "file": "rhwp-0.8.7-table-border-frame-ownership.patch",
+    "sha256": "cbbc4f6bc9370015d8e2a1877f36fe367573395c9fc927f663ffcc3c29356ce6",
+    "sources": [
+      {
+        "path": "src/renderer/layout/border_rendering.rs",
+        "originalSha256": "1207be94d1b3ca2fbcd266d64a98c03e387b01456498d134df3d36498d3ba805",
+        "patchedSha256": "90e0b68f39618b4524392f3a830a22eb3832c02157b7965c52da290618874f25"
+      }
+    ]
+  },
+  {
+    "file": "rhwp-0.8.7-folded-empty-host-float-frame.patch",
+    "sha256": "ae7c327406af7b73f438c0a263be5415788431920987ef887334850552f39da4",
+    "sources": [
+      {
+        "path": "src/renderer/typeset/controls/empty_float.rs",
+        "originalSha256": "75cb6cea26aa495c55f0f783d6cc5dfecfc3c3c3978ee7c28df34ad077050bff",
+        "patchedSha256": "0965d249e92a91f8010830a6674169f4f1cbb73cf668fe8693bd64e1a606d69d"
+      }
+    ]
+  },
+  {
+    "file": "rhwp-0.8.7-bounded-container-asset-reuse.patch",
+    "sha256": "975a00d031feb655a8327ceefc35b543849db82946e44d373c9af8aa546233ba",
+    "sources": [
+      {
+        "path": "src/model/bin_data.rs",
+        "originalSha256": "8194980b6883769e52a557ddfe4c45f7262d2b84ced3500271bfc33521d9c375",
+        "patchedSha256": "ae61c25ee3214a8022d35b1884de56490876f557b2749b94e288ad6814a92fc7"
+      },
+      {
+        "path": "src/parser/mod.rs",
+        "originalSha256": "9f454b82087a3c4775e0994bb8e75f22ba23d4b5cc685f11b997eac15e954dc8",
+        "patchedSha256": "3d6f8d879decebf0f769a7319e6987a9a0f45471fe45ed4892461751745946e3"
+      },
+      {
+        "path": "src/parser/hwpx/mod.rs",
+        "originalSha256": "2cae589e622d9af2d3eecdfa06b35511a90a340887ca6512ff2e5e0ed7e71935",
+        "patchedSha256": "fcc15db57edbfc2237750753e6f6ab7e76dfa80e8e3dfefe84aba1523303bcc4"
+      }
+    ]
+  },
+  {
+    "file": "rhwp-0.8.7-stored-nested-anchor-height-ownership.patch",
+    "sha256": "8c8f4d177118fd283cf4304644e19d7acf3d4e14f4f81596b136d53f00dd6b8d",
+    "sources": [
+      {
+        "path": "src/renderer/float_placement.rs",
+        "originalSha256": "5be7cfd022d5c0028c43a67975b87ff2ef8db80a63548142975003461a5498fb",
+        "patchedSha256": "98216bceaf7eedd3d129cf5e0f4cb0f28fb71902b314e55c8b5a565f4d6bcc18"
+      },
+      {
+        "path": "src/renderer/height_measurer.rs",
+        "originalSha256": "824049450b9febd76d4d1a396f53363b07084f51017dda5ec28c57a793630dcc",
+        "patchedSha256": "762d78f97735ebb2358820161774dacf74022c28655b0e95ba5f3fc4bf83aad2"
+      }
+    ]
+  },
+  {
+    "file": "rhwp-0.8.7-compressed-binary-export-reuse.patch",
+    "sha256": "eae7ad83498ce5240c8a945720979b3193eed55c70310be68e38908ba1dbcf3a",
+    "sources": [
+      {
+        "path": "src/serializer/hwpx/writer.rs",
+        "originalSha256": "aebde2c448a1ba283609512d8837065e0a73ff5ec23b1e769ff16e4cfb02084f",
+        "patchedSha256": "b485c982cdaa51c6909a26899da24b46218158f3f129d73022361714b473529b"
+      },
+      {
+        "path": "src/serializer/hwpx/mod.rs",
+        "originalSha256": "a229497d2ff10f2adaca6b72faa7a413e4ab4bbdb681eb39ba53bafe8172a0c4",
+        "patchedSha256": "2fc9d99f2fd0d0188b0c382292c6a87d69a59cfb504d76463d3a2d6974e4a2e5"
+      }
+    ]
+  },
+  {
+    "file": "rhwp-0.8.7-table-resize-allocated-grid.patch",
+    "sha256": "84a64da30fcc7955e450199162c3d47fa8704beacdb8dca18142cadc0f5e6a8f",
+    "sources": [
+      {
+        "path": "src/document_core/commands/table_ops.rs",
+        "originalSha256": "2270792a6db38028ddcbf97b0e43a15f8e4b38d1f9b53648f21460eb660d2b4f",
+        "patchedSha256": "5a2dae49893c180a4e5cb9d68971d9b61831095f8ff6412079cede193540df40"
+      },
+      {
+        "path": "src/renderer/height_measurer.rs",
+        "originalSha256": "762d78f97735ebb2358820161774dacf74022c28655b0e95ba5f3fc4bf83aad2",
+        "patchedSha256": "1d50093e8864806d08a1d7742177be348727806b8e623bc92d18946ae5e0b111"
+      }
+    ]
+  },
+  {
+    "file": "rhwp-0.8.7-drawing-tools-and-connector-style.patch",
+    "sha256": "1ddd297bd3a094289bc91bca8c56cda25d1ace2b9d163f49a7e0d945909a92aa",
+    "sources": [
+      {
+        "path": "src/document_core/commands/object_ops/shape.rs",
+        "originalSha256": "e490e168048229a30e79ced066202d78d5e10eb180c70d7fcd08474c230e89b3",
+        "patchedSha256": "bbd1393dc05317cada887683a08b858b588252c41b948bfd798cced30f66dfbc"
+      },
+      {
+        "path": "src/wasm_api.rs",
+        "originalSha256": "026d4d6d63b08a3b91314d33f0bac1ffdd62caf466c467c4baa5f9d3512c40ba",
+        "patchedSha256": "6dc612fd25a74e566c0921d2f6d7794d60008c57113df91c28bce80e5085c6ee"
+      },
+      {
+        "path": "src/renderer/layout/shape_layout.rs",
+        "originalSha256": "e2867b5ad92b002b83c30f2fc0ae7b34bcaaf86aa44935900be54b43ab986f4c",
+        "patchedSha256": "db556b3f089f6ec9aa1d1450abbe27e8d58d63be716260a5b5b56fe7e29a9d15"
+      },
+      {
+        "path": "src/document_core/queries/rendering.rs",
+        "originalSha256": "c29cb2f146cbeadbb8854fb1095ff6f39250bd9593e5eecfc7f35d05a1e82c08",
+        "patchedSha256": "8e646508e3f49434a3d60c4563d072b4bcd3f9a4188bc1ae09aaadcf3baa0905"
+      }
+    ]
   }
-,
-{
-  "file": "rhwp-0.8.7-cell-command-paths.patch",
-  "sha256": "05acd790a2d0e41a53e1bfbcb84c13c5030f12b166d54ae6e873a91dd9bcc9c6",
-  "sources": [
-    {
-      "path": "src/document_core/commands/object_ops/table.rs",
-      "originalSha256": "75ed6240c3d4d9e0e40eaab2bb43a72a17be7bccc6ce146be62e290c2ac05c09",
-      "patchedSha256": "348fb353d71c7b96e58e7567a09726c7b37cd6c8b9b1ba617917ba8f29c138f0"
-    },
-    {
-      "path": "src/document_core/commands/table_ops.rs",
-      "originalSha256": "02fcb1aa425e2bc3e7964231480e34956e38289648779c553d4dc135851749c5",
-      "patchedSha256": "8e83c31f98c45d3382ec5887d45d3073108ba9a5bcc5609283fd2dbd86a40acb"
-    },
-    {
-      "path": "src/wasm_api.rs",
-      "originalSha256": "e0923c7b6e2b9eb523c33492a0d4ccc56f0304994f059adf4f324893f775168f",
-      "patchedSha256": "5b7a2542ec69847a2a1c05c7805ec4598ce3f79f510541bb3a4470dd6213c76b"
-    }
-  ]
-}
-,
-{
-  "file": "rhwp-0.8.7-delete-control-metadata.patch",
-  "sha256": "7890662ffb658bfd354c489914fac7e51b94dc87f2c61caa5eb84193e3f685e4",
-  "sources": [
-    {
-      "path": "src/model/paragraph.rs",
-      "originalSha256": "9f2d4cf4558922bb259815cd3b14a2ee6271ed153283336190f685571a130ec4",
-      "patchedSha256": "f0d08a499e64de60a8bfab548ac5cb1e18c202e6784daf0fb19561b3bcb16244"
-    },
-    {
-      "path": "src/document_core/commands/object_ops/equation.rs",
-      "originalSha256": "3a2db00d0e79727f196909031face9efde540dcc41503b7cd2be7fc1212295f8",
-      "patchedSha256": "4999907c54ad32e1601f5ea1b3fad277fab8b8557026cad92faca0b5177c38c6"
-    },
-    {
-      "path": "src/document_core/commands/object_ops/picture.rs",
-      "originalSha256": "659722459d2bceefd2331d9fe4fe9d8acff0e2b738d59c5178f8c238a9551b2a",
-      "patchedSha256": "af8892f52e0a9cf104c4a339e6f492a0ca6f7c93e20ff7d4a935ba662c32c0a1"
-    },
-    {
-      "path": "src/document_core/commands/object_ops/shape.rs",
-      "originalSha256": "f9f8325f49eb3ddc918cd90a9710dfa0164ec010c9065e6280b7c804eed7b57d",
-      "patchedSha256": "e490e168048229a30e79ced066202d78d5e10eb180c70d7fcd08474c230e89b3"
-    },
-    {
-      "path": "src/document_core/commands/object_ops/table.rs",
-      "originalSha256": "348fb353d71c7b96e58e7567a09726c7b37cd6c8b9b1ba617917ba8f29c138f0",
-      "patchedSha256": "c3fec057cccd14a1af66241dd1ac4bf3db030d6295981d007f7e9f1c4b8d6365"
-    },
-    {
-      "path": "src/document_core/commands/table_ops.rs",
-      "originalSha256": "8e83c31f98c45d3382ec5887d45d3073108ba9a5bcc5609283fd2dbd86a40acb",
-      "patchedSha256": "2270792a6db38028ddcbf97b0e43a15f8e4b38d1f9b53648f21460eb660d2b4f"
-    }
-  ]
-},
-{
-  "file": "rhwp-0.8.7-nested-paragraph-format.patch",
-  "sha256": "e69392c7a45e1b0265e6f92c33d013509e829f8462e8345e9702b8d8c7f6417c",
-  "sources": [
-    {
-      "path": "src/document_core/commands/mod.rs",
-      "originalSha256": "84aa91a950208a23ee9534e50d76e7164c166d9f85995229bf73f3d885d9e980",
-      "patchedSha256": "52fb6e117d1abfed4eaf4d537edf776c67fd3ffd283146a6d8aa8bf4c68242d3"
-    },
-    {
-      "path": "src/document_core/commands/formatting.rs",
-      "originalSha256": "199dc58ab773f6d61f4366d452b16b2c02f2229a0e07ffff7a440bdf75d5a1d2",
-      "patchedSha256": "97a6580123e7eabf4a6227a753baa9f7cc632e605c5de64c2ad207f2a526c9a1"
-    },
-    {
-      "path": "src/document_core/commands/text_editing.rs",
-      "originalSha256": "7b1d758c473c5ea507a88d02f44cacaa169f92e73b2446b2d29e68152d9da980",
-      "patchedSha256": "66763ddead54f5e4445f6b950e71f95b1a2ef7187e19643e7b56be534003a346"
-    },
-    {
-      "path": "src/document_core/commands/cell_format_origin.rs",
-      "originalSha256": null,
-      "patchedSha256": "19f9413f26466f0197681f8fb80c9ba51d259474e0c81f62ebde932b5e77fdd1"
-    },
-    {
-      "path": "src/document_core/commands/paragraph_format_path.rs",
-      "originalSha256": null,
-      "patchedSha256": "af2fc4c38a0808498aa10b537616297f94d900ac9deeddc1c9c87f8f65a1313b"
-    },
-    {
-      "path": "src/wasm_api.rs",
-      "originalSha256": "5b7a2542ec69847a2a1c05c7805ec4598ce3f79f510541bb3a4470dd6213c76b",
-      "patchedSha256": "6328be70a2f9b0244a07524b734830492575370a35d49e38d1a751b717ea763c"
-    }
-  ]
-}
-,
-{
-  "file": "rhwp-0.8.7-unique-grouped-textbox-editing.patch",
-  "sha256": "73f2b82b52d0609edd654a6d658e658443ab14b2663e197253819827a7e05a3e",
-  "sources": [
-    {
-      "path": "src/document_core/helpers.rs",
-      "originalSha256": "274fa2b1ae174267a7071104358ef8d51bda9a9b7d0dec3fa43b8f317e9971b3",
-      "patchedSha256": "06cea15b1bf7989f38cdab67f5f20da23b8a8cb157b228dde09e6f960c97282e"
-    },
-    {
-      "path": "src/document_core/queries/cursor_rect.rs",
-      "originalSha256": "e90de808a212ae8ada8cbffc962fe4bbdd3327d41e03ce3a9e07ff6e4dfc952a",
-      "patchedSha256": "d1e3aa09b264469d87b7fca0c752d4801a4ba2512b5ffc572855033cb3a3b170"
-    }
-  ]
-},
-{
-  "file": "rhwp-0.8.7-body-inline-object-range.patch",
-  "sha256": "1c54c5e77654115f07019086f0ea4424c5a974937630b962a28d48a9fa6b63db",
-  "sources": [
-    {
-      "path": "src/document_core/commands/mod.rs",
-      "originalSha256": "52fb6e117d1abfed4eaf4d537edf776c67fd3ffd283146a6d8aa8bf4c68242d3",
-      "patchedSha256": "f9bac1b93b51efe12ee645a1f0d23fd36e3e11f58eeefe37638ad658cd4aa789"
-    },
-    {
-      "path": "src/document_core/commands/body_inline.rs",
-      "originalSha256": null,
-      "patchedSha256": "7cd5db6c2ad538f5eb907a039318cee9bfbdc73162108df360ffdfb6c92d689c"
-    },
-    {
-      "path": "src/wasm_api.rs",
-      "originalSha256": "6328be70a2f9b0244a07524b734830492575370a35d49e38d1a751b717ea763c",
-      "patchedSha256": "026d4d6d63b08a3b91314d33f0bac1ffdd62caf466c467c4baa5f9d3512c40ba"
-    }
-  ]
-},
-{
-  "file": "rhwp-0.8.7-cell-picture-size-floor.patch",
-  "sha256": "15d268ff8171dc6075e2c0c101755456030e3e9e561f721b652e0701b918112e",
-  "sources": [
-    {
-      "path": "src/document_core/commands/object_ops/table.rs",
-      "originalSha256": "c3fec057cccd14a1af66241dd1ac4bf3db030d6295981d007f7e9f1c4b8d6365",
-      "patchedSha256": "dbcc043ad1e5d61fe1f055f38048761c28d966cbdd912e578a852de03a540810"
-    }
-  ]
-},
-{
-  "file": "rhwp-0.8.7-table-border-frame-ownership.patch",
-  "sha256": "cbbc4f6bc9370015d8e2a1877f36fe367573395c9fc927f663ffcc3c29356ce6",
-  "sources": [
-    {
-      "path": "src/renderer/layout/border_rendering.rs",
-      "originalSha256": "1207be94d1b3ca2fbcd266d64a98c03e387b01456498d134df3d36498d3ba805",
-      "patchedSha256": "90e0b68f39618b4524392f3a830a22eb3832c02157b7965c52da290618874f25"
-    }
-  ]
-},
-{
-  "file": "rhwp-0.8.7-folded-empty-host-float-frame.patch",
-  "sha256": "ae7c327406af7b73f438c0a263be5415788431920987ef887334850552f39da4",
-  "sources": [
-    {
-      "path": "src/renderer/typeset/controls/empty_float.rs",
-      "originalSha256": "75cb6cea26aa495c55f0f783d6cc5dfecfc3c3c3978ee7c28df34ad077050bff",
-      "patchedSha256": "0965d249e92a91f8010830a6674169f4f1cbb73cf668fe8693bd64e1a606d69d"
-    }
-  ]
-},
-{
-  "file": "rhwp-0.8.7-bounded-container-asset-reuse.patch",
-  "sha256": "975a00d031feb655a8327ceefc35b543849db82946e44d373c9af8aa546233ba",
-  "sources": [
-    {
-      "path": "src/model/bin_data.rs",
-      "originalSha256": "8194980b6883769e52a557ddfe4c45f7262d2b84ced3500271bfc33521d9c375",
-      "patchedSha256": "ae61c25ee3214a8022d35b1884de56490876f557b2749b94e288ad6814a92fc7"
-    },
-    {
-      "path": "src/parser/mod.rs",
-      "originalSha256": "9f454b82087a3c4775e0994bb8e75f22ba23d4b5cc685f11b997eac15e954dc8",
-      "patchedSha256": "3d6f8d879decebf0f769a7319e6987a9a0f45471fe45ed4892461751745946e3"
-    },
-    {
-      "path": "src/parser/hwpx/mod.rs",
-      "originalSha256": "2cae589e622d9af2d3eecdfa06b35511a90a340887ca6512ff2e5e0ed7e71935",
-      "patchedSha256": "fcc15db57edbfc2237750753e6f6ab7e76dfa80e8e3dfefe84aba1523303bcc4"
-    }
-  ]
-},
-{
-  "file": "rhwp-0.8.7-stored-nested-anchor-height-ownership.patch",
-  "sha256": "8c8f4d177118fd283cf4304644e19d7acf3d4e14f4f81596b136d53f00dd6b8d",
-  "sources": [
-    {
-      "path": "src/renderer/float_placement.rs",
-      "originalSha256": "5be7cfd022d5c0028c43a67975b87ff2ef8db80a63548142975003461a5498fb",
-      "patchedSha256": "98216bceaf7eedd3d129cf5e0f4cb0f28fb71902b314e55c8b5a565f4d6bcc18"
-    },
-    {
-      "path": "src/renderer/height_measurer.rs",
-      "originalSha256": "824049450b9febd76d4d1a396f53363b07084f51017dda5ec28c57a793630dcc",
-      "patchedSha256": "762d78f97735ebb2358820161774dacf74022c28655b0e95ba5f3fc4bf83aad2"
-    }
-  ]
-},
-{
-  "file": "rhwp-0.8.7-compressed-binary-export-reuse.patch",
-  "sha256": "eae7ad83498ce5240c8a945720979b3193eed55c70310be68e38908ba1dbcf3a",
-  "sources": [
-    {
-      "path": "src/serializer/hwpx/writer.rs",
-      "originalSha256": "aebde2c448a1ba283609512d8837065e0a73ff5ec23b1e769ff16e4cfb02084f",
-      "patchedSha256": "b485c982cdaa51c6909a26899da24b46218158f3f129d73022361714b473529b"
-    },
-    {
-      "path": "src/serializer/hwpx/mod.rs",
-      "originalSha256": "a229497d2ff10f2adaca6b72faa7a413e4ab4bbdb681eb39ba53bafe8172a0c4",
-      "patchedSha256": "2fc9d99f2fd0d0188b0c382292c6a87d69a59cfb504d76463d3a2d6974e4a2e5"
-    }
-  ]
-},
-{
-  "file": "rhwp-0.8.7-table-resize-allocated-grid.patch",
-  "sha256": "84a64da30fcc7955e450199162c3d47fa8704beacdb8dca18142cadc0f5e6a8f",
-  "sources": [
-    {
-      "path": "src/document_core/commands/table_ops.rs",
-      "originalSha256": "2270792a6db38028ddcbf97b0e43a15f8e4b38d1f9b53648f21460eb660d2b4f",
-      "patchedSha256": "5a2dae49893c180a4e5cb9d68971d9b61831095f8ff6412079cede193540df40"
-    },
-    {
-      "path": "src/renderer/height_measurer.rs",
-      "originalSha256": "762d78f97735ebb2358820161774dacf74022c28655b0e95ba5f3fc4bf83aad2",
-      "patchedSha256": "1d50093e8864806d08a1d7742177be348727806b8e623bc92d18946ae5e0b111"
-    }
-  ]
-}
 ];
 const help = `Usage: node scripts/build-patched-core.mjs
   --source-archive <fixed upstream source ZIP>

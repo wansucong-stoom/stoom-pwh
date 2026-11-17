@@ -108,14 +108,14 @@
     {
       "path": "standalone-pwh/client/editor.js",
       "source": "standalone-pwh/client/editor.js",
-      "size": 2826775,
-      "sha256": "7d7884838775839925d384150205710b09685ffa17b3957eedf06f547f523d82"
+      "size": 2841383,
+      "sha256": "30dc78a25a224495ac68ee582fba7026d00197405d4c222fec52faaa08feb319"
     },
     {
       "path": "standalone-pwh/client/manifest.json",
       "source": "standalone-pwh/client/manifest.json",
-      "size": 18329,
-      "sha256": "36aab98a205aac6f112ade5299ea9e1bf7a6d8b9868274c2ea568d20e92c2500"
+      "size": 19369,
+      "sha256": "74cd3a1e61e64711e2389f42817f0284f7cda256ae39487d6977e5e946523b04"
     },
     {
       "path": "standalone-pwh/codex-agent.mjs",

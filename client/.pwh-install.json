@@ -4,14 +4,14 @@
   "upstreamVersion": "0.8.7",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "files": {
-    "editor.js": "8b898336d257bdc444bcabb1ce7e381532830454f570ffa329e8b3a0dbcbc683",
-    "rhwp-studio.css": "9389f692f374efa210b356dd4817899189ecb6044090b6d11db94ff429a3d439",
+    "editor.js": "342c028b454aad09f1e1dd6c00db35ea8860e7ec23ec3004baa114b10d1f2015",
+    "rhwp-studio.css": "10875c5542232767cc250c64623f545b4fb07a292bba2c2c4c0b08db92aff0f9",
     "editor-body.html": "098dfd61cfbe9146261ebd4293bd6047402c735f7a22c54ca7f754170d56df8d"
   },
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "common",
-    "sha256": "ab7000e49e86d87fdae77c78b64e7865218fe7543fe22d418da1d6d4c0115cfd",
+    "sha256": "9b3827f5ff74324c21c859ff3bca05c34408f88f731389d674187d53d119cf67",
     "files": [
       {
         "path": "docs/engine-patches/studio/clipboard-safety.patch",
@@ -27,7 +27,7 @@
       },
       {
         "path": "scripts/build-inline.mjs",
-        "sha256": "5ffb63332a5266c3c821e968b5f151756eccd28876f0be2c126de732243c1076"
+        "sha256": "53196802bb12c4cd047ed2737b1a591dd8dc7c955702b8fc30867f6c18a466e4"
       },
       {
         "path": "scripts/bundle-client.mjs",
@@ -35,11 +35,15 @@
       },
       {
         "path": "scripts/editor-build-contract.mjs",
-        "sha256": "05786588c80986bf03bea3cffd8c9cbfafbc5aa8e4a523eefcf12993668af98f"
+        "sha256": "931d32d673da9daf83b9126d578096c1301af6dba489fac2d39e01d40897b842"
       },
       {
         "path": "scripts/patch-auto-fill.mjs",
         "sha256": "b5640d2b149204785dc47b68e1b712de038bb9cd7cdc2c5dbc7f8bd7c6f47c57"
+      },
+      {
+        "path": "scripts/patch-auto-page-arrangement.mjs",
+        "sha256": "61a30983c2bb9bd851c9d03501f92ce585b8a87610f76cc75f364b0cc6e39f03"
       },
       {
         "path": "scripts/patch-background-recovery.mjs",
@@ -110,6 +114,10 @@
         "sha256": "19f3118df9de43b23af6fb21c782d3d42a31528cf21b171193b45eb5b4aea5b2"
       },
       {
+        "path": "scripts/patch-shape-tools.mjs",
+        "sha256": "299896e87db1e789f5d9f0cce6d5e712dba8fbdd466f8abcf6798001351f6cf5"
+      },
+      {
         "path": "scripts/patch-table-and-symbol-shortcuts.mjs",
         "sha256": "1cc46c6e523e644ba863d1f36cf4b690955eddb4cb0c0d00790bb8caecfe9184"
       },
@@ -140,6 +148,10 @@
       {
         "path": "src/auto-fill-table.mjs",
         "sha256": "c419b6ab7429eaeb38119d29a90c3f11323f914c506556208eaa866781ff43a8"
+      },
+      {
+        "path": "src/auto-page-arrangement.mjs",
+        "sha256": "d443e615a3f2f5003221b2d3579ff63444b59cbbc12a6b5ccf22e974d484c5d3"
       },
       {
         "path": "src/base64-bytes.mjs",
@@ -208,6 +220,10 @@
       {
         "path": "src/document-transfer.mjs",
         "sha256": "bc041632c1125101354ad1aacfa255e7cfe5309008f6589c6e14515116dad72a"
+      },
+      {
+        "path": "src/drawing-tools.mjs",
+        "sha256": "dc33492436c7bd63cb9d02165b507136fd4ba0b41446e5f64bb331bcf5e40901"
       },
       {
         "path": "src/editor-client.mjs",
@@ -396,6 +412,18 @@
       {
         "path": "src/pwh-ribbon-styles.ts",
         "sha256": "53d2ab6987b1c7c6e89bc2d231fbf678775de5b42915c5b314f88f74c3048721"
+      },
+      {
+        "path": "src/pwh-shape-picker.ts",
+        "sha256": "8283bff76a7161334ac81576ce9b0dde9db8e383e847b97de8f59ca3c3bd1c90"
+      },
+      {
+        "path": "src/pwh-shape-tools.css",
+        "sha256": "d938f9dd9a33f1b95e24c14f3ccf60676761eb6d152117d49b2960ed1a89ae3b"
+      },
+      {
+        "path": "src/pwh-shape-tools.ts",
+        "sha256": "1763b9b44519bfe1cd6ee576a6f32617e827d35b3b657ede4ece845c63235cc5"
       },
       {
         "path": "src/pwh-table-command-access.ts",

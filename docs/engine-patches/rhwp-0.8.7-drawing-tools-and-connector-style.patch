@@ -1,0 +1,591 @@
+--- a/src/document_core/commands/object_ops/shape.rs
++++ b/src/document_core/commands/object_ops/shape.rs
+@@ -295,10 +295,22 @@
+             let bl = &d.border_line;
+             let line_type = bl.attr & 0x3F; // bits 0-5: 선 종류 (0~17)
+             let line_end_shape = (bl.attr >> 6) & 0x0F; // bits 6-9: 끝 모양
+-            let arrow_start = (bl.attr >> 10) & 0x3F; // bits 10-15: 화살표 시작 모양
+-            let arrow_end = (bl.attr >> 16) & 0x3F; // bits 16-21: 화살표 끝 모양
+-            let arrow_start_size = (bl.attr >> 22) & 0x0F; // bits 22-25: 화살표 시작 크기
+-            let arrow_end_size = (bl.attr >> 26) & 0x0F; // bits 26-29: 화살표 끝 크기
++            let mut arrow_start = (bl.attr >> 10) & 0x3F; // bits 10-15: 화살표 시작 모양
++            let mut arrow_end = (bl.attr >> 16) & 0x3F; // bits 16-21: 화살표 끝 모양
++            let mut arrow_start_size = (bl.attr >> 22) & 0x0F; // bits 22-25: 화살표 시작 크기
++            let mut arrow_end_size = (bl.attr >> 26) & 0x0F;
++            if arrow_start==0 && arrow_end==0 {
++                if let ShapeObject::Line(line)=shape {
++                    if let Some(conn)=&line.connector {
++                        match conn.link_type as u32%3 {
++                            1=>{arrow_end=1;arrow_end_size=4;},
++                            2=>{arrow_start=1;arrow_end=1;arrow_start_size=4;arrow_end_size=4;},
++                            _=>{}
++                        }
++                    }
++                }
++            }
++ // bits 26-29: 화살표 끝 크기
+ 
+             let mut extra = format!(
+                 ",\"borderColor\":{},\"borderWidth\":{},\"borderAttr\":{},\"borderOutlineStyle\":{}\
+@@ -601,6 +613,19 @@
+             rect.y_coords = [0, 0, h, h];
+         }
+ 
++
++        if crate::document_core::helpers::json_i32(props_json,"arrowStart").is_some()
++            || crate::document_core::helpers::json_i32(props_json,"arrowEnd").is_some() {
++            if let ShapeObject::Line(line)=shape {
++                if let Some(conn)=&mut line.connector {
++                    let attr=line.drawing.border_line.attr;
++                    let start=(attr>>10)&0x3f;let end=(attr>>16)&0x3f;
++                    let arrows=if start!=0 && end!=0{2}else if end!=0{1}else{0};
++                    conn.link_type=crate::model::shape::LinkLineType::from_u32((conn.link_type as u32/3)*3+arrows);
++                }
++            }
++        }
++
+         let caption_changed = Self::apply_shape_caption_props(shape, props_json);
+ 
+         // Group 리사이즈: original_width 유지, current_width만 변경 (렌더러가 스케일 적용)
+@@ -634,6 +659,10 @@
+         }
+ 
+         // 리플로우 + 렌더 트리 캐시 무효화
++        if ["horzOffset","vertOffset","width","height"].iter().any(|key|
++            crate::document_core::helpers::json_i32(props_json,key).is_some()) {
++            self.update_connectors_in_section(section_idx);
++        }
+         let section = &mut self.document.sections[section_idx];
+         section.raw_stream = None;
+         self.recompose_section(section_idx);
+@@ -684,10 +713,22 @@
+             let bl = &d.border_line;
+             let line_type = bl.attr & 0x3F;
+             let line_end_shape = (bl.attr >> 6) & 0x0F;
+-            let arrow_start = (bl.attr >> 10) & 0x3F;
+-            let arrow_end = (bl.attr >> 16) & 0x3F;
+-            let arrow_start_size = (bl.attr >> 22) & 0x0F;
+-            let arrow_end_size = (bl.attr >> 26) & 0x0F;
++            let mut arrow_start = (bl.attr >> 10) & 0x3F;
++            let mut arrow_end = (bl.attr >> 16) & 0x3F;
++            let mut arrow_start_size = (bl.attr >> 22) & 0x0F;
++            let mut arrow_end_size = (bl.attr >> 26) & 0x0F;
++            if arrow_start==0 && arrow_end==0 {
++                if let ShapeObject::Line(line)=shape {
++                    if let Some(conn)=&line.connector {
++                        match conn.link_type as u32%3 {
++                            1=>{arrow_end=1;arrow_end_size=4;},
++                            2=>{arrow_start=1;arrow_end=1;arrow_start_size=4;arrow_end_size=4;},
++                            _=>{}
++                        }
++                    }
++                }
++            }
++
+ 
+             let mut extra = format!(
+                 ",\"borderColor\":{},\"borderWidth\":{},\"borderAttr\":{},\"borderOutlineStyle\":{}\
+@@ -953,6 +994,19 @@
+             rect.y_coords = [0, 0, h, h];
+         }
+ 
++
++        if crate::document_core::helpers::json_i32(props_json,"arrowStart").is_some()
++            || crate::document_core::helpers::json_i32(props_json,"arrowEnd").is_some() {
++            if let ShapeObject::Line(line)=shape {
++                if let Some(conn)=&mut line.connector {
++                    let attr=line.drawing.border_line.attr;
++                    let start=(attr>>10)&0x3f;let end=(attr>>16)&0x3f;
++                    let arrows=if start!=0 && end!=0{2}else if end!=0{1}else{0};
++                    conn.link_type=crate::model::shape::LinkLineType::from_u32((conn.link_type as u32/3)*3+arrows);
++                }
++            }
++        }
++
+         let caption_changed = Self::apply_shape_caption_props(shape, props_json);
+ 
+         if let crate::model::shape::ShapeObject::Group(ref mut group) = shape {
+@@ -1052,9 +1106,6 @@
+         line_flip_y: bool,
+         polygon_points: &[crate::model::Point],
+     ) -> Result<String, HwpError> {
+-        use crate::model::paragraph::{CharShapeRef, LineSeg};
+-        use crate::model::shape::*;
+-        use crate::model::style::{Fill, ShapeBorderLine};
+ 
+         // 유효성 검사
+         if section_idx >= self.document.sections.len() {
+@@ -1075,6 +1126,88 @@
+             ));
+         }
+ 
++        let shape_obj = self.build_drawing_shape_model(section_idx,
++            &self.document.sections[section_idx].paragraphs[para_idx], char_offset,
++            width, height, horz_offset, vert_offset, treat_as_char, text_wrap_str,
++            shape_type, line_flip_x, line_flip_y, polygon_points)?;
++
++        // --- 기존 문단에 인라인 컨트롤로 삽입 ---
++        self.document.sections[section_idx].raw_stream = None;
++
++        let insert_para_idx = para_idx;
++        let insert_ctrl_idx;
++        {
++            let paragraph = &mut self.document.sections[section_idx].paragraphs[para_idx];
++
++            // 컨트롤 삽입 위치 결정 (char_offset 기준)
++            let insert_idx = {
++                let positions =
++                    crate::document_core::helpers::find_control_text_positions(paragraph);
++                let mut idx = paragraph.controls.len();
++                for (i, &pos) in positions.iter().enumerate() {
++                    if pos > char_offset {
++                        idx = i;
++                        break;
++                    }
++                }
++                idx
++            };
++
++            // 컨트롤 추가
++            // [#3214] controls 기준 인덱스를 ctrl_data_records 에 그대로 쓰기 전에 정렬한다.
++            paragraph.align_ctrl_data_records();
++            paragraph
++                .controls
++                .insert(insert_idx, Control::Shape(Box::new(shape_obj)));
++            paragraph.ctrl_data_records.insert(insert_idx, None);
++
++            // 컨트롤은 char_offsets 에 원소로 들어가지 않고 8 code unit 갭으로 표현된다.
++            // 각주·수식·그림 경로와 같은 공용 시프트로 갭을 내고 뒤 누름틀 번호도 민다.
++            paragraph.shift_for_inline_control_insert(insert_idx, char_offset);
++
++            // char_count 갱신 (확장 컨트롤 = 8 code units)
++            paragraph.char_count += 8;
++
++            // control_mask에 GSO 비트 설정
++            paragraph.control_mask |= 0x00000800;
++            // has_para_text 보장
++            paragraph.has_para_text = true;
++            insert_ctrl_idx = insert_idx;
++        }
++        self.shift_active_field_for_control_insert(section_idx, para_idx, insert_ctrl_idx);
++
++        // 리플로우 + 페이지네이션
++        self.recompose_section(section_idx);
++        self.paginate_if_needed();
++
++        self.event_log.push(DocumentEvent::PictureInserted {
++            section: section_idx,
++            para: insert_para_idx,
++        });
++        Ok(crate::document_core::helpers::json_ok_with(&format!(
++            "\"paraIdx\":{},\"controlIdx\":{}",
++            insert_para_idx, insert_ctrl_idx
++        )))
++    }
++    fn build_drawing_shape_model(
++        &self,
++        section_idx: usize,
++        source: &Paragraph,
++        char_offset: usize,
++        width: u32,
++        height: u32,
++        horz_offset: u32,
++        vert_offset: u32,
++        treat_as_char: bool,
++        text_wrap_str: &str,
++        shape_type: &str,
++        line_flip_x: bool,
++        line_flip_y: bool,
++        polygon_points: &[crate::model::Point],
++    ) -> Result<ShapeObject, HwpError> {
++        use crate::model::paragraph::{CharShapeRef, LineSeg};
++        use crate::model::shape::*;
++        use crate::model::style::{Fill, ShapeBorderLine};
+         let text_wrap = match text_wrap_str {
+             "Square" => TextWrap::Square,
+             "Tight" => TextWrap::Tight,
+@@ -1086,7 +1219,7 @@
+         };
+ 
+         // 커서 위치 문단의 속성 상속 — 혼합 글자모양 문단에서는 커서 offset 의 글자모양이 기준.
+-        let current_para = &self.document.sections[section_idx].paragraphs[para_idx];
++        let current_para = source;
+         let default_char_shape_id: u32 = current_para.char_shape_id_at(char_offset).unwrap_or(0);
+         let default_para_shape_id: u16 = current_para.para_shape_id;
+ 
+@@ -1153,8 +1286,11 @@
+             | "connector-stroke"
+             | "connector-arc"
+             | "connector-straight-arrow"
++            | "connector-straight-both"
+             | "connector-stroke-arrow"
+-            | "connector-arc-arrow" => {
++            | "connector-stroke-both"
++            | "connector-arc-arrow"
++            | "connector-arc-both" => {
+                 if is_connector {
+                     0x24636f6c
+                 } else {
+@@ -1162,6 +1298,7 @@
+                 }
+             } // '$col' or '$lin'
+             "ellipse" => 0x24656c6c, // '$ell'
++            "curve" | "freehand" => 0x24637572,
+             "polygon" => 0x24706f6c, // '$pol'
+             "arc" => 0x24617263,     // '$arc'
+             _ => 0x24726563,         // '$rec' (rectangle, textbox)
+@@ -1237,7 +1374,7 @@
+         };
+ 
+         let has_textbox = shape_type == "textbox";
+-        let has_fill = shape_type != "line" && !is_connector;
++        let has_fill = !matches!(shape_type,"line"|"arc"|"curve"|"freehand") && !is_connector;
+ 
+         let drawing = DrawingObjAttr {
+             shape_attr: ShapeComponentAttr {
+@@ -1303,8 +1440,11 @@
+             | "connector-stroke"
+             | "connector-arc"
+             | "connector-straight-arrow"
++            | "connector-straight-both"
+             | "connector-stroke-arrow"
+-            | "connector-arc-arrow" => {
++            | "connector-stroke-both"
++            | "connector-arc-arrow"
++            | "connector-arc-both" => {
+                 // 드래그 방향에 따라 시작/끝점 결정
+                 let (sx, sy, ex, ey) = match (line_flip_x, line_flip_y) {
+                     (false, false) => (0, 0, w_i, h_i), // 좌상→우하
+@@ -1317,10 +1457,13 @@
+                     let link_type = match shape_type {
+                         "connector-straight" => LinkLineType::StraightNoArrow,
+                         "connector-straight-arrow" => LinkLineType::StraightOneWay,
++                        "connector-straight-both" => LinkLineType::StraightBoth,
+                         "connector-stroke" => LinkLineType::StrokeNoArrow,
+                         "connector-stroke-arrow" => LinkLineType::StrokeOneWay,
++                        "connector-stroke-both" => LinkLineType::StrokeBoth,
+                         "connector-arc" => LinkLineType::ArcNoArrow,
+                         "connector-arc-arrow" => LinkLineType::ArcOneWay,
++                        "connector-arc-both" => LinkLineType::ArcBoth,
+                         _ => LinkLineType::StraightNoArrow,
+                     };
+                     // 꺽인/곡선 연결선: 한컴 호환 제어점 생성
+@@ -1392,6 +1535,13 @@
+                 start2: crate::model::Point { x: w_i, y: h_i / 2 },
+                 end2: crate::model::Point { x: w_i, y: h_i / 2 },
+             }),
++            "curve" | "freehand" => {
++                let points=if polygon_points.is_empty() {
++                    vec![crate::model::Point{x:0,y:0},crate::model::Point{x:w_i/2,y:h_i},crate::model::Point{x:w_i,y:0}]
++                } else { polygon_points.to_vec() };
++                let segment_types=vec![if shape_type=="curve"{1}else{0};points.len().saturating_sub(1)];
++                ShapeObject::Curve(CurveShape{common,drawing,points,segment_types})
++            }
+             "polygon" => {
+                 let points = if !polygon_points.is_empty() {
+                     polygon_points.to_vec()
+@@ -1434,64 +1584,50 @@
+             }),
+         };
+ 
+-        // --- 기존 문단에 인라인 컨트롤로 삽입 ---
+-        self.document.sections[section_idx].raw_stream = None;
+-
+-        let insert_para_idx = para_idx;
+-        let insert_ctrl_idx;
+-        {
+-            let paragraph = &mut self.document.sections[section_idx].paragraphs[para_idx];
+-
+-            // 컨트롤 삽입 위치 결정 (char_offset 기준)
+-            let insert_idx = {
+-                let positions =
+-                    crate::document_core::helpers::find_control_text_positions(paragraph);
+-                let mut idx = paragraph.controls.len();
+-                for (i, &pos) in positions.iter().enumerate() {
+-                    if pos > char_offset {
+-                        idx = i;
+-                        break;
+-                    }
+-                }
+-                idx
+-            };
+-
+-            // 컨트롤 추가
+-            // [#3214] controls 기준 인덱스를 ctrl_data_records 에 그대로 쓰기 전에 정렬한다.
+-            paragraph.align_ctrl_data_records();
+-            paragraph
+-                .controls
+-                .insert(insert_idx, Control::Shape(Box::new(shape_obj)));
+-            paragraph.ctrl_data_records.insert(insert_idx, None);
+-
+-            // 컨트롤은 char_offsets 에 원소로 들어가지 않고 8 code unit 갭으로 표현된다.
+-            // 각주·수식·그림 경로와 같은 공용 시프트로 갭을 내고 뒤 누름틀 번호도 민다.
+-            paragraph.shift_for_inline_control_insert(insert_idx, char_offset);
+-
+-            // char_count 갱신 (확장 컨트롤 = 8 code units)
+-            paragraph.char_count += 8;
+-
+-            // control_mask에 GSO 비트 설정
+-            paragraph.control_mask |= 0x00000800;
+-            // has_para_text 보장
+-            paragraph.has_para_text = true;
+-            insert_ctrl_idx = insert_idx;
+-        }
+-        self.shift_active_field_for_control_insert(section_idx, para_idx, insert_ctrl_idx);
+-
+-        // 리플로우 + 페이지네이션
+-        self.recompose_section(section_idx);
+-        self.paginate_if_needed();
+-
+-        self.event_log.push(DocumentEvent::PictureInserted {
+-            section: section_idx,
+-            para: insert_para_idx,
+-        });
+-        Ok(crate::document_core::helpers::json_ok_with(&format!(
+-            "\"paraIdx\":{},\"controlIdx\":{}",
+-            insert_para_idx, insert_ctrl_idx
+-        )))
+-    }
++        Ok(shape_obj)
++    }
++
++    pub fn create_drawing_in_cell_by_path_native(
++        &mut self,
++        section_idx: usize,
++        parent_para_idx: usize,
++        path: &[(usize, usize, usize)],
++        char_offset: usize,
++        width: u32,
++        height: u32,
++        horz_offset: u32,
++        vert_offset: u32,
++        treat_as_char: bool,
++        text_wrap_str: &str,
++        shape_type: &str,
++        line_flip_x: bool,
++        line_flip_y: bool,
++        polygon_points: &[crate::model::Point],
++    ) -> Result<String, HwpError> {
++        let source=self.resolve_paragraph_by_path(section_idx,parent_para_idx,path)?.clone();
++        if path.is_empty() || char_offset > source.char_count as usize {
++            return Err(HwpError::RenderError("도형 삽입 위치가 범위를 벗어났습니다".into()));
++        }
++        let mut shape=self.build_drawing_shape_model(section_idx,&source,char_offset,
++            width,height,horz_offset,vert_offset,treat_as_char,text_wrap_str,
++            shape_type,line_flip_x,line_flip_y,polygon_points)?;
++        Self::apply_common_obj_attr_from_json(shape.common_mut(),
++            r#"{"horzRelTo":"Column","vertRelTo":"Para"}"#);
++        let para=self.get_cell_paragraph_mut_by_path(section_idx,parent_para_idx,path)?;
++        let positions=crate::document_core::helpers::find_control_text_positions(para);
++        let index=positions.iter().position(|&p|p>char_offset).unwrap_or(para.controls.len());
++        para.align_ctrl_data_records();
++        para.controls.insert(index,Control::Shape(Box::new(shape)));
++        para.ctrl_data_records.insert(index,None);
++        para.shift_for_inline_control_insert(index,char_offset);
++        para.char_count+=8;para.control_mask|=0x00000800;para.has_para_text=true;
++        self.reflow_cell_paragraph_by_path(section_idx,parent_para_idx,path,path.last().unwrap().2);
++        self.mark_cell_control_dirty(section_idx,parent_para_idx,path[0].0);
++        self.document.sections[section_idx].raw_stream=None;
++        self.mark_section_dirty(section_idx);self.paginate_if_needed();
++        Ok(serde_json::json!({"ok":true,"paraIdx":parent_para_idx,"controlIdx":index}).to_string())
++    }
++
+     /// 글상자(Shape) z-order 변경 (네이티브).
+     /// operation: "front" | "back" | "forward" | "backward"
+     pub fn change_shape_z_order_native(
+--- a/src/wasm_api.rs
++++ b/src/wasm_api.rs
+@@ -4603,11 +4603,19 @@
+         let line_flip_x = json_bool(json, "lineFlipX").unwrap_or(false);
+         let line_flip_y = json_bool(json, "lineFlipY").unwrap_or(false);
+         // 다각형 꼭짓점: "polygonPoints":[{"x":N,"y":N},...]
+-        let polygon_points: Vec<crate::model::Point> = if shape_type == "polygon" {
++        let polygon_points: Vec<crate::model::Point> = if matches!(shape_type.as_str(),"polygon"|"curve"|"freehand") {
+             Self::parse_polygon_points(json)
+         } else {
+             Vec::new()
+         };
++        let value:serde_json::Value=serde_json::from_str(json).map_err(|e|JsValue::from_str(&e.to_string()))?;
++        if let Some(path_value)=value.get("cellPath") {
++            let parent=value.get("parentParaIdx").and_then(|v|v.as_u64()).ok_or_else(||JsValue::from_str("parentParaIdx is required"))? as usize;
++            let path=DocumentCore::parse_cell_path(&path_value.to_string())?;
++            return self.create_drawing_in_cell_by_path_native(sec,parent,&path,offset,
++                width,height,horz_offset,vert_offset,treat_as_char,&text_wrap,&shape_type,
++                line_flip_x,line_flip_y,&polygon_points).map_err(Into::into);
++        }
+         let result = self.create_shape_control_native(
+             sec,
+             para,
+--- a/src/renderer/layout/shape_layout.rs
++++ b/src/renderer/layout/shape_layout.rs
+@@ -1546,6 +1546,7 @@
+                         let mut line_style = drawing_to_line_style(&line.drawing);
+                         // 연결선 화살표: LinkLineType → ArrowStyle
+                         use crate::model::shape::LinkLineType;
++                        if (line.drawing.border_line.attr & ((0x3f<<10)|(0x3f<<16)))==0 {
+                         match conn.link_type {
+                             LinkLineType::StraightOneWay
+                             | LinkLineType::StrokeOneWay
+@@ -1562,6 +1563,7 @@
+                                 line_style.end_arrow_size = 4;
+                             }
+                             _ => {}
++                        }
+                         }
+                         // 제어점으로 경로 생성
+                         let mut commands = Vec::new();
+@@ -1729,6 +1731,7 @@
+                         // 제어점 없는 연결선 → 직선으로 렌더링
+                         let mut line_style = drawing_to_line_style(&line.drawing);
+                         use crate::model::shape::LinkLineType;
++                        if (line.drawing.border_line.attr & ((0x3f<<10)|(0x3f<<16)))==0 {
+                         match conn.link_type {
+                             LinkLineType::StraightOneWay
+                             | LinkLineType::StrokeOneWay
+@@ -1745,6 +1748,7 @@
+                                 line_style.end_arrow_size = 4;
+                             }
+                             _ => {}
++                        }
+                         }
+                         let ((x1, y1), (x2, y2)) = self.line_endpoints_in_rendering_frame(
+                             line,
+--- a/src/document_core/queries/rendering.rs
++++ b/src/document_core/queries/rendering.rs
+@@ -3709,19 +3709,22 @@
+     /// 가 본문 API 로 떨어져 던지면서 칸 안 도형의 마우스 조작이 전부 막혔다. 선택 토글도
+     /// `cellPath` 로 개체를 구분하므로 같은 문단의 두 도형을 같은 것으로 봤다.
+     fn shape_cell_context_json(
+-        cell_index: Option<usize>,
+-        cell_para_index: Option<usize>,
++        cell_index: Option<usize>,cell_para_index: Option<usize>,
+         outer_table_control_index: Option<usize>,
++        enclosing: Option<&crate::renderer::layout::CellContext>,
+     ) -> String {
+-        let (Some(cei), Some(cpi), Some(otci)) =
+-            (cell_index, cell_para_index, outer_table_control_index)
+-        else {
+-            return String::new();
+-        };
+-        format!(
+-            ",\"cellIdx\":{cei},\"cellParaIdx\":{cpi},\"outerTableControlIdx\":{otci}\
+-             ,\"cellPath\":[{{\"controlIndex\":{otci},\"cellIndex\":{cei},\"cellParaIndex\":{cpi}}}]"
+-        )
++        let (Some(cei),Some(cpi),Some(otci))=(cell_index,cell_para_index,outer_table_control_index)
++            else {return String::new();};
++        if let Some(ctx)=enclosing.filter(|ctx|ctx.path.len()>1) {
++            let mut ctx=ctx.clone();
++            if let Some(last)=ctx.path.last_mut(){last.cell_index=cei;last.cell_para_index=cpi;}
++            let entries:Vec<_>=ctx.path.iter().map(|e|serde_json::json!({
++                "controlIndex":e.control_index,"cellIndex":e.cell_index,"cellParaIndex":e.cell_para_index
++            })).collect();
++            return format!(",\"cellIdx\":{cei},\"cellParaIdx\":{cpi},\"outerTableControlIdx\":{},\"parentParaIdx\":{},\"cellPath\":{}",
++                ctx.path[0].control_index,ctx.parent_para_index,serde_json::to_string(&entries).unwrap());
++        }
++        format!(",\"cellIdx\":{cei},\"cellParaIdx\":{cpi},\"outerTableControlIdx\":{otci},\"cellPath\":[{{\"controlIndex\":{otci},\"cellIndex\":{cei},\"cellParaIndex\":{cpi}}}]")
+     }
+ 
+     /// 컨트롤(표, 이미지 등) 레이아웃 정보 (네이티브 에러 타입)
+@@ -3735,6 +3738,7 @@
+             node: &RenderNode,
+             controls: &mut Vec<String>,
+             doc: &crate::model::document::Document,
++            enclosing_cell: Option<&crate::renderer::layout::CellContext>,
+         ) {
+             // [Task #1280 v2] 컨트롤별 plane/zOrder/stableIndex 노출 — 렌더 정렬키
+             // `paper_node_sort_key`(layout.rs)를 그대로 재사용해 프런트 히트테스트가
+@@ -4141,11 +4145,15 @@
+                         rect_node.para_index,
+                         rect_node.control_index,
+                     ) {
++                        let pi=if rect_node.cell_index.is_some() {
++                            enclosing_cell.filter(|ctx|ctx.path.len()>1).map(|ctx|ctx.parent_para_index).unwrap_or(pi)
++                        }else{pi};
+                         // [Task #1138] 표 셀 안 사각형: cellIdx/cellParaIdx/outerTableControlIdx
+                         let cell_str = DocumentCore::shape_cell_context_json(
+                             rect_node.cell_index,
+                             rect_node.cell_para_index,
+                             rect_node.outer_table_control_index,
++                            enclosing_cell,
+                         );
+                         controls.push(format!(
+                             "{{\"type\":\"shape\",\"x\":{:.1},\"y\":{:.1},\"w\":{:.1},\"h\":{:.1},\"secIdx\":{},\"paraIdx\":{},\"controlIdx\":{}{}{}}}",
+@@ -4164,11 +4172,15 @@
+                         line_node.para_index,
+                         line_node.control_index,
+                     ) {
++                        let pi=if line_node.cell_index.is_some() {
++                            enclosing_cell.filter(|ctx|ctx.path.len()>1).map(|ctx|ctx.parent_para_index).unwrap_or(pi)
++                        }else{pi};
+                         // [Task #1138] 표 셀 안 직선
+                         let cell_str = DocumentCore::shape_cell_context_json(
+                             line_node.cell_index,
+                             line_node.cell_para_index,
+                             line_node.outer_table_control_index,
++                            enclosing_cell,
+                         );
+                         controls.push(format!(
+                             "{{\"type\":\"line\",\"x\":{:.1},\"y\":{:.1},\"w\":{:.1},\"h\":{:.1},\"x1\":{:.1},\"y1\":{:.1},\"x2\":{:.1},\"y2\":{:.1},\"secIdx\":{},\"paraIdx\":{},\"controlIdx\":{}{}{}}}",
+@@ -4185,11 +4197,15 @@
+                         ell_node.para_index,
+                         ell_node.control_index,
+                     ) {
++                        let pi=if ell_node.cell_index.is_some() {
++                            enclosing_cell.filter(|ctx|ctx.path.len()>1).map(|ctx|ctx.parent_para_index).unwrap_or(pi)
++                        }else{pi};
+                         // [Task #1138] 표 셀 안 타원
+                         let cell_str = DocumentCore::shape_cell_context_json(
+                             ell_node.cell_index,
+                             ell_node.cell_para_index,
+                             ell_node.outer_table_control_index,
++                            enclosing_cell,
+                         );
+                         controls.push(format!(
+                             "{{\"type\":\"shape\",\"x\":{:.1},\"y\":{:.1},\"w\":{:.1},\"h\":{:.1},\"secIdx\":{},\"paraIdx\":{},\"controlIdx\":{}{}{}}}",
+@@ -4205,11 +4221,15 @@
+                         path_node.para_index,
+                         path_node.control_index,
+                     ) {
++                        let pi=if path_node.cell_index.is_some() {
++                            enclosing_cell.filter(|ctx|ctx.path.len()>1).map(|ctx|ctx.parent_para_index).unwrap_or(pi)
++                        }else{pi};
+                         // [Task #1138] 표 셀 안 path (다각형/곡선/연결선)
+                         let cell_str = DocumentCore::shape_cell_context_json(
+                             path_node.cell_index,
+                             path_node.cell_para_index,
+                             path_node.outer_table_control_index,
++                            enclosing_cell,
+                         );
+                         if let Some((x1, y1, x2, y2)) = path_node.connector_endpoints {
+                             // 연결선: 선 선택 방식 (시작/끝 좌표 포함)
+@@ -4231,13 +4251,27 @@
+                 }
+                 _ => {}
+             }
+-            for child in &node.children {
+-                collect_controls(child, controls, doc);
++            for (index,child) in node.children.iter().enumerate() {
++                // Keep the editing owner from table ancestry; shape nodes only
++                // carry the innermost scalar indices. Never infer from geometry.
++                let context=if let (RenderNodeType::Table(table),RenderNodeType::TableCell(cell))=(&node.node_type,&child.node_type) {
++                    let mut ctx=table.cell_context.clone().or_else(||{
++                        Some(crate::renderer::layout::CellContext{
++                            parent_para_index:table.para_index?,in_textbox:false,
++                            path:vec![crate::renderer::layout::CellPathEntry{
++                                control_index:table.control_index?,cell_index:0,cell_para_index:0,text_direction:cell.text_direction
++                            }],
++                        })
++                    });
++                    if let Some(ctx)=ctx.as_mut(){if let Some(last)=ctx.path.last_mut(){last.cell_index=cell.model_cell_index.map(|i|i as usize).unwrap_or(index);}}
++                    ctx
++                }else{None};
++                collect_controls(child,controls,doc,context.as_ref().or(enclosing_cell));
+             }
+         }
+ 
+         let mut controls = Vec::new();
+-        collect_controls(&tree.root, &mut controls, &self.document);
++        collect_controls(&tree.root, &mut controls, &self.document,None);
+ 
+         Ok(format!("{{\"controls\":[{}]}}", controls.join(",")))
+     }

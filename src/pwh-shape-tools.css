@@ -1,0 +1,10 @@
+.pwh-shape-picker{width:288px;max-width:calc(100vw - 8px);border:1px solid var(--ui-border);border-radius:3px;overflow:hidden;box-shadow:var(--shadow-dropdown)}
+.pwh-shape-picker .shape-picker-title{background:var(--color-surface-raised);color:var(--color-text-muted);font-weight:400;padding:5px 9px}
+.pwh-shape-picker .shape-picker-grid{gap:1px;padding:4px 6px}
+.pwh-shape-picker .pwh-drawing-grid{grid-template-columns:repeat(8,minmax(0,1fr))}
+.pwh-shape-picker .pwh-connector-grid{grid-template-columns:repeat(9,minmax(0,1fr))}
+.pwh-shape-picker .shape-picker-btn{min-width:0;width:100%;height:32px;padding:3px;border-radius:2px;color:var(--color-text)}
+.pwh-shape-picker .shape-picker-btn svg{width:24px;height:24px;overflow:visible}
+.pwh-shape-picker .shape-picker-btn:focus-visible{outline:2px solid var(--color-primary);outline-offset:-2px;background:var(--color-accent-bg)}
+.pwh-shape-hint{font-size:11px;line-height:1.5;padding:6px 9px;border-top:1px solid var(--ui-border);color:var(--color-text-muted)}
+.pwh-drawing-preview{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:visible}
