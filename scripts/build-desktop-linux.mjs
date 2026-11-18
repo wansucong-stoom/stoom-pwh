@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import {copyDesktopRuntime} from './desktop-runtime-assets.mjs';
+import {verifyDesktopRuntime} from './verify-desktop-runtime.mjs';
 import fs from 'node:fs/promises';import os from 'node:os';import path from 'node:path';
 import {createHash} from 'node:crypto';import {fileURLToPath} from 'node:url';
 import {execFile} from 'node:child_process';import {promisify} from 'node:util';
@@ -20,7 +22,7 @@ async function archive(item){const file=path.join(cache,item.name||item.file);le
 const inputs={};for(const[key,item]of Object.entries({...pin.artifacts,common:common.runtime})){inputs[key]=await archive(item);console.log('Verified '+path.basename(inputs[key].file));}
 const work=await fs.mkdtemp(path.join(os.tmpdir(),'pwh-linux-build-')),app=path.join(work,'PwhDesktop');await fs.mkdir(app);
 async function unzip(bytes,destination,{strip='',filter=()=>true}={}){const seen=new Set();for(const e of zipEntries(bytes,{maxMember:300*1024*1024})){let n=e.name;if(strip){if(!n.startsWith(strip))throw Error('Archive root differs');n=n.slice(strip.length);}if(!n||!filter(n))continue;const key=n.replace(/\/$/,'');if(seen.has(key))throw Error('Duplicate archive path');seen.add(key);const target=childPath(destination,key);if(n.endsWith('/'))await fs.mkdir(target,{recursive:true});else{await fs.mkdir(path.dirname(target),{recursive:true});await fs.writeFile(target,e.read(),{flag:'wx',mode:0o644});}}}
-await fs.cp(path.join(root,'desktop/standalone-pwh'),path.join(app,'standalone-pwh'),{recursive:true});await fs.mkdir(path.join(app,'bridge'));for(const n of ['hwp-codex-host.mjs','codex-image-host.mjs'])await fs.copyFile(path.join(root,'desktop/bridge',n),path.join(app,'bridge',n));
+await copyDesktopRuntime(path.join(root,'desktop/standalone-pwh'),path.join(app,'standalone-pwh'));await fs.writeFile(path.join(app,'standalone-pwh','version.json'),JSON.stringify({version})+'\n',{flag:'wx'});await fs.mkdir(path.join(app,'bridge'));for(const n of ['hwp-codex-host.mjs','codex-image-host.mjs'])await fs.copyFile(path.join(root,'desktop/bridge',n),path.join(app,'bridge',n));
 const plugin=path.join(work,'plugin.zip');await packagePlugin({output:plugin});await unzip(await fs.readFile(plugin),path.join(app,'release-source'),{strip:'pwh/'});
 await unzip(inputs.common.bytes,path.join(app,'engine'),{filter:n=>!n.startsWith('rhwp/')&&!n.toLowerCase().endsWith('.exe')});
 await unzip(inputs.electron.bytes,path.join(app,'electron'));
@@ -31,7 +33,8 @@ const nodeRoot=path.join(inputs.node.directory,'node-v24.22.3-linux-x64');await 
 for(const n of ['electron/electron','electron/chrome_crashpad_handler','electron/chrome-sandbox','node/node','engine/rhwp/rhwp'])await fs.chmod(path.join(app,n),0o755);
 await fs.writeFile(path.join(app,'standalone-pwh','distribution.json'),JSON.stringify({schema:1,channel:'linux'})+'\n');
 await fs.writeFile(path.join(app,'pwh-desktop'),'#!/bin/sh\nset -eu\nAPP_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)\nif [ "${1-}" = "--install" ]; then exec "$APP_DIR/node/node" "$APP_DIR/standalone-pwh/linux-install.mjs"; fi\nexec "$APP_DIR/node/node" "$APP_DIR/standalone-pwh/launch.mjs" "$@"\n',{mode:0o755});
-const manifest={schema:1,platform:'linux-x64',pwhVersion:pkg.version,desktopVersion:version,commonRuntime:common.id,commonArchiveSha256:common.runtime.sha256,coreSha256:sha(await fs.readFile(path.join(app,'engine/core/rhwp_bg.wasm'))),editorSha256:sha(await fs.readFile(path.join(app,'standalone-pwh/client/editor.js'))),artifacts:pin.artifacts};
+const runtimeSmoke=await verifyDesktopRuntime(app);
+const manifest={runtimeSmoke,schema:1,platform:'linux-x64',pwhVersion:pkg.version,desktopVersion:version,commonRuntime:common.id,commonArchiveSha256:common.runtime.sha256,coreSha256:sha(await fs.readFile(path.join(app,'engine/core/rhwp_bg.wasm'))),editorSha256:sha(await fs.readFile(path.join(app,'standalone-pwh/client/editor.js'))),artifacts:pin.artifacts};
 await fs.writeFile(path.join(app,'engine','.preserved-runtime.json'),JSON.stringify({schemaVersion:1,id:common.id,platform:'linux-x64',archiveSha256:common.runtime.sha256})+'\n');
 await fs.writeFile(path.join(app,'LINUX-BUILD.json'),JSON.stringify(manifest,null,2)+'\n');
 await fs.copyFile(path.join(root,'docs','LINUX.md'),path.join(app,'README.md'));

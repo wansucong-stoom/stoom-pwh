@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import {desktopRuntimeFiles} from './desktop-runtime-assets.mjs';
+import {verifyDesktopRuntime} from './verify-desktop-runtime.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
@@ -9,10 +11,7 @@ import {officialRuntimeFiles} from '../desktop/standalone-pwh/official-codex-run
 
 const repository = 'wansucong-stoom/stoom-pwh';
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
-const requiredDesktop = ['host.mjs','app.js','app.html','workspace-shell.mjs','workspace.js',
-  'native-paste.cjs','paste-bridge.mjs',
-  'electron-shell.cjs','electron-preload.cjs','electron-controller.mjs','official-codex-runtime.mjs',
-  'chatgpt-store.mjs','desktop-distribution.mjs','store-update-check.mjs','stoom.ico','client/editor.js','client/manifest.json'];
+
 
 export function storeReleaseAsset(release, {pwhVersion, desktopVersion}) {
   if (!release || release.draft !== false || release.prerelease !== false
@@ -44,6 +43,7 @@ export async function verifyStoreFiles(read, {sourceRoot, runtimeRoot, identity,
   const compare = async (member, file) => {
     if (sha(await read(member)) !== sha(await fs.readFile(file))) throw Error('Store package/source mismatch: ' + member);
   };
+  const requiredDesktop=await desktopRuntimeFiles(path.join(sourceRoot,'desktop/standalone-pwh'));
   for (const relative of requiredDesktop) await compare('standalone-pwh/' + relative, path.join(sourceRoot,'desktop/standalone-pwh',relative));
   for (const relative of ['package.json','client/editor.js','client/.pwh-install.json']) await compare('release-source/' + relative,path.join(sourceRoot,relative));
   for (const relative of ['core/rhwp.js','core/rhwp_bg.wasm']) await compare('engine/' + relative,path.join(runtimeRoot,relative));
@@ -62,7 +62,8 @@ export async function verifyStorePackage(packageFile, options) {
   const payload = path.join(work,'payload');
   try {
     await runMsixTool(path.join(options.sdkDirectory,'makeappx.exe'),['unpack','/p',packageFile,'/d',payload]);
-    return await verifyStoreFiles(name => fs.readFile(path.join(payload,name)),options);
+    const report=await verifyStoreFiles(name => fs.readFile(path.join(payload,name)),options);
+    return {...report,runtimeSmoke:await verifyDesktopRuntime(payload)};
   } finally {
     await fs.rm(work,{recursive:true,force:true});
   }

@@ -31,7 +31,9 @@ Pwh는 **무료·오픈소스 HWP/HWPX 문서 편집기**입니다. 익숙한 �
 | **Pwh Desktop · Linux x64 시험판** | [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases/latest) · [설치 안내](docs/LINUX.md) | 같은 정식 릴리스의 Linux 패키지를 확인하고 앱에서 업데이트 |
 | **Pwh 플러그인 · Codex 데스크톱** | [GitHub 릴리스의 플러그인 ZIP](https://github.com/wansucong-stoom/stoom-pwh/releases/latest) | 최신 플러그인으로 갱신 |
 
-최근 정식 배포 기준은 **Pwh 0.6.66 · Desktop 0.1.47 · 공통 코어 r32**입니다. GitHub 배포와 Store 심사·게시 시점은 다르며, Store 설치판은 게시된 버전으로 업데이트됩니다. 이전 MSI 사용자는 [Store 이전 안내](docs/PWH-DESKTOP.md#설치와-사용)를 참고하세요.
+최근 정식 배포 기준은 **Pwh 0.6.67 · Desktop 0.1.48 · 공통 코어 r32**입니다. GitHub 배포와 Store 심사·게시 시점은 다르며, Store 설치판은 게시된 버전으로 업데이트됩니다. 이전 MSI 사용자는 [Store 이전 안내](docs/PWH-DESKTOP.md#설치와-사용)를 참고하세요.
+
+Windows Desktop에서 문서 탭이 시작되지 않던 설치 모듈 누락을 수정했습니다. 모든 배포가 공통 실행 파일 목록을 사용하며, 완성 패키지에서 새 문서·기존 HWPX 탭 시작을 검사합니다.
 
 기존 첨부 문서 열기와 빈 조판기 열기를 구분합니다. 기존 HWPX는 새 문서나 출력 폴더를 만들지 않고 읽기 전용으로 열기를 준비하며, 파일 준비와 실제 우측 편집기 로드를 구별합니다. 이전 버전의 MCP 연결 복구도 유지합니다. [지원·검증 범위](docs/verification/PLUGIN-FILE-OPEN.md)
 
