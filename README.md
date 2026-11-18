@@ -31,9 +31,9 @@ Pwh는 **무료·오픈소스 HWP/HWPX 문서 편집기**입니다. 익숙한 �
 | **Pwh Desktop · Linux x64 시험판** | [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases/latest) · [설치 안내](docs/LINUX.md) | 같은 정식 릴리스의 Linux 패키지를 확인하고 앱에서 업데이트 |
 | **Pwh 플러그인 · Codex 데스크톱** | [GitHub 릴리스의 플러그인 ZIP](https://github.com/wansucong-stoom/stoom-pwh/releases/latest) | 최신 플러그인으로 갱신 |
 
-최근 정식 배포 기준은 **Pwh 0.6.65 · Desktop 0.1.46 · 공통 코어 r32**입니다. GitHub 배포와 Store 심사·게시 시점은 다르며, Store 설치판은 게시된 버전으로 업데이트됩니다. 이전 MSI 사용자는 [Store 이전 안내](docs/PWH-DESKTOP.md#설치와-사용)를 참고하세요.
+최근 정식 배포 기준은 **Pwh 0.6.66 · Desktop 0.1.47 · 공통 코어 r32**입니다. GitHub 배포와 Store 심사·게시 시점은 다르며, Store 설치판은 게시된 버전으로 업데이트됩니다. 이전 MSI 사용자는 [Store 이전 안내](docs/PWH-DESKTOP.md#설치와-사용)를 참고하세요.
 
-이번 버전은 Codex 플러그인의 초기 연결과 HWPX 파일 핸들러 등록을 보완합니다. 일반 압축 파일 미리보기로 열리는 문제의 원인이었던 연결 응답을 바로잡고, 스킬의 문서 열기·로드 확인 절차를 정리합니다. [지원·검증 범위](docs/verification/PLUGIN-FILE-OPEN.md)
+기존 첨부 문서 열기와 빈 조판기 열기를 구분합니다. 기존 HWPX는 새 문서나 출력 폴더를 만들지 않고 읽기 전용으로 열기를 준비하며, 파일 준비와 실제 우측 편집기 로드를 구별합니다. 이전 버전의 MCP 연결 복구도 유지합니다. [지원·검증 범위](docs/verification/PLUGIN-FILE-OPEN.md)
 
 [표의 상하좌우 자동 채우기](docs/AUTO-FILL.md), 대화상자 키보드 이동과 메뉴·제품 정보 정렬 보완이 포함됩니다. 설치판 반영 여부는 [변경 이력](docs/CHANGELOG.md)을 확인하세요.
 
