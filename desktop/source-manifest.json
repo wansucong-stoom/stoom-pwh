@@ -48,8 +48,8 @@
     {
       "path": "standalone-pwh/app.js",
       "source": "standalone-pwh/app.js",
-      "size": 53501,
-      "sha256": "32e1ad97cd78cdf5697e11301abbbaf819b3118d2d1d9ad0c125fea57e1e9336"
+      "size": 53726,
+      "sha256": "4372e547a6d861cf1ea1914ded43761dcd94d1ccbfaab34b0620300a358a93a1"
     },
     {
       "path": "standalone-pwh/build-desktop-editor.mjs",
@@ -204,8 +204,8 @@
     {
       "path": "standalone-pwh/desktop-distribution.mjs",
       "source": "standalone-pwh/desktop-distribution.mjs",
-      "size": 509,
-      "sha256": "a95e47035c1f565fe59cbfd73f7a47feb05390c7fb26ec363d42f69dfa2f6671"
+      "size": 525,
+      "sha256": "b22cf70e8ff0ae5ff842d1902ee57061a44b67acd73ca26b50fa3912d9a6668d"
     },
     {
       "path": "standalone-pwh/desktop-file-ui.check.mjs",
@@ -264,8 +264,8 @@
     {
       "path": "standalone-pwh/electron-shell.cjs",
       "source": "standalone-pwh/electron-shell.cjs",
-      "size": 9228,
-      "sha256": "b5d2568cc35229f4765f00fc2a5cd70929dde195d1dab1f1fd2fbc7012c08886"
+      "size": 10087,
+      "sha256": "14b33e820bf86e3669cdcad7bea04013200d701d0cf577e4a650f88a80907d4f"
     },
     {
       "path": "standalone-pwh/file-dialog.ps1",
@@ -288,8 +288,8 @@
     {
       "path": "standalone-pwh/host.mjs",
       "source": "standalone-pwh/host.mjs",
-      "size": 47850,
-      "sha256": "5a3fcf1ec06ba08052615b33c976dbb2e291c3064a52899eb124998607b791e9"
+      "size": 48440,
+      "sha256": "683012be7031bb2bc7ae1ffe62ffef11ef3842d28e2e8c9c7cfa73f35509564e"
     },
     {
       "path": "standalone-pwh/image-convert.ps1",
@@ -300,8 +300,8 @@
     {
       "path": "standalone-pwh/image-export.mjs",
       "source": "standalone-pwh/image-export.mjs",
-      "size": 6042,
-      "sha256": "48a7b5580893539ed6bde815ee1d3fce5cb2f758e14c7519546c289cbe0ec5d6"
+      "size": 6196,
+      "sha256": "ac9135e7db21114ac85eb5eb00278b402c7b1beb0f13439d2cef5e169ca5f2d0"
     },
     {
       "path": "standalone-pwh/install.cmd",
@@ -350,6 +350,12 @@
       "source": "standalone-pwh/linux-update-helper.mjs",
       "size": 3306,
       "sha256": "daa661a06fba2844ac8053fc1f7e5f517e9e5edea25322cc3e81d12ac8c5163b"
+    },
+    {
+      "path": "standalone-pwh/macos-main.cjs",
+      "source": "standalone-pwh/macos-main.cjs",
+      "size": 4418,
+      "sha256": "8429ac093c1dffa6310b6cee3ff7669c97547bb8eade697566eda764fa6d1746"
     },
     {
       "path": "standalone-pwh/native-branding.check.mjs",
@@ -534,8 +540,8 @@
     {
       "path": "standalone-pwh/update-check.mjs",
       "source": "standalone-pwh/update-check.mjs",
-      "size": 7489,
-      "sha256": "16ca1979810ba7c88cf443c0bd67b4280e857bcc5d852f8f22a71f625c46c20f"
+      "size": 8457,
+      "sha256": "1fc3668b7967c85630e7c4d57cea0bcbcb2f35fbd64232579c1cda5043900a06"
     },
     {
       "path": "standalone-pwh/update-helper.mjs",
@@ -576,8 +582,8 @@
     {
       "path": "standalone-pwh/workspace-child.mjs",
       "source": "standalone-pwh/workspace-child.mjs",
-      "size": 535,
-      "sha256": "fa27b1aef715cc53c74fbd06b648f7f6a40e4377ceab219ae3777d3794ad03d9"
+      "size": 1396,
+      "sha256": "71e36854509d3cae7167f56b2e746309eaf7ca5b3fd904076b5ce90b8885d409"
     },
     {
       "path": "standalone-pwh/workspace-shell.check.mjs",
@@ -588,8 +594,8 @@
     {
       "path": "standalone-pwh/workspace-shell.mjs",
       "source": "standalone-pwh/workspace-shell.mjs",
-      "size": 15487,
-      "sha256": "10591da08f041684c0415c261342bda42d2f6ca3f6c63c3bdcb674e17239d854"
+      "size": 17171,
+      "sha256": "e4f37827f3269e6b497a4874de8760dfb31c484aad892c31880642d9c83f894b"
     },
     {
       "path": "standalone-pwh/workspace.css",
@@ -606,8 +612,8 @@
     {
       "path": "standalone-pwh/workspace.js",
       "source": "standalone-pwh/workspace.js",
-      "size": 21672,
-      "sha256": "87eac74022d67a1079353e1fff43f9658fb9e40576f11e65fb2fcf0b3a503997"
+      "size": 22827,
+      "sha256": "a5643908f752331b05cf17c8943058c0002002bd3a3feef507da44b661463559"
     }
   ]
 }

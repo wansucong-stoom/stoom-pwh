@@ -1,0 +1,76 @@
+name: macOS Desktop
+on:
+  push:
+    branches: [main, 'codex/macos-desktop-*']
+    paths:
+      - '.github/workflows/macos-desktop.yml'
+      - 'desktop/**'
+      - 'client/**'
+      - 'src/**'
+      - 'packaging/macos/**'
+      - 'scripts/**'
+      - 'package.json'
+      - 'runtime-lock.json'
+      - 'docs/MACOS.md'
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    if: github.event_name != 'release' || (!github.event.release.draft && !github.event.release.prerelease)
+    runs-on: macos-15
+    timeout-minutes: 20
+    outputs:
+      artifact: ${{ steps.pack.outputs.artifact }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node desktop/verify-source.mjs
+      - run: node --test tests/macos-desktop.test.mjs
+      - name: Build and verify Apple Silicon preview
+        id: pack
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          if [ -n "$RELEASE_TAG" ] && [ "$RELEASE_TAG" != "v$(node -p 'require("./package.json").version')" ]; then
+            echo "Checkout and requested release differ"
+            exit 1
+          fi
+          npm install --prefix "$RUNNER_TEMP/pwh-macos-tools" --no-save --package-lock=false --ignore-scripts playwright-core@1.62.1
+          export PWH_MACOS_TEST_PLAYWRIGHT="$RUNNER_TEMP/pwh-macos-tools/node_modules/playwright-core/index.mjs"
+          desktop=$(node -p 'require("./desktop/standalone-pwh/version.json").version')
+          asset="PwhDesktop-$desktop-macos-arm64.zip"
+          node scripts/build-desktop-macos.mjs --output "$RUNNER_TEMP/$asset" --cache "$RUNNER_TEMP/pwh-macos-cache"
+          echo "artifact=$asset" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.pack.outputs.artifact }}
+          path: |
+            ${{ runner.temp }}/${{ steps.pack.outputs.artifact }}
+            ${{ runner.temp }}/${{ steps.pack.outputs.artifact }}.json
+          compression-level: 0
+          if-no-files-found: error
+
+  attach-release:
+    if: github.event_name == 'release'
+    needs: package
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.package.outputs.artifact }}
+      - name: Attach verified Mac preview to the shared release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          ASSET: ${{ needs.package.outputs.artifact }}
+        run: gh release upload "$RELEASE_TAG" "$ASSET" "$ASSET.json"

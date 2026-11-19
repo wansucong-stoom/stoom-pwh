@@ -17,13 +17,15 @@ export function documentTabStartupMessage(diagnostic=''){
  if(missing){const name=missing[1].split(/[\\/]/).pop();return `설치 구성 파일(${name})이 누락되어 문서 탭을 시작하지 못했습니다. Pwh Desktop을 업데이트해 주세요.`;}
  return '문서 탭을 시작하지 못했습니다. 앱을 다시 실행해 주세요. 자세한 오류는 앱의 진단 기록에 저장됩니다.';
 }
-export async function createWorkspaceServer({initialPath,nativeBranding,port=0,spawnImpl=spawn,updateServices,storeUpdateServices,distribution=process.env.PWH_DESKTOP_DISTRIBUTION,chooseFile=chooseDesktopFile,dataRoot:providedDataRoot}={}){
+export async function createWorkspaceServer({initialPath,nativeBranding,port=0,spawnImpl=spawn,updateServices,storeUpdateServices,distribution=process.env.PWH_DESKTOP_DISTRIBUTION,chooseFile=chooseDesktopFile,dataRoot:providedDataRoot,nodeExecutable=process.execPath}={}){
  const token=randomBytes(24).toString('hex'),tabs=new Map();let closing=false,generation=0;
  const dataRoot=providedDataRoot||process.env.PWH_STANDALONE_DATA||path.join(process.env.LOCALAPPDATA||process.env.HOME||root,'PwhDesktop');
  const services=updateServices||{check:checkForDesktopUpdate,download:downloadInstaller,schedule:scheduleDesktopUpdate};
  const recent=createRecentDocuments(dataRoot);let fileDialogBusy=false;
  // One nonblocking GitHub lookup per app start; offline operation is normal.
  const storeManaged=['msix-preview','microsoft-store'].includes(distribution);
+ const macPreview=distribution==='macos-preview';
+ const nativeFiles=new Set();
  const storeServices=storeUpdateServices||{check:()=>checkForStoreUpdate({channel:distribution}),open:()=>nativeBranding?.openStoreUpdate?.()};
  let updateCheck=null,checkedAt=0;
  const checkUpdate=()=>{if(!nativeBranding||storeManaged)return Promise.resolve(null);if(!updateCheck||Date.now()-checkedAt>60000){checkedAt=Date.now();updateCheck=desktopVersion(root).then(v=>v?services.check(v):null).catch(()=>null);}return updateCheck;};
@@ -36,7 +38,13 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
   // after reopening. A second window skips ports already owned by another app.
   for(let childPort=48674;childPort<48738;childPort++){
    if([...tabs.values()].some(tab=>tab.port===childPort))continue;
-   const child=spawnImpl(process.execPath,[path.join(root,'workspace-child.mjs'),String(childPort),...(file?[file,...imported?['imported']:[]]:[])],{windowsHide:true,stdio:['pipe','pipe','pipe'],env:process.env});
+   const child=spawnImpl(nodeExecutable,[path.join(root,'workspace-child.mjs'),String(childPort),...(file?[file,...imported?['imported']:[]]:[])],{windowsHide:true,stdio:macPreview?['pipe','pipe','pipe','ipc']:['pipe','pipe','pipe'],env:process.env});
+   if(macPreview)child.on('message',async message=>{
+    if(message?.type!=='choose-file'||typeof message.id!=='string')return;
+    let reply;
+    try{reply={result:await chooseFile(message.options)};}catch(error){reply={error:error.message};}
+    if(child.connected)child.send({id:message.id,...reply},()=>{});
+   });
    let output='',diagnostic='';child.stdin.on('error',()=>{});child.stderr.on('data',x=>diagnostic=(diagnostic+String(x)).slice(-16000));
    const result=await new Promise((resolve,reject)=>{const timer=setTimeout(()=>{child.kill();reject(Error('문서 탭을 준비하지 못했습니다.'));},90000);timer.unref?.();
     child.once('error',e=>{clearTimeout(timer);reject(e);});child.once('exit',async()=>{clearTimeout(timer);try{const directory=path.join(dataRoot,'logs'),file=path.join(directory,'document-startup.log');await fs.mkdir(directory,{recursive:true});const size=await fs.stat(file).then(s=>s.size,()=>0);if(size<1024*1024)await fs.appendFile(file,JSON.stringify({time:new Date().toISOString(),diagnostic})+'\n');}catch{}reject(Error(documentTabStartupMessage(diagnostic)));});
@@ -67,6 +75,17 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
   if(req.method==='POST'&&route==='tabs/closing'&&req.headers.origin===origin){closeAll();server.close();return send(res,{ok:true});}
   if(req.method!=='POST'||req.headers.origin!==origin||req.headers['x-pwh-request']!=='1')return send(res,{error:'허용되지 않은 요청입니다.'},403);
   if(route==='tabs/initial'){if(initialDelivered)throw Error('처음 화면이 이미 열렸습니다.');initialDelivered=true;const value=first||{home:true};first=null;return send(res,value);}
+  if(route==='native/open-queued'&&macPreview){
+   const paths=[...nativeFiles],opened=[],errors=[];
+   nativeFiles.clear();
+   for(const file of paths){
+    try{
+     if(!(await fs.lstat(file)).isFile())throw Error('일반 문서 파일을 선택하세요.');
+     opened.push(await makeTab(file));
+    }catch(error){errors.push(path.basename(file)+': '+error.message);}
+   }
+   return send(res,{opened,errors});
+  }
   if(route==='native/request-close'){
    if(!nativeBranding?.complete||typeof nativeBranding.requestClose!=='function')throw Error('앱 창을 확인하지 못했습니다. 문서를 저장한 뒤 다시 닫아 주세요.');
    setTimeout(()=>nativeBranding.requestClose(),100);return send(res,{requested:true});
@@ -103,9 +122,11 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
    return send(res,{opened:true});
   }
   if(route==='codex-plugin/status'){
+   if(macPreview)return send(res,{});
    try{return send(res,JSON.parse(await fs.readFile(path.join(dataRoot,'codex-setup-result.json'),'utf8')));}catch(error){if(error.code==='ENOENT')return send(res,nativeBranding?{status:'not-configured',message:'Codex Pwh 연결을 확인해 주세요.'}:{});throw error;}
   }
   if(route==='codex-plugin/retry'){
+   if(macPreview)throw Error('이 Mac 시험판에서는 Codex 연결을 사용할 수 없습니다.');
    if(!nativeBranding)throw Error('설치된 Pwh Desktop에서 연결해 주세요.');
    codexSetup??=recordCodexPluginSetup({dataRoot}).finally(()=>{codexSetup=null;});return send(res,await codexSetup);
   }
@@ -114,11 +135,13 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
    const file=path.join(dataRoot,'updates','last-result.json');try{const value=JSON.parse(await fs.readFile(file,'utf8'));await fs.rm(file,{force:true});return send(res,{status:value.status,message:value.message});}catch(error){if(error.code==='ENOENT')return send(res,{});throw error;}
   }
   if(route==='update/download'){
+   if(macPreview)throw Error('GitHub에서 새 Mac 시험판을 내려받아 주세요.');
    if(storeManaged)throw Error('이 MSIX 배포는 MSI 자동 업데이트를 사용하지 않습니다.');
    if(installingUpdate)throw Error('이미 업데이트를 시작했습니다.');const asset=await checkUpdate();if(!asset)throw Error('설치할 업데이트가 없습니다.');
    if(!preparedUpdate){const controller=new AbortController();res.once('close',()=>controller.abort());preparingUpdate??=services.download(asset,path.join(dataRoot,'updates'),{signal:controller.signal}).then(installer=>{preparedUpdate={asset,installer};}).finally(()=>{preparingUpdate=null;});await preparingUpdate;}return send(res,{version:asset.version});
   }
   if(route==='update/install'){
+   if(macPreview)throw Error('GitHub에서 받은 Mac 시험판을 직접 설치해 주세요.');
    if(storeManaged)throw Error('이 MSIX 배포는 MSI 자동 업데이트를 사용하지 않습니다.');
    if(!preparedUpdate||installingUpdate)throw Error('업데이트 파일을 먼저 준비해 주세요.');
    if(!nativeBranding?.complete||typeof nativeBranding.requestClose!=='function')throw Error('앱 창을 확인하지 못했습니다. 설치 파일을 직접 실행해 주세요.');
@@ -129,10 +152,21 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
    setTimeout(()=>nativeBranding.requestClose(),250);return send(res,{started:true});
   }
   if(route==='tabs/new')return send(res,await makeTab());
+  if(route==='update/macos'&&macPreview){
+   const asset=await checkUpdate();
+   if(!asset||typeof nativeBranding?.openMacUpdate!=='function')throw Error('내려받을 새 시험판이 없습니다.');
+   await nativeBranding.openMacUpdate(asset.releaseUrl);
+   return send(res,{opened:true});
+  }
   if(route==='tabs/close'){let body='';for await(const chunk of req){body+=chunk;if(body.length>1024)throw Error('탭 요청이 너무 큽니다.');}const tab=tabs.get(JSON.parse(body).id);if(!tab)throw Error('문서 탭을 찾을 수 없습니다.');stopTab(tab);tabs.delete(tab.id);return send(res,{ok:true});}
   return send(res,{error:'찾을 수 없는 요청입니다.'},404);
  }catch(error){return send(res,{error:error.message||'문서 탭을 열지 못했습니다.'},400);}});
  server.once('close',closeAll);await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(port,'127.0.0.1',resolve);});
  try{if(initialPath)first=await makeTab(initialPath);}catch(error){server.close();throw error;}
- return {server,url:`http://127.0.0.1:${server.address().port}/${token}/`};
+ return {
+  server,url:`http://127.0.0.1:${server.address().port}/${token}/`,
+  queueNativeFile(file){
+   if(macPreview&&typeof file==='string'&&path.isAbsolute(file)&&/\.hwpx?$/i.test(file)&&nativeFiles.size<12)nativeFiles.add(file);
+  },
+ };
 }

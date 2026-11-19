@@ -5,6 +5,7 @@ import {spawn} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 
 const latest='https://api.github.com/repos/wansucong-stoom/stoom-pwh/releases/latest';
+const recentReleases='https://api.github.com/repos/wansucong-stoom/stoom-pwh/releases?per_page=20';
 const allowedHosts=new Set(['github.com','release-assets.githubusercontent.com','objects.githubusercontent.com']);
 const maxBytes=512*1024*1024;
 export function compareVersions(a,b){
@@ -12,24 +13,36 @@ export function compareVersions(a,b){
  const left=parse(a),right=parse(b);for(let i=0;i<3;i++)if(left[i]!==right[i])return left[i]>right[i]?1:-1;return 0;
 }
 export function releaseInstaller(release,currentVersion,{platform=process.platform}={}){
- if(!release||release.draft||release.prerelease||typeof release.tag_name!=='string'||!Array.isArray(release.assets))return null;
+ if(!release||release.draft||typeof release.tag_name!=='string'||!Array.isArray(release.assets))return null;
+ const mac=platform==='darwin';
+ const preview=mac&&release.prerelease&&/^macos-preview-\d+\.\d+\.\d+$/.test(release.tag_name);
+ if(release.prerelease&&!preview)return null;
+ if(mac&&!preview&&!/^v\d+\.\d+\.\d+$/.test(release.tag_name))return null;
+ const pattern=mac?/^PwhDesktop-(\d{1,3}\.\d{1,3}\.\d{1,5})-macos-arm64\.zip$/
+  :platform==='linux'?/^PwhDesktop-(\d{1,3}\.\d{1,3}\.\d{1,5})-linux-x64\.tar\.gz$/
+  :/^PwhDesktop-(\d{1,3}\.\d{1,3}\.\d{1,5})\.msi$/;
  const tag=encodeURIComponent(release.tag_name),prefix=`/wansucong-stoom/stoom-pwh/releases/download/${tag}/`;
  const candidates=[];
  for(const asset of release.assets){
-  const pattern=platform==='linux'?/^PwhDesktop-(\d{1,3}\.\d{1,3}\.\d{1,5})-linux-x64\.tar\.gz$/:/^PwhDesktop-(\d{1,3}\.\d{1,3}\.\d{1,5})\.msi$/;
   const m=pattern.exec(asset.name||'');if(!m||asset.state&&asset.state!=='uploaded'||compareVersions(m[1],currentVersion)<=0)continue;
+  if(preview&&release.tag_name!=='macos-preview-'+m[1])continue;
   if(!Number.isSafeInteger(asset.size)||asset.size<1||asset.size>maxBytes||!/^sha256:[0-9a-f]{64}$/i.test(asset.digest||''))continue;
   let url;try{url=new URL(asset.browser_download_url);}catch{continue;}
   if(url.protocol!=='https:'||url.hostname!=='github.com'||url.username||url.password||url.search||url.hash||url.pathname!==prefix+encodeURIComponent(asset.name))continue;
-  candidates.push({version:m[1],name:asset.name,url:url.href,size:asset.size,sha256:asset.digest.slice(7).toLowerCase()});
+  candidates.push({version:m[1],name:asset.name,url:url.href,size:asset.size,sha256:asset.digest.slice(7).toLowerCase(),...(mac?{releaseUrl:'https://github.com/wansucong-stoom/stoom-pwh/releases/tag/'+tag}:{})});
  }
  candidates.sort((a,b)=>compareVersions(b.version,a.version));return candidates[0]||null;
 }
-export async function checkForDesktopUpdate(currentVersion,{fetchImpl=fetch}={}){
- const response=await fetchImpl(latest,{headers:{'accept':'application/vnd.github+json','user-agent':'Pwh-Desktop','x-github-api-version':'2022-11-28'},signal:AbortSignal.timeout(10000),redirect:'error'});
+export async function checkForDesktopUpdate(currentVersion,{fetchImpl=fetch,platform=process.platform}={}){
+ const response=await fetchImpl(platform==='darwin'?recentReleases:latest,{headers:{'accept':'application/vnd.github+json','user-agent':'Pwh-Desktop','x-github-api-version':'2022-11-28'},signal:AbortSignal.timeout(10000),redirect:'error'});
  if(!response.ok)throw Error('GitHub 업데이트 정보를 확인하지 못했습니다.');
  const text=await response.text();if(text.length>2*1024*1024)throw Error('업데이트 정보가 너무 큽니다.');
- return releaseInstaller(JSON.parse(text),currentVersion);
+ const release=JSON.parse(text);
+ if(platform!=='darwin')return releaseInstaller(release,currentVersion,{platform});
+ if(!Array.isArray(release))throw Error('Mac 업데이트 정보를 확인하지 못했습니다.');
+ const candidates=release.map(item=>releaseInstaller(item,currentVersion,{platform})).filter(Boolean);
+ candidates.sort((a,b)=>compareVersions(b.version,a.version));
+ return candidates[0]||null;
 }
 async function followDownload(url,fetchImpl,signal){
  for(let i=0;i<5;i++){

@@ -101,6 +101,7 @@ export async function createAppServer({initialBytes,initialPath,imported=false,c
  // tab signs out or selects a different account, including while a turn runs.
  const accountWatcher=setInterval(async()=>{if(!codexSession||!codexSessionAccount||checkingCredential)return;checkingCredential=true;const session=codexSession,accountId=codexSessionAccount;try{const stamp=await currentCredentialStamp();if(stamp!==credentialStamp){const state=await chatgptAuth.status();if(session!==codexSession)return;if(state.active!==accountId||!state.accounts.some(account=>account.id===accountId&&account.connected)){cancelRequested=true;closeCodexSession();}else credentialStamp=stamp;}}catch{if(session===codexSession){cancelRequested=true;closeCodexSession();}}finally{checkingCredential=false;}},1500);accountWatcher.unref();
  let lastActivity=Date.now();
+ const macPreview=process.env.PWH_DESKTOP_DISTRIBUTION==='macos-preview';
  const assets={'/':'app.html','/app.js':'app.js','/paste-bridge.mjs':'paste-bridge.mjs','/app.css':'app.css','/stoom-mark-original.css':'stoom-mark-original.css','/stoom-product-marks.css':'stoom-product-marks.css','/Inter-variable.ttf':'Inter-variable.ttf','/stoom-mark.svg':'stoom-mark.svg','/stoom.ico':'stoom.ico'};
  const server=createServer(async(req,res)=>{
   try{
@@ -108,6 +109,7 @@ export async function createAppServer({initialBytes,initialPath,imported=false,c
    const url=new URL(req.url,origin),prefix=`/${launchToken}`;
    if(!url.pathname.startsWith(prefix+'/'))return json(res,{error:'연결이 만료되었습니다.'},404);
    const route=url.pathname.slice(prefix.length);
+   if(macPreview&&/^\/(?:ai|chatgpt|codex|mcp)(?:\/|$)/.test(route))return json(res,{error:'이 Mac 시험판은 문서 편집을 지원합니다.'},404);
    lastActivity=Date.now();
    res.setHeader('Referrer-Policy','no-referrer');res.setHeader('X-Content-Type-Options','nosniff');
    if(req.method==='GET'&&route==='/native/window-branding'){
@@ -122,11 +124,14 @@ export async function createAppServer({initialBytes,initialPath,imported=false,c
     res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'});res.end('<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>인쇄 미리보기</title></head><body></body></html>');return;
    }
    if(req.method==='GET'&&route==='/editor'){
-    const html=await editorHtml();res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'});res.end(html);return;
+    const html=await editorHtml();
+    res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'});
+    return res.end(macPreview?html.replace('</head>','<style>#pwh-desktop-open-ai,#pwh-desktop-settings,[data-cmd^="ai:"]{display:none!important}</style></head>'):html);
    }
    if(req.method==='GET'&&assets[route]){
     const type=route==='/'?'text/html':route.endsWith('.css')?'text/css':route.endsWith('.ttf')?'font/ttf':route.endsWith('.svg')?'image/svg+xml':route.endsWith('.ico')?'image/x-icon':'text/javascript';
     let content=await fs.readFile(path.join(appRoot,assets[route]));
+    if(macPreview&&route==='/')content=Buffer.from(content.toString('utf8').replace('</head>','<meta name="pwh-macos-preview" content="1"><style>#settings,#open-ai{display:none!important}</style></head>'));
     if(route==='/'&&process.platform==='linux'&&(await readSettings(settingsPath)).provider!=='codex'&&!await discoverCodex())content=Buffer.from(content.toString('utf8').replace('</head>','<style>[data-provider-card="codex"]{display:none!important}</style></head>'));
     if(route==='/'&&nativeBranding){
      const title=`Pwh Desktop [${nativeBranding.token}]`;

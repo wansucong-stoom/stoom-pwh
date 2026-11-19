@@ -2,6 +2,7 @@
  const $=id=>document.getElementById(id),frame=$('editor'),status=$('status'),dialog=$('settings-dialog');let documentInfo,sessionId,busy=false,saving=false,pendingEditorRequest=null,attachedImage=null;
  const api=async(route,payload={})=>{const response=await fetch(route,{method:'POST',headers:{'x-pwh-request':'1',...(payload instanceof ArrayBuffer?{}:{'content-type':'application/json'})},body:payload instanceof ArrayBuffer?payload:JSON.stringify(payload)});const result=await response.json();if(!response.ok)throw Object.assign(Error(result.error||'요청에 실패했습니다.'),{code:result.code});return result;};
  const workspaceOrigin=(()=>{try{const value=new URL(location.href).searchParams.get('workspaceOrigin');const u=new URL(value);return u.protocol==='http:'&&u.hostname==='127.0.0.1'?u.origin:null;}catch{return null;}})();
+ const macPreview=!!document.querySelector('meta[name="pwh-macos-preview"]');
  let workspaceView=null;
  const workspaceAction=(action,id)=>{if(workspaceOrigin&&window.parent!==window)window.parent.postMessage({type:'pwh-workspace-ui',action,...id?{id}:{}},workspaceOrigin);};
  const nativePasteRequests=new Map();
@@ -79,7 +80,7 @@
  const statusObserver=new MutationObserver(()=>{const text=[status.textContent,$('desktop-workspace-status').textContent].filter(Boolean).join(' · ');$('conversation-status').textContent=text;$('conversation-status').hidden=!text;});for(const node of [status,$('desktop-workspace-status')])statusObserver.observe(node,{childList:true,characterData:true,subtree:true});
  const noticeObserver=new MutationObserver(()=>{const text=$('document-notice').textContent?.trim();if(text&&text!==$('document-notice').dataset.reported){$('document-notice').dataset.reported=text;notifyDocument(text);}});noticeObserver.observe($('document-notice'),{childList:true,characterData:true,subtree:true});
  let aiUserChoice=false;
- function setAiOpen(open){document.querySelector('main').classList.toggle('ai-closed',!open);$('open-ai').hidden=true;$('open-ai').setAttribute('aria-expanded',String(open));const button=frame.contentDocument?.getElementById('pwh-desktop-open-ai');if(button){button.hidden=open;button.setAttribute('aria-expanded',String(open));}}
+ function setAiOpen(open){open=open&&!macPreview;document.querySelector('main').classList.toggle('ai-closed',!open);$('open-ai').hidden=true;$('open-ai').setAttribute('aria-expanded',String(open));const button=frame.contentDocument?.getElementById('pwh-desktop-open-ai');if(button){button.hidden=open||macPreview;button.setAttribute('aria-expanded',String(open));}}
  function chooseAiOpen(open){aiUserChoice=true;setAiOpen(open);workspaceAction(open?'ai-open':'ai-close');}
  $('close-ai').onclick=()=>{chooseAiOpen(false);frame.contentDocument?.getElementById('pwh-desktop-open-ai')?.focus();};
  $('open-ai').onclick=()=>{chooseAiOpen(true);$('close-ai').focus();};
@@ -162,9 +163,9 @@
    const result=await api('image-export/finish',{ticket,documentId:docId});ticket=null;$('output-dialog').close();status.textContent=`${result.count}쪽을 그림으로 저장했습니다.`;
   }catch(error){$('output-status').textContent=error.message;}finally{if(ticket)await api('image-export/cancel',{ticket,documentId:documentInfo.documentId}).catch(()=>{});outputControls(false);}};
  function editorShortcut(event){
-  if(event.defaultPrevented||event.metaKey||event.isComposing)return;
+  if(event.defaultPrevented||event.isComposing||(event.metaKey&&!macPreview))return;
   const key=/^Key[A-Z]$/.test(event.code)?event.code.slice(-1).toLowerCase():event.key.toLowerCase();
-  const ctrl=event.ctrlKey,alt=event.altKey,shift=event.shiftKey;
+  const ctrl=event.ctrlKey||(macPreview&&event.metaKey),alt=event.altKey,shift=event.shiftKey;
   const contextKind=()=>frame.contentWindow?.pwhEditor?.context?.()?.kind;
   const consume=()=>{event.preventDefault();event.stopImmediatePropagation();};
   if(!shift&&key==='p'&&alt!==ctrl){consume();printDocument();return;}
@@ -228,5 +229,5 @@
  };
  $('prompt').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();$('send').click();}};
  const splitter=$('splitter'),main=document.querySelector('main');function resizeAt(x){const bounds=main.getBoundingClientRect(),min=Math.min(bounds.width<=760?160:200,bounds.width/3),width=Math.max(min,Math.min(bounds.width-min-8,x-bounds.left));main.style.setProperty('--chat-width',width+'px');splitter.setAttribute('aria-valuenow',Math.round(width));}splitter.onpointerdown=e=>{e.preventDefault();splitter.setPointerCapture(e.pointerId);document.body.classList.add('resizing');};splitter.onpointermove=e=>{if(splitter.hasPointerCapture(e.pointerId))resizeAt(e.clientX);};splitter.onpointerup=splitter.onpointercancel=()=>document.body.classList.remove('resizing');splitter.onkeydown=e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();resizeAt(splitter.getBoundingClientRect().left+(e.key==='ArrowLeft'?-20:20));}};
- (async()=>{try{const r=await api('initialize');const selected=await refreshProvider();await loadDocument(r.document);status.textContent='조판기를 불러오고 있습니다.';if(selected.provider==='codex'){try{const connection=await api('ai/status');if(!connection.ready){if(connection.installed===false&&!aiUserChoice){setAiOpen(false);workspaceAction('ai-default-closed');}say(connection.message||'Codex를 설치하고 로그인해 주세요.');$('download-codex').hidden=false;}}catch(error){say('Codex 연결을 확인하지 못했습니다. 설치와 로그인을 확인하거나 설정에서 다른 AI를 선택하세요.');$('download-codex').hidden=false;}}else if(selected.provider==='chatgpt'){try{const connection=await api('chatgpt/status');applyChatgptStatus(connection);if(!connection.active)say('AI 설정에서 ChatGPT 계정을 연결하면 문서 작업을 요청할 수 있습니다.');}catch{say('ChatGPT 계정 상태를 확인하지 못했습니다. AI 설정을 확인해 주세요.');}}}catch(e){status.textContent=e.message;}})();
+ (async()=>{try{const r=await api('initialize');const selected=macPreview?null:await refreshProvider();if(macPreview)setAiOpen(false);await loadDocument(r.document);status.textContent='조판기를 불러오고 있습니다.';if(macPreview)return;if(selected.provider==='codex'){try{const connection=await api('ai/status');if(!connection.ready){if(connection.installed===false&&!aiUserChoice){setAiOpen(false);workspaceAction('ai-default-closed');}say(connection.message||'Codex를 설치하고 로그인해 주세요.');$('download-codex').hidden=false;}}catch(error){say('Codex 연결을 확인하지 못했습니다. 설치와 로그인을 확인하거나 설정에서 다른 AI를 선택하세요.');$('download-codex').hidden=false;}}else if(selected.provider==='chatgpt'){try{const connection=await api('chatgpt/status');applyChatgptStatus(connection);if(!connection.active)say('AI 설정에서 ChatGPT 계정을 연결하면 문서 작업을 요청할 수 있습니다.');}catch{say('ChatGPT 계정 상태를 확인하지 못했습니다. AI 설정을 확인해 주세요.');}}}catch(e){status.textContent=e.message;}})();
 })();

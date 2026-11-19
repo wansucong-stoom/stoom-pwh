@@ -1,5 +1,5 @@
 'use strict';
-const {app,BrowserWindow,ipcMain,shell,session}=require('electron');
+const {app,BrowserWindow,ipcMain,shell,session,Menu}=require('electron');
 const path=require('node:path');
 const readline=require('node:readline');
 const fs=require('node:fs');
@@ -8,15 +8,15 @@ const os=require('node:os');
 const {printOptions}=require('./print-options.cjs');
 const {installNativePaste}=require('./native-paste.cjs');
 
-const urlArgument=process.argv.find(arg=>arg.startsWith('--pwh-url='));
-const url=urlArgument?.slice('--pwh-url='.length),dataRoot=process.env.PWH_STANDALONE_DATA;
+function startElectronShell({url,dataRoot,onReady}={}){
 const ownedLocal=(value,print=false)=>{try{const u=new URL(value);return u.protocol==='http:'&&u.hostname==='127.0.0.1'&&/^\/[a-f0-9]{48}\/(?:print\.html)?$/.test(u.pathname)&&(!print||u.pathname.endsWith('/print.html'));}catch{return false;}};
 const failStartup=error=>{process.stderr.write('Pwh startup failed: '+String(error?.stack||error)+'\n');app.exit(1);};
 process.on('uncaughtException',failStartup);process.on('unhandledRejection',failStartup);
 if(!ownedLocal(url)||!dataRoot){process.stderr.write('Pwh 앱 시작 정보가 올바르지 않습니다.\n');app.exit(1);}
-app.setName('Pwh Desktop');app.setAppUserModelId(process.env.PWH_APP_USER_MODEL_ID||'STOOM.PwhDesktop');
+app.setName('Pwh Desktop');
+if(process.platform==='win32')app.setAppUserModelId(process.env.PWH_APP_USER_MODEL_ID||'STOOM.PwhDesktop');
 if(process.platform==='linux'){app.setDesktopName('stoom-pwh-desktop.desktop');app.commandLine.appendSwitch('class','stoom-pwh-desktop');}
-const appIcon=path.join(__dirname,process.platform==='linux'?'stoom.png':'stoom.ico');
+const appIcon=path.join(__dirname,process.platform==='win32'?'stoom.ico':'stoom.png');
 try{fs.mkdirSync(path.join(dataRoot,'electron-profile'),{recursive:true});app.setPath('userData',path.join(dataRoot,'electron-profile'));}catch(error){failStartup(error);}
 let win=null,approvedClose=false,debugAttached=false;const printWindows=new Map();
 installNativePaste(ipcMain,()=>win,ownedLocal);
@@ -67,11 +67,22 @@ ipcMain.handle('pwh:print-document',async(event,value)=>{
  }finally{info.printing=false;if(!event.sender.isDestroyed())await event.sender.executeJavaScript('document.title="인쇄"').catch(()=>{});}
 });
 
-app.whenReady().then(async()=>{
+const ready=app.whenReady().then(async()=>{
  const prefs={nodeIntegration:false,contextIsolation:true,sandbox:true,preload:path.join(__dirname,'electron-preload.cjs'),backgroundThrottling:false};
  win=new BrowserWindow({width:1440,height:900,minWidth:360,minHeight:500,title:'Pwh Desktop',icon:appIcon,backgroundColor:'#ffffff',autoHideMenuBar:true,show:false,webPreferences:prefs});
  if(process.platform==='win32')win.setAppDetails({appId:'STOOM.PwhDesktop',appIconPath:path.join(__dirname,'stoom.ico'),appIconIndex:0,relaunchCommand:'"'+path.join(__dirname,'..','PwhDesktop.exe')+'"',relaunchDisplayName:'Pwh Desktop'});
- win.removeMenu();
+ if(process.platform==='darwin'){
+  const fileAction=(command)=>void win.webContents.executeJavaScript("window.dispatchEvent(new CustomEvent('pwh-native-file-menu',{detail:"+JSON.stringify(command)+"}))").catch(()=>{});
+  Menu.setApplicationMenu(Menu.buildFromTemplate([
+   {role:'appMenu'},
+   {label:'파일',submenu:[
+    {label:'새 문서',accelerator:'Command+N',click:()=>fileAction('new')},
+    {label:'열기…',accelerator:'Command+O',click:()=>fileAction('open')},
+   ]},
+   {role:'editMenu'},{role:'windowMenu'},
+  ]));
+ }
+ else win.removeMenu();
  session.defaultSession.setPermissionRequestHandler((contents,permission,callback,details)=>callback(['clipboard-read','clipboard-sanitized-write'].includes(permission)&&ownedLocal(details.requestingUrl||contents.getURL())));
  win.webContents.setWindowOpenHandler(({url:target})=>{
   const printOwner=ownedLocal(target,true)&&win.webContents.mainFrame.framesInSubtree.some(frame=>{try{const a=new URL(frame.url),b=new URL(target);return a.origin===b.origin&&a.pathname.split('/')[1]===b.pathname.split('/')[1];}catch{return false;}});
@@ -83,7 +94,7 @@ app.whenReady().then(async()=>{
  win.webContents.on('will-navigate',(event,target)=>{if(!ownedLocal(target))event.preventDefault();});
  win.on('close',event=>{if(approvedClose)return;event.preventDefault();void win.webContents.executeJavaScript("window.dispatchEvent(new Event('pwh-native-close-request'))",true).catch(()=>{});});
  win.once('closed',()=>{win=null;app.quit();});
- await win.loadURL(url);emit({type:'ready'});if(process.env.PWH_ELECTRON_TEST_HIDDEN!=='1')win.show();
+ await win.loadURL(url);onReady?.(win);emit({type:'ready'});if(process.env.PWH_ELECTRON_TEST_HIDDEN!=='1')win.show();
 }).catch(error=>{emit({type:'error',error:cleanError()});failStartup(error);});
 
 if(host){
@@ -100,3 +111,15 @@ input.on('line',async line=>{let message;try{message=JSON.parse(line);}catch{ret
 });
 input.on('close',()=>{if(win){approvedClose=true;win.close();}else app.quit();});
 }
+return {
+ ready,
+ requestClose(){approvedClose=true;win?.close();},
+ resolveDroppedFiles:droppedPaths,
+};
+}
+
+if(process.platform!=='darwin'){
+ const urlArgument=process.argv.find(arg=>arg.startsWith('--pwh-url='));
+ startElectronShell({url:urlArgument?.slice('--pwh-url='.length),dataRoot:process.env.PWH_STANDALONE_DATA});
+}
+module.exports={startElectronShell};

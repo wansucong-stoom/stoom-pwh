@@ -56,7 +56,22 @@
  }
  const inspect=tab=>request(tab,'inspect');
  const command=(tab,action,expected)=>request(tab,'command',{action,...expected?{expected}:{}},action==='save'?310000:10000);
- const setFrozen=()=>{const locked=updateLocked||closeLocked;$('documents').inert=locked;$('tabs').inert=locked;$('new-tab').disabled=locked||starting;$('workspace-home').disabled=locked||starting;for(const button of $('home-view').querySelectorAll('button'))button.disabled=locked||starting;publishWorkspace();};
+ let nativeOpenPending=false;
+ const setFrozen=()=>{const locked=updateLocked||closeLocked;$('documents').inert=locked;$('tabs').inert=locked;$('new-tab').disabled=locked||starting;$('workspace-home').disabled=locked||starting;for(const button of $('home-view').querySelectorAll('button'))button.disabled=locked||starting;publishWorkspace();if(nativeOpenPending&&!locked&&!starting)queueMicrotask(openQueuedFiles);};
+ async function openQueuedFiles(){
+  if(!nativeOpenPending||startupPending||starting||updateLocked||closeLocked||closingWindow)return;
+  nativeOpenPending=false;starting=true;setFrozen();
+  try{
+   const {opened,errors}=await api('native/open-queued');
+   for(const tab of opened)add(tab);
+   const message=errors.join(' · ');
+   $('workspace-status').textContent=message;
+   $('home-status').textContent=message;
+  }catch(error){$('home-status').textContent=error.message;}
+  finally{starting=false;setFrozen();}
+ }
+ let startupPending=true;
+ window.addEventListener('pwh-native-open',()=>{nativeOpenPending=true;void openQueuedFiles();});
  const freeze=value=>{updateLocked=value;setFrozen();};
 
  function askToSave(name){
@@ -193,6 +208,10 @@
   finally{starting=false;setFrozen();}
  }
  $('home-open').onclick=()=>void openFromHome('tabs/open');
+ window.addEventListener('pwh-native-file-menu',event=>{
+  if(event.detail==='new')$('new-tab').click();
+  else if(event.detail==='open')$('home-open').click();
+ });
  $('new-tab').onclick=async()=>{if(starting||updateLocked||closeLocked)return;starting=true;setFrozen();try{add(await api('tabs/new'));$('workspace-status').textContent='';}catch(e){$('workspace-status').textContent=e.message;}finally{starting=false;setFrozen();}};
  async function documentsReady(){if(starting||closingTabs||closingWindow)return false;const states=await Promise.all([...tabs.values()].map(inspect));return !starting&&!closingTabs&&!closingWindow&&states.every(state=>state&&state.ready===true&&!state.dirty&&!state.busy);}
  let updateChannel=null,checkingUpdate=null,lastUpdateCheck=0,storeOpening=false;
@@ -211,7 +230,7 @@
      updateButton.textContent=hasUpdate?'새 업데이트가 있습니다.':'Store에서 업데이트 확인';
      updateButton.title=hasUpdate?'Microsoft Store에서 새 버전을 받을 수 있습니다.':'Microsoft Store에서 Pwh Desktop의 업데이트를 확인합니다.';
     }else if(available.version){
-     updateButton.textContent='새 업데이트가 있습니다.';updateButton.title='새 버전 '+available.version+' 설치';updateButton.dataset.available='true';updateButton.hidden=false;
+     updateButton.textContent='새 업데이트가 있습니다.';updateButton.title=updateChannel==='macos-preview'?'GitHub에서 Mac 시험판 '+available.version+' 받기':'새 버전 '+available.version+' 설치';updateButton.dataset.available='true';updateButton.hidden=false;
     }
    }catch{}finally{checkingUpdate=null;}
   })();
@@ -219,9 +238,9 @@
  }
  $('workspace-update').onclick=async()=>{
   const button=$('workspace-update');if(button.disabled)return;button.disabled=true;
-  if(updateChannel==='microsoft-store'){
+  if(updateChannel==='microsoft-store'||updateChannel==='macos-preview'){
    storeOpening=true;
-   try{await api('update/store');}
+   try{await api(updateChannel==='macos-preview'?'update/macos':'update/store');}
    catch(error){$('workspace-status').textContent=error.message;}
    finally{storeOpening=false;button.disabled=false;}
    return;
@@ -234,7 +253,7 @@
    setTimeout(async()=>{try{const result=await api('update/result');if(result.message){freeze(false);button.disabled=false;$('workspace-status').textContent=result.message;}}catch{}},95000);
   }catch(e){freeze(false);button.disabled=false;$('workspace-status').textContent=e.message;}
  };
- (async()=>{try{const initial=await api('tabs/initial');if(initial.home)showHome({focus:true});else add(initial);}catch(e){$('workspace-status').textContent=e.message;}})();
+ (async()=>{try{const initial=await api('tabs/initial');if(initial.home)showHome({focus:true});else add(initial);}catch(e){$('workspace-status').textContent=e.message;}finally{startupPending=false;if(nativeOpenPending)void openQueuedFiles();}})();
  (async()=>{try{const result=await api('update/result');if(result.message)$('workspace-status').textContent=result.message;}catch{}await refreshUpdate(true);})();
  const updatePoll=setInterval(()=>{if(!document.hidden)void refreshUpdate();},4*60*60*1000);
  addEventListener('focus',()=>void refreshUpdate());

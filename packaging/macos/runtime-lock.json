@@ -1,0 +1,20 @@
+{
+  "electron": {
+    "name": "electron-v45.1.0-darwin-arm64.zip",
+    "url": "https://github.com/electron/electron/releases/download/v45.1.0/electron-v45.1.0-darwin-arm64.zip",
+    "size": 120939367,
+    "sha256": "002b71efcf90e247317d3da486f2d4e51860e9c2889d49f33e229ab2268b0f3b"
+  },
+  "node": {
+    "name": "node-v24.22.3-darwin-arm64.tar.xz",
+    "url": "https://nodejs.org/dist/v24.22.3/node-v24.22.3-darwin-arm64.tar.xz",
+    "size": 27519132,
+    "sha256": "1d64136c8a43d648d1b3bad10797a4c995b1ca032d2bde8799de43b37f058fe5"
+  },
+  "rhwp": {
+    "name": "rhwp-v0.8.7-macos-aarch64.tar.gz",
+    "url": "https://github.com/edwardkim/rhwp/releases/download/v0.8.7/rhwp-v0.8.7-macos-aarch64.tar.gz",
+    "size": 12941874,
+    "sha256": "6ed46aa63f6d10c447842999f73abc59cf9586c5645fefc5e763bd6a6d43662d"
+  }
+}

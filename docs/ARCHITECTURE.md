@@ -6,6 +6,8 @@ Pwh는 **Windows·Linux Desktop과 Codex 플러그인에서 사용하는 무료�
 
 Linux 시험판도 Windows판의 WASM과 편집기 번들을 그대로 사용합니다. 파일 대화상자·Unix 소켓·키 모음·앱 등록과 업데이트 설치는 운영체제 연결 계층에서 처리합니다. Windows Store판은 Store에서, Linux 사용자 설치판은 같은 GitHub 릴리스의 Linux 패키지로 업데이트합니다. [Linux 구성과 설치](LINUX.md)
 
+Apple Silicon Mac 시험판도 같은 WASM과 편집기 번들을 사용합니다. Electron 앱 번들이 Finder 파일 열기와 macOS 대화상자를 받아 공통 작업 공간과 문서 탭에 연결합니다. 새 버전은 GitHub 릴리스에서 받습니다. [Mac 구성과 설치](MACOS.md)
+
 ## Codex 파일 열기 연결
 
 기존 문서 열기는 pwh_open_document의 읽기 전용 경로 확인과 호스트 패널 호출로 나눕니다. 빈 조판기 생성은 별도 명령입니다. 파일 준비는 출력·런타임 폴더에 쓰지 않으며 호스트 호출 실패를 새 문서 생성으로 바꾸지 않습니다. 파일 준비 결과는 documentLoaded:false로 반환하고 실제 편집기 상태로 로드를 확인합니다.
