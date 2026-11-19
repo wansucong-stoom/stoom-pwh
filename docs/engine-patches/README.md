@@ -76,7 +76,7 @@ r29의 [89번 패치](rhwp-0.8.7-unique-grouped-textbox-editing.patch)는 묶음
 
 공통 코어 r28의 [87번](rhwp-0.8.7-delete-control-metadata.patch)은 그림·도형·수식·표 삭제의 스트림 좌표 갱신을 문단 모델에 모읍니다. Pwh의 HWPX 글줄 축·측정 키와 누름틀 소유 범위를 함께 갱신합니다. [88번](rhwp-0.8.7-nested-paragraph-format.patch)은 중첩 문단의 조회·변경·ID 복원 API를 연결하며 기존 부분 서식 병합과 dirty·배치 갱신을 유지합니다. 기존 86개 패치는 그대로 앞에 적용합니다.
 
-[공통 Studio 연결](../../scripts/patch-nested-paragraph-format.mjs)은 실제 경로를 선택·명령·실행 취소에 전달합니다. 셀 선택 정렬 명령과 Pwh 표 클립보드의 Ctrl+Shift+C 충돌도 함께 정리합니다. 문서·쪽 번호를 계산 조건으로 쓰지 않습니다. [사전·사후 시험과 기존 조판 유지](../verification/CORE-R28.md)
+[공통 Studio 연결](../../scripts/patch-nested-paragraph-format.mjs)은 실제 경로를 선택·명령·실행 취소에 전달합니다. 셀 선택 정렬 명령과 Pwh 표 클립보드의 Ctrl+Shift+C 충돌도 함께 정리합니다. AI의 글자 서식 검사는 이 연결에 기존 코어의 읽기 전용 셀 주소 조회를 사용합니다. 문서·쪽 번호를 계산 조건으로 쓰지 않습니다. [사전·사후 시험과 기존 조판 유지](../verification/CORE-R28.md)
 
 <a id="cell-command-paths"></a>
 ### 86번 셀 표 명령의 전체 경로

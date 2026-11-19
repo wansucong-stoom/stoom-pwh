@@ -4,14 +4,14 @@
   "upstreamVersion": "0.8.7",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "files": {
-    "editor.js": "843cba7f90ea47c077895278b77dcf763bf887d3eceb9ffb869ad74a7873378c",
+    "editor.js": "982f7273bdcb2440c628f56bb669e0a8b98832ac3ef5c97c9aa6ac06a1ba2da7",
     "rhwp-studio.css": "10875c5542232767cc250c64623f545b4fb07a292bba2c2c4c0b08db92aff0f9",
     "editor-body.html": "098dfd61cfbe9146261ebd4293bd6047402c735f7a22c54ca7f754170d56df8d"
   },
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "common",
-    "sha256": "2e914c1a7154df1536cec99164d0db9122bc70fcacd0b3667d1ae821cf3465fc",
+    "sha256": "127a39d83e5b1184beece53c3ca36453e16790a3e88d174bf08273c232146328",
     "files": [
       {
         "path": "docs/engine-patches/studio/clipboard-safety.patch",
@@ -107,7 +107,7 @@
       },
       {
         "path": "scripts/patch-nested-paragraph-format.mjs",
-        "sha256": "f732789420fc7f1fa01c67799a7dff6b46a2f335317199537b1c89e019d4d146"
+        "sha256": "2c358ed9988aed8daf55017f5f025837e23e528b6f5ba3fe2467a9c93735502f"
       },
       {
         "path": "scripts/patch-object-properties.mjs",
@@ -247,7 +247,7 @@
       },
       {
         "path": "src/editor-session.mjs",
-        "sha256": "9236669363eaf01caf76264108c1ebf87ab4a6097f834cc5175be6c1e1a247ec"
+        "sha256": "b90ce0061f03363f12dc0d2bae684af9e4e5ffed6e90be298b173a69fc1b1964"
       },
       {
         "path": "src/engine.mjs",
@@ -287,7 +287,7 @@
       },
       {
         "path": "src/inline-host.js",
-        "sha256": "552ef41ad8a5b92ddb2f4e467dbea71cfdbf22388ad128b6fb7995b98f808495"
+        "sha256": "da48a5b60bee509e32de7ef6d15ee1e6f62dd1e5ba2b3f5e0c37527fb1fc4f9b"
       },
       {
         "path": "src/inline-image-urls.mjs",
@@ -471,11 +471,11 @@
       },
       {
         "path": "src/server.mjs",
-        "sha256": "c22e320786cd9b19cfd1c25e78ad46b0fe4d3d46ade26b605666862965361caa"
+        "sha256": "cf2e3af6625a0b032223f04a1d20dcc1157ecb1ab9fe74a8f91cdbaa5d514676"
       },
       {
         "path": "src/studio-inline-adapter.ts",
-        "sha256": "8c677e5e1f9e897e6663dd57e12e5980acdcdcfa78984531d39781dd2cbbec1d"
+        "sha256": "10b47806c6206d919479035820081e33a37dfa1743d7d4760f1d416ad2ba76ef"
       },
       {
         "path": "src/studio-selection.ts",
@@ -519,7 +519,7 @@
       },
       {
         "path": "src/table-style.mjs",
-        "sha256": "78d392ff46e66e36dafd4dbee933bec3edb382815e6990d5c415d58fff11ce7f"
+        "sha256": "302c9e0cf1ad4df133aab6c274f68fc271a9b21435df37546ac61b05fc5206a6"
       },
       {
         "path": "src/template.mjs",
@@ -527,7 +527,7 @@
       },
       {
         "path": "src/text-edit.mjs",
-        "sha256": "b85b98cb08c4f54f679eda2e1902271d5246132abc0b7c9e301f7855c2a5b6ac"
+        "sha256": "b1ab7086f2a5f4b248c0b3c342fd1261588461b894d795a5392a2ed6995eb4e0"
       }
     ]
   }

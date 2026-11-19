@@ -125,13 +125,31 @@ test('full editor imports and fills a merged table through MCP queue, renders, a
   const initialColors=await colors();
   const styled=await callTool('pwh_editor_text_style',{
    sessionId,expected:editorState({sessionId}).context,
-   edits:[{searchId:searched.searchId,matchId:hit.id,style:{textColor:'#FF0000'}}],
+   edits:[{searchId:searched.searchId,matchId:hit.id,style:{textColor:'#FF0000',strikethrough:true}}],
   });
   const styleReceipt=await wait(styled.structuredContent);
   assert.equal(styleReceipt.result.undoSteps,1);
   assert.deepEqual(await colors(),{before:initialColors.before,range:'#ff0000'});
+  const audited=await callTool('pwh_editor_style_scan',{sessionId,expected:editorState({sessionId}).context,scope:'tables',filter:'strikethrough'});
+  const audit=(await wait(audited.structuredContent)).result.styleScan;
+  assert.equal(audit.nextCursor,null);
+  assert.equal(audit.unsupportedCellLists,0);
+  assert.equal(audit.hits.length,1);
+  assert.equal(audit.hits[0].text,'소개');
+  assert.deepEqual(audit.hits[0].source,hit.source);
+  const paragraphTicket=await callTool('pwh_editor_paragraph_style',{sessionId,expected:editorState({sessionId}).context,edits:[{searchId:audit.searchId,matchId:audit.hits[0].id,style:{alignment:'right',lineSpacingPercent:190}}]});
+  assert.equal((await wait(paragraphTicket.structuredContent)).result.undoSteps,1);
+  const auditedParagraph=async()=>{
+   const document=new HwpDocument(Uint8Array.from(await frame.evaluate(()=>Array.from(window.pwhEditor.export().bytes))));
+   try{return JSON.parse(document.getCellParaPropertiesAtByPath(hit.source.section,hit.source.paragraph,cell));}
+   finally{document.free();}
+  };
+  assert.equal((await auditedParagraph()).alignment,'right');
+  assert.equal((await auditedParagraph()).lineSpacing,190);
   const styleInput=frame.getByRole('textbox',{name:'문서 편집 입력'});
   await styleInput.focus();
+  await page.keyboard.press('Control+z');
+  assert.equal((await auditedParagraph()).alignment,audit.hits[0].paragraphStyle.alignment);
   await page.keyboard.press('Control+z');
   assert.deepEqual(await colors(),initialColors);
   await page.keyboard.press('Control+z');

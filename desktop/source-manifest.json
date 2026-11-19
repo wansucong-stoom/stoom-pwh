@@ -108,20 +108,20 @@
     {
       "path": "standalone-pwh/client/editor.js",
       "source": "standalone-pwh/client/editor.js",
-      "size": 2850986,
-      "sha256": "b1881d20331f496588ce96073d06115d3706860a637b2e5dc60f00827b8d0738"
+      "size": 2858367,
+      "sha256": "438bca39eca594af6eadc136937a19928adfae9dffb68941cb625975df9089ec"
     },
     {
       "path": "standalone-pwh/client/manifest.json",
       "source": "standalone-pwh/client/manifest.json",
       "size": 20130,
-      "sha256": "a264d18ac4d65087ae3f3086b125e178a228f2a5174c980183e17a648292d2bf"
+      "sha256": "ba0e1e48230d3a99fbd8bdb35a30ec04c4ddaf0081ac1072235a81f6f6ddd851"
     },
     {
       "path": "standalone-pwh/codex-agent.mjs",
       "source": "standalone-pwh/codex-agent.mjs",
-      "size": 4295,
-      "sha256": "73d5ddff8df0b0d1191ab5fe2eb44d732645d9a61b6ca14af4591a90430058de"
+      "size": 4171,
+      "sha256": "e76274d085913f96e73e924bcf0a6e133d1c1e44c230ffce717c493a0ded3d6f"
     },
     {
       "path": "standalone-pwh/CODEX-APACHE-LICENSE.txt",
@@ -180,8 +180,8 @@
     {
       "path": "standalone-pwh/codex-session.mjs",
       "source": "standalone-pwh/codex-session.mjs",
-      "size": 11016,
-      "sha256": "fec54fdb87c54435aba25964d6ce4ba9b532fc2725da7907ba38f1c4bc979239"
+      "size": 10784,
+      "sha256": "582307bd0cef6d3373a6f279ad48864b1717153bd21fadbceb87285278649f56"
     },
     {
       "path": "standalone-pwh/convert-hwp.check.mjs",
@@ -230,6 +230,12 @@
       "source": "standalone-pwh/document-scan.test.mjs",
       "size": 2240,
       "sha256": "5c01eb40dcc974029fabac33cfae2d2560165f1efac1490a96800d9f53b289ef"
+    },
+    {
+      "path": "standalone-pwh/document-menu-tools.mjs",
+      "source": "standalone-pwh/document-menu-tools.mjs",
+      "size": 1477,
+      "sha256": "7de109344fb1ff7755705bb8ffcccdecc82b8e4272e571651993073f87af363e"
     },
     {
       "path": "standalone-pwh/document-scan.mjs",
@@ -288,8 +294,8 @@
     {
       "path": "standalone-pwh/host.mjs",
       "source": "standalone-pwh/host.mjs",
-      "size": 48464,
-      "sha256": "2b1068131ecba4d71ac928498529c20eb02df15be6f9be9ee8eeff8204dbd764"
+      "size": 48517,
+      "sha256": "60caba1df1123a2bc5183b76c98ec522209d77567d77fba9fb66933bbcbb51b2"
     },
     {
       "path": "standalone-pwh/image-convert.ps1",
@@ -528,8 +534,8 @@
     {
       "path": "standalone-pwh/table-plan.mjs",
       "source": "standalone-pwh/table-plan.mjs",
-      "size": 1733,
-      "sha256": "a14c548e58c2cc3a2ab156ac2f6b0fe700b52011edbe5a1beef5a72b0fb76c2f"
+      "size": 1783,
+      "sha256": "ebfbe14362bc0a97482556e318380a7890bf1f292255a6da83eb13e048be33b0"
     },
     {
       "path": "standalone-pwh/text-edit-smoke.check.mjs",
