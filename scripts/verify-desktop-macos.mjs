@@ -1,3 +1,4 @@
+/* global document, window */
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import os from 'node:os';
@@ -31,7 +32,7 @@ export async function verifyMacDesktop(app){
    args:[],
    cwd:directory,
    timeout:30000,
-   env:{...process.env,PWH_DESKTOP_DATA_ROOT:path.join(directory,'data'),PWH_ELECTRON_TEST_HIDDEN:'1'},
+   env:{...process.env,PWH_DESKTOP_DATA_ROOT:path.join(directory,'data'),PWH_ELECTRON_TEST_HIDDEN:'0'},
   });
   const page=await electron.firstWindow({timeout:30000});
   page.setDefaultTimeout(30000);

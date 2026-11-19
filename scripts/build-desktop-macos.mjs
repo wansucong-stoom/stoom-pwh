@@ -71,6 +71,30 @@ async function extractTar(file,destination){
  await exec('/usr/bin/tar',['-xf',file,'-C',destination,'--no-same-owner']);
 }
 
+async function signBundle(bundle){
+ await exec('/usr/bin/codesign',['--force','--sign','-','--preserve-metadata=entitlements',bundle]);
+}
+
+async function signFrameworks(directory){
+ for(const entry of await fs.readdir(directory,{withFileTypes:true})){
+  if(!entry.isDirectory())continue;
+  const target=path.join(directory,entry.name);
+  if(entry.name.endsWith('.framework')){
+   const versions=path.join(target,'Versions');
+   const entries=await fs.readdir(versions,{withFileTypes:true}).catch(error=>{
+    if(error.code==='ENOENT')return [];
+    throw error;
+   });
+   const concrete=entries.filter(version=>version.isDirectory());
+   if(concrete.length){
+    for(const version of concrete)await signBundle(path.join(versions,version.name));
+   }else await signBundle(target);
+  }else if(entry.name.endsWith('.app')){
+   await signBundle(target);
+  }
+ }
+}
+
 async function configureBundle(app,resources,work){
  const info=path.join(app,'Contents','Info.plist');
  const {stdout}=await exec('/usr/bin/plutil',['-convert','json','-o','-',info]);
@@ -156,7 +180,8 @@ try{
  for(const license of ['LICENSE','LICENSES.chromium.html']){
   await fs.copyFile(path.join(extracted,license),path.join(runtime,'node','ELECTRON-'+license));
  }
- await exec('/usr/bin/codesign',['--force','--sign','-','--preserve-metadata=entitlements',app]);
+ await signFrameworks(path.join(app,'Contents','Frameworks'));
+ await signBundle(app);
  await exec('/usr/bin/codesign',['--verify','--deep','--strict',app]);
  const archive=path.join(temporary,packageName);
  await exec('/usr/bin/ditto',['-c','-k','--sequesterRsrc','--keepParent',app,archive]);
@@ -167,7 +192,9 @@ try{
  const verifiedApp=path.join(verified,'Pwh Desktop.app');
  const verifiedRuntime=path.join(verifiedApp,'Contents','Resources','app');
  await exec('/usr/bin/codesign',['--verify','--deep','--strict',verifiedApp]);
+ console.log('Verified the app and nested code in the final ZIP');
  const runtimeSmoke=await verifyDesktopRuntime(verifiedRuntime);
+ console.log('Verified new and existing HWPX document tabs in the final ZIP');
  const {verifyMacDesktop}=await import('./verify-desktop-macos.mjs');
  const appSmoke=await verifyMacDesktop(verifiedApp);
  const bytes=await fs.readFile(archive);

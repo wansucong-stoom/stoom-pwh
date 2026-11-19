@@ -2,6 +2,7 @@ name: macOS Desktop
 on:
   push:
     branches: [main, 'codex/macos-desktop-*']
+    tags: ['macos-preview-*']
     paths:
       - '.github/workflows/macos-desktop.yml'
       - 'desktop/**'
@@ -45,6 +46,10 @@ jobs:
           npm install --prefix "$RUNNER_TEMP/pwh-macos-tools" --no-save --package-lock=false --ignore-scripts playwright-core@1.62.1
           export PWH_MACOS_TEST_PLAYWRIGHT="$RUNNER_TEMP/pwh-macos-tools/node_modules/playwright-core/index.mjs"
           desktop=$(node -p 'require("./desktop/standalone-pwh/version.json").version')
+          if [ "$GITHUB_REF_TYPE" = tag ] && [ -z "$RELEASE_TAG" ] && [ "$GITHUB_REF_NAME" != "macos-preview-$desktop" ]; then
+            echo "Preview tag and Desktop version differ"
+            exit 1
+          fi
           asset="PwhDesktop-$desktop-macos-arm64.zip"
           node scripts/build-desktop-macos.mjs --output "$RUNNER_TEMP/$asset" --cache "$RUNNER_TEMP/pwh-macos-cache"
           echo "artifact=$asset" >> "$GITHUB_OUTPUT"
@@ -58,12 +63,16 @@ jobs:
           if-no-files-found: error
 
   attach-release:
-    if: github.event_name == 'release'
+    if: github.event_name == 'release' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/macos-preview-'))
     needs: package
     runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
+        if: github.event_name == 'push'
+        with:
+          persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
           name: ${{ needs.package.outputs.artifact }}
@@ -71,6 +80,14 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name || github.ref_name }}
           ASSET: ${{ needs.package.outputs.artifact }}
-        run: gh release upload "$RELEASE_TAG" "$ASSET" "$ASSET.json"
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = push ]; then
+            gh release create "$RELEASE_TAG" "$ASSET" "$ASSET.json" \
+              --verify-tag --prerelease --latest=false \
+              --title "Pwh Desktop Mac 시험판 $RELEASE_TAG" \
+              --notes-file docs/MACOS.md
+          else
+            gh release upload "$RELEASE_TAG" "$ASSET" "$ASSET.json"
+          fi
