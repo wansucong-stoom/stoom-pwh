@@ -138,7 +138,7 @@ export function installInlineEditor(d:any) {
   },
   async styleScan(command:any){
    const current=read();
-   assertTextRevision(command.expected,current);
+   if(!current.ready||current.documentState.documentEpoch!==command.expected.documentState?.documentEpoch)throw Error('문서를 다시 열어 서식 검사가 만료되었습니다.');
    const scanId=command.cursor?.scanId??crypto.randomUUID();
    let scan=styleScans.get(scanId);
    if(command.cursor){
@@ -149,7 +149,7 @@ export function installInlineEditor(d:any) {
     styleScans.set(scanId,scan);if(styleScans.size>4)styleScans.delete(styleScans.keys().next().value!);
    }
    const plan=createStyleScanPlan(d.wasm,scan.index,current,command),searchId=rememberTextPlan(plan);
-   return {ok:true,styleScan:{...plan.result,searchId,nextCursor:plan.result.nextCursor?{...plan.result.nextCursor,scanId}:null}};
+   return {ok:true,styleScan:{...plan.result,documentState:current.documentState,searchId,nextCursor:plan.result.nextCursor?{...plan.result.nextCursor,scanId}:null}};
   },
   async textStyle(command:any){
    if(applying)throw Error('이전 수정 적용 중입니다.');

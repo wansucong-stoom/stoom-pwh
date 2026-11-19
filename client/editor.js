@@ -73384,7 +73384,7 @@ function nz(e) {
 		},
 		async styleScan(t) {
 			let n = o();
-			XL(t.expected, n);
+			if (!n.ready || n.documentState.documentEpoch !== t.expected.documentState?.documentEpoch) throw Error("문서를 다시 열어 서식 검사가 만료되었습니다.");
 			let r = t.cursor?.scanId ?? crypto.randomUUID(), s = i.get(r);
 			if (t.cursor) {
 				if (!s || s.scope !== t.scope || s.filter !== t.filter) throw Error("서식 검사 조건이 변경되었습니다. 처음부터 확인해 주세요.");
@@ -73400,6 +73400,7 @@ function nz(e) {
 				ok: !0,
 				styleScan: {
 					...c.result,
+					documentState: n.documentState,
 					searchId: l,
 					nextCursor: c.result.nextCursor ? {
 						...c.result.nextCursor,

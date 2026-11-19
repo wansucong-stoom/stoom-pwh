@@ -123,16 +123,18 @@ test('full editor imports and fills a merged table through MCP queue, renders, a
    }finally{document.free();}
   };
   const initialColors=await colors();
+  const beforeStyle=editorState({sessionId}).context;
   const styled=await callTool('pwh_editor_text_style',{
-   sessionId,expected:editorState({sessionId}).context,
+   sessionId,expected:beforeStyle,
    edits:[{searchId:searched.searchId,matchId:hit.id,style:{textColor:'#FF0000',strikethrough:true}}],
   });
   const styleReceipt=await wait(styled.structuredContent);
   assert.equal(styleReceipt.result.undoSteps,1);
   assert.deepEqual(await colors(),{before:initialColors.before,range:'#ff0000'});
-  const audited=await callTool('pwh_editor_style_scan',{sessionId,expected:editorState({sessionId}).context,scope:'tables',filter:'strikethrough'});
+  const audited=await callTool('pwh_editor_style_scan',{sessionId,expected:beforeStyle,scope:'tables',filter:'strikethrough'});
   const audit=(await wait(audited.structuredContent)).result.styleScan;
   assert.equal(audit.nextCursor,null);
+  assert.ok(audit.documentState.changeSeq>beforeStyle.documentState.changeSeq);
   assert.equal(audit.unsupportedCellLists,0);
   assert.equal(audit.hits.length,1);
   assert.equal(audit.hits[0].text,'소개');

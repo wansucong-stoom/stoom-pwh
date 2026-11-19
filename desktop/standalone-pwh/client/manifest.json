@@ -1,12 +1,12 @@
 {
-  "sha256": "438bca39eca594af6eadc136937a19928adfae9dffb68941cb625975df9089ec",
+  "sha256": "58a52c124237ac9eea9fab8d2d35c02f7c2158e4ca6c7fb194bf986be0a42e13",
   "baseVersion": "0.6.67",
-  "baseEditorSha256": "982f7273bdcb2440c628f56bb669e0a8b98832ac3ef5c97c9aa6ac06a1ba2da7",
+  "baseEditorSha256": "ae7e29706fe5bc20123c66fb33cef52dd699a46a4dbb9e397fe16c97e61416b0",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "desktop",
-    "sha256": "282364195ec4971a66cdc528ef52ae466685efefd910ed7d2e92eb58bd3b8a7b",
+    "sha256": "6f2ab9da4e322779b729385de9f4cca5687dba7b93d3f13bb9caf4badde51d60",
     "files": [
       {
         "path": "desktop/standalone-pwh/build-desktop-editor.mjs",
@@ -482,7 +482,7 @@
       },
       {
         "path": "src/studio-inline-adapter.ts",
-        "sha256": "10b47806c6206d919479035820081e33a37dfa1743d7d4760f1d416ad2ba76ef"
+        "sha256": "7560ca48ca058cb0ce6e41917aa59d5f944bb5aef878b0785e988de3bade45d9"
       },
       {
         "path": "src/studio-selection.ts",
