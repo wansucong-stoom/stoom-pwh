@@ -5,7 +5,7 @@ import {applyLayout} from './pwh-page-layout';
 import {blankBody,composeBlankBody} from './pwh-blank-compose';
 import {applyCellEdits,prepareCellEdits,insertStructuredTable,addTableTitle} from './pwh-table-content.mjs';
 import {sameRequestContext} from './pwh-request-state.mjs';
-import {createTextSearchPlan,prepareTextEdits,applyTextEdits,textEditCursor} from './pwh-text-edit.mjs';
+import {createTextSearchPlan,prepareTextEdits,applyTextEdits,textEditCursor,prepareTextStyles,applyTextStyles} from './pwh-text-edit.mjs';
 import {installTableClipboard} from './pwh-table-clipboard.mjs';
 import {chooseTablePaste} from './pwh-table-paste-dialog';
 import {userSettings} from './core/user-settings';
@@ -131,6 +131,21 @@ export function installInlineEditor(d:any) {
    try{
     const prepared=prepareTextEdits(d.wasm,textPlans,command.edits,read());
     await input.executeDocumentAgentOperation({kind:'snapshot',operationType:'pwh-text-edit',operation:(wasm:any)=>{changes=applyTextEdits(wasm,prepared,replaceTextWithMutationEffects);return textEditCursor(prepared,cursor);}},()=>d.getCanvasView().refreshDocumentAgentMutation());
+    textPlans.clear();
+   }finally{applying=false;}
+   return {ok:true,changes,context:read(),undoSteps:1};
+  },
+  async textStyle(command:any){
+   if(applying)throw Error('이전 수정 적용 중입니다.');
+   applying=true;
+   const input=d.getInputHandler(),cursor=input.getCursorPosition();
+   let changes;
+   try{
+    const prepared=prepareTextStyles(d.wasm,textPlans,command.edits,read());
+    await input.executeDocumentAgentOperation({
+     kind:'snapshot',operationType:'pwh-text-style',
+     operation:(wasm:any)=>{changes=applyTextStyles(wasm,prepared);return cursor;},
+    },()=>d.getCanvasView().refreshDocumentAgentMutation());
     textPlans.clear();
    }finally{applying=false;}
    return {ok:true,changes,context:read(),undoSteps:1};

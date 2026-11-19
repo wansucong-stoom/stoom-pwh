@@ -27,6 +27,60 @@ function shapeIds(w,p,start,end){
  for(const r of runs){if(r.startOffset!==next||!Number.isSafeInteger(r.endOffset)||r.endOffset<=next||r.endOffset>end||!Number.isSafeInteger(r.charShapeId))throw Error('글자 서식 구간을 확인하지 못했습니다.');ids.push(...Array(r.endOffset-next).fill(r.charShapeId));next=r.endOffset;}
  if(next!==end)throw Error('글자 서식 구간이 누락되었습니다.');return ids;
 }
+
+const styleKeys=['textColor','bold','italic','fontSize'];
+export function validateTextStyles(edits){
+ if(!Array.isArray(edits)||!edits.length||edits.length>100)throw Error('서식을 적용할 검색 결과를 1~100개 지정하세요.');
+ for(const edit of edits){
+  if(!edit||typeof edit.searchId!=='string'||edit.searchId.length>64||typeof edit.matchId!=='string'||!/^\d+$/.test(edit.matchId)||edit.matchId.length>16)throw Error('서식을 적용할 검색 결과를 확인하세요.');
+  const style=edit.style;
+  if(!style||typeof style!=='object'||Array.isArray(style)||!Object.keys(style).length||Object.keys(style).some(key=>!styleKeys.includes(key)))throw Error('글자 서식을 확인하세요.');
+  if(Object.hasOwn(style,'textColor')&&(typeof style.textColor!=='string'||!/^#[0-9a-f]{6}$/i.test(style.textColor)))throw Error('글자색은 #FF0000 같은 RGB 값으로 지정하세요.');
+  for(const key of ['bold','italic'])if(Object.hasOwn(style,key)&&typeof style[key]!=='boolean')throw Error('굵게와 기울임 값은 참 또는 거짓이어야 합니다.');
+  if(Object.hasOwn(style,'fontSize')&&(!Number.isSafeInteger(style.fontSize)||style.fontSize<600||style.fontSize>7200))throw Error('글자 크기는 6~72pt 범위로 지정하세요.');
+ }
+}
+
+function resolveTextMatch(w,plans,edit,context){
+ const plan=plans.get(edit.searchId);
+ if(!plan)throw Error('검색 결과가 만료되었습니다. 다시 검색하세요.');
+ assertTextRevision(plan.revision,context);
+ const ref=plan.refs.find(candidate=>candidate.id===edit.matchId);
+ if(!ref)throw Error('검색 결과의 문장 위치를 확인하세요.');
+ const actual=readParagraph(w,ref.source);
+ if(actual!==ref.paragraphText)throw Error('검색한 문단이 변경되었습니다. 다시 검색해 주세요.');
+ return {ref,actual};
+}
+
+export function prepareTextStyles(w,plans,edits,context){
+ validateTextStyles(edits);
+ const groups=new Map();
+ for(const edit of edits){
+  const {ref,actual}=resolveTextMatch(w,plans,edit,context);
+  const key=sourceKey(ref.source);
+  const group=groups.get(key)||{source:ref.source,original:actual,ranges:[]};
+  const end=ref.start+ref.length;
+  if(group.ranges.some(range=>ref.start<range.end&&range.start<end))throw Error('서식을 적용할 텍스트 범위가 겹칩니다.');
+  shapeIds(w,ref.source,ref.start,end);
+  group.ranges.push({start:ref.start,end,style:{...edit.style}});
+  groups.set(key,group);
+ }
+ return {groups:[...groups.values()],count:edits.length};
+}
+
+export function applyTextStyles(w,prepared){
+ for(const {source,original,ranges} of prepared.groups){
+  for(const {start,end,style} of ranges){
+   const values=JSON.stringify(style);
+   checked(source.cellPath
+    ?w.applyCharFormatInCellByPath(source.section,source.paragraph,pathJson(source),start,end,values)
+    :w.applyCharFormat(source.section,source.paragraph,start,end,values));
+  }
+  if(readParagraph(w,source)!==original)throw Error('글자 서식 적용 중 원문이 변경되었습니다.');
+ }
+ w.flushDeferredPagination();
+ return {ranges:prepared.count,paragraphs:prepared.groups.length};
+}
 export function createTextSearchPlan(w,context,query,{cursor=0,limit=40}={}){
  if(!validText(query)||!Number.isSafeInteger(cursor)||cursor<0||!Number.isSafeInteger(limit)||limit<1||limit>100)throw Error('검색어와 검색 범위를 확인하세요.');
  const raw=parsed(w.searchAllText(query,true,true));if(!Array.isArray(raw))throw Error('텍스트 검색 결과가 올바르지 않습니다.');
@@ -67,9 +121,8 @@ export function prepareTextEdits(w,plans,edits,context){
  if(!Array.isArray(edits)||edits.length<1||edits.length>100)throw Error('수정할 텍스트 범위를 1~100개 지정하세요.');
  const parts=[],groups=new Map();let total=0;
  for(const edit of edits){
-  const plan=plans.get(edit.searchId);if(!plan)throw Error('검색 결과가 만료되었습니다. 다시 검색하세요.');assertTextRevision(plan.revision,context);
-  const ref=plan.refs.find(r=>r.id===edit.matchId);if(!ref||!validText(edit.replacement,true)||(total+=edit.replacement.length)>48000)throw Error('수정할 검색 결과와 내용을 확인하세요.');
-  const actual=readParagraph(w,ref.source);if(actual!==ref.paragraphText)throw Error('검색한 문단이 변경되었습니다. 다시 검색해 주세요.');
+  if(!validText(edit.replacement,true)||(total+=edit.replacement.length)>48000)throw Error('수정할 검색 결과와 내용을 확인하세요.');
+  const {ref,actual}=resolveTextMatch(w,plans,edit,context);
   const key=sourceKey(ref.source),ids=shapeIds(w,ref.source,ref.start,ref.start+ref.length),part={...ref,replacement:edit.replacement,ids:replacementShapeIds(ref.original,edit.replacement,ids)};
   const group=groups.get(key)||{source:ref.source,text:chars(actual),parts:[]};
   if(group.parts.some(p=>ref.start<p.start+p.length&&p.start<ref.start+ref.length))throw Error('수정할 텍스트 범위가 겹칩니다.');

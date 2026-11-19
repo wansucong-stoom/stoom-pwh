@@ -4,14 +4,14 @@
   "upstreamVersion": "0.8.7",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "files": {
-    "editor.js": "a58924a79879b03863f8828f2187553844a17e9a49617550158db567f9bb483b",
+    "editor.js": "843cba7f90ea47c077895278b77dcf763bf887d3eceb9ffb869ad74a7873378c",
     "rhwp-studio.css": "10875c5542232767cc250c64623f545b4fb07a292bba2c2c4c0b08db92aff0f9",
     "editor-body.html": "098dfd61cfbe9146261ebd4293bd6047402c735f7a22c54ca7f754170d56df8d"
   },
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "common",
-    "sha256": "5f3b490a507f14fcfa4ff2cb2e1f5420e9e414f0cb44ff1cea51d553317d5188",
+    "sha256": "2e914c1a7154df1536cec99164d0db9122bc70fcacd0b3667d1ae821cf3465fc",
     "files": [
       {
         "path": "docs/engine-patches/studio/clipboard-safety.patch",
@@ -247,7 +247,7 @@
       },
       {
         "path": "src/editor-session.mjs",
-        "sha256": "a2ffdab3389ee3c84199170da6031e8c6199bd8be806e7ff1877a1228bbea61a"
+        "sha256": "9236669363eaf01caf76264108c1ebf87ab4a6097f834cc5175be6c1e1a247ec"
       },
       {
         "path": "src/engine.mjs",
@@ -287,7 +287,7 @@
       },
       {
         "path": "src/inline-host.js",
-        "sha256": "48e514d9d39ce86163d1d6e4eba4d7e4d5da3c29c92dba96a86666f52a88d5ff"
+        "sha256": "552ef41ad8a5b92ddb2f4e467dbea71cfdbf22388ad128b6fb7995b98f808495"
       },
       {
         "path": "src/inline-image-urls.mjs",
@@ -471,11 +471,11 @@
       },
       {
         "path": "src/server.mjs",
-        "sha256": "7ccf742e89c66fdc1a48003e43291920f689f0eafd2103aac1b316388d91e40f"
+        "sha256": "c22e320786cd9b19cfd1c25e78ad46b0fe4d3d46ade26b605666862965361caa"
       },
       {
         "path": "src/studio-inline-adapter.ts",
-        "sha256": "c97744f9791d43062b8efdf21f7cc52919ae84da4f88b19ce8492321c72e6368"
+        "sha256": "8c677e5e1f9e897e6663dd57e12e5980acdcdcfa78984531d39781dd2cbbec1d"
       },
       {
         "path": "src/studio-selection.ts",
@@ -527,7 +527,7 @@
       },
       {
         "path": "src/text-edit.mjs",
-        "sha256": "e39e236270911809a80d0affdb6490a8bc1da05bfc60fbc76e3e7a56acb8355b"
+        "sha256": "b85b98cb08c4f54f679eda2e1902271d5246132abc0b7c9e301f7855c2a5b6ac"
       }
     ]
   }

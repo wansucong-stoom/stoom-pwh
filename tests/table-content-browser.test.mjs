@@ -7,7 +7,7 @@ import {pathToFileURL} from 'node:url';
 import {createServer} from 'node:http';
 import {setTimeout as pause} from 'node:timers/promises';
 import {clientViewerHtml,registerClientDocument} from '../src/client-assets.mjs';
-import {handleRequest} from '../src/server.mjs';
+import {callTool,handleRequest} from '../src/server.mjs';
 import {editorState,editorTables,editorTableFill,editorTableInsert,editorTableTitle,editorResult} from '../src/editor-session.mjs';
 
 test('full editor imports and fills a merged table through MCP queue, renders, and undoes in one step',{
@@ -111,7 +111,31 @@ test('full editor imports and fills a merged table through MCP queue, renders, a
   const borders=Object.fromEntries(['Left','Right','Top','Bottom'].map(side=>[side,{type:0,width:0,color:'#000000'}]));
   const titleTicket=await editorTableTitle({sessionId,expected:current.context,planId:plan.planId,tableIndex:0,title:'동물 소개',borders});const titleReceipt=await wait(titleTicket);assert.equal(titleReceipt.result.undoSteps,1);
   const titled=new HwpDocument(Uint8Array.from(await frame.evaluate(()=>Array.from(window.pwhEditor.export().bytes))));try{const ref=plan.tables[0].source;const dim=JSON.parse(titled.getTableDimensions(ref.sec,ref.ppi,ref.ci));assert.equal(dim.rowCount,12);assert.equal(JSON.parse(titled.getCellInfo(ref.sec,ref.ppi,ref.ci,0)).colSpan,3);assert.equal(titled.getTextInCell(ref.sec,ref.ppi,ref.ci,0,0,0,5),'동물 소개');assert.equal(titled.getTextInCell(ref.sec,ref.ppi,ref.ci,1,0,0,2),'동물');const props=JSON.parse(titled.getCellProperties(ref.sec,ref.ppi,ref.ci,0));for(const side of Object.keys(borders))assert.equal(props['border'+side].type,0);}finally{titled.free();}
-  await frame.getByRole('textbox',{name:'문서 편집 입력'}).focus();await page.keyboard.press('Control+z');for(let i=0;i<100;i++){const state=editorState({sessionId});if(state.context.documentState.changeSeq!==(titleReceipt.result.context?.documentState?.changeSeq))break;await pause(100);}
+  const textTools=await callTool('pwh_editor_text_search',{sessionId,expected:editorState({sessionId}).context,query:'소개'});
+  const searched=(await wait(textTools.structuredContent)).result.textSearch;
+  assert.equal(searched.hits.length,1);
+  const hit=searched.hits[0],cell=JSON.stringify(hit.source.cellPath);
+  const colors=async()=>{
+   const document=new HwpDocument(Uint8Array.from(await frame.evaluate(()=>Array.from(window.pwhEditor.export().bytes))));
+   try{
+    const color=offset=>JSON.parse(document.getCellCharPropertiesAtByPath(hit.source.section,hit.source.paragraph,cell,offset)).textColor.toLowerCase();
+    return {before:color(hit.start-1),range:color(hit.start)};
+   }finally{document.free();}
+  };
+  const initialColors=await colors();
+  const styled=await callTool('pwh_editor_text_style',{
+   sessionId,expected:editorState({sessionId}).context,
+   edits:[{searchId:searched.searchId,matchId:hit.id,style:{textColor:'#FF0000'}}],
+  });
+  const styleReceipt=await wait(styled.structuredContent);
+  assert.equal(styleReceipt.result.undoSteps,1);
+  assert.deepEqual(await colors(),{before:initialColors.before,range:'#ff0000'});
+  const styleInput=frame.getByRole('textbox',{name:'문서 편집 입력'});
+  await styleInput.focus();
+  await page.keyboard.press('Control+z');
+  assert.deepEqual(await colors(),initialColors);
+  await page.keyboard.press('Control+z');
+  for(let i=0;i<100;i++){const state=editorState({sessionId});if(state.context.documentState.changeSeq!==(styleReceipt.result.context?.documentState?.changeSeq))break;await pause(100);}
   // Select the first body cell through the actual rendered surface, then copy
   // with the real keyboard path. The source context locates a synthetic cell.
   const point=await frame.evaluate(()=>{

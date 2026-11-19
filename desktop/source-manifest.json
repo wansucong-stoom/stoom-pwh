@@ -108,14 +108,14 @@
     {
       "path": "standalone-pwh/client/editor.js",
       "source": "standalone-pwh/client/editor.js",
-      "size": 2848004,
-      "sha256": "19f0a60232f7032c08a30318acd2a0f8b7c5965c0c78e0580c0f372b046f3c8d"
+      "size": 2850986,
+      "sha256": "b1881d20331f496588ce96073d06115d3706860a637b2e5dc60f00827b8d0738"
     },
     {
       "path": "standalone-pwh/client/manifest.json",
       "source": "standalone-pwh/client/manifest.json",
       "size": 20130,
-      "sha256": "d1700c34899cbcbc22042ffcaee6ced756b736ca8b30b51cb726c8deef35887b"
+      "sha256": "a264d18ac4d65087ae3f3086b125e178a228f2a5174c980183e17a648292d2bf"
     },
     {
       "path": "standalone-pwh/codex-agent.mjs",
@@ -288,8 +288,8 @@
     {
       "path": "standalone-pwh/host.mjs",
       "source": "standalone-pwh/host.mjs",
-      "size": 48440,
-      "sha256": "683012be7031bb2bc7ae1ffe62ffef11ef3842d28e2e8c9c7cfa73f35509564e"
+      "size": 48464,
+      "sha256": "2b1068131ecba4d71ac928498529c20eb02df15be6f9be9ee8eeff8204dbd764"
     },
     {
       "path": "standalone-pwh/image-convert.ps1",

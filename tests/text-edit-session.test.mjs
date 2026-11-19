@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
-import {editorPoll,editorTextSearch,editorTextEdit,editorResult} from '../src/editor-session.mjs';
+import {editorPoll,editorTextSearch,editorTextEdit,editorTextStyle,editorResult} from '../src/editor-session.mjs';
 
 test('text tools require support and only acknowledge actual editor receipts',()=>{
  const sessionId=randomUUID(),context={ready:true,documentState:{documentEpoch:2,changeSeq:0,documentSha256:'a'}};
@@ -17,4 +17,22 @@ test('text tools require support and only acknowledge actual editor receipts',()
  editorPoll({sessionId,context,receipt:{ticketId:ticket.ticketId,ok:false,error:'stale'}});assert.equal(editorResult(ticket).status,'rejected');
  assert.throws(()=>editorTextEdit({sessionId,expected:{documentState:{documentEpoch:1}},edits}),/다시 열렸/);
  assert.throws(()=>editorTextEdit({sessionId,expected:context,edits:[{searchId:'plan',matchId:'0',replacement:'line\nbreak'}]}),/텍스트/);
+});
+
+test('style tools validate formatting, require the editor capability and wait for a receipt',()=>{
+ const sessionId=randomUUID(),context={ready:true,documentState:{documentEpoch:2,changeSeq:0,documentSha256:'a'}};
+ const edits=[{searchId:'plan',matchId:'0',style:{textColor:'#ff0000'}}];
+ editorPoll({sessionId,context,capabilities:{textEdit:true}});
+ assert.throws(()=>editorTextStyle({sessionId,expected:context,edits}),/새 편집기/);
+ editorPoll({sessionId,context,capabilities:{textStyle:true}});
+ assert.throws(()=>editorTextStyle({sessionId,expected:context,edits:[{...edits[0],style:{textColor:'red'}}]}),/RGB/);
+ assert.throws(()=>editorTextStyle({sessionId,expected:context,edits:[{...edits[0],style:{bold:null}}]}),/참 또는 거짓/);
+ const ticket=editorTextStyle({sessionId,expected:context,edits});
+ edits[0].style.textColor='#0000ff';
+ assert.equal(editorResult(ticket).status,'pending');
+ const command=editorPoll({sessionId,context}).commands[0];
+ assert.equal(command.type,'textStyle');
+ assert.equal(command.edits[0].style.textColor,'#ff0000');
+ editorPoll({sessionId,context,receipt:{ticketId:ticket.ticketId,ok:true,changes:{ranges:1,paragraphs:1},undoSteps:1}});
+ assert.equal(editorResult(ticket).status,'applied');
 });

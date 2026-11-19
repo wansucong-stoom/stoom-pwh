@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {zipEntries} from '../scripts/setup.mjs';
-import {textRevision,assertTextRevision,createTextSearchPlan,replacementShapeIds,prepareTextEdits,applyTextEdits,textEditCursor} from '../src/text-edit.mjs';
+import {textRevision,assertTextRevision,createTextSearchPlan,replacementShapeIds,prepareTextEdits,applyTextEdits,textEditCursor,prepareTextStyles,applyTextStyles} from '../src/text-edit.mjs';
 
 // Fully synthetic fixtures only. Use the same core paths as the engine
 // regression suite; these tests never open an installed application or a user file.
@@ -158,6 +158,46 @@ test('stale plans, overlapping ranges and invalid replacements reject before any
   ok(d.insertText(0,0,0,'external '));const changed=scan(d);
   assert.throws(()=>prepareTextEdits(d,plans,[edit(ref,'valid')],context),/문단이 변경/);assert.equal(scan(d),changed,'unchanged revision must not bypass source-text validation');
  }finally{d.free();}
+});
+
+test('formatting a duplicate phrase changes only the addressed nested cell and survives save and undo',integration,async()=>{
+ const d=await fixture();
+ let reopened;
+ try{
+  const firstPlan=search(d),target=firstPlan.refs.find(ref=>ref.source.cellPath?.length===3);
+  format(d,target,0,2,{bold:true,fontSize:1400,textColor:'#343434'});
+  format(d,target,2,4,{italic:true,textColor:'#535353'});
+  const plan=search(d),plans=new Map([['plan',plan]]);
+  const edits=[{searchId:'plan',matchId:target.id,style:{textColor:'#FF0000'}}];
+  const capture=doc=>plan.refs.map(ref=>Array.from({length:ref.length+1},(_,offset)=>props(doc,ref.source,ref.start-1+offset)));
+  const before=capture(d),original=scan(d),structure=protectedStructure(d),snapshot=d.saveSnapshot(),index=plan.refs.findIndex(ref=>ref.id===target.id);
+  assert.throws(()=>prepareTextStyles(d,plans,edits,{documentState:{...context.documentState,changeSeq:4}}),/변경/);
+  assert.throws(()=>prepareTextStyles(d,plans,[...edits,...edits],context),/겹칩니다/);
+  assert.deepEqual(capture(d),before);
+  const prepared=prepareTextStyles(d,plans,edits,context);
+  assert.deepEqual(applyTextStyles(d,prepared),{ranges:1,paragraphs:1});
+  const after=capture(d);
+  for(let i=0;i<plan.refs.length;i++){
+   if(i!==index){assert.deepEqual(after[i],before[i]);continue;}
+   assert.deepEqual(after[i][0],before[i][0]);
+   for(let j=1;j<after[i].length;j++){
+    assert.equal(after[i][j].textColor.toLowerCase(),'#ff0000');
+    assert.deepEqual({...semanticProps(after[i][j]),textColor:before[i][j].textColor},semanticProps(before[i][j]));
+   }
+  }
+  assert.equal(scan(d),original);
+  assert.deepEqual(protectedStructure(d),structure);
+  const {HwpDocument}=await core();
+  reopened=new HwpDocument(d.exportHwpx());
+  assert.equal(props(reopened,target.source,target.start).textColor.toLowerCase(),'#ff0000');
+  assert.equal(scan(reopened),original);
+  ok(d.restoreSnapshot(snapshot));
+  d.discardSnapshot(snapshot);
+  assert.deepEqual(capture(d),before);
+ }finally{
+  reopened?.free();
+  d.free();
+ }
 });
 
 test('empty replacement deletes only the selected text and remains snapshot-reversible',integration,async()=>{
