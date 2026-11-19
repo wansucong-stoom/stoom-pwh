@@ -4,6 +4,21 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import {fileURLToPath,pathToFileURL} from 'node:url';
+import {buildReportPrompt} from '../desktop/standalone-pwh/codex-session.mjs';
+
+test('template writing instructions give each current user request priority over stored and common rules',()=>{
+ const base={note:'날짜가 없으면 비워 주세요.',requestId:'fixture',sessionId:'fixture'};
+ const prompt=buildReportPrompt({...base,reportTemplate:{mode:'exact',rules:'누락 날짜는 별도 문구를 씁니다.',fields:[]}});
+ const order=['1순위 이번 사용자 요청','2순위 사용자가 이 양식에 저장한 작성 기준','3순위 공통 작성 기준'].map(title=>prompt.indexOf(title));
+ assert.ok(order[0]>=0&&order[0]<order[1]&&order[1]<order[2]);
+ assert.match(prompt,/숫자가 작은 높은 순위의 지침을 적용/);
+ assert.match(prompt,/text를 빈 문자열로 전달/);
+ assert.match(prompt,/소제목 추가는 형식 준용에서 지원/);
+ const noRules=buildReportPrompt({...base,reportTemplate:{mode:'adapt',rules:'',fields:[]}});
+ assert.doesNotMatch(noRules,/2순위 사용자가/);
+ assert.match(noRules,/3순위 공통 작성 기준/);
+ assert.match(noRules,/sections에 소제목/);
+});
 
 test('registered templates keep their names and rules and verify separately typeset outputs',{skip:!process.env.PWH_RUNTIME_ROOT,timeout:60000},async t=>{
  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'pwh-report-template-'));
@@ -35,6 +50,9 @@ test('registered templates keep their names and rules and verify separately type
  await assert.rejects(fillPreparedTemplate(draft,[{marker:'{{사업명}}',text:'교육 프로그램'}],[{title:'추가',text:'본문'}]),/형식 준용/);
  const written=await fillPreparedTemplate(draft,[{marker:'{{사업명}}',text:'교육 프로그램'}]);
  assert.equal(written.changes.missing,1);
+ const intentionallyBlank=await fillPreparedTemplate(draft,[{marker:'{{사업명}}',text:'교육 프로그램'},{marker:'{{요약}}',text:''}]);
+ const blankResult=new HwpDocument(intentionallyBlank.bytes);
+ try{assert.equal(intentionallyBlank.changes.missing,0);assert.equal(search(blankResult,'확인 필요').length,0);}finally{blankResult.free();}
  const reportId=await lib.saveResult(written),openedFile=await lib.openResult(reportId),data=await readDraftTemplate(openedFile);
  assert.equal(data.completed,true);
  const report=new HwpDocument(await fs.readFile(openedFile));

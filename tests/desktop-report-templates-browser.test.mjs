@@ -54,7 +54,10 @@ test('registered templates attach to a request and typeset a separate document a
   await page.setViewportSize({width:1240,height:850});
   await library.getByRole('textbox',{name:'기관·회사'}).fill('합성 기관');
   await library.getByRole('textbox',{name:'양식 이름'}).fill('기관 결과보고');
-  await library.getByRole('textbox',{name:/작성 기준/}).fill('결론 먼저');
+  const rules=library.getByRole('textbox',{name:/작성 기준/});
+  assert.equal(await rules.getAttribute('aria-describedby'),'report-template-rules-help');
+  assert.match(await library.locator('#report-template-rules-help').textContent(),/비워 두면 공통 기준이 자동으로 적용됩니다/);
+  await rules.fill('결론 먼저');
   await library.getByRole('button',{name:'HWP·HWPX 파일 선택'}).click();
   const selected=library.getByRole('button',{name:'기관 결과보고',exact:true});
   await selected.waitFor();

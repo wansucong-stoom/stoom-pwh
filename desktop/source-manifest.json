@@ -180,8 +180,8 @@
     {
       "path": "standalone-pwh/codex-session.mjs",
       "source": "standalone-pwh/codex-session.mjs",
-      "size": 13119,
-      "sha256": "4f0462644381843b5894c35dd1c1ab67e90c4d06d12d7f341c46b153c9e8729b"
+      "size": 13238,
+      "sha256": "910c1f643ddbedc302d40b8d0716c45606c7ca007a04c78838e761ded1ab27a7"
     },
     {
       "path": "standalone-pwh/convert-hwp.check.mjs",
@@ -612,14 +612,14 @@
     {
       "path": "standalone-pwh/workspace.css",
       "source": "standalone-pwh/workspace.css",
-      "size": 10321,
-      "sha256": "2c04e6b5bd15fcf554f851d00ca79ce07a5b4902e609235a9818ad3fc2a9ef6c"
+      "size": 10519,
+      "sha256": "2e90d4c150f0484e5f6a264c19e607463b67151f80a636c09296a7c3e5ffbafe"
     },
     {
       "path": "standalone-pwh/workspace.html",
       "source": "standalone-pwh/workspace.html",
-      "size": 5928,
-      "sha256": "c609bc37751bf95f8af456f16e517dc8d535afda97b3c7e79eff39147d5c7059"
+      "size": 6248,
+      "sha256": "ee566ba6025ebf7780507584d569c9182e8bcc2b3ca260b6ef6b20c491bf2abb"
     },
     {
       "path": "standalone-pwh/workspace.js",

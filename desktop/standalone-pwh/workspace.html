@@ -23,7 +23,11 @@
     <form id="report-template-form" hidden>
       <label>기관·회사<input id="report-template-organization" type="text" maxlength="80" required></label>
       <label>양식 이름<input id="report-template-name" type="text" maxlength="80" placeholder="비워 두면 파일 이름 사용"></label>
-      <label class="report-template-rules">작성 기준 <span>선택</span><textarea id="report-template-rules" rows="3" maxlength="4000" placeholder="결론을 먼저 쓰고, 일정은 날짜순으로 정리합니다."></textarea></label>
+      <div class="report-template-rules">
+        <label for="report-template-rules">작성 기준 <span>선택</span></label>
+        <p id="report-template-rules-help">이 양식으로 AI에 문서 작성을 요청할 때 적용할 기준과 지침을 적어 주세요. 비워 두면 공통 기준이 자동으로 적용됩니다.</p>
+        <textarea id="report-template-rules" aria-describedby="report-template-rules-help" rows="3" maxlength="4000" placeholder="결론을 먼저 쓰고, 일정은 날짜순으로 정리합니다."></textarea>
+      </div>
       <div class="report-template-actions"><button id="report-template-register-back" type="button">목록</button><button type="submit">HWP·HWPX 파일 선택</button></div>
     </form>
     <form id="report-template-use" hidden>
