@@ -967,6 +967,19 @@ if(!wasm.includes('pwh scratch paragraph operations')){
   deletePwhScratchParagraph(sec:number,index:number):string {if(!this.doc)throw new Error('문서가 로드되지 않았습니다');return this.doc.deleteParagraph(sec,index);}`);
 }
 
+// Export the core's logical cell addresses even when the pinned Studio input
+// already contains the nested paragraph patch and has its patch marker.
+if(!wasm.includes('  getCursorModel(): unknown {')){
+  const anchor='  getControls(): Array<{ ctrlId: string; list: number; para: number; controlIndex: number }> {';
+  if(wasm.split(anchor).length!==2)throw Error('Unsupported Studio cursor model bridge');
+  wasm=wasm.replace(anchor,()=>`  getCursorModel(): unknown {
+    if (!this.doc) throw new Error('문서가 로드되지 않았습니다');
+    return JSON.parse(this.doc.getCursorModel());
+  }
+
+${anchor}`);
+}
+
 wasm=wasm.replace('await init() as',"await init({module_or_path:await (window as any).pwhWasmBytes}) as");
 await fs.writeFile(wasmPath,wasm);
 await patchBodyCursorContract(studio);

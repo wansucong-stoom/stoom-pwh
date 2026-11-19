@@ -27556,6 +27556,10 @@ var Js = class {
 		if (!this.doc) throw Error("문서가 로드되지 않았습니다");
 		if (!JSON.parse(this.doc.deleteControlAt(e, t, n)).ok) throw Error("감추기 부호를 삭제하지 못했습니다.");
 	}
+	getCursorModel() {
+		if (!this.doc) throw Error("문서가 로드되지 않았습니다");
+		return JSON.parse(this.doc.getCursorModel());
+	}
 	getControls() {
 		if (!this.doc) throw Error("문서가 로드되지 않았습니다");
 		return JSON.parse(this.doc.getControls());
