@@ -69,9 +69,10 @@ export async function verifyMacDesktop(app){
   assert.deepEqual(await fs.readFile(hwpx),saved);
 
   await openFile(hwp);
-  await visibleTab().getByText('HWP 원본 보존 · HWPX로 저장',{exact:true}).waitFor();
+  await visibleTab().locator('#document-notice').filter({hasText:'HWP 원본 보존 · HWPX로 저장'}).waitFor({state:'attached'});
   await waitForInlineEditor(editor());
   await page.waitForFunction(()=>document.body.classList.contains('integrated-tabs'));
+  assert.equal(await editor().locator('body').evaluate(()=>window.pwhEditor.context().paragraph?.text),'Mac HWP import');
   assert.deepEqual(await fs.readFile(hwp),hwpBefore);
   return {electronWindow:true,newDocument:true,koreanText:true,commandSave:true,savedAndReopenedHwpx:true,openedLegacyHwp:true,originalPreserved:true};
  }finally{
