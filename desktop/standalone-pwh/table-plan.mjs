@@ -11,7 +11,7 @@ export async function inspectDesktopTablePlan(w,context){
 export async function resolveDesktopTablePlan(w,plan,current,scope,tableIndex){
  const state=current?.documentState,rev=plan?.revision;
  if(!rev||state?.documentEpoch!==rev.epoch||state?.changeSeq!==rev.seq||state?.documentSha256!==rev.sha256)throw Error('Table plan expired or document changed');
- if(scope==='document'&&plan.unsupported)throw Error('Nested/non-body tables need a supported table path before document-wide styling');
+ if(scope==='document'&&plan.unsupported)throw Error('일부 표의 디자인을 확인하지 못해 문서 전체 서식을 적용할 수 없습니다. 개별 표를 지정하세요.');
  const latest=await inspectOriginal(w,current);
  if(latest.unsupported!==plan.unsupported||latest.refs.length!==plan.refs.length)throw Error('Document table set changed');
  for(let i=0;i<plan.refs.length;i++){const a=plan.refs[i],b=latest.refs[i];if(!b||a.sec!==b.sec||a.ppi!==b.ppi||a.ci!==b.ci||a.sha256!==b.sha256)throw Error('Table changed or is ambiguous');}

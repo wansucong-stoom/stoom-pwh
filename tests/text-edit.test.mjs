@@ -4,7 +4,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {zipEntries} from '../scripts/setup.mjs';
-import {textRevision,assertTextRevision,createTextSearchPlan,replacementShapeIds,prepareTextEdits,applyTextEdits,textEditCursor} from '../src/text-edit.mjs';
+import {emptyCellCaretTwoSectionFixture} from './engine-cursor/empty-cell-fixture.mjs';
+import {textRevision,assertTextRevision,createTextSearchPlan,replacementShapeIds,prepareTextEdits,applyTextEdits,textEditCursor,prepareTextStyles,applyTextStyles,applyParagraphStyles,styleScanSources,createStyleScanPlan} from '../src/text-edit.mjs';
 
 // Fully synthetic fixtures only. Use the same core paths as the engine
 // regression suite; these tests never open an installed application or a user file.
@@ -160,6 +161,46 @@ test('stale plans, overlapping ranges and invalid replacements reject before any
  }finally{d.free();}
 });
 
+test('formatting a duplicate phrase changes only the addressed nested cell and survives save and undo',integration,async()=>{
+ const d=await fixture();
+ let reopened;
+ try{
+  const firstPlan=search(d),target=firstPlan.refs.find(ref=>ref.source.cellPath?.length===3);
+  format(d,target,0,2,{bold:true,fontSize:1400,textColor:'#343434'});
+  format(d,target,2,4,{italic:true,textColor:'#535353'});
+  const plan=search(d),plans=new Map([['plan',plan]]);
+  const edits=[{searchId:'plan',matchId:target.id,style:{textColor:'#FF0000'}}];
+  const capture=doc=>plan.refs.map(ref=>Array.from({length:ref.length+1},(_,offset)=>props(doc,ref.source,ref.start-1+offset)));
+  const before=capture(d),original=scan(d),structure=protectedStructure(d),snapshot=d.saveSnapshot(),index=plan.refs.findIndex(ref=>ref.id===target.id);
+  assert.throws(()=>prepareTextStyles(d,plans,edits,{documentState:{...context.documentState,changeSeq:4}}),/변경/);
+  assert.throws(()=>prepareTextStyles(d,plans,[...edits,...edits],context),/겹칩니다/);
+  assert.deepEqual(capture(d),before);
+  const prepared=prepareTextStyles(d,plans,edits,context);
+  assert.deepEqual(applyTextStyles(d,prepared),{ranges:1,paragraphs:1});
+  const after=capture(d);
+  for(let i=0;i<plan.refs.length;i++){
+   if(i!==index){assert.deepEqual(after[i],before[i]);continue;}
+   assert.deepEqual(after[i][0],before[i][0]);
+   for(let j=1;j<after[i].length;j++){
+    assert.equal(after[i][j].textColor.toLowerCase(),'#ff0000');
+    assert.deepEqual({...semanticProps(after[i][j]),textColor:before[i][j].textColor},semanticProps(before[i][j]));
+   }
+  }
+  assert.equal(scan(d),original);
+  assert.deepEqual(protectedStructure(d),structure);
+  const {HwpDocument}=await core();
+  reopened=new HwpDocument(d.exportHwpx());
+  assert.equal(props(reopened,target.source,target.start).textColor.toLowerCase(),'#ff0000');
+  assert.equal(scan(reopened),original);
+  ok(d.restoreSnapshot(snapshot));
+  d.discardSnapshot(snapshot);
+  assert.deepEqual(capture(d),before);
+ }finally{
+  reopened?.free();
+  d.free();
+ }
+});
+
 test('empty replacement deletes only the selected text and remains snapshot-reversible',integration,async()=>{
  const d=await fixture();try{
   const plan=search(d),before=scan(d),protectedBefore=protectedStructure(d),snapshot=d.saveSnapshot();
@@ -168,5 +209,75 @@ test('empty replacement deletes only the selected text and remains snapshot-reve
   // Compare structure after undo too: an empty replacement is not a cell/table deletion.
   assert.equal(parse(d.getControls()).filter(c=>c.ctrlId==='tbl').length,3);
   ok(d.restoreSnapshot(snapshot));d.discardSnapshot(snapshot);assert.equal(scan(d),before);assert.deepEqual(protectedStructure(d),protectedBefore);
+ }finally{d.free();}
+});
+
+test('paragraph menu uses the exact nested paragraph and leaves neighboring styles intact',integration,async()=>{
+ const d=await fixture();let reopened;
+ try{
+  const plan=search(d),target=plan.refs.find(ref=>ref.source.cellPath?.length===3),plans=new Map([['plan',plan]]);
+  const read=(doc,ref)=>parse(ref.source.cellPath?doc.getCellParaPropertiesAtByPath(ref.source.section,ref.source.paragraph,JSON.stringify(ref.source.cellPath)):doc.getParaPropertiesAt(ref.source.section,ref.source.paragraph));
+  const changed={searchId:'plan',matchId:target.id,style:{alignment:'center',lineSpacingPercent:180}};
+  const before=plan.refs.map(ref=>read(d,ref)),original=scan(d),snapshot=d.saveSnapshot();
+  assert.throws(()=>prepareTextStyles(d,plans,[changed,changed],context,true),/같은 문단/);
+  assert.deepEqual(applyParagraphStyles(d,prepareTextStyles(d,plans,[changed],context,true)),{paragraphs:1});
+  for(const [i,ref] of plan.refs.entries()){
+   const actual=read(d,ref);
+   assert.deepEqual(actual,ref===target?{...before[i],paraShapeId:actual.paraShapeId,alignment:'center',lineSpacing:180,lineSpacingType:'Percent'}:before[i]);
+  }
+  assert.equal(scan(d),original);
+  const {HwpDocument}=await core();reopened=new HwpDocument(d.exportHwpx());
+  assert.equal(read(reopened,target).lineSpacing,180);
+  ok(d.restoreSnapshot(snapshot));d.discardSnapshot(snapshot);
+  assert.deepEqual(plan.refs.map(ref=>read(d,ref)),before);
+ }finally{reopened?.free();d.free();}
+});
+
+test('style scan finds strikethrough beyond the table design limit and in a nested cell',integration,async()=>{
+ const {HwpDocument}=await core(),d=HwpDocument.createEmpty();d.createBlankDocument();
+ try{
+  const long=Array.from({length:280},(_,i)=>'<p>line '+i+'</p>').join('');
+  ok(d.pasteHtml(0,0,0,'<p>body alpha😀</p><table><tr><td>'+long+'<table><tr><td>nested alpha😀</td></tr></table><p>tail alpha😀</p></td></tr></table><p>gap</p><table><tr><td>short cell</td></tr></table>'));
+  const quote=search(d).refs;
+  assert.equal(quote.length,3);
+  for(const ref of quote)format(d,ref,0,ref.length,{strikethrough:true});
+  const index=styleScanSources(d,'tables'),results=[];
+  let cursor,iterations=0;
+  do{
+   const plan=createStyleScanPlan(d,index,context,{filter:'strikethrough',limit:1,cursor});
+   assert.equal(plan.result.unsupportedCellLists,0);
+   cursor=plan.result.nextCursor;results.push(...plan.refs);
+   assert.ok(++iterations<=8,'style scan cursor must advance');
+  }while(cursor);
+  assert.ok(iterations>=3);
+  assert.deepEqual(results.map(ref=>ref.source),quote.filter(ref=>ref.source.cellPath).map(ref=>ref.source));
+  const hit=results.at(-1),before=scan(d);
+  const request={searchId:'audit',matchId:hit.id,style:{strikethrough:false,textColor:'#ff0000'}};
+  applyTextStyles(d,prepareTextStyles(d,new Map([['audit',{revision:textRevision(context),refs:[hit]}]]),[request],context));
+  const verified=createTextSearchPlan(d,context,'alpha😀',{includeStyle:true}).result;
+  assert.equal(verified.hits.at(-1).formats[0].strikethrough,false);
+  assert.equal(verified.hits.at(-1).formats[0].textColor.toLowerCase(),'#ff0000');
+  assert.ok(verified.hits.slice(0,-1).every(h=>h.formats[0].strikethrough));
+  assert.equal(scan(d),before);
+  const {inspectTablePlan}=await import('../src/table-style.mjs');
+  const design=await inspectTablePlan(d,context);
+  assert.equal(design.refs.length,1,'an oversized table must not suppress other tables');
+  assert.match(design.skipped[0].reason,/Too many cell paragraphs/);
+ }finally{d.free();}
+});
+
+test('style scan keeps identical cell coordinates in separate sections distinct',integration,async()=>{
+ const {HwpDocument}=await core(),d=new HwpDocument(emptyCellCaretTwoSectionFixture());
+ try{
+  const plans=createTextSearchPlan(d,context,'LEFT_1');
+  assert.equal(plans.refs.length,2);
+  assert.deepEqual(plans.refs.map(ref=>ref.source.section),[0,1]);
+  const target=plans.refs[1];
+  format(d,target,0,target.length,{strikethrough:true});
+  const index=styleScanSources(d,'tables');
+  const audit=createStyleScanPlan(d,index,context,{filter:'strikethrough'});
+  assert.equal(audit.result.nextCursor,null);
+  assert.equal(audit.result.unsupportedCellLists,0);
+  assert.deepEqual(audit.refs.map(ref=>ref.source),[target.source]);
  }finally{d.free();}
 });

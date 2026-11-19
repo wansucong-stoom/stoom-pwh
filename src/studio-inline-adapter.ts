@@ -5,7 +5,7 @@ import {applyLayout} from './pwh-page-layout';
 import {blankBody,composeBlankBody} from './pwh-blank-compose';
 import {applyCellEdits,prepareCellEdits,insertStructuredTable,addTableTitle} from './pwh-table-content.mjs';
 import {sameRequestContext} from './pwh-request-state.mjs';
-import {createTextSearchPlan,prepareTextEdits,applyTextEdits,textEditCursor} from './pwh-text-edit.mjs';
+import {createTextSearchPlan,prepareTextEdits,applyTextEdits,textEditCursor,prepareTextStyles,applyTextStyles,applyParagraphStyles,createStyleScanPlan,styleScanSources,textRevision,assertTextRevision} from './pwh-text-edit.mjs';
 import {installTableClipboard} from './pwh-table-clipboard.mjs';
 import {chooseTablePaste} from './pwh-table-paste-dialog';
 import {userSettings} from './core/user-settings';
@@ -17,6 +17,8 @@ export function installInlineEditor(d:any) {
  const bridge=installSelectionBridge(d);
  const tablePlans=new Map<string,any>();
  const textPlans=new Map<string,any>();
+ const styleScans=new Map<string,any>();
+ const rememberTextPlan=(plan:any)=>{const id=crypto.randomUUID();textPlans.set(id,plan);if(textPlans.size>24)textPlans.delete(textPlans.keys().next().value!);return id;};
  const read=(fresh=true)=>{const c:any=bridge.getSelectionContext({fresh});return {...c,blankDocument:!!c.ready&&blankBody(d.wasm),requestScope:c.kind==='cell_block'&&c.table?.selectedCells?.length?'selection':c.selection&&c.selectedText?.text?'selection':c.kind==='object'?'object':'document',pageSettings:c.ready?Array.from({length:Math.min(d.wasm.getSectionCount(),32)},(_,i)=>({sectionIndex:i,...d.wasm.getPageDef(i)})):[]};};
  const availability=()=>{const input=d.getInputHandler();return {ready:!!input&&d.wasm.pageCount>0,requestScope:input?.isInPictureObjectSelection()?'object':input?.getSelection()||input?.isInCellSelectionMode()?'selection':'document'};};
  const canRequest=(c:any)=>!!c?.ready;
@@ -116,13 +118,12 @@ export function installInlineEditor(d:any) {
    const current:any=read();if(current.documentState.documentEpoch!==command.expected.documentState?.documentEpoch)throw Error('Table request expired');
    const plan=await inspectTablePlan(d.wasm,current),planId=crypto.randomUUID();
    tablePlans.set(planId,plan);if(tablePlans.size>8)tablePlans.delete(tablePlans.keys().next().value!);
-   return {ok:true,tablePlan:{planId,unsupportedTables:plan.unsupported,tables:plan.refs.map((r:any,index:number)=>({index,source:{sec:r.sec,ppi:r.ppi,ci:r.ci},dimensions:r.snapshot.dimensions,cells:r.snapshot.cells.map((c:any,cellIndex:number)=>({cellIndex,...c.geometry,paragraphs:c.paragraphs.map((p:any)=>p.text)})),headerRows:r.snapshot.cells.filter((c:any)=>c.properties.isHeader).map((c:any)=>c.geometry.row),sample:r.snapshot.cells.slice(0,4).map((c:any)=>c.paragraphs.map((p:any)=>p.text).join(' ').slice(0,160)),theme:themeFromTable(r)}))}};
+   return {ok:true,tablePlan:{planId,unsupportedTables:plan.unsupported,skippedTables:plan.skipped.slice(0,32),tables:plan.refs.map((r:any,index:number)=>({index,source:{sec:r.sec,ppi:r.ppi,ci:r.ci},dimensions:r.snapshot.dimensions,cells:r.snapshot.cells.map((c:any,cellIndex:number)=>({cellIndex,...c.geometry,paragraphs:c.paragraphs.map((p:any)=>p.text)})),headerRows:r.snapshot.cells.filter((c:any)=>c.properties.isHeader).map((c:any)=>c.geometry.row),sample:r.snapshot.cells.slice(0,4).map((c:any)=>c.paragraphs.map((p:any)=>p.text).join(' ').slice(0,160)),theme:themeFromTable(r)}))}};
   },
   async textSearch(command:any){
    const current=read();
    if(!current.ready||current.documentState.documentEpoch!==command.expected.documentState?.documentEpoch)throw Error('텍스트 검색 요청이 만료되었습니다.');
-   const plan=createTextSearchPlan(d.wasm,current,command.query,{cursor:command.cursor,limit:command.limit}),searchId=crypto.randomUUID();
-   textPlans.set(searchId,plan);if(textPlans.size>24)textPlans.delete(textPlans.keys().next().value!);
+   const plan=createTextSearchPlan(d.wasm,current,command.query,{cursor:command.cursor,limit:command.limit,includeStyle:command.includeStyle}),searchId=rememberTextPlan(plan);
    return {ok:true,textSearch:{searchId,...plan.result,documentState:current.documentState}};
   },
   async textEdit(command:any){
@@ -131,6 +132,37 @@ export function installInlineEditor(d:any) {
    try{
     const prepared=prepareTextEdits(d.wasm,textPlans,command.edits,read());
     await input.executeDocumentAgentOperation({kind:'snapshot',operationType:'pwh-text-edit',operation:(wasm:any)=>{changes=applyTextEdits(wasm,prepared,replaceTextWithMutationEffects);return textEditCursor(prepared,cursor);}},()=>d.getCanvasView().refreshDocumentAgentMutation());
+    textPlans.clear();
+   }finally{applying=false;}
+   return {ok:true,changes,context:read(),undoSteps:1};
+  },
+  async styleScan(command:any){
+   const current=read();
+   if(!current.ready||current.documentState.documentEpoch!==command.expected.documentState?.documentEpoch)throw Error('문서를 다시 열어 서식 검사가 만료되었습니다.');
+   const scanId=command.cursor?.scanId??crypto.randomUUID();
+   let scan=styleScans.get(scanId);
+   if(command.cursor){
+    if(!scan||scan.scope!==command.scope||scan.filter!==command.filter)throw Error('서식 검사 조건이 변경되었습니다. 처음부터 확인해 주세요.');
+    assertTextRevision(scan.revision,current);
+   }else{
+    scan={index:styleScanSources(d.wasm,command.scope),revision:textRevision(current),scope:command.scope,filter:command.filter};
+    styleScans.set(scanId,scan);if(styleScans.size>4)styleScans.delete(styleScans.keys().next().value!);
+   }
+   const plan=createStyleScanPlan(d.wasm,scan.index,current,command),searchId=rememberTextPlan(plan);
+   return {ok:true,styleScan:{...plan.result,documentState:current.documentState,searchId,nextCursor:plan.result.nextCursor?{...plan.result.nextCursor,scanId}:null}};
+  },
+  async textStyle(command:any){
+   if(applying)throw Error('이전 수정 적용 중입니다.');
+   applying=true;
+   const input=d.getInputHandler(),cursor=input.getCursorPosition();
+   let changes;
+   try{
+    const paragraph=command.type==='paragraphStyle';
+    const prepared=prepareTextStyles(d.wasm,textPlans,command.edits,read(),paragraph);
+    await input.executeDocumentAgentOperation({
+     kind:'snapshot',operationType:paragraph?'pwh-paragraph-style':'pwh-text-style',
+     operation:(wasm:any)=>{changes=paragraph?applyParagraphStyles(wasm,prepared):applyTextStyles(wasm,prepared);return cursor;},
+    },()=>d.getCanvasView().refreshDocumentAgentMutation());
     textPlans.clear();
    }finally{applying=false;}
    return {ok:true,changes,context:read(),undoSteps:1};

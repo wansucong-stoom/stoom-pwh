@@ -108,7 +108,7 @@ export function applyTableStyles(w,ref,styles){
 }
 
 export async function inspectTablePlan(w,context){
- const refs=[];let cells=0;
+ const refs=[],skipped=[];let cells=0;
  // Enumeration is deliberately bounded. An unsupported nested table prevents
  // a misleading document-wide success claim.
  const controls=parsed(w.getControls());
@@ -120,13 +120,16 @@ export async function inspectTablePlan(w,context){
    for(let ci=0;ci<positions.length;ci++){
     let dimensions;try{dimensions=parsed(w.getTableDimensions(sec,ppi,ci));}catch{continue;}
     if(!dimensions?.cellCount)continue;
-    const snapshot=tableSnapshot(w,sec,ppi,ci);cells+=snapshot.cells.length;
-    if(refs.length>=64||cells>2048)throw Error('Document table plan exceeds supported limits');
+    if(refs.length>=64||cells+dimensions.cellCount>2048){skipped.push({sec,ppi,ci,reason:'표 디자인 일괄 분석 한도 초과'});continue;}
+    let snapshot;
+    try{snapshot=tableSnapshot(w,sec,ppi,ci);}
+    catch(error){skipped.push({sec,ppi,ci,reason:error instanceof Error?error.message:String(error)});continue;}
+    cells+=snapshot.cells.length;
     refs.push({sec,ppi,ci,snapshot,sha256:await digest(snapshot)});
    }
   }
  }
- return {epoch:context.documentState.documentEpoch,refs,unsupported};
+ return {epoch:context.documentState.documentEpoch,refs,unsupported:unsupported+skipped.length,skipped};
 }
 const roleStyle=cell=>{
  const p=cell?.paragraphs.find(p=>p.length)||cell?.paragraphs[0],c=p?.formats[0]?.format||{};
@@ -152,7 +155,7 @@ export function stylesForTheme(ref,theme,headerRows=theme.headerRows){
 }
 export async function resolveTablePlan(w,plan,current,scope,tableIndex){
  if(plan.epoch!==current.documentState?.documentEpoch)throw Error('Table plan expired');
- if(scope==='document'&&plan.unsupported)throw Error('Nested/non-body tables need a supported table path before document-wide styling');
+ if(scope==='document'&&plan.unsupported)throw Error('일부 표의 디자인을 확인하지 못해 문서 전체 서식을 적용할 수 없습니다. 개별 표를 지정하세요.');
  const latest=await inspectTablePlan(w,current);
  if(scope==='document'&&(latest.refs.length!==plan.refs.length||latest.unsupported!==plan.unsupported))throw Error('Document table set changed');
  const selected=scope==='document'?plan.refs:[plan.refs[tableIndex]];if(selected.some(r=>!r))throw Error('Unknown table index');
