@@ -7,7 +7,7 @@ import {spawn} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {waitForInlineEditor} from './helpers/editor-ready.mjs';
 
-const simulatedAgent="\nimport assert from 'node:assert/strict';\nconst {port,initialPath,mode}=Object.fromEntries(['port','initialPath','mode'].map((key,index)=>[key,process.argv[index+2]]));\nconst {createAppServer}=await import(process.env.PWH_TEMPLATE_TEST_HOST);\ntry{\n const {server,url}=await createAppServer({port:Number(port),initialPath,report:mode==='report',imported:mode==='report'||mode==='imported',async createAgentSession({mcpUrl,bearerToken}){\n  const call=async(method,params={})=>{\n   const res=await fetch(mcpUrl,{method:'POST',headers:{authorization:'Bearer '+bearerToken,'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})});return res.json();\n  };\n  return {threadId:'synthetic',close(){},async send({note,reportTemplate,sessionId}){\n   assert.match(note,/양식에 맞춰/);\n   assert.equal(reportTemplate.rules,'결론 먼저');\n   assert.equal(reportTemplate.mode,'exact');\n   const listed=await call('tools/list');\n   assert.ok(listed.result.tools.some(tool=>tool.name==='pwh_desktop_fill_report'));\n   assert.ok(!listed.result.tools.some(tool=>tool.name==='pwh_editor_text_edit'));\n   const forbidden=await call('tools/call',{name:'pwh_editor_text_edit',arguments:{sessionId}});\n   assert.equal(forbidden.error.code,-32601);\n   const read=await call('tools/call',{name:'pwh_desktop_read_scan',arguments:{sessionId}});\n   assert.match(JSON.stringify(read.result),/교육 과정/);\n   const filled=await call('tools/call',{name:'pwh_desktop_fill_report',arguments:{sessionId,answers:[{marker:'{{사업명}}',text:'교육 과정'},{marker:'{{주요 결과}}',text:'실습을 마쳤습니다.'}]}});\n   assert.equal(filled.result?.structuredContent?.prepared,true,JSON.stringify(filled.error||{}));\n   return {text:'양식에 맞춰 작성했습니다.'};\n  }};\n }});\n process.stdout.write(JSON.stringify({url})+'\\n');\n process.stdin.on('end',()=>{server.close();server.closeAllConnections?.();});\n process.stdin.resume();\n}catch(error){process.stdout.write(JSON.stringify({errorCode:error.code||'START_FAILED'})+'\\n');process.exitCode=1;}\n";
+const simulatedAgent="\nimport assert from 'node:assert/strict';\nconst {port,initialPath,mode}=Object.fromEntries(['port','initialPath','mode'].map((key,index)=>[key,process.argv[index+2]]));\nconst {createAppServer}=await import(process.env.PWH_TEMPLATE_TEST_HOST);\ntry{\n const {server,url}=await createAppServer({port:Number(port),initialPath,report:mode==='report',imported:mode==='report'||mode==='imported',async createAgentSession({mcpUrl,bearerToken}){\n  const call=async(method,params={})=>{\n   const res=await fetch(mcpUrl,{method:'POST',headers:{authorization:'Bearer '+bearerToken,'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})});return res.json();\n  };\n  return {threadId:'synthetic',close(){},async send({note,reportTemplate,sessionId}){\n   assert.match(note,/장학금 신청 서식/);\n   assert.equal(reportTemplate.rules,'결론 먼저');\n   assert.equal(reportTemplate.mode,'exact');\n   assert.deepEqual(reportTemplate.fields,[]);\n   const listed=await call('tools/list');\n   assert.ok(listed.result.tools.some(tool=>tool.name==='pwh_desktop_fill_report'));\n   assert.ok(!listed.result.tools.some(tool=>tool.name==='pwh_editor_text_edit'));\n   const forbidden=await call('tools/call',{name:'pwh_editor_text_edit',arguments:{sessionId}});\n   assert.equal(forbidden.error.code,-32601);\n   const read=await call('tools/call',{name:'pwh_desktop_read_scan',arguments:{sessionId}});\n   assert.match(JSON.stringify(read.result),/교육 과정/);\n   const filled=await call('tools/call',{name:'pwh_desktop_fill_report',arguments:{sessionId,form:{title:'학생 장학금 신청서',sections:[{heading:'신청 정보',fields:[{label:'이름'},{label:'학번'},{label:'신청 사유',lines:4}]}]}}});\n   assert.equal(filled.result?.structuredContent?.prepared,true,JSON.stringify(filled.error||{}));\n   return {text:'양식에 맞춰 작성했습니다.'};\n  }};\n }});\n process.stdout.write(JSON.stringify({url})+'\\n');\n process.stdin.on('end',()=>{server.close();server.closeAllConnections?.();});\n process.stdin.resume();\n}catch(error){process.stdout.write(JSON.stringify({errorCode:error.code||'START_FAILED'})+'\\n');process.exitCode=1;}\n";
 test('registered templates attach to a request and typeset a separate document after AI prepares it',{
  skip:process.env.PWH_BROWSER_TESTS!=='1'||!process.env.PWH_DESKTOP_SOURCE_ROOT,timeout:120000,
 },async()=>{
@@ -19,7 +19,7 @@ test('registered templates attach to a request and typeset a separate document a
  await fs.writeFile(path.join(profile,'settings.json'),JSON.stringify({provider:'codex'}));
  const fakeChild=path.join(dir,'synthetic-agent-child.mjs');await fs.writeFile(fakeChild,simulatedAgent);
  const file=path.join(dir,'합성 양식.hwpx'),doc=core.HwpDocument.createEmpty();
- try{doc.createBlankDocument();doc.pasteHtml(0,0,0,'<p>업무 결과</p><table><tr><td>사업명</td><td></td></tr></table><p>{{주요 결과}}</p>');await fs.writeFile(file,doc.exportHwpx());}finally{doc.free();}
+ try{doc.createBlankDocument();doc.pasteHtml(0,0,0,'<p>이전 추천 양식</p><table><tr><td>업무명</td><td>기관 예시</td><td>예시 결과</td></tr></table>');await fs.writeFile(file,doc.exportHwpx());}finally{doc.free();}
  const original=await fs.readFile(file),root=process.env.PWH_DESKTOP_SOURCE_ROOT;
  const {createWorkspaceServer}=await import(pathToFileURL(path.join(root,'workspace-shell.mjs')));
  const app=await createWorkspaceServer({
@@ -64,7 +64,7 @@ test('registered templates attach to a request and typeset a separate document a
   await library.getByRole('button',{name:'양식 창 닫기'}).click();
 
   const prompt=child(0).getByRole('textbox',{name:'요청 내용'});
-  await prompt.fill('이 문서를 양식에 맞춰 작성해 줘');
+  await prompt.fill('이 양식을 참고해 학생 장학금 신청 서식을 만들어 줘');
   const pick=async()=>{
    await child(0).getByRole('button',{name:'첨부 및 자주 쓰는 양식'}).click();
    await child(0).getByRole('button',{name:'양식 선택',exact:true}).click();
@@ -76,7 +76,7 @@ test('registered templates attach to a request and typeset a separate document a
   await library.getByRole('button',{name:'요청에 첨부'}).click();
   await child(0).getByText('기관 결과보고 · 양식 그대로').waitFor();
   assert.equal(await page.locator('#documents iframe').count(),1,'choosing never opens the template');
-  assert.equal(await prompt.inputValue(),'이 문서를 양식에 맞춰 작성해 줘');
+  assert.equal(await prompt.inputValue(),'이 양식을 참고해 학생 장학금 신청 서식을 만들어 줘');
   const before=await editor(0).locator('body').evaluate(()=>window.pwhEditor.context().documentState);
   const sent=page.waitForResponse(response=>new URL(response.url()).pathname.endsWith('/ai/send'));
   await child(0).getByRole('button',{name:'요청 보내기'}).click();
@@ -87,8 +87,9 @@ test('registered templates attach to a request and typeset a separate document a
   const exported=await editor(1).locator('body').evaluate(()=>Array.from(window.pwhEditor.export().bytes));
   const edited=new core.HwpDocument(Uint8Array.from(exported));
   try{
-   assert.equal(JSON.parse(edited.searchAllText('교육 과정',true,true)).length,1);
-   assert.equal(JSON.parse(edited.searchAllText('실습을 마쳤습니다.',true,true)).length,1);
+   assert.equal(JSON.parse(edited.searchAllText('학생 장학금 신청서',true,true)).length,1);
+   assert.equal(JSON.parse(edited.searchAllText('신청 사유',true,true)).length,1);
+   assert.equal(JSON.parse(edited.searchAllText('기관 예시',true,true)).length,0);
   }finally{edited.free();}
   assert.deepEqual(await editor(0).locator('body').evaluate(()=>window.pwhEditor.context().documentState),before);
   await child(1).getByRole('button',{name:'첨부 및 자주 쓰는 양식'}).click();

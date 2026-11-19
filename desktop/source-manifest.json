@@ -180,8 +180,8 @@
     {
       "path": "standalone-pwh/codex-session.mjs",
       "source": "standalone-pwh/codex-session.mjs",
-      "size": 13238,
-      "sha256": "910c1f643ddbedc302d40b8d0716c45606c7ca007a04c78838e761ded1ab27a7"
+      "size": 13968,
+      "sha256": "808a6ce8808105914a20de2ce52fbda8ea4dae7ede17602df6513eb76a61b0c8"
     },
     {
       "path": "standalone-pwh/convert-hwp.check.mjs",
@@ -294,8 +294,8 @@
     {
       "path": "standalone-pwh/host.mjs",
       "source": "standalone-pwh/host.mjs",
-      "size": 53181,
-      "sha256": "28be797481cb2358793fe884fc0699971ea51c7f2e36b92df212b4992c13f017"
+      "size": 53914,
+      "sha256": "942b5ca2b63f0ccaa87f4b5a5eb6a19fc64d0646fb20f7da21d2c5604a4fea4b"
     },
     {
       "path": "standalone-pwh/image-convert.ps1",
@@ -444,8 +444,8 @@
     {
       "path": "standalone-pwh/report-templates.mjs",
       "source": "standalone-pwh/report-templates.mjs",
-      "size": 20173,
-      "sha256": "bbc5a2f1987ca0ac107d19b735772b086abac6d4c3118ab35cfb01aa7554181b"
+      "size": 25894,
+      "sha256": "6de37b648854f3fe6c67d822e8a51bfcc386930058b36934d4a68f0eb7500aef"
     },
     {
       "path": "standalone-pwh/recovery-smoke.check.mjs",

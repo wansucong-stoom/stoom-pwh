@@ -8,14 +8,15 @@ import {directConnection,initializeDirect} from './official-codex-runtime.mjs';
 export function buildReportPrompt({note,requestId,sessionId,reportTemplate}){
  const {rules,...format}=reportTemplate;
  const mode=format.mode==='exact'
-  ?'양식 그대로를 선택했습니다. 지정된 작성 표시를 채웁니다. 소제목 추가는 형식 준용에서 지원합니다.'
-  :'형식 준용을 선택했습니다. 제목·본문의 대표 서식과 기존 항목의 역할을 활용합니다. 요청에 따라 절을 추가할 때는 sections에 소제목(title)과 본문(text)을 순서대로 전달하세요.';
+  ?'양식 그대로를 선택했습니다. 기존 양식을 작성하라는 요청에는 지정된 작성 표시를 사용합니다. 소제목 추가는 형식 준용에서 지원합니다.'
+  :'형식 준용을 선택했습니다. 제목·본문·표의 대표 서식을 활용합니다. 요청에 따라 절을 추가할 때는 sections에 소제목(title)과 본문(text)을 순서대로 전달하세요.';
  return [
   '사용자가 첨부한 양식으로 새 문서를 작성합니다. 현재 편집기의 문서는 내용 자료이며 읽기만 합니다.',
   '요청 ID '+requestId+' 및 sessionId '+sessionId+'를 사용하세요.',
   '기존 문서를 양식에 맞춰 작성할 때 pwh_desktop_read_scan으로 본문·표·중첩 셀을 읽고 nextCursor와 truncated를 확인하세요. 새 작성 요청은 사용자가 준 자료를 사용하세요.',
   mode,
-  '각 항목의 text는 줄바꿈 없는 문단으로 pwh_desktop_fill_report의 answers에 전달하세요. prepared를 확인한 경우에만 새 문서가 준비되었다고 알려 주세요.',
+  '이번 요청의 목적을 먼저 해석하세요. 참고 양식으로 새 신청서·평가표 등 빈 양식을 만드는 요청에는 pwh_desktop_fill_report의 form을 사용하세요. 이 작업은 형식 준용으로 처리하며, 원본에 작성 표시나 빈 입력 항목이 없어도 진행합니다. form에 새 제목, 필요한 안내문, 구역별 입력 항목명과 입력 칸 크기(lines)를 전달하세요. 실제 입력 칸은 편집 가능한 빈 셀로 만들어집니다. 원본의 기관명·기존 항목·예시 답변은 현재 사용자 요청에 필요한 경우에만 사용하세요.',
+  '기존 양식에 내용을 채우는 요청에는 answers를 사용하고, 각 text는 줄바꿈 없는 문단으로 전달하세요. answers와 form을 한 번에 전달하지 마세요. prepared를 확인한 경우에만 새 문서가 준비되었다고 알려 주세요.',
   '작성 지침의 우선순위는 아래 1순위, 2순위, 3순위 순입니다. 같은 사항에서 충돌하면 숫자가 작은 높은 순위의 지침을 적용하세요. 서로 양립하는 지침은 함께 적용합니다.',
   '1순위 이번 사용자 요청\n'+note,
   rules?'2순위 사용자가 이 양식에 저장한 작성 기준\n'+rules:'',

@@ -14,6 +14,7 @@ test('template writing instructions give each current user request priority over
  assert.match(prompt,/숫자가 작은 높은 순위의 지침을 적용/);
  assert.match(prompt,/text를 빈 문자열로 전달/);
  assert.match(prompt,/소제목 추가는 형식 준용에서 지원/);
+ assert.match(prompt,/새 신청서·평가표 등 빈 양식을 만드는 요청에는 pwh_desktop_fill_report의 form/);
  const noRules=buildReportPrompt({...base,reportTemplate:{mode:'adapt',rules:'',fields:[]}});
  assert.doesNotMatch(noRules,/2순위 사용자가/);
  assert.match(noRules,/3순위 공통 작성 기준/);
@@ -29,7 +30,7 @@ test('registered templates keep their names and rules and verify separately type
  await fs.symlink(fileURLToPath(new URL('..',import.meta.url)),common,process.platform==='win32'?'junction':'dir').catch(async()=>{
   await fs.cp(new URL('../src/',import.meta.url),path.join(common,'src'),{recursive:true});
  });
- const {createReportTemplateLibrary,readDraftTemplate,fillPreparedTemplate}=await import(pathToFileURL(path.join(desktop,'report-templates.mjs')).href);
+ const {createReportTemplateLibrary,readDraftTemplate,fillPreparedTemplate,createPreparedForm}=await import(pathToFileURL(path.join(desktop,'report-templates.mjs')).href);
  const profile=path.join(dir,'profile'),lib=createReportTemplateLibrary(profile);
  assert.deepEqual(await lib.list(),[]);
  await assert.rejects(lib.prepare('builtin-weekly'),/등록된 양식/);
@@ -72,6 +73,50 @@ test('registered templates keep their names and rules and verify separately type
   assert.equal(search(rebuilt,'추가 계획').length,1);
   assert.equal(search(rebuilt,'다음 달 준비').length,1);
  }finally{rebuilt.free();}
+ const blankFormSource=path.join(dir,'빈 입력 표시가 없는 양식.hwpx'),reference=HwpDocument.createEmpty();
+ try{
+  reference.createBlankDocument();
+  reference.pasteHtml(0,0,0,'<p><span style="font-size:23pt;color:#125377"><strong>기존 추천서</strong></span></p><table><tr><td colspan="2" style="background-color:#dce8f0">기존 추천 대상</td><td colspan="2">예시 인명</td></tr></table><p>기존 안내문</p>');
+  const paper=JSON.parse(reference.getPageDef(0));paper.marginTop=7200;reference.setPageDef(0,JSON.stringify(paper));
+  await fs.writeFile(blankFormSource,reference.exportHwpx());
+ }finally{reference.free();}
+ const referenceBytes=await fs.readFile(blankFormSource),markerless=await lib.register(blankFormSource,{organization:'합성 기관',name:'추천서 양식'});
+ assert.deepEqual(markerless.fields,[]);
+ const recordPath=path.join(profile,'report-templates',markerless.id,'template.json');
+ const oldRecord=JSON.parse(await fs.readFile(recordPath,'utf8'));delete oldRecord.analysis.version;delete oldRecord.analysis.structure.formTable;
+ await fs.writeFile(recordPath,JSON.stringify(oldRecord));
+ const legacyDraft=await lib.prepare(markerless.id,'exact');
+ assert.deepEqual(legacyDraft.template.fields,[]);
+ const formSpec={title:'학생 장학금 신청서',introduction:'증빙을 첨부하세요.',sections:[
+  {heading:'신청인 정보',fields:[{label:'이름'},{label:'학번'}]},
+  {heading:'신청 내용',guidance:'신청 사유를 적어 주세요.',fields:[{label:'신청 사유',lines:4}]},
+ ]};
+ await assert.rejects(createPreparedForm(legacyDraft,{...formSpec,sections:[]}),/구성/);
+ const form=await createPreparedForm(legacyDraft,formSpec);
+ assert.equal(form.template.mode,'adapt');
+ assert.equal(form.template.name,formSpec.title);
+ assert.equal(form.changes.fields,3);
+ const composed=new HwpDocument(form.bytes);
+ try{
+  assert.equal(JSON.parse(composed.getCharPropertiesAt(0,0,0)).fontSize,2300);
+  assert.equal(JSON.parse(composed.getCharPropertiesAt(0,0,0)).textColor.toLowerCase(),'#125377');
+  assert.equal(JSON.parse(composed.getPageDef(0)).marginTop,7200);
+  assert.equal(search(composed,'신청인 정보').length,1);
+  assert.equal(search(composed,'기존 안내문').length,0);
+  assert.equal(search(composed,'예시 인명').length,0);
+  for(const {para,controlIndex} of JSON.parse(composed.getControls()).filter(item=>item.ctrlId==='tbl')){
+   const dimensions=JSON.parse(composed.getTableDimensions(0,para,controlIndex));
+   assert.equal(dimensions.colCount,2);
+   for(let cellIndex=1;cellIndex<dimensions.cellCount;cellIndex+=2){
+    const p=JSON.stringify([{controlIndex,cellIndex,cellParaIndex:0}]);
+    assert.equal(composed.getCellParagraphLengthByPath(0,para,p),0);
+   }
+   assert.equal(JSON.parse(composed.getCellOwnProperties(0,para,controlIndex,0)).fillColor.toLowerCase(),'#dce8f0');
+  }
+ }finally{composed.free();}
+ assert.deepEqual(await fs.readFile(blankFormSource),referenceBytes);
+ assert.equal(JSON.parse(await fs.readFile(recordPath,'utf8')).analysis.version,undefined);
+ await lib.remove(markerless.id);
  await lib.remove(record.id);
  assert.deepEqual(await lib.list(),[]);
  assert.equal(await lib.openResult(reportId),openedFile,'removing a template keeps generated documents');

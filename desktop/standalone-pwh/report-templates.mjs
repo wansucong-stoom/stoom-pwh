@@ -11,6 +11,8 @@ const idPattern=/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const escapeHtml=value=>value.replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',[String.fromCharCode(39)]:'&#39;'}[char]));
 const parse=value=>typeof value==='string'?JSON.parse(value):value;
+const analysisVersion=2;
+const borderSides=['borderLeft','borderRight','borderTop','borderBottom'];
 const checked=value=>{const result=parse(value);if(result?.ok===false||result?.error)throw Error(result.error||'보고서 양식을 준비하지 못했습니다.');};
 let loadedCore;
 async function loadCore(){
@@ -43,7 +45,7 @@ function readFormatting(doc,source){
   paragraph:take(para,['alignment','lineSpacing','lineSpacingType','marginLeft','marginRight','indent','spacingBefore','spacingAfter','headType','paraLevel']),
  };
 }
-function readReportStructure(doc,body,tables){
+function readReportStructure(doc,body,tables,tableLabel){
  const pages=Array.from({length:Math.min(32,doc.getSectionCount())},(_,section)=>({
   paper:parse(doc.getPageDef(section)),columns:parse(doc.getColumnDef(section)),
  }));
@@ -61,17 +63,19 @@ function readReportStructure(doc,body,tables){
   return text.length<=70&&!text.includes('{{')&&(/제목|개요\s*\d|heading|^title$/i.test(named||'')||
    paragraph.headType==='Outline'||characters.bold&&characters.fontSize>=base+150);
  });
- const title=candidates.find(({source,format})=>source.section===0&&(source.paragraph===0||/제목|^title$/i.test(format.named||''))&&format.characters.fontSize>=base);
+ const title=candidates.find(({source,format})=>source.section===0&&(source.paragraph===0||/제목|^title$/i.test(format.named||''))&&format.characters.fontSize>=base)
+  ||candidates.find(({source,format})=>source.section===0&&format.characters.fontSize>=base+150);
  const headings=candidates.filter(item=>item!==title).slice(0,32);
  return {pages,tables:[...tables.values()].slice(0,48),headings:headings.map(({text,source})=>({text,source})),
   title:title?{text:title.text,source:title.source}:null,
-  styles:{title:title?.format||headings[0]?.format,heading:headings[0]?.format||title?.format,body:bodyFormat}};
+  styles:{title:title?.format||headings[0]?.format,heading:headings[0]?.format||title?.format,body:bodyFormat},formTable:tableLabel||null};
 }
 function boundedFields(fields){
  return fields.slice(0,64).map(({name,marker,source})=>({name,marker,section:source?.section,paragraph:source?.paragraph,cell:source?.cellPath?.at(-1)?.cellIndex}));
 }
 export function analyzeReportTemplate(doc){
  const {sources,unsupported}=styleScanSources(doc,'document'),explicit=new Map(),tables=new Map(),tableSizes=new Map(),body=[];
+ let tableLabel;
  const controls=new Set(parse(doc.getControls()).map(control=>JSON.stringify([control.list,control.para])));
  const hostKey=(list,section,paragraph,control,cell)=>JSON.stringify([list,section,paragraph,control,cell]);
  const hosts=new Map(parse(doc.getCursorModel()).lists.filter(list=>list.isCell).map(list=>[hostKey(list.hostListId,list.sectionIndex,list.hostPara,list.controlIndex,list.cellIndex),list.listId]));
@@ -97,6 +101,11 @@ export function analyzeReportTemplate(doc){
   if(!dims){dims=parse(doc.getTableDimensionsByPath(source.section,source.paragraph,JSON.stringify(p)));tableSizes.set(tableKey,{rows:dims.rowCount,columns:dims.colCount,depth:p.length});}
   else dims={colCount:dims.columns,rowCount:dims.rows};
   const info=parse(doc.getCellInfoByPath(source.section,source.paragraph,JSON.stringify(p)));
+  if(!tableLabel&&info&&dims.colCount>=2&&info.col===0&&label(value,64)&&value.trim().length<=40&&!containsCellControl(source)){
+   const props=parse(doc.getCellOwnPropertiesByPath(source.section,source.paragraph,JSON.stringify(p),last.cellIndex));
+   tableLabel={format:readFormatting(doc,source),fill:props?.fillType==='solid'&&/^#[0-9a-f]{6}$/i.test(props.fillColor)?props.fillColor:null,
+    border:borderSides.map(side=>props?.[side]).find(border=>border?.type>0)||null};
+  }
   if(!info||info.rowSpan!==1||info.colSpan!==1||![0,1].includes(info.col))continue;
   if(dims.colCount===1&&dims.rowCount===1&&value.trim()&&value.trim().length<=70&&body.length<256)body.push({text:value.trim(),source,format:readFormatting(doc,source)});
   if(dims.colCount!==2||containsCellControl(source)||doc.getCellParagraphCountByPath(source.section,source.paragraph,JSON.stringify(p))!==1)continue;
@@ -115,7 +124,7 @@ export function analyzeReportTemplate(doc){
   used.add(marker);blanks.push({name,marker,source:right.source});
  }
  const fields=[...explicit.values(),...blanks];
- return {sections:doc.getSectionCount(),paragraphs:sources.length,fields:fields.slice(0,64).map(field=>({...field,format:readFormatting(doc,field.source)})),structure:readReportStructure(doc,body,tableSizes),limited:fields.length>64||unsupported.length>0||tableSizes.size>48||doc.getSectionCount()>32};
+ return {version:analysisVersion,sections:doc.getSectionCount(),paragraphs:sources.length,fields:fields.slice(0,64).map(field=>({...field,format:readFormatting(doc,field.source)})),structure:readReportStructure(doc,body,tableSizes,tableLabel),limited:fields.length>64||unsupported.length>0||tableSizes.size>48||doc.getSectionCount()>32};
 }
 function addBlankMarkers(doc,fields){
  for(const {source,marker,explicit} of fields){
@@ -138,13 +147,19 @@ function applyFormatting(doc,source,format){
   ?doc.applyParaFormatInCellByPath(source.section,source.paragraph,p,JSON.stringify(paragraph))
   :doc.applyParaFormat(source.section,source.paragraph,JSON.stringify(paragraph)));
 }
-function adaptedDraft(HwpDocument,analysis,additionalHeadings=[]){
+function createStyledDraft(HwpDocument,structure,compose){
  const doc=HwpDocument.createEmpty();
  try{
   doc.createBlankDocument();
-  const {structure}=analysis,first=structure?.pages[0],styles=structure?.styles||{};
+  const first=structure?.pages[0];
   if(first?.paper)checked(doc.setPageDef(0,JSON.stringify(first.paper)));
   if(first?.columns?.sameWidth&&first.columns.columnCount>1)checked(doc.setColumnDef(0,first.columns.columnCount,first.columns.columnType,1,first.columns.spacing));
+  return compose(doc,structure?.styles||{});
+ }finally{doc.free();}
+}
+function adaptedDraft(HwpDocument,analysis,additionalHeadings=[]){
+ const {structure}=analysis;
+ return createStyledDraft(HwpDocument,structure,(doc,styles)=>{
   const overviewFields=analysis.fields.filter(field=>field.source?.cellPath&&field.name.length<=48&&!/[{}]/.test(field.name)).slice(0,4);
   const overviewNames=new Set(overviewFields.map(field=>field.name));
   const headings=[...new Set((structure?.headings.length?structure.headings.map(item=>item.text):analysis.fields.map(field=>field.name))
@@ -166,7 +181,7 @@ function adaptedDraft(HwpDocument,analysis,additionalHeadings=[]){
   const fields=analyzeReportTemplate(doc).fields,byName=new Map(overviewFields.map(field=>[field.name,field.format]));
   for(const field of fields)if(field.source.cellPath)applyFormatting(doc,field.source,byName.get(field.name));
   return {bytes:Buffer.from(doc.exportHwpx()),fields};
- }finally{doc.free();}
+ });
 }
 async function readRegular(file){
  const stat=await fs.lstat(file);
@@ -234,15 +249,20 @@ export function createReportTemplateLibrary(dataRoot){
   },
   async prepare(id,mode='exact'){
    if(!['exact','adapt'].includes(mode))throw Error('양식 활용 수준을 선택하세요.');
-   const template=await read(id),{HwpDocument}=await loadCore(),{analysis}=template;
-   let bytes=await readRegular(template.source),fields=analysis.fields;
+   const template=await read(id),{HwpDocument}=await loadCore();
+   let bytes=await readRegular(template.source),analysis=template.analysis;
    if(sha(bytes)!==template.sourceSha256)throw Error('등록된 원본 양식이 변경되었습니다. 다시 등록하세요.');
+   if(analysis.version!==analysisVersion){
+    const doc=new HwpDocument(bytes);
+    try{analysis=analyzeReportTemplate(doc);}finally{doc.free();}
+   }
+   let fields=analysis.fields;
    if(mode==='exact'&&fields.some(field=>field.source&&!field.explicit)){
     const doc=new HwpDocument(bytes);
     try{addBlankMarkers(doc,fields);bytes=Buffer.from(doc.exportHwpx());}finally{doc.free();}
    }
    if(mode==='adapt')({bytes,fields}=adaptedDraft(HwpDocument,analysis));
-   return {bytes,analysis,template:{...overview(template),mode,rules:template.rules||'',headings:analysis.structure?.headings.map(item=>item.text)||[],fields:boundedFields(fields)}};
+   return {bytes,analysis,template:{...overview({...template,analysis}),mode,rules:template.rules||'',headings:analysis.structure?.headings.map(item=>item.text)||[],fields:boundedFields(fields)}};
   },
   async saveResult(generated){
    const id=randomUUID();
@@ -270,7 +290,75 @@ function layoutIdentity(doc){
  const objects=parse(doc.getControls()).map(control=>[control.ctrlId,control.list,control.para,control.controlIndex]);
  return JSON.stringify({sections,tables,objects});
 }
+function formText(value,maxLength,optional=false){
+ if(value==null&&optional)return '';
+ if(typeof value!=='string'||value.length>maxLength||/[\u0000-\u001f\ufffc]/.test(value)||!optional&&!value.trim())throw Error('새 양식의 제목, 안내문, 항목명을 확인하세요.');
+ return value.trim();
+}
+export async function createPreparedForm(prepared,form){
+ if(!form||!Array.isArray(form.sections)||!form.sections.length||form.sections.length>12)throw Error('새 양식의 구성을 확인하세요.');
+ const title=formText(form.title,100),intro=formText(form.introduction,600,true),paragraphs=[{text:title,role:'title'}],tables=[];
+ let html='<p>'+escapeHtml(title)+'</p>',fieldCount=0;
+ if(intro){html+='<p>'+escapeHtml(intro)+'</p>';paragraphs.push({text:intro,role:'body'});}
+ for(const section of form.sections){
+  if(!section||!Array.isArray(section.fields)||!section.fields.length||section.fields.length>24||(fieldCount+=section.fields.length)>96)throw Error('구역별 새 양식 항목을 확인하세요.');
+  const heading=formText(section.heading,80,true),guidance=formText(section.guidance,600,true);
+  for(const [text,role] of [[heading,'heading'],[guidance,'body']]){
+   if(text){html+='<p>'+escapeHtml(text)+'</p>';paragraphs.push({text,role});}
+  }
+  const rows=section.fields.map(field=>{
+   const label=formText(field?.label,80),lines=field.lines??1;
+   if(!Number.isInteger(lines)||lines<1||lines>6)throw Error('입력 칸의 줄 수는 1~6줄로 지정하세요.');
+   return {label,lines};
+  });
+  tables.push(rows);
+  html+='<table>'+rows.map(({label})=>'<tr><td><strong>'+escapeHtml(label)+'</strong></td><td></td></tr>').join('')+'</table>';
+ }
+ const {HwpDocument}=await loadCore(),structure=prepared.analysis.structure;
+ return createStyledDraft(HwpDocument,structure,(doc,styles)=>{
+  checked(doc.pasteHtml(0,0,0,html));
+  let paragraphIndex=0;
+  for(let paragraph=0;paragraph<doc.getParagraphCount(0);paragraph++){
+   const source={section:0,paragraph},text=paragraphText(doc,source).trim();
+   if(!text)continue;
+   const expected=paragraphs[paragraphIndex++];
+   if(text!==expected?.text)throw Error('새 양식의 제목과 안내문을 조판하지 못했습니다.');
+   applyFormatting(doc,source,styles[expected.role]);
+  }
+  if(paragraphIndex!==paragraphs.length)throw Error('새 양식의 제목과 안내문을 조판하지 못했습니다.');
+  const tableControls=parse(doc.getControls()).filter(control=>control.ctrlId==='tbl'&&control.list===0);
+  if(tableControls.length!==tables.length)throw Error('새 양식의 입력 표를 조판하지 못했습니다.');
+  const tableStyle=structure?.formTable,border=tableStyle?.border||{type:1,width:2,color:'#8c949b'};
+  const borders=Object.fromEntries(borderSides.map(side=>[side,border]));
+  function checkCells(target,format=false){
+   for(const [index,rows] of tables.entries()){
+    const {para,controlIndex}=tableControls[index],dimensions=parse(target.getTableDimensions(0,para,controlIndex));
+    if(dimensions.rowCount!==rows.length||dimensions.colCount!==2)throw Error('새 양식의 입력 표를 확인하지 못했습니다.');
+    for(const [row,{label,lines}] of rows.entries()){
+     for(const column of [0,1]){
+      const cellIndex=row*2+column,source={section:0,paragraph:para,cellPath:[{controlIndex,cellIndex,cellParaIndex:0}]};
+      if(paragraphText(target,source)!==(column?'':label))throw Error('새 양식의 입력 칸을 확인하지 못했습니다.');
+      if(!format)continue;
+      const current=parse(target.getCellOwnProperties(0,para,controlIndex,cellIndex));
+      const fill=!column&&tableStyle?.fill?{fillType:'solid',fillColor:tableStyle.fill}:{};
+      checked(target.setCellProperties(0,para,controlIndex,cellIndex,JSON.stringify({...borders,...fill,height:Math.max(current.height,1600+(lines-1)*1000)})));
+      if(!column)applyFormatting(target,source,tableStyle?.format);
+     }
+    }
+   }
+  }
+  checkCells(doc,true);
+  const bytes=Buffer.from(doc.exportHwpx()),reopened=new HwpDocument(bytes);
+  try{
+   checkCells(reopened);
+   const pages=reopened.pageCount();
+   if(!pages||layoutIdentity(reopened)!==layoutIdentity(doc))throw Error('새 양식의 용지와 표를 확인하지 못했습니다.');
+   return {bytes,template:{...prepared.template,name:title,mode:'adapt'},changes:{kind:'blank_form',fields:fieldCount,pages}};
+  }finally{reopened.free();}
+ });
+}
 export async function fillPreparedTemplate(prepared,answers,sections=[]){
+ if(!prepared.template.fields.length)throw Error('기존 양식에 채울 항목을 찾지 못했습니다. 새 빈 양식을 만들려면 양식을 참고해 새 서식을 만들어 달라고 요청하세요.');
  if(!Array.isArray(answers)||answers.length>64||!Array.isArray(sections)||sections.length>8||!answers.length&&!sections.length)throw Error('작성할 양식 항목을 지정하세요.');
  if(sections.length&&prepared.template.mode!=='adapt')throw Error('새 소제목은 형식 준용에서만 추가할 수 있습니다.');
  const {HwpDocument}=await loadCore();

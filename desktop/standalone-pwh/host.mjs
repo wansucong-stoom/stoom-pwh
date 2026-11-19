@@ -11,7 +11,7 @@ import {inlineEditorImageUrls} from '../release-source/src/inline-image-urls.mjs
 import {handleRequest,TOOLS} from '../release-source/src/server.mjs';
 import {editorRewrite,editorResult,editorCapture,editorState,editorRequest} from '../release-source/src/editor-session.mjs';
 import config from '../release-source/src/config.mjs';
-import {readDraftTemplate,createReportTemplateLibrary,fillPreparedTemplate} from './report-templates.mjs';
+import {readDraftTemplate,createReportTemplateLibrary,fillPreparedTemplate,createPreparedForm} from './report-templates.mjs';
 import {convertHwp} from './convert-hwp.mjs';
 import {createLocalProvider,createCodexProvider} from './ai-providers.mjs';
 import {readSettings,writeSettings,validateSettings} from './settings.mjs';
@@ -88,10 +88,16 @@ export async function createAppServer({initialBytes,initialPath,imported=false,r
  let documentSnapshot=null;
  const readTools=[{name:'pwh_desktop_read_scan',description:'문서 전체를 엔진의 구조 순서로 읽습니다. 본문, 표 셀, 중첩 표와 지원되는 글상자 텍스트를 포함합니다. 표 서식 분석의 표 개수 제한과는 무관합니다. page 번호는 제공하지 않습니다. nextCursor를 끝까지 따라가고 truncated 여부를 확인하세요.',inputSchema:{type:'object',properties:{sessionId:{type:'string'},cursor:{type:'integer',minimum:0}},required:['sessionId']},annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false}},{name:'pwh_desktop_read_page',description:'한 페이지의 조판된 텍스트를 읽습니다. 페이지는 1부터 시작하며 표의 보이는 텍스트를 포함할 수 있습니다. 조판 결과와 글꼴에 따라 사용자 화면과 쪽 나눔이 다를 수 있고, 잘린 표의 숨은 텍스트는 포함되지 않습니다. 전체 내용은 pwh_desktop_read_scan도 확인하세요.',inputSchema:{type:'object',properties:{sessionId:{type:'string'},page:{type:'integer',minimum:1}},required:['sessionId','page']},annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false}}];
  const templateTool={name:'pwh_desktop_fill_report',
-  description:'AI 요청에 첨부한 양식의 작성 표시(marker)를 채워 새 HWPX 문서를 조판합니다. 현재 편집 중인 원본은 변경하지 않습니다. 저장하기 전 용지·표·개체 구조를 검사합니다.',
-  inputSchema:{type:'object',additionalProperties:false,required:['sessionId','answers'],properties:{
+  description:'첨부한 양식의 작성 항목 채우기(answers, sections) 또는 대표 서식으로 새 빈 양식 만들기(form)를 실행합니다. 현재 문서는 읽기 전용입니다.',
+  inputSchema:{type:'object',additionalProperties:false,required:['sessionId'],properties:{
    sessionId:{type:'string'},
    answers:{type:'array',maxItems:64,items:{type:'object',additionalProperties:false,required:['marker','text'],properties:{marker:{type:'string',maxLength:80},text:{type:'string',maxLength:12000}}}},
+   form:{type:'object',additionalProperties:false,required:['title','sections'],description:'새 빈 양식의 제목, 안내문과 입력 항목입니다. answers 및 sections와 별도로 사용합니다.',
+    properties:{title:{type:'string',maxLength:100},introduction:{type:'string',maxLength:600},
+     sections:{type:'array',minItems:1,maxItems:12,items:{type:'object',additionalProperties:false,required:['fields'],
+      properties:{heading:{type:'string',maxLength:80},guidance:{type:'string',maxLength:600},
+       fields:{type:'array',minItems:1,maxItems:24,items:{type:'object',additionalProperties:false,required:['label'],
+        properties:{label:{type:'string',maxLength:80},lines:{type:'integer',minimum:1,maximum:6}}}}}}}}},
    sections:{type:'array',maxItems:8,description:'형식 준용에서 추가할 소제목과 본문',items:{type:'object',additionalProperties:false,required:['title','text'],properties:{title:{type:'string',maxLength:48},text:{type:'string',maxLength:12000}}}}
   }},annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false}};
  const reportLibrary=createReportTemplateLibrary(appData);
@@ -215,7 +221,10 @@ export async function createAppServer({initialBytes,initialPath,imported=false,r
      const args=message.params.arguments||{};
      assertTemplateSource(args.sessionId);
      if(reportTurn.generated)throw Error('이 요청의 양식 문서가 이미 작성되었습니다.');
-     const active=reportTurn,generated=await fillPreparedTemplate(active.prepared,args.answers,args.sections);
+     if(args.form&&(args.answers?.length||args.sections?.length))throw Error('새 양식 만들기와 기존 항목 채우기는 각각 요청하세요.');
+     const active=reportTurn,generated=args.form
+      ?await createPreparedForm(active.prepared,args.form)
+      :await fillPreparedTemplate(active.prepared,args.answers,args.sections);
      assertTemplateSource(args.sessionId);
      if(active!==reportTurn||active.generated)throw Error('이 요청의 상태가 변경되었습니다.');
      active.generated=generated;
@@ -297,7 +306,6 @@ export async function createAppServer({initialBytes,initialPath,imported=false,r
       const source=input.context?.documentState,snapshot=documentSnapshot;
       if(!source||!snapshot||snapshot.sessionId!==input.sessionId||snapshot.epoch!==source.documentEpoch||snapshot.seq!==source.changeSeq)throw Error('현재 문서 상태를 다시 확인한 뒤 요청을 보내세요.');
       const prepared=await reportLibrary.prepare(input.reportTemplate.id,input.reportTemplate.mode);
-      if(!prepared.template.fields.length)throw Error('이 양식에는 자동으로 채울 항목이 없습니다. 형식 준용을 선택하거나 원본 양식에 {{항목명}}을 표시해 등록하세요.');
       reportTurn={prepared,source,snapshot,generated:null};
       assertTemplateSource(input.sessionId);
      }
