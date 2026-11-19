@@ -48,8 +48,8 @@
     {
       "path": "standalone-pwh/app.js",
       "source": "standalone-pwh/app.js",
-      "size": 55680,
-      "sha256": "f60da34a9b4e5d72dfd028f21d1c731a3823402379fd4ff8c0ecb3d5b29b0232"
+      "size": 55998,
+      "sha256": "43fba96ce5f20b9499395ef84ca09ddc7ec574ef9689ebd0e2b7c54adc580c04"
     },
     {
       "path": "standalone-pwh/build-desktop-editor.mjs",
@@ -180,8 +180,8 @@
     {
       "path": "standalone-pwh/codex-session.mjs",
       "source": "standalone-pwh/codex-session.mjs",
-      "size": 13968,
-      "sha256": "808a6ce8808105914a20de2ce52fbda8ea4dae7ede17602df6513eb76a61b0c8"
+      "size": 15503,
+      "sha256": "2121bbe6523d49141f1de31cfa5101eeb4d4a1335655bd6be789c0e305ca8efe"
     },
     {
       "path": "standalone-pwh/convert-hwp.check.mjs",
@@ -294,8 +294,8 @@
     {
       "path": "standalone-pwh/host.mjs",
       "source": "standalone-pwh/host.mjs",
-      "size": 53914,
-      "sha256": "942b5ca2b63f0ccaa87f4b5a5eb6a19fc64d0646fb20f7da21d2c5604a4fea4b"
+      "size": 57130,
+      "sha256": "a783e7123b5e8b3bc7b305e9f28786f48a9fb08f3265576bbe6183d09257a27e"
     },
     {
       "path": "standalone-pwh/image-convert.ps1",
@@ -444,8 +444,8 @@
     {
       "path": "standalone-pwh/report-templates.mjs",
       "source": "standalone-pwh/report-templates.mjs",
-      "size": 25894,
-      "sha256": "6de37b648854f3fe6c67d822e8a51bfcc386930058b36934d4a68f0eb7500aef"
+      "size": 27560,
+      "sha256": "26f842bf333d03663deb92868fcb057744963cf4f878c993d12d522cfcbb0645"
     },
     {
       "path": "standalone-pwh/recovery-smoke.check.mjs",

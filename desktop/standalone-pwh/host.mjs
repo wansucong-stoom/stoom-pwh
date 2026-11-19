@@ -11,7 +11,7 @@ import {inlineEditorImageUrls} from '../release-source/src/inline-image-urls.mjs
 import {handleRequest,TOOLS} from '../release-source/src/server.mjs';
 import {editorRewrite,editorResult,editorCapture,editorState,editorRequest} from '../release-source/src/editor-session.mjs';
 import config from '../release-source/src/config.mjs';
-import {readDraftTemplate,createReportTemplateLibrary,fillPreparedTemplate,createPreparedForm} from './report-templates.mjs';
+import {readDraftTemplate,createReportTemplateLibrary,fillPreparedTemplate,createPreparedForm,createPreparedDraft} from './report-templates.mjs';
 import {convertHwp} from './convert-hwp.mjs';
 import {createLocalProvider,createCodexProvider} from './ai-providers.mjs';
 import {readSettings,writeSettings,validateSettings} from './settings.mjs';
@@ -88,16 +88,20 @@ export async function createAppServer({initialBytes,initialPath,imported=false,r
  let documentSnapshot=null;
  const readTools=[{name:'pwh_desktop_read_scan',description:'문서 전체를 엔진의 구조 순서로 읽습니다. 본문, 표 셀, 중첩 표와 지원되는 글상자 텍스트를 포함합니다. 표 서식 분석의 표 개수 제한과는 무관합니다. page 번호는 제공하지 않습니다. nextCursor를 끝까지 따라가고 truncated 여부를 확인하세요.',inputSchema:{type:'object',properties:{sessionId:{type:'string'},cursor:{type:'integer',minimum:0}},required:['sessionId']},annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false}},{name:'pwh_desktop_read_page',description:'한 페이지의 조판된 텍스트를 읽습니다. 페이지는 1부터 시작하며 표의 보이는 텍스트를 포함할 수 있습니다. 조판 결과와 글꼴에 따라 사용자 화면과 쪽 나눔이 다를 수 있고, 잘린 표의 숨은 텍스트는 포함되지 않습니다. 전체 내용은 pwh_desktop_read_scan도 확인하세요.',inputSchema:{type:'object',properties:{sessionId:{type:'string'},page:{type:'integer',minimum:1}},required:['sessionId','page']},annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false}}];
  const templateTool={name:'pwh_desktop_fill_report',
-  description:'첨부한 양식의 작성 항목 채우기(answers, sections) 또는 대표 서식으로 새 빈 양식 만들기(form)를 실행합니다. 현재 문서는 읽기 전용입니다.',
-  inputSchema:{type:'object',additionalProperties:false,required:['sessionId'],properties:{
+  description:'첨부한 양식으로 새 HWPX 초안을 조판합니다. 기존 항목을 채우는 answers, 빈 서식을 만드는 form, 새 본문을 쓰는 draft 중 하나를 사용합니다. 다시 호출하면 검증된 새 초안을 보관합니다.',
+  inputSchema:{type:'object',additionalProperties:false,required:['sessionId','phase'],properties:{
    sessionId:{type:'string'},
+   phase:{type:'string',enum:['draft','complete'],description:'검토할 중간본은 draft, 요청을 충족한 결과는 complete를 사용합니다.'},
    answers:{type:'array',maxItems:64,items:{type:'object',additionalProperties:false,required:['marker','text'],properties:{marker:{type:'string',maxLength:80},text:{type:'string',maxLength:12000}}}},
    form:{type:'object',additionalProperties:false,required:['title','sections'],description:'새 빈 양식의 제목, 안내문과 입력 항목입니다. answers 및 sections와 별도로 사용합니다.',
-    properties:{title:{type:'string',maxLength:100},introduction:{type:'string',maxLength:600},
-     sections:{type:'array',minItems:1,maxItems:12,items:{type:'object',additionalProperties:false,required:['fields'],
-      properties:{heading:{type:'string',maxLength:80},guidance:{type:'string',maxLength:600},
-       fields:{type:'array',minItems:1,maxItems:24,items:{type:'object',additionalProperties:false,required:['label'],
-        properties:{label:{type:'string',maxLength:80},lines:{type:'integer',minimum:1,maximum:6}}}}}}}}},
+    properties:{title:{type:'string'},introduction:{type:'string'},
+     sections:{type:'array',minItems:1,items:{type:'object',additionalProperties:false,required:['fields'],
+      properties:{heading:{type:'string'},guidance:{type:'string'},
+       fields:{type:'array',minItems:1,items:{type:'object',additionalProperties:false,required:['label'],
+        properties:{label:{type:'string'},lines:{type:'integer',minimum:1}}}}}}}}},
+   draft:{type:'object',additionalProperties:false,required:['title','paragraphs'],description:'대표 서식으로 새 제목·소제목·본문을 조판합니다. 채울 칸을 찾지 못했거나 새 본문이 필요한 경우 사용하세요.',
+    properties:{title:{type:'string'},paragraphs:{type:'array',minItems:1,items:{type:'object',additionalProperties:false,required:['role','text'],
+     properties:{role:{type:'string',enum:['heading','body']},text:{type:'string'}}}}}},
    sections:{type:'array',maxItems:8,description:'형식 준용에서 추가할 소제목과 본문',items:{type:'object',additionalProperties:false,required:['title','text'],properties:{title:{type:'string',maxLength:48},text:{type:'string',maxLength:12000}}}}
   }},annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false}};
  const reportLibrary=createReportTemplateLibrary(appData);
@@ -106,7 +110,7 @@ export async function createAppServer({initialBytes,initialPath,imported=false,r
  function assertTemplateSource(sessionId){
   if(!agentBusy||cancelRequested||!reportTurn||sessionId!==activeAgentSessionId)throw Error('현재 양식 작성 요청을 확인하지 못했습니다.');
   const observed=editorState({sessionId}).context.documentState,expected=reportTurn.source;
-  if(observed.documentEpoch!==expected.documentEpoch||observed.changeSeq>expected.changeSeq)throw Error('원본 문서가 변경되었습니다. 최신 문서에서 다시 요청해 주세요.');
+  if(observed.documentEpoch!==expected.documentEpoch)throw Error('원본 문서가 바뀌었습니다. 현재 문서에서 다시 요청해 주세요.');
  }
  const imageAssets=new Map();let imageController=null;
  const desktopCommands=[],desktopTickets=new Map();
@@ -219,17 +223,30 @@ export async function createAppServer({initialBytes,initialPath,imported=false,r
     }
     if(message.method==='tools/call'&&message.params?.name===templateTool.name){
      const args=message.params.arguments||{};
-     assertTemplateSource(args.sessionId);
-     if(reportTurn.generated)throw Error('이 요청의 양식 문서가 이미 작성되었습니다.');
-     if(args.form&&(args.answers?.length||args.sections?.length))throw Error('새 양식 만들기와 기존 항목 채우기는 각각 요청하세요.');
-     const active=reportTurn,generated=args.form
-      ?await createPreparedForm(active.prepared,args.form)
-      :await fillPreparedTemplate(active.prepared,args.answers,args.sections);
-     assertTemplateSource(args.sessionId);
-     if(active!==reportTurn||active.generated)throw Error('이 요청의 상태가 변경되었습니다.');
-     active.generated=generated;
-     const result={prepared:true,...generated.changes};
-     return json(res,{jsonrpc:'2.0',id:message.id,result:{content:[{type:'text',text:JSON.stringify(result)}],structuredContent:result}});
+     try{
+      assertTemplateSource(args.sessionId);
+      if(!['draft','complete'].includes(args.phase))throw Error('초안인지 완성본인지 지정하세요.');
+      if(Number(!!args.form)+Number(!!args.draft)+Number(!!(args.answers?.length||args.sections?.length))!==1)throw Error('한 번에 새 양식, 새 본문, 기존 항목 채우기 중 하나를 지정하세요.');
+      const active=reportTurn,attempt=++active.attempts;
+      const generated=args.form?await createPreparedForm(active.prepared,args.form)
+       :args.draft?await createPreparedDraft(active.prepared,args.draft)
+       :await fillPreparedTemplate(active.prepared,args.answers,args.sections);
+      assertTemplateSource(args.sessionId);
+      if(active!==reportTurn)throw Error('이 요청의 상태가 변경되었습니다.');
+      if(attempt>active.confirmedAttempt){
+       active.confirmedAttempt=attempt;
+       const fingerprint=createHash('sha256').update(JSON.stringify([args.form,args.draft,args.answers,args.sections])).digest('hex');
+       const changed=!active.verifiedPlans.has(fingerprint);
+       if(changed){active.verifiedPlans.add(fingerprint);active.draftRevision++;}
+       if(changed||args.phase==='complete')active.generated=generated;
+       active.complete=args.phase==='complete';
+      }
+      const result={prepared:true,phase:active.complete?'complete':'draft',draftRevision:active.draftRevision,...active.generated.changes};
+      return json(res,{jsonrpc:'2.0',id:message.id,result:{content:[{type:'text',text:JSON.stringify(result)}],structuredContent:result}});
+     }catch(error){
+      const text=error.message+' 작성 가능한 항목을 조정하거나 새 양식 또는 본문으로 만들어 요청을 계속하세요.';
+      return json(res,{jsonrpc:'2.0',id:message.id,result:{isError:true,content:[{type:'text',text}]}});
+     }
     }
     if(message.method==='tools/call'&&message.params?.name==='pwh_desktop_result'){
      const controller=new AbortController();res.once('close',()=>controller.abort());
@@ -295,7 +312,7 @@ export async function createAppServer({initialBytes,initialPath,imported=false,r
    }
    if(route==='/ai/send'){
     const input=JSON.parse((await parse(req,200000)).toString()),settings=await readSettings(settingsPath);
-    if(typeof input.note!=='string'||!input.note.trim()||input.note.length>4000)throw Error('요청 내용을 입력하세요.');
+    if(typeof input.note!=='string'||!input.note.trim()||input.note.length>4000&&!(input.reportTemplate||current.reportTemplate))throw Error('요청 내용을 입력하세요.');
     if(input.history!==undefined&&(!Array.isArray(input.history)||input.history.length>24||input.history.some(x=>!x||!['user','assistant'].includes(x.role)||typeof x.text!=='string'||x.text.length>6000)||input.history.reduce((n,x)=>n+x.text.length,0)>32000))throw Error('이전 대화를 확인할 수 없습니다.');
     if(input.reportTemplate&&settings.provider==='local')throw Error('양식으로 새 문서 작성은 ChatGPT·Codex 연결에서 지원합니다.');
     if(settings.provider==='codex'||settings.provider==='chatgpt'){
@@ -306,10 +323,10 @@ export async function createAppServer({initialBytes,initialPath,imported=false,r
       const source=input.context?.documentState,snapshot=documentSnapshot;
       if(!source||!snapshot||snapshot.sessionId!==input.sessionId||snapshot.epoch!==source.documentEpoch||snapshot.seq!==source.changeSeq)throw Error('현재 문서 상태를 다시 확인한 뒤 요청을 보내세요.');
       const prepared=await reportLibrary.prepare(input.reportTemplate.id,input.reportTemplate.mode);
-      reportTurn={prepared,source,snapshot,generated:null};
+      reportTurn={prepared,source,snapshot,generated:null,attempts:0,confirmedAttempt:0,draftRevision:0,verifiedPlans:new Set(),complete:false};
       assertTemplateSource(input.sessionId);
      }
-     const request=input.requestId?editorRequest({requestId:input.requestId}):editorCapture({sessionId:input.sessionId,source:state.source,context:input.context,note:input.note});
+     const request=input.requestId?editorRequest({requestId:input.requestId}):editorCapture({sessionId:input.sessionId,source:state.source,context:input.context,note:input.note.slice(0,4000)});
      if(input.requestId&&(request.sessionId!==input.sessionId||request.note!==input.note||request.source!==state.source))throw Error('편집기 요청이 현재 문서와 일치하지 않습니다. 다시 요청해 주세요.');
      const credentials=settings.provider==='chatgpt'?await chatgptAuth.getAccessToken():null;
      const key=JSON.stringify([settings.provider,input.sessionId,settings.codexModel,settings.codexReasoningEffort,credentials?.accountId||'',reportTurn?'template':'edit']);
@@ -320,15 +337,42 @@ export async function createAppServer({initialBytes,initialPath,imported=false,r
      if(credentials&&restoring){codexSessionAccount=credentials.accountId;credentialStamp=await currentCredentialStamp();const state=await chatgptAuth.status();if(state.active!==credentials.accountId||!state.accounts.some(account=>account.id===credentials.accountId&&account.connected))throw Error('ChatGPT 계정이 변경되었습니다. 다시 요청해 주세요.');}
      if(cancelRequested)throw Error('Codex 작업을 중지했습니다.');
      const asset=input.imageAssetId?imageAssets.get(input.imageAssetId):null;if(input.imageAssetId&&(!asset||asset.sessionId!==input.sessionId||Date.now()-asset.createdAt>600000))throw Error('첨부 그림이 만료되었습니다. 다시 첨부하세요.');
-     const result=await codexSession.send({requestId:request.requestId,sessionId:input.sessionId,note:input.note,history:restoring&&!resumed?input.history:undefined,imageAssetId:input.imageAssetId||undefined,reportTemplate:reportTurn?.prepared.template});
-     if(reportTurn){
-      if(cancelRequested)throw Error('양식 문서 작성을 중지했습니다.');
-      if(!reportTurn.generated)return json(res,{text:result.text,applied:false});
-      assertTemplateSource(input.sessionId);
-      const reportId=await reportLibrary.saveResult(reportTurn.generated);
-      return json(res,{text:result.text,applied:true,reportId});
+     const turn={requestId:request.requestId,sessionId:input.sessionId,note:input.note,history:restoring&&!resumed?input.history:undefined,imageAssetId:input.imageAssetId||undefined,reportTemplate:reportTurn?.prepared.template};
+     if(!reportTurn){
+      const result=await codexSession.send(turn);
+      return json(res,{text:result.text,applied:null});
      }
-     return json(res,{text:result.text,applied:null});
+     let result,connectionError;
+     try{
+      let reportRecovery=null,progressing=true;
+      while(progressing&&!reportTurn.complete&&!cancelRequested){
+       const previousRevision=reportTurn.draftRevision;
+       if(reportRecovery)agentProgress=[];
+       result=await codexSession.send({...turn,reportRecovery});
+       progressing=!reportRecovery||reportTurn.draftRevision!==previousRevision;
+       reportRecovery=reportTurn.generated?'partial':'missing';
+      }
+     }catch(error){
+      connectionError=error;
+      closeCodexSession({preserve:settings.provider==='chatgpt'});
+     }
+     if(cancelRequested)throw Error('양식 문서 작성을 중지했습니다.');
+     assertTemplateSource(input.sessionId);
+     let text=result?.text?.trim();
+     if(!reportTurn.generated){
+      if(!text)throw connectionError||Error('AI가 초안에 담을 내용을 반환하지 않았습니다.');
+      reportTurn.generated=await createPreparedDraft(reportTurn.prepared,{
+       title:reportTurn.prepared.template.name+' 작업 초안',paragraphs:[{role:'body',text}],
+      },'response_draft');
+      text='AI 응답을 편집 가능한 작업 초안에 담았습니다. 새 탭에서 내용을 다듬거나 이어서 요청할 수 있습니다.';
+     }else if(connectionError||!text||!reportTurn.complete){
+      const notice='마지막으로 조판이 확인된 초안을 열었습니다. 새 탭에서 이어서 수정할 수 있습니다.';
+      text=connectionError||!text?notice:notice+'\n\n'+text;
+     }
+     assertTemplateSource(input.sessionId);
+     const conversation=[{role:'user',text:input.note.slice(0,6000)},{role:'assistant',text:text.slice(0,6000)}];
+     const reportId=await reportLibrary.saveResult(reportTurn.generated,conversation);
+     return json(res,{text,applied:true,reportId});
      }catch(error){closeCodexSession({preserve:settings.provider==='chatgpt'});throw error;}finally{agentBusy=false;activeAgentSessionId=null;reportTurn=null;}
     }
     const provider=await providerFor(settings,chatgptRuntime);

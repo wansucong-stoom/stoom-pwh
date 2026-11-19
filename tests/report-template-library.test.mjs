@@ -30,7 +30,7 @@ test('registered templates keep their names and rules and verify separately type
  await fs.symlink(fileURLToPath(new URL('..',import.meta.url)),common,process.platform==='win32'?'junction':'dir').catch(async()=>{
   await fs.cp(new URL('../src/',import.meta.url),path.join(common,'src'),{recursive:true});
  });
- const {createReportTemplateLibrary,readDraftTemplate,fillPreparedTemplate,createPreparedForm}=await import(pathToFileURL(path.join(desktop,'report-templates.mjs')).href);
+ const {createReportTemplateLibrary,readDraftTemplate,fillPreparedTemplate,createPreparedForm,createPreparedDraft}=await import(pathToFileURL(path.join(desktop,'report-templates.mjs')).href);
  const profile=path.join(dir,'profile'),lib=createReportTemplateLibrary(profile);
  assert.deepEqual(await lib.list(),[]);
  await assert.rejects(lib.prepare('builtin-weekly'),/등록된 양식/);
@@ -114,6 +114,24 @@ test('registered templates keep their names and rules and verify separately type
    assert.equal(JSON.parse(composed.getCellOwnProperties(0,para,controlIndex,0)).fillColor.toLowerCase(),'#dce8f0');
   }
  }finally{composed.free();}
+ const fields=Array.from({length:103},(_,index)=>({label:'입력 항목 '+(index+1),lines:index===0?8:1}));
+ const longForm=await createPreparedForm(legacyDraft,{title:'여러 쪽 신청 서식',introduction:'첫째 안내\n둘째 안내',sections:[{heading:'신청 내용',fields}]});
+ assert.equal(longForm.changes.fields,fields.length);
+ assert.ok(longForm.changes.pages>1);
+ const longDoc=new HwpDocument(longForm.bytes);
+ try{
+  let shown='';
+  for(let page=0;page<longDoc.pageCount();page++)shown+=JSON.parse(longDoc.getPageTextLayout(page)).runs.map(run=>run.text).join(' ');
+  assert.match(shown,/입력 항목\s+103/);
+  assert.match(shown,/둘째 안내/);
+ }finally{longDoc.free();}
+ const flexible=await createPreparedDraft(legacyDraft,{title:'참고 양식으로 쓴 본문',paragraphs:[{role:'heading',text:'주요 내용'},{role:'body',text:'신청 기간 미정\n마감일 확인 필요'}]});
+ const styled=new HwpDocument(flexible.bytes);
+ try{
+  assert.equal(search(styled,'신청 기간 미정').length,1);
+  assert.equal(search(styled,'마감일 확인 필요').length,1);
+  assert.equal(JSON.parse(styled.getPageDef(0)).marginTop,7200);
+ }finally{styled.free();}
  assert.deepEqual(await fs.readFile(blankFormSource),referenceBytes);
  assert.equal(JSON.parse(await fs.readFile(recordPath,'utf8')).analysis.version,undefined);
  await lib.remove(markerless.id);

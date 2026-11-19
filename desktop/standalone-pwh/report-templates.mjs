@@ -264,13 +264,13 @@ export function createReportTemplateLibrary(dataRoot){
    if(mode==='adapt')({bytes,fields}=adaptedDraft(HwpDocument,analysis));
    return {bytes,analysis,template:{...overview({...template,analysis}),mode,rules:template.rules||'',headings:analysis.structure?.headings.map(item=>item.text)||[],fields:boundedFields(fields)}};
   },
-  async saveResult(generated){
+  async saveResult(generated,conversation=[]){
    const id=randomUUID();
    await fs.mkdir(draftRoot,{recursive:true});
    const dir=await fs.mkdtemp(path.join(draftRoot,'.report-')),destination=path.join(draftRoot,id);
    try{
     await fs.writeFile(path.join(dir,'report.hwpx'),generated.bytes,{flag:'wx',mode:0o600});
-    await fs.writeFile(path.join(dir,'report.json'),JSON.stringify({name:generated.template.name,organization:generated.template.organization,mode:generated.template.mode,fields:[],completed:true}),{flag:'wx',mode:0o600});
+    await fs.writeFile(path.join(dir,'report.json'),JSON.stringify({name:generated.template.name,organization:generated.template.organization,mode:generated.template.mode,fields:[],completed:true,conversation}),{flag:'wx',mode:0o600});
     await fs.rename(dir,destination);
     return id;
    }catch(error){await cleanFiles(dir,['report.hwpx','report.json']);throw error;}
@@ -290,72 +290,103 @@ function layoutIdentity(doc){
  const objects=parse(doc.getControls()).map(control=>[control.ctrlId,control.list,control.para,control.controlIndex]);
  return JSON.stringify({sections,tables,objects});
 }
-function formText(value,maxLength,optional=false){
+function draftText(value,{optional=false,multiline=false}={}){
  if(value==null&&optional)return '';
- if(typeof value!=='string'||value.length>maxLength||/[\u0000-\u001f\ufffc]/.test(value)||!optional&&!value.trim())throw Error('새 양식의 제목, 안내문, 항목명을 확인하세요.');
- return value.trim();
+ if(typeof value!=='string'||/[\u0000-\u0008\u000b-\u001f\ufffc]/.test(value.replace(/\r\n?/g,'\n'))||!optional&&!value.trim())
+  throw Error('초안의 제목, 안내문, 항목명을 확인하세요.');
+ const text=value.trim().replace(/\r\n?/g,'\n');
+ return multiline?text:text.replace(/\s*\n\s*/g,' ');
 }
-export async function createPreparedForm(prepared,form){
- if(!form||!Array.isArray(form.sections)||!form.sections.length||form.sections.length>12)throw Error('새 양식의 구성을 확인하세요.');
- const title=formText(form.title,100),intro=formText(form.introduction,600,true),paragraphs=[{text:title,role:'title'}],tables=[];
- let html='<p>'+escapeHtml(title)+'</p>',fieldCount=0;
- if(intro){html+='<p>'+escapeHtml(intro)+'</p>';paragraphs.push({text:intro,role:'body'});}
- for(const section of form.sections){
-  if(!section||!Array.isArray(section.fields)||!section.fields.length||section.fields.length>24||(fieldCount+=section.fields.length)>96)throw Error('구역별 새 양식 항목을 확인하세요.');
-  const heading=formText(section.heading,80,true),guidance=formText(section.guidance,600,true);
-  for(const [text,role] of [[heading,'heading'],[guidance,'body']]){
-   if(text){html+='<p>'+escapeHtml(text)+'</p>';paragraphs.push({text,role});}
-  }
-  const rows=section.fields.map(field=>{
-   const label=formText(field?.label,80),lines=field.lines??1;
-   if(!Number.isInteger(lines)||lines<1||lines>6)throw Error('입력 칸의 줄 수는 1~6줄로 지정하세요.');
-   return {label,lines};
-  });
-  tables.push(rows);
-  html+='<table>'+rows.map(({label})=>'<tr><td><strong>'+escapeHtml(label)+'</strong></td><td></td></tr>').join('')+'</table>';
+function pushParagraphs(parts,value,role){
+ const text=draftText(value,{optional:true,multiline:role==='body'});
+ for(const line of text.split('\n')){
+  if(line.trim())parts.push({text:line.trim(),role});
  }
+}
+async function composeStyledReport(prepared,title,parts,kind){
  const {HwpDocument}=await loadCore(),structure=prepared.analysis.structure;
+ const paragraphs=parts.filter(part=>!part.rows),tables=parts.filter(part=>part.rows).map(part=>part.rows);
+ const html=parts.map(part=>part.rows
+  ?'<table>'+part.rows.map(({label})=>'<tr><td><strong>'+escapeHtml(label)+'</strong></td><td></td></tr>').join('')+'</table>'
+  :'<p>'+escapeHtml(part.text)+'</p>').join('');
  return createStyledDraft(HwpDocument,structure,(doc,styles)=>{
-  checked(doc.pasteHtml(0,0,0,html));
-  let paragraphIndex=0;
-  for(let paragraph=0;paragraph<doc.getParagraphCount(0);paragraph++){
-   const source={section:0,paragraph},text=paragraphText(doc,source).trim();
-   if(!text)continue;
-   const expected=paragraphs[paragraphIndex++];
-   if(text!==expected?.text)throw Error('새 양식의 제목과 안내문을 조판하지 못했습니다.');
-   applyFormatting(doc,source,styles[expected.role]);
-  }
-  if(paragraphIndex!==paragraphs.length)throw Error('새 양식의 제목과 안내문을 조판하지 못했습니다.');
-  const tableControls=parse(doc.getControls()).filter(control=>control.ctrlId==='tbl'&&control.list===0);
-  if(tableControls.length!==tables.length)throw Error('새 양식의 입력 표를 조판하지 못했습니다.');
   const tableStyle=structure?.formTable,border=tableStyle?.border||{type:1,width:2,color:'#8c949b'};
   const borders=Object.fromEntries(borderSides.map(side=>[side,border]));
+  const paper=parse(doc.getPageDef(0)),maxRowHeight=Math.max(1600,Math.floor((paper.height-paper.marginTop-paper.marginBottom-paper.marginHeader-paper.marginFooter)*0.8));
+  let adjustedFields=0,tableControls;
   function checkCells(target,format=false){
    for(const [index,rows] of tables.entries()){
     const {para,controlIndex}=tableControls[index],dimensions=parse(target.getTableDimensions(0,para,controlIndex));
     if(dimensions.rowCount!==rows.length||dimensions.colCount!==2)throw Error('새 양식의 입력 표를 확인하지 못했습니다.');
+    if(format)checked(target.setTableProperties(0,para,controlIndex,JSON.stringify({pageBreak:1})));
     for(const [row,{label,lines}] of rows.entries()){
+     const requestedHeight=1600+(lines-1)*1000;
+     if(format&&requestedHeight>maxRowHeight)adjustedFields++;
      for(const column of [0,1]){
       const cellIndex=row*2+column,source={section:0,paragraph:para,cellPath:[{controlIndex,cellIndex,cellParaIndex:0}]};
       if(paragraphText(target,source)!==(column?'':label))throw Error('새 양식의 입력 칸을 확인하지 못했습니다.');
       if(!format)continue;
       const current=parse(target.getCellOwnProperties(0,para,controlIndex,cellIndex));
       const fill=!column&&tableStyle?.fill?{fillType:'solid',fillColor:tableStyle.fill}:{};
-      checked(target.setCellProperties(0,para,controlIndex,cellIndex,JSON.stringify({...borders,...fill,height:Math.max(current.height,1600+(lines-1)*1000)})));
+      const height=Math.max(current.height,Math.min(maxRowHeight,requestedHeight));
+      checked(target.setCellProperties(0,para,controlIndex,cellIndex,JSON.stringify({...borders,...fill,height})));
       if(!column)applyFormatting(target,source,tableStyle?.format);
      }
     }
    }
   }
-  checkCells(doc,true);
+  doc.beginBatch();
+  try{
+   checked(doc.pasteHtml(0,0,0,html));
+   let paragraphIndex=0;
+   for(let paragraph=0;paragraph<doc.getParagraphCount(0);paragraph++){
+    const source={section:0,paragraph},text=paragraphText(doc,source).trim();
+    if(!text)continue;
+    const expected=paragraphs[paragraphIndex++];
+    if(text!==expected?.text)throw Error('초안의 본문을 조판하지 못했습니다.');
+    applyFormatting(doc,source,styles[expected.role]);
+   }
+   if(paragraphIndex!==paragraphs.length)throw Error('초안의 본문을 조판하지 못했습니다.');
+   tableControls=parse(doc.getControls()).filter(control=>control.ctrlId==='tbl'&&control.list===0);
+   if(tableControls.length!==tables.length)throw Error('새 양식의 입력 표를 조판하지 못했습니다.');
+   checkCells(doc,true);
+  }finally{doc.endBatch();}
   const bytes=Buffer.from(doc.exportHwpx()),reopened=new HwpDocument(bytes);
   try{
    checkCells(reopened);
    const pages=reopened.pageCount();
-   if(!pages||layoutIdentity(reopened)!==layoutIdentity(doc))throw Error('새 양식의 용지와 표를 확인하지 못했습니다.');
-   return {bytes,template:{...prepared.template,name:title,mode:'adapt'},changes:{kind:'blank_form',fields:fieldCount,pages}};
+   if(!pages||layoutIdentity(reopened)!==layoutIdentity(doc))throw Error('초안의 용지와 표를 확인하지 못했습니다.');
+   const fields=tables.reduce((count,rows)=>count+rows.length,0);
+   return {bytes,template:{...prepared.template,name:title,mode:'adapt'},changes:{kind,fields,pages,adjustedFields}};
   }finally{reopened.free();}
  });
+}
+export async function createPreparedForm(prepared,form){
+ if(!form||!Array.isArray(form.sections)||!form.sections.length)throw Error('새 양식의 구성을 확인하세요.');
+ const title=draftText(form.title),parts=[{text:title,role:'title'}];
+ pushParagraphs(parts,form.introduction,'body');
+ for(const section of form.sections){
+  if(!section||!Array.isArray(section.fields)||!section.fields.length)throw Error('구역별 새 양식 항목을 확인하세요.');
+  pushParagraphs(parts,section.heading,'heading');
+  pushParagraphs(parts,section.guidance,'body');
+  const rows=section.fields.map(field=>{
+   const label=draftText(field?.label),lines=field.lines??1;
+   if(!Number.isSafeInteger(lines)||lines<1)throw Error('입력 칸의 줄 수는 양의 정수로 지정하세요.');
+   return {label,lines};
+  });
+  parts.push({rows});
+ }
+ return composeStyledReport(prepared,title,parts,'blank_form');
+}
+export async function createPreparedDraft(prepared,draft,kind='styled_draft'){
+ if(!draft||!Array.isArray(draft.paragraphs))throw Error('초안의 본문을 확인하세요.');
+ const title=draftText(draft.title),parts=[{text:title,role:'title'}];
+ for(const paragraph of draft.paragraphs){
+  if(!['heading','body'].includes(paragraph?.role))throw Error('초안의 문단 종류를 확인하세요.');
+  pushParagraphs(parts,paragraph.text,paragraph.role);
+ }
+ if(parts.length===1)throw Error('초안에 담을 본문을 작성하세요.');
+ return composeStyledReport(prepared,title,parts,kind);
 }
 export async function fillPreparedTemplate(prepared,answers,sections=[]){
  if(!prepared.template.fields.length)throw Error('기존 양식에 채울 항목을 찾지 못했습니다. 새 빈 양식을 만들려면 양식을 참고해 새 서식을 만들어 달라고 요청하세요.');
@@ -394,5 +425,7 @@ export async function readDraftTemplate(file){
  if(path.basename(file)!=='report.hwpx')throw Error('보고서 작업 사본을 확인하지 못했습니다.');
  const entry=JSON.parse(await readRegular(path.join(path.dirname(file),'report.json')));
  if(typeof entry.name!=='string'||!Array.isArray(entry.fields)||entry.fields.length>64)throw Error('보고서 양식 정보를 확인하지 못했습니다.');
+ if(!Array.isArray(entry.conversation))entry.conversation=[];
+ entry.conversation=entry.conversation.slice(-2).filter(item=>['user','assistant'].includes(item?.role)&&typeof item.text==='string').map(item=>({role:item.role,text:item.text.slice(0,6000)}));
  return entry;
 }
