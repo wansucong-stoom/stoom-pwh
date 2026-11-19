@@ -3,22 +3,9 @@ import {createHash,randomUUID} from 'node:crypto';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import config from '../release-source/src/config.mjs';
-import {styleScanSources} from '../release-source/src/text-edit.mjs';
+import {styleScanSources,prepareReportFill,applyTextEdits} from '../release-source/src/text-edit.mjs';
 import {convertHwp} from './convert-hwp.mjs';
 
-const starterTemplates=[
- ['weekly','주간업무 보고','보고 기간','주요 추진 사항','추진 실적','다음 주 계획','협조 요청'],
- ['minutes','회의록','회의 일시·장소','참석자','안건 및 논의 내용','결정 사항','후속 조치'],
- ['project','사업계획서','사업명','추진 배경과 목적','세부 추진 계획','일정 및 예산','기대 효과'],
- ['result','사업 결과보고','사업명','추진 개요','주요 실적','성과와 개선 사항','후속 계획'],
- ['proposal','검토 보고서','검토 안건','배경 및 현황','검토 내용','대안 비교','검토 의견'],
- ['progress','업무 진행 보고','보고 기준일','진행 현황','주요 성과','이슈 및 대응','향후 일정'],
- ['event','행사 운영계획','행사명','일시·장소 및 대상','운영 계획','인력 및 예산','안전 및 비상 대응'],
- ['training','교육 운영보고','교육명','교육 개요','운영 내용','참여 및 성과','개선 계획'],
- ['visit','출장 결과보고','출장 기간·장소','출장 목적','주요 활동','결과 및 시사점','후속 조치'],
- ['incident','현안 보고','현안명','발생 경위','영향 및 현재 상태','조치 사항','향후 대응'],
-];
-const names=new Map(starterTemplates.map(([id,name,...fields])=>['builtin-'+id,{id:'builtin-'+id,name,organization:'Pwh 기본 양식',fields}]));
 const limit=256*1024*1024;
 const idPattern=/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -151,7 +138,7 @@ function applyFormatting(doc,source,format){
   ?doc.applyParaFormatInCellByPath(source.section,source.paragraph,p,JSON.stringify(paragraph))
   :doc.applyParaFormat(source.section,source.paragraph,JSON.stringify(paragraph)));
 }
-function adaptedDraft(HwpDocument,analysis){
+function adaptedDraft(HwpDocument,analysis,additionalHeadings=[]){
  const doc=HwpDocument.createEmpty();
  try{
   doc.createBlankDocument();
@@ -163,6 +150,7 @@ function adaptedDraft(HwpDocument,analysis){
   const headings=[...new Set((structure?.headings.length?structure.headings.map(item=>item.text):analysis.fields.map(field=>field.name))
    .map(name=>label(name,48)).filter(name=>name&&name!=='보고서 제목'&&!overviewNames.has(name)&&!/[{}]/.test(name)))].slice(0,16);
   if(!headings.length)headings.push('개요','주요 내용','향후 계획');
+  for(const heading of additionalHeadings)headings.push(heading);
   const titleMarker='{{보고서 제목}}';
   const overview=overviewFields.length?'<table>'+overviewFields.map(field=>{
    const name=escapeHtml(field.name);return '<tr><td><strong>'+name+'</strong></td><td>{{'+name+'}}</td></tr>';
@@ -180,16 +168,6 @@ function adaptedDraft(HwpDocument,analysis){
   return {bytes:Buffer.from(doc.exportHwpx()),fields};
  }finally{doc.free();}
 }
-function starterHtml(template){
- const [first,...sections]=template.fields;
- const title=escapeHtml(template.name),intro=escapeHtml(first);
- return '<p><span style="font-size:22pt;color:#17394c"><strong>'+title+'</strong></span></p>'
-  +'<table><tr><td style="background:#eaf1f3"><strong>'+intro+'</strong></td><td>{{'+intro+'}}</td></tr></table>'
-  +sections.map(section=>{
-   const name=escapeHtml(section);
-   return '<p><span style="font-size:13pt;color:#17394c"><strong>'+name+'</strong></span></p><p>{{'+name+'}}</p>';
-  }).join('');
-}
 async function readRegular(file){
  const stat=await fs.lstat(file);
  if(!stat.isFile()||stat.isSymbolicLink()||stat.size<8||stat.size>limit)throw Error('256MiB 이하의 일반 HWP·HWPX 양식을 선택하세요.');
@@ -201,9 +179,9 @@ async function cleanFiles(directory,files){
 }
 
 export function createReportTemplateLibrary(dataRoot){
- const directory=path.join(dataRoot,'report-templates'),draftRoot=path.join(dataRoot,'documents'),starterCache=new Map();
+ const directory=path.join(dataRoot,'report-templates'),draftRoot=path.join(dataRoot,'documents');
  async function read(id){
-  if(!idPattern.test(String(id)))throw Error('등록된 양식을 선택하세요.');
+  if(typeof id!=='string'||!idPattern.test(id))throw Error('등록된 양식을 선택하세요.');
   const dir=path.join(directory,id);
   const stat=await fs.lstat(dir);
   if(!stat.isDirectory()||stat.isSymbolicLink())throw Error('등록한 양식을 읽을 수 없습니다.');
@@ -211,22 +189,24 @@ export function createReportTemplateLibrary(dataRoot){
   if(metadata.version!==1||metadata.id!==id||!metadata.name||!metadata.organization||!Array.isArray(metadata.analysis?.fields))throw Error('등록한 양식 정보가 올바르지 않습니다.');
   return {...metadata,source:path.join(dir,'template.hwpx')};
  }
- const overview=entry=>({id:entry.id,name:entry.name,organization:entry.organization,fields:entry.analysis?.fields.map(field=>field.name)||entry.fields,limited:entry.analysis?.limited||false,sections:entry.analysis?.sections??1,tables:entry.analysis?.structure?.tables.length??1});
+ const overview=entry=>({id:entry.id,name:entry.name,organization:entry.organization,fields:entry.analysis.fields.map(field=>field.name),limited:entry.analysis?.limited||false,sections:entry.analysis?.sections??1,tables:entry.analysis?.structure?.tables.length??1});
  return {
   async list(){
    let entries=[];
    try{entries=await fs.readdir(directory);}catch(error){if(error.code!=='ENOENT')throw error;}
-   const result=[...names.values()].map(overview);
+   const result=[];
    for(const id of entries.filter(name=>idPattern.test(name))){
     try{result.push(overview(await read(id)));}catch{}
    }
-   return result;
+   return result.sort((left,right)=>left.name.localeCompare(right.name,'ko'));
   },
   async register(file,details={}){
    const ext=typeof file==='string'?path.extname(file).toLowerCase():'';
    if(!['.hwp','.hwpx'].includes(ext)||!path.isAbsolute(file))throw Error('HWP 또는 HWPX 양식을 선택하세요.');
    const organization=label(details.organization,80),name=label(details.name,80)||label(path.basename(file,ext),80);
    if(!organization||!name)throw Error('기관·회사 이름과 양식 이름을 확인하세요.');
+   const rules=typeof details.rules==='string'?details.rules.trim():'';
+   if(rules.length>4000)throw Error('작성 기준을 4,000자 이내로 입력하세요.');
    const source=await readRegular(file);
    await fs.mkdir(directory,{recursive:true});
    const dir=await fs.mkdtemp(path.join(directory,'.register-')),target=path.join(dir,'template.hwpx');
@@ -240,42 +220,87 @@ export function createReportTemplateLibrary(dataRoot){
     const bytes=await readRegular(target),{HwpDocument}=await loadCore(),doc=new HwpDocument(bytes);
     let analysis;
     try{analysis=analyzeReportTemplate(doc);}finally{doc.free();}
-    const id=randomUUID(),metadata={version:1,id,name,organization,sourceSha256:sha(bytes),analysis};
+    const id=randomUUID(),metadata={version:1,id,name,organization,rules,sourceSha256:sha(bytes),analysis};
     await fs.writeFile(path.join(dir,'template.json'),JSON.stringify(metadata),{flag:'wx',mode:0o600});
     await fs.rename(dir,path.join(directory,id));
     return overview(metadata);
    }catch(error){await cleanFiles(dir,['original.hwp','template.hwpx','template.json']);throw error;}
   },
+  async remove(id){
+   const template=await read(id);
+   const removed=path.join(directory,'.removed-'+randomUUID());
+   await fs.rename(path.dirname(template.source),removed);
+   await cleanFiles(removed,['template.hwpx','template.json']);
+  },
   async prepare(id,mode='exact'){
    if(!['exact','adapt'].includes(mode))throw Error('양식 활용 수준을 선택하세요.');
-   const builtin=names.get(id),template=builtin||await read(id),{HwpDocument}=await loadCore();
-   let bytes,fields,analysis;
-   if(builtin){
-    let ready=starterCache.get(id);
-    if(!ready){
-     const doc=HwpDocument.createEmpty();
-     try{doc.createBlankDocument();checked(doc.pasteHtml(0,0,0,starterHtml(builtin)));ready={analysis:analyzeReportTemplate(doc),bytes:Buffer.from(doc.exportHwpx())};starterCache.set(id,ready);}finally{doc.free();}
-    }
-    ({analysis,bytes}=ready);fields=analysis.fields;
-   }else{
-    bytes=await readRegular(template.source);
-    if(sha(bytes)!==template.sourceSha256)throw Error('등록된 원본 양식이 변경되었습니다. 다시 등록하세요.');
-    analysis=template.analysis;fields=analysis.fields;
-    if(mode==='exact'&&fields.some(field=>field.source&&!field.explicit)){
-     const doc=new HwpDocument(bytes);
-     try{addBlankMarkers(doc,fields);bytes=Buffer.from(doc.exportHwpx());}finally{doc.free();}
-    }
+   const template=await read(id),{HwpDocument}=await loadCore(),{analysis}=template;
+   let bytes=await readRegular(template.source),fields=analysis.fields;
+   if(sha(bytes)!==template.sourceSha256)throw Error('등록된 원본 양식이 변경되었습니다. 다시 등록하세요.');
+   if(mode==='exact'&&fields.some(field=>field.source&&!field.explicit)){
+    const doc=new HwpDocument(bytes);
+    try{addBlankMarkers(doc,fields);bytes=Buffer.from(doc.exportHwpx());}finally{doc.free();}
    }
    if(mode==='adapt')({bytes,fields}=adaptedDraft(HwpDocument,analysis));
+   return {bytes,analysis,template:{...overview(template),mode,rules:template.rules||'',headings:analysis.structure?.headings.map(item=>item.text)||[],fields:boundedFields(fields)}};
+  },
+  async saveResult(generated){
+   const id=randomUUID();
    await fs.mkdir(draftRoot,{recursive:true});
-   const dir=await fs.mkdtemp(path.join(draftRoot,'report-')),file=path.join(dir,'report.hwpx');
+   const dir=await fs.mkdtemp(path.join(draftRoot,'.report-')),destination=path.join(draftRoot,id);
    try{
-    await fs.writeFile(file,bytes,{flag:'wx',mode:0o600});
-    await fs.writeFile(path.join(dir,'report.json'),JSON.stringify({...overview(template),mode,headings:analysis.structure?.headings.map(item=>item.text)||[],fields:boundedFields(fields)}),{flag:'wx',mode:0o600});
-    return {file,discard:()=>cleanFiles(dir,['report.hwpx','report.json'])};
+    await fs.writeFile(path.join(dir,'report.hwpx'),generated.bytes,{flag:'wx',mode:0o600});
+    await fs.writeFile(path.join(dir,'report.json'),JSON.stringify({name:generated.template.name,organization:generated.template.organization,mode:generated.template.mode,fields:[],completed:true}),{flag:'wx',mode:0o600});
+    await fs.rename(dir,destination);
+    return id;
    }catch(error){await cleanFiles(dir,['report.hwpx','report.json']);throw error;}
   },
+  async openResult(id){
+   if(typeof id!=='string'||!idPattern.test(id))throw Error('완성된 양식 문서를 확인할 수 없습니다.');
+   const directory=path.join(draftRoot,id),file=path.join(directory,'report.hwpx');
+   const folder=await fs.lstat(directory),stat=await fs.lstat(file);
+   if(!folder.isDirectory()||folder.isSymbolicLink()||!stat.isFile()||stat.isSymbolicLink()||(await readDraftTemplate(file)).completed!==true)throw Error('완성된 양식 문서를 확인할 수 없습니다.');
+   return file;
+  },
  };
+}
+function layoutIdentity(doc){
+ const sections=Array.from({length:doc.getSectionCount()},(_,index)=>[parse(doc.getPageDef(index)),parse(doc.getColumnDef(index))]);
+ const tables=parse(doc.getCursorModel()).lists.filter(cell=>cell.isCell).map(cell=>[cell.sectionIndex,cell.hostListId,cell.hostPara,cell.controlIndex,cell.cellIndex,cell.row,cell.col,cell.rowSpan,cell.colSpan]);
+ const objects=parse(doc.getControls()).map(control=>[control.ctrlId,control.list,control.para,control.controlIndex]);
+ return JSON.stringify({sections,tables,objects});
+}
+export async function fillPreparedTemplate(prepared,answers,sections=[]){
+ if(!Array.isArray(answers)||answers.length>64||!Array.isArray(sections)||sections.length>8||!answers.length&&!sections.length)throw Error('작성할 양식 항목을 지정하세요.');
+ if(sections.length&&prepared.template.mode!=='adapt')throw Error('새 소제목은 형식 준용에서만 추가할 수 있습니다.');
+ const {HwpDocument}=await loadCore();
+ let bytes=prepared.bytes;
+ const fields=new Set(prepared.template.fields.map(field=>field.marker)),seen=new Set(),additions=[];
+ for(const section of sections){
+  const heading=label(section?.title,48),marker='{{'+heading+'}}';
+  if(!heading||heading!==section.title||/[{}]/.test(heading)||fields.has(marker))throw Error('추가할 소제목과 기존 양식의 항목을 확인하세요.');
+  fields.add(marker);additions.push({heading,marker,text:section.text});
+ }
+ if(additions.length)bytes=adaptedDraft(HwpDocument,prepared.analysis,additions.map(addition=>addition.heading)).bytes;
+ let length=0;
+ const accepted=[...answers,...additions].map(answer=>{
+  if(!answer||!fields.has(answer.marker)||seen.has(answer.marker)||typeof answer.text!=='string'||answer.text.length>12000||(length+=answer.text.length)>48000||/[\r\n\u0000-\u0008\u000b-\u001f\ufffc]/.test(answer.text))throw Error('작성 항목과 문단 내용을 확인하세요.');
+  seen.add(answer.marker);return {marker:answer.marker,text:answer.text};
+ });
+ const missing=[...fields].filter(marker=>!seen.has(marker));
+ for(const marker of missing)accepted.push({marker,text:'확인 필요'});
+ const doc=new HwpDocument(bytes);
+ try{
+  const context={documentState:{documentEpoch:1,changeSeq:0,documentSha256:sha(bytes)}};
+  const originalLayout=layoutIdentity(doc),initialPages=doc.pageCount();
+  const changes=applyTextEdits(doc,prepareReportFill(doc,accepted,context));
+  const written=Buffer.from(doc.exportHwpx()),reopened=new HwpDocument(written);
+  try{
+   const pages=reopened.pageCount();
+   if(!pages||layoutIdentity(reopened)!==originalLayout)throw Error('작성 후 양식의 용지·표·개체 구조를 확인하지 못했습니다.');
+   return {bytes:written,template:prepared.template,changes:{...changes,initialPages,pages,missing:missing.length}};
+  }finally{reopened.free();}
+ }finally{doc.free();}
 }
 export async function readDraftTemplate(file){
  if(path.basename(file)!=='report.hwpx')throw Error('보고서 작업 사본을 확인하지 못했습니다.');

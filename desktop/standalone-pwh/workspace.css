@@ -23,17 +23,25 @@
 .report-library button:hover{background:#eff5f6}
 .report-library-tools{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:8px}
 .report-library input{width:100%;min-width:0;font:inherit;padding:7px 8px;border:1px solid #b7ccd2;border-radius:6px;color:inherit}
-#report-template-form:not([hidden]){display:grid;grid-template-columns:1fr 1fr auto;align-items:end;gap:8px;margin-top:12px;padding:12px;background:#f3f7f7;border-radius:7px}
+#report-template-form:not([hidden]){display:grid;grid-template-columns:1fr 1fr;gap:12px}
 #report-template-form label{display:grid;gap:4px}
 #report-template-status{margin:12px 0 6px;white-space:normal}
-#report-template-list{display:grid;gap:6px;max-height:min(54vh,480px);overflow:auto}
-#report-template-list button{display:grid;text-align:left;gap:3px;white-space:normal}
-#report-template-list small{color:#4f6872}
+#report-template-list{display:grid;gap:6px;margin-top:12px;max-height:min(54vh,480px);overflow:auto}
+.report-template-row{display:grid;grid-template-columns:minmax(0,1fr) 36px;gap:6px}
+.report-template-row button:first-child{text-align:left;white-space:normal;font-weight:600;overflow-wrap:anywhere}
+.report-template-row .report-template-delete{font-size:18px;padding:4px}
+.report-template-actions{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin-top:14px}
+#report-template-form .report-template-actions{grid-column:1/-1;margin-top:0}
+#report-template-selected{font-weight:650;overflow-wrap:anywhere}
 @media(max-width:540px){.report-library-tools{grid-template-columns:minmax(0,1fr) auto}.report-library-tools label{grid-column:1/-1}#report-template-form:not([hidden]){grid-template-columns:1fr}}
 
-#report-template-mode{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:14px 0 0;padding:8px;border:1px solid #d3e0e3;border-radius:7px}
+#report-template-mode:not([hidden]){display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:14px 0 0;padding:8px;border:1px solid #d3e0e3;border-radius:7px}
 #report-template-mode label{display:flex;align-items:flex-start;gap:6px;padding:4px;cursor:pointer}
 #report-template-mode input{width:auto;margin:2px 0 0;accent-color:#17394c}
 #report-template-mode span{display:grid;gap:4px}
 #report-template-mode small{color:#4f6872}
-@media(max-width:420px){#report-template-mode{grid-template-columns:1fr}}
+@media(max-width:420px){#report-template-mode:not([hidden]){grid-template-columns:1fr}}
+
+.report-template-rules{grid-column:1/-1}
+.report-template-rules span{color:#4f6872;font-size:11px}
+.report-template-rules textarea{resize:vertical;min-height:64px;width:100%;padding:8px;border:1px solid #b7ccd2;border-radius:6px;color:inherit;font:inherit}

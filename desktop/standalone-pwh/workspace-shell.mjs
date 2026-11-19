@@ -100,13 +100,17 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
    return send(res,{opened,errors});
   }
   if(route==='templates/list')return send(res,{templates:await (await reportTemplates()).list()});
-  if(route==='templates/register'||route==='templates/open'){
-   let body='';for await(const chunk of req){body+=chunk;if(body.length>4096)throw Error('양식 요청이 너무 큽니다.');}
+  if(['templates/register','templates/open-result','templates/remove'].includes(route)){
+   let body='';for await(const chunk of req){body+=chunk;if(body.length>20000)throw Error('양식 요청이 너무 큽니다.');}
    const input=JSON.parse(body);
-   if(route==='templates/open'){
+   if(route==='templates/remove'){
+    await (await reportTemplates()).remove(input.id);
+    return send(res,{ok:true});
+   }
+   if(route==='templates/open-result'){
     if(tabs.size>=12)throw Error('문서는 최대 12개까지 열 수 있습니다.');
-    const draft=await (await reportTemplates()).prepare(input.id,input.mode);
-    try{return send(res,await makeTab(draft.file,true,true));}catch(error){await draft.discard();throw error;}
+    const file=await (await reportTemplates()).openResult(input.id);
+    return send(res,await makeTab(file,true,true));
    }
    if(fileDialogBusy)throw Error('파일 선택창이 이미 열려 있습니다.');
    fileDialogBusy=true;

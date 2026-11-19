@@ -36,26 +36,26 @@
     {
       "path": "standalone-pwh/app.css",
       "source": "standalone-pwh/app.css",
-      "size": 20270,
-      "sha256": "b6fd42498b5212fc6226050281800d23dff3c312b7058a448084f75d1e3d5704"
+      "size": 20656,
+      "sha256": "e84e3678114c258345aad342087649220c29dd9ee0d0f4ecec2c2f2f71372207"
     },
     {
       "path": "standalone-pwh/app.html",
       "source": "standalone-pwh/app.html",
-      "size": 15421,
-      "sha256": "6080a301325a8d2f1456f24671a765e9dd03c7d3032ab7f5f77434ea10803c75"
+      "size": 15606,
+      "sha256": "4f511a1e1145ae630464d805d9db602134be62f982b7d8eb046e8951f1e94fcb"
     },
     {
       "path": "standalone-pwh/app.js",
       "source": "standalone-pwh/app.js",
-      "size": 55115,
-      "sha256": "e772d9d15d7387b94b58b1dd5d69255d40d281268ee1c468ce36044c02ab095b"
+      "size": 55680,
+      "sha256": "f60da34a9b4e5d72dfd028f21d1c731a3823402379fd4ff8c0ecb3d5b29b0232"
     },
     {
       "path": "standalone-pwh/build-desktop-editor.mjs",
       "source": "standalone-pwh/build-desktop-editor.mjs",
-      "size": 5247,
-      "sha256": "871850a7f20bad7b8634965cb90e85d3f75b1f6c9079028b8d0ba5a7d019126d"
+      "size": 5865,
+      "sha256": "d7b79e12d24045f7079df5a7abc4be6d59ea422424b469e49c55c306d20de20a"
     },
     {
       "path": "standalone-pwh/build-msi.mjs",
@@ -108,14 +108,14 @@
     {
       "path": "standalone-pwh/client/editor.js",
       "source": "standalone-pwh/client/editor.js",
-      "size": 2859282,
-      "sha256": "3e24dbec84e0fb0a0fd31d582973bfc18ef35f395e97cfb22e69c095b87ef70c"
+      "size": 2859034,
+      "sha256": "34559552e3f2bdbd6af3d3491765bc4ee2330894fdb7901ef5565a6a9ccf8b1f"
     },
     {
       "path": "standalone-pwh/client/manifest.json",
       "source": "standalone-pwh/client/manifest.json",
       "size": 20130,
-      "sha256": "090f70fff9e599083f5991333f4596974bc78c8835e01d9ea3d9945249983496"
+      "sha256": "e883c7570e8ad2f3ff9c1d1155bcca4421ec406eb7d2c6dfd8d4ac9c923a9723"
     },
     {
       "path": "standalone-pwh/codex-agent.mjs",
@@ -180,8 +180,8 @@
     {
       "path": "standalone-pwh/codex-session.mjs",
       "source": "standalone-pwh/codex-session.mjs",
-      "size": 11715,
-      "sha256": "5384783ed04bc0cd06d6e7a425e5af7fba9b67c4603810570a651692f65e4c4a"
+      "size": 13119,
+      "sha256": "4f0462644381843b5894c35dd1c1ab67e90c4d06d12d7f341c46b153c9e8729b"
     },
     {
       "path": "standalone-pwh/convert-hwp.check.mjs",
@@ -294,8 +294,8 @@
     {
       "path": "standalone-pwh/host.mjs",
       "source": "standalone-pwh/host.mjs",
-      "size": 51665,
-      "sha256": "0cedbe24d1e041743fd27ead206a336114a8a43dc0db096cfd1f7e84fb9c7127"
+      "size": 53181,
+      "sha256": "28be797481cb2358793fe884fc0699971ea51c7f2e36b92df212b4992c13f017"
     },
     {
       "path": "standalone-pwh/image-convert.ps1",
@@ -444,8 +444,8 @@
     {
       "path": "standalone-pwh/report-templates.mjs",
       "source": "standalone-pwh/report-templates.mjs",
-      "size": 18387,
-      "sha256": "c439da4b331dff0e210e777de98061613f2267c9765307b7b14e72115ab623a4"
+      "size": 20173,
+      "sha256": "bbc5a2f1987ca0ac107d19b735772b086abac6d4c3118ab35cfb01aa7554181b"
     },
     {
       "path": "standalone-pwh/recovery-smoke.check.mjs",
@@ -606,26 +606,26 @@
     {
       "path": "standalone-pwh/workspace-shell.mjs",
       "source": "standalone-pwh/workspace-shell.mjs",
-      "size": 18334,
-      "sha256": "0238ae3ffb967f2a142432a16d88a6da1387f885733e12eeefef097e8afecbdc"
+      "size": 18427,
+      "sha256": "6d925b8ef780c0e0133947183b45fe63b6c9997fc1a440003e61dc7c9efac87e"
     },
     {
       "path": "standalone-pwh/workspace.css",
       "source": "standalone-pwh/workspace.css",
-      "size": 9715,
-      "sha256": "483427ec299ca072203b5afba615f3161dcbab46b0911b74815857844c412601"
+      "size": 10321,
+      "sha256": "2c04e6b5bd15fcf554f851d00ca79ce07a5b4902e609235a9818ad3fc2a9ef6c"
     },
     {
       "path": "standalone-pwh/workspace.html",
       "source": "standalone-pwh/workspace.html",
-      "size": 4829,
-      "sha256": "3fade86c22a2a0ab93f915f7dd4d7ecc000aa7ab2ac4054581a3dee75c962dfa"
+      "size": 5928,
+      "sha256": "c609bc37751bf95f8af456f16e517dc8d535afda97b3c7e79eff39147d5c7059"
     },
     {
       "path": "standalone-pwh/workspace.js",
       "source": "standalone-pwh/workspace.js",
-      "size": 26862,
-      "sha256": "220c0b91109f92046ce4f8af398f5cbca9906b6129e55d3687e34b610c3d6c1b"
+      "size": 29664,
+      "sha256": "fec5439f42d63121b435f6113615e7515ecc7ee7de657e3083480547da3ba19c"
     }
   ]
 }

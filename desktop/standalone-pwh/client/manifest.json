@@ -1,16 +1,16 @@
 {
-  "sha256": "3e24dbec84e0fb0a0fd31d582973bfc18ef35f395e97cfb22e69c095b87ef70c",
+  "sha256": "34559552e3f2bdbd6af3d3491765bc4ee2330894fdb7901ef5565a6a9ccf8b1f",
   "baseVersion": "0.6.67",
-  "baseEditorSha256": "5a851aefa2ec14e8f7df2109a7aa14a3086b377058b3abb0ff0c3765ecae196a",
+  "baseEditorSha256": "af80f03e7b5bf1d506f6f9f6d2e49fed10ed17bb8d6bc0571aef80959d953a47",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "desktop",
-    "sha256": "c3c3650db1fb02258a5481163ea42965e2a85d553e9f8a64ddc64b6cac5d10a9",
+    "sha256": "9946cdc53a388efbda552b3313d17210d8ddafea356c357c2fc265ce880d1768",
     "files": [
       {
         "path": "desktop/standalone-pwh/build-desktop-editor.mjs",
-        "sha256": "871850a7f20bad7b8634965cb90e85d3f75b1f6c9079028b8d0ba5a7d019126d"
+        "sha256": "d7b79e12d24045f7079df5a7abc4be6d59ea422424b469e49c55c306d20de20a"
       },
       {
         "path": "desktop/standalone-pwh/desktop-body-style.mjs",
@@ -434,7 +434,7 @@
       },
       {
         "path": "src/pwh-ribbon-model.mjs",
-        "sha256": "aa6c933e15687fb1d48438d701dcef6de1365bcbb7fe8479eca140ffc0e39697"
+        "sha256": "4e55bd597bdfb487b2552dde8b95099ec2bbe05556fc833c2c899e26868f7b38"
       },
       {
         "path": "src/pwh-ribbon-styles.ts",
@@ -482,7 +482,7 @@
       },
       {
         "path": "src/studio-inline-adapter.ts",
-        "sha256": "f5ed3512a1524a59f23c0994e8860ea44167fbeb31359405e23c6f4a43e2131a"
+        "sha256": "7560ca48ca058cb0ce6e41917aa59d5f944bb5aef878b0785e988de3bade45d9"
       },
       {
         "path": "src/studio-selection.ts",

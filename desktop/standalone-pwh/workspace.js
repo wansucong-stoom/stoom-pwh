@@ -39,13 +39,13 @@
   const tab=tabs.get(id);if(!tab)return;active=id;$('home-view').hidden=true;document.body.classList.toggle('integrated-tabs',tab.tabsReady===true);
   for(const [key,item] of tabs){const selected=key===id;item.frame.hidden=!selected;item.element.setAttribute('aria-selected',String(selected));item.name.tabIndex=selected?0:-1;}publishWorkspace();
  }
- function add({id,url},prompt=''){
+ function add({id,url},template=null){
   const element=document.createElement('div');element.className='tab';element.setAttribute('role','tab');element.setAttribute('aria-selected','false');
   const name=document.createElement('button');name.className='tab-name';name.type='button';name.textContent='새 문서';name.onclick=()=>activate(id);
   const close=document.createElement('button');close.className='tab-close';close.type='button';close.textContent='×';close.title='문서 닫기';close.setAttribute('aria-label','문서 닫기');close.onclick=()=>void closeTab(id);
   element.append(name,close);$('tabs').append(element);
   const frame=document.createElement('iframe'),childUrl=new URL(url);childUrl.searchParams.set('workspaceOrigin',location.origin);frame.src=childUrl.href;frame.title='문서와 AI 대화';frame.hidden=true;$('documents').append(frame);
-  tabs.set(id,{id,url,origin:new URL(url).origin,frame,element,name,title:'새 문서',dirty:true,busy:false,ready:false,tabsReady:false,prompt});activate(id);
+  tabs.set(id,{id,url,origin:new URL(url).origin,frame,element,name,title:'새 문서',dirty:true,busy:false,ready:false,tabsReady:false,template});activate(id);
  }
  function request(tab,kind,extra={},timeout=4000){
   return new Promise(resolve=>{
@@ -153,7 +153,7 @@
    return;
   }
   if(state.type==='pwh-workspace-drop'){void openDroppedFiles(state.files);return;}
-  if(state.type==='pwh-workspace-tabs-ready'){tab.tabsReady=true;if(tab.prompt){event.source.postMessage({type:'pwh-workspace-report-prompt',prompt:tab.prompt},tab.origin);tab.prompt='';}if(active===tab.id)document.body.classList.add('integrated-tabs');publishWorkspace();return;}
+  if(state.type==='pwh-workspace-tabs-ready'){tab.tabsReady=true;if(tab.template){event.source.postMessage({type:'pwh-workspace-template-selection',template:tab.template},tab.origin);tab.template=null;}if(active===tab.id)document.body.classList.add('integrated-tabs');publishWorkspace();return;}
   if(state.type==='pwh-workspace-ui'){
    if(state.action==='ai-open'||state.action==='ai-close'){aiOpen=state.action==='ai-open';aiUserChoice=true;publishWorkspace();}
    else if(state.action==='ai-default-closed'&&!aiUserChoice){aiOpen=false;publishWorkspace();}
@@ -168,7 +168,9 @@
    }
    else if(state.action==='new')$('new-tab').click();
    else if(state.action==='home')showHome({focus:true});
-   else if(state.action==='templates'&&active===tab.id)void openTemplates(state.prompt);
+   else if(state.action==='templates'&&active===tab.id)void openTemplates(tab.id);
+   else if(state.action==='template-register'&&active===tab.id)void openTemplates(tab.id,true);
+   else if(state.action==='open-template-result'&&typeof state.id==='string')void openFromHome('templates/open-result',{id:state.id});
    else if(state.action==='update')$('workspace-update').click();
    else if(state.action==='codex')$('codex-plugin-retry').click();
    return;
@@ -209,63 +211,115 @@
   finally{starting=false;setFrozen();}
  }
  $('home-open').onclick=()=>void openFromHome('tabs/open');
- const templateDialog=$('report-templates'),templateStatus=$('report-template-status');
- let availableTemplates=[],templateBusy=false,templatePrompt='';
+ const templateDialog=$('report-templates'),templateStatus=$('report-template-status'),templateFilter=$('report-template-filter');
+ const templateViews={
+  library:[$('report-template-library'),'자주 쓰는 양식'],
+  register:[$('report-template-form'),'양식 등록'],
+  use:[$('report-template-use'),'양식 사용'],
+  remove:[$('report-template-remove'),'양식 삭제'],
+ };
+ let availableTemplates=[],templateBusy=false,templateTarget=null,selectedTemplate=null;
+ const canUseTemplates=()=>!templateBusy&&!starting&&!updateLocked&&!closeLocked;
+ function showTemplateView(view,focus){
+  for(const [key,[element]] of Object.entries(templateViews))element.hidden=key!==view;
+  $('report-templates-title').textContent=templateViews[view][1];
+  templateStatus.textContent='';
+  if(focus&&templateDialog.open)$(focus).focus();
+ }
  function showTemplates(){
-  const query=$('report-template-filter').value.normalize('NFC').trim().toLocaleLowerCase('ko');
+  const query=templateFilter.value.normalize('NFC').trim().toLocaleLowerCase('ko');
   const list=$('report-template-list');list.replaceChildren();
+  templateFilter.hidden=$('report-template-filter-label').hidden=!availableTemplates.length;
   for(const template of availableTemplates){
    if(!(template.organization+' '+template.name).toLocaleLowerCase('ko').includes(query))continue;
-   const button=document.createElement('button'),name=document.createElement('strong'),detail=document.createElement('small');
-   button.type='button';name.textContent=template.name;
-   detail.textContent=template.organization+' · '+template.sections+'개 구역 · 표 '+template.tables+'개 · '+(template.fields.length?'작성 항목 '+template.fields.length+'개':'자동 감지된 항목 없음');
-   if(template.limited)detail.textContent+=' · 일부 항목 검토 필요';
-   button.append(name,detail);
-   button.onclick=async()=>{
-    if(templateBusy||starting||updateLocked||closeLocked)return;
-    templateBusy=true;starting=true;setFrozen();templateStatus.textContent='양식으로 새 보고서를 여는 중입니다.';
-    try{const mode=$('report-template-mode').querySelector('input:checked').value;add(await api('templates/open',{id:template.id,mode}),templatePrompt);templateDialog.close();}
-    catch(error){templateStatus.textContent=error.message;}
-    finally{templateBusy=false;starting=false;setFrozen();}
+   const row=document.createElement('div'),choose=document.createElement('button'),remove=document.createElement('button');
+   row.className='report-template-row';
+   choose.type=remove.type='button';
+   choose.textContent=template.name;choose.title=template.organization;
+   choose.onclick=()=>{
+    if(!canUseTemplates())return;
+    selectedTemplate=template;
+    $('report-template-selected').textContent=template.name;
+    $('report-template-use').reset();
+    showTemplateView('use');
+    $('report-template-mode').querySelector('input:checked').focus();
    };
-   list.append(button);
+   remove.className='report-template-delete';remove.textContent='×';
+   const deleteLabel=template.name+' 삭제';
+   remove.title=deleteLabel;remove.setAttribute('aria-label',deleteLabel);
+   remove.onclick=()=>{
+    if(!canUseTemplates())return;
+    selectedTemplate=template;
+    $('report-template-remove-name').textContent='‘'+template.name+'’ 양식의 등록을 지울까요?';
+    showTemplateView('remove','report-template-remove-back');
+   };
+   row.append(choose,remove);list.append(row);
   }
-  if(!list.childElementCount){const empty=document.createElement('div');empty.textContent='검색 결과가 없습니다.';list.append(empty);}
+  if(!list.childElementCount){const empty=document.createElement('div');empty.textContent=availableTemplates.length?'검색 결과가 없습니다.':'등록한 양식이 없습니다.';list.append(empty);}
  }
  async function refreshTemplates(){
-  const result=await api('templates/list');
-  availableTemplates=result.templates;
-  if(templateDialog.open)showTemplates();
+  const {templates}=await api('templates/list');
+  availableTemplates=templates;showTemplates();
  }
- async function openTemplates(prompt=''){
-  if(starting||updateLocked||closeLocked||templateDialog.open)return;
-  templatePrompt=typeof prompt==='string'?prompt.slice(0,4000):'';
+ function showTemplateLibrary(){
+  showTemplateView('library');
+  showTemplates();
+  $(!availableTemplates.length?'report-template-register':'report-template-filter').focus();
+ }
+ async function openTemplates(tabId=null,register=false){
+  if(!canUseTemplates()||templateDialog.open)return;
+  templateTarget=tabId;
+  selectedTemplate=null;templateFilter.value='';
+  $('report-template-form').reset();
+  showTemplateView(register?'register':'library');
+  templateDialog.showModal();
+  if(register){$('report-template-organization').focus();return;}
   templateStatus.textContent='양식 목록을 불러오는 중입니다.';
-  $('report-template-list').replaceChildren();
-  $('report-template-form').hidden=true;
-  templateDialog.showModal();$('report-template-filter').focus();
-  try{await refreshTemplates();templateStatus.textContent='';}
+  try{await refreshTemplates();if(templateDialog.open&&!templateViews.library[0].hidden)showTemplateLibrary();}
   catch(error){templateStatus.textContent=error.message;}
  }
  $('home-templates').onclick=()=>void openTemplates();
- $('report-template-filter').oninput=showTemplates;
+ templateFilter.oninput=showTemplates;
  $('report-templates-close').onclick=()=>{if(!templateBusy)templateDialog.close();};
  templateDialog.addEventListener('cancel',event=>{if(templateBusy)event.preventDefault();});
- $('report-template-register').onclick=()=>{
-  const form=$('report-template-form');form.hidden=!form.hidden;
-  if(!form.hidden)$('report-template-organization').focus();
+ $('report-template-register').onclick=()=>{if(canUseTemplates())showTemplateView('register','report-template-organization');};
+ $('report-template-register-back').onclick=async()=>{
+  if(!canUseTemplates())return;
+  try{await refreshTemplates();showTemplateLibrary();}catch(error){templateStatus.textContent=error.message;}
  };
+ $('report-template-use-back').onclick=$('report-template-remove-back').onclick=()=>{if(canUseTemplates())showTemplateLibrary();};
  $('report-template-form').onsubmit=async event=>{
-  event.preventDefault();if(templateBusy||starting||updateLocked||closeLocked)return;
-  templateBusy=true;templateStatus.textContent='선택한 양식을 분석합니다.';
-  event.submitter.disabled=true;
+  event.preventDefault();if(!canUseTemplates())return;
+  templateBusy=true;templateStatus.textContent='선택한 양식을 분석합니다.';event.submitter.disabled=true;
   try{
-   const result=await api('templates/register',{organization:$('report-template-organization').value,name:$('report-template-name').value});
+   const result=await api('templates/register',{organization:$('report-template-organization').value,name:$('report-template-name').value,rules:$('report-template-rules').value});
    if(result.cancelled){templateStatus.textContent='';return;}
-   event.target.reset();event.target.hidden=true;$('report-template-filter').value='';
-   await refreshTemplates();
-   const n=result.template.fields.length;
-   templateStatus.textContent=n?'양식을 등록했습니다. 작성 항목 '+n+'개를 확인했습니다.':'양식을 등록했습니다. 자동 입력할 항목은 감지되지 않았습니다.';
+   event.target.reset();templateFilter.value='';
+   await refreshTemplates();showTemplateLibrary();
+   templateStatus.textContent='‘'+result.template.name+'’ 양식을 등록했습니다.';
+  }catch(error){templateStatus.textContent=error.message;}
+  finally{templateBusy=false;event.submitter.disabled=false;}
+ };
+ $('report-template-use').onsubmit=async event=>{
+  event.preventDefault();if(!canUseTemplates()||!selectedTemplate)return;
+  templateBusy=true;starting=true;setFrozen();event.submitter.disabled=true;
+  try{
+   const mode=$('report-template-mode').querySelector('input:checked').value;
+   const template={id:selectedTemplate.id,name:selectedTemplate.name,mode};
+   const target=templateTarget&&tabs.get(templateTarget);
+   if(target)target.frame.contentWindow.postMessage({type:'pwh-workspace-template-selection',template},target.origin);
+   else add(await api('tabs/new'),template);
+   templateDialog.close();
+  }catch(error){templateStatus.textContent=error.message;}
+  finally{templateBusy=false;starting=false;event.submitter.disabled=false;setFrozen();}
+ };
+ $('report-template-remove').onsubmit=async event=>{
+  event.preventDefault();if(!canUseTemplates()||!selectedTemplate)return;
+  templateBusy=true;event.submitter.disabled=true;
+  try{
+   await api('templates/remove',{id:selectedTemplate.id});
+   availableTemplates=availableTemplates.filter(template=>template.id!==selectedTemplate.id);
+   showTemplateLibrary();templateStatus.textContent='‘'+selectedTemplate.name+'’ 양식의 등록을 삭제했습니다.';selectedTemplate=null;
   }catch(error){templateStatus.textContent=error.message;}
   finally{templateBusy=false;event.submitter.disabled=false;}
  };

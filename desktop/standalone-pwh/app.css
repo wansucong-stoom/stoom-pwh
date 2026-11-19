@@ -56,3 +56,7 @@ main{grid-template-columns:minmax(200px,var(--chat-width,19.333333%)) 6px minmax
 
 .composer{position:relative}
 #attachment-menu:not([hidden]){position:absolute;bottom:42px;left:8px;z-index:4;display:grid;min-width:130px;padding:4px;border:1px solid #c7d9df;border-radius:8px;background:#fff;box-shadow:0 5px 16px #17394c24}#attachment-menu button{border:0;border-radius:5px;background:#fff;color:#17394c;padding:8px;text-align:left;font:inherit;cursor:pointer}#attachment-menu button:hover,#attachment-menu button:focus-visible{background:#eaf3f5}
+
+#attached-template:not([hidden]){display:flex;justify-content:space-between;align-items:center;gap:8px;margin:4px 0;padding:4px 7px;border:1px solid #c7d9df;border-radius:7px;color:#17394c;background:#edf5f6;font-size:11px}
+#attached-template span{min-width:0;overflow-wrap:anywhere}
+#remove-template{border:0;background:none;color:inherit;font:inherit;cursor:pointer;padding:3px 6px}
