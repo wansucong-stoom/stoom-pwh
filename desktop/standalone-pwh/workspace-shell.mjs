@@ -21,7 +21,8 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
  const token=randomBytes(24).toString('hex'),tabs=new Map();let closing=false,generation=0;
  const dataRoot=providedDataRoot||process.env.PWH_STANDALONE_DATA||path.join(process.env.LOCALAPPDATA||process.env.HOME||root,'PwhDesktop');
  const services=updateServices||{check:checkForDesktopUpdate,download:downloadInstaller,schedule:scheduleDesktopUpdate};
- const recent=createRecentDocuments(dataRoot);let fileDialogBusy=false;
+ const recent=createRecentDocuments(dataRoot);let fileDialogBusy=false,templates;
+ const reportTemplates=async()=>templates??=(await import('./report-templates.mjs')).createReportTemplateLibrary(dataRoot);
  // One nonblocking GitHub lookup per app start; offline operation is normal.
  const storeManaged=['msix-preview','microsoft-store'].includes(distribution);
  const macPreview=distribution==='macos-preview';
@@ -31,14 +32,14 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
  const checkUpdate=()=>{if(!nativeBranding||storeManaged)return Promise.resolve(null);if(!updateCheck||Date.now()-checkedAt>60000){checkedAt=Date.now();updateCheck=desktopVersion(root).then(v=>v?services.check(v):null).catch(()=>null);}return updateCheck;};
  void checkUpdate();
  let preparedUpdate=null,preparingUpdate=null,installingUpdate=false,codexSetup=null;
- const makeTab=async (file,imported=false)=>{
+ const makeTab=async (file,imported=false,report=false)=>{
   if(closing||tabs.size>=12)throw Error('문서는 최대 12개까지 열 수 있습니다.');
   const id=randomUUID();
   // A stable origin per tab slot keeps the editor's local recovery store reachable
   // after reopening. A second window skips ports already owned by another app.
   for(let childPort=48674;childPort<48738;childPort++){
    if([...tabs.values()].some(tab=>tab.port===childPort))continue;
-   const child=spawnImpl(nodeExecutable,[path.join(root,'workspace-child.mjs'),String(childPort),...(file?[file,...imported?['imported']:[]]:[])],{windowsHide:true,stdio:macPreview?['pipe','pipe','pipe','ipc']:['pipe','pipe','pipe'],env:process.env});
+   const child=spawnImpl(nodeExecutable,[path.join(root,'workspace-child.mjs'),String(childPort),...(file?[file,...report?['report']:imported?['imported']:[]]:[])],{windowsHide:true,stdio:macPreview?['pipe','pipe','pipe','ipc']:['pipe','pipe','pipe'],env:process.env});
    if(macPreview)child.on('message',async message=>{
     if(message?.type!=='choose-file'||typeof message.id!=='string')return;
     let reply;
@@ -97,6 +98,23 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
    if(tabs.size+paths.length>12)throw Error('문서는 최대 12개까지 열 수 있습니다.');
    const opened=[],errors=[];for(const file of paths){try{opened.push(await makeTab(file));}catch(error){errors.push(path.basename(file)+': '+error.message);}}
    return send(res,{opened,errors});
+  }
+  if(route==='templates/list')return send(res,{templates:await (await reportTemplates()).list()});
+  if(route==='templates/register'||route==='templates/open'){
+   let body='';for await(const chunk of req){body+=chunk;if(body.length>4096)throw Error('양식 요청이 너무 큽니다.');}
+   const input=JSON.parse(body);
+   if(route==='templates/open'){
+    if(tabs.size>=12)throw Error('문서는 최대 12개까지 열 수 있습니다.');
+    const draft=await (await reportTemplates()).prepare(input.id,input.mode);
+    try{return send(res,await makeTab(draft.file,true,true));}catch(error){await draft.discard();throw error;}
+   }
+   if(fileDialogBusy)throw Error('파일 선택창이 이미 열려 있습니다.');
+   fileDialogBusy=true;
+   try{
+    const picked=await chooseFile({mode:'Open'});
+    if(picked?.cancelled)return send(res,{cancelled:true});
+    return send(res,{template:await (await reportTemplates()).register(picked?.path,input)});
+   }finally{fileDialogBusy=false;}
   }
   if(route==='recent/list')return send(res,{documents:await recent.list()});
   if(route==='recent/remove'){let body='';for await(const chunk of req){body+=chunk;if(body.length>1024)throw Error('최근 문서 요청이 너무 큽니다.');}await recent.remove(JSON.parse(body).id);return send(res,{ok:true});}

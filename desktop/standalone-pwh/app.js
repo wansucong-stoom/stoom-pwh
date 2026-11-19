@@ -62,6 +62,7 @@
   if(event.data?.type==='pwh-workspace-paste-result'){
    const request=nativePasteRequests.get(event.data.requestId);if(!request)return;clearTimeout(request.timer);nativePasteRequests.delete(event.data.requestId);event.data.ok?request.resolve({ok:true}):request.reject(Error(event.data.error||'붙여넣지 못했습니다.'));return;
   }
+  if(event.data?.type==='pwh-workspace-report-prompt'){if(typeof event.data.prompt==='string'&&!$('prompt').value)$('prompt').value=event.data.prompt;return;}
   if(event.data?.type==='pwh-workspace-view'){workspaceView=event.data;if(event.data.aiUserChoice)aiUserChoice=true;if(typeof event.data.aiOpen==='boolean')setAiOpen(event.data.aiOpen);renderWorkspaceView();return;}
   if(event.data?.type==='pwh-workspace-focus-editor'){restoreInitialEditorFocus(true);return;}
   if(event.data?.type==='pwh-workspace-inspect'){reportWorkspace(event.data.requestId);return;}
@@ -113,7 +114,7 @@
  $('chatgpt-signout').onclick=disconnectChatgpt;$('connection-chatgpt-disconnect').onclick=disconnectChatgpt;
  $('chatgpt-welcome-ok').onclick=async()=>{try{await api('chatgpt/welcome');$('chatgpt-welcome').close();}catch(error){$('chatgpt-status').textContent=error.message;}};
  $('chatgpt-welcome').addEventListener('cancel',event=>{event.preventDefault();$('chatgpt-welcome-ok').click();});
- async function loadDocument(doc){documentInfo=doc;sessionId=null;attachedImage=null;$('attached-image').hidden=true;const notice=$('document-notice');notice.hidden=!doc.convertedFromHwp&&!doc.imported;notice.textContent=doc.convertedFromHwp?'HWP 원본 보존 · HWPX로 저장':doc.imported?'작업본 · 저장 위치 선택 필요':'';frame.src='editor?instance='+encodeURIComponent(crypto.randomUUID());reportWorkspace();if(doc.convertedFromHwp)say('HWP 원본을 보존하고 HWPX 작업본으로 열었습니다. 저장 시 새 파일로 저장합니다.'+(doc.layoutWarning?' 저장된 글줄 배치가 달라져 줄바꿈과 쪽 나눔을 확인해 주세요.':''));else if(doc.imported)say('끌어온 문서를 작업본으로 열었습니다. 저장할 때 위치와 파일 이름을 선택해 주세요.');}
+ async function loadDocument(doc){documentInfo=doc;sessionId=null;attachedImage=null;$('attached-image').hidden=true;const notice=$('document-notice');notice.hidden=!doc.convertedFromHwp&&!doc.imported;notice.textContent=doc.reportTemplate?(doc.reportTemplate.mode==='adapt'?'형식 준용':'양식 그대로')+' · '+doc.reportTemplate.organization:doc.convertedFromHwp?'HWP 원본 보존 · HWPX로 저장':doc.imported?'작업본 · 저장 위치 선택 필요':'';frame.src='editor?instance='+encodeURIComponent(crypto.randomUUID());reportWorkspace();if(doc.convertedFromHwp)say('HWP 원본을 보존하고 HWPX 작업본으로 열었습니다. 저장 시 새 파일로 저장합니다.'+(doc.layoutWarning?' 저장된 글줄 배치가 달라져 줄바꿈과 쪽 나눔을 확인해 주세요.':''));else if(doc.reportTemplate)say(doc.reportTemplate.name+' 양식으로 열었습니다. 보고서에 넣을 자료와 작성할 항목을 알려 주세요.');else if(doc.imported)say('끌어온 문서를 작업본으로 열었습니다. 저장할 때 위치와 파일 이름을 선택해 주세요.');}
  window.addEventListener('message',async event=>{
   if(event.source!==frame.contentWindow||event.origin!==location.origin||event.data?.jsonrpc!=='2.0')return;
   const message=event.data;if(message.method==='ui/notifications/initialized'){frame.contentWindow.postMessage({jsonrpc:'2.0',method:'ui/notifications/tool-result',params:{structuredContent:documentInfo}},location.origin);return;}
@@ -211,7 +212,19 @@
  $('check').onclick=async()=>{try{$('connection-status').textContent='연결 확인 중';const r=await api('ai/check',settings());$('connection-status').textContent=r.ready?`연결됨 · 모델 ${r.models?.length??0}개`:r.message||'연결되지 않았습니다.';}catch(e){$('connection-status').textContent=e.message;}};
  let stopRequested=false,steerInFlight=false,resetActiveAnswer=null,activeCodex=false;
  $('stop').onclick=async()=>{stopRequested=true;try{await api('ai/interrupt');status.textContent='작업 중지를 요청했습니다.';}catch(e){status.textContent=e.message;}};
- $('attach-image').onmousedown=e=>e.preventDefault();$('attach-image').onclick=()=>{if(busy||!sessionId){status.textContent='편집기가 준비된 뒤 그림을 첨부하세요.';return;}$('image-file').click();};$('remove-image').onclick=()=>{attachedImage=null;$('attached-image').hidden=true;};
+ $('attach-image').onmousedown=e=>e.preventDefault();
+ $('attach-image').onclick=()=>{
+  if(busy||!sessionId){status.textContent='편집기가 준비된 뒤 첨부를 사용하세요.';return;}
+  if(!workspaceOrigin){$('image-file').click();return;}
+  const menu=$('attachment-menu');menu.hidden=!menu.hidden;$('attach-image').setAttribute('aria-expanded',String(!menu.hidden));
+  if(!menu.hidden)$('attach-picture-action').focus();
+ };
+ function closeAttachmentMenu(){const menu=$('attachment-menu');if(menu.hidden)return;menu.hidden=true;$('attach-image').setAttribute('aria-expanded','false');}
+ $('attach-picture-action').onclick=()=>{closeAttachmentMenu();$('image-file').click();};
+ $('attach-template-action').onclick=()=>{closeAttachmentMenu();window.parent.postMessage({type:'pwh-workspace-ui',action:'templates',prompt:$('prompt').value},workspaceOrigin);};
+ document.addEventListener('pointerdown',event=>{if(!event.target.closest?.('#attach-image,#attachment-menu'))closeAttachmentMenu();});
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!$('attachment-menu').hidden){closeAttachmentMenu();$('attach-image').focus();}});
+ $('remove-image').onclick=()=>{attachedImage=null;$('attached-image').hidden=true;};
  $('image-file').onchange=async event=>{const file=event.target.files[0];event.target.value='';if(!file)return;try{if(file.size>8*1024*1024||!['image/png','image/jpeg'].includes(file.type))throw Error('8 MiB 이하 PNG 또는 JPEG 그림을 선택하세요.');const bitmap=await createImageBitmap(file);const width=bitmap.width,height=bitmap.height;bitmap.close();if(!width||!height||width*height>16000000)throw Error('그림 크기를 확인하세요.');const response=await fetch('image/attach',{method:'POST',headers:{'x-pwh-request':'1','x-pwh-session':sessionId,'x-pwh-width':String(width),'x-pwh-height':String(height)},body:await file.arrayBuffer()});const result=await response.json();if(!response.ok)throw Error(result.error||'그림 첨부에 실패했습니다.');attachedImage={assetId:result.assetId,sessionId};$('attached-image-name').textContent=file.name;$('attached-image').hidden=false;status.textContent='그림을 첨부했습니다. 본문 커서를 선택하고 삽입을 요청하세요.';}catch(error){status.textContent=error.message;}};
  async function captureDocumentSnapshot(context,targetSession){const editor=frame.contentWindow?.pwhEditor,state=context?.documentState;if(!editor||!state||!targetSession)throw Error('편집기 상태를 확인하지 못했습니다.');const artifact=editor.export(),after=editor.context()?.documentState;if(!after||after.documentEpoch!==state.documentEpoch||after.changeSeq!==state.changeSeq)throw Error('문서가 변경되었습니다. 다시 요청해 주세요.');if(artifact.contentLoss?.count)throw Error('현재 문서의 전체 내용을 안전하게 읽지 못했습니다. 저장 후 다시 열어 주세요.');const response=await fetch('document/snapshot',{method:'POST',headers:{'x-pwh-request':'1','x-pwh-session':targetSession,'x-pwh-epoch':String(state.documentEpoch),'x-pwh-seq':String(state.changeSeq)},body:artifact.bytes});const result=await response.json();if(!response.ok)throw Error(result.error||'문서 본문을 읽지 못했습니다.');}
  function recentConversation(){const messages=[...$('conversation').querySelectorAll('.message:not(.document-notification)')].map(node=>({role:node.classList.contains('user')?'user':'assistant',text:node.textContent||''})).filter(item=>item.text.trim());let remaining=32000,result=[];for(const item of messages.slice(-24).reverse()){if(remaining<=0)break;const text=item.text.slice(-Math.min(remaining,6000));result.unshift({role:item.role,text});remaining-=text.length;}return result;}

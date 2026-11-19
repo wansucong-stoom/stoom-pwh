@@ -72283,6 +72283,20 @@ function wR(e, t, n, r) {
 	};
 }
 function TR(e, t, n) {
+	let r = /* @__PURE__ */ new Map(), i = [];
+	for (let { marker: a, text: o } of t) {
+		let t = bR(e, n, a, { limit: 100 });
+		if (!t.refs.length || t.result.nextCursor !== null) throw Error("보고서 양식의 작성 위치가 변경되었거나 결과가 너무 많습니다. 문서를 다시 확인하세요.");
+		r.set(a, t);
+		for (let e of t.refs) i.push({
+			searchId: a,
+			matchId: e.id,
+			replacement: o
+		});
+	}
+	return wR(e, r, i, n);
+}
+function ER(e, t, n) {
 	for (let r of t.groups) for (let t of r.parts) {
 		let r = t.source, i = r.cellPath?.[0], a = {
 			sectionIndex: r.section,
@@ -72310,7 +72324,7 @@ function TR(e, t, n) {
 		paragraphs: t.groups.length
 	};
 }
-function ER(e, t) {
+function DR(e, t) {
 	let n = t.cellPath?.length ? t.cellPath : t.parentParaIndex == null ? void 0 : [{
 		controlIndex: t.controlIndex,
 		cellIndex: t.cellIndex,
@@ -72338,11 +72352,11 @@ function ER(e, t) {
 }
 //#endregion
 //#region @rhwp/studio/src/pwh-nested-table-paste.mjs
-var DR = (e) => typeof e == "string" ? JSON.parse(e) : e, OR = (e) => {
-	let t = DR(e);
+var OR = (e) => typeof e == "string" ? JSON.parse(e) : e, kR = (e) => {
+	let t = OR(e);
 	if (!t?.ok) throw Error("중첩 표 처리에 실패했습니다.");
 	return t;
-}, kR = (e) => e.reduce((e, t) => (e[t.ctrlId] = (e[t.ctrlId] || 0) + 1, e), {}), AR = (e, t) => {
+}, AR = (e) => e.reduce((e, t) => (e[t.ctrlId] = (e[t.ctrlId] || 0) + 1, e), {}), jR = (e, t) => {
 	let n = {};
 	for (let r of /* @__PURE__ */ new Set([...Object.keys(e), ...Object.keys(t)])) {
 		let i = (e[r] || 0) - (t[r] || 0);
@@ -72350,7 +72364,7 @@ var DR = (e) => typeof e == "string" ? JSON.parse(e) : e, OR = (e) => {
 	}
 	return n;
 };
-function jR(e) {
+function MR(e) {
 	if (typeof e != "string" || e.length > 8388608) return null;
 	let t = e.indexOf("[data-hwpjson]");
 	if (t < 0) return null;
@@ -72364,7 +72378,7 @@ function jR(e) {
 	}
 	return i;
 }
-function MR(e) {
+function NR(e) {
 	let t = e?.cursor, n = e?.table?.selectedCells;
 	if (!t || t.parentParaIndex == null || t.controlIndex == null || t.cellIndex == null || t.cellParaIndex == null || t.isTextBox || t.headerFooter || t.noteRef) throw Error("표 안의 셀에 커서를 놓고 다시 붙여넣으세요.");
 	let r = (e) => e && Object.fromEntries([
@@ -72380,36 +72394,36 @@ function MR(e) {
 	if (e.selection && !LL(r(e.selection.start), r(e.selection.end)) || e.kind === "cell_block" && (!n || n.length !== 1 || n[0].cellIndex !== t.cellIndex)) throw Error("표를 넣을 셀 하나만 선택해 주세요.");
 	return t;
 }
-function NR(e, t) {
-	return t.cellPath?.length > 1 ? OR(e.pasteInternalInCellByPath(t.sectionIndex, t.parentParaIndex, JSON.stringify(t.cellPath), t.charOffset)) : OR(e.pasteInternalInCell(t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, t.cellParaIndex, t.charOffset));
-}
 function PR(e, t) {
-	let n = MR(t);
+	return t.cellPath?.length > 1 ? kR(e.pasteInternalInCellByPath(t.sectionIndex, t.parentParaIndex, JSON.stringify(t.cellPath), t.charOffset)) : kR(e.pasteInternalInCell(t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, t.cellParaIndex, t.charOffset));
+}
+function FR(e, t) {
+	let n = NR(t);
 	if (!e.clipboardHasControl()) throw Error("복사한 표를 다시 선택해 복사하세요.");
-	let r = kR(DR(e.getControls()));
-	if (NR(e, n), (kR(DR(e.getControls())).tbl || 0) <= (r.tbl || 0)) throw Error("붙여넣은 표 개체를 확인하지 못했습니다.");
+	let r = AR(OR(e.getControls()));
+	if (PR(e, n), (AR(OR(e.getControls())).tbl || 0) <= (r.tbl || 0)) throw Error("붙여넣은 표 개체를 확인하지 못했습니다.");
 	return { ok: !0 };
 }
-function FR(e, t, n, r, i) {
-	let a = MR(t);
+function IR(e, t, n, r, i) {
+	let a = NR(t);
 	if (typeof n != "string" || !n || n.length > 8388608) throw Error("표 원본 정보를 확인하지 못했습니다.");
 	if (e.getSectionCount() !== 1 || a.sectionIndex !== 0) throw Error("여러 구역 문서에는 아직 표를 넣을 수 없습니다.");
 	let o = a.sectionIndex, s = e.getParagraphCount(o), c = s - 1;
 	if (c < 0) throw Error("문서의 본문을 확인하지 못했습니다.");
-	let l = DR(e.getControls()), u = e.getParagraphLength(o, c), d = e.getTextRange(o, c, 0, u), f = DR(e.getParaPropertiesAt(o, c)), p = Array.from({ length: Math.max(1, u) }, (t, n) => DR(e.getCharPropertiesAt(o, c, n)));
-	if (OR(e.insertPwhScratchParagraph(o, s)), e.getParagraphCount(o) !== s + 1) throw Error("임시 문단을 확인하지 못했습니다.");
+	let l = OR(e.getControls()), u = e.getParagraphLength(o, c), d = e.getTextRange(o, c, 0, u), f = OR(e.getParaPropertiesAt(o, c)), p = Array.from({ length: Math.max(1, u) }, (t, n) => OR(e.getCharPropertiesAt(o, c, n)));
+	if (kR(e.insertPwhScratchParagraph(o, s)), e.getParagraphCount(o) !== s + 1) throw Error("임시 문단을 확인하지 못했습니다.");
 	let m = s;
-	OR(r === "hancom" ? e.pasteHwpJson(o, m, 0, n) : e.pasteHtml(o, m, 0, n));
-	let h = DR(e.getControls()), g = h.filter((e) => e.list === 0 && e.para >= m), _ = g.filter((e) => e.ctrlId === "tbl");
+	kR(r === "hancom" ? e.pasteHwpJson(o, m, 0, n) : e.pasteHtml(o, m, 0, n));
+	let h = OR(e.getControls()), g = h.filter((e) => e.list === 0 && e.para >= m), _ = g.filter((e) => e.ctrlId === "tbl");
 	if (_.length !== 1 || g.length !== 1) throw Error("표 하나만 복사해 다시 붙여넣어 주세요.");
-	let v = _[0], y = DR(e.getTableDimensions(o, v.para, v.controlIndex));
+	let v = _[0], y = OR(e.getTableDimensions(o, v.para, v.controlIndex));
 	if (!y?.cellCount || y.cellCount > 256) throw Error("복사한 표의 크기를 확인하지 못했습니다.");
 	if (i) {
 		if (y.rowCount !== i.rows || y.colCount !== i.columns || y.cellCount !== i.cells.length) throw Error("원본 표의 행·열·병합을 보존하지 못했습니다.");
 		for (let [t, n] of i.cells.entries()) {
 			let r = -1;
 			for (let t = 0; t < y.cellCount; t++) {
-				let i = DR(e.getCellInfo(o, v.para, v.controlIndex, t));
+				let i = OR(e.getCellInfo(o, v.para, v.controlIndex, t));
 				if (i.row === n.row && i.col === n.column) {
 					if (i.rowSpan !== (n.rowSpan ?? 1) || i.colSpan !== (n.columnSpan ?? 1)) throw Error("원본 표의 병합을 보존하지 못했습니다.");
 					r = t;
@@ -72426,53 +72440,53 @@ function FR(e, t, n, r, i) {
 			if (c(s) !== c(n.paragraphs)) throw Error("원본 표의 셀 내용을 보존하지 못했습니다.");
 			let l = i.clipboardStyles?.[t];
 			if (l) {
-				let t = DR(e.getCellProperties(o, v.para, v.controlIndex, r));
+				let t = OR(e.getCellProperties(o, v.para, v.controlIndex, r));
 				if (l.fillColor && String(t.fillColor).toLowerCase() !== l.fillColor.toLowerCase()) throw Error("셀 배경을 보존하지 못했습니다.");
 				for (let t = 0; t < a; t++) {
 					if (!e.getCellParagraphLength(o, v.para, v.controlIndex, r, t)) continue;
-					let n = DR(e.getCellCharPropertiesAt(o, v.para, v.controlIndex, r, t, 0));
+					let n = OR(e.getCellCharPropertiesAt(o, v.para, v.controlIndex, r, t, 0));
 					for (let e of [
 						"bold",
 						"fontSize",
 						"fontFamily",
 						"textColor"
 					]) if (l[e] !== void 0 && String(n[e]).toLowerCase() !== String(l[e]).toLowerCase()) throw Error("셀 글자 서식을 보존하지 못했습니다.");
-					if (l.alignment && DR(e.getCellParaPropertiesAt(o, v.para, v.controlIndex, r, t)).alignment !== l.alignment) throw Error("셀 문단 정렬을 보존하지 못했습니다.");
+					if (l.alignment && OR(e.getCellParaPropertiesAt(o, v.para, v.controlIndex, r, t)).alignment !== l.alignment) throw Error("셀 문단 정렬을 보존하지 못했습니다.");
 				}
 			}
 		}
 	}
-	let b = AR(kR(h), kR(l)), x = e.getParagraphCount(o);
+	let b = jR(AR(h), AR(l)), x = e.getParagraphCount(o);
 	for (let t = m; t < x; t++) if (e.getParagraphLength(o, t) !== 0) throw Error("표 밖의 글이 함께 복사되어 중첩 표로 넣지 않았습니다.");
-	OR(e.copyControl(o, v.para, v.controlIndex, "[]")), OR(e.deleteTableControl(o, v.para, v.controlIndex));
+	kR(e.copyControl(o, v.para, v.controlIndex, "[]")), kR(e.deleteTableControl(o, v.para, v.controlIndex));
 	for (let t = e.getParagraphCount(o) - 1; t >= m; t--) {
-		if (e.getParagraphLength(o, t) !== 0 || DR(e.getControls()).some((e) => e.list === 0 && e.para === t)) throw Error("임시 표를 안전하게 정리하지 못했습니다.");
-		OR(e.deletePwhScratchParagraph(o, t));
+		if (e.getParagraphLength(o, t) !== 0 || OR(e.getControls()).some((e) => e.list === 0 && e.para === t)) throw Error("임시 표를 안전하게 정리하지 못했습니다.");
+		kR(e.deletePwhScratchParagraph(o, t));
 	}
-	if (e.getParagraphCount(o) !== s || e.getParagraphLength(o, c) !== u || e.getTextRange(o, c, 0, u) !== d || !LL(DR(e.getParaPropertiesAt(o, c)), f) || !LL(Array.from({ length: Math.max(1, u) }, (t, n) => DR(e.getCharPropertiesAt(o, c, n))), p) || !LL(DR(e.getControls()), l)) throw Error("원래 본문을 보존하지 못해 붙여넣기를 취소했습니다.");
-	if (NR(e, a), !LL(AR(kR(DR(e.getControls())), kR(l)), b)) throw Error("붙여넣은 표의 개체를 확인하지 못했습니다.");
+	if (e.getParagraphCount(o) !== s || e.getParagraphLength(o, c) !== u || e.getTextRange(o, c, 0, u) !== d || !LL(OR(e.getParaPropertiesAt(o, c)), f) || !LL(Array.from({ length: Math.max(1, u) }, (t, n) => OR(e.getCharPropertiesAt(o, c, n))), p) || !LL(OR(e.getControls()), l)) throw Error("원래 본문을 보존하지 못해 붙여넣기를 취소했습니다.");
+	if (PR(e, a), !LL(jR(AR(OR(e.getControls())), AR(l)), b)) throw Error("붙여넣은 표의 개체를 확인하지 못했습니다.");
 	return {
 		rows: y.rowCount,
 		columns: y.colCount,
 		cells: y.cellCount
 	};
 }
-function IR(e, t, n) {
-	return FR(e, t, n, "hancom");
+function LR(e, t, n) {
+	return IR(e, t, n, "hancom");
 }
-function LR(e, t, n, r) {
-	return FR(e, t, n, "html", r);
+function RR(e, t, n, r) {
+	return IR(e, t, n, "html", r);
 }
 //#endregion
 //#region @rhwp/studio/src/pwh-table-clipboard.mjs
-var RR = (e) => String(e ?? "").replace(/[&<>"']/g, (e) => ({
+var zR = (e) => String(e ?? "").replace(/[&<>"']/g, (e) => ({
 	"&": "&amp;",
 	"<": "&lt;",
 	">": "&gt;",
 	"\"": "&quot;",
 	"'": "&#39;"
-})[e]), zR = (e) => typeof e == "string" ? JSON.parse(e) : e;
-function BR(e, t) {
+})[e]), BR = (e) => typeof e == "string" ? JSON.parse(e) : e;
+function VR(e, t) {
 	if (!Array.isArray(t) || !t.length || new Set(t).size !== t.length) throw Error("Select table cells to copy");
 	let n = t.map((t) => e.cells[t]);
 	if (n.some((e) => !e)) throw Error("Invalid selected cell");
@@ -72494,9 +72508,9 @@ function BR(e, t) {
 		let n = s.cells[t], r = e.properties, i = e.paragraphs.map((e) => {
 			let t = Array.from(e.text), n = e.formats.map((n, r) => {
 				let i = n.format, a = t.slice(n.offset, e.formats[r + 1]?.offset ?? t.length).join("");
-				return `<span style="font-family:${RR(i.fontFamily || "맑은 고딕")};font-size:${(i.fontSize || 1e3) / 100}pt;font-weight:${i.bold ? "bold" : "normal"};font-style:${i.italic ? "italic" : "normal"};color:${RR(i.textColor || "#000000")}">${RR(a)}</span>`;
+				return `<span style="font-family:${zR(i.fontFamily || "맑은 고딕")};font-size:${(i.fontSize || 1e3) / 100}pt;font-weight:${i.bold ? "bold" : "normal"};font-style:${i.italic ? "italic" : "normal"};color:${zR(i.textColor || "#000000")}">${zR(a)}</span>`;
 			}).join("");
-			return `<p style="margin:0;text-align:${RR(e.format.alignment || "left")}">${n || "<br>"}</p>`;
+			return `<p style="margin:0;text-align:${zR(e.format.alignment || "left")}">${n || "<br>"}</p>`;
 		}).join(""), a = [
 			"Left",
 			"Right",
@@ -72504,11 +72518,11 @@ function BR(e, t) {
 			"Bottom"
 		].map((e) => {
 			let t = r["border" + e];
-			return `border-${e.toLowerCase()}:${t?.type === 0 ? "none" : `${Math.max(.3, (t?.width || 1) * .25)}pt ${t?.type === 2 ? "dashed" : t?.type === 3 ? "dotted" : "solid"} ${RR(t?.color || "#000000")}`}`;
+			return `border-${e.toLowerCase()}:${t?.type === 0 ? "none" : `${Math.max(.3, (t?.width || 1) * .25)}pt ${t?.type === 2 ? "dashed" : t?.type === 3 ? "dotted" : "solid"} ${zR(t?.color || "#000000")}`}`;
 		}).join(";");
 		c[n.row].push({
 			column: n.column,
-			html: `<td rowspan="${n.rowSpan}" colspan="${n.columnSpan}" style="${a};padding:2pt;width:${(r.width || 0) / 100}pt;height:${(r.height || 0) / 100}pt;background:${RR(r.fillType === "solid" ? r.fillColor : "#ffffff")}">${i}</td>`
+			html: `<td rowspan="${n.rowSpan}" colspan="${n.columnSpan}" style="${a};padding:2pt;width:${(r.width || 0) / 100}pt;height:${(r.height || 0) / 100}pt;background:${zR(r.fillType === "solid" ? r.fillColor : "#ffffff")}">${i}</td>`
 		}), l[n.row][n.column] = n.paragraphs.join("\n");
 	}), {
 		spec: s,
@@ -72516,7 +72530,7 @@ function BR(e, t) {
 		html: `<table style="border-collapse:collapse">${c.map((e) => "<tr>" + e.sort((e, t) => e.column - t.column).map((e) => e.html).join("") + "</tr>").join("")}</table>`
 	};
 }
-function VR(e) {
+function HR(e) {
 	let t = [];
 	for (let n = e; n && n.tagName !== "BODY"; n = n.parentElement) t.unshift(n);
 	let n = {};
@@ -72548,7 +72562,7 @@ function VR(e) {
 	let f = (i["font-family"] || "").split(",")[0].trim().replace(/^['"]|['"]$/g, "");
 	return f && f.length <= 100 && (o.fontFamily = f), o;
 }
-function HR(e, t = globalThis.DOMParser) {
+function UR(e, t = globalThis.DOMParser) {
 	if (typeof e != "string" || !e.trim() || e.length > 8388608) return null;
 	if (typeof t != "function") throw Error("HTML parser unavailable");
 	!/<table\b/i.test(e) && /<(?:tr|td|th)\b/i.test(e) && (e = "<table>" + e + "</table>");
@@ -72597,7 +72611,7 @@ function HR(e, t = globalThis.DOMParser) {
 				rowSpan: e,
 				columnSpan: l,
 				paragraphs: u
-			}), a.push(VR(r));
+			}), a.push(HR(r));
 			for (let r = 0; r < e; r++) for (let e = 0; e < l; e++) {
 				let i = t + r + ":" + (n + e);
 				if (o.has(i)) throw Error("Overlapping clipboard cells");
@@ -72613,7 +72627,7 @@ function HR(e, t = globalThis.DOMParser) {
 	});
 	return Object.defineProperty(l, "clipboardStyles", { value: a }), l;
 }
-function UR(e) {
+function WR(e) {
 	if (typeof e != "string" || !e.includes("	") || e.length > 24e3) return null;
 	let t = e.replace(/\r\n?/g, "\n").replace(/\n$/, "").split("\n").map((e) => e.split("	")), n = t[0]?.length;
 	return !n || t.some((e) => e.length !== n) ? null : JL({
@@ -72626,7 +72640,7 @@ function UR(e) {
 		})))
 	});
 }
-function WR(e, t) {
+function GR(e, t) {
 	if (e && /<table\b/i.test(e)) {
 		let t = new DOMParser().parseFromString(e, "text/html").querySelectorAll("table");
 		if (t.length !== 1 || t[0].querySelector("table,img,svg,object,embed,math,iframe,video,canvas")) throw Error("이 HTML 표의 중첩 객체는 안전하게 가져올 수 없습니다.");
@@ -72638,11 +72652,11 @@ function WR(e, t) {
 	let n = Array.from({ length: t.rows }, () => []);
 	for (let e of t.cells) n[e.row].push({
 		column: e.column,
-		html: `<td rowspan="${e.rowSpan ?? 1}" colspan="${e.columnSpan ?? 1}">${e.paragraphs.map((e) => "<p>" + RR(e) + "</p>").join("")}</td>`
+		html: `<td rowspan="${e.rowSpan ?? 1}" colspan="${e.columnSpan ?? 1}">${e.paragraphs.map((e) => "<p>" + zR(e) + "</p>").join("")}</td>`
 	});
 	return "<table>" + n.map((e) => "<tr>" + e.sort((e, t) => e.column - t.column).map((e) => e.html).join("") + "</tr>").join("") + "</table>";
 }
-function GR(e) {
+function KR(e) {
 	if (typeof e != "string" || e.length > 8388608) return !1;
 	let t = e.indexOf("[data-hwpjson]"), n = e.indexOf("{", t), r = e.indexOf("-->", n);
 	if (t < 0 || n < 0 || r < 0) return !1;
@@ -72652,7 +72666,7 @@ function GR(e) {
 		return !1;
 	}
 }
-function KR(e, t, n) {
+function qR(e, t, n) {
 	JL(n);
 	let r = t.table?.source, i = t.cursor;
 	if (!r || r.cellPath?.length > 1) throw Error("중첩 표의 기존 셀에 덮어쓰기는 아직 지원하지 않습니다.");
@@ -72683,7 +72697,7 @@ function KR(e, t, n) {
 		throw /mixed character formatting/i.test(e.message) ? Error("대상 셀에 여러 글자 서식이 섞여 있어 덮어쓰지 않았습니다.") : /contains an object/i.test(e.message) ? Error("대상 셀에 표나 그림이 있어 덮어쓰지 않았습니다.") : e;
 	}
 	let p = (e) => {
-		if (zR(e)?.ok !== !0) throw Error("Cell paragraph operation failed");
+		if (BR(e)?.ok !== !0) throw Error("Cell paragraph operation failed");
 	};
 	for (let t of f) {
 		let n = o.cells[t.cellIndex].paragraphs;
@@ -72695,7 +72709,7 @@ function KR(e, t, n) {
 	}
 	return KL(e, a, f, d ? [...d] : void 0);
 }
-function qR({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a, chooseTablePaste: o, enableNestedClipping: s }) {
+function JR({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a, chooseTablePaste: o, enableNestedClipping: s }) {
 	let c = !1, l = 0, u = null, d = (t, n) => {
 		let r = t.cellPath || [], i = r.length > 1 ? {
 			ci: r.at(-1).controlIndex,
@@ -72704,7 +72718,7 @@ function qR({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 			ci: t.ci,
 			owner: "[]"
 		};
-		if (zR(e.copyControl(t.sec, t.ppi, i.ci, i.owner))?.ok !== !0) throw Error("표를 복사하지 못했습니다.");
+		if (BR(e.copyControl(t.sec, t.ppi, i.ci, i.owner))?.ok !== !0) throw Error("표를 복사하지 못했습니다.");
 		let a = e.exportControlHtml(t.sec, t.ppi, i.ci, i.owner);
 		if (typeof a != "string" || !/<table\b/i.test(a)) throw Error("표의 복사 형식을 만들지 못했습니다.");
 		let o = crypto.randomUUID();
@@ -72731,7 +72745,7 @@ function qR({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 			throw Error("중첩 표의 일부 셀 복사는 아직 지원하지 않습니다.");
 		}
 		let s = uL(e, a.sec, a.ppi, a.ci);
-		return o ??= s.cells.map((e, t) => t), o.length === s.dimensions.cellCount ? d(a, i) : BR(s, o);
+		return o ??= s.cells.map((e, t) => t), o.length === s.dimensions.cellCount ? d(a, i) : VR(s, o);
 	};
 	document.addEventListener("copy", (e) => {
 		u = null;
@@ -72765,7 +72779,7 @@ function qR({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 	let m = async (e, t) => r(t, (n) => {
 		let r, i;
 		if (t.cursor?.parentParaIndex != null) {
-			r = KR(n, t, e);
+			r = qR(n, t, e);
 			let a = t.table.source;
 			i = {
 				sec: a.sec,
@@ -72798,10 +72812,10 @@ function qR({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 			return;
 		}
 		let p = f.getData("text/html"), h = f.getData("text/plain"), g, _, v = d.cursor?.parentParaIndex != null, y = p.match(/<!--pwh-rich-table:([0-9a-f-]+)-->/i)?.[1], b = v && !!y && u?.token === y && u.epoch === d.documentState.documentEpoch && e.clipboardHasControl();
-		if (!v && GR(p)) return;
-		let x = v ? jR(p) : null;
+		if (!v && KR(p)) return;
+		let x = v ? MR(p) : null;
 		try {
-			!x && !b && (g = HR(p) || UR(h));
+			!x && !b && (g = UR(p) || WR(h));
 		} catch (e) {
 			_ = e;
 		}
@@ -72844,23 +72858,23 @@ function qR({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 					E();
 					let t = (e) => String(e || "").replace(/\r\n?/g, "\n").replace(/\0+$/, "");
 					if (e && t(h) && t(e.text) === t(h)) {
-						if (!v && GR(e.html)) {
+						if (!v && KR(e.html)) {
 							let t = new DataTransfer();
 							t.setData("text/html", e.html), t.setData("text/plain", h), D(t);
 							return;
 						}
-						v && GR(e.html) && (p = e.html, x = jR(p));
+						v && KR(e.html) && (p = e.html, x = MR(p));
 					}
 				}
 				if ((x || b || g) && v) {
 					let e = await o({ htmlOnly: !x && !b });
 					if (!e) return;
 					if (e === "nested") {
-						let e = !x && !b ? WR(p, g) : null;
-						await r(d, (t) => x ? IR(t, d, x) : b ? PR(t, d) : LR(t, d, e, g)), s?.(), i("셀 안에 표를 넣었습니다. 실행 취소 한 번으로 되돌릴 수 있습니다.");
+						let e = !x && !b ? GR(p, g) : null;
+						await r(d, (t) => x ? LR(t, d, x) : b ? FR(t, d) : RR(t, d, e, g)), s?.(), i("셀 안에 표를 넣었습니다. 실행 취소 한 번으로 되돌릴 수 있습니다.");
 						return;
 					}
-					if (g ||= HR(p) || UR(h), !g) throw Error("기존 셀에 붙일 표 내용을 확인하지 못했습니다.");
+					if (g ||= UR(p) || WR(h), !g) throw Error("기존 셀에 붙일 표 내용을 확인하지 못했습니다.");
 				}
 				if (_ && !g) throw _;
 				g ? (await m(g, d), i("표·셀 붙여넣기를 완료했습니다. 실행 취소 한 번으로 되돌릴 수 있습니다.")) : (E(), D(T));
@@ -72873,7 +72887,7 @@ function qR({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 		(async () => {
 			try {
 				let n = await a(), l = e.cursor?.parentParaIndex != null;
-				if (!l && GR(n.html)) {
+				if (!l && KR(n.html)) {
 					let r = t();
 					if (JSON.stringify(r.documentState) !== JSON.stringify(e.documentState) || JSON.stringify(r.cursor) !== JSON.stringify(e.cursor)) throw Error("문서나 커서가 변경되어 붙여넣기를 취소했습니다.");
 					let i = new DataTransfer();
@@ -72892,17 +72906,17 @@ function qR({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 					}
 					return;
 				}
-				let u = l ? jR(n.html) : null, d = u ? null : HR(n.html) || UR(n.text);
+				let u = l ? MR(n.html) : null, d = u ? null : UR(n.html) || WR(n.text);
 				if (l && (u || d)) {
 					let t = await o({ htmlOnly: !u });
 					if (!t) return;
 					if (t === "nested") {
-						let t = u ? null : WR(n.html, d);
-						await r(e, (n) => u ? IR(n, e, u) : LR(n, e, t, d)), s?.(), i("셀 안에 표를 넣었습니다. 실행 취소 한 번으로 되돌릴 수 있습니다.");
+						let t = u ? null : GR(n.html, d);
+						await r(e, (n) => u ? LR(n, e, u) : RR(n, e, t, d)), s?.(), i("셀 안에 표를 넣었습니다. 실행 취소 한 번으로 되돌릴 수 있습니다.");
 						return;
 					}
 				}
-				if (d ||= HR(n.html) || UR(n.text), !d) throw Error("클립보드에서 표 구조를 찾지 못했습니다. 한글에서 표 또는 셀을 다시 복사하거나 원본 HWPX를 열어 주세요.");
+				if (d ||= UR(n.html) || WR(n.text), !d) throw Error("클립보드에서 표 구조를 찾지 못했습니다. 한글에서 표 또는 셀을 다시 복사하거나 원본 HWPX를 열어 주세요.");
 				await m(d, e), i("한글 표·셀을 가져왔습니다.");
 			} catch (e) {
 				i(e.message, !0);
@@ -72915,7 +72929,7 @@ function qR({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 }
 //#endregion
 //#region @rhwp/studio/src/pwh-table-paste-dialog.ts
-function JR(e = {}) {
+function YR(e = {}) {
 	return new Promise((t) => {
 		class n extends A {
 			choice = null;
@@ -72948,7 +72962,7 @@ function JR(e = {}) {
 }
 //#endregion
 //#region @rhwp/studio/src/selection-page-context.mjs
-function YR(e, t) {
+function XR(e, t) {
 	let n = e?.cursorRect?.pageIndex, r = t?.cursorRect?.pageIndex;
 	return Number.isInteger(n) && n >= 0 && Number.isInteger(r) && r >= 0 ? {
 		startPageHint: n,
@@ -72957,11 +72971,11 @@ function YR(e, t) {
 }
 //#endregion
 //#region @rhwp/studio/src/collaboration-selection.ts
-var XR = 6e3, ZR = 24, QR = 256, $R = 256, ez = 96;
-function tz(e, t = 0) {
-	return e == null ? null : typeof e == "string" ? e.slice(0, XR) : typeof e == "number" ? Number.isFinite(e) ? e : null : typeof e == "boolean" ? e : t > 7 || typeof e != "object" || ArrayBuffer.isView(e) ? null : Array.isArray(e) ? e.slice(0, ez).map((e) => tz(e, t + 1)) : Object.fromEntries(Object.entries(e).slice(0, 80).filter(([, e]) => typeof e != "function").map(([e, n]) => [e, tz(n, t + 1)]));
+var ZR = 6e3, QR = 24, $R = 256, ez = 256, tz = 96;
+function nz(e, t = 0) {
+	return e == null ? null : typeof e == "string" ? e.slice(0, ZR) : typeof e == "number" ? Number.isFinite(e) ? e : null : typeof e == "boolean" ? e : t > 7 || typeof e != "object" || ArrayBuffer.isView(e) ? null : Array.isArray(e) ? e.slice(0, tz).map((e) => nz(e, t + 1)) : Object.fromEntries(Object.entries(e).slice(0, 80).filter(([, e]) => typeof e != "function").map(([e, n]) => [e, nz(n, t + 1)]));
 }
-function nz(e, t, n) {
+function rz(e, t, n) {
 	let r = (e?.cellPath || []).map((e) => ({
 		controlIndex: e.controlIndex ?? e.controlIdx,
 		cellIndex: e.cellIndex ?? e.cellIdx,
@@ -72969,20 +72983,20 @@ function nz(e, t, n) {
 	}));
 	return r.length && (t !== void 0 && (r[r.length - 1].cellParaIndex = t), n !== void 0 && (r[r.length - 1].cellIndex = n)), r;
 }
-function rz(e) {
-	return nz(e).at(-1)?.cellParaIndex ?? e.cellParaIndex ?? e.paragraphIndex;
+function iz(e) {
+	return rz(e).at(-1)?.cellParaIndex ?? e.cellParaIndex ?? e.paragraphIndex;
 }
-function iz(e, t) {
+function az(e, t) {
 	if (!e || !t || e.sectionIndex !== t.sectionIndex) return !1;
 	if (e.parentParaIndex === void 0 || t.parentParaIndex === void 0) return e.parentParaIndex === void 0 && t.parentParaIndex === void 0;
 	if (e.parentParaIndex !== t.parentParaIndex) return !1;
-	let n = nz(e), r = nz(t);
+	let n = rz(e), r = rz(t);
 	return n.length || r.length ? JSON.stringify(n.map(({ controlIndex: e, cellIndex: t }) => [e, t])) === JSON.stringify(r.map(({ controlIndex: e, cellIndex: t }) => [e, t])) : e.controlIndex === t.controlIndex && e.cellIndex === t.cellIndex;
 }
-function az(e) {
+function oz(e) {
 	let t = window;
 	function n(t = {}) {
-		let n = e.getInputHandler(), r = [], i = XR, a = (e, t, n, ...i) => {
+		let n = e.getInputHandler(), r = [], i = ZR, a = (e, t, n, ...i) => {
 			if (typeof t?.[n] != "function") return r.push(`${e}: unavailable`), null;
 			try {
 				return t[n](...i);
@@ -73014,7 +73028,7 @@ function az(e) {
 		let c = a("text selection", n, "getSelection"), l = a("cell selection mode", n, "isInCellSelectionMode") === !0, u = a("table object selection", n, "isInTableObjectSelection") === !0, d = a("picture object selection", n, "isInPictureObjectSelection") === !0, f = s.parentParaIndex !== void 0, p = !l && !u && !d && a("text submode coverage", n, "canEditHyperlink") === !0, m = d ? "object" : u ? "table_object" : l ? "cell_block" : p ? f ? s.isTextBox ? "textbox_text" : "cell_text" : "body_text" : "unsupported_submode";
 		m === "unsupported_submode" && r.push("Header/footer/footnote coordinates are not exposed by this bridge.");
 		function h(t, n, r, s) {
-			let c = t.parentParaIndex !== void 0, l = nz(t, n), u = c ? l.length ? a("cell paragraph length", e.wasm, "getCellParagraphLengthByPath", t.sectionIndex, t.parentParaIndex, JSON.stringify(l)) : a("cell paragraph length", e.wasm, "getCellParagraphLength", t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, n) : a("paragraph length", e.wasm, "getParagraphLength", t.sectionIndex, n);
+			let c = t.parentParaIndex !== void 0, l = rz(t, n), u = c ? l.length ? a("cell paragraph length", e.wasm, "getCellParagraphLengthByPath", t.sectionIndex, t.parentParaIndex, JSON.stringify(l)) : a("cell paragraph length", e.wasm, "getCellParagraphLength", t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, n) : a("paragraph length", e.wasm, "getParagraphLength", t.sectionIndex, n);
 			if (!Number.isInteger(u) || u < 0) return {
 				text: null,
 				length: null,
@@ -73032,9 +73046,9 @@ function az(e) {
 			truncated: !1,
 			known: !1
 		}, _ = [];
-		if (p && c?.start && c?.end && iz(c.start, c.end)) {
-			let { start: t, end: n } = c, o = f ? rz(t) : t.paragraphIndex, s = f ? rz(n) : n.paragraphIndex, l = [], u = !1, d = !0;
-			for (let e = o; e <= Math.min(s, o + ZR - 1); e++) {
+		if (p && c?.start && c?.end && az(c.start, c.end)) {
+			let { start: t, end: n } = c, o = f ? iz(t) : t.paragraphIndex, s = f ? iz(n) : n.paragraphIndex, l = [], u = !1, d = !0;
+			for (let e = o; e <= Math.min(s, o + QR - 1); e++) {
 				let r = e === o ? t.charOffset : 0, a = e === s ? Math.max(0, n.charOffset - r) : 2 ** 53 - 1, c = h(t, e, r, a);
 				if (c.text === null ? d = !1 : l.push(c.text), u ||= c.truncated, !i && e < s) {
 					u = !0;
@@ -73044,21 +73058,21 @@ function az(e) {
 			g = {
 				text: d ? l.join("\n") : null,
 				known: d,
-				truncated: u || s - o + 1 > ZR
+				truncated: u || s - o + 1 > QR
 			};
-			let p = nz(t), m = YR(t, n), v = f ? p.length > 1 ? a("selection rectangles", e.wasm, "getSelectionRectsInCellByPath", t.sectionIndex, t.parentParaIndex, JSON.stringify(p), o, t.charOffset, s, n.charOffset, m) : a("selection rectangles", e.wasm, "getSelectionRectsInCell", t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, o, t.charOffset, s, n.charOffset, m) : a("selection rectangles", e.wasm, "getSelectionRects", t.sectionIndex, t.paragraphIndex, t.charOffset, n.paragraphIndex, n.charOffset);
-			_ = Array.isArray(v) ? v.slice(0, ez) : [], Array.isArray(v) && v.length > ez && r.push("Selection rectangle list truncated.");
+			let p = rz(t), m = XR(t, n), v = f ? p.length > 1 ? a("selection rectangles", e.wasm, "getSelectionRectsInCellByPath", t.sectionIndex, t.parentParaIndex, JSON.stringify(p), o, t.charOffset, s, n.charOffset, m) : a("selection rectangles", e.wasm, "getSelectionRectsInCell", t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, o, t.charOffset, s, n.charOffset, m) : a("selection rectangles", e.wasm, "getSelectionRects", t.sectionIndex, t.paragraphIndex, t.charOffset, n.paragraphIndex, n.charOffset);
+			_ = Array.isArray(v) ? v.slice(0, tz) : [], Array.isArray(v) && v.length > tz && r.push("Selection rectangle list truncated.");
 		} else p && !c ? g = {
 			text: "",
 			known: !0,
 			truncated: !1
-		} : c && !iz(c.start, c.end) && r.push("Selected text spans unsupported source containers.");
+		} : c && !az(c.start, c.end) && r.push("Selected text spans unsupported source containers.");
 		let v = p ? {
 			position: {
 				...s,
 				charOffset: 0
 			},
-			...h(s, f ? rz(s) : s.paragraphIndex, 0, 2 ** 53 - 1)
+			...h(s, f ? iz(s) : s.paragraphIndex, 0, 2 ** 53 - 1)
 		} : null, y = {
 			character: a("current character properties", n, "getCharProperties"),
 			paragraph: a("current paragraph properties", n, "getParaProperties")
@@ -73069,16 +73083,16 @@ function az(e) {
 			cellPath: s.cellPath
 		} : null, x = null;
 		if (b) {
-			let t = nz(b), i = t.length > 1, o = l ? a("selected cell range", n, "getSelectedCellRange") : null, s = l && a("excluded cells", n, "hasExcludedCellSelection") === !0, c = i ? a("table dimensions", e.wasm, "getTableDimensionsByPath", b.sec, b.ppi, JSON.stringify(t)) : a("table dimensions", e.wasm, "getTableDimensions", b.sec, b.ppi, b.ci), u = i ? a("cell rectangles", e.wasm, "getTableCellBboxesByPath", b.sec, b.ppi, JSON.stringify(t)) : a("cell rectangles", e.wasm, "getTableCellBboxes", b.sec, b.ppi, b.ci), d = [], f = 0;
+			let t = rz(b), i = t.length > 1, o = l ? a("selected cell range", n, "getSelectedCellRange") : null, s = l && a("excluded cells", n, "hasExcludedCellSelection") === !0, c = i ? a("table dimensions", e.wasm, "getTableDimensionsByPath", b.sec, b.ppi, JSON.stringify(t)) : a("table dimensions", e.wasm, "getTableDimensions", b.sec, b.ppi, b.ci), u = i ? a("cell rectangles", e.wasm, "getTableCellBboxesByPath", b.sec, b.ppi, JSON.stringify(t)) : a("cell rectangles", e.wasm, "getTableCellBboxes", b.sec, b.ppi, b.ci), d = [], f = 0;
 			if (s) r.push("Nonrectangular cell exclusions are not public; selectedCells is unknown.");
-			else if (o && Number.isInteger(c?.cellCount)) for (let n = 0; n < Math.min(c.cellCount, $R); n++) {
+			else if (o && Number.isInteger(c?.cellCount)) for (let n = 0; n < Math.min(c.cellCount, ez); n++) {
 				f++;
 				let r = {
 					...b,
 					cellPath: t
-				}, s = i ? a("cell information", e.wasm, "getCellInfoByPath", b.sec, b.ppi, JSON.stringify(nz(r, 0, n))) : a("cell information", e.wasm, "getCellInfo", b.sec, b.ppi, b.ci, n);
+				}, s = i ? a("cell information", e.wasm, "getCellInfoByPath", b.sec, b.ppi, JSON.stringify(rz(r, 0, n))) : a("cell information", e.wasm, "getCellInfo", b.sec, b.ppi, b.ci, n);
 				if (s && !(s.row > o.endRow || s.col > o.endCol || s.row + s.rowSpan <= o.startRow || s.col + s.colSpan <= o.startCol)) {
-					if (d.length >= QR) break;
+					if (d.length >= $R) break;
 					d.push({
 						cellIndex: n,
 						...s,
@@ -73086,7 +73100,7 @@ function az(e) {
 							sec: b.sec,
 							ppi: b.ppi,
 							ci: b.ci,
-							...t.length ? { cellPath: nz(r, 0, n) } : {}
+							...t.length ? { cellPath: rz(r, 0, n) } : {}
 						}
 					});
 				}
@@ -73099,8 +73113,8 @@ function az(e) {
 				selectedCellsComplete: !s && (!o || f >= (c?.cellCount ?? Infinity)),
 				scannedCellCount: f,
 				properties: i ? null : a("table properties", e.wasm, "getTableProperties", b.sec, b.ppi, b.ci),
-				rectangles: Array.isArray(u) ? u.slice(0, ez) : [],
-				rectanglesTruncated: Array.isArray(u) && u.length > ez
+				rectangles: Array.isArray(u) ? u.slice(0, tz) : [],
+				rectanglesTruncated: Array.isArray(u) && u.length > tz
 			};
 		}
 		let S = d ? a("selected objects", n, "getSelectedPictureRefs") : [], C = d ? a("selected object", n, "getSelectedPictureRef") : null, w = (Array.isArray(S) && S.length ? S : C ? [C] : []).slice(0, 16).map((t) => {
@@ -73139,7 +73153,7 @@ function az(e) {
 				} : null
 			};
 		}), T = e.getDocumentAgent?.(), E = t.fresh === !1 && typeof T?.getPresentationDocumentState == "function" ? "getPresentationDocumentState" : "getDocumentState";
-		return tz({
+		return nz({
 			schemaVersion: 1,
 			ready: !0,
 			kind: m,
@@ -73154,11 +73168,11 @@ function az(e) {
 			selectionRects: _,
 			coordinateSystem: "Source indices are zero-based; rectangles use unzoomed page CSS pixels.",
 			limits: {
-				maxTextCodePoints: XR,
-				maxParagraphs: ZR,
-				maxCells: QR,
-				maxScannedCells: $R,
-				maxRectangles: ez
+				maxTextCodePoints: ZR,
+				maxParagraphs: QR,
+				maxCells: $R,
+				maxScannedCells: ez,
+				maxRectangles: tz
 			},
 			unknown: [...new Set(r)].slice(0, 24)
 		});
@@ -73179,7 +73193,7 @@ function az(e) {
 		try {
 			o = (e.wasm.getPageControlLayout(n)?.controls || []).filter((e) => r >= e.x && i >= e.y && r <= e.x + e.w && i <= e.y + e.h).slice(0, 16);
 		} catch {}
-		return tz({
+		return nz({
 			schemaVersion: 1,
 			ready: !0,
 			pageIndex: n,
@@ -73199,8 +73213,8 @@ function az(e) {
 }
 //#endregion
 //#region @rhwp/studio/src/pwh-inline-adapter.ts
-function oz(e) {
-	let t = az(e), n = /* @__PURE__ */ new Map(), r = /* @__PURE__ */ new Map(), i = /* @__PURE__ */ new Map(), a = (e) => {
+function sz(e) {
+	let t = oz(e), n = /* @__PURE__ */ new Map(), r = /* @__PURE__ */ new Map(), i = /* @__PURE__ */ new Map(), a = (e) => {
 		let t = crypto.randomUUID();
 		return r.set(t, e), r.size > 24 && r.delete(r.keys().next().value), t;
 	}, o = (n = !0) => {
@@ -73239,11 +73253,11 @@ function oz(e) {
 		execute: l
 	});
 	let u = !1;
-	e.ready.then(() => qR({
+	e.ready.then(() => JR({
 		wasm: e.wasm,
 		read: () => o(),
 		getInput: () => e.getInputHandler(),
-		chooseTablePaste: JR,
+		chooseTablePaste: YR,
 		enableNestedClipping: () => {
 			V.getViewSettings().clipView && document.querySelector("[data-cmd=\"view:toggle-clip\"]")?.click();
 		},
@@ -73516,11 +73530,13 @@ function oz(e) {
 			u = !0;
 			let n = e.getInputHandler(), i = n.getCursorPosition(), a;
 			try {
-				let s = wR(e.wasm, r, t.edits, o());
+				let s = o(), c = t.type === "desktopReportFill";
+				c && eR(t.expected, s);
+				let l = c ? TR(e.wasm, t.answers, s) : wR(e.wasm, r, t.edits, s);
 				await n.executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-text-edit",
-					operation: (e) => (a = TR(e, s, ip), ER(s, i))
+					operation: (e) => (a = ER(e, l, ip), DR(l, i))
 				}, () => e.getCanvasView().refreshDocumentAgentMutation()), r.clear();
 			} finally {
 				u = !1;
@@ -73874,43 +73890,43 @@ function oz(e) {
 document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", () => n(), { once: !0 }) : n(), ht(), se();
 var J = new Js();
 Ys(J);
-var Y = new Xs(), sz = new pP(Y);
-sz.installBeforeUnload(window);
-var cz = new VP({
+var Y = new Xs(), cz = new pP(Y);
+cz.installBeforeUnload(window);
+var lz = new VP({
 	exportBytes: () => J.exportHwp(),
 	isRecoveryBlocked: () => J.requiresPasswordForSave,
-	schedule: Rz(),
-	onStatus: zz
+	schedule: zz(),
+	onStatus: Bz
 });
-cz.connect(Y), PD((e, t) => {
+lz.connect(Y), PD((e, t) => {
 	Y.emit("theme-changed", {
 		mode: t,
 		effective: e
 	}), Y.emit("command-state-changed");
 }), sO();
-var lz = Sb(document.getElementById("icon-toolbar"));
+var uz = Sb(document.getElementById("icon-toolbar"));
 Ab(document.getElementById("style-bar"));
-async function uz(e) {
-	let t = sz.isDirty();
-	return e && (J.fileName = e), sz.markClean("host-save"), await cz.discardCurrentDraft("host-save"), {
+async function dz(e) {
+	let t = cz.isDirty();
+	return e && (J.fileName = e), cz.markClean("host-save"), await lz.discardCurrentDraft("host-save"), {
 		ok: !0,
 		wasDirty: t
 	};
 }
 window.rhwpStudio = {
-	notifySaved: (e) => uz(e),
+	notifySaved: (e) => dz(e),
 	fonts: {
 		setProvider: ai,
 		getState: li
 	}
 };
-var X = null, Z = null, dz = null, fz = null, pz = null, mz = null, hz = "normal", gz = null, _z = null, vz = null, yz = !1, bz = { disableExternalWebFonts: !1 };
-async function xz() {}
-var Sz = fP("?chrome=embed"), Cz = Sz.mode;
-Sz.unsupportedReason && console.warn(`[main] 지원하지 않는 chrome 값입니다: ${Sz.requested}; full 프로파일을 사용합니다.`);
-var wz = new Gb();
-function Tz() {
-	let e = J.pageCount > 0, t = Z?.canEditCurrentFormField() ?? !1, n = hz === "form";
+var X = null, Z = null, fz = null, pz = null, mz = null, hz = null, gz = "normal", _z = null, vz = null, yz = null, bz = !1, xz = { disableExternalWebFonts: !1 };
+async function Sz() {}
+var Cz = fP("?chrome=embed"), wz = Cz.mode;
+Cz.unsupportedReason && console.warn(`[main] 지원하지 않는 chrome 값입니다: ${Cz.requested}; full 프로파일을 사용합니다.`);
+var Tz = new Gb();
+function Ez() {
+	let e = J.pageCount > 0, t = Z?.canEditCurrentFormField() ?? !1, n = gz === "form";
 	return {
 		hasDocument: e,
 		hasSelection: Z?.hasSelection() ?? !1,
@@ -73924,7 +73940,7 @@ function Tz() {
 		inPictureObjectSelection: Z?.isInPictureObjectSelection() ?? !1,
 		inField: Z?.isInField() ?? !1,
 		isEditable: !n || t,
-		editMode: hz,
+		editMode: gz,
 		isFormMode: n,
 		canEditFormField: t,
 		canUndo: Z?.canUndo() ?? !1,
@@ -73932,53 +73948,53 @@ function Tz() {
 		zoom: X?.getViewportManager().getZoom() ?? 1,
 		showControlCodes: J.getShowControlCodes(),
 		showParagraphMarks: J.getShowParagraphMarks(),
-		isDirty: sz.isDirty(),
+		isDirty: cz.isDirty(),
 		sourceFormat: e ? J.getSourceFormat() : void 0
 	};
 }
-function Ez(e) {
-	hz = e, Z?.setEditMode(e), document.documentElement.dataset.editMode = e, document.querySelectorAll("[data-cmd=\"view:form-mode\"]").forEach((t) => {
+function Dz(e) {
+	gz = e, Z?.setEditMode(e), document.documentElement.dataset.editMode = e, document.querySelectorAll("[data-cmd=\"view:form-mode\"]").forEach((t) => {
 		t.classList.toggle("active", e === "form");
-	}), Mz().textContent = g(e === "form" ? "ui.sbMessage.formMode" : "ui.sbMessage.editMode"), Y.emit("edit-mode-changed", e), Y.emit("command-state-changed");
+	}), Nz().textContent = g(e === "form" ? "ui.sbMessage.formMode" : "ui.sbMessage.editMode"), Y.emit("edit-mode-changed", e), Y.emit("command-state-changed");
 }
-var Dz = {
+var Oz = {
 	eventBus: Y,
 	wasm: J,
-	documentState: sz,
-	getContext: Tz,
+	documentState: cz,
+	getContext: Ez,
 	getInputHandler: () => Z,
 	getViewportManager: () => X?.getViewportManager() ?? null,
 	gotoPage: (e) => X?.gotoPage(e) ?? !1,
 	refreshDocumentStatus: () => {
-		Mz().textContent = g("ui.sbMessage.filePages", {
+		Nz().textContent = g("ui.sbMessage.filePages", {
 			p1: J.fileName,
 			p2: J.pageCount
 		});
 	},
-	setEditMode: Ez
-}, Q = new Sx(wz, Dz, Y), Oz = new cx({
-	registry: wz,
+	setEditMode: Dz
+}, Q = new Sx(Tz, Oz, Y), kz = new cx({
+	registry: Tz,
 	dispatcher: Q,
-	getContext: Tz,
+	getContext: Ez,
 	getMenuContainer: () => document.getElementById("menu-bar")
 });
-window.rhwpStudio.automation = Oz;
-async function kz(e) {
+window.rhwpStudio.automation = kz;
+async function Az(e) {
 	throw Error(`허용되지 않은 플러그인: ${e}`);
 }
-var Az = new vx({
+var jz = new vx({
 	wasm: J,
-	automation: Oz,
+	automation: kz,
 	eventBus: Y,
 	getInputHandler: () => Z,
-	loadDocument: (e, t) => vB(e, t ?? "document.hwp", null),
+	loadDocument: (e, t) => yB(e, t ?? "document.hwp", null),
 	createBlankDocument: () => {
-		TB();
+		EB();
 	},
-	resolve: kz
+	resolve: Az
 });
-window.rhwpStudio.plugins = Az, wz.registerAll(Cz === "embed" ? xw.filter((e) => !lP.includes(e.id) || window.__PWH_DESKTOP__ === !0 && e.id === "file:print") : xw), wz.registerAll(Cz === "embed" ? yD.filter((e) => !uP.includes(e.id)) : yD), wz.registerAll(pO), wz.registerAll(Gj), wz.registerAll(qA), wz.registerAll(hN), wz.registerAll(We), wz.registerAll(VN), wz.registerAll(QN);
-function jz() {
+window.rhwpStudio.plugins = jz, Tz.registerAll(wz === "embed" ? xw.filter((e) => !lP.includes(e.id) || window.__PWH_DESKTOP__ === !0 && e.id === "file:print") : xw), Tz.registerAll(wz === "embed" ? yD.filter((e) => !uP.includes(e.id)) : yD), Tz.registerAll(pO), Tz.registerAll(Gj), Tz.registerAll(qA), Tz.registerAll(hN), Tz.registerAll(We), Tz.registerAll(VN), Tz.registerAll(QN);
+function Mz() {
 	for (let e of [...lP, ...uP]) (window.__PWH_DESKTOP__ !== !0 || e !== "file:print") && document.querySelectorAll(`[data-cmd="${e}"]`).forEach((e) => e.remove());
 	let e = document.querySelector(".menu-item[data-menu=\"file\"] .menu-dropdown");
 	if (!e) return;
@@ -73989,11 +74005,11 @@ function jz() {
 	let t = e.lastElementChild;
 	t?.classList.contains("md-sep") && t.remove();
 }
-Cz === "embed" && jz(), Cz === "embed" && document.addEventListener("keydown", (e) => {
+wz === "embed" && Mz(), wz === "embed" && document.addEventListener("keydown", (e) => {
 	dP(e) && e.preventDefault();
 }, !0);
-var Mz = () => document.getElementById("sb-message"), Nz = () => document.getElementById("sb-page"), Pz = () => document.getElementById("sb-section"), Fz = () => document.getElementById("sb-zoom-val"), Iz = null, Lz = null;
-function Rz() {
+var Nz = () => document.getElementById("sb-message"), Pz = () => document.getElementById("sb-page"), Fz = () => document.getElementById("sb-section"), Iz = () => document.getElementById("sb-zoom-val"), Lz = null, Rz = null;
+function zz() {
 	let e = V.getAutosaveSettings();
 	return {
 		recoveryEnabled: e.recoveryEnabled,
@@ -74002,26 +74018,26 @@ function Rz() {
 		idleDelayMs: e.idleDelaySeconds * 1e3
 	};
 }
-function zz(e) {
+function Bz(e) {
 	let t = document.getElementById("sb-message");
 	if (!t) return;
-	if (Iz &&= (clearTimeout(Iz), null), e.state === "saving") {
-		Lz === null && (Lz = t.textContent ?? ""), t.textContent = "복구용 자동 저장 중...";
+	if (Lz &&= (clearTimeout(Lz), null), e.state === "saving") {
+		Rz === null && (Rz = t.textContent ?? ""), t.textContent = "복구용 자동 저장 중...";
 		return;
 	}
-	let n = Lz ?? (e.state === "blocked" ? t.textContent ?? "" : null);
-	Lz = null;
+	let n = Rz ?? (e.state === "blocked" ? t.textContent ?? "" : null);
+	Rz = null;
 	let r;
-	r = e.state === "saved" ? `복구용 자동 저장 완료 (${Bz(e.byteLength)})` : e.state === "blocked" ? "보호 문서는 복구용 자동 저장을 하지 않습니다" : "복구용 자동 저장 실패", t.textContent = r, n !== null && n !== r && (Iz = setTimeout(() => {
-		t.textContent === r && (t.textContent = n), Iz = null;
+	r = e.state === "saved" ? `복구용 자동 저장 완료 (${Vz(e.byteLength)})` : e.state === "blocked" ? "보호 문서는 복구용 자동 저장을 하지 않습니다" : "복구용 자동 저장 실패", t.textContent = r, n !== null && n !== r && (Lz = setTimeout(() => {
+		t.textContent === r && (t.textContent = n), Lz = null;
 	}, e.state === "saved" ? 1600 : 4e3));
 }
-function Bz(e) {
+function Vz(e) {
 	if (e < 1024) return `${e} B`;
 	let t = e / 1024;
 	return t < 1024 ? `${t.toFixed(1)} KiB` : `${(t / 1024).toFixed(1)} MiB`;
 }
-function Vz() {
+function Hz() {
 	return new Promise((e) => {
 		let t = !1, n = () => {
 			t || (t = !0, e());
@@ -74029,28 +74045,28 @@ function Vz() {
 		window.setTimeout(n, 50), requestAnimationFrame(() => requestAnimationFrame(n));
 	});
 }
-async function Hz(e, t) {
+async function Uz(e, t) {
 	let n = Math.max(0, Math.min(100, Math.round(e)));
-	Mz().textContent = `파일 로딩 ${n}% - ${t}`, await Vz();
+	Nz().textContent = `파일 로딩 ${n}% - ${t}`, await Hz();
 }
-function Uz(e) {
-	let t = X?.getRenderBackend() === "canvaskit" ? mz?.getCanvasKitRenderer() ?? null : null;
+function Wz(e) {
+	let t = X?.getRenderBackend() === "canvaskit" ? hz?.getCanvasKitRenderer() ?? null : null;
 	if (!t || !e?.length) return;
 	let n = [...e];
 	(async () => {
-		await Vr(), await t.prepareLocalFonts(n), t === mz?.getCanvasKitRenderer() && X?.getRenderBackend() === "canvaskit" && Y.emit("document-view-changed");
+		await Vr(), await t.prepareLocalFonts(n), t === hz?.getCanvasKitRenderer() && X?.getRenderBackend() === "canvaskit" && Y.emit("document-view-changed");
 	})().catch((e) => {
 		console.warn("[CanvasKit] 로컬 Typeface 준비 실패, 기본 fallback으로 계속 표시합니다:", e);
 	});
 }
-async function Wz() {
-	let e = Mz();
+async function Gz() {
+	let e = Nz();
 	try {
-		bz = await Wb(), bz.disableExternalWebFonts && console.info("[main] 외부 웹폰트 사용 안 함 옵션이 켜져 있습니다."), e.textContent = bz.disableExternalWebFonts ? "로컬 폰트 준비 중..." : "웹폰트 로딩 중...", await Dn([], void 0, bz), e.textContent = "WASM 로딩 중...", await J.initialize();
+		xz = await Wb(), xz.disableExternalWebFonts && console.info("[main] 외부 웹폰트 사용 안 함 옵션이 켜져 있습니다."), e.textContent = xz.disableExternalWebFonts ? "로컬 폰트 준비 중..." : "웹폰트 로딩 중...", await Dn([], void 0, xz), e.textContent = "WASM 로딩 중...", await J.initialize();
 		let t = Ul(window.location.search), n = Wl(window.location.search);
 		n.mode;
 		let r = Gl(window.location.search), i = Kl(window.location.search);
-		gz = {
+		_z = {
 			backend: t.backend === "auto" ? {
 				...t,
 				backend: "canvas2d"
@@ -74061,11 +74077,11 @@ async function Wz() {
 			canvaskitMode: n,
 			canvaskitSurface: r,
 			renderProfile: i
-		}, t.unsupportedReason && console.warn(`[main] 지원하지 않는 renderer 값입니다: ${t.requested}; Canvas2D를 사용합니다.`), n.unsupportedReason && console.warn(`[main] 지원하지 않는 CanvasKit mode입니다: ${n.requested}; default를 사용합니다.`), _z = t.unsupportedReason ?? null, mz = new FF(t, n, r, i, async (n, r) => (e.textContent = "CanvasKit 로딩 중...", { create() {
+		}, t.unsupportedReason && console.warn(`[main] 지원하지 않는 renderer 값입니다: ${t.requested}; Canvas2D를 사용합니다.`), n.unsupportedReason && console.warn(`[main] 지원하지 않는 CanvasKit mode입니다: ${n.requested}; default를 사용합니다.`), vz = t.unsupportedReason ?? null, hz = new FF(t, n, r, i, async (n, r) => (e.textContent = "CanvasKit 로딩 중...", { create() {
 			throw Error("This client uses the Canvas2D editor backend");
 		} }.create(n, r, { requirePreparedFontFamilies: t.backend === "auto" })), {
 			transformCanvasKitPreflight(e) {
-				return gs(e, mn(e.requiredFontFamilies, bz).unavailableFonts.map((e) => `fontUnavailable:${e}`));
+				return gs(e, mn(e.requiredFontFamilies, xz).unavailableFonts.map((e) => `fontUnavailable:${e}`));
 			},
 			async prepareCanvasKitDocument(e, t) {
 				if (si()) {
@@ -74076,7 +74092,7 @@ async function Wz() {
 					await e.prepareHostFonts([...r.values()]);
 				}
 				if (!t) return;
-				let n = mn(t.requiredFontFamilies, bz);
+				let n = mn(t.requiredFontFamilies, xz);
 				if (n.unavailableFonts.length > 0) throw Error(`CanvasKit font family가 준비되지 않았습니다: ${n.unavailableFonts.join(", ")}`);
 				try {
 					await Vr(), await e.prepareLocalFonts(t.requiredFontFamilies);
@@ -74087,15 +74103,15 @@ async function Wz() {
 			}
 		}), e.textContent = "HWP 파일을 선택해주세요.";
 		let a = document.getElementById("scroll-container");
-		X = new Ad(a, J, Y, mz), await xz(), J.onExternalImagesInjected = () => {
+		X = new Ad(a, J, Y, hz), await Sz(), J.onExternalImagesInjected = () => {
 			X?.loadDocument();
-		}, pz = new EF(document.getElementById("h-ruler"), document.getElementById("v-ruler"), a, Y, J, X.getVirtualScroll(), X.getViewportManager()), Z = new ib(a, J, Y, X.getVirtualScroll(), X.getViewportManager()), Z.setEditMode(hz), dz?.dispose(), dz = new nL({
+		}, mz = new EF(document.getElementById("h-ruler"), document.getElementById("v-ruler"), a, Y, J, X.getVirtualScroll(), X.getViewportManager()), Z = new ib(a, J, Y, X.getVirtualScroll(), X.getViewportManager()), Z.setEditMode(gz), fz?.dispose(), fz = new nL({
 			wasm: J,
 			input: Z,
 			eventBus: Y,
-			isDirty: () => sz.isDirty(),
+			isDirty: () => cz.isDirty(),
 			render: () => X.refreshDocumentAgentMutation()
-		}), pz.onCommitPin = (e) => {
+		}), mz.onCommitPin = (e) => {
 			if (Z) {
 				if (e.kind === "paraProps") {
 					Z.applyParaPropsAtCursor(e.props);
@@ -74110,19 +74126,19 @@ async function Wz() {
 		}, J.onBeforeExport = () => {
 			let e = Z?.getCursorPosition();
 			e && J.setCaretPosition(e.sectionIndex, e.parentParaIndex ?? e.paragraphIndex, e.parentParaIndex === void 0 ? e.charOffset : 0);
-		}, fz = new sb(document.getElementById("style-bar"), J, Y, Q), fz.setEnabled(!1), Z.setDispatcher(Q), Z.setContextMenu(new nP(Q, wz)), Z.setCommandPalette(new rP(wz, Q)), Z.setCellSelectionRenderer(new ZP(a, X.getVirtualScroll(), (e) => Y.emit("cell-selection-phase-changed", e))), Z.setTableObjectRenderer(new rF(a, X.getVirtualScroll())), Z.setTableResizeRenderer(new cF(a, X.getVirtualScroll())), Z.setPictureObjectRenderer(new rF(a, X.getVirtualScroll(), !0));
+		}, pz = new sb(document.getElementById("style-bar"), J, Y, Q), pz.setEnabled(!1), Z.setDispatcher(Q), Z.setContextMenu(new nP(Q, Tz)), Z.setCommandPalette(new rP(Tz, Q)), Z.setCellSelectionRenderer(new ZP(a, X.getVirtualScroll(), (e) => Y.emit("cell-selection-phase-changed", e))), Z.setTableObjectRenderer(new rF(a, X.getVirtualScroll())), Z.setTableResizeRenderer(new cF(a, X.getVirtualScroll())), Z.setPictureObjectRenderer(new rF(a, X.getVirtualScroll(), !0));
 		let o = Ze({
 			menu: document.getElementById("menu-bar"),
 			toolbar: document.getElementById("icon-toolbar"),
-			registry: wz,
+			registry: Tz,
 			dispatcher: Q,
 			eventBus: Y,
-			onChange: () => lz?.resetToStart()
+			onChange: () => uz?.resetToStart()
 		});
-		new Mb(document.getElementById("menu-bar"), Y, Q, wz, {
+		new Mb(document.getElementById("menu-bar"), Y, Q, Tz, {
 			onTabSelect: (e) => o.select(e),
 			onMenuOpen: (e, t) => {
-				Qe(t), e === "file" && xB();
+				Qe(t), e === "file" && SB();
 			}
 		});
 		let s = () => {
@@ -74192,46 +74208,46 @@ async function Wz() {
 				e.target.tagName !== "INPUT" && e.target.tagName !== "SELECT" && e.preventDefault();
 			});
 		}
-		Yz(), Xz(), eB(), Gz(), Jz(), (async () => {
-			await OB(), Cz !== "embed" && await CB(), await EB();
-		})(), Cz !== "embed" && tP(window, {
+		Xz(), Zz(), tB(), Kz(), Yz(), (async () => {
+			await kB(), wz !== "embed" && await wB(), await DB();
+		})(), wz !== "embed" && tP(window, {
 			openDocumentBytes(e) {
 				Y.emit("open-document-bytes", e);
 			},
 			notifyUnsupportedFile(e) {
-				jB(/* @__PURE__ */ Error(`지원하지 않는 파일 형식입니다: ${e}. HWP/HWPX/HML 파일만 지원합니다.`));
+				MB(/* @__PURE__ */ Error(`지원하지 않는 파일 형식입니다: ${e}. HWP/HWPX/HML 파일만 지원합니다.`));
 			},
 			notifyError(e) {
-				hB(e);
+				gB(e);
 			},
 			notifyMultipleFiles(e) {
 				console.warn(`[pwa-file-handling] 여러 파일(${e}개)이 전달되어 첫 번째 파일만 엽니다.`);
 			}
-		}), yz = !0;
+		}), bz = !0;
 	} catch (t) {
-		vz = t instanceof Error ? t.message : String(t), e.textContent = `WASM 초기화 실패: ${t}`, console.error("[main] WASM 초기화 실패:", t);
+		yz = t instanceof Error ? t.message : String(t), e.textContent = `WASM 초기화 실패: ${t}`, console.error("[main] WASM 초기화 실패:", t);
 	}
 }
-function Gz() {
+function Kz() {
 	document.addEventListener(ce, () => {
 		Z?.isActive() && Z.focus();
 	});
 }
-var Kz = /* @__PURE__ */ new Set([
+var qz = /* @__PURE__ */ new Set([
 	"PageUp",
 	"PageDown",
 	"Home",
 	"End"
-]), qz = /* @__PURE__ */ new Set([
+]), Jz = /* @__PURE__ */ new Set([
 	"view:zoom-in",
 	"view:zoom-out",
 	"view:zoom-100",
 	"view:toolbox-basic"
 ]);
-function Jz() {
+function Yz() {
 	document.addEventListener("keydown", (e) => {
 		if (Cx(e.target)) return;
-		if (Kz.has(e.key) && !e.altKey) {
+		if (qz.has(e.key) && !e.altKey) {
 			if (Z?.isActive()) {
 				Z.handleDocumentNavigationKey(e);
 				return;
@@ -74242,7 +74258,7 @@ function Jz() {
 			}
 		}
 		let t = N_(e, M_);
-		if (t && qz.has(t)) {
+		if (t && Jz.has(t)) {
 			e.preventDefault(), Q.dispatch(t);
 			return;
 		}
@@ -74269,7 +74285,7 @@ function Jz() {
 		}
 	}, !1);
 }
-function Yz() {
+function Xz() {
 	let e = document.getElementById("file-input");
 	e.addEventListener("change", async (t) => {
 		let n = t.target, r = n.dataset.skipUnsavedGuard === "true";
@@ -74280,7 +74296,7 @@ function Yz() {
 				alert("HWP/HWPX/HML 파일만 지원합니다."), e.value = "";
 				return;
 			}
-			await gB(i, { skipUnsavedGuard: r }), e.value = "";
+			await _B(i, { skipUnsavedGuard: r }), e.value = "";
 		}
 	}), document.addEventListener("dragover", (e) => e.preventDefault()), document.addEventListener("drop", (e) => e.preventDefault());
 	let t = document.getElementById("scroll-container");
@@ -74300,7 +74316,7 @@ function Yz() {
 			".bmp",
 			".webp"
 		].some((e) => r.endsWith(e)), a = mC(r);
-		if (!(Cz === "embed" && a)) {
+		if (!(wz === "embed" && a)) {
 			if (!i && !a) {
 				alert("HWP/HWPX/HML 파일 또는 이미지 파일만 지원합니다.");
 				return;
@@ -74325,11 +74341,11 @@ function Yz() {
 				}
 				return;
 			}
-			await gB(n);
+			await _B(n);
 		}
 	});
 }
-function Xz() {
+function Zz() {
 	if (!X) return;
 	let e = X.getViewportManager(), t = document.getElementById("sb-zoom-in"), n = document.getElementById("sb-zoom-out"), r = document.getElementById("sb-zoom-range"), i = D_();
 	t.title = NF("zoomIn", "Ctrl++", i), n.title = NF("zoomOut", "Ctrl+-", i), t.addEventListener("click", () => {
@@ -74373,28 +74389,28 @@ function Xz() {
 		Q.dispatch("view:zoom-dialog");
 	});
 }
-var Zz = 1, Qz = [], $z = null;
-function eB() {
-	Nz().addEventListener("click", () => {
+var Qz = 1, $z = [], eB = null;
+function tB() {
+	Pz().addEventListener("click", () => {
 		Q.dispatch("edit:goto");
 	}), Y.on("current-page-changed", (e, t) => {
 		let n = e, r = null;
 		if (J.pageCount > 0) try {
 			r = J.getPageInfo(n);
 		} catch {}
-		Nz().textContent = UF({
+		Pz().textContent = UF({
 			pageIndex: n,
 			totalPages: t,
 			documentPageNumber: r?.pageNumber
-		}), r && (Pz().textContent = g("ui.sbSection.text", {
+		}), r && (Fz().textContent = g("ui.sbSection.text", {
 			p1: r.sectionIndex + 1,
-			p2: Zz
+			p2: Qz
 		}));
 	}), Y.on("zoom-fit-mode-changed", (e) => {
 		V.setZoomFitMode(Eu(e));
 	}), Y.on("zoom-level-display", (e) => {
 		let t = Math.round(e * 100);
-		Fz().textContent = `${t}%`;
+		Iz().textContent = `${t}%`;
 		let n = document.getElementById("sb-zoom-range");
 		n && (n.value = String(jF(t)), n.setAttribute("aria-valuetext", `${t}%`));
 	}), Y.on("insert-mode-changed", (e) => {
@@ -74405,11 +74421,11 @@ function eB() {
 		let r = n === null ? "" : QP(n);
 		t.textContent !== r && (t.textContent = r);
 	}), Y.on("document-mutated", (e) => {
-		J.noteCanvasMetricMutation(e === "input-handler-paragraph-geometry"), sz.markDirty(typeof e == "string" ? e : "document-mutated");
+		J.noteCanvasMetricMutation(e === "input-handler-paragraph-geometry"), cz.markDirty(typeof e == "string" ? e : "document-mutated");
 	}), Y.on("document-changed", (e) => {
-		sz.markDirty(typeof e == "string" ? e : "document-changed");
+		cz.markDirty(typeof e == "string" ? e : "document-changed");
 	}), Y.on("renderer-selection-changed", (e) => {
-		_z = e.fallbackReason;
+		vz = e.fallbackReason;
 	}), oi(() => {
 		X && J.pageCount !== 0 && (J.invalidateCanvasMetricFonts(), X.refreshFontResources().catch((e) => {
 			console.warn("[HostFonts] View refresh failed:", e);
@@ -74417,9 +74433,9 @@ function eB() {
 	}), Y.on("local-fonts-changed", () => {
 		if (!X || J.pageCount === 0) return;
 		let e = $r(), t = `${e.detectedAt ?? "none"}:${e.source ?? "none"}:${e.count}`;
-		if (t !== $z) {
-			if ($z = t, J.invalidateCanvasMetricFonts(), X.getRenderBackend() === "canvaskit") {
-				Uz(Qz);
+		if (t !== eB) {
+			if (eB = t, J.invalidateCanvasMetricFonts(), X.getRenderBackend() === "canvaskit") {
+				Wz($z);
 				return;
 			}
 			Y.emit("document-view-changed");
@@ -74429,7 +74445,7 @@ function eB() {
 	}), Y.on("document-dirty-changed", () => {
 		Y.emit("command-state-changed");
 	}), Y.on("autosave-settings-changed", () => {
-		cz.updateSchedule(Rz());
+		lz.updateSchedule(zz());
 	});
 	let e = document.getElementById("sb-field");
 	Y.on("field-info-changed", (t) => {
@@ -74451,7 +74467,7 @@ function eB() {
 	let d = document.getElementById("hf-edit-status-live");
 	Y.on("headerFooterModeChanged", (e) => {
 		let t = qu(e), n = t !== "none";
-		if (r = n, lz?.resetToStart(), o && (o.hidden = !n), s) {
+		if (r = n, uz?.resetToStart(), o && (o.hidden = !n), s) {
 			let e = t === "none" ? "" : t.mode === "header" ? g("ui.tbHfLabel.header") : g("ui.tbHfLabel.footer"), n = t === "none" ? "" : Wu(t.applyTo);
 			s.textContent = t === "none" ? "" : g("ui.tbHfLabel.editing", {
 				p1: e,
@@ -74467,12 +74483,12 @@ function eB() {
 		}), a(), u && (n ? u.classList.add("hf-editing") : u.classList.remove("hf-editing"));
 	}), Y.on("footnoteModeChanged", (e) => {
 		let t = e;
-		n = t, lz?.resetToStart(), c && (c.hidden = !t), l.forEach((e) => {
+		n = t, uz?.resetToStart(), c && (c.hidden = !t), l.forEach((e) => {
 			e.hidden = t;
 		}), a();
 	});
 }
-function tB(e) {
+function nB(e) {
 	if (e === "none") return;
 	let t = X?.getViewportManager(), n = document.getElementById("scroll-container");
 	if (t && n && J.pageCount !== 0) try {
@@ -74488,24 +74504,24 @@ function tB(e) {
 		console.warn("[main] 저장된 맞춤 배율 복원 실패:", e);
 	}
 }
-function nB() {
+function rB() {
 	let e = V.getViewSettings();
 	J.setShowControlCodes(e.showControlCodes), J.setShowParagraphMarks(e.showParagraphMarks), iO(e.showControlCodes, e.showParagraphMarks);
 	let t = !e.clipView;
 	J.setClipEnabled(t), oO(t);
 }
-async function rB(e, t, n = {}) {
-	let r = Mz();
+async function iB(e, t, n = {}) {
+	let r = Nz();
 	try {
-		Fa(e.fontSubstitutions), Qz = [...e.fontsUsed ?? []], $z = null, console.log("[initDoc] 1. 폰트 로딩 시작"), await Hz(55, "폰트 준비 중..."), e.fontsUsed?.length && await Dn(e.fontsUsed, (e, t) => {
+		Fa(e.fontSubstitutions), $z = [...e.fontsUsed ?? []], eB = null, console.log("[initDoc] 1. 폰트 로딩 시작"), await Uz(55, "폰트 준비 중..."), e.fontsUsed?.length && await Dn(e.fontsUsed, (e, t) => {
 			let n = t > 0 ? 55 + Math.round(e / t * 20) : 65;
 			r.textContent = `파일 로딩 ${n}% - 폰트 로딩 중... (${e}/${t})`;
-		}, bz), console.log("[initDoc] 2. 폰트 로딩 완료"), await Vr(), await Hz(75, "문서 상태 적용 중..."), Zz = e.sectionCount ?? 1, Pz().textContent = g("ui.sbSection.text", {
+		}, xz), console.log("[initDoc] 2. 폰트 로딩 완료"), await Vr(), await Uz(75, "문서 상태 적용 중..."), Qz = e.sectionCount ?? 1, Fz().textContent = g("ui.sbSection.text", {
 			p1: 1,
-			p2: Zz
-		}), nB(), console.log("[initDoc] 3. inputHandler deactivate"), Z?.deactivate(), console.log("[initDoc] 4. canvasView loadDocument"), await Hz(82, "페이지 렌더 준비 중...");
+			p2: Qz
+		}), rB(), console.log("[initDoc] 3. inputHandler deactivate"), Z?.deactivate(), console.log("[initDoc] 4. canvasView loadDocument"), await Uz(82, "페이지 렌더 준비 중...");
 		let i = V.getViewSettings().zoomFitMode;
-		await X?.loadDocument(), tB(i), Uz(e.fontsUsed), console.log("[initDoc] 5. toolbar setEnabled"), await Hz(90, "도구 모음 준비 중..."), fz?.setEnabled(!0), console.log("[initDoc] 6. toolbar initFontDropdown + initStyleDropdown"), fz?.initFontDropdown(e.fontsUsed), fz?.initStyleDropdown(), console.log("[initDoc] 7. 사전 검증 및 로컬 글꼴 확인"), await Hz(94, "문서 검증 및 글꼴 확인 중...");
+		await X?.loadDocument(), nB(i), Wz(e.fontsUsed), console.log("[initDoc] 5. toolbar setEnabled"), await Uz(90, "도구 모음 준비 중..."), pz?.setEnabled(!0), console.log("[initDoc] 6. toolbar initFontDropdown + initStyleDropdown"), pz?.initFontDropdown(e.fontsUsed), pz?.initStyleDropdown(), console.log("[initDoc] 7. 사전 검증 및 로컬 글꼴 확인"), await Uz(94, "문서 검증 및 글꼴 확인 중...");
 		try {
 			if (J.getSourceFormat() === "hwpx") {
 				let e = J.getValidationWarnings();
@@ -74517,13 +74533,13 @@ async function rB(e, t, n = {}) {
 		} catch (e) {
 			console.warn("[validation] 감지 실패 (치명적이지 않음):", e);
 		}
-		n.suppressDialogs || await iB(e, t), console.log("[initDoc] 8. inputHandler activateWithCaretPosition"), await Hz(96, "편집 상태 초기화 중..."), Z?.activateWithCaretPosition(), r.textContent = t, console.log("[initDoc] 9. 완료"), sz.markClean("document-initialized");
+		n.suppressDialogs || await aB(e, t), console.log("[initDoc] 8. inputHandler activateWithCaretPosition"), await Uz(96, "편집 상태 초기화 중..."), Z?.activateWithCaretPosition(), r.textContent = t, console.log("[initDoc] 9. 완료"), cz.markClean("document-initialized");
 	} catch (e) {
 		if (console.error("[initDoc] 오류:", e), n.suppressDialogs) throw e;
 		window.innerWidth < 768 && alert(`초기화 오류: ${e}`);
 	}
 }
-async function iB(e, t) {
+async function aB(e, t) {
 	if (e.fontsUsed?.length) try {
 		$r().loaded || await Vr();
 		let n = _P(e.fontsUsed);
@@ -74533,100 +74549,100 @@ async function iB(e, t) {
 		console.warn("[local-fonts] 저장된 감지 결과 로드 실패 (치명적이지 않음):", e);
 	}
 }
-var aB = class extends Error {
+var oB = class extends Error {
 	constructor() {
 		super("문서 열기가 취소되었습니다."), this.name = "DocumentOpenCancelledError";
 	}
-}, oB = "비밀번호가 필요한 암호 문서", sB = "비밀번호가 일치하지 않거나 암호화 데이터가 손상되었습니다";
-function cB(e) {
-	return e instanceof aB;
-}
+}, sB = "비밀번호가 필요한 암호 문서", cB = "비밀번호가 일치하지 않거나 암호화 데이터가 손상되었습니다";
 function lB(e) {
-	return String(e).includes(oB);
+	return e instanceof oB;
 }
 function uB(e) {
 	return String(e).includes(sB);
 }
 function dB(e) {
+	return String(e).includes(cB);
+}
+function fB(e) {
 	let t = String(e);
 	return t.includes("지원하지 않는 암호화 방식") ? /* @__PURE__ */ Error("지원하지 않는 암호화 방식의 문서입니다. 지원되는 HWP3/HWP5 암호 문서만 열 수 있습니다.") : t.includes("DRM") ? /* @__PURE__ */ Error("DRM으로 보호된 문서는 지원하지 않습니다.") : /* @__PURE__ */ Error("암호화된 문서를 열 수 없습니다. 문서가 손상되었는지 확인하세요.");
 }
-async function fB(e, t) {
+async function pB(e, t) {
 	let n;
 	for (;;) {
 		let r = await kS(t, n);
-		if (r === null) throw new aB();
+		if (r === null) throw new oB();
 		try {
 			J.loadDocumentWithPassword(e, r, t);
 			return;
 		} catch (e) {
-			if (uB(e)) {
+			if (dB(e)) {
 				n = "암호가 일치하지 않거나 문서가 손상되었습니다. 다시 입력하세요.";
 				continue;
 			}
-			throw dB(e);
+			throw fB(e);
 		} finally {
 			r = "";
 		}
 	}
 }
-async function pB(e, t) {
+async function mB(e, t) {
 	try {
 		return J.loadDocument(e, t);
 	} catch (n) {
-		if (!lB(n)) throw n;
-		return await fB(e, t), J.getDocumentInfo();
+		if (!uB(n)) throw n;
+		return await pB(e, t), J.getDocumentInfo();
 	}
 }
-function mB() {
+function hB() {
 	X && J.pageCount !== 0 && X.loadDocument().catch((e) => {
 		console.warn("[main] 열기 실패 후 이전 문서 뷰 복구 실패:", e);
 	});
 }
-function hB(e) {
-	if (cB(e)) {
-		Mz().textContent = "문서 열기를 취소했습니다.", mB();
+function gB(e) {
+	if (lB(e)) {
+		Nz().textContent = "문서 열기를 취소했습니다.", hB();
 		return;
 	}
-	jB(e);
+	MB(e);
 }
-async function gB(e, t = {}) {
+async function _B(e, t = {}) {
 	try {
-		return await DB(t.skipUnsavedGuard) ? await BF(document.documentElement, async () => {
+		return await OB(t.skipUnsavedGuard) ? await BF(document.documentElement, async () => {
 			let n = performance.now();
-			await Hz(0, "파일 읽는 중...");
+			await Uz(0, "파일 읽는 중...");
 			let r = new Uint8Array(await e.arrayBuffer());
-			return await Hz(15, "파일 읽기 완료"), await vB(r, e.name, t.fileHandle ?? null, n, { dataReadProgressShown: !0 }), !0;
+			return await Uz(15, "파일 읽기 완료"), await yB(r, e.name, t.fileHandle ?? null, n, { dataReadProgressShown: !0 }), !0;
 		}) : !1;
 	} catch (e) {
-		return hB(e), !1;
+		return gB(e), !1;
 	}
 }
-function _B() {
+function vB() {
 	X?.prepareDocumentLoad();
 }
-async function vB(e, t, n, r = performance.now(), i = {}) {
+async function yB(e, t, n, r = performance.now(), i = {}) {
 	await BF(document.documentElement, async () => {
-		X?.showBlankPage(), i.dataReadProgressShown || await Hz(0, "문서 데이터 준비 중..."), await Hz(25, "문서 파싱 및 쪽 계산 중...");
-		let a = await pB(e, t);
-		_B(), Az.notifyDocumentSwap(), Y.emit("document-swapped"), await Hz(45, "자동 저장 준비 중..."), xS(n), J.currentFileHandle = n, i.skipRecent || (bB = !1, RC({
+		X?.showBlankPage(), i.dataReadProgressShown || await Uz(0, "문서 데이터 준비 중..."), await Uz(25, "문서 파싱 및 쪽 계산 중...");
+		let a = await mB(e, t);
+		vB(), jz.notifyDocumentSwap(), Y.emit("document-swapped"), await Uz(45, "자동 저장 준비 중..."), xS(n), J.currentFileHandle = n, i.skipRecent || (xB = !1, RC({
 			fileName: J.fileName,
 			sourceFormat: J.getSourceFormat(),
 			handle: n
-		}).catch((e) => console.warn("[recent] 최근 문서 기록 실패:", e))), await cz.beginDocument({
+		}).catch((e) => console.warn("[recent] 최근 문서 기록 실패:", e))), await lz.beginDocument({
 			fileName: J.fileName,
 			sourceFormat: J.getSourceFormat()
-		}, { discardPreviousDraft: !0 }), await Hz(50, "문서 초기화 중...");
+		}, { discardPreviousDraft: !0 }), await Uz(50, "문서 초기화 중...");
 		let o = performance.now() - r;
-		await rB(a, g("ui.sbMessage.filePagesTimed", {
+		await iB(a, g("ui.sbMessage.filePagesTimed", {
 			p1: t,
 			p2: a.pageCount,
 			p3: o.toFixed(1)
 		}), { suppressDialogs: i.suppressDialogs });
 	});
 }
-var yB = 8, bB = !1;
-async function xB() {
+var bB = 8, xB = !1;
+async function SB() {
 	let e = document.getElementById("recent-docs-panel");
 	if (!e) return;
 	let t;
@@ -74655,7 +74671,7 @@ async function xB() {
 		disabled: !0
 	}));
 	else {
-		let e = bB ? t : t.slice(0, yB);
+		let e = xB ? t : t.slice(0, bB);
 		for (let t of e) r.append(n({
 			label: t.fileName,
 			cmd: "file:open-recent",
@@ -74663,10 +74679,10 @@ async function xB() {
 			right: t.sourceFormat.toUpperCase(),
 			title: t.fileName
 		}));
-		!bB && t.length > yB && r.append(n({
-			label: `최근 문서 더보기 (${t.length - yB}개)`,
+		!xB && t.length > bB && r.append(n({
+			label: `최근 문서 더보기 (${t.length - bB}개)`,
 			onClick: () => {
-				bB = !0, xB();
+				xB = !0, SB();
 			}
 		}));
 		let i = document.createElement("div");
@@ -74677,13 +74693,13 @@ async function xB() {
 	}
 	e.replaceChildren(r), e.closest(".md-sub")?.classList.toggle("disabled", t.length === 0);
 }
-function SB() {
+function CB() {
 	return new URLSearchParams(window.location.search).has("url");
 }
-async function CB() {
-	if (!SB()) try {
+async function wB() {
+	if (!CB()) try {
 		let e = (await FP()).filter((e) => e.data.byteLength > 0);
-		if (e.length === 0 || J.pageCount > 0 || sz.isDirty()) return;
+		if (e.length === 0 || J.pageCount > 0 || cz.isDirty()) return;
 		let t = await XP(e);
 		if (t.action === "later") return;
 		if (t.action === "delete-all") {
@@ -74696,45 +74712,45 @@ async function CB() {
 		let n = e.find((e) => e.id === t.draftId);
 		if (!n) return;
 		try {
-			await wB(n);
+			await TB(n);
 		} catch (e) {
-			hB(e);
+			gB(e);
 		}
 	} catch (e) {
 		console.warn("[autosave] 복구 후보 확인 실패:", e);
 	}
 }
-async function wB(e) {
+async function TB(e) {
 	let t = GP(e.fileName);
-	await vB(new Uint8Array(e.data), t, null, performance.now(), { skipRecent: !0 }), await IP(e.id), sz.markDirty("autosave-recovered"), j({
+	await yB(new Uint8Array(e.data), t, null, performance.now(), { skipRecent: !0 }), await IP(e.id), cz.markDirty("autosave-recovered"), j({
 		message: `"${t}" 복구본을 열었습니다.\n원본 파일은 자동으로 덮어쓰지 않습니다.`,
 		durationMs: 5e3
 	});
 }
-async function TB() {
-	let e = Mz();
+async function EB() {
+	let e = Nz();
 	try {
 		await BF(document.documentElement, async () => {
 			e.textContent = "새 문서 생성 중...";
 			let t = J.createNewDocument();
-			_B(), Az.notifyDocumentSwap(), await cz.beginDocument({
+			vB(), jz.notifyDocumentSwap(), await lz.beginDocument({
 				fileName: J.fileName,
 				sourceFormat: J.getSourceFormat()
-			}, { discardPreviousDraft: !0 }), await rB(t, g("ui.sbMessage.newDocPages", { p1: t.pageCount }));
+			}, { discardPreviousDraft: !0 }), await iB(t, g("ui.sbMessage.newDocPages", { p1: t.pageCount }));
 		});
 	} catch (t) {
 		e.textContent = `새 문서 생성 실패: ${t}`, console.error("[main] 새 문서 생성 실패:", t);
 	}
 }
-async function EB() {
-	Cz !== "embed" && (J.pageCount > 0 || sz.isDirty() || await TB());
+async function DB() {
+	wz !== "embed" && (J.pageCount > 0 || cz.isDirty() || await EB());
 }
-async function DB(e) {
-	return e === !0 || await uw(Dz, { allowLocalSave: Cz !== "embed" });
+async function OB(e) {
+	return e === !0 || await uw(Oz, { allowLocalSave: wz !== "embed" });
 }
 Y.on("create-new-document", (e) => {
 	(async () => {
-		await DB(e?.skipUnsavedGuard) && await TB();
+		await OB(e?.skipUnsavedGuard) && await EB();
 	})();
 }), Y.on("open-document-bytes", async (e) => {
 	let t = e, n = (e, n) => {
@@ -74745,23 +74761,23 @@ Y.on("create-new-document", (e) => {
 		});
 	};
 	try {
-		if (!await DB(t.skipUnsavedGuard)) {
+		if (!await OB(t.skipUnsavedGuard)) {
 			n(!1, "문서 열기가 취소되었습니다.");
 			return;
 		}
-		await vB(t.bytes, t.fileName, t.fileHandle), n(!0);
+		await yB(t.bytes, t.fileName, t.fileHandle), n(!0);
 	} catch (e) {
-		hB(e), n(!1, cB(e) ? "문서 열기가 취소되었습니다." : e instanceof Error ? e.message : String(e));
+		gB(e), n(!1, lB(e) ? "문서 열기가 취소되었습니다." : e instanceof Error ? e.message : String(e));
 	}
 }), Y.on("pwh-picture-properties-request", () => Q.dispatch("insert:picture-props")), Y.on("pwh-table-properties-request", () => Q.dispatch("table:cell-props")), Y.on("equation-edit-request", () => {
 	Q.dispatch("insert:equation-edit");
 }), Y.on("chart-data-edit-request", () => {
 	Q.dispatch("insert:chart-data-edit");
 });
-async function OB() {
+async function kB() {
 	let e = new URLSearchParams(window.location.search), t = e.get("url");
 	if (!t) return;
-	let n = e.get("filename") || t.split("/").pop()?.split("?")[0] || "document.hwp", r = Mz();
+	let n = e.get("filename") || t.split("/").pop()?.split("?")[0] || "document.hwp", r = Nz();
 	try {
 		r.textContent = "파일 로딩 중...", console.log(`[loadFromUrlParam] ${t}`);
 		let e;
@@ -74774,26 +74790,26 @@ async function OB() {
 			});
 			if (e.error) throw Error(e.error);
 			let r = new Uint8Array(e.data);
-			oc(r), await vB(r, n, null);
+			oc(r), await yB(r, n, null);
 			return;
 		}
 		else e = await fetch(t);
 		if (!e.ok) throw Error(`HTTP ${e.status}: ${e.statusText}`);
 		let i = e.headers.get("content-type"), a = await e.arrayBuffer(), o = new Uint8Array(a);
-		oc(o, i), await vB(o, n, null);
+		oc(o, i), await yB(o, n, null);
 	} catch (e) {
-		if (cB(e)) {
-			hB(e);
+		if (lB(e)) {
+			gB(e);
 			return;
 		}
-		if (t.startsWith("file:") && typeof chrome < "u" && await kB() === !1) {
-			AB();
+		if (t.startsWith("file:") && typeof chrome < "u" && await AB() === !1) {
+			jB();
 			return;
 		}
-		hB(e);
+		gB(e);
 	}
 }
-async function kB() {
+async function AB() {
 	let e = typeof chrome < "u" ? chrome.extension : void 0;
 	if (!e?.isAllowedFileSchemeAccess) return null;
 	try {
@@ -74802,8 +74818,8 @@ async function kB() {
 		return null;
 	}
 }
-function AB() {
-	let e = Mz();
+function jB() {
+	let e = Nz();
 	e && (e.textContent = "파일 로드 실패: 파일 URL 액세스 권한이 필요합니다."), console.error("[main] file:// 로드 실패 — 파일 URL 액세스 미허용 (#1131)"), j({
 		message: "로컬 파일을 열려면 확장 프로그램의 \"파일 URL에 대한 액세스 허용\"을 켜야 합니다.\n설정에서 권한을 허용한 뒤 파일을 다시 열어 주세요.",
 		durationMs: 0,
@@ -74816,15 +74832,15 @@ function AB() {
 		}
 	});
 }
-function jB(e) {
-	let t = `파일 로드 실패: ${String(e).replace(/^Error:\s*/, "")}`, n = Mz();
-	n && (n.textContent = t), console.error("[main] 파일 로드 실패:", e), mB(), j({
+function MB(e) {
+	let t = `파일 로드 실패: ${String(e).replace(/^Error:\s*/, "")}`, n = Nz();
+	n && (n.textContent = t), console.error("[main] 파일 로드 실패:", e), hB(), j({
 		message: t,
 		durationMs: 0,
 		confirmLabel: "확인"
 	});
 }
-var $ = Wz();
+var $ = Gz();
 $.then(() => {}), SI({
 	hostWindow: window,
 	parentWindow: window.parent,
@@ -74834,8 +74850,8 @@ $.then(() => {}), SI({
 			return await $, !0;
 		},
 		async loadFile(e, t, n, r) {
-			if (await $, !await DB(n)) throw Error("문서 열기가 취소되었습니다.");
-			return await vB(e, t, null, void 0, { suppressDialogs: r }), { pageCount: J.pageCount };
+			if (await $, !await OB(n)) throw Error("문서 열기가 취소되었습니다.");
+			return await yB(e, t, null, void 0, { suppressDialogs: r }), { pageCount: J.pageCount };
 		},
 		async pageCount() {
 			return await $, J.pageCount;
@@ -74845,11 +74861,11 @@ $.then(() => {}), SI({
 			let t = X?.getRendererSessionDiagnostics() ?? null;
 			return {
 				schemaVersion: 1,
-				request: gz,
-				initialized: yz,
-				initializationError: vz,
+				request: _z,
+				initialized: bz,
+				initializationError: yz,
 				effectiveBackend: t?.effectiveBackend ?? null,
-				backendFallbackReason: t?.fallbackReason ?? _z,
+				backendFallbackReason: t?.fallbackReason ?? vz,
 				selection: t,
 				page: {
 					index: e,
@@ -74879,54 +74895,54 @@ $.then(() => {}), SI({
 			return await $, JSON.parse(J.exportHwpVerify());
 		},
 		async notifySaved(e) {
-			return await $, uz(e);
+			return await $, dz(e);
 		},
 		async getDocumentState() {
-			if (await $, !dz) throw Error("Document agent is not initialized");
-			return dz.getDocumentState();
+			if (await $, !fz) throw Error("Document agent is not initialized");
+			return fz.getDocumentState();
 		},
 		async getSelectionContext() {
-			if (await $, !dz) throw Error("Document agent is not initialized");
-			return dz.getSelectionContext();
+			if (await $, !fz) throw Error("Document agent is not initialized");
+			return fz.getSelectionContext();
 		},
 		async applyTextCommand(e) {
-			if (await $, !dz) throw Error("Document agent is not initialized");
-			return dz.applyTextCommand(e);
+			if (await $, !fz) throw Error("Document agent is not initialized");
+			return fz.applyTextCommand(e);
 		},
 		async revertTextCommand(e) {
-			if (await $, !dz) throw Error("Document agent is not initialized");
-			return dz.revertTextCommand(e);
+			if (await $, !fz) throw Error("Document agent is not initialized");
+			return fz.revertTextCommand(e);
 		},
 		async focusTarget(e) {
-			if (await $, !dz) throw Error("Document agent is not initialized");
-			return dz.focusTarget(e);
+			if (await $, !fz) throw Error("Document agent is not initialized");
+			return fz.focusTarget(e);
 		},
 		async automationList() {
-			return await $, Oz.listCommands();
+			return await $, kz.listCommands();
 		},
 		async automationMenuModel() {
-			return await $, Oz.getMenuModel();
+			return await $, kz.getMenuModel();
 		},
 		async automationIsEnabled(e) {
-			return await $, Oz.isEnabled(e);
+			return await $, kz.isEnabled(e);
 		},
 		async automationExecute(e, t, n) {
-			return await $, Oz.execute(e, t, n);
+			return await $, kz.execute(e, t, n);
 		},
 		async automationContext() {
-			return await $, Oz.getContext();
+			return await $, kz.getContext();
 		},
 		async pluginList() {
-			return await $, Az.list();
+			return await $, jz.list();
 		},
 		async pluginLoad(e) {
-			return await $, Az.load(e);
+			return await $, jz.load(e);
 		},
 		async pluginUnload(e) {
-			return await $, await Az.unload(e), { ok: !0 };
+			return await $, await jz.unload(e), { ok: !0 };
 		},
 		async pluginInvoke(e, t, n) {
-			return await $, Az.invoke(e, t, n);
+			return await $, jz.invoke(e, t, n);
 		},
 		async chromeGet() {
 			return dx();
@@ -74935,16 +74951,16 @@ $.then(() => {}), SI({
 			return fx(e);
 		}
 	}
-}), oz({
-	registry: wz,
+}), sz({
+	registry: Tz,
 	ready: $,
 	getInputHandler: () => Z,
 	wasm: J,
-	getDocumentAgent: () => dz,
+	getDocumentAgent: () => fz,
 	getCanvasView: () => X,
-	load: (e, t) => vB(e, t, null, void 0, { suppressDialogs: !0 }),
-	saved: uz,
-	recovered: () => sz.markDirty("pwh-recovered"),
+	load: (e, t) => yB(e, t, null, void 0, { suppressDialogs: !0 }),
+	saved: dz,
+	recovered: () => cz.markDirty("pwh-recovered"),
 	legacyDrafts: FP
 });
 for (let e of [

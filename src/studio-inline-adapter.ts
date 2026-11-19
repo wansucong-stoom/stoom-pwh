@@ -5,7 +5,7 @@ import {applyLayout} from './pwh-page-layout';
 import {blankBody,composeBlankBody} from './pwh-blank-compose';
 import {applyCellEdits,prepareCellEdits,insertStructuredTable,addTableTitle} from './pwh-table-content.mjs';
 import {sameRequestContext} from './pwh-request-state.mjs';
-import {createTextSearchPlan,prepareTextEdits,applyTextEdits,textEditCursor,prepareTextStyles,applyTextStyles,applyParagraphStyles,createStyleScanPlan,styleScanSources,textRevision,assertTextRevision} from './pwh-text-edit.mjs';
+import {createTextSearchPlan,prepareTextEdits,applyTextEdits,textEditCursor,prepareTextStyles,applyTextStyles,applyParagraphStyles,prepareReportFill,createStyleScanPlan,styleScanSources,textRevision,assertTextRevision} from './pwh-text-edit.mjs';
 import {installTableClipboard} from './pwh-table-clipboard.mjs';
 import {chooseTablePaste} from './pwh-table-paste-dialog';
 import {userSettings} from './core/user-settings';
@@ -130,7 +130,10 @@ export function installInlineEditor(d:any) {
    if(applying)throw Error('이전 수정 적용 중입니다.');applying=true;
    const input=d.getInputHandler(),cursor=input.getCursorPosition();let changes:any;
    try{
-    const prepared=prepareTextEdits(d.wasm,textPlans,command.edits,read());
+    const current=read();
+    const report=command.type==='desktopReportFill';
+    if(report)assertTextRevision(command.expected,current);
+    const prepared=report?prepareReportFill(d.wasm,command.answers,current):prepareTextEdits(d.wasm,textPlans,command.edits,current);
     await input.executeDocumentAgentOperation({kind:'snapshot',operationType:'pwh-text-edit',operation:(wasm:any)=>{changes=applyTextEdits(wasm,prepared,replaceTextWithMutationEffects);return textEditCursor(prepared,cursor);}},()=>d.getCanvasView().refreshDocumentAgentMutation());
     textPlans.clear();
    }finally{applying=false;}

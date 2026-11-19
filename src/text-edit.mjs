@@ -266,6 +266,17 @@ export function prepareTextEdits(w,plans,edits,context){
  for(const group of groups.values()){group.parts.sort((a,b)=>b.start-a.start);for(const p of group.parts)group.text.splice(p.start,p.length,...chars(p.replacement));group.expectedText=group.text.join('');}
  return {groups:[...groups.values()],count:parts.length};
 }
+export function prepareReportFill(w,answers,context){
+ const plans=new Map(),edits=[];
+ for(const {marker,text} of answers){
+  const plan=createTextSearchPlan(w,context,marker,{limit:100});
+  if(!plan.refs.length||plan.result.nextCursor!==null)throw Error('보고서 양식의 작성 위치가 변경되었거나 결과가 너무 많습니다. 문서를 다시 확인하세요.');
+  plans.set(marker,plan);
+  for(const ref of plan.refs)edits.push({searchId:marker,matchId:ref.id,replacement:text});
+ }
+ return prepareTextEdits(w,plans,edits,context);
+}
+
 export function applyTextEdits(w,prepared,replace){
  for(const group of prepared.groups){
   for(const p of group.parts){
