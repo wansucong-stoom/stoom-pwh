@@ -100,6 +100,7 @@ export async function createAppServer({initialBytes,initialPath,imported=false,r
   inputSchema:{type:'object',additionalProperties:false,required:['sessionId','phase'],properties:{
    sessionId:{type:'string'},
    phase:{type:'string',enum:['draft','complete'],description:'검토할 중간본은 draft, 요청을 충족한 결과는 complete를 사용합니다.'},
+   useMode:{type:'string',enum:['exact','adapt'],description:'이번 사용자 요청에 선택과 다른 활용 수준이 명시된 경우에만 지정합니다.'},
    answers:{type:'array',maxItems:64,items:{type:'object',additionalProperties:false,required:['marker','text'],properties:{marker:{type:'string',maxLength:80},text:{type:'string',maxLength:12000}}}},
    form:{type:'object',additionalProperties:false,required:['title','sections'],description:'새 빈 양식의 제목, 안내문과 입력 항목입니다. answers 및 sections와 별도로 사용합니다.',
     properties:{title:{type:'string'},introduction:{type:'string'},marginsMm:draftMargins,
@@ -109,8 +110,11 @@ export async function createAppServer({initialBytes,initialPath,imported=false,r
         properties:{label:{type:'string'},lines:{type:'integer',minimum:1},wide:{type:'boolean',description:'긴 답이 필요한 항목을 한 줄 전체에 배치합니다.'}}}}}}}}},
    applyStyle:{type:'object',additionalProperties:false,description:'편집 중인 문서의 문장과 표 구조를 보존하고 첨부 양식의 대표 서식을 적용한 사본을 만듭니다.',properties:{pageSetup:{type:'boolean',description:'참고 양식의 용지 여백도 적용하도록 요청한 경우 true입니다.'}}},
    draft:{type:'object',additionalProperties:false,required:['title','paragraphs'],description:'대표 서식으로 새 제목·소제목·본문을 조판합니다. 채울 칸을 찾지 못했거나 새 본문이 필요한 경우 사용하세요.',
-    properties:{title:{type:'string'},marginsMm:draftMargins,paragraphs:{type:'array',minItems:1,items:{type:'object',additionalProperties:false,required:['role','text'],
-     properties:{role:{type:'string',enum:['heading','body']},text:{type:'string'}}}}}},
+    properties:{title:{type:'string'},marginsMm:draftMargins,paragraphs:{type:'array',minItems:1,items:{oneOf:[
+     {type:'object',additionalProperties:false,required:['role','text'],properties:{role:{type:'string',enum:['heading','body','note','caption']},text:{type:'string'},level:{type:'integer',minimum:1,maximum:3}}},
+     {type:'object',additionalProperties:false,required:['role','headers','rows'],properties:{role:{type:'string',enum:['table']},
+      headers:{type:'array',minItems:1,items:{type:'string'}},rows:{type:'array',minItems:1,items:{type:'array',items:{type:'string'}}}}},
+    ]}}}},
    sections:{type:'array',maxItems:8,description:'형식 준용에서 추가할 소제목과 본문',items:{type:'object',additionalProperties:false,required:['title','text'],properties:{title:{type:'string',maxLength:48},text:{type:'string',maxLength:12000}}}}
   }},annotations:{readOnlyHint:false,destructiveHint:false,openWorldHint:false}};
  const reportLibrary=createReportTemplateLibrary(appData);
@@ -294,25 +298,30 @@ export async function createAppServer({initialBytes,initialPath,imported=false,r
       assertTemplateSource(args.sessionId);
       if(!['draft','complete'].includes(args.phase))throw Error('초안인지 완성본인지 지정하세요.');
       if(Number(!!args.form)+Number(!!args.draft)+Number(!!args.applyStyle)+Number(!!(args.answers?.length||args.sections?.length))!==1)throw Error('한 번에 수행할 양식 적용, 새 문서 작성 또는 항목 입력 방식을 지정하세요.');
-      const active=reportTurn,attempt=++active.attempts;
-      const generated=args.form?await createPreparedForm(active.prepared,args.form)
-       :args.applyStyle?await applyPreparedReportStyle(active.prepared,active.snapshot.bytes,args.applyStyle)
-       :args.draft?await createPreparedDraft(active.prepared,args.draft)
-       :await fillPreparedTemplate(active.prepared,args.answers,args.sections);
+      const active=reportTurn,selected=active.prepared.template.mode,mode=args.useMode??selected;
+      if(!['exact','adapt'].includes(mode))throw Error('양식 활용 수준을 확인하세요.');
+      if(mode==='exact'&&(args.form||args.draft||args.applyStyle))
+       throw Error('양식 그대로는 형식·목차·디자인을 유지하며 확인된 입력 항목을 채웁니다.');
+      const attempt=++active.attempts;
+      const prepared=mode===selected?active.prepared:await reportLibrary.prepare(active.prepared.template.id,mode);
+      const generated=args.form?await createPreparedForm(prepared,args.form)
+       :args.applyStyle?await applyPreparedReportStyle(prepared,active.snapshot.bytes,args.applyStyle)
+       :args.draft?await createPreparedDraft(prepared,args.draft)
+       :await fillPreparedTemplate(prepared,args.answers,args.sections);
       assertTemplateSource(args.sessionId);
       if(active!==reportTurn)throw Error('이 요청의 상태가 변경되었습니다.');
       if(attempt>active.confirmedAttempt){
        active.confirmedAttempt=attempt;
-       const fingerprint=createHash('sha256').update(JSON.stringify([args.form,args.draft,args.applyStyle,args.answers,args.sections])).digest('hex');
+       const fingerprint=createHash('sha256').update(JSON.stringify([mode,args.form,args.draft,args.applyStyle,args.answers,args.sections])).digest('hex');
        const changed=!active.verifiedPlans.has(fingerprint);
        if(changed){active.verifiedPlans.add(fingerprint);active.draftRevision++;}
        if(changed||args.phase==='complete')active.generated=generated;
        active.complete=args.phase==='complete';
       }
-      const result={prepared:true,phase:active.complete?'complete':'draft',draftRevision:active.draftRevision,...active.generated.changes};
+      const result={prepared:true,phase:active.complete?'complete':'draft',draftRevision:active.draftRevision,mode:active.generated.template.mode,...active.generated.changes};
       return json(res,{jsonrpc:'2.0',id:message.id,result:{content:[{type:'text',text:JSON.stringify(result)}],structuredContent:result}});
      }catch(error){
-      const text=error.message+' 작성 가능한 항목을 조정하거나 새 양식 또는 본문으로 만들어 요청을 계속하세요.';
+      const text=error.message+' 선택한 활용 기준에 맞는 작성 방법으로 이어서 작업하세요.';
       return json(res,{jsonrpc:'2.0',id:message.id,result:{isError:true,content:[{type:'text',text}]}});
      }
     }
@@ -442,10 +451,16 @@ export async function createAppServer({initialBytes,initialPath,imported=false,r
      let text=result?.text?.trim();
      if(!reportTurn.generated){
       if(!text)throw connectionError||Error('AI가 초안에 담을 내용을 반환하지 않았습니다.');
-      reportTurn.generated=await createPreparedDraft(reportTurn.prepared,{
-       title:reportTurn.prepared.template.name+' 작업 초안',paragraphs:[{role:'body',text}],
-      },'response_draft');
-      text='AI 응답을 편집 가능한 작업 초안에 담았습니다. 새 탭에서 내용을 다듬거나 이어서 요청할 수 있습니다.';
+      const prepared=reportTurn.prepared;
+      if(prepared.template.mode==='exact'){
+       reportTurn.generated={bytes:prepared.originalBytes,template:prepared.template};
+       text='양식의 입력 위치를 확인할 수 없어 원본 형식·목차·디자인을 담은 작업본을 열었습니다. 작성 내용은 아래에서 확인할 수 있습니다.\n\n'+text;
+      }else{
+       reportTurn.generated=await createPreparedDraft(prepared,{
+        title:'작업 초안',paragraphs:[{role:'body',text}],
+       },'response_draft');
+       text='AI 응답을 편집 가능한 작업 초안에 담았습니다. 새 탭에서 내용을 다듬거나 이어서 요청할 수 있습니다.';
+      }
      }else if(connectionError||!text||!reportTurn.complete){
       const notice='마지막으로 조판이 확인된 초안을 열었습니다. 새 탭에서 이어서 수정할 수 있습니다.';
       text=connectionError||!text?notice:notice+'\n\n'+text;

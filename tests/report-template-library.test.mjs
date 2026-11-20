@@ -13,14 +13,14 @@ test('template writing instructions give each current user request priority over
  assert.ok(order[0]>=0&&order[0]<order[1]&&order[1]<order[2]);
  assert.match(prompt,/숫자가 작은 높은 순위의 지침을 적용/);
  assert.match(prompt,/text를 빈 문자열로 전달/);
- assert.match(prompt,/소제목 추가는 형식 준용에서 지원/);
+ assert.match(prompt,/원본의 형식·목차·디자인과 제목·항목의 순서를 유지/);
  assert.match(prompt,/형식 준용 기준/);
  assert.match(prompt,/실제 본문 폭에 맞추고/);
  assert.match(prompt,/새 신청서·평가표 등 빈 양식을 만드는 요청에는 pwh_desktop_fill_report의 form/);
  const noRules=buildReportPrompt({...base,reportTemplate:{mode:'adapt',rules:'',fields:[]}});
  assert.doesNotMatch(noRules,/2순위 사용자가/);
  assert.match(noRules,/3순위 공통 작성 기준/);
- assert.match(noRules,/sections에 소제목/);
+ assert.match(noRules,/새 요청의 목적과 자료에서 목차·소제목·항목 순서를 정합니다/);
 });
 
 test('registered templates keep their names and rules and verify separately typeset outputs',{skip:!process.env.PWH_RUNTIME_ROOT,timeout:60000},async t=>{
@@ -63,19 +63,50 @@ test('registered templates keep their names and rules and verify separately type
  try{
   assert.equal(search(report,'교육 프로그램')[0].cellContext.cellIdx,1);
   assert.equal(search(report,'원래 내용').length,1);
+  assert.equal(search(report,'추진 개요').length,1);
   assert.equal(search(report,'확인 필요').length,1);
   assert.equal(JSON.parse(report.getPageDef(0)).marginTop,7200);
  }finally{report.free();}
  const adapt=await lib.prepare(record.id,'adapt');
+ assert.ok(draft.template.outline.some(item=>item.text==='추진 개요'));
+ assert.equal(adapt.template.outline,undefined);
+ assert.deepEqual(adapt.template.fields,[]);
  const expanded=await fillPreparedTemplate(adapt,[{marker:'{{보고서 제목}}',text:'재구성한 문서'}],[{title:'추가 계획',text:'다음 달 준비'}]);
  const rebuilt=new HwpDocument(expanded.bytes);
  try{
   assert.equal(JSON.parse(rebuilt.getCharPropertiesAt(0,0,0)).fontSize,2300);
   assert.equal(JSON.parse(rebuilt.getCharPropertiesAt(0,0,0)).textColor.toLowerCase(),'#125377');
   assert.equal(search(rebuilt,'옛 보고서 예시 문장').length,0);
+  assert.equal(search(rebuilt,'추진 개요').length,0);
+  assert.equal(search(rebuilt,'사업명').length,0);
   assert.equal(search(rebuilt,'추가 계획').length,1);
   assert.equal(search(rebuilt,'다음 달 준비').length,1);
  }finally{rebuilt.free();}
+ const detailed=await createPreparedDraft(adapt,{title:'학생 지원 실행계획',paragraphs:[
+  {role:'heading',level:1,text:'지원 운영'},
+  {role:'heading',level:2,text:'모집 절차'},
+  {role:'body',text:'학기별 신청을 받습니다.'},
+  {role:'caption',text:'접수 계획'},
+  {role:'table',headers:['항목','일정','담당'],rows:Array.from({length:68},(_,index)=>['업무 '+(index+1),'확인 필요','학생지원팀'])},
+  {role:'note',text:'확정 일정은 공고로 안내합니다.'},
+ ]});
+ const designed=new HwpDocument(detailed.bytes);
+ try{
+  const size=text=>JSON.parse(designed.getCharPropertiesAt(0,search(designed,text)[0].para,0)).fontSize;
+  assert.equal(size('학생 지원 실행계획'),2300);
+  assert.equal(size('지원 운영'),1500);
+  assert.ok(size('모집 절차')<size('지원 운영'));
+  assert.ok(size('확정 일정은 공고로 안내합니다.')<size('학기별 신청을 받습니다.'));
+  assert.equal(search(designed,'업무 68').length,1);
+  const tables=JSON.parse(designed.getControls()).filter(control=>control.ctrlId==='tbl');
+  assert.ok(tables.length>1);
+  for(const {para,controlIndex} of tables){
+   assert.equal(JSON.parse(designed.getTableDimensions(0,para,controlIndex)).colCount,3);
+   assert.equal(JSON.parse(designed.getCellOwnProperties(0,para,controlIndex,0)).isHeader,true);
+   assert.equal(designed.getTextInCellByPath(0,para,JSON.stringify([{controlIndex,cellIndex:0,cellParaIndex:0}]),0,2),'항목');
+  }
+  assert.deepEqual(inspectBodyFlow(designed).overflows,[]);
+ }finally{designed.free();}
  const blankFormSource=path.join(dir,'빈 입력 표시가 없는 양식.hwpx'),reference=HwpDocument.createEmpty();
  try{
   reference.createBlankDocument();

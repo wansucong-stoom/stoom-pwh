@@ -53,14 +53,18 @@ try{
    assert.match(JSON.stringify(read.result),final?/학생 장학금 신청서/:/교육 과정/);
    if(!reportRecovery)return {text:'신청 서식의 구성을 확인했습니다.'};
    const sections=[{heading:'신청 정보',fields:[{label:'이름'},{label:'학번'},{label:'신청 사유',lines:7}]}];
-   const submit=async(title,fields,phase='draft')=>tool('pwh_desktop_fill_report',{sessionId,phase,form:{title,sections:fields}});
+   const submit=async(title,fields,phase='draft')=>tool('pwh_desktop_fill_report',{sessionId,phase,useMode:'adapt',form:{title,sections:fields}});
    if(reportRecovery==='missing'){
-    const first=await submit('장학금 신청서 초안',[{fields:[{label:'이름'}]}]);
+    const form={title:'장학금 신청서 초안',sections:[{fields:[{label:'이름'}]}]};
+    const kept=await tool('pwh_desktop_fill_report',{sessionId,phase:'draft',form});
+    assert.equal(kept.result?.isError,true);
+    assert.match(kept.result.content[0].text,/형식·목차·디자인을 유지/);
+    const first=await submit(form.title,form.sections);
     assert.equal(first.result?.structuredContent?.draftRevision,1,JSON.stringify(first));
     return {text:'항목을 더 확인합니다.'};
    }
    assert.equal(reportRecovery,'partial');
-   const revised=final?await tool('pwh_desktop_fill_report',{sessionId,phase:'complete',applyStyle:{pageSetup:true}})
+   const revised=final?await tool('pwh_desktop_fill_report',{sessionId,phase:'complete',useMode:'adapt',applyStyle:{pageSetup:true}})
     :await submit('학생 장학금 신청서',sections);
    assert.equal(revised.result?.structuredContent?.draftRevision,2,JSON.stringify(revised));
    if(final){
@@ -68,7 +72,7 @@ try{
     assert.equal(revised.result.structuredContent.kind,'applied_style');
     return {text:'참고 양식의 서식을 적용했습니다.'};
    }
-   const rejected=await tool('pwh_desktop_fill_report',{sessionId,phase:'draft',form:{title:'잘못된 조판',sections:[]}});
+   const rejected=await tool('pwh_desktop_fill_report',{sessionId,phase:'draft',useMode:'adapt',form:{title:'잘못된 조판',sections:[]}});
    assert.equal(rejected.result?.isError,true);
    throw Error('Synthetic provider closed after verifying the draft');
   }};

@@ -180,8 +180,8 @@
     {
       "path": "standalone-pwh/codex-session.mjs",
       "source": "standalone-pwh/codex-session.mjs",
-      "size": 18756,
-      "sha256": "c814aa9cf96c5c8601124f2e7281ae79c86936e2a9562b88d7fc0fcaa05b123a"
+      "size": 19687,
+      "sha256": "0a20416e4f94a4dfaff70583a70332fe34aef230b6b1b16241b3f77fa44caf38"
     },
     {
       "path": "standalone-pwh/convert-hwp.check.mjs",
@@ -294,8 +294,8 @@
     {
       "path": "standalone-pwh/host.mjs",
       "source": "standalone-pwh/host.mjs",
-      "size": 63572,
-      "sha256": "246b7143dc19f9872e68d473dabc634a6ed744a6334bc0afb187bc7dd8239654"
+      "size": 64911,
+      "sha256": "3f87b96f222960f8b6596cc9aec414a584af316c944a7b94c36984aee176ecb0"
     },
     {
       "path": "standalone-pwh/image-convert.ps1",
@@ -444,8 +444,8 @@
     {
       "path": "standalone-pwh/report-templates.mjs",
       "source": "standalone-pwh/report-templates.mjs",
-      "size": 41360,
-      "sha256": "c8a148f8253db0e43b04a3d61db6f94bc2b665b81979a293d6860fefb9efeb4d"
+      "size": 43353,
+      "sha256": "26f0460d555c55fc4a72d00641bcb7addd7382876db4091ba305808bbd3d650f"
     },
     {
       "path": "standalone-pwh/recovery-smoke.check.mjs",
@@ -618,8 +618,8 @@
     {
       "path": "standalone-pwh/workspace.html",
       "source": "standalone-pwh/workspace.html",
-      "size": 6248,
-      "sha256": "ee566ba6025ebf7780507584d569c9182e8bcc2b3ca260b6ef6b20c491bf2abb"
+      "size": 6299,
+      "sha256": "0537f91b9419223b3a130a2304d1ca8c12d37ea28081039a7b24a2c89daf10ae"
     },
     {
       "path": "standalone-pwh/workspace.js",

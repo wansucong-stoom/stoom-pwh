@@ -12,7 +12,7 @@ const idPattern=/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const escapeHtml=value=>value.replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',[String.fromCharCode(39)]:'&#39;'}[char]));
 const parse=value=>typeof value==='string'?JSON.parse(value):value;
-const analysisVersion=3;
+const analysisVersion=4;
 const borderSides=['borderLeft','borderRight','borderTop','borderBottom'];
 const checked=value=>{const result=parse(value);if(result?.ok===false||result?.error)throw Error(result.error||'보고서 양식을 준비하지 못했습니다.');};
 let loadedCore;
@@ -67,9 +67,19 @@ function readReportStructure(doc,body,tables,tableLabel){
  const title=candidates.find(({source,format})=>source.section===0&&(source.paragraph===0||/제목|^title$/i.test(format.named||''))&&format.characters.fontSize>=base)
   ||candidates.find(({source,format})=>source.section===0&&format.characters.fontSize>=base+150);
  const headings=candidates.filter(item=>item!==title).slice(0,32);
- return {pages,tables:[...tables.values()].slice(0,48),headings:headings.map(({text,source})=>({text,source})),
+ const sizes=[...new Set(headings.map(item=>item.format.characters.fontSize))].sort((left,right)=>right-left);
+ const headingsByLevel={};
+ const outline=headings.map(({text,source,format})=>{
+  const named=/(?:heading|제목|개요)\s*([1-9])/i.exec(format.named||'');
+  const level=Math.min(3,format.paragraph.headType==='Outline'?1+(format.paragraph.paraLevel||0)
+   :named?Number(named[1]):1+sizes.indexOf(format.characters.fontSize));
+  headingsByLevel[level]??=format;
+  return {text,source,level};
+ });
+ const note=body.find(item=>/캡션|주석|각주|caption|note/i.test(item.format.named||''));
+ return {pages,tables:[...tables.values()].slice(0,48),headings:outline,
   title:title?{text:title.text,source:title.source}:null,
-  styles:{title:title?.format||headings[0]?.format,heading:headings[0]?.format||title?.format,body:bodyFormat},formTable:tableLabel||null};
+  styles:{title:title?.format,heading:headingsByLevel[1],headingsByLevel,body:bodyFormat,note:note?.format},formTable:tableLabel||null};
 }
 function boundedFields(fields){
  return fields.slice(0,64).map(({name,marker,source})=>({name,marker,section:source?.section,paragraph:source?.paragraph,cell:source?.cellPath?.at(-1)?.cellIndex}));
@@ -185,32 +195,6 @@ function createStyledDraft(HwpDocument,structure,compose){
   return compose(doc,structure?.styles||{});
  }finally{doc.free();}
 }
-function adaptedDraft(HwpDocument,analysis,additionalHeadings=[]){
- const {structure}=analysis;
- return createStyledDraft(HwpDocument,structure,(doc,styles)=>{
-  const overviewFields=analysis.fields.filter(field=>field.source?.cellPath&&field.name.length<=48&&!/[{}]/.test(field.name)).slice(0,4);
-  const overviewNames=new Set(overviewFields.map(field=>field.name));
-  const headings=[...new Set((structure?.headings.length?structure.headings.map(item=>item.text):analysis.fields.map(field=>field.name))
-   .map(name=>label(name,48)).filter(name=>name&&name!=='보고서 제목'&&!overviewNames.has(name)&&!/[{}]/.test(name)))].slice(0,16);
-  if(!headings.length)headings.push('개요','주요 내용','향후 계획');
-  for(const heading of additionalHeadings)headings.push(heading);
-  const titleMarker='{{보고서 제목}}';
-  const overview=overviewFields.length?'<table>'+overviewFields.map(field=>{
-   const name=escapeHtml(field.name);return '<tr><td><strong>'+name+'</strong></td><td>{{'+name+'}}</td></tr>';
-  }).join('')+'</table>':'';
-  const html='<p>'+titleMarker+'</p>'+overview+headings.map(text=>{
-   const name=escapeHtml(text);return '<p>'+name+'</p><p>{{'+name+'}}</p>';
-  }).join('');
-  checked(doc.pasteHtml(0,0,0,html));
-  for(let paragraph=0;paragraph<doc.getParagraphCount(0);paragraph++){
-   const source={section:0,paragraph},text=paragraphText(doc,source);
-   if(text)applyFormatting(doc,source,text===titleMarker?styles.title:text.startsWith('{{')?styles.body:styles.heading);
-  }
-  const fields=analyzeReportTemplate(doc).fields,byName=new Map(overviewFields.map(field=>[field.name,field.format]));
-  for(const field of fields)if(field.source.cellPath)applyFormatting(doc,field.source,byName.get(field.name));
-  return {bytes:Buffer.from(doc.exportHwpx()),fields};
- });
-}
 async function readRegular(file){
  const stat=await fs.lstat(file);
  if(!stat.isFile()||stat.isSymbolicLink()||stat.size<8||stat.size>limit)throw Error('256MiB 이하의 일반 HWP·HWPX 양식을 선택하세요.');
@@ -278,24 +262,25 @@ export function createReportTemplateLibrary(dataRoot){
   async prepare(id,mode='exact'){
    if(!['exact','adapt'].includes(mode))throw Error('양식 활용 수준을 선택하세요.');
    const template=await read(id),{HwpDocument}=await loadCore();
-   let bytes=await readRegular(template.source),analysis=template.analysis;
+   const originalBytes=await readRegular(template.source);
+   let bytes=originalBytes,analysis=template.analysis;
    if(sha(bytes)!==template.sourceSha256)throw Error('등록된 원본 양식이 변경되었습니다. 다시 등록하세요.');
    if(analysis.version!==analysisVersion){
     const doc=new HwpDocument(bytes);
     try{analysis=analyzeReportTemplate(doc);}finally{doc.free();}
    }
-   let fields=analysis.fields;
-   if(mode==='exact'&&fields.some(field=>field.source&&!field.explicit)){
+   const fields=mode==='exact'?analysis.fields:[];
+   if(fields.some(field=>field.source&&!field.explicit)){
     const doc=new HwpDocument(bytes);
     try{addBlankMarkers(doc,fields);bytes=Buffer.from(doc.exportHwpx());}finally{doc.free();}
    }
-   if(mode==='adapt')({bytes,fields}=adaptedDraft(HwpDocument,analysis));
    const paper=analysis.structure?.pages[0]?.paper;
    const mm=value=>Math.round(value*25.4/72)/100;
    const page=paper?{widthMm:mm(paper.width),heightMm:mm(paper.height),marginsMm:{top:mm(paper.marginTop),bottom:mm(paper.marginBottom),left:mm(paper.marginLeft),right:mm(paper.marginRight)}}:null;
    const {styles,formTable,tables}=analysis.structure||{};
    const reference={name:template.name,page,roles:styles,formTable,tables};
-   return {bytes,analysis,template:{...overview({...template,analysis}),reference,mode,rules:template.rules||'',headings:analysis.structure?.headings.map(item=>item.text)||[],fields:boundedFields(fields)}};
+   return {bytes,originalBytes,analysis,template:{...overview({...template,analysis}),reference,mode,rules:template.rules||'',
+    ...(mode==='exact'?{outline:analysis.structure?.headings.map(({text,level})=>({text,level}))||[]}:{}),fields:boundedFields(fields)}};
   },
   async saveResult(generated,conversation=[]){
    const id=randomUUID();
@@ -375,13 +360,36 @@ function draftText(value,{optional=false,multiline=false}={}){
  const text=value.trim().replace(/\r\n?/g,'\n');
  return multiline?text:text.replace(/\s*\n\s*/g,' ');
 }
-function pushParagraphs(parts,value,role){
- const text=draftText(value,{optional:true,multiline:role==='body'});
+function draftParagraphStyle(styles,part){
+ const {role,level=1}=part;
+ const body=styles.body||{characters:{fontSize:1000},paragraph:{lineSpacing:155,lineSpacingType:'Percent'}};
+ const bodySize=body.characters.fontSize||1000;
+ if(role==='title'){
+  const title=styles.title||{...body,characters:{...body.characters,fontSize:Math.max(1600,Math.round(bodySize*1.5)),bold:true},
+   paragraph:{...body.paragraph,spacingAfter:600}};
+  return {...title,paragraph:{...title.paragraph,keepWithNext:true}};
+ }
+ if(role==='heading'){
+  const base=styles.headingsByLevel?.[1]||styles.heading||body;
+  const inherited=styles.headingsByLevel?.[level];
+  const fontSize=Math.max(bodySize,Math.round((base.characters.fontSize||bodySize)*(level===1?1:level===2?0.9:0.85)));
+  const format=inherited||{...base,characters:{...base.characters,fontSize:level===1&&base===body?Math.round(bodySize*1.18):fontSize,bold:true},
+   paragraph:{...base.paragraph,spacingBefore:base.paragraph.spacingBefore||450,spacingAfter:base.paragraph.spacingAfter||200}};
+  return {...format,paragraph:{...format.paragraph,keepWithNext:true}};
+ }
+ if(role==='note'||role==='caption'){
+  const note=styles.note||{...body,characters:{...body.characters,fontSize:Math.max(800,Math.round(bodySize*0.88))},paragraph:{...body.paragraph,spacingBefore:200}};
+  return role==='caption'?{...note,paragraph:{...note.paragraph,keepWithNext:true}}:note;
+ }
+ return body;
+}
+function pushParagraphs(parts,value,role,level){
+ const text=draftText(value,{optional:true,multiline:role!=='heading'});
  for(const line of text.split('\n')){
-  if(line.trim())parts.push({text:line.trim(),role});
+  if(line.trim())parts.push({text:line.trim(),role,...(level?{level}:{})});
  }
 }
-function splitTallFormTables(parts,groups,controls,overflows){
+function splitTallTables(parts,groups,controls,overflows){
  const chunksByPart=new Map();
  for(const block of overflows){
   if(block.kind!=='table'||block.rect.h<=block.frame.h||!block.outside.bottom)continue;
@@ -394,7 +402,11 @@ function splitTallFormTables(parts,groups,controls,overflows){
   const capacity=block.frame.h-8,chunks=[];
   let rows=[],height=0;
   for(const [row,value] of group.rows.entries()){
-   if(rows.length&&height+heights[row]>capacity){chunks.push(rows);rows=[];height=0;}
+   if(rows.length>(group.header?1:0)&&height+heights[row]>capacity){
+    chunks.push(rows);
+    rows=group.header?[group.rows[0]]:[];
+    height=group.header?heights[0]:0;
+   }
    rows.push(value);
    height+=heights[row];
   }
@@ -404,7 +416,7 @@ function splitTallFormTables(parts,groups,controls,overflows){
  if(!chunksByPart.size)return null;
  return parts.flatMap(part=>{
   const chunks=chunksByPart.get(part);
-  return chunks?chunks.map((rows,index)=>index?{rows,columns:part.columns,startsPage:true}:{...part,rows}):[part];
+  return chunks?chunks.map((rows,index)=>index?{rows,columns:part.columns,header:part.header,startsPage:true}:{...part,rows}):[part];
  });
 }
 function applyDraftMargins(doc,marginsMm){
@@ -424,7 +436,11 @@ async function composeStyledReport(prepared,title,parts,kind,marginsMm){
  const {HwpDocument}=await loadCore(),structure=prepared.analysis.structure;
  const paragraphs=parts.filter(part=>!part.rows),groups=parts.filter(part=>part.rows),tables=groups.map(part=>part.rows);
  const html=parts.map(part=>part.rows
-  ?'<table>'+part.rows.map(({cells})=>'<tr>'+cells.map(({label,span})=>'<td'+(span>1?' colspan="'+span+'"':'')+'>'+(label?'<strong>'+escapeHtml(label)+'</strong>':'')+'</td>').join('')+'</tr>').join('')+'</table>'
+  ?'<table>'+part.rows.map(({cells})=>'<tr>'+cells.map(({label,text,header,span})=>{
+   const tag=header?'th':'td';
+   const value=escapeHtml(label??text??'');
+   return '<'+tag+(span>1?' colspan="'+span+'"':'')+'>'+(label?'<strong>'+value+'</strong>':value)+'</'+tag+'>';
+  }).join('')+'</tr>').join('')+'</table>'
   :'<p>'+escapeHtml(part.text)+'</p>').join('');
  const result=createStyledDraft(HwpDocument,structure,(doc,styles)=>{
   applyDraftMargins(doc,marginsMm);
@@ -440,7 +456,7 @@ async function composeStyledReport(prepared,title,parts,kind,marginsMm){
     const group=groups[index];
     if(dimensions.rowCount!==rows.length||dimensions.colCount!==group.columns)throw Error('새 양식의 입력 표를 확인하지 못했습니다.');
     if(format){
-     checked(target.setTableProperties(0,para,controlIndex,JSON.stringify({pageBreak:1})));
+     checked(target.setTableProperties(0,para,controlIndex,JSON.stringify({pageBreak:1,repeatHeader:!!group.header})));
      if(group.startsPage)checked(target.applyParaFormat(0,para,JSON.stringify({pageBreakBefore:true})));
     }
     const widths=tableStyle?.widths;
@@ -452,18 +468,24 @@ async function composeStyledReport(prepared,title,parts,kind,marginsMm){
      const requestedHeight=1600+(lines-1)*1000;
      if(format&&requestedHeight>maxRowHeight)adjustedFields+=cells.filter(cell=>cell.label).length;
      let column=0;
-     for(const {label,span} of cells){
+     for(const {label,text,header,span} of cells){
       const source={section:0,paragraph:para,cellPath:[{controlIndex,cellIndex,cellParaIndex:0}]};
       const info=parse(target.getCellInfo(0,para,controlIndex,cellIndex));
-      if(info.row!==row||info.col!==column||info.colSpan!==span||paragraphText(target,source)!==(label||''))throw Error('새 양식의 입력 칸을 확인하지 못했습니다.');
+      if(info.row!==row||info.col!==column||info.colSpan!==span||paragraphText(target,source)!==(label??text??''))throw Error('새 양식의 입력 칸을 확인하지 못했습니다.');
       if(format){
-       const current=parse(target.getCellOwnProperties(0,para,controlIndex,cellIndex)),skin=label?tableStyle?.label:tableStyle?.value;
-       const fill=skin?.fill?{fillType:'solid',fillColor:skin.fill}:{};
+       const current=parse(target.getCellOwnProperties(0,para,controlIndex,cellIndex));
+       const skin=label||header?tableStyle?.label:tableStyle?.value;
+       const fillColor=skin?.fill||(header&&!tableStyle?'#e8edf3':null);
+       const fill=fillColor?{fillType:'solid',fillColor}:{};
        const height=Math.max(current.height,Math.min(maxRowHeight,requestedHeight));
        const fallback=referenceBorders?Object.fromEntries(borderSides.map(side=>[side,referenceBorders])):defaultBorders;
        const borders=borderSides.some(side=>skin?.sides?.[side]?.type>0)?skin.sides:fallback;
-       checked(target.setCellProperties(0,para,controlIndex,cellIndex,JSON.stringify({...borders,...fill,height})));
-       if(label)applyFormatting(target,source,tableStyle?.format);
+       checked(target.setCellProperties(0,para,controlIndex,cellIndex,JSON.stringify({...borders,...fill,height,...(header?{isHeader:true}:{})})));
+       if(label||header){
+        const base=tableStyle?.format||draftParagraphStyle(styles,{role:'body'});
+        const font=header?{...base,characters:{...base.characters,bold:true}}:tableStyle?.format;
+        applyFormatting(target,source,font);
+       }else if(text)applyFormatting(target,source,tableStyle?.value?.format||draftParagraphStyle(styles,{role:'body'}));
        if(totalWidth){
         const weight=weights.slice(column,column+span).reduce((sum,width)=>sum+width,0);
         resize.push({cellIdx:cellIndex,widthDelta:Math.floor(totalWidth*weight/totalWeight)-current.width});
@@ -486,7 +508,7 @@ async function composeStyledReport(prepared,title,parts,kind,marginsMm){
     const expected=paragraphs[paragraphIndex++];
     if(text!==expected?.text)throw Error('초안의 본문을 조판하지 못했습니다.');
     bodyAddresses.set(expected,paragraph);
-    applyFormatting(doc,source,styles[expected.role]);
+    applyFormatting(doc,source,draftParagraphStyle(styles,expected));
    }
    if(paragraphIndex!==paragraphs.length)throw Error('초안의 본문을 조판하지 못했습니다.');
    tableControls=parse(doc.getControls()).filter(control=>control.ctrlId==='tbl'&&control.list===0);
@@ -494,8 +516,13 @@ async function composeStyledReport(prepared,title,parts,kind,marginsMm){
    checkCells(doc,true);
   }finally{doc.endBatch();}
   const preferredBreaks=new Map(groups.map((part,index)=>['0:'+tableControls[index].para,bodyAddresses.get(part.lead)]));
-  const layout=verifyReportFlow(HwpDocument,doc,{validate:checkCells,identity:layoutIdentity(doc),preferredBreaks,
-   splitTables:overflows=>splitTallFormTables(parts,groups,tableControls,overflows)});
+  const validate=target=>{
+   checkCells(target);
+   for(const [part,paragraph] of bodyAddresses)
+    if(paragraphText(target,{section:0,paragraph}).trim()!==part.text)throw Error('저장 후 본문 또는 목차 항목을 확인하지 못했습니다.');
+  };
+  const layout=verifyReportFlow(HwpDocument,doc,{validate,identity:layoutIdentity(doc),preferredBreaks,
+   splitTables:overflows=>splitTallTables(parts,groups,tableControls,overflows)});
   if(layout.splitParts)return layout;
   const {bytes,pages,pageBreaks,fittedTables}=layout,fields=tables.flat().reduce((count,row)=>count+row.cells.filter(cell=>cell.label).length,0);
   return {bytes,template:{...prepared.template,name:title,mode:'adapt'},changes:{kind,fields,pages,
@@ -539,8 +566,19 @@ export async function createPreparedDraft(prepared,draft,kind='styled_draft'){
  if(!draft||!Array.isArray(draft.paragraphs))throw Error('초안의 본문을 확인하세요.');
  const title=draftText(draft.title),parts=[{text:title,role:'title'}];
  for(const paragraph of draft.paragraphs){
-  if(!['heading','body'].includes(paragraph?.role))throw Error('초안의 문단 종류를 확인하세요.');
-  pushParagraphs(parts,paragraph.text,paragraph.role);
+  const role=paragraph?.role;
+  if(role==='table'){
+   const {headers,rows}=paragraph;
+   if(!Array.isArray(headers)||!headers.length||!Array.isArray(rows)||!rows.length||rows.some(row=>!Array.isArray(row)||row.length!==headers.length))
+    throw Error('표의 제목 행과 각 데이터 행의 열 수를 맞춰 주세요.');
+   const rendered=[headers,...rows].map((row,index)=>({lines:1,cells:row.map(text=>({text:draftText(text,{optional:index>0}),span:1,header:index===0}))}));
+   const lead=parts.at(-1);
+   parts.push({rows:rendered,columns:headers.length,header:true,lead:['heading','caption'].includes(lead?.role)?lead:undefined});
+   continue;
+  }
+  if(!['heading','body','note','caption'].includes(role))throw Error('초안의 문단 종류를 확인하세요.');
+  if(paragraph.level!==undefined&&(role!=='heading'||![1,2,3].includes(paragraph.level)))throw Error('소제목의 단계는 1~3으로 지정하세요.');
+  pushParagraphs(parts,paragraph.text,role,paragraph.level);
  }
  if(parts.length===1)throw Error('초안에 담을 본문을 작성하세요.');
  return composeStyledReport(prepared,title,parts,kind,draft.marginsMm);
@@ -617,21 +655,21 @@ export async function applyPreparedReportStyle(prepared,sourceBytes,{pageSetup=f
  }finally{doc.free();}
 }
 
-export async function fillPreparedTemplate(prepared,answers,sections=[]){
- if(!prepared.template.fields.length)throw Error('기존 양식에 채울 항목을 찾지 못했습니다. 새 빈 양식을 만들려면 양식을 참고해 새 서식을 만들어 달라고 요청하세요.');
- if(!Array.isArray(answers)||answers.length>64||!Array.isArray(sections)||sections.length>8||!answers.length&&!sections.length)throw Error('작성할 양식 항목을 지정하세요.');
- if(sections.length&&prepared.template.mode!=='adapt')throw Error('새 소제목은 형식 준용에서만 추가할 수 있습니다.');
- const {HwpDocument}=await loadCore();
- let bytes=prepared.bytes;
- const fields=new Set(prepared.template.fields.map(field=>field.marker)),seen=new Set(),additions=[];
- for(const section of sections){
-  const heading=label(section?.title,48),marker='{{'+heading+'}}';
-  if(!heading||heading!==section.title||/[{}]/.test(heading)||fields.has(marker))throw Error('추가할 소제목과 기존 양식의 항목을 확인하세요.');
-  fields.add(marker);additions.push({heading,marker,text:section.text});
+export async function fillPreparedTemplate(prepared,answers=[],sections=[]){
+ if(!Array.isArray(answers)||!Array.isArray(sections)||!answers.length&&!sections.length)throw Error('작성할 양식 항목을 지정하세요.');
+ if(prepared.template.mode==='adapt'){
+  if(answers.length>1||answers.some(answer=>answer?.marker!=='{{보고서 제목}}')||!sections.length)
+   throw Error('형식 준용에서는 새 제목과 목차를 정해 draft 또는 form으로 제출하세요.');
+  const paragraphs=sections.flatMap(section=>[{role:'heading',text:draftText(section?.title)},{role:'body',text:section.text}]);
+  return createPreparedDraft(prepared,{title:answers[0]?.text||'작성 초안',paragraphs});
  }
- if(additions.length)bytes=adaptedDraft(HwpDocument,prepared.analysis,additions.map(addition=>addition.heading)).bytes;
+ if(sections.length)throw Error('새 소제목은 형식 준용에서만 추가할 수 있습니다.');
+ if(!prepared.template.fields.length)throw Error('기존 양식에 채울 항목을 찾지 못했습니다. 새 빈 양식을 만들려면 양식을 참고해 새 서식을 만들어 달라고 요청하세요.');
+ if(answers.length>64)throw Error('작성할 양식 항목을 확인하세요.');
+ const {HwpDocument}=await loadCore(),{bytes}=prepared;
+ const fields=new Set(prepared.template.fields.map(field=>field.marker)),seen=new Set();
  let length=0;
- const accepted=[...answers,...additions].map(answer=>{
+ const accepted=answers.map(answer=>{
   if(!answer||!fields.has(answer.marker)||seen.has(answer.marker)||typeof answer.text!=='string'||answer.text.length>12000||(length+=answer.text.length)>48000||/[\r\n\u0000-\u0008\u000b-\u001f\ufffc]/.test(answer.text))throw Error('작성 항목과 문단 내용을 확인하세요.');
   seen.add(answer.marker);return {marker:answer.marker,text:answer.text};
  });
