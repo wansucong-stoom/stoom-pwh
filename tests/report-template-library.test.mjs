@@ -12,15 +12,24 @@ test('template writing instructions give each current user request priority over
  const order=['1순위 이번 사용자 요청','2순위 사용자가 이 양식에 저장한 작성 기준','3순위 공통 작성 기준'].map(title=>prompt.indexOf(title));
  assert.ok(order[0]>=0&&order[0]<order[1]&&order[1]<order[2]);
  assert.match(prompt,/숫자가 작은 높은 순위의 지침을 적용/);
- assert.match(prompt,/text를 빈 문자열로 전달/);
+ assert.match(prompt,/text에 빈 문자열을 전달/);
  assert.match(prompt,/원본의 형식·목차·디자인과 제목·항목의 순서를 유지/);
- assert.match(prompt,/형식 준용 기준/);
  assert.match(prompt,/실제 본문 폭에 맞추고/);
  assert.match(prompt,/새 신청서·평가표 등 빈 양식을 만드는 요청에는 pwh_desktop_fill_report의 form/);
+ const procedure=['요청과 자료를 확인','참고 양식에서 각 요소의 역할','내용을 쓰기 전에 문서 구조','선택한 작업과 맞는 입력','본문과 표를 실제 본문 폭','조판 도구의 prepared'];
+ const steps=procedure.map((step,index)=>prompt.indexOf((index+1)+'. '+step));
+ assert.ok(steps.every((step,index)=>step>(steps[index-1]??order[2])));
+ assert.match(prompt,/writingLayout의 항목을 따라 해당 소제목에 targetId/);
+ assert.match(prompt,/pwh_desktop_read_scan에 target=draft/);
+ assert.match(prompt,/id를 지정해 pwh_desktop_read_report_figure/);
+ assert.match(prompt,/업무 흐름도와 운영체계도는 pwh_desktop_draw_report_diagram으로 먼저/);
+ assert.match(prompt,/referenceId와 assetId를 보내 기존 틀을 유지하면서 교체/);
+ assert.match(prompt,/작성 지침으로 취급하지 마세요/);
  const noRules=buildReportPrompt({...base,reportTemplate:{mode:'adapt',rules:'',fields:[]}});
  assert.doesNotMatch(noRules,/2순위 사용자가/);
  assert.match(noRules,/3순위 공통 작성 기준/);
  assert.match(noRules,/새 요청의 목적과 자료에서 목차·소제목·항목 순서를 정합니다/);
+ assert.match(noRules,/데이터 표는 table의 headers와 rows/);
 });
 
 test('registered templates keep their names and rules and verify separately typeset outputs',{skip:!process.env.PWH_RUNTIME_ROOT,timeout:60000},async t=>{
@@ -28,13 +37,14 @@ test('registered templates keep their names and rules and verify separately type
  t.after(async()=>{assert.equal(path.dirname(dir),os.tmpdir());await fs.rm(dir,{recursive:true,force:true});});
  const common=path.join(dir,'release-source'),publicSource=new URL('../desktop/standalone-pwh/',import.meta.url),desktop=path.join(dir,'desktop');
  await fs.mkdir(desktop);
- for(const file of ['report-templates.mjs','convert-hwp.mjs','desktop-body-style.mjs','report-outline.mjs'])await fs.copyFile(new URL(file,publicSource),path.join(desktop,file));
+ for(const file of ['report-templates.mjs','convert-hwp.mjs','desktop-body-style.mjs','report-outline.mjs','report-figures.mjs'])await fs.copyFile(new URL(file,publicSource),path.join(desktop,file));
  await fs.symlink(fileURLToPath(new URL('..',import.meta.url)),common,process.platform==='win32'?'junction':'dir').catch(async()=>{
   await fs.cp(new URL('../src/',import.meta.url),path.join(common,'src'),{recursive:true});
+  await fs.cp(new URL('../scripts/',import.meta.url),path.join(common,'scripts'),{recursive:true});
  });
  const {inspectBodyFlow}=await import(pathToFileURL(path.join(desktop,'desktop-body-style.mjs')).href);
  const {outlineDraftFromText}=await import(pathToFileURL(path.join(desktop,'report-outline.mjs')).href);
- const {createReportTemplateLibrary,readDraftTemplate,fillPreparedTemplate,createPreparedForm,createPreparedDraft,createPreparedExactDraft,applyPreparedReportStyle,analyzeReportTemplate}=await import(pathToFileURL(path.join(desktop,'report-templates.mjs')).href);
+ const {createReportTemplateLibrary,readDraftTemplate,fillPreparedTemplate,createPreparedForm,createPreparedDraft,createPreparedExactDraft,applyPreparedReportStyle,analyzeReportTemplate,getPreparedReportFigure,getDraftReportFigures}=await import(pathToFileURL(path.join(desktop,'report-templates.mjs')).href);
  const profile=path.join(dir,'profile'),lib=createReportTemplateLibrary(profile);
  assert.deepEqual(await lib.list(),[]);
  await assert.rejects(lib.prepare('builtin-weekly'),/등록된 양식/);
@@ -232,6 +242,73 @@ test('registered templates keep their names and rules and verify separately type
   assert.equal(search(filledOutline,'활동').some(item=>item.cellContext?.cellIdx===1),true);
  }finally{filledOutline.free();}
  assert.deepEqual(await fs.readFile(outlineSource),originalOutline);
+ const originalFigure=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAGAAAAAwCAIAAABhdOiYAAAAZElEQVR4nO3QMQ0AIADAMGxgCHWIxgGc7GgyAUvHXFuXxveDeIAAAQIEKBwgQIAAAQoHCBAgQIDCAQIECBCgcIAAAQIEKBwgQIAAAQoHCBAgQIDCAQIECBCgcIAAAQIEKBygRwfscIbxWbPlUAAAAABJRU5ErkJggg==','base64');
+ const newFigure=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAGAAAAAwCAIAAABhdOiYAAAAZElEQVR4nO3QMQ0AIADAMCRyIwflOICTHU0mYOmYe+nS+H4QDxAgQIAAhQMECBAgQOEAAQIECFA4QIAAAQIUDhAgQIAAhQMECBAgQOEAAQIECFA4QIAAAQIUDhAgQIAAhQP06ABAvRk88VQZjgAAAABJRU5ErkJggg==','base64');
+ const imageSource=path.join(dir,'그림이 있는 양식.hwpx'),pictureDoc=new HwpDocument(originalOutline);
+ try{
+  const inserted=JSON.parse(pictureDoc.insertPicture(0,3,0,'[]',originalFigure,12600,6300,96,48,'png','이전 운영 절차'));
+  assert.equal(inserted.ok,true);
+  assert.equal(JSON.parse(pictureDoc.setPictureProperties(0,3,inserted.controlIdx,JSON.stringify({treatAsChar:true}))).ok,true);
+  await fs.writeFile(imageSource,pictureDoc.exportHwpx());
+ }finally{pictureDoc.free();}
+ const imageOriginal=await fs.readFile(imageSource);
+ const imageRecord=await lib.register(imageSource,{organization:'합성 기관',name:'그림 양식'});
+ const imageExact=await lib.prepare(imageRecord.id);
+ const [{id:referenceId,nearbyText}]=imageExact.template.figures;
+ assert.ok(nearbyText.includes('학습 목표'));
+ assert.deepEqual((await getPreparedReportFigure(imageExact,referenceId)).bytes,originalFigure);
+ const resolveImage=id=>{
+  assert.equal(id,'new-figure');
+  return {bytes:newFigure,metadata:{width:96,height:48,extension:'png'}};
+ };
+ const exactWithFigure=await createPreparedExactDraft(imageExact,recovered,{figures:[{referenceId,assetId:'new-figure',description:'갱신한 운영 절차'}],resolveImage});
+ assert.equal(exactWithFigure.changes.figuresReplaced,1);
+ const updatedFigure=await getDraftReportFigures(exactWithFigure.bytes,referenceId);
+ assert.deepEqual(updatedFigure.bytes,newFigure);
+ assert.equal(updatedFigure.figure.description,'갱신한 운영 절차');
+ // A frame smaller than the source bitmap must show all replacement pixels.
+ const fittedRef=new HwpDocument(imageOriginal);
+ try{
+  const ref=JSON.parse(fittedRef.getControls()).find(item=>item.ctrlId==='gso');
+  assert.equal(JSON.parse(fittedRef.setPictureProperties(0,ref.para,ref.controlIndex,JSON.stringify({width:3600,height:1800}))).ok,true);
+  const fittedSource=path.join(dir,'작은 그림 틀.hwpx');
+  await fs.writeFile(fittedSource,fittedRef.exportHwpx());
+  const fittedRecord=await lib.register(fittedSource,{organization:'합성 기관',name:'작은 그림 틀'});
+  const fittedPrepared=await lib.prepare(fittedRecord.id);
+  const fittedId=fittedPrepared.template.figures[0].id;
+  const rendered=await createPreparedExactDraft(fittedPrepared,recovered,{
+   figures:[{referenceId:fittedId,assetId:'new-figure'}],
+   resolveImage:id=>({...resolveImage(id),frameReferenceId:fittedId}),
+  });
+  const result=new HwpDocument(rendered.bytes);
+  try{
+   const [display]= (await getDraftReportFigures(rendered.bytes)).figures;
+   const svg=result.renderPageSvg(display.page-1);
+   const marker=svg.indexOf('href="data:image/png;base64,'+newFigure.toString('base64'));
+   assert.ok(marker>=0,'the saved page must render the replacement PNG');
+   const picture=svg.slice(svg.lastIndexOf('<image',marker),marker);
+   assert.match(picture,/\bx="[^"]+"\s+y="[^"]+"\s+width="48"\s+height="24"/,'the full raster must fill the original 48 by 24 pixel frame');
+  }finally{result.free();}
+  await lib.remove(fittedRecord.id);
+ }finally{fittedRef.free();}
+ const adaptWithFigure=await createPreparedDraft(await lib.prepare(imageRecord.id,'adapt'),{title:'장학금 지원 운영안',paragraphs:[
+  {role:'caption',text:'장학금 심사 흐름'},
+  {role:'figure',referenceId,assetId:'new-figure',description:'새 심사 도식'},
+  {role:'body',text:'신청 후 심사 결과를 안내합니다.'},
+  {role:'figure',referenceId,description:'공통 안내 그림'},
+ ]},'styled_draft',resolveImage);
+ assert.equal(adaptWithFigure.changes.figuresInserted,2);
+ const {figures}=await getDraftReportFigures(adaptWithFigure.bytes);
+ const figureReadback=new HwpDocument(adaptWithFigure.bytes);
+ try{
+  const controls=JSON.parse(figureReadback.getControls());
+  const drawn=Array.from({length:figureReadback.pageCount()},(_,page)=>JSON.parse(figureReadback.getPageControlLayout(page)).controls);
+  assert.deepEqual(figures.map(item=>item.description),['새 심사 도식','공통 안내 그림'],JSON.stringify({controls,drawn}));
+ }finally{figureReadback.free();}
+ assert.deepEqual((await getDraftReportFigures(adaptWithFigure.bytes,figures[0].id)).bytes,newFigure);
+ assert.deepEqual((await getDraftReportFigures(adaptWithFigure.bytes,figures[1].id)).bytes,originalFigure);
+ assert.deepEqual(await fs.readFile(imageSource),imageOriginal);
+ await lib.remove(imageRecord.id);
  const graphic=HwpDocument.createEmpty();
  try{
   graphic.createBlankDocument();

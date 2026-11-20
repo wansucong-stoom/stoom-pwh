@@ -1,12 +1,12 @@
 {
-  "sha256": "824af615c52a8be0d4a159bbda1d11f77afb4f49f54b5a1811e34f40af8bbb8a",
-  "baseVersion": "0.6.67",
-  "baseEditorSha256": "af80f03e7b5bf1d506f6f9f6d2e49fed10ed17bb8d6bc0571aef80959d953a47",
+  "sha256": "9afeb11f72487fbee9e6cf11011a040171348bf52beb4c616d0b87af6344433b",
+  "baseVersion": "0.6.68",
+  "baseEditorSha256": "2d939d95bd91a01a9be5a14dea9717f9d0d207a86de62d736852a491fec9eb06",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "desktop",
-    "sha256": "2ef86adcdd31472bdad299fd4200f437b47786a1e8ba1c526233431d9100070a",
+    "sha256": "9a596b4f4bf41af668c8bf6d859779ecceb6073d0eaf6c0059acce4017db2774",
     "files": [
       {
         "path": "desktop/standalone-pwh/build-desktop-editor.mjs",
@@ -30,7 +30,7 @@
       },
       {
         "path": "package.json",
-        "sha256": "8d2960bdccbc6bf4a8bed1d087bcae95f20d2748133a5254ea8af04aef5fcb02"
+        "sha256": "adee661e03f26c1a49136735fb40185ddfe5b22847d527c8faa3bab617a17eef"
       },
       {
         "path": "scripts/build-inline.mjs",

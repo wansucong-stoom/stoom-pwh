@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pluginVersion": "0.6.67",
+  "pluginVersion": "0.6.68",
   "copyPolicy": "Original bytes; .test.mjs filenames renamed to .check.mjs for staged-only discovery.",
   "files": [
     {
@@ -48,8 +48,8 @@
     {
       "path": "standalone-pwh/app.js",
       "source": "standalone-pwh/app.js",
-      "size": 56036,
-      "sha256": "d8849bddc541d98743c329df21e1d2aa7f1c125ebc7388e570c0ceb31a5dc6ae"
+      "size": 56994,
+      "sha256": "b2e31180faf73413203891c4b08984521a2164b880dc9fc2377c5a50a0468abb"
     },
     {
       "path": "standalone-pwh/build-desktop-editor.mjs",
@@ -61,7 +61,7 @@
       "path": "standalone-pwh/build-msi.mjs",
       "source": "standalone-pwh/build-msi.mjs",
       "size": 16005,
-      "sha256": "c5140c38800249ee478202663458c443a75986ef5b7313fd9fcb9b360d4083cd"
+      "sha256": "e119b836c4de8eabdb2268953243a3a182011cc55a8af21f73b0f1f6739cda13"
     },
     {
       "path": "standalone-pwh/build-native-launcher.mjs",
@@ -73,7 +73,7 @@
       "path": "standalone-pwh/build-offline.mjs",
       "source": "standalone-pwh/build-offline.mjs",
       "size": 7359,
-      "sha256": "98e8a2cdd2676a87c2d4f541c0279a8e54e1193c892a297b7c7b8de8805df092"
+      "sha256": "afa6344c25a60cf55605f8e89f7edae64fd3089fe6bc668daff67d7b708529e7"
     },
     {
       "path": "standalone-pwh/build-stoom-icon.mjs",
@@ -109,13 +109,13 @@
       "path": "standalone-pwh/client/editor.js",
       "source": "standalone-pwh/client/editor.js",
       "size": 2864458,
-      "sha256": "824af615c52a8be0d4a159bbda1d11f77afb4f49f54b5a1811e34f40af8bbb8a"
+      "sha256": "9afeb11f72487fbee9e6cf11011a040171348bf52beb4c616d0b87af6344433b"
     },
     {
       "path": "standalone-pwh/client/manifest.json",
       "source": "standalone-pwh/client/manifest.json",
       "size": 20130,
-      "sha256": "1d386c6849fa21cff7662e10d6b92a4652fb0b549129559f833bd7f128ce096a"
+      "sha256": "8b11713e2308d5d977d60d175b1390d200a4b277f08ede504261e0bf24052461"
     },
     {
       "path": "standalone-pwh/codex-agent.mjs",
@@ -138,8 +138,8 @@
     {
       "path": "standalone-pwh/codex-native-host.mjs",
       "source": "standalone-pwh/codex-native-host.mjs",
-      "size": 32149,
-      "sha256": "c1d1de5dbdfaf6470d62b2c2a0b5211285721bda23c2bba2ab492358b19fab21"
+      "size": 32229,
+      "sha256": "1236e48fd760fe375c80398afacddb56d874ebd34360c69a5b90040ecf569b2f"
     },
     {
       "path": "standalone-pwh/CODEX-NOTICE.txt",
@@ -180,8 +180,8 @@
     {
       "path": "standalone-pwh/codex-session.mjs",
       "source": "standalone-pwh/codex-session.mjs",
-      "size": 20404,
-      "sha256": "74c7ce0398fe1378ac44bfd78da471066fb61e169dc9b0ed6f67a18f068275d5"
+      "size": 13630,
+      "sha256": "581de18c7462bab8d8d560c47365a9283b3d08bc41810b70c9d859edafe4d443"
     },
     {
       "path": "standalone-pwh/convert-hwp.check.mjs",
@@ -294,8 +294,8 @@
     {
       "path": "standalone-pwh/host.mjs",
       "source": "standalone-pwh/host.mjs",
-      "size": 65368,
-      "sha256": "ba953f3db2fc92ebb3d0356f2c1409c007417ef9b59ee2f0d012c6f3b9c7cdee"
+      "size": 74452,
+      "sha256": "8d80223e6cee3ce298fe81e5eaa5f6fc786bf96336bad4d1765d532a422f9b0a"
     },
     {
       "path": "standalone-pwh/image-convert.ps1",
@@ -442,6 +442,24 @@
       "sha256": "39d5fc03acb74ad421b1eeb0bad5e1f8dd818b6e6e2f650bac2983ce00ad2696"
     },
     {
+      "path": "standalone-pwh/report-diagram-canvas.mjs",
+      "source": "standalone-pwh/report-diagram-canvas.mjs",
+      "size": 5352,
+      "sha256": "5b82774e6f99aaaf2271da6b98738bc2f5bd9fa085b835d38cefbbfa70e11214"
+    },
+    {
+      "path": "standalone-pwh/report-diagram.mjs",
+      "source": "standalone-pwh/report-diagram.mjs",
+      "size": 1954,
+      "sha256": "4124bd3073708f907f89054e10aa89559f71d9a92640e2394b9f2f390a68e576"
+    },
+    {
+      "path": "standalone-pwh/report-figures.mjs",
+      "source": "standalone-pwh/report-figures.mjs",
+      "size": 9775,
+      "sha256": "ed242769520afd17be24a90c9c3bfd711061369f119ce03ef9f160000e63ac6a"
+    },
+    {
       "path": "standalone-pwh/report-outline.mjs",
       "source": "standalone-pwh/report-outline.mjs",
       "size": 13011,
@@ -450,8 +468,14 @@
     {
       "path": "standalone-pwh/report-templates.mjs",
       "source": "standalone-pwh/report-templates.mjs",
-      "size": 50822,
-      "sha256": "6f4394c9a826d4bb9194806d1011eb1cee1388855085190d1fd0fad99b451f4c"
+      "size": 54556,
+      "sha256": "430a6f925ba2b57b15713beae8f12c008651e9bb0132c04230f19532f92e90e3"
+    },
+    {
+      "path": "standalone-pwh/report-writing-workflow.mjs",
+      "source": "standalone-pwh/report-writing-workflow.mjs",
+      "size": 8485,
+      "sha256": "7b675310eee2e2481807cd1b0f04ba3e61b50e15d1d1748d3f09f543c5bba8c3"
     },
     {
       "path": "standalone-pwh/recovery-smoke.check.mjs",
@@ -589,7 +613,7 @@
       "path": "standalone-pwh/version.json",
       "source": "standalone-pwh/version.json",
       "size": 21,
-      "sha256": "7f9fdea3acc760f9b72d00e4e2392d2baa874019711e89defbea7cda9422aaf0"
+      "sha256": "e790660e0582ce11eeba104e19d7ac6e2cd94385db41220094c4543363ef9589"
     },
     {
       "path": "standalone-pwh/window-close-controller.mjs",

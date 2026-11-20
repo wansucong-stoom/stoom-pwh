@@ -7,13 +7,14 @@ import {styleScanSources,prepareReportFill,applyTextEdits} from '../release-sour
 import {convertHwp} from './convert-hwp.mjs';
 import {inspectBodyFlow,newBodyOverflows,reflowBody} from './desktop-body-style.mjs';
 import {prepareOutlineLocations,outlineWritingLayout,applyOutlineDraft} from './report-outline.mjs';
+import {copyReportFigure,fitReportPictureViewports,insertReportFigure,inventoryReportFigures,publicReportFigure,readReportFigure,replaceReportFigures,reportFigureById,verifyReportFigures} from './report-figures.mjs';
 
 const limit=256*1024*1024;
 const idPattern=/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const escapeHtml=value=>value.replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',[String.fromCharCode(39)]:'&#39;'}[char]));
 const parse=value=>typeof value==='string'?JSON.parse(value):value;
-const analysisVersion=5;
+const analysisVersion=6;
 const borderSides=['borderLeft','borderRight','borderTop','borderBottom'];
 const checked=value=>{const result=parse(value);if(result?.ok===false||result?.error)throw Error(result.error||'보고서 양식을 준비하지 못했습니다.');};
 let loadedCore;
@@ -121,7 +122,8 @@ function readReportStructure(doc,body,tables,tableLabel,decorativeTables){
  return {pages,tables:[...tables.values()].slice(0,48),headings:outline,
   title:cover?{text:cover.text,source:cover.source}:title?{text:title.text,source:title.source}:null,
   styles:{title:cover?.cells[1].format||title?.format,heading:banner?.cells.find(cell=>cell.text===banner.text)?.format||headingsByLevel[1],headingsByLevel,body:bodyFormat,note:note?.format},
-  decorations:{cover:cover?{columns:cover.columns,...coverMetrics,cells:cover.cells.map(({source,text,...style})=>style)}:null,heading:banner?{columns:banner.columns,headingColumn:banner.cells.findIndex(cell=>cell.text===banner.text),cells:banner.cells.map(({source,text,...style})=>style)}:null},formTable:tableLabel||null};
+  decorations:{cover:cover?{columns:cover.columns,...coverMetrics,cells:cover.cells.map(({source,text,...style})=>style)}:null,heading:banner?{columns:banner.columns,headingColumn:banner.cells.findIndex(cell=>cell.text===banner.text),cells:banner.cells.map(({source,text,...style})=>style)}:null},formTable:tableLabel||null,
+  figures:inventoryReportFigures(doc)};
 }
 function boundedFields(fields){
  return fields.slice(0,64).map(({name,marker,source})=>({name,marker,section:source?.section,paragraph:source?.paragraph,cell:source?.cellPath?.at(-1)?.cellIndex}));
@@ -325,9 +327,9 @@ export function createReportTemplateLibrary(dataRoot){
    const paper=analysis.structure?.pages[0]?.paper;
    const mm=value=>Math.round(value*25.4/72)/100;
    const page=paper?{widthMm:mm(paper.width),heightMm:mm(paper.height),marginsMm:{top:mm(paper.marginTop),bottom:mm(paper.marginBottom),left:mm(paper.marginLeft),right:mm(paper.marginRight)}}:null;
-   const {styles,formTable,tables,decorations}=analysis.structure||{};
+   const {styles,formTable,tables,decorations,figures=[]}=analysis.structure||{};
    const reference={name:template.name,page,roles:styles,formTable,tables,decorations:{cover:!!decorations?.cover,numberedHeadings:!!decorations?.heading}};
-   return {bytes,originalBytes,analysis,template:{...overview({...template,analysis}),reference,mode,rules:template.rules||'',
+   return {bytes,originalBytes,analysis,template:{...overview({...template,analysis}),reference,mode,rules:template.rules||'',figures:figures.map(publicReportFigure),
     ...(mode==='exact'?{outline:analysis.structure?.headings.map(({text,level})=>({text,level}))||[],...(writingLayout?{writingLayout}:{})}:{}),fields:boundedFields(fields)}};
   },
   async saveResult(generated,conversation=[]){
@@ -376,15 +378,16 @@ function fitGeneratedTables(doc,overflows){
  if(sized.size)doc.flushDeferredPagination();
  return sized.size;
 }
-function verifyReportFlow(HwpDocument,doc,{validate,identity,preferredBreaks,originalOverflows,splitTables,fitTables=false}={}){
- let bytes=Buffer.from(doc.exportHwpx()),reopened=new HwpDocument(bytes);
+function verifyReportFlow(HwpDocument,doc,{validate,identity,preferredBreaks,originalOverflows,splitTables,fitTables=false,fullFramePictures=[]}={}){
+ const exportHwpx=target=>fitReportPictureViewports(Buffer.from(target.exportHwpx()),fullFramePictures);
+ let bytes=exportHwpx(doc),reopened=new HwpDocument(bytes);
  try{
   const fitted=splitTables||fitTables?fitGeneratedTables(reopened,inspectBodyFlow(reopened).overflows):0;
   const splitParts=splitTables?.(inspectBodyFlow(reopened,{measureRows:true}).overflows);
   if(splitParts)return {splitParts};
   const {breaks}=reflowBody(reopened,{preferredBreaks,originalOverflows});
   if(fitted||breaks.length){
-   bytes=Buffer.from(reopened.exportHwpx());
+   bytes=exportHwpx(reopened);
    const verified=new HwpDocument(bytes);
    reopened.free();
    reopened=verified;
@@ -507,13 +510,14 @@ function applyDraftMargins(doc,marginsMm){
 async function composeStyledReport(prepared,title,parts,kind,marginsMm){
  const {HwpDocument}=await loadCore(),structure=prepared.analysis.structure;
  const paragraphs=parts.filter(part=>!part.rows),groups=parts.filter(part=>part.rows),tables=groups.map(part=>part.rows);
+ const anchorText='\u25a1';
  const html=parts.map(part=>part.rows
   ?'<table>'+part.rows.map(({cells})=>'<tr>'+cells.map(({label,text,header,span})=>{
    const tag=header?'th':'td';
    const value=escapeHtml(label??text??'');
    return '<'+tag+(span>1?' colspan="'+span+'"':'')+'>'+(label?'<strong>'+value+'</strong>':value)+'</'+tag+'>';
   }).join('')+'</tr>').join('')+'</table>'
-  :'<p>'+escapeHtml(part.text)+'</p>').join('');
+  :'<p>'+escapeHtml(part.image?anchorText:part.text)+'</p>').join('');
  const result=createStyledDraft(HwpDocument,structure,(doc,styles)=>{
   applyDraftMargins(doc,marginsMm);
   const tableStyle=structure?.formTable;
@@ -521,7 +525,7 @@ async function composeStyledReport(prepared,title,parts,kind,marginsMm){
   const referenceBorders=borderSides.map(side=>tableStyle?.label?.sides?.[side]).find(side=>side?.type>0);
   const paper=parse(doc.getPageDef(0)),maxRowHeight=Math.max(1600,Math.floor((paper.height-paper.marginTop-paper.marginBottom-paper.marginHeader-paper.marginFooter)*0.8));
   let adjustedFields=0,tableControls;
-  const bodyAddresses=new Map();
+  const bodyAddresses=new Map(),insertedFigures=[];
   function checkCells(target,format=false){
    for(const [index,rows] of tables.entries()){
     const {para,controlIndex}=tableControls[index],dimensions=parse(target.getTableDimensions(0,para,controlIndex));
@@ -592,9 +596,15 @@ async function composeStyledReport(prepared,title,parts,kind,marginsMm){
     const source={section:0,paragraph},text=paragraphText(doc,source).trim();
     if(!text)continue;
     const expected=paragraphs[paragraphIndex++];
-    if(text!==expected?.text)throw Error('초안의 본문을 조판하지 못했습니다.');
+    if(text!==(expected?.image?anchorText:expected?.text))throw Error('초안의 본문을 조판하지 못했습니다.');
     bodyAddresses.set(expected,paragraph);
     applyFormatting(doc,source,draftParagraphStyle(styles,expected));
+    if(expected.image){
+     checked(doc.deleteText(0,paragraph,0,anchorText.length));
+     // Keep a text run so the engine restores the inline object's line on reopen.
+     checked(doc.insertText(0,paragraph,0,' '));
+     insertedFigures.push(insertReportFigure(doc,paragraph,expected));
+    }
     if(expected.startsPage)checked(doc.applyParaFormat(0,paragraph,JSON.stringify({pageBreakBefore:true})));
    }
    if(paragraphIndex!==paragraphs.length)throw Error('초안의 본문을 조판하지 못했습니다.');
@@ -606,27 +616,41 @@ async function composeStyledReport(prepared,title,parts,kind,marginsMm){
   const preferredBreaks=new Map(groups.map((part,index)=>['0:'+tableControls[index].para,bodyAddresses.get(part.lead)]));
   const validate=target=>{
    checkCells(target);
+   verifyReportFigures(target,insertedFigures);
    for(const [part,paragraph] of bodyAddresses)
-    if(!part.design&&paragraphText(target,{section:0,paragraph}).trim()!==part.text)throw Error('저장 후 본문 또는 목차 항목을 확인하지 못했습니다.');
+    if(!part.design&&paragraphText(target,{section:0,paragraph}).trim()!==(part.image?'':part.text))throw Error('저장 후 본문 또는 목차 항목을 확인하지 못했습니다.');
   };
   const layout=verifyReportFlow(HwpDocument,doc,{validate,identity:layoutIdentity(doc),preferredBreaks,
    splitTables:overflows=>splitTallTables(parts,groups,tableControls,overflows)});
   if(layout.splitParts)return layout;
   const {bytes,pages,pageBreaks,fittedTables}=layout,fields=tables.flat().reduce((count,row)=>count+row.cells.filter(cell=>cell.label).length,0);
   return {bytes,template:{...prepared.template,name:title,mode:'adapt'},changes:{kind,fields,pages,
-   pageBreaks:pageBreaks+groups.filter(part=>part.startsPage).length,fittedTables,adjustedFields}};
+   pageBreaks:pageBreaks+groups.filter(part=>part.startsPage).length,fittedTables,adjustedFields,figuresInserted:insertedFigures.length}};
  });
  return result.splitParts?composeStyledReport(prepared,title,result.splitParts,kind,marginsMm):result;
 }
-export async function createPreparedForm(prepared,form){
+async function addPreparedFigure(parts,prepared,spec,resolveImage){
+ const reference=spec.referenceId?reportFigureById(prepared.analysis.structure?.figures||[],spec.referenceId):null;
+ if(!spec.assetId&&!reference)throw Error('넣을 그림 또는 참고 그림 번호를 확인하세요.');
+ let image;
+ if(spec.assetId)image=resolveImage(spec.assetId);
+ else{
+  const {HwpDocument}=await loadCore(),source=new HwpDocument(prepared.originalBytes);
+  try{image=copyReportFigure(source,reference);}finally{source.free();}
+ }
+ parts.push({role:'figure',image,reference,description:draftText(spec.description||reference?.description||'그림')});
+}
+export async function createPreparedForm(prepared,form,resolveImage){
  if(!form||!Array.isArray(form.sections)||!form.sections.length)throw Error('새 양식의 구성을 확인하세요.');
  const title=draftText(form.title),parts=[{text:title,role:'title'}];
  pushParagraphs(parts,form.introduction,'body');
+ for(const figure of form.figures||[])await addPreparedFigure(parts,prepared,figure,resolveImage);
  for(const section of form.sections){
   if(!section||!Array.isArray(section.fields)||!section.fields.length)throw Error('구역별 새 양식 항목을 확인하세요.');
   const start=parts.length;
   pushParagraphs(parts,section.heading,'heading');
   pushParagraphs(parts,section.guidance,'body');
+  for(const figure of section.figures||[])await addPreparedFigure(parts,prepared,figure,resolveImage);
   const pairs=section.pairsPerRow??prepared.analysis.structure?.formTable?.pairsPerRow??1;
   if(![1,2].includes(pairs))throw Error('한 줄에 한 쌍 또는 두 쌍의 작성 항목을 배치할 수 있습니다.');
   const fields=section.fields.map(field=>{
@@ -650,11 +674,39 @@ export async function createPreparedForm(prepared,form){
  }
  return composeStyledReport(prepared,title,parts,'blank_form',form.marginsMm);
 }
-export async function createPreparedDraft(prepared,draft,kind='styled_draft'){
+export async function getPreparedReportFigure(prepared,id){
+ const figure=reportFigureById(prepared.analysis.structure?.figures||[],id);
+ const {HwpDocument}=await loadCore(),doc=new HwpDocument(prepared.originalBytes);
+ try{return {figure:publicReportFigure(figure),bytes:readReportFigure(doc,figure)};}finally{doc.free();}
+}
+export async function getDraftReportFigures(bytes,id){
+ const {HwpDocument}=await loadCore(),doc=new HwpDocument(bytes);
+ try{
+  const figures=inventoryReportFigures(doc);
+  if(!id)return {figures:figures.map(publicReportFigure)};
+  const figure=reportFigureById(figures,id);
+  return {figure:publicReportFigure(figure),bytes:readReportFigure(doc,figure)};
+ }finally{doc.free();}
+}
+function figureReplacements(prepared,{figures=[],resolveImage}={}){
+ if(!Array.isArray(figures))throw Error('교체할 양식 그림을 확인하세요.');
+ const seen=new Set();
+ return figures.map(({referenceId,assetId,description})=>{
+  if(seen.has(referenceId))throw Error('각 그림에는 교체할 이미지 하나를 지정하세요.');
+  seen.add(referenceId);
+  return {figure:reportFigureById(prepared.analysis.structure?.figures||[],referenceId),image:resolveImage(assetId),
+   description:description===undefined?undefined:draftText(description)};
+ });
+}
+export async function createPreparedDraft(prepared,draft,kind='styled_draft',resolveImage){
  if(!draft||!Array.isArray(draft.paragraphs))throw Error('초안의 본문을 확인하세요.');
  const title=draftText(draft.title),parts=[{text:title,role:'title'}];
  for(const paragraph of draft.paragraphs){
   const role=paragraph?.role;
+  if(role==='figure'){
+   await addPreparedFigure(parts,prepared,paragraph,resolveImage);
+   continue;
+  }
   if(role==='table'){
    const {headers,rows}=paragraph;
    if(!Array.isArray(headers)||!headers.length||!Array.isArray(rows)||!rows.length||rows.some(row=>!Array.isArray(row)||row.length!==headers.length))
@@ -743,21 +795,26 @@ export async function applyPreparedReportStyle(prepared,sourceBytes,{pageSetup=f
  }finally{doc.free();}
 }
 
-export async function createPreparedExactDraft(prepared,draft){
+export async function createPreparedExactDraft(prepared,draft,images){
  if(prepared.template.mode!=='exact'||prepared.template.fields.length)throw Error('지정된 입력 표시가 있는 양식에는 answers를 사용하세요.');
  if(draft?.marginsMm)throw Error('원본 양식의 여백을 유지해야 합니다.');
  const {HwpDocument}=await loadCore(),doc=new HwpDocument(prepared.originalBytes);
  try{
   const places=prepareOutlineLocations(doc,prepared.analysis.structure),styles=prepared.analysis.structure?.styles||{};
   const before=inspectBodyFlow(doc),structure=layoutIdentity(doc,true);
+  const updated=replaceReportFigures(doc,figureReplacements(prepared,images));
   const {changes,validate,translateSource}=applyOutlineDraft(doc,places,draft,(source,part)=>applyFormatting(doc,source,draftParagraphStyle(styles,part)));
   if(layoutIdentity(doc,true)!==structure)throw Error('작성 중 원본의 표 또는 개체 구조가 변경되었습니다.');
   const originalOverflows=before.overflows.map(block=>({...block,paragraph:translateSource(block).paragraph}));
-  const layout=verifyReportFlow(HwpDocument,doc,{validate,identity:layoutIdentity(doc),originalOverflows});
-  return {bytes:layout.bytes,template:{...prepared.template,name:draft.title.trim()},changes:{...changes,pages:layout.pages,pageBreaks:layout.pageBreaks}};
+  const validateAll=target=>{
+   validate(target);
+   verifyReportFigures(target,updated.map(item=>({...item,figure:translateSource(item.figure)})));
+  };
+  const layout=verifyReportFlow(HwpDocument,doc,{validate:validateAll,identity:layoutIdentity(doc),originalOverflows,fullFramePictures:updated.flatMap(item=>item.fullFrame||[])});
+  return {bytes:layout.bytes,template:{...prepared.template,name:draft.title.trim()},changes:{...changes,pages:layout.pages,pageBreaks:layout.pageBreaks,figuresReplaced:updated.length}};
  }finally{doc.free();}
 }
-export async function fillPreparedTemplate(prepared,answers=[],sections=[]){
+export async function fillPreparedTemplate(prepared,answers=[],sections=[],images){
  if(!Array.isArray(answers)||!Array.isArray(sections)||!answers.length&&!sections.length)throw Error('작성할 양식 항목을 지정하세요.');
  if(prepared.template.mode==='adapt'){
   if(answers.length>1||answers.some(answer=>answer?.marker!=='{{보고서 제목}}')||!sections.length)
@@ -781,9 +838,10 @@ export async function fillPreparedTemplate(prepared,answers=[],sections=[]){
  try{
   const context={documentState:{documentEpoch:1,changeSeq:0,documentSha256:sha(bytes)}};
   const originalLayout=layoutIdentity(doc),before=inspectBodyFlow(doc);
+  const updated=replaceReportFigures(doc,figureReplacements(prepared,images));
   const changes=applyTextEdits(doc,prepareReportFill(doc,accepted,context));
-  const written=verifyReportFlow(HwpDocument,doc,{identity:originalLayout,originalOverflows:before.overflows});
-  return {bytes:written.bytes,template:prepared.template,changes:{...changes,initialPages:before.pageCount,pages:written.pages,pageBreaks:written.pageBreaks,missing:missing.length}};
+  const written=verifyReportFlow(HwpDocument,doc,{identity:originalLayout,originalOverflows:before.overflows,fullFramePictures:updated.flatMap(item=>item.fullFrame||[]),validate:target=>verifyReportFigures(target,updated)});
+  return {bytes:written.bytes,template:prepared.template,changes:{...changes,initialPages:before.pageCount,pages:written.pages,pageBreaks:written.pageBreaks,missing:missing.length,figuresReplaced:updated.length}};
  }finally{doc.free();}
 }
 export async function readDraftTemplate(file){

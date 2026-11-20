@@ -8,9 +8,11 @@ Apple Silicon Mac용 시험판입니다. Windows·Linux와 같은 Pwh 편집기�
 2. 압축을 풀고 `Pwh Desktop.app`을 응용 프로그램 폴더에 복사합니다.
 3. 처음 실행할 때 개발자를 확인할 수 없다는 메시지가 뜨면, 공식 배포 파일인지 확인한 뒤 **시스템 설정 → 개인정보 보호 및 보안 → 그래도 열기**에서 이 앱을 허용합니다. 관리되는 Mac은 이 방법을 제한할 수 있습니다. [Apple 안내](https://support.apple.com/ko-kr/102445)
 
-이 시험판은 Apple Developer ID 없이 임시 서명하며 Apple 공증을 받지 않았습니다. Intel Mac과 ChatGPT·Codex 연결은 첫 시험판 범위에서 제외합니다. 문서에 사용된 글꼴의 설치 여부에 따라 줄바꿈과 쪽 나눔이 달라질 수 있습니다.
+이 시험판은 Apple Developer ID 없이 임시 서명하며 Apple 공증을 받지 않았습니다. 지원 아키텍처는 Apple Silicon입니다. 문서에 사용된 글꼴의 설치 여부에 따라 줄바꿈과 쪽 나눔이 달라질 수 있습니다.
 
 앱의 **문서 열기** 또는 Finder의 **다음으로 열기 → Pwh Desktop**으로 문서를 엽니다. `⌘N`은 새 탭, `⌘O`는 열기, `⌘S`는 저장, `⌘⇧S`는 다른 이름으로 저장입니다.
+
+AI 대화와 자주 쓰는 양식은 Mac에 설치하고 ChatGPT 계정으로 로그인한 Codex CLI를 사용합니다. 직접 ChatGPT 로그인은 Windows·Linux에서 제공합니다. [Codex CLI 설치 안내](https://github.com/openai/codex)
 
 **새 업데이트가 있습니다.** 버튼은 새 Mac 패키지가 있는 GitHub 릴리스를 엽니다. 열린 문서를 저장한 뒤 기존 앱을 종료하고 새 `.app`으로 바꾸면 됩니다.
 

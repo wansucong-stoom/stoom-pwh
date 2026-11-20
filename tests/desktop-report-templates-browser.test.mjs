@@ -25,7 +25,7 @@ try{
    assert.equal(receipt?.status,'applied',JSON.stringify(response));
    return receipt.result;
   }
-  return {threadId:'synthetic',close(){},async send({note,reportTemplate,sessionId,reportRecovery,history}){
+  return {threadId:'synthetic',close(){},async send({note,reportTemplate,sessionId,reportRecovery,history,imageAssetId}){
    if(!reportTemplate){
     assert.equal(note,'신청 정보를 신청자 기본 정보로 바꿔 줘');
     assert.ok(history.some(item=>item.role==='user'&&item.text.includes('장학금 신청 서식')));
@@ -45,6 +45,62 @@ try{
     assert.ok(reportTemplate.writingLayout.some(group=>group.heading==='학습 목표'));
     return {text:'# 새 교육 계획\n\n## 학습 목표\n문제를 찾고 실험합니다.\n배운 점을 발표합니다.\n'};
    }
+   if(note==='양식 그대로 학생축제 활성화방안을 작성하고 절차 그림도 갱신해 줘'){
+    assert.equal(reportTemplate.mode,'exact');
+    assert.equal(imageAssetId,undefined);
+    const [reference]=reportTemplate.figures;
+    const listed=(await call('tools/list')).result.tools;
+    assert.ok(listed.some(item=>item.name==='pwh_desktop_draw_report_diagram'));
+    const failed=await tool('pwh_desktop_draw_report_diagram',{sessionId,referenceId:reference.id,diagram:{title:'',steps:[]}});
+    assert.equal(failed.result.isError,true);
+    const draw=await tool('pwh_desktop_draw_report_diagram',{sessionId,referenceId:reference.id,diagram:{
+     title:'학생축제 운영 흐름',layout:'flow',accent:'#295884',
+     steps:[{label:'의견 수렴',detail:'참여 수요와 개선사항 파악'},{label:'기획·공모',detail:'학생 주도 프로그램 모집'},
+      {label:'현장 운영',detail:'안전 안내와 행사 지원'},{label:'성과 환류',detail:'참여 의견을 다음 행사에 반영'}],
+    }});
+    const image=draw.result?.structuredContent;
+    assert.ok(image?.assetId,JSON.stringify(draw));
+    assert.ok(image.width>800&&image.height>400);
+    assert.ok(Math.abs(image.width/image.height-reference.widthMm/reference.heightMm)<0.02);
+    const prepared=await tool('pwh_desktop_fill_report',{sessionId,phase:'complete',
+     figures:[{referenceId:reference.id,assetId:image.assetId,description:'학생축제 운영 흐름'}],
+     draft:{title:'학생축제 활성화방안',paragraphs:[
+      {role:'heading',text:'학습 목표',level:1},
+      {role:'body',text:'학생 기획팀을 중심으로 의견을 수렴하고 참여 프로그램을 공모합니다.'},
+     ]}});
+    assert.equal(prepared.result?.structuredContent?.figuresReplaced,1,JSON.stringify(prepared));
+    const checked=await tool('pwh_desktop_read_report_figure',{sessionId,target:'draft',id:reference.id});
+    assert.equal(checked.result.structuredContent.figure.description,'학생축제 운영 흐름');
+    const png=Buffer.from(checked.result.content.find(item=>item.type==='image').data,'base64');
+    assert.equal(png.readUInt32BE(16),image.width);
+    assert.equal(png.readUInt32BE(20),image.height);
+    return {text:'학생축제 운영 흐름도를 새로 그려 조판했습니다.'};
+   }
+   if(note==='형식을 준용해 프로그램 운영안을 작성해 줘'){
+    assert.equal(reportTemplate.mode,'adapt');
+    assert.ok(imageAssetId);
+    const [reference]=reportTemplate.figures;
+    const listed=(await call('tools/list')).result.tools;
+    assert.ok(listed.some(item=>item.name==='pwh_desktop_generate_image'));
+    const review=await tool('pwh_desktop_read_report_figure',{sessionId,target:'template',id:reference.id});
+    assert.equal(review.result.structuredContent.figure.description,'예전 절차 그림');
+    const oldImage=review.result.content.find(item=>item.type==='image');
+    assert.equal(oldImage.mimeType,'image/png');
+    const prepared=await tool('pwh_desktop_fill_report',{sessionId,phase:'complete',draft:{title:'새 프로그램 운영안',paragraphs:[
+     {role:'heading',text:'추진 절차',level:1},
+     {role:'body',text:'신청을 접수하고 결과를 안내합니다.'},
+     {role:'table',headers:['업무','담당'],rows:[['접수','운영팀']]},
+     {role:'figure',referenceId:reference.id,assetId:imageAssetId,description:'갱신한 절차 그림'},
+    ]}});
+    assert.equal(prepared.result.structuredContent.figuresInserted,1);
+    const inventory=await tool('pwh_desktop_read_report_figure',{sessionId,target:'draft'});
+    const [updated]=inventory.result.structuredContent.figures;
+    assert.equal(updated.description,'갱신한 절차 그림');
+    const checked=await tool('pwh_desktop_read_report_figure',{sessionId,target:'draft',id:updated.id});
+    const updatedImage=checked.result.content.find(item=>item.type==='image');
+    assert.notEqual(updatedImage.data,oldImage.data);
+    return {text:'새 운영안과 그림을 조판했습니다.'};
+   }
    assert.match(note,/장학금 신청 서식|참고 양식의 서식/);
    assert.equal(reportTemplate.rules,'결론 먼저');
    assert.equal(reportTemplate.mode,'exact');
@@ -61,6 +117,8 @@ try{
    const sections=[{heading:'신청 정보',fields:[{label:'이름'},{label:'학번'},{label:'신청 사유',lines:7}]}];
    const submit=async(title,fields,phase='draft')=>tool('pwh_desktop_fill_report',{sessionId,phase,useMode:'adapt',form:{title,sections:fields}});
    if(reportRecovery==='missing'){
+    const missing=await tool('pwh_desktop_read_scan',{sessionId,target:'draft'});
+    assert.match(missing.error,/작업본이 아직 없습니다/);
     const form={title:'장학금 신청서 초안',sections:[{fields:[{label:'이름'}]}]};
     const kept=await tool('pwh_desktop_fill_report',{sessionId,phase:'draft',form});
     assert.equal(kept.result?.isError,true);
@@ -70,16 +128,31 @@ try{
     return {text:'항목을 더 확인합니다.'};
    }
    assert.equal(reportRecovery,'partial');
+   const earlier=(await tool('pwh_desktop_read_scan',{sessionId,target:'draft'})).result.structuredContent;
+   assert.equal(earlier.draftRevision,1);
+   assert.equal(earlier.nextCursor,null);
+   assert.ok(earlier.items.some(item=>item.text.includes('장학금 신청서 초안')));
    const revised=final?await tool('pwh_desktop_fill_report',{sessionId,phase:'complete',useMode:'adapt',applyStyle:{pageSetup:true}})
     :await submit('학생 장학금 신청서',sections);
    assert.equal(revised.result?.structuredContent?.draftRevision,2,JSON.stringify(revised));
    if(final){
     assert.equal(revised.result.structuredContent.phase,'complete');
     assert.equal(revised.result.structuredContent.kind,'applied_style');
+    const scan=(await tool('pwh_desktop_read_scan',{sessionId,target:'draft'})).result.structuredContent;
+    assert.equal(scan.draftRevision,2);
+    assert.ok(scan.items.some(item=>item.text.includes('신청자 기본 정보')));
+    const page=(await tool('pwh_desktop_read_page',{sessionId,target:'draft',page:1})).result.structuredContent;
+    assert.equal(page.draftRevision,scan.draftRevision);
+    assert.equal(page.pageCount,revised.result.structuredContent.pages);
+    assert.match(page.runs.map(run=>run.text).join(''),/학생\s*장학금\s*신청서/);
     return {text:'참고 양식의 서식을 적용했습니다.'};
    }
    const rejected=await tool('pwh_desktop_fill_report',{sessionId,phase:'draft',useMode:'adapt',form:{title:'잘못된 조판',sections:[]}});
    assert.equal(rejected.result?.isError,true);
+   const scan=(await tool('pwh_desktop_read_scan',{sessionId,target:'draft'})).result.structuredContent;
+   assert.equal(scan.draftRevision,2);
+   assert.ok(scan.items.some(item=>item.text.includes('신청 사유')));
+   assert.ok(!scan.items.some(item=>item.text.includes('교육 과정')));
    throw Error('Synthetic provider closed after verifying the draft');
   }};
  }});
@@ -94,17 +167,28 @@ test('registered templates attach to a request and typeset a separate document a
  const {chromium}=await import(process.env.PWH_PLAYWRIGHT_MODULE);
  const core=await import(pathToFileURL(process.env.PWH_CORE_JS));await core.default({module_or_path:await fs.readFile(process.env.PWH_CORE_WASM)});
  const dir=await fs.mkdtemp(path.join(os.tmpdir(),'pwh-templates-ui-')),profile=path.join(dir,'profile');
+ const macPreview=process.env.PWH_TEMPLATE_BROWSER_PLATFORM==='macos';
  process.env.PWH_STANDALONE_DATA=profile;
  await fs.mkdir(profile);
- await fs.writeFile(path.join(profile,'settings.json'),JSON.stringify({provider:'codex'}));
+ await fs.writeFile(path.join(profile,'settings.json'),JSON.stringify({provider:macPreview?'chatgpt':'codex'}));
  const fakeChild=path.join(dir,'synthetic-agent-child.mjs');await fs.writeFile(fakeChild,simulatedAgent);
  const file=path.join(dir,'합성 양식.hwpx'),doc=core.HwpDocument.createEmpty();
- try{doc.createBlankDocument();doc.pasteHtml(0,0,0,'<p><strong style="font-size:23pt">이전 추천 양식</strong></p><p><strong style="font-size:16pt">학습 목표</strong></p><p>이전 목표 내용</p><table><tr><td>업무명</td><td>기관 예시</td><td>예시 결과</td></tr></table>');await fs.writeFile(file,doc.exportHwpx());}finally{doc.free();}
+ const previousPicture=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jP1sAAAAASUVORK5CYII=','base64');
+ const newPicture=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAGAAAAAwCAIAAABhdOiYAAAAZElEQVR4nO3QMQ0AIADAMCRyIwflOICTHU0mYOmYe+nS+H4QDxAgQIAAhQMECBAgQOEAAQIECFA4QIAAAQIUDhAgQIAAhQMECBAgQOEAAQIECFA4QIAAAQIUDhAgQIAAhQP06ABAvRk88VQZjgAAAABJRU5ErkJggg==','base64');
+ try{
+  doc.createBlankDocument();
+  doc.pasteHtml(0,0,0,'<p><strong style="font-size:23pt">이전 추천 양식</strong></p><p><strong style="font-size:16pt">학습 목표</strong></p><p>이전 목표 내용</p><table><tr><td>업무명</td><td>기관 예시</td><td>예시 결과</td></tr></table><p>참고 그림 안내</p>');
+  const at=doc.getParagraphCount(0)-1,inserted=JSON.parse(doc.insertPicture(0,at,0,'[]',previousPicture,12000,6000,1,1,'png','예전 절차 그림'));
+  assert.equal(inserted.ok,true);
+  assert.equal(JSON.parse(doc.setPictureProperties(0,at,inserted.controlIdx,JSON.stringify({treatAsChar:true}))).ok,true);
+  await fs.writeFile(file,doc.exportHwpx());
+ }finally{doc.free();}
  const original=await fs.readFile(file),root=process.env.PWH_DESKTOP_SOURCE_ROOT;
  const {createWorkspaceServer}=await import(pathToFileURL(path.join(root,'workspace-shell.mjs')));
  const app=await createWorkspaceServer({
   chooseFile:async()=>({cancelled:false,path:file}),updateServices:{check:async()=>null},
-  spawnImpl(exe,args,options){return spawn(exe,[fakeChild,...args.slice(1)],{...options,env:{...options.env,PWH_TEMPLATE_TEST_HOST:pathToFileURL(path.join(root,'host.mjs')).href}});},
+  spawnImpl(exe,args,options){return spawn(exe,[fakeChild,...args.slice(1)],{...options,env:{...options.env,PWH_TEMPLATE_TEST_HOST:pathToFileURL(path.join(root,'host.mjs')).href,
+   ...(macPreview?{PWH_DESKTOP_DISTRIBUTION:'macos-preview'}:{})}});},
  });
  const browser=await chromium.launch({headless:true,executablePath:process.env.PWH_BROWSER_EXECUTABLE});
  try{
@@ -121,6 +205,14 @@ test('registered templates attach to a request and typeset a separate document a
   const child=index=>page.frameLocator('#documents iframe').nth(index);
   const editor=index=>child(index).frameLocator('#editor');
   await waitForInlineEditor(editor(0));
+  await child(0).locator('#provider-label').filter({hasText:/^Codex$/}).waitFor({state:'attached'});
+  if(macPreview){
+   await child(0).getByRole('button',{name:'대화 설정 열기'}).click({force:true});
+   const panel=child(0).getByRole('dialog',{name:'AI 연결'});
+   await panel.waitFor();
+   assert.equal(await panel.getByRole('tab',{name:'ChatGPT 계정'}).count(),0);
+   await panel.getByRole('button',{name:'설정 닫기'}).click();
+  }
   const input=editor(0).getByRole('textbox',{name:'문서 편집 입력'});
   await input.focus();await page.keyboard.insertText('교육 과정 실습을 마쳤습니다.');
   await editor(0).locator('[data-menu="format"] .menu-title').click();
@@ -219,13 +311,67 @@ test('registered templates attach to a request and typeset a separate document a
   }finally{originalStyle.free();}
   await child(3).getByRole('button',{name:'첨부 및 자주 쓰는 양식'}).click();
   await child(3).getByRole('button',{name:'양식 선택',exact:true}).click();
+  await selected.click();
+  await library.getByRole('radio',{name:/형식 준용/}).check();
+  await library.getByRole('button',{name:'요청에 첨부'}).click();
+  await child(3).locator('#image-file').setInputFiles({name:'업데이트한 절차.png',mimeType:'image/png',buffer:newPicture});
+  await child(3).getByText('업데이트한 절차.png',{exact:true}).waitFor();
+  await child(3).getByRole('textbox',{name:'요청 내용'}).fill('형식을 준용해 프로그램 운영안을 작성해 줘');
+  const adaptResponse=page.waitForResponse(response=>new URL(response.url()).pathname.endsWith('/ai/send'));
+  await child(3).getByRole('button',{name:'요청 보내기'}).click();
+  const adapted=await (await adaptResponse).json();
+  assert.ok(adapted.reportId,JSON.stringify(adapted));
+  assert.equal(adapted.text,'새 운영안과 그림을 조판했습니다.');
+  await waitForInlineEditor(editor(4));
+  const adaptedDoc=new core.HwpDocument(Uint8Array.from(await editor(4).locator('body').evaluate(()=>Array.from(window.pwhEditor.export().bytes))));
+  try{
+   const hit=text=>JSON.parse(adaptedDoc.searchAllText(text,true,true));
+   assert.equal(hit('새 프로그램 운영안').length,1);
+   assert.equal(hit('추진 절차').length,1);
+   assert.equal(hit('학습 목표').length,0);
+   assert.ok(hit('운영팀')[0].cellContext);
+   const {para,controlIndex}=JSON.parse(adaptedDoc.getControls()).find(item=>item.ctrlId==='gso');
+   assert.deepEqual(Buffer.from(adaptedDoc.getControlImageData(0,para,'[]',controlIndex)),newPicture);
+  }finally{adaptedDoc.free();}
+  await child(4).getByRole('button',{name:'첨부 및 자주 쓰는 양식'}).click();
+  await child(4).getByRole('button',{name:'양식 선택',exact:true}).click();
+  await selected.click();
+  await library.getByRole('radio',{name:/양식 그대로/}).check();
+  await library.getByRole('button',{name:'요청에 첨부'}).click();
+  await child(4).getByRole('textbox',{name:'요청 내용'}).fill('양식 그대로 학생축제 활성화방안을 작성하고 절차 그림도 갱신해 줘');
+  const festivalResponse=page.waitForResponse(response=>new URL(response.url()).pathname.endsWith('/ai/send'));
+  await child(4).getByRole('button',{name:'요청 보내기'}).click();
+  const festival=await (await festivalResponse).json();
+  assert.ok(festival.reportId,JSON.stringify(festival));
+  assert.equal(festival.text,'학생축제 운영 흐름도를 새로 그려 조판했습니다.');
+  await waitForInlineEditor(editor(5));
+  const festivalDoc=new core.HwpDocument(Uint8Array.from(await editor(5).locator('body').evaluate(()=>Array.from(window.pwhEditor.export().bytes))));
+  try{
+   const hit=text=>JSON.parse(festivalDoc.searchAllText(text,true,true));
+   assert.equal(hit('학생축제 활성화방안').length,1);
+   assert.equal(hit('학습 목표').length,1);
+   const sourceDiagram=new core.HwpDocument(original);
+   let originalProps;
+   try{
+    const originalFigure=JSON.parse(sourceDiagram.getControls()).find(item=>item.ctrlId==='gso');
+    originalProps=JSON.parse(sourceDiagram.getPictureProperties(0,originalFigure.para,originalFigure.controlIndex));
+   }finally{sourceDiagram.free();}
+   const {para,controlIndex}=JSON.parse(festivalDoc.getControls()).find(item=>item.ctrlId==='gso');
+   const properties=JSON.parse(festivalDoc.getPictureProperties(0,para,controlIndex));
+   assert.deepEqual(properties,{...originalProps,cropLeft:0,cropTop:0,cropRight:0,cropBottom:0,description:'학생축제 운영 흐름'});
+   const pic=Buffer.from(festivalDoc.getControlImageData(0,para,'[]',controlIndex));
+   assert.ok(pic.readUInt32BE(16)>800);
+   assert.ok(JSON.parse(festivalDoc.getPageControlLayout(0)).controls.some(item=>item.type==='image'));
+  }finally{festivalDoc.free();}
+  await child(5).getByRole('button',{name:'첨부 및 자주 쓰는 양식'}).click();
+  await child(5).getByRole('button',{name:'양식 선택',exact:true}).click();
   await library.getByRole('button',{name:'기관 결과보고 삭제'}).click();
   await library.getByRole('button',{name:'취소'}).click();
   await selected.waitFor();
   await library.getByRole('button',{name:'기관 결과보고 삭제'}).click();
   await library.getByRole('button',{name:'양식 삭제',exact:true}).click();
   await library.getByText('등록한 양식이 없습니다.').waitFor();
-  assert.equal(await page.locator('#documents iframe').count(),4);
+  assert.equal(await page.locator('#documents iframe').count(),6);
   assert.deepEqual(await fs.readFile(file),original);
  }finally{
   await browser.close();await new Promise(resolve=>app.server.close(resolve));
