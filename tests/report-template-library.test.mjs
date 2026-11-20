@@ -28,12 +28,13 @@ test('registered templates keep their names and rules and verify separately type
  t.after(async()=>{assert.equal(path.dirname(dir),os.tmpdir());await fs.rm(dir,{recursive:true,force:true});});
  const common=path.join(dir,'release-source'),publicSource=new URL('../desktop/standalone-pwh/',import.meta.url),desktop=path.join(dir,'desktop');
  await fs.mkdir(desktop);
- for(const file of ['report-templates.mjs','convert-hwp.mjs','desktop-body-style.mjs'])await fs.copyFile(new URL(file,publicSource),path.join(desktop,file));
+ for(const file of ['report-templates.mjs','convert-hwp.mjs','desktop-body-style.mjs','report-outline.mjs'])await fs.copyFile(new URL(file,publicSource),path.join(desktop,file));
  await fs.symlink(fileURLToPath(new URL('..',import.meta.url)),common,process.platform==='win32'?'junction':'dir').catch(async()=>{
   await fs.cp(new URL('../src/',import.meta.url),path.join(common,'src'),{recursive:true});
  });
  const {inspectBodyFlow}=await import(pathToFileURL(path.join(desktop,'desktop-body-style.mjs')).href);
- const {createReportTemplateLibrary,readDraftTemplate,fillPreparedTemplate,createPreparedForm,createPreparedDraft,applyPreparedReportStyle,analyzeReportTemplate}=await import(pathToFileURL(path.join(desktop,'report-templates.mjs')).href);
+ const {outlineDraftFromText}=await import(pathToFileURL(path.join(desktop,'report-outline.mjs')).href);
+ const {createReportTemplateLibrary,readDraftTemplate,fillPreparedTemplate,createPreparedForm,createPreparedDraft,createPreparedExactDraft,applyPreparedReportStyle,analyzeReportTemplate}=await import(pathToFileURL(path.join(desktop,'report-templates.mjs')).href);
  const profile=path.join(dir,'profile'),lib=createReportTemplateLibrary(profile);
  assert.deepEqual(await lib.list(),[]);
  await assert.rejects(lib.prepare('builtin-weekly'),/등록된 양식/);
@@ -206,6 +207,59 @@ test('registered templates keep their names and rules and verify separately type
  }finally{pairedRef.free();}
  assert.deepEqual(await fs.readFile(blankFormSource),referenceBytes);
  assert.equal(JSON.parse(await fs.readFile(recordPath,'utf8')).analysis.version,undefined);
+ const outlineSource=path.join(dir,'본래 순서.hwpx'),outlineDoc=HwpDocument.createEmpty();
+ try{
+  outlineDoc.createBlankDocument();
+  outlineDoc.pasteHtml(0,0,0,'<p><strong style="font-size:23pt">원본 교육안</strong></p><p>원본 안내</p><p><strong style="font-size:16pt">학습 목표</strong></p><p>기존 목표 본문</p><p><strong style="font-size:16pt">강의 구성</strong></p><table><tr><th>순서</th><th>활동</th></tr><tr><td>기존 번호</td><td>기존 내용</td></tr></table>');
+  await fs.writeFile(outlineSource,outlineDoc.exportHwpx());
+ }finally{outlineDoc.free();}
+ const originalOutline=await fs.readFile(outlineSource),outlineRecord=await lib.register(outlineSource,{organization:'합성 기관',name:'기존 개요'});
+ assert.deepEqual(outlineRecord.fields,[]);
+ const outlinePrepared=await lib.prepare(outlineRecord.id,'exact');
+ assert.deepEqual(outlinePrepared.template.writingLayout.flatMap(group=>group.heading||[]),['학습 목표','강의 구성']);
+ const recovered=outlineDraftFromText(['# 창업 프로그램','','## 강의 구성','교육 소개','','| 단계 | 방법 |','| --- | --- |','| 첫 활동 | 고객 인터뷰 |','| 추가 활동 | 결과 발표 |','','## 학습 목표','문제를 확인합니다.','팀과 배운 점을 나눕니다.'].join('\n'));
+ const exact=await createPreparedExactDraft(outlinePrepared,recovered);
+ const filledOutline=new HwpDocument(exact.bytes);
+ try{
+  assert.equal(exact.template.mode,'exact');
+  const position=value=>search(filledOutline,value)[0].para;
+  assert.ok(position('학습 목표')<position('문제를 확인합니다.'));
+  assert.ok(position('팀과 배운 점을 나눕니다.')<position('강의 구성'));
+  assert.equal(search(filledOutline,'창업 프로그램').length,1);
+  assert.equal(search(filledOutline,'기존 목표 본문').length,0);
+  assert.equal(search(filledOutline,'고객 인터뷰')[0].cellContext.cellIdx,3);
+  assert.equal(search(filledOutline,'결과 발표').length,1);
+  assert.equal(search(filledOutline,'활동').some(item=>item.cellContext?.cellIdx===1),true);
+ }finally{filledOutline.free();}
+ assert.deepEqual(await fs.readFile(outlineSource),originalOutline);
+ const graphic=HwpDocument.createEmpty();
+ try{
+  graphic.createBlankDocument();
+  graphic.pasteHtml(0,0,0,'<table><tr><td style="background-color:#c75252"></td></tr><tr><td><strong style="font-size:20pt">원본 표지 제목</strong></td></tr><tr><td style="background-color:#315f97"></td></tr></table><table><tr><td style="background-color:#00478d"><strong style="font-size:18pt;color:#ffffff">1</strong></td><td></td><td><strong style="font-size:16pt">기존 장제목</strong></td></tr></table><p><span style="font-size:11pt">형식 분석에 사용할 원본 본문</span></p>');
+  const analyzed=analyzeReportTemplate(graphic);
+  assert.equal(analyzed.structure.title.text,'원본 표지 제목');
+  assert.equal(analyzed.structure.headings[0].text,'기존 장제목');
+  assert.equal(analyzed.structure.formTable,null);
+  const design=await createPreparedDraft({...adapt,analysis:analyzed},{title:'새 보고서',paragraphs:[
+   {role:'heading',level:1,text:'새 운영계획'},
+   {role:'body',text:'새 본문 설명입니다.'},
+   {role:'table',headers:['항목','내용'],rows:[['대상','재학생']]},
+  ]});
+  const decorated=new HwpDocument(design.bytes);
+  try{
+   assert.equal(search(decorated,'새 운영계획').length,1);
+   assert.equal(search(decorated,'기존 장제목').length,0);
+   const [cover,banner,data]=JSON.parse(decorated.getControls()).filter(control=>control.ctrlId==='tbl');
+   const own=(table,index)=>JSON.parse(decorated.getCellOwnProperties(0,table.para,table.controlIndex,index));
+   const font=(table,index)=>JSON.parse(decorated.getCellCharPropertiesAtByPath(0,table.para,JSON.stringify([{controlIndex:table.controlIndex,cellIndex:index,cellParaIndex:0}]),0)).fontSize;
+   assert.equal(own(cover,0).fillColor.toLowerCase(),'#c75252');
+   assert.equal(own(cover,2).fillColor.toLowerCase(),'#315f97');
+   assert.equal(own(banner,0).fillColor.toLowerCase(),'#00478d');
+   assert.equal(font(banner,0),1800);
+   assert.equal(font(data,3),1100);
+  }finally{decorated.free();}
+ }finally{graphic.free();}
+ await lib.remove(outlineRecord.id);
  await lib.remove(markerless.id);
  await lib.remove(record.id);
  assert.deepEqual(await lib.list(),[]);

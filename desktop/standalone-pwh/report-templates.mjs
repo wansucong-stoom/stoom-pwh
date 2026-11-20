@@ -6,13 +6,14 @@ import config from '../release-source/src/config.mjs';
 import {styleScanSources,prepareReportFill,applyTextEdits} from '../release-source/src/text-edit.mjs';
 import {convertHwp} from './convert-hwp.mjs';
 import {inspectBodyFlow,newBodyOverflows,reflowBody} from './desktop-body-style.mjs';
+import {prepareOutlineLocations,outlineWritingLayout,applyOutlineDraft} from './report-outline.mjs';
 
 const limit=256*1024*1024;
 const idPattern=/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
 const escapeHtml=value=>value.replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',[String.fromCharCode(39)]:'&#39;'}[char]));
 const parse=value=>typeof value==='string'?JSON.parse(value):value;
-const analysisVersion=4;
+const analysisVersion=5;
 const borderSides=['borderLeft','borderRight','borderTop','borderBottom'];
 const checked=value=>{const result=parse(value);if(result?.ok===false||result?.error)throw Error(result.error||'보고서 양식을 준비하지 못했습니다.');};
 let loadedCore;
@@ -46,7 +47,29 @@ function readFormatting(doc,source){
   paragraph:take(para,['alignment','lineSpacing','lineSpacingType','marginLeft','marginRight','indent','spacingBefore','spacingAfter','headType','paraLevel','widowOrphan','keepWithNext','keepLines','fontLineHeight','englishBreakUnit','koreanBreakUnit']),
  };
 }
-function readReportStructure(doc,body,tables,tableLabel){
+function captureDecorativeTable(doc,source,dims){
+ const {section,paragraph,cellPath}=source,controlIndex=cellPath[0].controlIndex;
+ if(cellPath.length!==1||!(dims.rowCount===1&&dims.colCount>=2&&dims.colCount<=4||dims.rowCount===3&&dims.colCount===1))return null;
+ const cells=Array.from({length:dims.cellCount},(_,cellIndex)=>{
+  const pos={section,paragraph,cellPath:[{controlIndex,cellIndex,cellParaIndex:0}]};
+  const props=parse(doc.getCellOwnProperties(section,paragraph,controlIndex,cellIndex));
+  return {source:pos,text:paragraphText(doc,pos).trim(),format:readFormatting(doc,pos),width:props.width,height:props.height,
+   fill:props.fillType==='solid'?props.fillColor:null,borders:Object.fromEntries(borderSides.map(side=>[side,props[side]])),
+   padding:Object.fromEntries(['paddingLeft','paddingRight','paddingTop','paddingBottom'].map(key=>[key,props[key]]))};
+ });
+ const [first,...remaining]=cells,nonempty=remaining.filter(cell=>cell.text);
+ if(dims.rowCount===1&&/^\d{1,3}$/.test(first.text)&&nonempty.length===1&&nonempty[0].text.length<=72&&nonempty[0].format.characters.bold&&
+  (first.fill||nonempty[0].borders.borderBottom?.type)){
+  return {kind:'heading',source:nonempty[0].source,text:nonempty[0].text,number:first.text,columns:dims.colCount,cells};
+ }
+ if(dims.colCount===1&&cells[1]?.text&&cells[1].format.characters.bold&&!first.text&&!cells[2]?.text&&first.fill&&cells[2]?.fill){
+  return {kind:'cover',source:cells[1].source,text:cells[1].text,columns:1,cells};
+ }
+ return null;
+}
+function outlineAddress(source){return source.section+':'+source.paragraph;}
+
+function readReportStructure(doc,body,tables,tableLabel,decorativeTables){
  const pages=Array.from({length:Math.min(32,doc.getSectionCount())},(_,section)=>({
   paper:parse(doc.getPageDef(section)),columns:parse(doc.getColumnDef(section)),
  }));
@@ -76,10 +99,29 @@ function readReportStructure(doc,body,tables,tableLabel){
   headingsByLevel[level]??=format;
   return {text,source,level};
  });
+ const decorative=[...decorativeTables.values()].filter(Boolean);
+ const cover=decorative.find(item=>item.kind==='cover'&&item.source.section===0);
+ const banners=decorative.filter(item=>item.kind==='heading');
+ const banner=banners[0];
+ let coverMetrics;
+ if(cover){
+  const page=parse(doc.getPageRenderTree(0)).children.find(node=>node.type==='Body');
+  const blocks=page?.children.flatMap(column=>column.children||[])||[];
+  const frame=blocks.find(block=>block.type==='Table'&&block.pi===cover.source.paragraph);
+  if(frame){
+   const separatePage=doc.pageCount()>1&&!!banner&&!blocks.some(block=>block.type==='Table'&&block.pi===banner.source.paragraph);
+   // Paragraph spacing uses twice the geometry units of a table position.
+   coverMetrics={topInset:Math.max(0,Math.round((frame.bbox.y-page.bbox.y)*150)),separatePage};
+  }
+ }
+ const seenHeadings=new Set(outline.map(item=>outlineAddress(item.source)));
+ for(const {source,text} of banners)if(!seenHeadings.has(outlineAddress(source)))outline.push({source,text,level:1});
+ outline.sort((a,b)=>a.source.section-b.source.section||a.source.paragraph-b.source.paragraph);
  const note=body.find(item=>/캡션|주석|각주|caption|note/i.test(item.format.named||''));
  return {pages,tables:[...tables.values()].slice(0,48),headings:outline,
-  title:title?{text:title.text,source:title.source}:null,
-  styles:{title:title?.format,heading:headingsByLevel[1],headingsByLevel,body:bodyFormat,note:note?.format},formTable:tableLabel||null};
+  title:cover?{text:cover.text,source:cover.source}:title?{text:title.text,source:title.source}:null,
+  styles:{title:cover?.cells[1].format||title?.format,heading:banner?.cells.find(cell=>cell.text===banner.text)?.format||headingsByLevel[1],headingsByLevel,body:bodyFormat,note:note?.format},
+  decorations:{cover:cover?{columns:cover.columns,...coverMetrics,cells:cover.cells.map(({source,text,...style})=>style)}:null,heading:banner?{columns:banner.columns,headingColumn:banner.cells.findIndex(cell=>cell.text===banner.text),cells:banner.cells.map(({source,text,...style})=>style)}:null},formTable:tableLabel||null};
 }
 function boundedFields(fields){
  return fields.slice(0,64).map(({name,marker,source})=>({name,marker,section:source?.section,paragraph:source?.paragraph,cell:source?.cellPath?.at(-1)?.cellIndex}));
@@ -114,7 +156,7 @@ function formTableStyle(doc,source,info,dims){
  return style;
 }
 export function analyzeReportTemplate(doc){
- const {sources,unsupported}=styleScanSources(doc,'document'),explicit=new Map(),tables=new Map(),tableSizes=new Map(),body=[];
+ const {sources,unsupported}=styleScanSources(doc,'document'),explicit=new Map(),tables=new Map(),tableSizes=new Map(),decorativeTables=new Map(),body=[];
  let tableLabel;
  const controls=new Set(parse(doc.getControls()).map(control=>JSON.stringify([control.list,control.para])));
  const hostKey=(list,section,paragraph,control,cell)=>JSON.stringify([list,section,paragraph,control,cell]);
@@ -141,7 +183,8 @@ export function analyzeReportTemplate(doc){
   if(!dims){dims=parse(doc.getTableDimensionsByPath(source.section,source.paragraph,JSON.stringify(p)));tableSizes.set(tableKey,{rows:dims.rowCount,columns:dims.colCount,depth:p.length});}
   else dims={colCount:dims.columns,rowCount:dims.rows};
   const info=parse(doc.getCellInfoByPath(source.section,source.paragraph,JSON.stringify(p)));
-  if(!tableLabel&&info&&dims.colCount>=2&&info.col===0&&label(value,64)&&value.trim().length<=40&&!containsCellControl(source)){
+  if(!decorativeTables.has(tableKey))decorativeTables.set(tableKey,captureDecorativeTable(doc,source,dims));
+  if(!tableLabel&&!decorativeTables.get(tableKey)&&info&&dims.colCount>=2&&info.col===0&&label(value,64)&&value.trim().length<=40&&!containsCellControl(source)){
    tableLabel=formTableStyle(doc,source,info,dims);
   }
   if(!info||info.rowSpan!==1||info.colSpan!==1||![0,1].includes(info.col))continue;
@@ -162,7 +205,7 @@ export function analyzeReportTemplate(doc){
   used.add(marker);blanks.push({name,marker,source:right.source});
  }
  const fields=[...explicit.values(),...blanks];
- return {version:analysisVersion,sections:doc.getSectionCount(),paragraphs:sources.length,fields:fields.slice(0,64).map(field=>({...field,format:readFormatting(doc,field.source)})),structure:readReportStructure(doc,body,tableSizes,tableLabel),limited:fields.length>64||unsupported.length>0||tableSizes.size>48||doc.getSectionCount()>32};
+ return {version:analysisVersion,sections:doc.getSectionCount(),paragraphs:sources.length,fields:fields.slice(0,64).map(field=>({...field,format:readFormatting(doc,field.source)})),structure:readReportStructure(doc,body,tableSizes,tableLabel,decorativeTables),limited:fields.length>64||unsupported.length>0||tableSizes.size>48||doc.getSectionCount()>32};
 }
 function addBlankMarkers(doc,fields){
  for(const {source,marker,explicit} of fields){
@@ -172,13 +215,13 @@ function addBlankMarkers(doc,fields){
   checked(doc.insertTextInCellByPath(section,paragraph,JSON.stringify(cellPath),0,marker));
  }
 }
-function applyFormatting(doc,source,format){
+function applyFormatting(doc,source,format,includeEmptyCell=false){
  if(!format)return;
  const {fontFamily,fontFamilies,...characters}=format.characters;
  const {headType,paraLevel,...paragraph}=format.paragraph,p=source.cellPath&&JSON.stringify(source.cellPath);
  const length=Array.from(paragraphText(doc,source)).length;
  if(fontFamily||fontFamilies?.length===7)characters.fontIds=Array.from({length:7},(_,lang)=>doc.findOrCreateFontIdForLang(lang,fontFamilies?.[lang]||fontFamily));
- if(length&&Object.keys(characters).length)checked(p
+ if((length||includeEmptyCell&&p)&&Object.keys(characters).length)checked(p
   ?doc.applyCharFormatInCellByPath(source.section,source.paragraph,p,0,length,JSON.stringify(characters))
   :doc.applyCharFormat(source.section,source.paragraph,0,length,JSON.stringify(characters)));
  if(Object.keys(paragraph).length)checked(p
@@ -270,6 +313,11 @@ export function createReportTemplateLibrary(dataRoot){
     try{analysis=analyzeReportTemplate(doc);}finally{doc.free();}
    }
    const fields=mode==='exact'?analysis.fields:[];
+   let writingLayout;
+   if(mode==='exact'&&!fields.length){
+    const doc=new HwpDocument(originalBytes);
+    try{writingLayout=outlineWritingLayout(prepareOutlineLocations(doc,analysis.structure));}finally{doc.free();}
+   }
    if(fields.some(field=>field.source&&!field.explicit)){
     const doc=new HwpDocument(bytes);
     try{addBlankMarkers(doc,fields);bytes=Buffer.from(doc.exportHwpx());}finally{doc.free();}
@@ -277,10 +325,10 @@ export function createReportTemplateLibrary(dataRoot){
    const paper=analysis.structure?.pages[0]?.paper;
    const mm=value=>Math.round(value*25.4/72)/100;
    const page=paper?{widthMm:mm(paper.width),heightMm:mm(paper.height),marginsMm:{top:mm(paper.marginTop),bottom:mm(paper.marginBottom),left:mm(paper.marginLeft),right:mm(paper.marginRight)}}:null;
-   const {styles,formTable,tables}=analysis.structure||{};
-   const reference={name:template.name,page,roles:styles,formTable,tables};
+   const {styles,formTable,tables,decorations}=analysis.structure||{};
+   const reference={name:template.name,page,roles:styles,formTable,tables,decorations:{cover:!!decorations?.cover,numberedHeadings:!!decorations?.heading}};
    return {bytes,originalBytes,analysis,template:{...overview({...template,analysis}),reference,mode,rules:template.rules||'',
-    ...(mode==='exact'?{outline:analysis.structure?.headings.map(({text,level})=>({text,level}))||[]}:{}),fields:boundedFields(fields)}};
+    ...(mode==='exact'?{outline:analysis.structure?.headings.map(({text,level})=>({text,level}))||[],...(writingLayout?{writingLayout}:{})}:{}),fields:boundedFields(fields)}};
   },
   async saveResult(generated,conversation=[]){
    const id=randomUUID();
@@ -302,10 +350,10 @@ export function createReportTemplateLibrary(dataRoot){
   },
  };
 }
-function layoutIdentity(doc){
+function layoutIdentity(doc,ignoreBodyOffsets=false){
  const sections=Array.from({length:doc.getSectionCount()},(_,index)=>[parse(doc.getPageDef(index)),parse(doc.getColumnDef(index))]);
- const tables=parse(doc.getCursorModel()).lists.filter(cell=>cell.isCell).map(cell=>[cell.sectionIndex,cell.hostListId,cell.hostPara,cell.controlIndex,cell.cellIndex,cell.row,cell.col,cell.rowSpan,cell.colSpan]);
- const objects=parse(doc.getControls()).map(control=>[control.ctrlId,control.list,control.para,control.controlIndex]);
+ const tables=parse(doc.getCursorModel()).lists.filter(cell=>cell.isCell).map(cell=>[cell.sectionIndex,cell.hostListId,ignoreBodyOffsets&&cell.hostListId===0?null:cell.hostPara,cell.controlIndex,cell.cellIndex,cell.row,cell.col,cell.rowSpan,cell.colSpan]);
+ const objects=parse(doc.getControls()).map(control=>[control.ctrlId,control.list,ignoreBodyOffsets&&control.list===0?null:control.para,control.controlIndex]);
  return JSON.stringify({sections,tables,objects});
 }
 function fitGeneratedTables(doc,overflows){
@@ -395,7 +443,7 @@ function splitTallTables(parts,groups,controls,overflows){
   if(block.kind!=='table'||block.rect.h<=block.frame.h||!block.outside.bottom)continue;
   const index=controls.findIndex(control=>control.para===block.paragraph&&control.controlIndex===block.controlIndex);
   const group=groups[index];
-  if(!group||group.rows.length<2||chunksByPart.has(group))continue;
+  if(!group||group.design||group.rows.length<2||chunksByPart.has(group))continue;
   const heights=group.rows.map((_,row)=>block.rowHeights[row]);
   if(!heights.every(height=>height>0))continue;
   // Keep a small allowance for the table's inline anchor at the top of each page.
@@ -419,6 +467,30 @@ function splitTallTables(parts,groups,controls,overflows){
   return chunks?chunks.map((rows,index)=>index?{rows,columns:part.columns,header:part.header,startsPage:true}:{...part,rows}):[part];
  });
 }
+function decorateDraft(parts,structure){
+ const {cover,heading}=structure?.decorations||{};
+ const decorated=new Map();
+ let number=0,startsPage=false;
+ return parts.map((part,index)=>{
+  if(index===0&&part.role==='title'&&cover){
+   const group={columns:1,design:cover,rows:cover.cells.map((_,row)=>({lines:1,cells:[{span:1,text:row===1?part.text:''}]}))};
+   startsPage=cover.separatePage;
+   decorated.set(part,group);
+   return group;
+  }
+  let result;
+  if(part.role==='heading'&&(part.level??1)===1&&heading){
+   const name=part.text.replace(/^\s*\d+[.)]\s+/,'').trim()||part.text;
+   result={columns:heading.columns,design:heading,rows:[{lines:1,cells:heading.cells.map((_,column)=>({
+    span:1,text:column===0?String(++number):column===heading.headingColumn?name:' ',
+   }))}]};
+  }else result={...part,...(part.lead&&decorated.get(part.lead)?{lead:decorated.get(part.lead)}:{})};
+  if(startsPage){result.startsPage=true;startsPage=false;}
+  decorated.set(part,result);
+  return result;
+ });
+}
+
 function applyDraftMargins(doc,marginsMm){
  if(marginsMm===undefined)return;
  const keys={top:'marginTop',bottom:'marginBottom',left:'marginLeft',right:'marginRight'};
@@ -457,11 +529,14 @@ async function composeStyledReport(prepared,title,parts,kind,marginsMm){
     if(dimensions.rowCount!==rows.length||dimensions.colCount!==group.columns)throw Error('새 양식의 입력 표를 확인하지 못했습니다.');
     if(format){
      checked(target.setTableProperties(0,para,controlIndex,JSON.stringify({pageBreak:1,repeatHeader:!!group.header})));
-     if(group.startsPage)checked(target.applyParaFormat(0,para,JSON.stringify({pageBreakBefore:true})));
+     if(group.startsPage||group.design?.topInset||group.design?.headingColumn!==undefined)checked(target.applyParaFormat(0,para,JSON.stringify({
+      ...(group.startsPage?{pageBreakBefore:true}:{}),...(group.design?.topInset?{spacingBefore:group.design.topInset}:{}),
+      ...(group.design?.headingColumn!==undefined?{keepWithNext:true}:{}),
+     })));
     }
-    const widths=tableStyle?.widths;
+    const widths=group.design?group.design.cells.slice(0,group.columns).map(cell=>cell.width):tableStyle?.widths;
     const weights=widths?.length===group.columns?widths:widths?.length===4&&group.columns===2?[widths[0]+widths[2],widths[1]+widths[3]]:null;
-    const totalWidth=format&&weights?parse(target.getTableProperties(0,para,controlIndex)).tableWidth:0;
+    const totalWidth=format&&weights?(group.design?weights.reduce((sum,value)=>sum+value,0):parse(target.getTableProperties(0,para,controlIndex)).tableWidth):0;
     const totalWeight=weights?.reduce((sum,value)=>sum+value,0),resize=[];
     let cellIndex=0;
     for(const [row,{cells,lines}] of rows.entries()){
@@ -471,9 +546,20 @@ async function composeStyledReport(prepared,title,parts,kind,marginsMm){
      for(const {label,text,header,span} of cells){
       const source={section:0,paragraph:para,cellPath:[{controlIndex,cellIndex,cellParaIndex:0}]};
       const info=parse(target.getCellInfo(0,para,controlIndex,cellIndex));
-      if(info.row!==row||info.col!==column||info.colSpan!==span||paragraphText(target,source)!==(label??text??''))throw Error('새 양식의 입력 칸을 확인하지 못했습니다.');
+      if(info.row!==row||info.col!==column||info.colSpan!==span||paragraphText(target,source).trim()!==(label??text??'').trim())throw Error('새 양식의 입력 칸을 확인하지 못했습니다.');
       if(format){
        const current=parse(target.getCellOwnProperties(0,para,controlIndex,cellIndex));
+       const decorative=group.design?.cells[cellIndex];
+       if(decorative){
+        checked(target.setCellProperties(0,para,controlIndex,cellIndex,JSON.stringify({...decorative.borders,...decorative.padding,
+         height:decorative.height,...(decorative.fill?{fillType:'solid',fillColor:decorative.fill}:{fillType:'none'}),
+        })));
+        applyFormatting(target,source,decorative.format,true);
+        resize.push({cellIdx:cellIndex,widthDelta:decorative.width-current.width});
+        column+=span;
+        cellIndex++;
+        continue;
+       }
        const skin=label||header?tableStyle?.label:tableStyle?.value;
        const fillColor=skin?.fill||(header&&!tableStyle?'#e8edf3':null);
        const fill=fillColor?{fillType:'solid',fillColor}:{};
@@ -509,17 +595,19 @@ async function composeStyledReport(prepared,title,parts,kind,marginsMm){
     if(text!==expected?.text)throw Error('초안의 본문을 조판하지 못했습니다.');
     bodyAddresses.set(expected,paragraph);
     applyFormatting(doc,source,draftParagraphStyle(styles,expected));
+    if(expected.startsPage)checked(doc.applyParaFormat(0,paragraph,JSON.stringify({pageBreakBefore:true})));
    }
    if(paragraphIndex!==paragraphs.length)throw Error('초안의 본문을 조판하지 못했습니다.');
    tableControls=parse(doc.getControls()).filter(control=>control.ctrlId==='tbl'&&control.list===0);
    if(tableControls.length!==tables.length)throw Error('새 양식의 입력 표를 조판하지 못했습니다.');
    checkCells(doc,true);
   }finally{doc.endBatch();}
+  for(const [index,part] of groups.entries())if(part.design)bodyAddresses.set(part,tableControls[index].para);
   const preferredBreaks=new Map(groups.map((part,index)=>['0:'+tableControls[index].para,bodyAddresses.get(part.lead)]));
   const validate=target=>{
    checkCells(target);
    for(const [part,paragraph] of bodyAddresses)
-    if(paragraphText(target,{section:0,paragraph}).trim()!==part.text)throw Error('저장 후 본문 또는 목차 항목을 확인하지 못했습니다.');
+    if(!part.design&&paragraphText(target,{section:0,paragraph}).trim()!==part.text)throw Error('저장 후 본문 또는 목차 항목을 확인하지 못했습니다.');
   };
   const layout=verifyReportFlow(HwpDocument,doc,{validate,identity:layoutIdentity(doc),preferredBreaks,
    splitTables:overflows=>splitTallTables(parts,groups,tableControls,overflows)});
@@ -581,7 +669,7 @@ export async function createPreparedDraft(prepared,draft,kind='styled_draft'){
   pushParagraphs(parts,paragraph.text,role,paragraph.level);
  }
  if(parts.length===1)throw Error('초안에 담을 본문을 작성하세요.');
- return composeStyledReport(prepared,title,parts,kind,draft.marginsMm);
+ return composeStyledReport(prepared,title,decorateDraft(parts,prepared.analysis.structure),kind,draft.marginsMm);
 }
 export async function applyPreparedReportStyle(prepared,sourceBytes,{pageSetup=false}={}){
  if(typeof pageSetup!=='boolean')throw Error('용지 설정 적용 여부를 확인하세요.');
@@ -655,6 +743,20 @@ export async function applyPreparedReportStyle(prepared,sourceBytes,{pageSetup=f
  }finally{doc.free();}
 }
 
+export async function createPreparedExactDraft(prepared,draft){
+ if(prepared.template.mode!=='exact'||prepared.template.fields.length)throw Error('지정된 입력 표시가 있는 양식에는 answers를 사용하세요.');
+ if(draft?.marginsMm)throw Error('원본 양식의 여백을 유지해야 합니다.');
+ const {HwpDocument}=await loadCore(),doc=new HwpDocument(prepared.originalBytes);
+ try{
+  const places=prepareOutlineLocations(doc,prepared.analysis.structure),styles=prepared.analysis.structure?.styles||{};
+  const before=inspectBodyFlow(doc),structure=layoutIdentity(doc,true);
+  const {changes,validate,translateSource}=applyOutlineDraft(doc,places,draft,(source,part)=>applyFormatting(doc,source,draftParagraphStyle(styles,part)));
+  if(layoutIdentity(doc,true)!==structure)throw Error('작성 중 원본의 표 또는 개체 구조가 변경되었습니다.');
+  const originalOverflows=before.overflows.map(block=>({...block,paragraph:translateSource(block).paragraph}));
+  const layout=verifyReportFlow(HwpDocument,doc,{validate,identity:layoutIdentity(doc),originalOverflows});
+  return {bytes:layout.bytes,template:{...prepared.template,name:draft.title.trim()},changes:{...changes,pages:layout.pages,pageBreaks:layout.pageBreaks}};
+ }finally{doc.free();}
+}
 export async function fillPreparedTemplate(prepared,answers=[],sections=[]){
  if(!Array.isArray(answers)||!Array.isArray(sections)||!answers.length&&!sections.length)throw Error('작성할 양식 항목을 지정하세요.');
  if(prepared.template.mode==='adapt'){
@@ -664,7 +766,7 @@ export async function fillPreparedTemplate(prepared,answers=[],sections=[]){
   return createPreparedDraft(prepared,{title:answers[0]?.text||'작성 초안',paragraphs});
  }
  if(sections.length)throw Error('새 소제목은 형식 준용에서만 추가할 수 있습니다.');
- if(!prepared.template.fields.length)throw Error('기존 양식에 채울 항목을 찾지 못했습니다. 새 빈 양식을 만들려면 양식을 참고해 새 서식을 만들어 달라고 요청하세요.');
+ if(!prepared.template.fields.length)throw Error('표시된 입력 위치가 없는 양식입니다. draft로 원본의 목차 아래에 넣을 본문과 표 내용을 전달하세요.');
  if(answers.length>64)throw Error('작성할 양식 항목을 확인하세요.');
  const {HwpDocument}=await loadCore(),{bytes}=prepared;
  const fields=new Set(prepared.template.fields.map(field=>field.marker)),seen=new Set();

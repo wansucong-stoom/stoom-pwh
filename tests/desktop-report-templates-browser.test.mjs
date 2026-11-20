@@ -39,6 +39,12 @@ try{
     assert.deepEqual(checked.changes.overflows,[]);
     return {text:'신청자 기본 정보로 바꿨습니다.'};
    }
+   if(note==='원래 목차에 맞춰 새 교육 내용을 작성해 줘'){
+    assert.equal(reportTemplate.mode,'exact');
+    assert.deepEqual(reportTemplate.fields,[]);
+    assert.ok(reportTemplate.writingLayout.some(group=>group.heading==='학습 목표'));
+    return {text:'# 새 교육 계획\n\n## 학습 목표\n문제를 찾고 실험합니다.\n배운 점을 발표합니다.\n'};
+   }
    assert.match(note,/장학금 신청 서식|참고 양식의 서식/);
    assert.equal(reportTemplate.rules,'결론 먼저');
    assert.equal(reportTemplate.mode,'exact');
@@ -93,7 +99,7 @@ test('registered templates attach to a request and typeset a separate document a
  await fs.writeFile(path.join(profile,'settings.json'),JSON.stringify({provider:'codex'}));
  const fakeChild=path.join(dir,'synthetic-agent-child.mjs');await fs.writeFile(fakeChild,simulatedAgent);
  const file=path.join(dir,'합성 양식.hwpx'),doc=core.HwpDocument.createEmpty();
- try{doc.createBlankDocument();doc.pasteHtml(0,0,0,'<p>이전 추천 양식</p><table><tr><td>업무명</td><td>기관 예시</td><td>예시 결과</td></tr></table>');await fs.writeFile(file,doc.exportHwpx());}finally{doc.free();}
+ try{doc.createBlankDocument();doc.pasteHtml(0,0,0,'<p><strong style="font-size:23pt">이전 추천 양식</strong></p><p><strong style="font-size:16pt">학습 목표</strong></p><p>이전 목표 내용</p><table><tr><td>업무명</td><td>기관 예시</td><td>예시 결과</td></tr></table>');await fs.writeFile(file,doc.exportHwpx());}finally{doc.free();}
  const original=await fs.readFile(file),root=process.env.PWH_DESKTOP_SOURCE_ROOT;
  const {createWorkspaceServer}=await import(pathToFileURL(path.join(root,'workspace-shell.mjs')));
  const app=await createWorkspaceServer({
@@ -193,13 +199,33 @@ test('registered templates attach to a request and typeset a separate document a
    try{assert.equal(JSON.parse(finalDoc.searchAllText('신청자 기본 정보',true,true)).length,1);}finally{finalDoc.free();}
   await child(2).getByRole('button',{name:'첨부 및 자주 쓰는 양식'}).click();
   await child(2).getByRole('button',{name:'양식 선택',exact:true}).click();
+  await selected.click();
+  await library.getByRole('radio',{name:/양식 그대로/}).check();
+  await library.getByRole('button',{name:'요청에 첨부'}).click();
+  await child(2).getByRole('textbox',{name:'요청 내용'}).fill('원래 목차에 맞춰 새 교육 내용을 작성해 줘');
+  const exactResponse=page.waitForResponse(response=>new URL(response.url()).pathname.endsWith('/ai/send'));
+  await child(2).getByRole('button',{name:'요청 보내기'}).click();
+  const exact=await (await exactResponse).json();
+  assert.ok(exact.reportId,JSON.stringify(exact));
+  assert.match(exact.text,/원본 목차 아래에 조판했습니다/);
+  await waitForInlineEditor(editor(3));
+  const originalStyle=new core.HwpDocument(Uint8Array.from(await editor(3).locator('body').evaluate(()=>Array.from(window.pwhEditor.export().bytes))));
+  try{
+   const hit=text=>JSON.parse(originalStyle.searchAllText(text,true,true));
+   assert.equal(hit('학습 목표').length,1);
+   assert.equal(hit('이전 목표 내용').length,0);
+   assert.equal(hit('문제를 찾고 실험합니다.').length,1);
+   assert.equal(hit('배운 점을 발표합니다.').length,1);
+  }finally{originalStyle.free();}
+  await child(3).getByRole('button',{name:'첨부 및 자주 쓰는 양식'}).click();
+  await child(3).getByRole('button',{name:'양식 선택',exact:true}).click();
   await library.getByRole('button',{name:'기관 결과보고 삭제'}).click();
   await library.getByRole('button',{name:'취소'}).click();
   await selected.waitFor();
   await library.getByRole('button',{name:'기관 결과보고 삭제'}).click();
   await library.getByRole('button',{name:'양식 삭제',exact:true}).click();
   await library.getByText('등록한 양식이 없습니다.').waitFor();
-  assert.equal(await page.locator('#documents iframe').count(),3);
+  assert.equal(await page.locator('#documents iframe').count(),4);
   assert.deepEqual(await fs.readFile(file),original);
  }finally{
   await browser.close();await new Promise(resolve=>app.server.close(resolve));

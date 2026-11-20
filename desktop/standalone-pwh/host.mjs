@@ -11,8 +11,9 @@ import {inlineEditorImageUrls} from '../release-source/src/inline-image-urls.mjs
 import {handleRequest,TOOLS} from '../release-source/src/server.mjs';
 import {editorRewrite,editorResult,editorCapture,editorState,editorRequest} from '../release-source/src/editor-session.mjs';
 import config from '../release-source/src/config.mjs';
-import {readDraftTemplate,createReportTemplateLibrary,fillPreparedTemplate,createPreparedForm,createPreparedDraft,applyPreparedReportStyle} from './report-templates.mjs';
+import {readDraftTemplate,createReportTemplateLibrary,fillPreparedTemplate,createPreparedForm,createPreparedDraft,createPreparedExactDraft,applyPreparedReportStyle} from './report-templates.mjs';
 import {convertHwp} from './convert-hwp.mjs';
+import {outlineDraftFromText} from './report-outline.mjs';
 import {inspectBodyFlow,newBodyOverflows} from './desktop-body-style.mjs';
 import {createLocalProvider,createCodexProvider} from './ai-providers.mjs';
 import {readSettings,writeSettings,validateSettings} from './settings.mjs';
@@ -111,7 +112,7 @@ export async function createAppServer({initialBytes,initialPath,imported=false,r
    applyStyle:{type:'object',additionalProperties:false,description:'편집 중인 문서의 문장과 표 구조를 보존하고 첨부 양식의 대표 서식을 적용한 사본을 만듭니다.',properties:{pageSetup:{type:'boolean',description:'참고 양식의 용지 여백도 적용하도록 요청한 경우 true입니다.'}}},
    draft:{type:'object',additionalProperties:false,required:['title','paragraphs'],description:'대표 서식으로 새 제목·소제목·본문을 조판합니다. 채울 칸을 찾지 못했거나 새 본문이 필요한 경우 사용하세요.',
     properties:{title:{type:'string'},marginsMm:draftMargins,paragraphs:{type:'array',minItems:1,items:{oneOf:[
-     {type:'object',additionalProperties:false,required:['role','text'],properties:{role:{type:'string',enum:['heading','body','note','caption']},text:{type:'string'},level:{type:'integer',minimum:1,maximum:3}}},
+     {type:'object',additionalProperties:false,required:['role','text'],properties:{role:{type:'string',enum:['heading','body','note','caption']},text:{type:'string'},level:{type:'integer',minimum:1,maximum:3},targetId:{type:'string',description:'양식 그대로의 writingLayout에 있는 항목 ID'}}},
      {type:'object',additionalProperties:false,required:['role','headers','rows'],properties:{role:{type:'string',enum:['table']},
       headers:{type:'array',minItems:1,items:{type:'string'}},rows:{type:'array',minItems:1,items:{type:'array',items:{type:'string'}}}}},
     ]}}}},
@@ -300,13 +301,13 @@ export async function createAppServer({initialBytes,initialPath,imported=false,r
       if(Number(!!args.form)+Number(!!args.draft)+Number(!!args.applyStyle)+Number(!!(args.answers?.length||args.sections?.length))!==1)throw Error('한 번에 수행할 양식 적용, 새 문서 작성 또는 항목 입력 방식을 지정하세요.');
       const active=reportTurn,selected=active.prepared.template.mode,mode=args.useMode??selected;
       if(!['exact','adapt'].includes(mode))throw Error('양식 활용 수준을 확인하세요.');
-      if(mode==='exact'&&(args.form||args.draft||args.applyStyle))
-       throw Error('양식 그대로는 형식·목차·디자인을 유지하며 확인된 입력 항목을 채웁니다.');
+      if(mode==='exact'&&(args.form||args.applyStyle))
+       throw Error('양식 그대로는 형식·목차·디자인을 유지합니다. 원본의 작성 위치에 본문을 넣으려면 answers 또는 draft를 사용하세요.');
       const attempt=++active.attempts;
       const prepared=mode===selected?active.prepared:await reportLibrary.prepare(active.prepared.template.id,mode);
       const generated=args.form?await createPreparedForm(prepared,args.form)
        :args.applyStyle?await applyPreparedReportStyle(prepared,active.snapshot.bytes,args.applyStyle)
-       :args.draft?await createPreparedDraft(prepared,args.draft)
+       :args.draft?await (mode==='exact'?createPreparedExactDraft(prepared,args.draft):createPreparedDraft(prepared,args.draft))
        :await fillPreparedTemplate(prepared,args.answers,args.sections);
       assertTemplateSource(args.sessionId);
       if(active!==reportTurn)throw Error('이 요청의 상태가 변경되었습니다.');
@@ -453,8 +454,10 @@ export async function createAppServer({initialBytes,initialPath,imported=false,r
       if(!text)throw connectionError||Error('AI가 초안에 담을 내용을 반환하지 않았습니다.');
       const prepared=reportTurn.prepared;
       if(prepared.template.mode==='exact'){
-       reportTurn.generated={bytes:prepared.originalBytes,template:prepared.template};
-       text='양식의 입력 위치를 확인할 수 없어 원본 형식·목차·디자인을 담은 작업본을 열었습니다. 작성 내용은 아래에서 확인할 수 있습니다.\n\n'+text;
+       const draft=outlineDraftFromText(text);
+       if(!draft||prepared.template.fields.length)throw Error('작성 내용을 원본 양식에 조판하지 못했습니다. 원본 목차의 작성 위치를 확인해 주세요.');
+       reportTurn.generated=await createPreparedExactDraft(prepared,draft);
+       text='작성한 본문을 원본 목차 아래에 조판했습니다. 문서 탭에서 초안을 확인하고 이어서 수정할 수 있습니다.';
       }else{
        reportTurn.generated=await createPreparedDraft(prepared,{
         title:'작업 초안',paragraphs:[{role:'body',text}],

@@ -180,8 +180,8 @@
     {
       "path": "standalone-pwh/codex-session.mjs",
       "source": "standalone-pwh/codex-session.mjs",
-      "size": 19687,
-      "sha256": "0a20416e4f94a4dfaff70583a70332fe34aef230b6b1b16241b3f77fa44caf38"
+      "size": 20404,
+      "sha256": "74c7ce0398fe1378ac44bfd78da471066fb61e169dc9b0ed6f67a18f068275d5"
     },
     {
       "path": "standalone-pwh/convert-hwp.check.mjs",
@@ -294,8 +294,8 @@
     {
       "path": "standalone-pwh/host.mjs",
       "source": "standalone-pwh/host.mjs",
-      "size": 64911,
-      "sha256": "3f87b96f222960f8b6596cc9aec414a584af316c944a7b94c36984aee176ecb0"
+      "size": 65368,
+      "sha256": "ba953f3db2fc92ebb3d0356f2c1409c007417ef9b59ee2f0d012c6f3b9c7cdee"
     },
     {
       "path": "standalone-pwh/image-convert.ps1",
@@ -442,10 +442,16 @@
       "sha256": "39d5fc03acb74ad421b1eeb0bad5e1f8dd818b6e6e2f650bac2983ce00ad2696"
     },
     {
+      "path": "standalone-pwh/report-outline.mjs",
+      "source": "standalone-pwh/report-outline.mjs",
+      "size": 13011,
+      "sha256": "c17eeeba899281d3193eea3d7918b1cf0968933556e542abff40753d0d9ffd65"
+    },
+    {
       "path": "standalone-pwh/report-templates.mjs",
       "source": "standalone-pwh/report-templates.mjs",
-      "size": 43353,
-      "sha256": "26f0460d555c55fc4a72d00641bcb7addd7382876db4091ba305808bbd3d650f"
+      "size": 50822,
+      "sha256": "6f4394c9a826d4bb9194806d1011eb1cee1388855085190d1fd0fad99b451f4c"
     },
     {
       "path": "standalone-pwh/recovery-smoke.check.mjs",
