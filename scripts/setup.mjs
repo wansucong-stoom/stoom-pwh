@@ -181,11 +181,15 @@ export function zipEntries(bytes, {maxMember = MAX_MEMBER} = {}) {
     const name = bytes.subarray(cursor + 46, cursor + 46 + nameLength).toString(flags & 0x800 ? 'utf8' : 'latin1');
     const unixMode = bytes.readUInt32LE(cursor + 38) >>> 16;
     if ((unixMode & 0xf000) === 0xa000) throw new Error('Archive symlinks are not allowed.');
-    entries.push({ name, size, read() {
+    const crc=bytes.readUInt32LE(cursor+16);
+    function compressedData() {
       if (offset + 30 > bytes.length || bytes.readUInt32LE(offset) !== 0x04034b50) throw new Error('Malformed ZIP local header.');
       const start = offset + 30 + bytes.readUInt16LE(offset + 26) + bytes.readUInt16LE(offset + 28);
       if (start + compressed > bytes.length) throw new Error('Truncated ZIP member.');
-      const data = bytes.subarray(start, start + compressed);
+      return bytes.subarray(start, start + compressed);
+    }
+    entries.push({ name, size, raw:()=>({data:compressedData(),method,size,crc}),read() {
+      const data = compressedData();
       const decoded = method === 0 ? Buffer.from(data) : inflateRawSync(data, { maxOutputLength: maxMember });
       if (decoded.length !== size) throw new Error('ZIP member size mismatch.');
       return decoded;

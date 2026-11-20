@@ -1,7 +1,7 @@
 import {createAppServer} from './host.mjs';
 import {randomUUID} from 'node:crypto';
 
-const port=Number(process.argv[2]),initialPath=process.argv[3]||undefined,imported=process.argv[4]==='imported';
+const port=Number(process.argv[2]),initialPath=process.argv[3]||undefined,report=process.argv[4]==='report',imported=report||process.argv[4]==='imported';
 const chooseFile=process.connected?options=>new Promise((resolve,reject)=>{
  const id=randomUUID();
  const finish=(error,result)=>{
@@ -19,7 +19,7 @@ const chooseFile=process.connected?options=>new Promise((resolve,reject)=>{
  process.send({type:'choose-file',id,options},error=>{if(error)finish(error);});
 }):undefined;
 try{
- const {server,url}=await createAppServer({initialPath,imported,port,chooseFile,idleTimeoutMs:24*60*60*1000});
+ const {server,url}=await createAppServer({initialPath,imported,report,port,chooseFile,idleTimeoutMs:24*60*60*1000});
  process.stdout.write(JSON.stringify({url})+'\n');
  process.stdin.on('end',()=>{server.close();server.closeAllConnections?.();if(process.connected)process.disconnect();});
  process.stdin.resume();

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pluginVersion": "0.6.67",
+  "pluginVersion": "0.6.68",
   "copyPolicy": "Original bytes; .test.mjs filenames renamed to .check.mjs for staged-only discovery.",
   "files": [
     {
@@ -36,32 +36,32 @@
     {
       "path": "standalone-pwh/app.css",
       "source": "standalone-pwh/app.css",
-      "size": 19803,
-      "sha256": "111f190697d83a9faa8980cd60ca1fcb2dcc5fb34849812e66b77c803482bf37"
+      "size": 20656,
+      "sha256": "e84e3678114c258345aad342087649220c29dd9ee0d0f4ecec2c2f2f71372207"
     },
     {
       "path": "standalone-pwh/app.html",
       "source": "standalone-pwh/app.html",
-      "size": 15158,
-      "sha256": "7cd5244b5d98aeceecba2befaa2e88b3bb326832babdbb6c89a05e6f720d080b"
+      "size": 15606,
+      "sha256": "4f511a1e1145ae630464d805d9db602134be62f982b7d8eb046e8951f1e94fcb"
     },
     {
       "path": "standalone-pwh/app.js",
       "source": "standalone-pwh/app.js",
-      "size": 53726,
-      "sha256": "4372e547a6d861cf1ea1914ded43761dcd94d1ccbfaab34b0620300a358a93a1"
+      "size": 56994,
+      "sha256": "b2e31180faf73413203891c4b08984521a2164b880dc9fc2377c5a50a0468abb"
     },
     {
       "path": "standalone-pwh/build-desktop-editor.mjs",
       "source": "standalone-pwh/build-desktop-editor.mjs",
-      "size": 5247,
-      "sha256": "871850a7f20bad7b8634965cb90e85d3f75b1f6c9079028b8d0ba5a7d019126d"
+      "size": 5982,
+      "sha256": "a58f4e760447c29f77af02e7a89b26743b76cf5cd847b6b4990bfa987d98845c"
     },
     {
       "path": "standalone-pwh/build-msi.mjs",
       "source": "standalone-pwh/build-msi.mjs",
       "size": 16005,
-      "sha256": "c5140c38800249ee478202663458c443a75986ef5b7313fd9fcb9b360d4083cd"
+      "sha256": "e119b836c4de8eabdb2268953243a3a182011cc55a8af21f73b0f1f6739cda13"
     },
     {
       "path": "standalone-pwh/build-native-launcher.mjs",
@@ -73,7 +73,7 @@
       "path": "standalone-pwh/build-offline.mjs",
       "source": "standalone-pwh/build-offline.mjs",
       "size": 7359,
-      "sha256": "98e8a2cdd2676a87c2d4f541c0279a8e54e1193c892a297b7c7b8de8805df092"
+      "sha256": "afa6344c25a60cf55605f8e89f7edae64fd3089fe6bc668daff67d7b708529e7"
     },
     {
       "path": "standalone-pwh/build-stoom-icon.mjs",
@@ -108,14 +108,14 @@
     {
       "path": "standalone-pwh/client/editor.js",
       "source": "standalone-pwh/client/editor.js",
-      "size": 2858699,
-      "sha256": "902d1dbc585c51892026a01c11d61ae16a8b235fe7bb5234f54be121aa9fbad2"
+      "size": 2864458,
+      "sha256": "9afeb11f72487fbee9e6cf11011a040171348bf52beb4c616d0b87af6344433b"
     },
     {
       "path": "standalone-pwh/client/manifest.json",
       "source": "standalone-pwh/client/manifest.json",
       "size": 20130,
-      "sha256": "dc5af1cca2643dc533b69f76c011a428e56119fa7d93a64ed309c8b214437416"
+      "sha256": "8b11713e2308d5d977d60d175b1390d200a4b277f08ede504261e0bf24052461"
     },
     {
       "path": "standalone-pwh/codex-agent.mjs",
@@ -138,8 +138,8 @@
     {
       "path": "standalone-pwh/codex-native-host.mjs",
       "source": "standalone-pwh/codex-native-host.mjs",
-      "size": 32149,
-      "sha256": "c1d1de5dbdfaf6470d62b2c2a0b5211285721bda23c2bba2ab492358b19fab21"
+      "size": 32229,
+      "sha256": "1236e48fd760fe375c80398afacddb56d874ebd34360c69a5b90040ecf569b2f"
     },
     {
       "path": "standalone-pwh/CODEX-NOTICE.txt",
@@ -180,8 +180,8 @@
     {
       "path": "standalone-pwh/codex-session.mjs",
       "source": "standalone-pwh/codex-session.mjs",
-      "size": 10784,
-      "sha256": "582307bd0cef6d3373a6f279ad48864b1717153bd21fadbceb87285278649f56"
+      "size": 13630,
+      "sha256": "581de18c7462bab8d8d560c47365a9283b3d08bc41810b70c9d859edafe4d443"
     },
     {
       "path": "standalone-pwh/convert-hwp.check.mjs",
@@ -198,8 +198,8 @@
     {
       "path": "standalone-pwh/desktop-body-style.mjs",
       "source": "standalone-pwh/desktop-body-style.mjs",
-      "size": 6338,
-      "sha256": "a576fe41a239ee2a08cd2f50d3c1172a944f10dcfa0e117905fba9272792ccdd"
+      "size": 13014,
+      "sha256": "416f255c9f9aada6399a8113abb0898a535285275161a5e8f6fa261e634d33d5"
     },
     {
       "path": "standalone-pwh/desktop-distribution.mjs",
@@ -234,8 +234,8 @@
     {
       "path": "standalone-pwh/document-menu-tools.mjs",
       "source": "standalone-pwh/document-menu-tools.mjs",
-      "size": 1477,
-      "sha256": "7de109344fb1ff7755705bb8ffcccdecc82b8e4272e571651993073f87af363e"
+      "size": 2317,
+      "sha256": "984a91d7d056e72636b433e2485ba5fa3c867fcecf3530cfe2cd416f6b6f68a3"
     },
     {
       "path": "standalone-pwh/document-scan.mjs",
@@ -294,8 +294,8 @@
     {
       "path": "standalone-pwh/host.mjs",
       "source": "standalone-pwh/host.mjs",
-      "size": 48517,
-      "sha256": "60caba1df1123a2bc5183b76c98ec522209d77567d77fba9fb66933bbcbb51b2"
+      "size": 74452,
+      "sha256": "8d80223e6cee3ce298fe81e5eaa5f6fc786bf96336bad4d1765d532a422f9b0a"
     },
     {
       "path": "standalone-pwh/image-convert.ps1",
@@ -442,6 +442,42 @@
       "sha256": "39d5fc03acb74ad421b1eeb0bad5e1f8dd818b6e6e2f650bac2983ce00ad2696"
     },
     {
+      "path": "standalone-pwh/report-diagram-canvas.mjs",
+      "source": "standalone-pwh/report-diagram-canvas.mjs",
+      "size": 5352,
+      "sha256": "5b82774e6f99aaaf2271da6b98738bc2f5bd9fa085b835d38cefbbfa70e11214"
+    },
+    {
+      "path": "standalone-pwh/report-diagram.mjs",
+      "source": "standalone-pwh/report-diagram.mjs",
+      "size": 1954,
+      "sha256": "4124bd3073708f907f89054e10aa89559f71d9a92640e2394b9f2f390a68e576"
+    },
+    {
+      "path": "standalone-pwh/report-figures.mjs",
+      "source": "standalone-pwh/report-figures.mjs",
+      "size": 9775,
+      "sha256": "ed242769520afd17be24a90c9c3bfd711061369f119ce03ef9f160000e63ac6a"
+    },
+    {
+      "path": "standalone-pwh/report-outline.mjs",
+      "source": "standalone-pwh/report-outline.mjs",
+      "size": 13011,
+      "sha256": "c17eeeba899281d3193eea3d7918b1cf0968933556e542abff40753d0d9ffd65"
+    },
+    {
+      "path": "standalone-pwh/report-templates.mjs",
+      "source": "standalone-pwh/report-templates.mjs",
+      "size": 54556,
+      "sha256": "430a6f925ba2b57b15713beae8f12c008651e9bb0132c04230f19532f92e90e3"
+    },
+    {
+      "path": "standalone-pwh/report-writing-workflow.mjs",
+      "source": "standalone-pwh/report-writing-workflow.mjs",
+      "size": 8485,
+      "sha256": "7b675310eee2e2481807cd1b0f04ba3e61b50e15d1d1748d3f09f543c5bba8c3"
+    },
+    {
       "path": "standalone-pwh/recovery-smoke.check.mjs",
       "source": "standalone-pwh/recovery-smoke.test.mjs",
       "size": 2944,
@@ -577,7 +613,7 @@
       "path": "standalone-pwh/version.json",
       "source": "standalone-pwh/version.json",
       "size": 21,
-      "sha256": "7f9fdea3acc760f9b72d00e4e2392d2baa874019711e89defbea7cda9422aaf0"
+      "sha256": "e790660e0582ce11eeba104e19d7ac6e2cd94385db41220094c4543363ef9589"
     },
     {
       "path": "standalone-pwh/window-close-controller.mjs",
@@ -588,8 +624,8 @@
     {
       "path": "standalone-pwh/workspace-child.mjs",
       "source": "standalone-pwh/workspace-child.mjs",
-      "size": 1396,
-      "sha256": "71e36854509d3cae7167f56b2e746309eaf7ca5b3fd904076b5ce90b8885d409"
+      "size": 1445,
+      "sha256": "3f051c44b77155a3bba4c5e5ff0043af9898bbef2e1ea783b7a91a226a13646a"
     },
     {
       "path": "standalone-pwh/workspace-shell.check.mjs",
@@ -600,26 +636,26 @@
     {
       "path": "standalone-pwh/workspace-shell.mjs",
       "source": "standalone-pwh/workspace-shell.mjs",
-      "size": 17171,
-      "sha256": "e4f37827f3269e6b497a4874de8760dfb31c484aad892c31880642d9c83f894b"
+      "size": 18427,
+      "sha256": "6d925b8ef780c0e0133947183b45fe63b6c9997fc1a440003e61dc7c9efac87e"
     },
     {
       "path": "standalone-pwh/workspace.css",
       "source": "standalone-pwh/workspace.css",
-      "size": 7830,
-      "sha256": "de3bf0f55beed5b2d403f48059fcebe49e3420302a9860f08625b9eaac9baf6d"
+      "size": 10519,
+      "sha256": "2e90d4c150f0484e5f6a264c19e607463b67151f80a636c09296a7c3e5ffbafe"
     },
     {
       "path": "standalone-pwh/workspace.html",
       "source": "standalone-pwh/workspace.html",
-      "size": 2953,
-      "sha256": "4bd7f5a2daaf5058402e6fba7681bb8fa9d0145dc2debe19bfc0ace023aa67fb"
+      "size": 6299,
+      "sha256": "0537f91b9419223b3a130a2304d1ca8c12d37ea28081039a7b24a2c89daf10ae"
     },
     {
       "path": "standalone-pwh/workspace.js",
       "source": "standalone-pwh/workspace.js",
-      "size": 22827,
-      "sha256": "a5643908f752331b05cf17c8943058c0002002bd3a3feef507da44b661463559"
+      "size": 29664,
+      "sha256": "fec5439f42d63121b435f6113615e7515ecc7ee7de657e3083480547da3ba19c"
     }
   ]
 }

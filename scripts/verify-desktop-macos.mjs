@@ -50,6 +50,7 @@ export async function verifyMacDesktop(app){
   const editor=()=>visibleTab().frameLocator('#editor');
   await waitForInlineEditor(editor());
   await page.waitForFunction(()=>document.body.classList.contains('integrated-tabs'));
+  await visibleTab().locator('#provider-label').filter({hasText:/^Codex$/}).waitFor({state:'attached'});
   const text='맥용 Pwh 편집 시험';
   await editor().getByRole('textbox',{name:'문서 편집 입력'}).focus();
   await page.keyboard.insertText(text);
@@ -74,7 +75,7 @@ export async function verifyMacDesktop(app){
   await page.waitForFunction(()=>document.body.classList.contains('integrated-tabs'));
   assert.equal(await editor().locator('body').evaluate(()=>window.pwhEditor.context().paragraph?.text),'Mac HWP import');
   assert.deepEqual(await fs.readFile(hwp),hwpBefore);
-  return {electronWindow:true,newDocument:true,koreanText:true,commandSave:true,savedAndReopenedHwpx:true,openedLegacyHwp:true,originalPreserved:true};
+  return {electronWindow:true,newDocument:true,koreanText:true,commandSave:true,savedAndReopenedHwpx:true,openedLegacyHwp:true,originalPreserved:true,codexConnectionVisible:true};
  }finally{
   if(electron){
    const child=electron.process();

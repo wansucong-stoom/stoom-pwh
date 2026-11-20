@@ -27,6 +27,7 @@ export const ribbonTabs=[
   group('문자',[item('insert:symbols','문자표','symbols')])
  ]},
  {id:'format',label:'서식',groups:[
+  group('양식',[item('pwh:register-report-template','양식 등록','page')]),
   group('스타일',[{special:'styles',label:'문서 스타일',icon:'styles'},item('format:style-dialog','스타일 설정','styles')]),
   group('글자',[item('format:char-shape','글자 모양','character'),item('format:bold','진하게','bold',{toggle:true}),item('format:italic','기울임','italic',{toggle:true}),item('format:underline','밑줄','underline',{toggle:true}),item('format:strikethrough','취소선','strike',{toggle:true}),item('format:font-size-increase','글자 크게','text-plus'),item('format:font-size-decrease','글자 작게','text-minus')]),
   group('문단',[item('format:para-shape','문단 모양','paragraph'),item('format:align-left','왼쪽 정렬','align-left'),item('format:align-center','가운데 정렬','align-center'),item('format:align-right','오른쪽 정렬','align-right'),item('format:align-justify','양쪽 정렬','align-justify')]),

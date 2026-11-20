@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   package:
-    if: github.event_name == 'workflow_dispatch' || (!github.event.release.draft && !github.event.release.prerelease)
+    if: github.event_name == 'workflow_dispatch' || (!github.event.release.draft && !github.event.release.prerelease && !contains(join(github.event.release.assets.*.name, ' '), '-linux-x64.tar.gz'))
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4

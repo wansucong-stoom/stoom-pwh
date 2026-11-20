@@ -110,6 +110,7 @@ export async function discoverCodex({ env = process.env, platform = process.plat
   }
   const pathValue = env.PATH || env.Path || '';
   const dirs = [...pathValue.split(platform === 'win32' ? ';' : path.delimiter), path.join(home, '.local', 'bin')];
+  if (platform === 'darwin') dirs.push('/opt/homebrew/bin', '/usr/local/bin');
   for (const raw of dirs) {
     const dir = raw.trim().replace(/^"|"$/g, '');
     if (!dir || !path.isAbsolute(dir)) continue;

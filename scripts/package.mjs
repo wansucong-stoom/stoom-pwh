@@ -4,11 +4,12 @@ import path from 'node:path';
 import os from 'node:os';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {createHash, randomUUID} from 'node:crypto';
-import {deflateRawSync} from 'node:zlib';
+import {writeZipMembers} from './zip-writer.mjs';
 import {assertEditorBuildInputs,assertPortableEditorBundle} from './editor-build-contract.mjs';
 
 const PROJECT_ROOT = fileURLToPath(new URL('../', import.meta.url));
 const FILES = Object.freeze([
+  'scripts/zip-writer.mjs',
   'scripts/patch-picture-drag.mjs', 'scripts/patch-background-recovery.mjs',
   'scripts/patch-auto-fill.mjs', 'scripts/patch-dialog-focus.mjs',
   'scripts/patch-table-resize-grid.mjs',
@@ -142,47 +143,10 @@ function validate(entries) {
   return {version: pkg.version, manifestFiles: ['plugin.json', '.codex-plugin/plugin.json', 'mcp.json', '.mcp.json', 'package.json']};
 }
 
-const CRC_TABLE = Uint32Array.from({length: 256}, (_, index) => {
-  for (let bit = 0; bit < 8; bit++) index = (index >>> 1) ^ ((index & 1) ? 0xedb88320 : 0);
-  return index >>> 0;
-});
-function crc32(bytes) {
-  let crc = 0xffffffff;
-  for (const byte of bytes) crc = CRC_TABLE[(crc ^ byte) & 255] ^ (crc >>> 8);
-  return (crc ^ 0xffffffff) >>> 0;
-}
-
 function makeZip(entries) {
-  const local = [], central = [];
-  let offset = 0, centralBytes = 0;
-  const records = [['', Buffer.alloc(0)], ...[...entries].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)];
-  if (records.length > 65535) throw new Error('Too many source files for ZIP32.');
-  for (const [relative, bytes] of records) {
-    const directory = relative === '', name = Buffer.from(`pwh/${relative}`, 'utf8');
-    const compressed = directory ? bytes : deflateRawSync(bytes, {level: 9});
-    const method = directory ? 0 : 8, crc = crc32(bytes);
-    const header = Buffer.alloc(30);
-    header.writeUInt32LE(0x04034b50, 0); header.writeUInt16LE(20, 4);
-    header.writeUInt16LE(0x800, 6); header.writeUInt16LE(method, 8);
-    header.writeUInt16LE(0x21, 12); // Fixed 1980-01-01: source bytes determine ZIP bytes.
-    header.writeUInt32LE(crc, 14); header.writeUInt32LE(compressed.length, 18);
-    header.writeUInt32LE(bytes.length, 22); header.writeUInt16LE(name.length, 26);
-    local.push(header, name, compressed);
-    const record = Buffer.alloc(46);
-    record.writeUInt32LE(0x02014b50, 0); record.writeUInt16LE(0x0314, 4);
-    record.writeUInt16LE(20, 6); record.writeUInt16LE(0x800, 8); record.writeUInt16LE(method, 10);
-    record.writeUInt16LE(0x21, 14); record.writeUInt32LE(crc, 16);
-    record.writeUInt32LE(compressed.length, 20); record.writeUInt32LE(bytes.length, 24);
-    record.writeUInt16LE(name.length, 28);
-    record.writeUInt32LE(directory ? ((0o40755 << 16) | 0x10) >>> 0 : (0o100644 << 16) >>> 0, 38);
-    record.writeUInt32LE(offset, 42);
-    central.push(record, name); centralBytes += record.length + name.length;
-    offset += header.length + name.length + compressed.length;
-  }
-  const end = Buffer.alloc(22);
-  end.writeUInt32LE(0x06054b50, 0); end.writeUInt16LE(records.length, 8);
-  end.writeUInt16LE(records.length, 10); end.writeUInt32LE(centralBytes, 12); end.writeUInt32LE(offset, 16);
-  return Buffer.concat([...local, ...central, end]);
+  const members = [...entries].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)
+    .map(([relative, bytes]) => ({name: 'pwh/'+relative, bytes}));
+  return writeZipMembers([{name:'pwh/',bytes:Buffer.alloc(0)},...members]);
 }
 
 export async function packagePlugin({output} = {}) {

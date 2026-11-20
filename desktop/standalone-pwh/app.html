@@ -18,9 +18,10 @@
     <p id="conversation-status" role="status" hidden></p>
     <div class="composer">
       <label class="sr-only" for="prompt">요청 내용</label><textarea id="prompt" placeholder="문서에 요청할 내용을 입력하세요"></textarea>
+      <div id="attached-template" hidden><span id="attached-template-name"></span><button id="remove-template" type="button" aria-label="첨부 양식 제거">×</button></div>
       <div id="attached-image" hidden><span id="attached-image-name"></span><button id="remove-image" type="button" aria-label="첨부 그림 제거">×</button></div>
       <div class="composer-actions">
-        <button id="attach-image" class="icon-button" type="button" title="그림 첨부" aria-label="그림 첨부"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><input id="image-file" type="file" accept="image/png,image/jpeg" hidden>
+        <button id="attach-image" class="icon-button" type="button" title="첨부 및 자주 쓰는 양식" aria-label="첨부 및 자주 쓰는 양식" aria-expanded="false" aria-controls="attachment-menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button><div id="attachment-menu" hidden><button id="attach-picture-action" type="button">그림 첨부</button><button id="attach-template-action" type="button">양식 선택</button></div><input id="image-file" type="file" accept="image/png,image/jpeg" hidden>
         <button id="composer-settings" class="icon-button" type="button" title="대화 설정" aria-label="대화 설정 열기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h6m4 0h6M4 17h10m4 0h2"/><circle cx="12" cy="7" r="2"/><circle cx="16" cy="17" r="2"/></svg></button>
         <span class="composer-spacer"></span>
         <details id="model-menu"><summary id="composer-model" aria-label="모델과 추론 강도 선택">모델 선택</summary><div class="model-panel"><h2>대화 모델</h2><label for="quick-model">Codex 모델</label><select id="quick-model"><option value="">기본 모델</option></select><label for="quick-effort">추론 강도</label><select id="quick-effort"><option value="">모델 기본값</option></select><div class="model-panel-actions"><span id="quick-status" role="status"></span><button id="quick-apply" type="button">적용</button></div></div></details>
