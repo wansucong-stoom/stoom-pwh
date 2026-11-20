@@ -14,6 +14,8 @@ test('template writing instructions give each current user request priority over
  assert.match(prompt,/숫자가 작은 높은 순위의 지침을 적용/);
  assert.match(prompt,/text를 빈 문자열로 전달/);
  assert.match(prompt,/소제목 추가는 형식 준용에서 지원/);
+ assert.match(prompt,/형식 준용 기준/);
+ assert.match(prompt,/실제 본문 폭에 맞추고/);
  assert.match(prompt,/새 신청서·평가표 등 빈 양식을 만드는 요청에는 pwh_desktop_fill_report의 form/);
  const noRules=buildReportPrompt({...base,reportTemplate:{mode:'adapt',rules:'',fields:[]}});
  assert.doesNotMatch(noRules,/2순위 사용자가/);
@@ -26,11 +28,12 @@ test('registered templates keep their names and rules and verify separately type
  t.after(async()=>{assert.equal(path.dirname(dir),os.tmpdir());await fs.rm(dir,{recursive:true,force:true});});
  const common=path.join(dir,'release-source'),publicSource=new URL('../desktop/standalone-pwh/',import.meta.url),desktop=path.join(dir,'desktop');
  await fs.mkdir(desktop);
- for(const file of ['report-templates.mjs','convert-hwp.mjs'])await fs.copyFile(new URL(file,publicSource),path.join(desktop,file));
+ for(const file of ['report-templates.mjs','convert-hwp.mjs','desktop-body-style.mjs'])await fs.copyFile(new URL(file,publicSource),path.join(desktop,file));
  await fs.symlink(fileURLToPath(new URL('..',import.meta.url)),common,process.platform==='win32'?'junction':'dir').catch(async()=>{
   await fs.cp(new URL('../src/',import.meta.url),path.join(common,'src'),{recursive:true});
  });
- const {createReportTemplateLibrary,readDraftTemplate,fillPreparedTemplate,createPreparedForm,createPreparedDraft}=await import(pathToFileURL(path.join(desktop,'report-templates.mjs')).href);
+ const {inspectBodyFlow}=await import(pathToFileURL(path.join(desktop,'desktop-body-style.mjs')).href);
+ const {createReportTemplateLibrary,readDraftTemplate,fillPreparedTemplate,createPreparedForm,createPreparedDraft,applyPreparedReportStyle,analyzeReportTemplate}=await import(pathToFileURL(path.join(desktop,'report-templates.mjs')).href);
  const profile=path.join(dir,'profile'),lib=createReportTemplateLibrary(profile);
  assert.deepEqual(await lib.list(),[]);
  await assert.rejects(lib.prepare('builtin-weekly'),/등록된 양식/);
@@ -124,14 +127,52 @@ test('registered templates keep their names and rules and verify separately type
   for(let page=0;page<longDoc.pageCount();page++)shown+=JSON.parse(longDoc.getPageTextLayout(page)).runs.map(run=>run.text).join(' ');
   assert.match(shown,/입력 항목\s+103/);
   assert.match(shown,/둘째 안내/);
+  assert.deepEqual(inspectBodyFlow(longDoc).overflows,[]);
  }finally{longDoc.free();}
- const flexible=await createPreparedDraft(legacyDraft,{title:'참고 양식으로 쓴 본문',paragraphs:[{role:'heading',text:'주요 내용'},{role:'body',text:'신청 기간 미정\n마감일 확인 필요'}]});
+ const flexible=await createPreparedDraft(legacyDraft,{title:'참고 양식으로 쓴 본문',marginsMm:{bottom:10},paragraphs:[{role:'heading',text:'주요 내용'},{role:'body',text:'신청 기간 미정\n마감일 확인 필요'}]});
  const styled=new HwpDocument(flexible.bytes);
  try{
   assert.equal(search(styled,'신청 기간 미정').length,1);
   assert.equal(search(styled,'마감일 확인 필요').length,1);
   assert.equal(JSON.parse(styled.getPageDef(0)).marginTop,7200);
+  assert.equal(JSON.parse(styled.getPageDef(0)).marginBottom,2835);
+  assert.deepEqual(inspectBodyFlow(styled).overflows,[]);
  }finally{styled.free();}
+ const sourceDoc=HwpDocument.createEmpty();
+ let content;
+ try{
+  sourceDoc.createBlankDocument();
+  sourceDoc.pasteHtml(0,0,0,'<p>현재 신청서 머리말</p><p>유지할 본문</p><table><tr><td>제출 기한</td><td>미정</td></tr></table>');
+  content=Buffer.from(sourceDoc.exportHwpx());
+ }finally{sourceDoc.free();}
+ const restyled=await applyPreparedReportStyle(legacyDraft,content,{pageSetup:true});
+ const applied=new HwpDocument(restyled.bytes);
+ try{
+  assert.equal(restyled.changes.kind,'applied_style');
+  assert.equal(search(applied,'현재 신청서 머리말').length,1);
+  assert.equal(search(applied,'유지할 본문').length,1);
+  assert.equal(search(applied,'미정')[0].cellContext.cellIdx,1);
+  assert.equal(search(applied,'기존 추천 대상').length,0);
+  assert.equal(JSON.parse(applied.getCharPropertiesAt(0,0,0)).fontSize,2300);
+  assert.equal(JSON.parse(applied.getPageDef(0)).marginTop,7200);
+  assert.deepEqual(inspectBodyFlow(applied).overflows,[]);
+ }finally{applied.free();}
+ const pairedRef=HwpDocument.createEmpty();
+ try{
+  pairedRef.createBlankDocument();
+  pairedRef.pasteHtml(0,0,0,'<p>참고 신청서</p><table><tr><td style="background-color:#b0b0b0">직급</td><td>예시</td><td style="background-color:#b0b0b0">소속</td><td>예시</td></tr></table>');
+  const analyzed=analyzeReportTemplate(pairedRef);
+  assert.equal(analyzed.structure.formTable.pairsPerRow,2);
+  const paired=await createPreparedForm({...legacyDraft,analysis:analyzed},{title:'신청서',sections:[{fields:[{label:'성명'},{label:'학번'},{label:'신청 사유',lines:5}]}]});
+  const rows=new HwpDocument(paired.bytes);
+  try{
+   const {para,controlIndex}=JSON.parse(rows.getControls()).find(item=>item.ctrlId==='tbl');
+   assert.equal(JSON.parse(rows.getTableDimensions(0,para,controlIndex)).colCount,4);
+   assert.equal(JSON.parse(rows.getCellInfo(0,para,controlIndex,5)).colSpan,3);
+   assert.equal(paired.changes.fields,3);
+   assert.deepEqual(inspectBodyFlow(rows).overflows,[]);
+  }finally{rows.free();}
+ }finally{pairedRef.free();}
  assert.deepEqual(await fs.readFile(blankFormSource),referenceBytes);
  assert.equal(JSON.parse(await fs.readFile(recordPath,'utf8')).analysis.version,undefined);
  await lib.remove(markerless.id);

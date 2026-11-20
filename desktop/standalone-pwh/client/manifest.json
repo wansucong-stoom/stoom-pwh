@@ -1,20 +1,20 @@
 {
-  "sha256": "34559552e3f2bdbd6af3d3491765bc4ee2330894fdb7901ef5565a6a9ccf8b1f",
+  "sha256": "824af615c52a8be0d4a159bbda1d11f77afb4f49f54b5a1811e34f40af8bbb8a",
   "baseVersion": "0.6.67",
   "baseEditorSha256": "af80f03e7b5bf1d506f6f9f6d2e49fed10ed17bb8d6bc0571aef80959d953a47",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "desktop",
-    "sha256": "9946cdc53a388efbda552b3313d17210d8ddafea356c357c2fc265ce880d1768",
+    "sha256": "2ef86adcdd31472bdad299fd4200f437b47786a1e8ba1c526233431d9100070a",
     "files": [
       {
         "path": "desktop/standalone-pwh/build-desktop-editor.mjs",
-        "sha256": "d7b79e12d24045f7079df5a7abc4be6d59ea422424b469e49c55c306d20de20a"
+        "sha256": "a58f4e760447c29f77af02e7a89b26743b76cf5cd847b6b4990bfa987d98845c"
       },
       {
         "path": "desktop/standalone-pwh/desktop-body-style.mjs",
-        "sha256": "a576fe41a239ee2a08cd2f50d3c1172a944f10dcfa0e117905fba9272792ccdd"
+        "sha256": "416f255c9f9aada6399a8113abb0898a535285275161a5e8f6fa261e634d33d5"
       },
       {
         "path": "desktop/standalone-pwh/table-plan.mjs",

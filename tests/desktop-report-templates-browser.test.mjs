@@ -20,7 +20,7 @@ try{
   async function ticket(name,args){
    const queued=(await tool(name,args)).result?.structuredContent;
    assert.ok(queued?.ticketId);
-   const response=await tool('pwh_editor_result',{ticketId:queued.ticketId});
+   const response=await tool(name==='pwh_desktop_page_flow'?'pwh_desktop_result':'pwh_editor_result',{ticketId:queued.ticketId});
    const receipt=response.result?.structuredContent;
    assert.equal(receipt?.status,'applied',JSON.stringify(response));
    return receipt.result;
@@ -34,9 +34,12 @@ try{
     const search=await ticket('pwh_editor_text_search',{sessionId,expected:state.context,query:'신청 정보'});
     assert.equal(search.textSearch.hits.length,1);
     await ticket('pwh_editor_text_edit',{sessionId,expected:state.context,edits:[{searchId:search.textSearch.searchId,matchId:search.textSearch.hits[0].id,replacement:'신청자 기본 정보'}]});
+    const after=(await tool('pwh_editor_state',{sessionId})).result.structuredContent;
+    const checked=await ticket('pwh_desktop_page_flow',{sessionId,expected:after.context.documentState,count:2});
+    assert.deepEqual(checked.changes.overflows,[]);
     return {text:'신청자 기본 정보로 바꿨습니다.'};
    }
-   assert.match(note,/장학금 신청 서식/);
+   assert.match(note,/장학금 신청 서식|참고 양식의 서식/);
    assert.equal(reportTemplate.rules,'결론 먼저');
    assert.equal(reportTemplate.mode,'exact');
    assert.deepEqual(reportTemplate.fields,[]);
@@ -57,9 +60,14 @@ try{
     return {text:'항목을 더 확인합니다.'};
    }
    assert.equal(reportRecovery,'partial');
-   const revised=await submit(final?'학생 장학금 신청서 최종본':'학생 장학금 신청서',sections,final?'complete':'draft');
+   const revised=final?await tool('pwh_desktop_fill_report',{sessionId,phase:'complete',applyStyle:{pageSetup:true}})
+    :await submit('학생 장학금 신청서',sections);
    assert.equal(revised.result?.structuredContent?.draftRevision,2,JSON.stringify(revised));
-   if(final){assert.equal(revised.result.structuredContent.phase,'complete');return {text:'신청서 최종본을 작성했습니다.'};}
+   if(final){
+    assert.equal(revised.result.structuredContent.phase,'complete');
+    assert.equal(revised.result.structuredContent.kind,'applied_style');
+    return {text:'참고 양식의 서식을 적용했습니다.'};
+   }
    const rejected=await tool('pwh_desktop_fill_report',{sessionId,phase:'draft',form:{title:'잘못된 조판',sections:[]}});
    assert.equal(rejected.result?.isError,true);
    throw Error('Synthetic provider closed after verifying the draft');
@@ -158,7 +166,9 @@ test('registered templates attach to a request and typeset a separate document a
   await child(1).getByRole('textbox',{name:'요청 내용'}).fill('신청 정보를 신청자 기본 정보로 바꿔 줘');
   const editResponse=page.waitForResponse(response=>new URL(response.url()).pathname.endsWith('/ai/send'));
   await child(1).getByRole('button',{name:'요청 보내기'}).click();
-  assert.equal((await (await editResponse).json()).text,'신청자 기본 정보로 바꿨습니다.');
+  const followup=await (await editResponse).json();
+  assert.equal(followup.text,'신청자 기본 정보로 바꿨습니다.',JSON.stringify(followup));
+  assert.deepEqual(followup.layout.remaining,[]);
   const revised=new core.HwpDocument(Uint8Array.from(await editor(1).locator('body').evaluate(()=>Array.from(window.pwhEditor.export().bytes))));
   try{assert.equal(JSON.parse(revised.searchAllText('신청자 기본 정보',true,true)).length,1);}finally{revised.free();}
   assert.equal(await page.locator('#documents iframe').count(),2,'follow-up applies to the draft without opening another tab');
@@ -168,15 +178,15 @@ test('registered templates attach to a request and typeset a separate document a
   await selected.click();
   await library.getByRole('radio',{name:/양식 그대로/}).check();
   await library.getByRole('button',{name:'요청에 첨부'}).click();
-  await child(1).getByRole('textbox',{name:'요청 내용'}).fill('장학금 신청 서식 최종본을 작성해 줘');
+  await child(1).getByRole('textbox',{name:'요청 내용'}).fill('지금 문서에 참고 양식의 서식을 적용해 최종본을 만들어 줘');
   const finalResponse=page.waitForResponse(response=>new URL(response.url()).pathname.endsWith('/ai/send'));
   await child(1).getByRole('button',{name:'요청 보내기'}).click();
   const completed=await (await finalResponse).json();
   assert.ok(completed.reportId);
-  assert.equal(completed.text,'신청서 최종본을 작성했습니다.');
+  assert.equal(completed.text,'참고 양식의 서식을 적용했습니다.');
   await waitForInlineEditor(editor(2));
   const finalDoc=new core.HwpDocument(Uint8Array.from(await editor(2).locator('body').evaluate(()=>Array.from(window.pwhEditor.export().bytes))));
-  try{assert.equal(JSON.parse(finalDoc.searchAllText('학생 장학금 신청서 최종본',true,true)).length,1);}finally{finalDoc.free();}
+   try{assert.equal(JSON.parse(finalDoc.searchAllText('신청자 기본 정보',true,true)).length,1);}finally{finalDoc.free();}
   await child(2).getByRole('button',{name:'첨부 및 자주 쓰는 양식'}).click();
   await child(2).getByRole('button',{name:'양식 선택',exact:true}).click();
   await library.getByRole('button',{name:'기관 결과보고 삭제'}).click();
