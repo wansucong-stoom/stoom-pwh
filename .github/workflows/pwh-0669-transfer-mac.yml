@@ -1,0 +1,44 @@
+name: Attach verified Pwh 0.6.69 Apple Silicon package
+on:
+  push:
+    branches: [codex/pwh-0669-mac-transfer]
+    paths: [.github/workflows/pwh-0669-transfer-mac.yml]
+permissions:
+  actions: read
+  contents: write
+jobs:
+  attach:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: wansucong-stoom/stoom-pwh
+      RELEASE_ID: '456357932'
+      RELEASE_COMMIT: 307d2415eff9dcc3763d649ef5e9fd8e0144acf5
+      PACKAGE: PwhDesktop-0.1.51-macos-arm64.zip
+      PACKAGE_SHA: ffba0719893fa310bcd135ce31f28421031b93076901d308321ff665a9ef984e
+    steps:
+      - name: Download verified Apple Silicon package
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: '45334389615'
+          artifact-ids: '14893975384'
+          merge-multiple: true
+      - name: Check and attach both files to the intended draft
+        run: |
+          set -euo pipefail
+          printf '%s  %s\n' "$PACKAGE_SHA" "$PACKAGE" | sha256sum --check --strict
+          test "$(stat -c %s "$PACKAGE")" = 305701501
+          jq -e --arg sha "$PACKAGE_SHA" '.sha256 == $sha and .size == 305701501 and .platform == "darwin-arm64" and .pwhVersion == "0.6.69" and .desktopVersion == "0.1.51" and .coreSha256 == "499d6cae8734aca53582470a509720dc0fba215f855d0a0399d7d45a00fb3f05" and .editorSha256 == "826b5d66c508a2abb68eec68b72e1785c555662cf631068b3a58031094fcb4c8" and .runtimeSmoke.docxRoundTrip == true and .runtimeSmoke.sectionEditing == true and (.appSmoke | type == "object")' "$PACKAGE.json" >/dev/null
+          gh api "repos/$GH_REPO/releases/$RELEASE_ID" | jq -e --arg commit "$RELEASE_COMMIT" '.tag_name == "v0.6.69" and .target_commitish == $commit and .draft == true' >/dev/null
+          for file in "$PACKAGE" "$PACKAGE.json"; do
+            sum=$(sha256sum "$file" | cut -d ' ' -f 1)
+            bytes=$(stat -c %s "$file")
+            echo "Verifying $file $bytes $sum"
+            response=$(curl --fail --silent --show-error --connect-timeout 20 --max-time 240 \
+              -H "Authorization: Bearer $GH_TOKEN" -H 'Content-Type: application/octet-stream' \
+              --data-binary "@$file" "https://uploads.github.com/repos/$GH_REPO/releases/$RELEASE_ID/assets?name=$file")
+            jq -e --arg file "$file" --arg digest "sha256:$sum" --argjson bytes "$bytes" \
+              '.name == $file and .state == "uploaded" and .digest == $digest and .size == $bytes' <<< "$response"
+          done
