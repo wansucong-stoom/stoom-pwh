@@ -25,7 +25,7 @@ if(!app.requestSingleInstanceLock()){
  }
 
  function openFile(file){
-  if(typeof file==='string'&&path.isAbsolute(file)&&/\.hwpx?$/i.test(file)&&pendingFiles.size<12)pendingFiles.add(file);
+  if(typeof file==='string'&&path.isAbsolute(file)&&/\.(?:hwpx?|docx)$/i.test(file)&&pendingFiles.size<12)pendingFiles.add(file);
   flushOpenFiles();
  }
  app.on('open-file',(event,file)=>{event.preventDefault();openFile(file);});
@@ -37,20 +37,21 @@ if(!app.requestSingleInstanceLock()){
  app.on('activate',()=>window?.show());
  for(const arg of process.argv.slice(1))openFile(arg);
 
- async function chooseFile({mode,suggestedName}){
+ async function chooseFile({mode,suggestedName,hancomOnly=false}){
   if(!window||window.isDestroyed())throw Error('문서 창을 확인하지 못했습니다.');
   if(dialogBusy)throw Error('파일 선택창이 이미 열려 있습니다.');
   dialogBusy=true;
   try{
    if(mode==='Open'){
-    const result=await dialog.showOpenDialog(window,{title:'문서 열기',properties:['openFile'],filters:[{name:'한글 문서',extensions:['hwp','hwpx']}]});
+    const result=await dialog.showOpenDialog(window,{title:'문서 열기',properties:['openFile'],filters:[{name:hancomOnly?'한글 문서':'한글·Word 문서',extensions:hancomOnly?['hwp','hwpx']:['hwp','hwpx','docx']}]});
     return result.canceled?{cancelled:true}:{path:result.filePaths[0]};
    }
    if(mode!=='Save'&&mode!=='Image')throw Error('파일 선택 방식이 올바르지 않습니다.');
    const image=mode==='Image';
    const defaultPath=path.basename(typeof suggestedName==='string'?suggestedName:'')||(image?'문서.png':'문서.hwpx');
+   const hancom={name:'한글 문서',extensions:['hwpx']},word={name:'Word 문서',extensions:['docx']};
    const result=await dialog.showSaveDialog(window,{title:image?'그림으로 저장':'문서 저장',defaultPath,filters:image?
-    [{name:'그림',extensions:['png','jpg','jpeg','bmp','gif','tif','tiff']}]:[{name:'한글 문서',extensions:['hwpx']}]});
+    [{name:'그림',extensions:['png','jpg','jpeg','bmp','gif','tif','tiff']}]:(/\.docx$/i.test(defaultPath)?[word,hancom]:[hancom,word])});
    return result.canceled?{cancelled:true}:{path:result.filePath};
   }finally{dialogBusy=false;}
  }

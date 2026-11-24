@@ -18,7 +18,7 @@ process.env.PWH_RUNTIME_ROOT=path.join(programRoot,'engine');
 process.env.PWH_OUTPUT_ROOT=path.join(dataRoot,'documents');
 process.env.PWH_FONT_ROOT=path.join(dataRoot,'fonts');
 const arg=process.argv[2];
-if(arg&&!/\.hwpx?$/i.test(arg))throw Error('HWP 또는 HWPX 문서를 선택하세요.');
+if(arg&&!/\.(?:hwpx?|docx)$/i.test(arg))throw Error('HWP, HWPX 또는 DOCX 문서를 선택하세요.');
 await fs.access(runtime);await fs.mkdir(dataRoot,{recursive:true});
 const {createWorkspaceServer}=await import('./workspace-shell.mjs');
 const nativeBranding={token:randomBytes(16).toString('hex'),complete:false,failed:false};

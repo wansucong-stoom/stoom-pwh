@@ -7,11 +7,12 @@ import {execFile} from 'node:child_process';import {promisify} from 'node:util';
 import {packagePlugin} from './package.mjs';import {zipEntries,childPath} from './setup.mjs';
 import {verifyOfficialRuntime} from '../desktop/standalone-pwh/official-codex-runtime.mjs';
 import {ELECTRON_VERSION} from './stage-electron.mjs';
+import {desktopPackageVersion} from '../desktop/standalone-pwh/version-info.mjs';
 
 const root=fileURLToPath(new URL('../',import.meta.url)),exec=promisify(execFile),sha=b=>createHash('sha256').update(b).digest('hex');
 const options={};for(let i=2;i<process.argv.length;i+=2){const key=process.argv[i];if(!['--output','--cache'].includes(key)||options[key]||!path.isAbsolute(process.argv[i+1]||''))throw Error('Usage: --output ABSOLUTE.tar.gz --cache ABSOLUTE_DIRECTORY');options[key]=process.argv[i+1];}
 if(process.platform!=='linux'||process.arch!=='x64')throw Error('Linux x64 is required');
-const version=JSON.parse(await fs.readFile(path.join(root,'desktop/standalone-pwh/version.json'),'utf8')).version,pkg=JSON.parse(await fs.readFile(path.join(root,'package.json'),'utf8'));
+const version=await desktopPackageVersion(path.join(root,'desktop/standalone-pwh')),pkg=JSON.parse(await fs.readFile(path.join(root,'package.json'),'utf8'));
 if(!options['--output']||path.basename(options['--output'])!==`PwhDesktop-${version}-linux-x64.tar.gz`)throw Error('Output name must match the shared Desktop version');
 await fs.mkdir(path.dirname(options['--output']),{recursive:true});try{await fs.access(options['--output']);throw Error('Output already exists');}catch(e){if(e.code!=='ENOENT')throw e;}
 const cache=options['--cache']||await fs.mkdtemp(path.join(os.tmpdir(),'pwh-linux-cache-'));await fs.mkdir(cache,{recursive:true});
@@ -33,7 +34,7 @@ const nodeRoot=path.join(inputs.node.directory,'node-v24.22.3-linux-x64');await 
 for(const n of ['electron/electron','electron/chrome_crashpad_handler','electron/chrome-sandbox','node/node','engine/rhwp/rhwp'])await fs.chmod(path.join(app,n),0o755);
 await fs.writeFile(path.join(app,'standalone-pwh','distribution.json'),JSON.stringify({schema:1,channel:'linux'})+'\n');
 await fs.writeFile(path.join(app,'pwh-desktop'),'#!/bin/sh\nset -eu\nAPP_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)\nif [ "${1-}" = "--install" ]; then exec "$APP_DIR/node/node" "$APP_DIR/standalone-pwh/linux-install.mjs"; fi\nexec "$APP_DIR/node/node" "$APP_DIR/standalone-pwh/launch.mjs" "$@"\n',{mode:0o755});
-const runtimeSmoke=await verifyDesktopRuntime(app);
+const runtimeSmoke=await verifyDesktopRuntime(app,{sectionEditing:true,runtimeId:common.id});
 const manifest={runtimeSmoke,schema:1,platform:'linux-x64',pwhVersion:pkg.version,desktopVersion:version,commonRuntime:common.id,commonArchiveSha256:common.runtime.sha256,coreSha256:sha(await fs.readFile(path.join(app,'engine/core/rhwp_bg.wasm'))),editorSha256:sha(await fs.readFile(path.join(app,'standalone-pwh/client/editor.js'))),artifacts:pin.artifacts};
 await fs.writeFile(path.join(app,'engine','.preserved-runtime.json'),JSON.stringify({schemaVersion:1,id:common.id,platform:'linux-x64',archiveSha256:common.runtime.sha256})+'\n');
 await fs.writeFile(path.join(app,'LINUX-BUILD.json'),JSON.stringify(manifest,null,2)+'\n');

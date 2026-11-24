@@ -7,12 +7,16 @@ Pwh는 [rhwp](https://github.com/edwardkim/rhwp)와 rhwp Studio를 기반으로 
 ## 비교 기준
 
 - **기준 원본:** rhwp 0.8.7, 커밋 [`1a76570e833917d15817415a53c09ad61ab3203f`](https://github.com/edwardkim/rhwp/commit/1a76570e833917d15817415a53c09ad61ab3203f).
-- **공통 코어:** 배포 기준 `rhwp-0.8.7-pwh-r32`는 100개 패치를 사용합니다. 기존 97개를 유지하고 도형 생성·연결선 속성, 원본 쪽 프레임과 공통 예약·쪽 소유 계획을 보완합니다. 배포 런타임의 Windows x64 자산과 확정된 해시는 [runtime-lock.json](../runtime-lock.json)에 기록합니다.
+- **공통 코어:** 다음 빌드에 고정한 `rhwp-0.8.7-pwh-r33`은 r32의 100개 패치에 구역 편집 패치를 추가합니다. Windows·Linux·Apple Silicon macOS가 같은 WASM을 사용합니다. 공통 런타임과 보존 입력의 해시는 [runtime-lock.json](../runtime-lock.json)에 기록합니다.
 - **비교 범위:** 위 고정 버전 대비 Pwh에서 보존한 코어 패치와 Studio 빌드 변경, 그리고 별도의 pwh 연결 기능입니다. 별도의 [rhwp 0.9.0 검토](UPSTREAM-0.9-REVIEW.md)에서 관련 경로의 선택 반영 결과를 확인할 수 있습니다.
 - **배포 방식:** 고정 소스와 패치·빌드 입력을 보존해 재빌드하는 방식입니다. 전체 upstream 저장소의 Git 포크나 모든 원본 파일을 그대로 포함한 저장소라는 뜻은 아닙니다.
 - **반영 상태:** 아래는 pwh 쪽 변경입니다. rhwp 원본에 병합되었다고 주장하지 않습니다.
 
 ## 1. rhwp 조판 코어 변경
+
+### 편집 가능한 구역 경계
+
+Pwh의 r33 시험 코어는 본문에서 구역을 나누거나 합칠 때 구역 목록과 새 구역의 용지·단 설정을 함께 갱신합니다. Studio는 쪽 메뉴와 Alt+Shift+Enter를 연결하고, 구역 구조 변경을 한 번의 실행 취소로 복원합니다. [공통 구역 패치](engine-patches/rhwp-0.8.7-editable-section-break.patch)
 
 ### 공통 편집기: 줄 간격과 글자 폭 측정 목록의 수명
 
@@ -485,6 +489,8 @@ Pwh 0.6.59의 [메뉴 패치](../scripts/patch-context-ribbon.mjs)는 키를 문
 Pwh 공통 편집기는 rhwp Studio 유래의 고정 도구 상자를 **편집·보기·입력·서식·쪽·표·도구**별 패널로 나눕니다. [메뉴 정의](../src/pwh-ribbon-model.mjs), [컨트롤러](../src/pwh-context-ribbon.ts), [자체 SVG 아이콘](../src/pwh-ribbon-icons.ts)을 공통·Desktop 빌드에 같은 방식으로 넣습니다. 한글 이미지 자산은 사용하지 않습니다.
 
 기존 명령 registry·dispatcher와 원래 도구 버튼의 식별자·리스너를 유지하고, 추가 버튼도 같은 실행 경로에 연결합니다. 메뉴 이름은 패널을 전환하고 옆 화살표는 기존 목록을 엽니다. 좁은 폭에서는 한 줄과 » 탐색을 유지합니다. 머리말·꼬리말·주석 편집 도구는 원래의 별도 상태를 따릅니다. 버튼 상태를 갱신할 때 보이는 패널에 대해 편집 상태를 한 번 조회하며, 명령 실행 시의 양식 모드·선택 제한은 유지합니다.
+
+Studio의 문서 비교는 Pwh에서 두 입력 문서와 결과용 세션을 편집 중인 탭의 조판 상태에서 분리합니다. 리본 전환 버튼은 명령 완료 이벤트에서 눌림 상태를 갱신하며, 커서 이동에 따른 전체 버튼 상태 계산은 기존대로 화면 갱신에 맞춥니다. [문서 비교 연결](../scripts/patch-document-compare.mjs)
 
 [빌드 패치](../scripts/patch-context-ribbon.mjs)는 원본 앵커가 달라지면 빌드를 중단합니다. WASM·글줄·표 높이·쪽 분할 계산은 변경하지 않습니다. [메뉴 모형 시험](../tests/context-ribbon-model.test.mjs)과 [실제 메뉴 회귀 시험](../tests/desktop-hancom-menu-browser.test.mjs)은 분류·누락 명령·기존 목록 경로·키보드·좁은 폭 접근을 검사합니다. 새 메뉴는 모든 한글 기능을 구현했다는 뜻이 아니며, 문단 띠·메모 등 원본의 미구현 명령은 그래픽 패널에서 제외합니다. [실제 화면·빌드 검증과 한계](verification/CONTEXTUAL-RIBBON.md)
 

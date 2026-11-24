@@ -147,10 +147,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: refs/tags/${{ github.event.release.tag_name }}
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Confirm Store source matches the tested release
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: node scripts/check-desktop-release-ref.mjs
       - name: Check Store connection
         shell: pwsh
         env:

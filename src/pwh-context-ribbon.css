@@ -41,6 +41,13 @@
 @media(max-width:640px){.pwh-ribbon-menubar .menu-title{padding-left:8px}.pwh-ribbon-section{padding-inline:5px}#icon-toolbar.pwh-context-ribbon .tb-btn{padding-inline:5px;min-width:44px}}
 .dialog-wrap.pwh-about-dialog{display:flex;flex-direction:column;max-width:calc(100vw - 32px);max-height:calc(100dvh - 32px);overflow:hidden}
 .pwh-about-dialog>.dialog-title,.pwh-about-dialog>.dialog-footer{flex:0 0 auto}
+.compare-dialog.doc-compare-dialog{right:clamp(8px,3vw,20px);width:min(560px,calc(100vw - 24px));box-sizing:border-box}
+.doc-compare-dialog .compare-actions{flex-wrap:wrap}
+.doc-compare-dialog .compare-file{min-width:0}
+@media(max-width:620px){
+ .compare-inspector-window .compare-inspector-body{overflow:auto}
+ .compare-inspector-window .compare-inspector-panes{grid-template-columns:minmax(0,1fr)}
+}
 .pwh-about-dialog>.dialog-body{min-height:0;overflow:auto;overscroll-behavior:contain}
 .pwh-about-dialog .about-notice ul{margin:7px 0 0;padding-inline-start:18px;list-style:disc outside;text-align:left}
 .pwh-about-dialog .about-notice li{padding:0;margin:3px 0;line-height:1.6}

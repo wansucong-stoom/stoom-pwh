@@ -1,9 +1,9 @@
-﻿param([ValidateSet('Open','Save','Image')][string]$Mode,[string]$SuggestedName = '문서.hwpx')
+﻿param([ValidateSet('Open','Save','Image')][string]$Mode,[string]$SuggestedName = '문서.hwpx',[switch]$HancomOnly)
 Add-Type -AssemblyName System.Windows.Forms
 [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 if ($Mode -eq 'Open') {
   $dialog = [System.Windows.Forms.OpenFileDialog]::new()
-  $dialog.Filter = '한글 문서 (*.hwp;*.hwpx)|*.hwp;*.hwpx'
+  $dialog.Filter = if ($HancomOnly) { '한글 문서 (*.hwp;*.hwpx)|*.hwp;*.hwpx' } else { '한글·Word 문서 (*.hwp;*.hwpx;*.docx)|*.hwp;*.hwpx;*.docx' }
   $dialog.CheckFileExists = $true
 } elseif ($Mode -eq 'Image') {
   $dialog = [System.Windows.Forms.SaveFileDialog]::new()
@@ -15,8 +15,8 @@ if ($Mode -eq 'Open') {
   $dialog.FileName = $SuggestedName
 } else {
   $dialog = [System.Windows.Forms.SaveFileDialog]::new()
-  $dialog.Filter = '한글 문서 (*.hwpx)|*.hwpx'
-  $dialog.DefaultExt = 'hwpx'
+  $dialog.Filter = '한글 문서 (*.hwpx)|*.hwpx|Word 문서 (*.docx)|*.docx'
+  $dialog.FilterIndex = if ($SuggestedName -match '\.docx$') { 2 } else { 1 }
   $dialog.AddExtension = $true
   $dialog.OverwritePrompt = $true
   $dialog.FileName = $SuggestedName

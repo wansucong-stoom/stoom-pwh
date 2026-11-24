@@ -8,6 +8,7 @@ import {createHash} from 'node:crypto';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {msixIdentity, msixManifest, runMsixTool} from './msix-package.mjs';
 import {officialRuntimeFiles} from '../desktop/standalone-pwh/official-codex-runtime.mjs';
+import {desktopPackageVersion} from '../desktop/standalone-pwh/version-info.mjs';
 
 const repository = 'wansucong-stoom/stoom-pwh';
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -38,6 +39,7 @@ export async function verifyStoreFiles(read, {sourceRoot, runtimeRoot, identity,
   const expected = msixIdentity({channel:'store', version:desktopVersion, identity});
   const manifest = (await read('AppxManifest.xml')).toString('utf8').replace(/^\uFEFF/, '').replaceAll('\r\n','\n').trim();
   if (manifest !== msixManifest(expected).trim()) throw Error('Store package identity, version, architecture or capabilities differ');
+  if (JSON.parse(await read('standalone-pwh/version.json')).version !== desktopVersion) throw Error('Store Desktop version differs from the package identity');
   const distribution = JSON.parse(await read('standalone-pwh/distribution.json'));
   if (distribution.schema !== 1 || distribution.channel !== 'microsoft-store' || distribution.name !== expected.name) throw Error('Store package distribution differs');
   const compare = async (member, file) => {
@@ -63,7 +65,8 @@ export async function verifyStorePackage(packageFile, options) {
   try {
     await runMsixTool(path.join(options.sdkDirectory,'makeappx.exe'),['unpack','/p',packageFile,'/d',payload]);
     const report=await verifyStoreFiles(name => fs.readFile(path.join(payload,name)),options);
-    return {...report,runtimeSmoke:await verifyDesktopRuntime(payload)};
+    const lock=JSON.parse(await fs.readFile(path.join(options.sourceRoot,'runtime-lock.json'),'utf8'));
+    return {...report,runtimeSmoke:await verifyDesktopRuntime(payload,{sectionEditing:true,runtimeId:lock.id})};
   } finally {
     await fs.rm(work,{recursive:true,force:true});
   }
@@ -72,7 +75,7 @@ export async function verifyStorePackage(packageFile, options) {
 async function main() {
   const root = fileURLToPath(new URL('../',import.meta.url));
   const {version:pwhVersion} = JSON.parse(await fs.readFile(path.join(root,'package.json'),'utf8'));
-  const {version:desktopVersion} = JSON.parse(await fs.readFile(path.join(root,'desktop/standalone-pwh/version.json'),'utf8'));
+  const desktopVersion = await desktopPackageVersion(path.join(root,'desktop/standalone-pwh'));
   const event = JSON.parse(await fs.readFile(process.env.GITHUB_EVENT_PATH,'utf8'));
   if (process.env.GITHUB_EVENT_NAME !== 'release' || process.env.GITHUB_REPOSITORY !== repository) throw Error('Only this repository stable release event can submit to Store');
   const asset = storeReleaseAsset(event.release,{pwhVersion,desktopVersion});

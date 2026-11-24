@@ -12,6 +12,12 @@ scripts/patch-canvas-metric-reuse.mjs는 코어 패치와 별개로 rhwp Studio 
 <a id="cause-and-scope"></a>
 ## 원인과 적용 범위
 
+### r33 공통 코어의 101번 구역 편집 패치
+
+[101번 패치](rhwp-0.8.7-editable-section-break.patch)는 본문의 커서 위치에서 실제 구역을 분리합니다. 새 구역은 활성 용지·여백·단 설정을 상속하고 쪽 번호를 이어갑니다. 쪽과 단이 문서 모델의 구역 목록을 공유하므로 구역별 설정, 조판, HWPX 직렬화가 같은 경계를 사용합니다. 구역 경계에서 Backspace나 Delete로 합칠 때는 앞 구역의 배치를 따릅니다. [편집기 연결](../../scripts/patch-section-edit.mjs)은 이 작업을 기존 실행 취소에 연결합니다.
+
+r33의 빌드 입력은 기존 잠금 파일이 검증한 패치 적용 전 Studio 소스와 r33에서 확인한 코어 연결 코드로 구성합니다. 보존 스크립트는 기본 런타임과 같은 디렉터리에서 인라인 빌드 입력 ZIP을 읽습니다. 별도 위치에 저장한 경우 `--studio-input-archive`로 지정합니다.
+
 ### r32: 99·100번 저장 쪽 프레임과 공통 계획
 
 [99번 패치](rhwp-0.8.7-stored-physical-page-frame.patch)는 기존 98개를 유지하고 다음 공통 규칙을 추가합니다.
@@ -55,6 +61,8 @@ r30은 기존 90개 뒤에 아래 여섯 패치를 적용합니다. 공통 편�
 [그림 이동 빌드 패치](../../scripts/patch-picture-drag.mjs)는 Studio 마우스 입력의 최신 좌표와 mouseup을 연결하고, 이동 전 문서 체크포인트를 기존 실행 취소 기록으로 이관합니다. 공통 상태 조회와 Desktop의 반복 탭 상태 보고를 분리해 드래그 도중 불필요한 HWPX 내보내기를 없앱니다. 원천 조판 코어 패치는 추가하지 않으며, 공통·Desktop 번들과 입력 해시를 함께 생성합니다. [구현 계층과 검증](../verification/PICTURE-MOTION.md)
 
 [탭별 그래픽 메뉴 패치](../../scripts/patch-context-ribbon.mjs)는 rhwp Studio 유래 메뉴 입력·도구 상자·명령 상태 조회를 Pwh 공통 편집기에서 보완합니다. 공통과 Desktop 번들에 함께 적용하며 메뉴 자체는 WASM 조판 규칙을 변경하지 않습니다. [소스·검증·지원 제한](../RHWP-DIFFERENCES.md#contextual-ribbon)
+
+[문서 비교 연결](../../scripts/patch-document-compare.mjs)은 Studio의 비교 엔진과 미리보기를 사용합니다. 비교 결과 세션과 렌더러를 편집기에서 분리하여 같은 탭에서 파일과 실행 취소 기록을 유지합니다.
 
 같은 빌드에서 [모양 복사 범위](../../scripts/patch-format-copy-options.mjs), [표시된 감추기 부호 삭제](../../scripts/patch-control-marker-delete.mjs), [상단 붙이기 연결](../../scripts/patch-native-paste-command.mjs)을 별도로 적용합니다. 원본 앵커가 맞지 않으면 빌드를 중단하고, 스크립트와 새 UI 소스는 공통·Desktop 입력 해시에 포함합니다. 인라인 그림 뒤 단어 선택은 공통 편집기의 끝점 변환만 보완하며 공통 코어의 기존 개체 API를 사용합니다. 제품 정보창에는 뷰포트 높이 제한과 본문 스크롤을 적용하며, 보존 입력에 이미 패치된 창에도 중복 없이 반영합니다.
 

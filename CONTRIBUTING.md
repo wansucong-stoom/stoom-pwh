@@ -1,5 +1,7 @@
 # Pwh에 기여하기
 
+변경 항목별 확인 절차와 Windows·Linux·macOS 패키지의 출시 전 점검은 [유지보수 안내](docs/MAINTENANCE.md)에서 확인할 수 있습니다.
+
 기관의 HWPX 양식을 최대한 보존하고, 미리보기 주석으로 문서를 고치는 작업을 개선하는 기여를 환영합니다.
 
 ## 개발 환경
@@ -36,10 +38,11 @@ GitHub Actions의 일반 시험·정적 검사·PDF 비교는 소스 push와 PR�
 node scripts/verify-editor-build.mjs --write
 node scripts/verify-editor-build.mjs
 node scripts/verify-editor-build.mjs --check-inputs
+node desktop/verify-source.mjs --write
 node desktop/verify-source.mjs
 ```
 
-Windows x64의 고정 입력·의존성 ZIP을 해시로 확인하고 서로 다른 두 폴더에서 공통·Desktop을 빌드합니다. `--write`만 저장소의 두 번들과 manifest를 갱신하며, 기본 실행은 커밋된 산출물과 비교합니다. `--check-inputs`는 다운로드 없이 현재 소스 지문과 산출물 해시를 확인합니다. `--cache-dir`로 검증된 다운로드 캐시를 재사용할 수 있습니다. Desktop 소스 변경 후에는 `desktop/source-manifest.json`의 해당 파일 크기·SHA256도 갱신합니다.
+Windows x64의 고정 입력·의존성 ZIP을 해시로 확인하고 서로 다른 두 폴더에서 공통·Desktop을 빌드합니다. 편집기 빌드 명령의 `--write`는 두 번들과 해당 manifest를 갱신합니다. 기본 실행은 커밋된 산출물과 비교합니다. `--check-inputs`는 다운로드 없이 현재 소스 지문과 산출물 해시를 확인합니다. `--cache-dir`로 검증된 다운로드 캐시를 재사용할 수 있습니다. Desktop 소스를 바꾼 뒤에는 `node desktop/verify-source.mjs --write`로 공개 소스 목록과 해시를 갱신합니다.
 
 소스 지문은 `src`의 JavaScript·TypeScript·CSS와 빌드 스크립트를 보수적으로 포함합니다. Desktop은 전용 어댑터와 빌더도 포함합니다. 생성한 `editor.js`나 해시만 손으로 고쳐 검사를 통과시키지 않습니다. `.editorconfig`와 `.gitattributes`를 따르며, 보존 패치와 Desktop 파일의 문맥·바이트를 일괄 포맷하지 않습니다.
 

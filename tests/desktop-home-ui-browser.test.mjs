@@ -43,7 +43,7 @@ test('Desktop home preserves unsaved tabs and reopens real recent documents', {
     assert.equal(await editor.locator('body').evaluate(()=>window.pwhEditor.context().paragraph.text),'unsaved','cancel keeps the original text');
     await editor.getByRole('button',{name:/닫기$/}).first().click();await dialog.getByRole('button',{name:'저장하지 않음'}).click();
     await page.getByRole('heading',{name:'어떤 문서를 작업할까요?'}).waitFor();assert.equal(await page.locator('#documents iframe').count(),0);
-    await page.getByRole('button',{name:'문서 열기 PC에서 HWP·HWPX 선택'}).click();
+    await page.getByRole('button',{name:'문서 열기 PC에서 HWP·HWPX·DOCX 선택'}).click();
     await editor.getByRole('button',{name:'최근 업무.hwpx',exact:true}).waitFor({timeout:60000});assert.equal(pickerCalls,1);
     await editor.getByRole('button',{name:'시작 화면'}).click();
     await page.getByRole('button',{name:'최근 업무.hwpx 열기'}).waitFor({timeout:30000});

@@ -30,6 +30,7 @@
 
 ## 개발과 유지보수
 
+- [세 플랫폼 유지보수](MAINTENANCE.md)는 변경 유형별 점검 항목과 Windows·Linux·macOS의 실행 및 배포 확인 절차를 정리합니다.
 - [기여 안내](../CONTRIBUTING.md) · [아키텍처](ARCHITECTURE.md) · [정적 검사](STATIC-CHECKS.md)
 - [편집 성능 측정](EDITOR-PERFORMANCE.md) · [개체 속성 동작](OBJECT-PROPERTIES.md)
 - [오프라인 설치와 런타임 보존](engine-preservation.md) · [Pwh 스킬](../skills/pwh/SKILL.md)

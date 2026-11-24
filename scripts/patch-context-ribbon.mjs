@@ -116,8 +116,10 @@ export async function patchContextRibbon(studio){
     return new Map(Array.from(commandIds,id=>[id,this.enabledInContext(id,ctx)] as [string,boolean]));
   }
   isEnabled(commandId:string):boolean {return this.enabledInContext(commandId,this.services.getContext());}`+dispatcher.slice(end+4);
-  await fs.writeFile(dispatcherPath,dispatcher);
  }
+ const fired="      this.eventBus.emit('command-state-changed', commandId);";
+ if(!dispatcher.includes(fired))dispatcher=once(dispatcher,"      this.eventBus.emit('command-state-changed');",fired,'completed command state');
+ await fs.writeFile(dispatcherPath,dispatcher);
  const scrollerPath=path.join(studio,'src/ui/icon-toolbar-scroller.ts');let scroller=await fs.readFile(scrollerPath,'utf8');
  if(!scroller.includes('pwh-ribbon-section')){
   scroller=once(scroller,"const DIVIDER_SELECTOR = ':scope > .tb-sep';","const DIVIDER_SELECTOR = ':scope > .tb-sep, :scope > .pwh-ribbon-panel[data-active=\"true\"] > .pwh-ribbon-section';",'group navigation');await fs.writeFile(scrollerPath,scroller);

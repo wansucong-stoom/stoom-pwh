@@ -15,10 +15,10 @@ import {copyOfficialRuntime} from './official-codex-runtime.mjs';
 import {stageElectron} from '../release-source/scripts/stage-electron.mjs';
 import {brandElectron} from '../release-source/scripts/brand-electron.mjs';
 import {packageMsix} from '../release-source/scripts/msix-package.mjs';
+import {desktopPackageVersion} from './version-info.mjs';
 
 const app=path.dirname(fileURLToPath(import.meta.url)),workspace=path.dirname(app);
-const version=process.env.PWH_MSI_VERSION||'0.1.49';
-if(!/^\d{1,3}\.\d{1,3}\.\d{1,5}$/.test(version)||version.split('.').some((n,i)=>Number(n)>(i===2?65535:255)))throw Error('MSI 버전이 올바르지 않습니다.');
+const version=await desktopPackageVersion(app,process.env.PWH_MSI_VERSION);
 const output=path.resolve(process.argv[2]||path.join(workspace,'dist',`PwhDesktop-${version}.msi`));
 const wix=path.resolve(process.env.PWH_WIX_DIR||path.join(workspace,'pwh-test-temp','wix314-binaries'));
 const archive=process.env.PWH_OFFLINE_RUNTIME_ARCHIVE||path.join(os.homedir(),'.stoom-pwh','downloads',JSON.parse(await fs.readFile(new URL('../release-source/runtime-lock.json',import.meta.url),'utf8')).runtime.file);
@@ -48,7 +48,7 @@ await copy(process.execPath,'node/node.exe');await copy(path.join(app,'NODE-LICE
 await run(process.execPath,[path.join(workspace,'release-source','scripts','setup.mjs'),'--runtime-root',path.join(payload,'engine'),'--runtime-archive',archive,'--skip-download']);
 const candidateDir=process.env.PWH_CORE_CANDIDATE_DIR;
 const coreCandidate=candidateDir?await stagePreviewCore({candidateDir:path.resolve(candidateDir),runtimeRoot:path.join(payload,'engine'),pluginRoot:pwhRoot,lock}):null;
-const runtimeSmoke=await verifyDesktopRuntime(payload);
+const runtimeSmoke=await verifyDesktopRuntime(payload,{sectionEditing:true,runtimeId:coreCandidate?undefined:lock.id});
 await fs.writeFile(path.join(payload,'DESKTOP-RUNTIME-VERIFICATION.json'),JSON.stringify(runtimeSmoke,null,2)+'\n',{flag:'wx'});
 if(process.env.PWH_DESKTOP_FORMAT==='msix'){
  const result=await packageMsix({payload,output,sdkDirectory:process.env.PWH_WINDOWS_SDK_DIR,

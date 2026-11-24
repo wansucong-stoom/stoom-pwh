@@ -12,11 +12,20 @@
  window.addEventListener('pwh-status',event=>status(String(event.detail)));
  window.pwhReadNativeClipboard=async()=>{const result=await tool('pwh_client_clipboard',{});return result._meta?.['pwh/clipboard']||{html:'',text:''};};
  const documentChunkCap=()=>window.__PWH_DESKTOP__===true?2*1024*1024:512*1024;
+ const desktopRecovery=()=>window.__PWH_DESKTOP__===true;
+ const embeddedRecoveryLimit=8*1024*1024;
+ async function recoveryRequest(action,body={},documentId=state.documentId,extraHeaders={}){
+  const response=await fetch('recovery/'+action,{method:'POST',
+   headers:{'x-pwh-request':'1','x-pwh-document':documentId,...extraHeaders},
+   body:body instanceof Uint8Array?body:JSON.stringify(body)});
+  if(!response.ok)throw Error((await response.json()).error||'복구본을 처리하지 못했습니다.');
+  return action==='read'?response.arrayBuffer():response.json();
+ }
  const sha=async bytes=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),x=>x.toString(16).padStart(2,'0')).join('');
  async function asset(kind,documentId=state.documentId,updateState=true){let offset=0,hash,buffer;do{const r=await tool('pwh_client_asset',{kind,offset,...(kind==='document'?{maxChunkBytes:documentChunkCap()}:{}),...(hash?{expectedSha256:hash}:{}),...(documentId?{documentId}:{})}),m=r.structuredContent;
  if(!m||m.offset!==offset||!Number.isSafeInteger(m.totalBytes)||m.totalBytes<1||(kind==='wasm'&&m.totalBytes>32*1024*1024))throw Error('문서 자산 전송 오류');
  if(!buffer){hash=m.sha256;buffer=new Uint8Array(m.totalBytes);}if(hash!==m.sha256||buffer.length!==m.totalBytes)throw Error('문서가 전송 중 변경되었습니다.');
- if(kind==='document'&&updateState){state.source=m.source;state.sourceSha256=m.sha256;state.recoveryEligible=m.totalBytes<=8*1024*1024;document.getElementById('pwh-title').textContent=state.displayName||m.name;}
+ if(kind==='document'&&updateState){state.source=m.source;state.sourceSha256=m.sha256;state.recoveryEligible=desktopRecovery()||m.totalBytes<=embeddedRecoveryLimit;document.getElementById('pwh-title').textContent=state.displayName||m.name;}
  const bytes=base64ToBytes(r._meta?.['pwh/client-bytes']||'');if(!bytes.length||bytes.length>(kind==='document'?documentChunkCap():512*1024)||offset+bytes.length>buffer.length)throw Error('문서 청크 오류');buffer.set(bytes,offset);offset+=bytes.length;
  }while(offset<buffer.length);if(await sha(buffer)!==hash)throw Error('문서 지문 검증 실패');return buffer;}
  let fontInstall;
@@ -39,19 +48,61 @@
  async function undismissRecovery(key){const items=await dismissedRecoveries();if(items.includes(key))await recoveryStore('put',dismissalKey,{items:items.filter(x=>x!==key)});}
  async function checkpoint(context){
   if(state.recoveryClosing||!state.recoveryEligible||state.protectedRecoveryKey===recoveryKey()||!context.documentState.dirty||state.checkpointSha===context.documentState.documentSha256)return;
-  const task=(async()=>{const artifact=window.pwhEditor.recoveryExport?.()??window.pwhEditor.export();if(artifact.bytes.length>8*1024*1024){state.recoveryEligible=false;return;}if(artifact.contentLoss.count)return;
-   const digest=await sha(artifact.bytes),key=recoveryKey();await undismissRecovery('exact|'+key+'|'+digest);
-   await recoveryStore('put',key,{bytes:artifact.bytes.buffer.slice(artifact.bytes.byteOffset,artifact.bytes.byteOffset+artifact.bytes.byteLength),sha256:digest,savedAt:Date.now(),source:state.source});state.checkpointSha=context.documentState.documentSha256;state.checkpointRevision={documentEpoch:context.documentState.documentEpoch,changeSeq:context.documentState.changeSeq};})();
+  const documentId=state.documentId,key=recoveryKey(),source=state.source;
+  const task=(async()=>{
+   const artifact=window.pwhEditor.recoveryExport?.()??window.pwhEditor.export();
+   if(!desktopRecovery()&&artifact.bytes.length>embeddedRecoveryLimit){state.recoveryEligible=false;return;}
+   if(artifact.contentLoss.count)return;
+   const digest=await sha(artifact.bytes);
+   if(state.documentId!==documentId)return;
+   if(desktopRecovery()){
+    await recoveryRequest('write',artifact.bytes,documentId,{'x-pwh-digest':digest});
+    if(state.recoveredDiskDraft)await recoveryRequest('acknowledge',{draft:state.recoveredDiskDraft,dismissed:true},documentId).catch(()=>{});
+    state.recoveryWriteWarning=false;
+   }else{
+    await undismissRecovery('exact|'+key+'|'+digest);
+    await recoveryStore('put',key,{bytes:artifact.bytes.buffer.slice(artifact.bytes.byteOffset,artifact.bytes.byteOffset+artifact.bytes.byteLength),sha256:digest,savedAt:Date.now(),source});
+   }
+   if(state.documentId===documentId){
+    state.checkpointSha=context.documentState.documentSha256;
+    state.checkpointRevision={documentEpoch:context.documentState.documentEpoch,changeSeq:context.documentState.changeSeq};
+   }
+  })().catch(error=>{
+   if(state.documentId===documentId&&desktopRecovery()&&!state.recoveryWriteWarning){
+    state.recoveryWriteWarning=true;
+    status('자동 복구본을 저장하지 못했습니다. 문서를 직접 저장해 주세요.');
+   }
+   throw error;
+  });
   state.checkpointTask=task;try{await task;}finally{if(state.checkpointTask===task)state.checkpointTask=null;}
  }
  window.pwhRecoveryCheckpointCurrent=()=>{const saved=state.checkpointRevision,current=window.pwhEditor?.status?.()?.documentState;return !!(state.loaded&&!state.loading&&saved&&current&&saved.documentEpoch===current.documentEpoch&&saved.changeSeq===current.changeSeq);};
  async function offerRecovery(includeDismissed=false){
+  if(desktopRecovery()){
+   try{
+    const {draft}=await recoveryRequest('info',{includeDismissed});
+    if(draft){
+     const bytes=new Uint8Array(await recoveryRequest('read',draft));
+     if(bytes.length!==draft.size||await sha(bytes)!==draft.sha256)return false;
+     if(draft.sha256===await sha(window.pwhEditor.export().bytes))return false;
+     const choice=await promptRecovery();
+     if(choice==='recover'){
+      await window.pwhEditor.load(bytes,state.displayName||state.source.split(/[\\/]/).pop());
+      state.recoveredDiskDraft=draft;
+      window.pwhEditor.recovered();
+     }else if(choice==='source'){
+      await recoveryRequest('acknowledge',{draft,dismissed:true}).catch(()=>{});
+     }
+     return true;
+    }
+   }catch(error){console.warn('[pwh disk recovery]',error.message);}
+  }
   try{const dismissed=includeDismissed?[]:await dismissedRecoveries();let draft=await recoveryStore('get',recoveryKey()),legacy=false,ack=draft?.sha256?'exact|'+recoveryKey()+'|'+draft.sha256:null;
    if(ack&&dismissed.includes(ack))draft=null;
-   if(!draft?.bytes){const candidates=(await window.pwhEditor.legacyDrafts()).filter(x=>x.fileName===state.source.split(/[\\/]/).pop()&&x.sourceFormat==='hwpx'&&x.data?.byteLength<=8*1024*1024).sort((a,b)=>b.savedAt-a.savedAt);
+   if(!draft?.bytes&&(!desktopRecovery()||!/[\\/][.]pwh-edit-/.test(state.source))){const candidates=(await window.pwhEditor.legacyDrafts()).filter(x=>x.fileName===state.source.split(/[\\/]/).pop()&&x.sourceFormat==='hwpx'&&x.data?.byteLength<=embeddedRecoveryLimit).sort((a,b)=>b.savedAt-a.savedAt);
     for(const old of candidates){const digest=await sha(old.data),key='legacy|'+old.id+'|'+digest;if(dismissed.includes(key))continue;draft={bytes:old.data,sha256:digest,savedAt:old.savedAt};legacy=true;ack=key;break;}}
    if(!draft?.bytes)return false;
-   const bytes=new Uint8Array(draft.bytes);if(bytes.length>8*1024*1024||await sha(bytes)!==draft.sha256||draft.sha256===await sha(window.pwhEditor.export().bytes))return false;
+   const bytes=new Uint8Array(draft.bytes);if(bytes.length>embeddedRecoveryLimit||await sha(bytes)!==draft.sha256||draft.sha256===await sha(window.pwhEditor.export().bytes))return false;
    const choice=await promptRecovery(legacy);
    if(ack)await dismissRecovery(ack).catch(()=>{});
    if(choice==='dismiss'&&!legacy)state.protectedRecoveryKey=recoveryKey();
@@ -68,14 +119,30 @@
   if(!same(current))throw Error('닫는 동안 문서가 변경되었습니다. 다시 확인해 주세요.');
   const key=recoveryKey();state.recoveryClosing=true;state.preparedCloseDirty=!!current.dirty;
   try{if(state.checkpointTask)await state.checkpointTask;if(!same(window.pwhEditor.context().documentState))throw Error('닫는 동안 문서가 변경되었습니다. 다시 확인해 주세요.');
+   if(desktopRecovery()&&current.dirty){
+    const {draft}=await recoveryRequest('info',{own:true});
+    state.preparedDiskDrafts=[];
+    for(const candidate of [draft,state.recoveredDiskDraft]){
+     if(!candidate)continue;
+     const {changed}=await recoveryRequest('acknowledge',{draft:candidate,dismissed:true});
+     if(changed)state.preparedDiskDrafts.push(candidate);
+    }
+   }
    // Preserve the bytes until the close really succeeds: another tab or the
    // native window may still reject the operation. Suppress only this exact
    // acknowledged snapshot, and undo that suppression if close is cancelled.
    if(state.protectedRecoveryKey!==key){const draft=await recoveryStore('get',key);if(draft?.sha256){const ack='exact|'+key+'|'+draft.sha256;if(!(await dismissedRecoveries()).includes(ack)){await dismissRecovery(ack);state.preparedCloseAcknowledgement=ack;}}}
    await window.pwhEditor.saved();state.checkpointSha=null;return {ok:true};
-  }catch(error){if(state.preparedCloseDirty&&!window.pwhEditor.context().documentState.dirty)window.pwhEditor.recovered();if(state.preparedCloseAcknowledgement)await undismissRecovery(state.preparedCloseAcknowledgement).catch(()=>{});state.preparedCloseAcknowledgement=null;state.recoveryClosing=false;state.preparedCloseDirty=false;throw error;}
+  }catch(error){await window.pwhAbortDesktopClose();throw error;}
  };
- window.pwhAbortDesktopClose=async()=>{if(!state.recoveryClosing)return;if(state.preparedCloseDirty&&!window.pwhEditor.context().documentState.dirty)window.pwhEditor.recovered();const ack=state.preparedCloseAcknowledgement;state.preparedCloseAcknowledgement=null;state.checkpointSha=null;state.preparedCloseDirty=false;state.recoveryClosing=false;if(ack)await undismissRecovery(ack);};
+ window.pwhAbortDesktopClose=async()=>{
+  if(!state.recoveryClosing)return;
+  if(state.preparedCloseDirty&&!window.pwhEditor.context().documentState.dirty)window.pwhEditor.recovered();
+  const ack=state.preparedCloseAcknowledgement,drafts=state.preparedDiskDrafts??[];
+  state.preparedCloseAcknowledgement=null;state.preparedDiskDrafts=null;state.checkpointSha=null;state.preparedCloseDirty=false;state.recoveryClosing=false;
+  for(const draft of drafts)await recoveryRequest('acknowledge',{draft,dismissed:false}).catch(()=>{});
+  if(ack)await undismissRecovery(ack).catch(()=>{});
+ };
  async function consume(result){const d=result?._meta?.['pwh/client-document']||result?.structuredContent;if(d?.documentId)state.documentId=d.documentId;if(d?.source)state.source=d.source;if(d?.name)state.displayName=d.name;
  if(state.loaded||state.loading)return;state.loading=true;try{status('문서 파일을 읽고 있습니다.');const bytes=await asset('document');status('편집기 초기화를 기다리고 있습니다.');await installed;await window.pwhEditor.ready();try{status('시스템 글꼴 목록을 준비하고 있습니다.');fontInstall??=installSystemFonts();await fontInstall;}catch(error){console.warn('[pwh fonts]',error.message);}status('문서 조판과 첫 페이지를 준비하고 있습니다.');await window.pwhEditor.load(bytes,state.displayName||state.source.split(/[\\/]/).pop());status('미저장 복구본을 확인하고 있습니다.');await offerRecovery();state.loaded=true;state.loading=false;status('');void poll();}catch(e){state.loading=false;status(e.message);const retry=document.getElementById('pwh-retry');if(retry){retry.hidden=false;retry.onclick=()=>{retry.hidden=true;void consume({});};}}}
  window.addEventListener('message',event=>{if(event.source!==parent||event.data?.jsonrpc!=='2.0')return;if(state.origin!==null&&event.origin!==state.origin)return;const m=event.data,p=pending.get(m.id);if(p&&!m.method){state.origin=event.origin;clearTimeout(p.timer);pending.delete(m.id);m.error?p.reject(Error(m.error.message)):p.resolve(m.result);return;}if(m.method==='ui/notifications/tool-result')void consume(m.params);if(m.method==='ui/notifications/tool-input'&&m.params?.arguments?.file)void consume({});if(m.id!==undefined&&m.method==='ping')post({jsonrpc:'2.0',id:m.id,result:{}});});
@@ -126,7 +193,7 @@
   const latest=window.pwhEditor.context().documentState;
   if(latest.dirty||!sameRequestValue(latest,command.expected))throw Error('전송 중 현재 문서가 수정되어 열지 않았습니다.');
   await window.pwhEditor.openClean(bytes,doc.name,command.expected,state.source.split(/[\\/]/).pop());
-  state.documentId=doc.documentId;state.source=doc.source;state.sourceSha256=doc.sourceSha256;state.checkpointSha=null;state.recoveryEligible=bytes.length<=8*1024*1024;
+  state.documentId=doc.documentId;state.source=doc.source;state.sourceSha256=doc.sourceSha256;state.checkpointSha=null;state.recoveredDiskDraft=null;state.recoveryEligible=desktopRecovery()||bytes.length<=embeddedRecoveryLimit;
   document.getElementById('pwh-title').textContent=doc.name;document.getElementById('pwh-title').title=doc.source;
   return {ok:true,openedDocument:{source:doc.source,name:doc.name,pageCount:window.pwhEditor.context().documentState.pageCount}};
  }

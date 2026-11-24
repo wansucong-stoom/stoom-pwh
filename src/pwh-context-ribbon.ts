@@ -93,6 +93,13 @@ export function installContextRibbon({menu,toolbar,registry,dispatcher,eventBus,
   const label=button.querySelector('.tb-label')?.textContent||button.title||'도구';
   const id=button.dataset.cmd||'';decorate(button,{label,icon:id.includes('footnote')?'footnote':id.includes('endnote')?'endnote':id.includes('delete')?'cut':id.includes('close')?'undo':'page',command:id});
  }
+ function syncPressed(button:HTMLButtonElement) {
+  const cmd=button.dataset.cmd!;
+  const lower=({ 'format:bold':'btn-bold','format:italic':'btn-italic','format:underline':'btn-underline','format:strikethrough':'btn-strike'} as Record<string,string>)[cmd];
+  const state=lower?document.getElementById(lower):menu.querySelector<HTMLElement>('[data-cmd="'+cmd+'"]');
+  const pressed=state?.classList.contains('active')||false;
+  button.setAttribute('aria-pressed',String(pressed));button.classList.toggle('active',pressed);
+ }
  function updateState(){
   pending=0;const panel=panels.get(active);if(!panel)return;
   if(active==='format')syncStyles();
@@ -101,15 +108,19 @@ export function installContextRibbon({menu,toolbar,registry,dispatcher,eventBus,
   for(const button of buttons) {
    const enabled=enabledStates.get(button.dataset.cmd!)===true;if(button.disabled===enabled)button.disabled=!enabled;
    button.setAttribute('aria-disabled',String(!enabled));
-   if(button.hasAttribute('aria-pressed')){
-    const cmd=button.dataset.cmd!;const lower=({ 'format:bold':'btn-bold','format:italic':'btn-italic','format:underline':'btn-underline','format:strikethrough':'btn-strike'} as Record<string,string>)[cmd];
-    const state=lower?document.getElementById(lower):menu.querySelector<HTMLElement>('[data-cmd="'+cmd+'"]');
-    const pressed=state?.classList.contains('active')||false;button.setAttribute('aria-pressed',String(pressed));button.classList.toggle('active',pressed);
-   }
+   if(button.hasAttribute('aria-pressed'))syncPressed(button);
   }
  }
  const schedule=()=>{if(!pending)pending=requestAnimationFrame(updateState);};
- for(const event of ['command-state-changed','document-loaded','selection-changed','cell-selection-phase-changed','cursor-cell-changed','cursor-format-changed','cursor-para-changed','table-object-selection-changed','picture-object-selection-changed'])eventBus.on(event,schedule);
+ eventBus.on('command-state-changed',command=>{
+  if(typeof command==='string'){
+   for(const button of panels.get(active)?.querySelectorAll<HTMLButtonElement>('button[data-cmd][aria-pressed]')??[]){
+    if(button.dataset.cmd===command)syncPressed(button);
+   }
+  }
+  schedule();
+ });
+ for(const event of ['document-loaded','selection-changed','cell-selection-phase-changed','cursor-cell-changed','cursor-format-changed','cursor-para-changed','table-object-selection-changed','picture-object-selection-changed'])eventBus.on(event,schedule);
  function closeOverflow(){overflowMenu.hidden=true;overflow.setAttribute('aria-expanded','false');}
  function revealSelectedTab(){
   const item=titles.get(active)?.parentElement;if(!item)return;

@@ -76,6 +76,57 @@ export async function verifyMacDesktop(app){
   assert.equal(await editor().locator('body').evaluate(()=>window.pwhEditor.context().paragraph?.text),text);
   assert.deepEqual(await fs.readFile(hwpx),saved);
 
+  await editor().locator('[data-menu="view"] .menu-title').click();
+  const marks=editor().locator('#pwh-ribbon-panel-view [data-cmd="view:para-mark"]');
+  const marksBefore=await marks.getAttribute('aria-pressed');
+  assert.match(marksBefore,/^(true|false)$/);
+  await marks.click();
+  await marks.and(editor().locator('[aria-pressed="'+(marksBefore==='true'?'false':'true')+'"]')).waitFor();
+  await marks.click();
+  await marks.and(editor().locator('[aria-pressed="'+marksBefore+'"]')).waitFor();
+
+  await editor().locator('[data-menu="file"] .menu-title').click();
+  const previewReady=electron.waitForEvent('window',{timeout:30000});
+  await editor().locator('[data-pwh-file="print-preview"]').click();
+  const preview=await previewReady;
+  await preview.locator('.page svg').first().waitFor({state:'attached'});
+  await preview.getByRole('combobox',{name:'미리보기 배율'}).selectOption('200');
+  assert.equal(await preview.getByRole('status',{name:'현재 배율'}).textContent(),'200%');
+  await preview.close();
+
+  const input=editor().getByRole('textbox',{name:'문서 편집 입력'});
+  await input.press('End');
+  await page.keyboard.insertText(' 미저장 변경');
+  const activeDocument=()=>editor().locator('body').evaluate(()=>{
+   const {paragraph,documentState}=window.pwhEditor.context();
+   return {text:paragraph?.text,documentState};
+  });
+  const beforeComparison=await activeDocument();
+  assert.equal(beforeComparison.text,text+' 미저장 변경');
+  await editor().locator('[data-menu="tool"] .menu-title').click();
+  await editor().getByRole('button',{name:'문서 비교',exact:true}).click();
+  const comparison=editor().getByRole('dialog',{name:'문서 비교',exact:true});
+  const pick=async (index,file)=>{
+   const selection=page.waitForEvent('filechooser');
+   await comparison.locator('.compare-row button').nth(index).click();
+   await (await selection).setFiles(file);
+   await comparison.getByText(path.basename(file),{exact:true}).waitFor();
+  };
+  await pick(0,hwp);
+  await pick(1,hwpx);
+  await comparison.locator('.compare-actions button').first().click();
+  await comparison.locator('.compare-result-item').first().click();
+  const inspector=editor().locator('.compare-inspector-window');
+  await inspector.waitFor();
+  assert.deepEqual(await activeDocument(),beforeComparison);
+  await inspector.locator('.dialog-close').click();
+  await comparison.locator('.dialog-close').click();
+  await input.focus();
+  await page.keyboard.press('Meta+z');
+  assert.equal((await activeDocument()).text,text);
+  assert.deepEqual(await fs.readFile(hwpx),saved);
+  assert.deepEqual(await fs.readFile(hwp),hwpBefore);
+
   await openFile(hwp);
   await visibleTab().locator('#document-notice').filter({hasText:'HWP 원본 보존 · HWPX로 저장'}).waitFor({state:'attached'});
   await waitForInlineEditor(editor());
@@ -122,7 +173,10 @@ export async function verifyMacDesktop(app){
    return JSON.parse(result).hostId;
   },encrypted.toString('base64'));
   assert.equal(restored,authorize.searchParams.get('ext_agent_host_id'));
-  return {electronWindow:true,newDocument:true,koreanText:true,commandSave:true,savedAndReopenedHwpx:true,openedLegacyHwp:true,originalPreserved:true,codexConnectionVisible:true,bundledChatgptRuntime:true,sharedChatgptLogin:true,macKeychainEncryption:true};
+  return {electronWindow:true,newDocument:true,koreanText:true,commandSave:true,commandUndo:true,
+   savedAndReopenedHwpx:true,openedLegacyHwp:true,originalPreserved:true,
+   paragraphMarks:true,printPreview:true,documentComparison:true,comparisonPreservesUnsavedEdits:true,
+   codexConnectionVisible:true,bundledChatgptRuntime:true,sharedChatgptLogin:true,macKeychainEncryption:true};
  }finally{
   if(electron){
    const child=electron.process();

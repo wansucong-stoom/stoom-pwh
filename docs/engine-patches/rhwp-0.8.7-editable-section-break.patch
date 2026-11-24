@@ -1,0 +1,206 @@
+diff --git a/src/document_core/queries/hwpctrl_sets.rs b/src/document_core/queries/hwpctrl_sets.rs
+--- a/src/document_core/queries/hwpctrl_sets.rs
++++ b/src/document_core/queries/hwpctrl_sets.rs
+@@ -7,7 +7,7 @@
+ 
+ use crate::document_core::queries::field_query::{
+     caret_stops, cell_path_to_list, char_idx_at_stream_pos, cursor_paragraph, json_escape,
+-    leading_anchor_pos, root_para_count, root_para_location, root_para_of, select_start_pos,
++    leading_anchor_pos, rebuild_char_offsets, root_para_count, root_para_location, root_para_of, select_start_pos,
+     shape_lists, stream_len, word_end_from, word_starts, ListEntry, EXTENDED_CTRL_UNITS,
+     ROOT_LIST_ID,
+ };
+@@ -19,6 +19,49 @@ use crate::model::paragraph::{ColumnBreakType, Paragraph};
+ use crate::model::shape::{Caption, ShapeObject, TextBox};
+ use crate::model::style::{Alignment, HeadType, LineSpacingType, UnderlineType};
+ 
++fn section_split_offset(paragraph: &Paragraph, offset: usize, logical_end: usize) -> usize {
++    if offset == 0 {
++        return 0;
++    }
++    // Paragraph splitting also counts objects that can move with the text
++    // without occupying a body caret slot (for example a floating picture).
++    let positions = paragraph.logical_control_positions();
++    offset + paragraph.controls.iter().enumerate().filter(|(i, ctrl)| {
++        Paragraph::is_split_movable_control(ctrl)
++            && !ctrl.is_logical_inline()
++            && !matches!(ctrl, Control::CharOverlap(_))
++            && (offset == logical_end || positions.get(*i).is_some_and(|&pos| pos < offset))
++    }).count()
++}
++
++fn replace_section_opening(
++    paragraph: &mut Paragraph,
++    opening: Option<(crate::model::document::SectionDef, ColumnDef)>,
++) {
++    for i in (0..paragraph.controls.len()).rev() {
++        if matches!(paragraph.controls[i], Control::SectionDef(_) | Control::ColumnDef(_)) {
++            paragraph.remove_control(i);
++        }
++    }
++    if let Some((definition, mut column)) = opening {
++        if column.column_count == 0 {
++            column.column_count = 1;
++            column.same_width = true;
++        }
++        for (index, control) in [Control::SectionDef(Box::new(definition)), Control::ColumnDef(column)]
++            .into_iter().enumerate()
++        {
++            paragraph.shift_for_inline_control_insert(index, 0);
++            paragraph.controls.insert(index, control);
++            paragraph.ctrl_data_records.insert(index, None);
++            paragraph.char_count += EXTENDED_CTRL_UNITS as u32;
++        }
++        paragraph.control_mask |= 1 << 2;
++    } else {
++        paragraph.control_mask &= !(1 << 2);
++    }
++}
++
+ /// 언어 일곱 갈래 — 항목 이름 접미사 순서가 모델 배열 순서와 같다.
+ const LANGS: [&str; 7] = [
+     "Hangul", "Latin", "Hanja", "Japanese", "Other", "Symbol", "User",
+@@ -1801,6 +1844,18 @@ impl DocumentCore {
+         pos: usize,
+         kind: &str,
+     ) -> Result<String, HwpError> {
++        if matches!(kind, "pwhSection" | "pwhJoinSection") {
++            if list_id != ROOT_LIST_ID {
++                return Err(HwpError::InvalidField("본문에서만 구역을 변경할 수 있습니다.".into()));
++            }
++            let (section, paragraph) = root_para_location(self, para_in_list)
++                .ok_or_else(|| HwpError::InvalidField("구역 경계를 찾지 못했습니다.".into()))?;
++            return if kind == "pwhSection" {
++                self.split_body_section(section, paragraph, pos)
++            } else {
++                self.join_body_section(section, paragraph, pos)
++            };
++        }
+         let marker_units = match kind {
+             "page" | "column" => 0usize,
+             "colDef" => EXTENDED_CTRL_UNITS,
+@@ -1914,6 +1969,124 @@ impl DocumentCore {
+         ))
+     }
+ 
++    /// Pwh's body cursor uses logical character offsets, including inline objects.
++    /// A break creates an actual section so page settings and serializers see it.
++    fn split_body_section(
++        &mut self,
++        section_index: usize,
++        paragraph_index: usize,
++        offset: usize,
++    ) -> Result<String, HwpError> {
++        use crate::model::document::Section;
++        if self.document.sections.len() >= u16::MAX.into() {
++            return Err(HwpError::InvalidField("구역 수 한도에 도달했습니다.".into()));
++        }
++        let section = &self.document.sections[section_index];
++        let paragraph = &section.paragraphs[paragraph_index];
++        let end = crate::document_core::helpers::logical_paragraph_length(paragraph);
++        if offset > end {
++            return Err(HwpError::InvalidField("구역을 나눌 위치가 올바르지 않습니다.".into()));
++        }
++        let (boundary, split_paragraph) = if offset == 0 && paragraph_index > 0 && end > 0 {
++            (paragraph_index, false)
++        } else if offset == end && paragraph_index + 1 < section.paragraphs.len() {
++            (paragraph_index + 1, false)
++        } else {
++            (paragraph_index + 1, true)
++        };
++        let split_offset = split_paragraph.then(|| section_split_offset(paragraph, offset, end));
++        let column = Self::find_column_def_for_paragraph(
++            &section.paragraphs,
++            if split_paragraph { paragraph_index } else { boundary },
++        );
++        let mut definition = section.section_def.clone();
++        // Do not restart explicit numbering that belonged to the source section.
++        definition.page_num = 0;
++        definition.page_num_type = 0;
++        definition.picture_num = 0;
++        definition.table_num = 0;
++        definition.equation_num = 0;
++        self.cancel_deferred_pagination();
++        let section = &mut self.document.sections[section_index];
++        if let Some(split_offset) = split_offset {
++            let next = section.paragraphs[paragraph_index].split_at(split_offset);
++            section.paragraphs.insert(boundary, next);
++            for para in &mut section.paragraphs[paragraph_index..=boundary] {
++                if !para.field_ranges.is_empty() {
++                    rebuild_char_offsets(para);
++                }
++            }
++        }
++        let mut paragraphs = section.paragraphs.split_off(boundary);
++        section.raw_stream = None;
++        section.raw_provenance = None;
++        let first = &mut paragraphs[0];
++        // The section boundary already causes the page break.
++        first.column_type = ColumnBreakType::None;
++        first.raw_break_type &= !0x0f;
++        replace_section_opening(first, Some((definition.clone(), column)));
++        let next_section = section_index + 1;
++        self.document.sections.insert(next_section, Section {
++            section_def: definition,
++            paragraphs,
++            raw_stream: None,
++            raw_provenance: None,
++        });
++        self.document.doc_properties.section_count = self.document.sections.len() as u16;
++        if split_paragraph {
++            self.reflow_paragraph(section_index, paragraph_index);
++        }
++        self.reset_joined_section_flow(next_section, 0);
++        self.rebuild_derived_state();
++        Ok(format!("{{\"ok\":true,\"sectionIndex\":{next_section},\"paragraphIndex\":0,\"charOffset\":0}}"))
++    }
++
++    /// Remove the boundary from the first paragraph of a noninitial section.
++    fn join_body_section(
++        &mut self,
++        section_index: usize,
++        paragraph_index: usize,
++        offset: usize,
++    ) -> Result<String, HwpError> {
++        if section_index == 0 || paragraph_index != 0 || offset != 0 {
++            return Err(HwpError::InvalidField("구역의 시작에서만 구역을 합칠 수 있습니다.".into()));
++        }
++        self.cancel_deferred_pagination();
++        let mut right = self.document.sections.remove(section_index);
++        let left_index = section_index - 1;
++        let left = &mut self.document.sections[left_index];
++        let joined_index = left.paragraphs.len();
++        let first = &mut right.paragraphs[0];
++        replace_section_opening(first, None);
++        first.column_type = ColumnBreakType::None;
++        first.raw_break_type &= !0x0f;
++        left.paragraphs.append(&mut right.paragraphs);
++        left.raw_stream = None;
++        left.raw_provenance = None;
++        self.document.doc_properties.section_count = self.document.sections.len() as u16;
++        self.reset_joined_section_flow(left_index, joined_index);
++        self.rebuild_derived_state();
++        Ok(format!("{{\"ok\":true,\"sectionIndex\":{left_index},\"paragraphIndex\":{joined_index},\"charOffset\":0}}"))
++    }
++
++    fn reset_joined_section_flow(&mut self, section: usize, start: usize) {
++        use crate::renderer::composer::{paragraph_flow_end, recalculate_section_vpos};
++        let stored_end = paragraph_flow_end(&self.document.sections[section].paragraphs[start]);
++        let hwp3 = self.document.layout_profile().hwp3_layout();
++        self.reflow_paragraph(section, start);
++        let paragraphs = &mut self.document.sections[section].paragraphs;
++        if start == 0 {
++            let origin = paragraphs[0].line_segs.first().map_or(0, |line| line.vertical_pos);
++            for line in &mut paragraphs[0].line_segs {
++                line.vertical_pos = line.vertical_pos.saturating_sub(origin);
++            }
++        }
++        recalculate_section_vpos(
++            paragraphs, start, None, stored_end, &self.styles, self.dpi,
++            hwp3,
++        );
++    }
++
+     /// 자동 번호를 캐럿 자리에 끼운다 — 웹한글컨트롤 `InsertPageNum`·`InsertCpNo`·`InsertTpNo`.
+     ///
+     /// 셋 다 사슬에 `atno` 하나를 더하고 스트림에서 **8칸**을 차지한다(실측: 문단 끝 7 → 15).

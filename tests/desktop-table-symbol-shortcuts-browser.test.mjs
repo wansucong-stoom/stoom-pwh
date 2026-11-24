@@ -72,6 +72,9 @@ test('Hancom editing and table shortcuts work through trusted input', {
         controlIndex:ctrl,cellIndex:0,cellParaIndex:0,charOffset:0});
       ih.focus();
     },context);
+    await editor.locator('[data-menu="table"] .menu-title').click();
+    const blockSum=editor.locator('.pwh-ribbon-panel[data-active="true"] [data-cmd="table:block-sum"]');
+    assert.equal(await blockSum.isEnabled(),false,'block calculation requires a selected cell range');
     await page.keyboard.press('F5');
     await page.keyboard.press('F7');
     const range=()=>editor.evaluate(()=>window.rhwpStudio.plugins.deps.getInputHandler().getSelectedCellRange());
@@ -87,6 +90,7 @@ test('Hancom editing and table shortcuts work through trusted input', {
     await widthButton.waitFor({state:'visible'});
     await editor.waitForFunction(()=>!document.querySelector('.pwh-ribbon-panel[data-active="true"] [data-cmd="table:cell-width-equal"]').disabled);
     assert.equal(await heightButton.isEnabled(),true,'F5 updates both graphic size commands');
+    assert.equal(await blockSum.isEnabled(),true,'a selected block enables calculation');
     await page.keyboard.press('w');
     const wide=await dims();
     const wideBoxes=await boxes();

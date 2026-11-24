@@ -12,6 +12,7 @@ import {childPath,zipEntries} from './setup.mjs';
 import {packagePlugin} from './package.mjs';
 import {ELECTRON_VERSION} from './stage-electron.mjs';
 import {verifyOfficialRuntime} from '../desktop/standalone-pwh/official-codex-runtime.mjs';
+import {desktopPackageVersion} from '../desktop/standalone-pwh/version-info.mjs';
 
 const exec=promisify(execFile);
 const root=fileURLToPath(new URL('../',import.meta.url));
@@ -21,7 +22,7 @@ const {values}=parseArgs({options:{output:{type:'string'},cache:{type:'string'}}
 const {output,cache}=values;
 if(process.platform!=='darwin'||process.arch!=='arm64')throw Error('An Apple Silicon macOS host is required');
 const source=path.join(root,'desktop','standalone-pwh');
-const {version:desktopVersion}=await readJson(path.join(source,'version.json'));
+const desktopVersion=await desktopPackageVersion(source);
 const {version:pwhVersion}=await readJson(path.join(root,'package.json'));
 const packageName='PwhDesktop-'+desktopVersion+'-macos-arm64.zip';
 if(!path.isAbsolute(output||'')||path.basename(output)!==packageName||!path.isAbsolute(cache||'')){
@@ -198,7 +199,7 @@ try{
  const verifiedRuntime=path.join(verifiedApp,'Contents','Resources','app');
  await exec('/usr/bin/codesign',['--verify','--deep','--strict',verifiedApp]);
  console.log('Verified the app and nested code in the final ZIP');
- const runtimeSmoke=await verifyDesktopRuntime(verifiedRuntime);
+ const runtimeSmoke=await verifyDesktopRuntime(verifiedRuntime,{sectionEditing:true,runtimeId:common.id});
  console.log('Verified new and existing HWPX document tabs in the final ZIP');
  const {verifyMacDesktop}=await import('./verify-desktop-macos.mjs');
  const appSmoke=await verifyMacDesktop(verifiedApp);

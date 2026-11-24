@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pluginVersion": "0.6.68",
+  "pluginVersion": "0.6.69",
   "copyPolicy": "Original bytes; .test.mjs filenames renamed to .check.mjs for staged-only discovery.",
   "files": [
     {
@@ -14,6 +14,60 @@
       "source": "bridge/hwp-codex-host.mjs",
       "size": 26251,
       "sha256": "f455a32822068c927872ef8f7eeab4d8cc10d405ec55c8c8d0c05b32e7bec3d9"
+    },
+    {
+      "path": "standalone-pwh/CODEX-APACHE-LICENSE.txt",
+      "source": "standalone-pwh/CODEX-APACHE-LICENSE.txt",
+      "size": 10926,
+      "sha256": "d17f227e4df5da1600391338865ce0f3055211760a36688f816941d58232d8dc"
+    },
+    {
+      "path": "standalone-pwh/CODEX-BUBBLEWRAP-LGPL-2.0.txt",
+      "source": "standalone-pwh/CODEX-BUBBLEWRAP-LGPL-2.0.txt",
+      "size": 25383,
+      "sha256": "b7993225104d90ddd8024fd838faf300bea5e83d91203eab98e29512acebd69c"
+    },
+    {
+      "path": "standalone-pwh/CODEX-NOTICE.txt",
+      "source": "standalone-pwh/CODEX-NOTICE.txt",
+      "size": 242,
+      "sha256": "9d71575ecfd9a843fc1677b0efb08053c6ba9fd686a0de1a6f5382fd3c220915"
+    },
+    {
+      "path": "standalone-pwh/CODEX-PCRE2-LICENSE.txt",
+      "source": "standalone-pwh/CODEX-PCRE2-LICENSE.txt",
+      "size": 3867,
+      "sha256": "9cf7ac6976099a1d856826d3ef1b093bd6b84489dc6100628ac79e740cf9885a"
+    },
+    {
+      "path": "standalone-pwh/CODEX-RATATUI-MIT.txt",
+      "source": "standalone-pwh/CODEX-RATATUI-MIT.txt",
+      "size": 1132,
+      "sha256": "50eb43e8d742c9c61a9391e42b2184fce54dbd1893a1bb1c85b8c9ee217ab1f5"
+    },
+    {
+      "path": "standalone-pwh/CODEX-RIPGREP-MIT.txt",
+      "source": "standalone-pwh/CODEX-RIPGREP-MIT.txt",
+      "size": 1081,
+      "sha256": "0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f"
+    },
+    {
+      "path": "standalone-pwh/Inter-variable.ttf",
+      "source": "standalone-pwh/Inter-variable.ttf",
+      "size": 876576,
+      "sha256": "29160a80ff49ddcab2c97711247e08b1fab27a484a329ce8b813d820dc559031"
+    },
+    {
+      "path": "standalone-pwh/NODE-LICENSE.txt",
+      "source": "standalone-pwh/NODE-LICENSE.txt",
+      "size": 157609,
+      "sha256": "5888dbb9a1d2b18f2c3e6c5f6af1b39de658372b402a0577b002777f14c62ace"
+    },
+    {
+      "path": "standalone-pwh/OFL-Inter.txt",
+      "source": "standalone-pwh/OFL-Inter.txt",
+      "size": 4377,
+      "sha256": "5b9321a4298cfeb6b34354164a1c3afc3db114569984c502b9b35d988fd58c57"
     },
     {
       "path": "standalone-pwh/ai-providers.check.mjs",
@@ -48,8 +102,8 @@
     {
       "path": "standalone-pwh/app.js",
       "source": "standalone-pwh/app.js",
-      "size": 56992,
-      "sha256": "2a324df83c82dfb3374501f8a150aadf28a1abccc13308aa556e4730a7335a53"
+      "size": 57329,
+      "sha256": "d5eb363ceaafe9953133a35e324b5ea9c10eabde7ff5962320810fdcea6d6f2f"
     },
     {
       "path": "standalone-pwh/build-desktop-editor.mjs",
@@ -60,8 +114,8 @@
     {
       "path": "standalone-pwh/build-msi.mjs",
       "source": "standalone-pwh/build-msi.mjs",
-      "size": 16005,
-      "sha256": "e119b836c4de8eabdb2268953243a3a182011cc55a8af21f73b0f1f6739cda13"
+      "size": 15984,
+      "sha256": "444276ee7a1b1d98a9ee17689afcb6b718fb09ad031a560f32674d6c5807c4db"
     },
     {
       "path": "standalone-pwh/build-native-launcher.mjs",
@@ -72,8 +126,8 @@
     {
       "path": "standalone-pwh/build-offline.mjs",
       "source": "standalone-pwh/build-offline.mjs",
-      "size": 7359,
-      "sha256": "afa6344c25a60cf55605f8e89f7edae64fd3089fe6bc668daff67d7b708529e7"
+      "size": 7339,
+      "sha256": "ac64100af0b75e67f8d59730a7fecbde4594f1c65feebfc1abc3a1244076a412"
     },
     {
       "path": "standalone-pwh/build-stoom-icon.mjs",
@@ -108,14 +162,14 @@
     {
       "path": "standalone-pwh/client/editor.js",
       "source": "standalone-pwh/client/editor.js",
-      "size": 2864458,
-      "sha256": "9afeb11f72487fbee9e6cf11011a040171348bf52beb4c616d0b87af6344433b"
+      "size": 2867540,
+      "sha256": "826b5d66c508a2abb68eec68b72e1785c555662cf631068b3a58031094fcb4c8"
     },
     {
       "path": "standalone-pwh/client/manifest.json",
       "source": "standalone-pwh/client/manifest.json",
-      "size": 20130,
-      "sha256": "8b11713e2308d5d977d60d175b1390d200a4b277f08ede504261e0bf24052461"
+      "size": 20583,
+      "sha256": "7c42dbf5cd5b6cfafcb0fa095be32867a3cfe7fd843cde2d86a3a5fa8ef81ae3"
     },
     {
       "path": "standalone-pwh/codex-agent.mjs",
@@ -124,52 +178,16 @@
       "sha256": "e76274d085913f96e73e924bcf0a6e133d1c1e44c230ffce717c493a0ded3d6f"
     },
     {
-      "path": "standalone-pwh/CODEX-APACHE-LICENSE.txt",
-      "source": "standalone-pwh/CODEX-APACHE-LICENSE.txt",
-      "size": 10926,
-      "sha256": "d17f227e4df5da1600391338865ce0f3055211760a36688f816941d58232d8dc"
-    },
-    {
-      "path": "standalone-pwh/CODEX-BUBBLEWRAP-LGPL-2.0.txt",
-      "source": "standalone-pwh/CODEX-BUBBLEWRAP-LGPL-2.0.txt",
-      "size": 25383,
-      "sha256": "b7993225104d90ddd8024fd838faf300bea5e83d91203eab98e29512acebd69c"
-    },
-    {
       "path": "standalone-pwh/codex-native-host.mjs",
       "source": "standalone-pwh/codex-native-host.mjs",
       "size": 32229,
       "sha256": "1236e48fd760fe375c80398afacddb56d874ebd34360c69a5b90040ecf569b2f"
     },
     {
-      "path": "standalone-pwh/CODEX-NOTICE.txt",
-      "source": "standalone-pwh/CODEX-NOTICE.txt",
-      "size": 242,
-      "sha256": "9d71575ecfd9a843fc1677b0efb08053c6ba9fd686a0de1a6f5382fd3c220915"
-    },
-    {
-      "path": "standalone-pwh/CODEX-PCRE2-LICENSE.txt",
-      "source": "standalone-pwh/CODEX-PCRE2-LICENSE.txt",
-      "size": 3867,
-      "sha256": "9cf7ac6976099a1d856826d3ef1b093bd6b84489dc6100628ac79e740cf9885a"
-    },
-    {
       "path": "standalone-pwh/codex-plugin-setup.mjs",
       "source": "standalone-pwh/codex-plugin-setup.mjs",
       "size": 15126,
       "sha256": "5c80726d5c3122d417b67d286fad9a3a99ecad916a19ac4d4adecff415d26469"
-    },
-    {
-      "path": "standalone-pwh/CODEX-RATATUI-MIT.txt",
-      "source": "standalone-pwh/CODEX-RATATUI-MIT.txt",
-      "size": 1132,
-      "sha256": "50eb43e8d742c9c61a9391e42b2184fce54dbd1893a1bb1c85b8c9ee217ab1f5"
-    },
-    {
-      "path": "standalone-pwh/CODEX-RIPGREP-MIT.txt",
-      "source": "standalone-pwh/CODEX-RIPGREP-MIT.txt",
-      "size": 1081,
-      "sha256": "0f96a83840e146e43c0ec96a22ec1f392e0680e6c1226e6f3ba87e0740af850f"
     },
     {
       "path": "standalone-pwh/codex-session-live.check.mjs",
@@ -222,14 +240,14 @@
     {
       "path": "standalone-pwh/desktop-files.mjs",
       "source": "standalone-pwh/desktop-files.mjs",
-      "size": 4510,
-      "sha256": "3c7197e0bf85ccefbae3a5421dc1d2a97857ceb46ffae19e9e42b2f1b5547556"
+      "size": 5508,
+      "sha256": "de673c8051c575030e626926b4df70ac26eb47c1eb7fe30ec3efeaf89998bdc4"
     },
     {
-      "path": "standalone-pwh/document-scan.check.mjs",
-      "source": "standalone-pwh/document-scan.test.mjs",
-      "size": 2240,
-      "sha256": "5c01eb40dcc974029fabac33cfae2d2560165f1efac1490a96800d9f53b289ef"
+      "path": "standalone-pwh/desktop-recovery.mjs",
+      "source": "standalone-pwh/desktop-recovery.mjs",
+      "size": 5825,
+      "sha256": "cb3a57e864ea2bc861ebd6ad299cb44e9ffad28288afb9d4aa5eb085074811d2"
     },
     {
       "path": "standalone-pwh/document-menu-tools.mjs",
@@ -238,10 +256,28 @@
       "sha256": "984a91d7d056e72636b433e2485ba5fa3c867fcecf3530cfe2cd416f6b6f68a3"
     },
     {
+      "path": "standalone-pwh/document-scan.check.mjs",
+      "source": "standalone-pwh/document-scan.test.mjs",
+      "size": 2240,
+      "sha256": "5c01eb40dcc974029fabac33cfae2d2560165f1efac1490a96800d9f53b289ef"
+    },
+    {
       "path": "standalone-pwh/document-scan.mjs",
       "source": "standalone-pwh/document-scan.mjs",
       "size": 1193,
       "sha256": "a85f808ec7051eb6b49e9894437dfd1cf6260e6f9ef566a73dca3efd7b3c2523"
+    },
+    {
+      "path": "standalone-pwh/docx-conversion.mjs",
+      "source": "standalone-pwh/docx-conversion.mjs",
+      "size": 46658,
+      "sha256": "0bd5b976059553e20974c66280135fd44657f90659ccabc9990f914539c1b13a"
+    },
+    {
+      "path": "standalone-pwh/docx-xml.mjs",
+      "source": "standalone-pwh/docx-xml.mjs",
+      "size": 5287,
+      "sha256": "575e24c6b1e8fada79082bfd66ad4c67726162c2da85aaf28feafc5a4e36f1b1"
     },
     {
       "path": "standalone-pwh/editor-result-wait.check.mjs",
@@ -276,8 +312,14 @@
     {
       "path": "standalone-pwh/file-dialog.ps1",
       "source": "standalone-pwh/file-dialog.ps1",
-      "size": 1793,
-      "sha256": "4345d8a9765b2b087fd98c23630296841c8b74e4d44a2b5a2a4c61fab53ae720"
+      "size": 1983,
+      "sha256": "9a2a1d0da8850ab264e68c08e58d6d7b8bd59ccbc9858123ac5be2ef1782c675"
+    },
+    {
+      "path": "standalone-pwh/file-transaction.mjs",
+      "source": "standalone-pwh/file-transaction.mjs",
+      "size": 4245,
+      "sha256": "511ef22cabcee6b0a9938a4035504896771ca8e582d5f6c8ab8f24e946eb78b2"
     },
     {
       "path": "standalone-pwh/font-provenance.json",
@@ -294,8 +336,8 @@
     {
       "path": "standalone-pwh/host.mjs",
       "source": "standalone-pwh/host.mjs",
-      "size": 74364,
-      "sha256": "8a55f892431196a52a9cf46dd6d659b60dfb77f3c6778e688d358ee4664b333a"
+      "size": 80098,
+      "sha256": "c25bd5b9437cd61732c3f136240308edfff5700c763e81c472ad0d6d912fc043"
     },
     {
       "path": "standalone-pwh/image-convert.ps1",
@@ -322,16 +364,10 @@
       "sha256": "b49bc388ae706cec71c2032cb8ad444d78656e49a3bc469078ebc93fcb1bc1db"
     },
     {
-      "path": "standalone-pwh/Inter-variable.ttf",
-      "source": "standalone-pwh/Inter-variable.ttf",
-      "size": 876576,
-      "sha256": "29160a80ff49ddcab2c97711247e08b1fab27a484a329ce8b813d820dc559031"
-    },
-    {
       "path": "standalone-pwh/launch.mjs",
       "source": "standalone-pwh/launch.mjs",
-      "size": 3277,
-      "sha256": "dea7b15361f467890eae47d19f74e7d5629cc109ac53d4b0bc398ba3e646b697"
+      "size": 3292,
+      "sha256": "bab362d74a83f7f98f850abea98480a1904aac2ce8f61616556ba207d81ede31"
     },
     {
       "path": "standalone-pwh/launch.vbs",
@@ -366,8 +402,8 @@
     {
       "path": "standalone-pwh/macos-main.cjs",
       "source": "standalone-pwh/macos-main.cjs",
-      "size": 4665,
-      "sha256": "100e062f94513937bfb1d3474bb9954ede5e51636b9f67e4ee86ca398ccda7e4"
+      "size": 4877,
+      "sha256": "e4e4e7cedb20b328a69407bdacd6f2972fb5f3a3954d2c869f341defddf8bad6"
     },
     {
       "path": "standalone-pwh/native-branding.check.mjs",
@@ -400,22 +436,10 @@
       "sha256": "aebf6084a057acee299e0fd1af3a7041dfc9ae787b0a07143260ea9388479fd2"
     },
     {
-      "path": "standalone-pwh/NODE-LICENSE.txt",
-      "source": "standalone-pwh/NODE-LICENSE.txt",
-      "size": 157609,
-      "sha256": "5888dbb9a1d2b18f2c3e6c5f6af1b39de658372b402a0577b002777f14c62ace"
-    },
-    {
       "path": "standalone-pwh/official-codex-runtime.mjs",
       "source": "standalone-pwh/official-codex-runtime.mjs",
       "size": 7399,
       "sha256": "5cf87bc8469d5a5a9c37acc8083f2919cc7fb2ebc9a62a0aca31eeb3aff4049e"
-    },
-    {
-      "path": "standalone-pwh/OFL-Inter.txt",
-      "source": "standalone-pwh/OFL-Inter.txt",
-      "size": 4377,
-      "sha256": "5b9321a4298cfeb6b34354164a1c3afc3db114569984c502b9b35d988fd58c57"
     },
     {
       "path": "standalone-pwh/paste-bridge.mjs",
@@ -444,8 +468,14 @@
     {
       "path": "standalone-pwh/recent-documents.mjs",
       "source": "standalone-pwh/recent-documents.mjs",
-      "size": 3397,
-      "sha256": "39d5fc03acb74ad421b1eeb0bad5e1f8dd818b6e6e2f650bac2983ce00ad2696"
+      "size": 3406,
+      "sha256": "0e7f77d7765a8eb2254d7b0c7c0167bdf3a832121c57620a54f2c161609e52fe"
+    },
+    {
+      "path": "standalone-pwh/recovery-smoke.check.mjs",
+      "source": "standalone-pwh/recovery-smoke.test.mjs",
+      "size": 2944,
+      "sha256": "8825f86cc68b011818c3b50e2c48dfbae347aae230b568f3e0c45260361d1e80"
     },
     {
       "path": "standalone-pwh/report-diagram-canvas.mjs",
@@ -482,12 +512,6 @@
       "source": "standalone-pwh/report-writing-workflow.mjs",
       "size": 8485,
       "sha256": "7b675310eee2e2481807cd1b0f04ba3e61b50e15d1d1748d3f09f543c5bba8c3"
-    },
-    {
-      "path": "standalone-pwh/recovery-smoke.check.mjs",
-      "source": "standalone-pwh/recovery-smoke.test.mjs",
-      "size": 2944,
-      "sha256": "8825f86cc68b011818c3b50e2c48dfbae347aae230b568f3e0c45260361d1e80"
     },
     {
       "path": "standalone-pwh/rewrite.mjs",
@@ -612,14 +636,14 @@
     {
       "path": "standalone-pwh/version-info.mjs",
       "source": "standalone-pwh/version-info.mjs",
-      "size": 735,
-      "sha256": "51cd617f59a6d01595818c811d064bac227ca0e2b9e2bc528ed73845a5b2c821"
+      "size": 1151,
+      "sha256": "e4029680ee3792a33078a32767211ddcc8a2f864830767d7467776ef30a69eea"
     },
     {
       "path": "standalone-pwh/version.json",
       "source": "standalone-pwh/version.json",
       "size": 21,
-      "sha256": "5a36f8f84845191c750be8426901756c20d9569437508075f669a4f203493bdc"
+      "sha256": "c48db361de35fc982b6ee3bfe56ceed17533a457ac9afd0a26ca03209798d78a"
     },
     {
       "path": "standalone-pwh/window-close-controller.mjs",
@@ -630,8 +654,8 @@
     {
       "path": "standalone-pwh/workspace-child.mjs",
       "source": "standalone-pwh/workspace-child.mjs",
-      "size": 1897,
-      "sha256": "63caddec4d738dbf0dcffec9e0aff10254a82383db496e7f448a8ef2b7d77dd0"
+      "size": 1957,
+      "sha256": "d743e5161c548d1fd35b51ec7d11378509a7e1732bc37acbc0320b6627a4e71d"
     },
     {
       "path": "standalone-pwh/workspace-shell.check.mjs",
@@ -642,8 +666,8 @@
     {
       "path": "standalone-pwh/workspace-shell.mjs",
       "source": "standalone-pwh/workspace-shell.mjs",
-      "size": 18691,
-      "sha256": "3681a1437edbe2e1e3fc940c98ff74ef3cd67158aed71875e8043a332386ce08"
+      "size": 20162,
+      "sha256": "a91a40b7a04b819a0d5586eec6b7bc1eb443d18b0c8bc1d25546ca3aaa88529e"
     },
     {
       "path": "standalone-pwh/workspace.css",
@@ -654,14 +678,14 @@
     {
       "path": "standalone-pwh/workspace.html",
       "source": "standalone-pwh/workspace.html",
-      "size": 6299,
-      "sha256": "0537f91b9419223b3a130a2304d1ca8c12d37ea28081039a7b24a2c89daf10ae"
+      "size": 6305,
+      "sha256": "ee4e07d191c9ccb68fb6e07066ee5745943d2f0000142267052e7487b2d256a0"
     },
     {
       "path": "standalone-pwh/workspace.js",
       "source": "standalone-pwh/workspace.js",
-      "size": 29664,
-      "sha256": "fec5439f42d63121b435f6113615e7515ecc7ee7de657e3083480547da3ba19c"
+      "size": 29675,
+      "sha256": "7c38af335102c8dc8261c50736720072a94c7860e2bcdbfc6e9b7de208867994"
     }
   ]
 }
