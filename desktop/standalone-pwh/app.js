@@ -4,7 +4,7 @@
  const workspaceOrigin=(()=>{try{const value=new URL(location.href).searchParams.get('workspaceOrigin');const u=new URL(value);return u.protocol==='http:'&&u.hostname==='127.0.0.1'?u.origin:null;}catch{return null;}})();
  const macPreview=!!document.querySelector('meta[name="pwh-macos-preview"]');
  if(macPreview){
-  for(const node of document.querySelectorAll('[data-provider-card="chatgpt"],[data-provider-card="local"],#tab-chatgpt,#tab-local'))node.hidden=true;
+  for(const node of document.querySelectorAll('[data-provider-card="local"],#tab-local'))node.hidden=true;
   $('download-codex').href='https://github.com/openai/codex';
   $('download-codex').textContent='Codex CLI 설치 안내 열기';
  }
@@ -109,7 +109,7 @@
   applyChatgptStatus(state);clearTimeout(chatgptPoll);if(state.pending)chatgptPoll=setTimeout(()=>refreshChatgptAccounts().catch(error=>{$('chatgpt-status').textContent=error.message;}),1500);return state;
  }
  async function startChatgptLogin(accountId){try{await api('chatgpt/begin',accountId?{accountId}:{});await refreshChatgptAccounts();}catch(error){$('chatgpt-status').textContent=error.message;}}
- $('connection-chatgpt-login').onclick=()=>{$('provider').value='chatgpt';updateProviderDetails();void startChatgptLogin(null);};
+ $('connection-chatgpt-login').onclick=()=>{$('provider').value='chatgpt';updateProviderDetails();showSettingsSection('chatgpt',{focus:true});void startChatgptLogin(null);};
  $('connection-chatgpt-manage').onclick=()=>showSettingsSection('chatgpt',{focus:true});
  $('connection-codex-model').onclick=()=>{showSettingsSection('codex',{focus:true});void loadCodexModels(settings());};
  $('connection-local-settings').onclick=()=>showSettingsSection('local',{focus:true});
@@ -208,7 +208,7 @@
  $('model-menu').ontoggle=async()=>{if(!$('model-menu').open)return;try{const s=await refreshProvider();if(s.provider==='local'){$('model-menu').open=false;$('settings').click();return;}$('quick-status').textContent='모델 목록 확인 중';await loadCodexModels(s);const select=$('quick-model');select.replaceChildren(...Array.from($('codex-model').options,option=>new Option(option.text,option.value)));select.value=s.codexModel;effortOptions(select.value,$('quick-effort'),s.codexReasoningEffort);$('quick-status').textContent=availableModels.length?(busy?'현재 작업이 끝나면 변경할 수 있습니다.':''):'모델 목록을 불러오지 못했습니다.';}catch(e){$('quick-status').textContent=e.message;}};
  $('quick-model').onchange=()=>effortOptions($('quick-model').value,$('quick-effort'));
  $('quick-apply').onclick=async()=>{try{if(busy)throw Error('작업이 끝난 뒤 모델을 바꿔 주세요.');const s=await api('settings/read');await api('settings/write',{...s,codexModel:$('quick-model').value,codexReasoningEffort:$('quick-effort').value});await refreshProvider();$('model-menu').open=false;status.textContent='모델 설정을 적용했습니다. 새 Codex 대화에서 사용합니다.';}catch(e){$('quick-status').textContent=e.message;}};
- $('settings').onclick=async()=>{try{const s=await refreshProvider();$('provider').value=s.provider;$('local-url').value=s.localBaseUrl;$('local-model').value=s.localModel;prefillSavedModel(s);updateProviderDetails();showSettingsSection('connection');$('model-menu').open=false;$('connection-status').textContent='';dialog.showModal();void checkProviderCard('codex');if(!macPreview){void checkProviderCard('local');await refreshChatgptAccounts();}}catch(e){$('connection-status').textContent=e.message;}};
+ $('settings').onclick=async()=>{try{const s=await refreshProvider();$('provider').value=s.provider;$('local-url').value=s.localBaseUrl;$('local-model').value=s.localModel;prefillSavedModel(s);updateProviderDetails();showSettingsSection('connection');$('model-menu').open=false;$('connection-status').textContent='';dialog.showModal();void checkProviderCard('codex');if(!macPreview)void checkProviderCard('local');await refreshChatgptAccounts();}catch(e){$('connection-status').textContent=e.message;}};
  $('composer-settings').onclick=()=>$('settings').click();
  const settings=()=>({provider:$('provider').value,localBaseUrl:$('local-url').value,localModel:$('local-model').value,codexModel:$('codex-model').value,codexReasoningEffort:$('codex-effort').value});
  async function checkProviderCard(name){const badge=$(name+'-card-status');badge.textContent='확인 중';badge.classList.remove('connected');try{const result=await api('ai/check',{...settings(),provider:name});badge.textContent=result.ready?(name==='local'?(selectedProvider==='local'?'사용 중':'서버 연결됨'):(selectedProvider==='codex'?'사용 중':'사용 가능')):name==='codex'&&result.installed===false?'설치되지 않음':'연결 필요';badge.classList.toggle('connected',!!result.ready);}catch{badge.textContent=name==='local'?'연결 안 됨':'확인 필요';}}

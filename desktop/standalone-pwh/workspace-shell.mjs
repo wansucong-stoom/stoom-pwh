@@ -10,6 +10,7 @@ import {checkForDesktopUpdate,downloadInstaller,scheduleDesktopUpdate} from './u
 import {recordCodexPluginSetup} from './codex-plugin-setup.mjs';
 import {chooseDesktopFile} from './desktop-files.mjs';
 import {createRecentDocuments} from './recent-documents.mjs';
+import {childAuthMethods} from './chatgpt-auth.mjs';
 
 const root=path.dirname(fileURLToPath(import.meta.url));
 export function documentTabStartupMessage(diagnostic=''){
@@ -17,7 +18,7 @@ export function documentTabStartupMessage(diagnostic=''){
  if(missing){const name=missing[1].split(/[\\/]/).pop();return `설치 구성 파일(${name})이 누락되어 문서 탭을 시작하지 못했습니다. Pwh Desktop을 업데이트해 주세요.`;}
  return '문서 탭을 시작하지 못했습니다. 앱을 다시 실행해 주세요. 자세한 오류는 앱의 진단 기록에 저장됩니다.';
 }
-export async function createWorkspaceServer({initialPath,nativeBranding,port=0,spawnImpl=spawn,updateServices,storeUpdateServices,distribution=process.env.PWH_DESKTOP_DISTRIBUTION,chooseFile=chooseDesktopFile,dataRoot:providedDataRoot,nodeExecutable=process.execPath}={}){
+export async function createWorkspaceServer({initialPath,nativeBranding,port=0,spawnImpl=spawn,updateServices,storeUpdateServices,distribution=process.env.PWH_DESKTOP_DISTRIBUTION,chooseFile=chooseDesktopFile,chatgptAuth,dataRoot:providedDataRoot,nodeExecutable=process.execPath}={}){
  const token=randomBytes(24).toString('hex'),tabs=new Map();let closing=false,generation=0;
  const dataRoot=providedDataRoot||process.env.PWH_STANDALONE_DATA||path.join(process.env.LOCALAPPDATA||process.env.HOME||root,'PwhDesktop');
  const services=updateServices||{check:checkForDesktopUpdate,download:downloadInstaller,schedule:scheduleDesktopUpdate};
@@ -41,9 +42,13 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
    if([...tabs.values()].some(tab=>tab.port===childPort))continue;
    const child=spawnImpl(nodeExecutable,[path.join(root,'workspace-child.mjs'),String(childPort),...(file?[file,...report?['report']:imported?['imported']:[]]:[])],{windowsHide:true,stdio:macPreview?['pipe','pipe','pipe','ipc']:['pipe','pipe','pipe'],env:process.env});
    if(macPreview)child.on('message',async message=>{
-    if(message?.type!=='choose-file'||typeof message.id!=='string')return;
+    if(typeof message?.id!=='string')return;
     let reply;
-    try{reply={result:await chooseFile(message.options)};}catch(error){reply={error:error.message};}
+    try{
+     if(message.type==='choose-file')reply={result:await chooseFile(message.options)};
+     else if(message.type==='chatgpt-auth'&&chatgptAuth&&childAuthMethods.includes(message.method))reply={result:await chatgptAuth[message.method](message.accountId)};
+     else return;
+    }catch(error){reply={error:error.message};}
     if(child.connected)child.send({id:message.id,...reply},()=>{});
    });
    let output='',diagnostic='';child.stdin.on('error',()=>{});child.stderr.on('data',x=>diagnostic=(diagnostic+String(x)).slice(-16000));

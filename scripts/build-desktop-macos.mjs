@@ -11,6 +11,7 @@ import {verifyDesktopRuntime} from './verify-desktop-runtime.mjs';
 import {childPath,zipEntries} from './setup.mjs';
 import {packagePlugin} from './package.mjs';
 import {ELECTRON_VERSION} from './stage-electron.mjs';
+import {verifyOfficialRuntime} from '../desktop/standalone-pwh/official-codex-runtime.mjs';
 
 const exec=promisify(execFile);
 const root=fileURLToPath(new URL('../',import.meta.url));
@@ -154,6 +155,10 @@ try{
   name:'pwh-desktop',version:desktopVersion,main:'standalone-pwh/macos-main.cjs',
  })+'\n',{flag:'wx'});
  await copyDesktopRuntime(source,path.join(runtime,'standalone-pwh'));
+ // Keep the upstream signatures and exact executable bytes for runtime validation.
+ const codex=path.join(runtime,'standalone-pwh','codex-runtime');
+ await extractTar(inputs.codex,codex);
+ await verifyOfficialRuntime(codex);
  await fs.copyFile(path.join(source,'version.json'),path.join(runtime,'standalone-pwh','version.json'));
  await fs.writeFile(path.join(runtime,'standalone-pwh','distribution.json'),JSON.stringify({schema:1,channel:'macos-preview'})+'\n');
  await fs.mkdir(path.join(runtime,'bridge'));

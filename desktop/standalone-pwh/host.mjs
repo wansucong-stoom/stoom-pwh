@@ -83,7 +83,7 @@ async function desktopEditorHtml(){
  const editor=inlineEditorImageUrls(bytes.toString('utf8')).replace(/<\/script/gi,'<\\/script');
  return html.slice(0,start+marker.length)+editor+html.slice(end);
 }
-export async function createAppServer({initialBytes,initialPath,imported=false,report=false,chooseFile,createAgentSession=createCodexSession,editorHtml=desktopEditorHtml,launchToken=randomBytes(24).toString('hex'),idleTimeoutMs=120000,port=0,nativeBranding}={}){
+export async function createAppServer({initialBytes,initialPath,imported=false,report=false,chooseFile,chatgptAuth:sharedChatgptAuth,createAgentSession=createCodexSession,editorHtml=desktopEditorHtml,launchToken=randomBytes(24).toString('hex'),idleTimeoutMs=120000,port=0,nativeBranding}={}){
  if(nativeBranding&&!/^[0-9a-f]{32}$/.test(nativeBranding.token))throw Error('Windows 창 식별자가 올바르지 않습니다.');
  let nativePageGeneration=0;
  let current=initialPath?(path.extname(initialPath).toLowerCase()==='.hwp'?await stageDocument(await fs.readFile(path.resolve(initialPath)),{sourceName:initialPath}):await registerClientDocument(path.resolve(initialPath))):await stageDocument(initialBytes||await blankDocument());
@@ -222,7 +222,7 @@ export async function createAppServer({initialBytes,initialPath,imported=false,r
  const recent=createRecentDocuments(appData),remember=async file=>{try{if(typeof file==='string')await recent.record(path.resolve(file));}catch{}};
  if(initialPath&&!imported)await remember(initialPath);
  if(initialPath&&!imported&&path.extname(initialPath).toLowerCase()==='.hwpx')files.setTarget(current.source,current.sourceSha256);
- const chatgptAuth=createChatgptAuth({dataRoot:path.join(appData,'chatgpt-auth')});
+ const chatgptAuth=sharedChatgptAuth??createChatgptAuth({dataRoot:path.join(appData,'chatgpt-auth')});
  const chatgptRuntime={auth:chatgptAuth,runtimeRoot:process.env.PWH_CODEX_RUNTIME_DIR||path.join(appRoot,'codex-runtime'),home:path.join(appData,'chatgpt-runtime')};
  let codexSession=null,codexSessionKey='',codexTokenHash='',codexSessionAccount='',credentialStamp='',checkingCredential=false,savedThread=null,agentBusy=false,activeAgentSessionId=null,agentProgress=[],cancelRequested=false;
  function closeCodexSession({preserve=false}={}){if(preserve&&codexSession?.hasTurn&&codexSessionKey)savedThread={key:codexSessionKey,id:codexSession.threadId};else if(!preserve)savedThread=null;imageController?.abort(Error('AI 연결이 종료되었습니다.'));codexSession?.close();codexSession=null;codexSessionKey='';codexTokenHash='';codexSessionAccount='';credentialStamp='';}
@@ -234,11 +234,11 @@ export async function createAppServer({initialBytes,initialPath,imported=false,r
  const macPreview=process.env.PWH_DESKTOP_DISTRIBUTION==='macos-preview';
  const getSettings=async()=>{
   const settings=await readSettings(settingsPath);
-  return macPreview?{...settings,provider:'codex'}:settings;
+  return macPreview&&settings.provider==='local'?{...settings,provider:'chatgpt'}:settings;
  };
  const allowedSettings=input=>{
   const settings=validateSettings(input);
-  if(macPreview&&settings.provider!=='codex')throw Error('Mac 시험판에서는 설치된 Codex 연결을 사용합니다.');
+  if(macPreview&&settings.provider==='local')throw Error('Mac 시험판에서는 ChatGPT 또는 설치된 Codex를 선택해 주세요.');
   return settings;
  };
  const assets={'/':'app.html','/app.js':'app.js','/paste-bridge.mjs':'paste-bridge.mjs','/report-diagram-canvas.mjs':'report-diagram-canvas.mjs','/app.css':'app.css','/stoom-mark-original.css':'stoom-mark-original.css','/stoom-product-marks.css':'stoom-product-marks.css','/Inter-variable.ttf':'Inter-variable.ttf','/stoom-mark.svg':'stoom-mark.svg','/stoom.ico':'stoom.ico'};
@@ -248,7 +248,6 @@ export async function createAppServer({initialBytes,initialPath,imported=false,r
    const url=new URL(req.url,origin),prefix=`/${launchToken}`;
    if(!url.pathname.startsWith(prefix+'/'))return json(res,{error:'연결이 만료되었습니다.'},404);
    const route=url.pathname.slice(prefix.length);
-   if(macPreview&&(/^\/chatgpt(?:\/|$)/.test(route)||route==='/codex/disconnect'))return json(res,{error:'Mac 시험판에서는 설치된 Codex 연결을 사용합니다.'},404);
    lastActivity=Date.now();
    res.setHeader('Referrer-Policy','no-referrer');res.setHeader('X-Content-Type-Options','nosniff');
    if(req.method==='GET'&&route==='/native/window-branding'){

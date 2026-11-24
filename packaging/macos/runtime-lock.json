@@ -16,5 +16,11 @@
     "url": "https://github.com/edwardkim/rhwp/releases/download/v0.8.7/rhwp-v0.8.7-macos-aarch64.tar.gz",
     "size": 12941874,
     "sha256": "6ed46aa63f6d10c447842999f73abc59cf9586c5645fefc5e763bd6a6d43662d"
+  },
+  "codex": {
+    "name": "codex-app-server-package-aarch64-apple-darwin.tar.gz",
+    "url": "https://github.com/openai/codex/releases/download/rust-v0.165.0/codex-app-server-package-aarch64-apple-darwin.tar.gz",
+    "size": 105257885,
+    "sha256": "db80061560c75c440efe11d347f5bebcf78aa895b40e38ca47623d8a37b41cd7"
   }
 }

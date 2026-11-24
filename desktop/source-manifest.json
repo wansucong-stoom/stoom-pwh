@@ -48,8 +48,8 @@
     {
       "path": "standalone-pwh/app.js",
       "source": "standalone-pwh/app.js",
-      "size": 56994,
-      "sha256": "b2e31180faf73413203891c4b08984521a2164b880dc9fc2377c5a50a0468abb"
+      "size": 56992,
+      "sha256": "2a324df83c82dfb3374501f8a150aadf28a1abccc13308aa556e4730a7335a53"
     },
     {
       "path": "standalone-pwh/build-desktop-editor.mjs",
@@ -90,8 +90,8 @@
     {
       "path": "standalone-pwh/chatgpt-auth.mjs",
       "source": "standalone-pwh/chatgpt-auth.mjs",
-      "size": 15480,
-      "sha256": "32c48f2d1bf32a7565c8e28d8d9b897c5133ccafe8ff80306aa8a15042a9183a"
+      "size": 15602,
+      "sha256": "0209aff177443f570ec10872891403d2f092fdd53e806e364bc2996806e1400c"
     },
     {
       "path": "standalone-pwh/chatgpt-credentials.ps1",
@@ -294,8 +294,8 @@
     {
       "path": "standalone-pwh/host.mjs",
       "source": "standalone-pwh/host.mjs",
-      "size": 74452,
-      "sha256": "8d80223e6cee3ce298fe81e5eaa5f6fc786bf96336bad4d1765d532a422f9b0a"
+      "size": 74364,
+      "sha256": "8a55f892431196a52a9cf46dd6d659b60dfb77f3c6778e688d358ee4664b333a"
     },
     {
       "path": "standalone-pwh/image-convert.ps1",
@@ -358,10 +358,16 @@
       "sha256": "daa661a06fba2844ac8053fc1f7e5f517e9e5edea25322cc3e81d12ac8c5163b"
     },
     {
+      "path": "standalone-pwh/macos-chatgpt.mjs",
+      "source": "standalone-pwh/macos-chatgpt.mjs",
+      "size": 1417,
+      "sha256": "4af5800747745886d7eee593a9f900786c79ce5237b15030d5834094f84c7993"
+    },
+    {
       "path": "standalone-pwh/macos-main.cjs",
       "source": "standalone-pwh/macos-main.cjs",
-      "size": 4418,
-      "sha256": "8429ac093c1dffa6310b6cee3ff7669c97547bb8eade697566eda764fa6d1746"
+      "size": 4665,
+      "sha256": "100e062f94513937bfb1d3474bb9954ede5e51636b9f67e4ee86ca398ccda7e4"
     },
     {
       "path": "standalone-pwh/native-branding.check.mjs",
@@ -402,8 +408,8 @@
     {
       "path": "standalone-pwh/official-codex-runtime.mjs",
       "source": "standalone-pwh/official-codex-runtime.mjs",
-      "size": 6739,
-      "sha256": "b44f847953545e3974a6044cca38bf95f951a1a7c354e57ee065ee8d73b42f3f"
+      "size": 7399,
+      "sha256": "5cf87bc8469d5a5a9c37acc8083f2919cc7fb2ebc9a62a0aca31eeb3aff4049e"
     },
     {
       "path": "standalone-pwh/OFL-Inter.txt",
@@ -613,7 +619,7 @@
       "path": "standalone-pwh/version.json",
       "source": "standalone-pwh/version.json",
       "size": 21,
-      "sha256": "e790660e0582ce11eeba104e19d7ac6e2cd94385db41220094c4543363ef9589"
+      "sha256": "5a36f8f84845191c750be8426901756c20d9569437508075f669a4f203493bdc"
     },
     {
       "path": "standalone-pwh/window-close-controller.mjs",
@@ -624,8 +630,8 @@
     {
       "path": "standalone-pwh/workspace-child.mjs",
       "source": "standalone-pwh/workspace-child.mjs",
-      "size": 1445,
-      "sha256": "3f051c44b77155a3bba4c5e5ff0043af9898bbef2e1ea783b7a91a226a13646a"
+      "size": 1897,
+      "sha256": "63caddec4d738dbf0dcffec9e0aff10254a82383db496e7f448a8ef2b7d77dd0"
     },
     {
       "path": "standalone-pwh/workspace-shell.check.mjs",
@@ -636,8 +642,8 @@
     {
       "path": "standalone-pwh/workspace-shell.mjs",
       "source": "standalone-pwh/workspace-shell.mjs",
-      "size": 18427,
-      "sha256": "6d925b8ef780c0e0133947183b45fe63b6c9997fc1a440003e61dc7c9efac87e"
+      "size": 18691,
+      "sha256": "3681a1437edbe2e1e3fc940c98ff74ef3cd67158aed71875e8043a332386ce08"
     },
     {
       "path": "standalone-pwh/workspace.css",

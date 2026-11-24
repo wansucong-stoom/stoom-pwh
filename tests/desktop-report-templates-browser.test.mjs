@@ -170,7 +170,7 @@ test('registered templates attach to a request and typeset a separate document a
  const macPreview=process.env.PWH_TEMPLATE_BROWSER_PLATFORM==='macos';
  process.env.PWH_STANDALONE_DATA=profile;
  await fs.mkdir(profile);
- await fs.writeFile(path.join(profile,'settings.json'),JSON.stringify({provider:macPreview?'chatgpt':'codex'}));
+ await fs.writeFile(path.join(profile,'settings.json'),JSON.stringify({provider:'codex'}));
  const fakeChild=path.join(dir,'synthetic-agent-child.mjs');await fs.writeFile(fakeChild,simulatedAgent);
  const file=path.join(dir,'합성 양식.hwpx'),doc=core.HwpDocument.createEmpty();
  const previousPicture=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jP1sAAAAASUVORK5CYII=','base64');
@@ -210,7 +210,7 @@ test('registered templates attach to a request and typeset a separate document a
    await child(0).getByRole('button',{name:'대화 설정 열기'}).click({force:true});
    const panel=child(0).getByRole('dialog',{name:'AI 연결'});
    await panel.waitFor();
-   assert.equal(await panel.getByRole('tab',{name:'ChatGPT 계정'}).count(),0);
+   await panel.getByRole('tab',{name:'ChatGPT 계정'}).waitFor({state:'visible'});
    await panel.getByRole('button',{name:'설정 닫기'}).click();
   }
   const input=editor(0).getByRole('textbox',{name:'문서 편집 입력'});

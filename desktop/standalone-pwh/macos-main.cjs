@@ -1,6 +1,6 @@
 'use strict';
 
-const {app,dialog,shell}=require('electron');
+const {app,dialog,safeStorage,shell}=require('electron');
 const path=require('node:path');
 const fs=require('node:fs');
 const {randomBytes}=require('node:crypto');
@@ -56,7 +56,7 @@ if(!app.requestSingleInstanceLock()){
  }
 
  async function start(){
-  for(const key of ['PWH_CONFIG','PWH_RHWP_PATH','PWH_STUDIO_PATH','PWH_EDITOR_SDK_PATH','PWH_HOP_PATH','PWH_STOOM_MODULE','PWH_DESKTOP_DEBUG','HWPXYZ_RHWP_PATH','HWPXYZ_OUTPUT_ROOT'])delete process.env[key];
+  for(const key of ['PWH_CONFIG','PWH_RHWP_PATH','PWH_STUDIO_PATH','PWH_EDITOR_SDK_PATH','PWH_HOP_PATH','PWH_STOOM_MODULE','PWH_DESKTOP_DEBUG','PWH_CODEX_RUNTIME_DIR','HWPXYZ_RHWP_PATH','HWPXYZ_OUTPUT_ROOT'])delete process.env[key];
   Object.assign(process.env,{
    PWH_DESKTOP_DISTRIBUTION:'macos-preview',
    PWH_STANDALONE_DATA:dataRoot,
@@ -65,6 +65,8 @@ if(!app.requestSingleInstanceLock()){
    PWH_FONT_ROOT:path.join(dataRoot,'fonts'),
   });
   const {createWorkspaceServer}=await import('./workspace-shell.mjs');
+  const {createMacChatgptAuth}=await import('./macos-chatgpt.mjs');
+  const chatgptAuth=createMacChatgptAuth({dataRoot,safeStorage,openExternal:url=>shell.openExternal(url)});
   const nativeBranding={
    token:randomBytes(16).toString('hex'),
    complete:false,
@@ -75,10 +77,10 @@ if(!app.requestSingleInstanceLock()){
    },
   };
   workspace=await createWorkspaceServer({
-   nativeBranding,chooseFile,distribution:'macos-preview',
+   nativeBranding,chooseFile,chatgptAuth,distribution:'macos-preview',
    nodeExecutable:path.join(programRoot,'node','node'),
   });
-  app.once('will-quit',()=>workspace.server.close());
+  app.once('will-quit',()=>{chatgptAuth.close();workspace.server.close();});
   const desktop=startElectronShell({url:workspace.url,dataRoot,onReady:current=>{
    window=current;
    nativeBranding.complete=true;

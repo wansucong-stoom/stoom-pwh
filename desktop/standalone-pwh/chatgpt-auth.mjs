@@ -6,6 +6,7 @@ import {createCredentialStore} from './chatgpt-store.mjs';
 const ISSUER='https://auth.openai.com',RESOURCE='https://api.openai.com/v1';
 const ENDPOINTS={authorize:ISSUER+'/api/accounts/authorize',token:ISSUER+'/api/accounts/oauth/token',jwks:ISSUER+'/.well-known/jwks.json',discovery:ISSUER+'/.well-known/openid-configuration'};
 const SCOPES=['openid','profile','email','offline_access','resource.invoke','chatgpt.tokens.use.direct'];
+export const childAuthMethods=Object.freeze(['status','begin','select','signOut','acknowledgeWelcome','getAccessToken']);
 const random=()=>randomBytes(32).toString('base64url');
 const digest=value=>createHash('sha256').update(value).digest('base64url');
 const clean=(value,max=16384)=>typeof value==='string'&&value.length>0&&value.length<=max&&!/[\x00-\x20\x7f]/.test(value);
@@ -50,7 +51,7 @@ function openSystemBrowser(url){
 export function createChatgptAuth({dataRoot,store=createCredentialStore({root:dataRoot}),fetchImpl=fetch,openBrowser=openSystemBrowser,now=Date.now,endpoints=ENDPOINTS}={}){
  let pending=null,starting=false,lastError='',issuedForRetry=null;
  const summary=state=>({active:state.active,accounts:state.accounts.map(a=>({id:a.id,email:a.email||'',name:a.name||'',connected:!!a.refreshToken&&!a.signingOut,active:a.id===state.active})),needsWelcome:!!state.active&&!state.planWelcomeAcknowledged,pending:!!pending||starting,error:lastError});
- const status=async()=>process.platform==='linux'&&store.exists&&!await store.exists()?summary({active:null,accounts:[]}):store.transaction(async state=>({value:summary(state)}));
+ const status=async()=>process.platform!=='win32'&&store.exists&&!await store.exists()?summary({active:null,accounts:[]}):store.transaction(async state=>({value:summary(state)}));
  async function begin(accountIdToUse=null){
   if(pending||starting)throw Error('이미 ChatGPT 로그인 창이 열려 있습니다.');starting=true;
   try{
