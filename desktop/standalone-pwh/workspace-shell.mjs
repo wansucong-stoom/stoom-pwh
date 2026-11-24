@@ -13,13 +13,30 @@ import {createRecentDocuments} from './recent-documents.mjs';
 import {childAuthMethods} from './chatgpt-auth.mjs';
 
 const root=path.dirname(fileURLToPath(import.meta.url));
-export function documentTabStartupMessage(diagnostic=''){
+function missingStartupModule(diagnostic){
  const missing=diagnostic.match(/Cannot find (?:module|package) ['"]([^'"]+)['"]/);
- if(missing){const name=missing[1].split(/[\\/]/).pop();return `설치 구성 파일(${name})이 누락되어 문서 탭을 시작하지 못했습니다. Pwh Desktop을 업데이트해 주세요.`;}
+ const name=missing?.[1].split(/[\\/]/).pop();
+ return /^[\w.@-]{1,96}$/.test(name??'')?name:null;
+}
+export function documentTabStartupMessage(diagnostic='',code='START_FAILED'){
+ const module=missingStartupModule(diagnostic);
+ if(module)return '설치 구성 파일('+module+')이 누락되어 문서 탭을 시작하지 못했습니다. Pwh Desktop을 업데이트해 주세요.';
+ if(code==='INVALID_DOCX')return 'Word DOCX 파일을 읽지 못했습니다. 파일이 다른 편집기에서 열리는지 확인해 주세요.';
+ if(code==='ENOENT')return '문서 파일을 찾지 못했습니다. 저장 위치를 확인해 주세요.';
+ if(code==='EACCES'||code==='EPERM')return '문서를 읽을 권한을 확인해 주세요.';
+ if(code==='TAB_TIMEOUT')return '문서 탭을 준비하는 시간이 초과되었습니다. 파일을 다시 열어 주세요.';
  return '문서 탭을 시작하지 못했습니다. 앱을 다시 실행해 주세요. 자세한 오류는 앱의 진단 기록에 저장됩니다.';
 }
+async function recordStartupFailure(dataRoot,code,module){
+ const directory=path.join(dataRoot,'logs'),file=path.join(directory,'document-startup.log');
+ try{
+  await fs.mkdir(directory,{recursive:true});
+  const size=await fs.stat(file).then(s=>s.size,()=>0);
+  if(size<1024*1024)await fs.appendFile(file,JSON.stringify({time:new Date().toISOString(),code,...(module?{module}:{})})+'\n');
+ }catch{/* The startup error can still be displayed without a local log. */}
+}
 export async function createWorkspaceServer({initialPath,nativeBranding,port=0,spawnImpl=spawn,updateServices,storeUpdateServices,distribution=process.env.PWH_DESKTOP_DISTRIBUTION,chooseFile=chooseDesktopFile,chatgptAuth,dataRoot:providedDataRoot,nodeExecutable=process.execPath}={}){
- const token=randomBytes(24).toString('hex'),tabs=new Map();let closing=false,generation=0;
+ const token=randomBytes(24).toString('hex'),tabs=new Map();let closing=false,generation=0,startingTabs=0;
  const dataRoot=providedDataRoot||process.env.PWH_STANDALONE_DATA||path.join(process.env.LOCALAPPDATA||process.env.HOME||root,'PwhDesktop');
  const services=updateServices||{check:checkForDesktopUpdate,download:downloadInstaller,schedule:scheduleDesktopUpdate};
  const recent=createRecentDocuments(dataRoot);let fileDialogBusy=false,templates;
@@ -34,13 +51,15 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
  void checkUpdate();
  let preparedUpdate=null,preparingUpdate=null,installingUpdate=false,codexSetup=null;
  const makeTab=async (file,imported=false,report=false)=>{
-  if(closing||tabs.size>=12)throw Error('문서는 최대 12개까지 열 수 있습니다.');
+  if(closing)throw Error('Pwh 창을 닫고 있습니다.');
+  if(tabs.size+startingTabs>=12)throw Error('문서는 최대 12개까지 열 수 있습니다.');
+  startingTabs++;
   const id=randomUUID();
   // A stable origin per tab slot keeps the editor's local recovery store reachable
   // after reopening. A second window skips ports already owned by another app.
-  for(let childPort=48674;childPort<48738;childPort++){
+  try{for(let childPort=48674;childPort<48738;childPort++){
    if([...tabs.values()].some(tab=>tab.port===childPort))continue;
-   const child=spawnImpl(nodeExecutable,[path.join(root,'workspace-child.mjs'),String(childPort),...(file?[file,...report?['report']:imported?['imported']:[]]:[])],{windowsHide:true,stdio:macPreview?['pipe','pipe','pipe','ipc']:['pipe','pipe','pipe'],env:process.env});
+   const child=spawnImpl(nodeExecutable,[path.join(root,'workspace-child.mjs'),String(childPort),...(file?[file,...report?['report']:imported?['imported']:[]]:[])],{windowsHide:true,stdio:macPreview?['pipe','pipe','pipe','ipc']:['pipe','pipe','pipe'],env:{...process.env,PWH_STANDALONE_DATA:dataRoot}});
    if(macPreview)child.on('message',async message=>{
     if(typeof message?.id!=='string')return;
     let reply;
@@ -52,15 +71,38 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
     if(child.connected)child.send({id:message.id,...reply},()=>{});
    });
    let output='',diagnostic='';child.stdin.on('error',()=>{});child.stderr.on('data',x=>diagnostic=(diagnostic+String(x)).slice(-16000));
-   const result=await new Promise((resolve,reject)=>{const timer=setTimeout(()=>{child.kill();reject(Error('문서 탭을 준비하지 못했습니다.'));},90000);timer.unref?.();
-    child.once('error',e=>{clearTimeout(timer);reject(e);});child.once('exit',async()=>{clearTimeout(timer);try{const directory=path.join(dataRoot,'logs'),file=path.join(directory,'document-startup.log');await fs.mkdir(directory,{recursive:true});const size=await fs.stat(file).then(s=>s.size,()=>0);if(size<1024*1024)await fs.appendFile(file,JSON.stringify({time:new Date().toISOString(),diagnostic})+'\n');}catch{}reject(Error(documentTabStartupMessage(diagnostic)));});
-    child.stdout.on('data',part=>{output+=String(part);const end=output.indexOf('\n');if(end<0)return;clearTimeout(timer);try{const value=JSON.parse(output.slice(0,end));if(value.errorCode)return resolve(value);const candidate=new URL(value.url);if(candidate.hostname!=='127.0.0.1'||candidate.protocol!=='http:'||Number(candidate.port)!==childPort)throw Error('Invalid document host');resolve({url:candidate.href});}catch{child.kill();reject(Error('문서 탭 연결을 확인하지 못했습니다.'));}});
+   const result=await new Promise(resolve=>{
+    let complete=false;
+    const finish=value=>{if(complete)return;complete=true;clearTimeout(timer);resolve(value);};
+    const invalid=()=>{finish({errorCode:'INVALID_TAB_RESPONSE'});child.kill();};
+    const timer=setTimeout(()=>{finish({errorCode:'TAB_TIMEOUT'});child.kill();},90000);timer.unref?.();
+    child.once('error',error=>finish({errorCode:error.code||'START_FAILED'}));
+    child.once('close',()=>finish({errorCode:'START_FAILED'}));
+    child.stdout.on('data',part=>{
+     if(complete)return;
+     output+=String(part);
+     if(output.length>8192)return invalid();
+     const end=output.indexOf('\n');
+     if(end<0)return;
+     try{
+      const value=JSON.parse(output.slice(0,end));
+      if(/^[A-Z_]{3,32}$/.test(value.errorCode??''))return finish({errorCode:value.errorCode});
+      const candidate=new URL(value.url);
+      if(candidate.hostname!=='127.0.0.1'||candidate.protocol!=='http:'||Number(candidate.port)!==childPort)return invalid();
+      finish({url:candidate.href});
+     }catch{invalid();}
+    });
    });
    if(result.errorCode==='EADDRINUSE')continue;
-   if(result.errorCode)throw Error('문서 탭을 열지 못했습니다.');
+   if(result.errorCode){
+    await recordStartupFailure(dataRoot,result.errorCode,missingStartupModule(diagnostic));
+    throw Error(documentTabStartupMessage(diagnostic,result.errorCode));
+   }
+   if(closing){stopTab({child});throw Error('Pwh 창을 닫고 있습니다.');}
    tabs.set(id,{id,url:result.url,child,port:childPort});child.once('exit',()=>tabs.delete(id));return {id,url:result.url};
   }
   throw Error('사용 가능한 문서 탭 연결을 찾지 못했습니다.');
+  }finally{startingTabs--;}
  };
  let first=null,initialDelivered=false;
  const stopTab=tab=>{const timer=setTimeout(()=>tab.child.kill(),3000);timer.unref?.();tab.child.once('exit',()=>clearTimeout(timer));try{tab.child.stdin.end();}catch{tab.child.kill();}};
@@ -99,7 +141,7 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
   if(route==='native/drop-open'){
    let body='';for await(const chunk of req){body+=chunk;if(body.length>1024)throw Error('파일 요청이 너무 큽니다.');}const {id,count}=JSON.parse(body);
    const paths=await nativeBranding?.resolveDroppedFiles?.(id,count);if(!Array.isArray(paths)||paths.length!==count)throw Error('원본 파일 경로를 확인하지 못했습니다.');
-   for(const file of paths){if(typeof file!=='string'||!path.isAbsolute(file)||!/\.hwpx?$/i.test(file))throw Error('HWP 또는 HWPX 파일만 열 수 있습니다.');const stat=await fs.lstat(file);if(!stat.isFile()||stat.isSymbolicLink())throw Error('일반 문서 파일을 선택하세요.');}
+   for(const file of paths){if(typeof file!=='string'||!path.isAbsolute(file)||!/\.(?:hwpx?|docx)$/i.test(file))throw Error('HWP, HWPX 또는 DOCX 파일을 선택하세요.');const stat=await fs.lstat(file);if(!stat.isFile()||stat.isSymbolicLink())throw Error('일반 문서 파일을 선택하세요.');}
    if(tabs.size+paths.length>12)throw Error('문서는 최대 12개까지 열 수 있습니다.');
    const opened=[],errors=[];for(const file of paths){try{opened.push(await makeTab(file));}catch(error){errors.push(path.basename(file)+': '+error.message);}}
    return send(res,{opened,errors});
@@ -120,7 +162,7 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
    if(fileDialogBusy)throw Error('파일 선택창이 이미 열려 있습니다.');
    fileDialogBusy=true;
    try{
-    const picked=await chooseFile({mode:'Open'});
+    const picked=await chooseFile({mode:'Open',hancomOnly:true});
     if(picked?.cancelled)return send(res,{cancelled:true});
     return send(res,{template:await (await reportTemplates()).register(picked?.path,input)});
    }finally{fileDialogBusy=false;}
@@ -130,13 +172,13 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
   if(route==='recent/open'){let body='';for await(const chunk of req){body+=chunk;if(body.length>1024)throw Error('최근 문서 요청이 너무 큽니다.');}const file=await recent.open(JSON.parse(body).id);return send(res,await makeTab(file));}
   if(route==='tabs/open'){
    if(fileDialogBusy)throw Error('파일 선택창이 이미 열려 있습니다.');if(tabs.size>=12)throw Error('문서는 최대 12개까지 열 수 있습니다.');fileDialogBusy=true;
-   try{const picked=await chooseFile({mode:'Open'});if(picked?.cancelled)return send(res,{cancelled:true});const file=picked?.path;if(typeof file!=='string'||!path.isAbsolute(file)||!/\.hwpx?$/i.test(file))throw Error('HWP 또는 HWPX 문서를 선택하세요.');const stat=await fs.lstat(file);if(!stat.isFile()||stat.isSymbolicLink())throw Error('일반 문서를 선택하세요.');return send(res,await makeTab(file));}finally{fileDialogBusy=false;}
+   try{const picked=await chooseFile({mode:'Open'});if(picked?.cancelled)return send(res,{cancelled:true});const file=picked?.path;if(typeof file!=='string'||!path.isAbsolute(file)||!/\.(?:hwpx?|docx)$/i.test(file))throw Error('HWP, HWPX 또는 DOCX 문서를 선택하세요.');const stat=await fs.lstat(file);if(!stat.isFile()||stat.isSymbolicLink())throw Error('일반 문서를 선택하세요.');return send(res,await makeTab(file));}finally{fileDialogBusy=false;}
   }
   if(route==='tabs/import'){
    let name;try{name=decodeURIComponent(String(req.headers['x-pwh-filename']||''));}catch{throw Error('파일 이름을 확인하지 못했습니다.');}
-   if(!name||name!==path.basename(name)||!/\.hwpx?$/i.test(name)||name.length>200)throw Error('HWP 또는 HWPX 파일만 열 수 있습니다.');
+   if(!name||name!==path.basename(name)||!/\.(?:hwpx?|docx)$/i.test(name)||name.length>200)throw Error('HWP, HWPX 또는 DOCX 파일을 선택하세요.');
    let size=0;const chunks=[];for await(const chunk of req){size+=chunk.length;chunks.push(chunk);}const bytes=Buffer.concat(chunks);
-   if(bytes.length<8||(bytes.subarray(0,2).toString()!=='PK'&&bytes.subarray(0,8).toString('hex')!=='d0cf11e0a1b11ae1'))throw Error('HWP 또는 HWPX 문서가 아닙니다.');
+   if(bytes.length<8||(bytes.subarray(0,2).toString()!=='PK'&&bytes.subarray(0,8).toString('hex')!=='d0cf11e0a1b11ae1'))throw Error('HWP, HWPX 또는 DOCX 문서를 확인해 주세요.');
    const dir=path.join(dataRoot,'documents','import-'+randomUUID());await fs.mkdir(dir,{recursive:true});const file=path.join(dir,name);await fs.writeFile(file,bytes,{flag:'wx'});return send(res,await makeTab(file,true));
   }
   if(route==='update/status'){
@@ -193,7 +235,7 @@ export async function createWorkspaceServer({initialPath,nativeBranding,port=0,s
  return {
   server,url:`http://127.0.0.1:${server.address().port}/${token}/`,
   queueNativeFile(file){
-   if(macPreview&&typeof file==='string'&&path.isAbsolute(file)&&/\.hwpx?$/i.test(file)&&nativeFiles.size<12)nativeFiles.add(file);
+   if(macPreview&&typeof file==='string'&&path.isAbsolute(file)&&/\.(?:hwpx?|docx)$/i.test(file)&&nativeFiles.size<12)nativeFiles.add(file);
   },
  };
 }

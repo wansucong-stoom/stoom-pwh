@@ -4793,7 +4793,8 @@ var He = class extends A {
 			P("나누기", [
 				N("page:break", "쪽 나누기", "page-break"),
 				N("page:column-break", "단 나누기", "column-break"),
-				N("page:section-settings", "구역 설정", "section")
+				N("page:section-settings", "구역 설정", "section"),
+				N("page:section-break", "구역 나누기", "page-break")
 			]),
 			P("단", [
 				N("page:col-1", "1단", "column-one"),
@@ -5125,7 +5126,7 @@ function Ze({ menu: e, toolbar: t, registry: n, dispatcher: r, eventBus: i, onCh
 		o.insertBefore(s, o.querySelector(".tb-headerfooter-group")), l.set(t.id, s);
 		let c = document.createElement("button");
 		c.type = "button", c.setAttribute("role", "menuitemradio"), c.textContent = t.label, c.dataset.tab = t.id, c.addEventListener("click", () => {
-			u.get(t.id)?.click(), w(), u.get(t.id)?.focus({ preventScroll: !0 });
+			u.get(t.id)?.click(), T(), u.get(t.id)?.focus({ preventScroll: !0 });
 		}), _.append(c);
 	}
 	for (let e of o.querySelectorAll(".tb-headerfooter-group .tb-btn,.tb-note-group .tb-btn,.tb-rotate-group .tb-btn")) {
@@ -5136,30 +5137,34 @@ function Ze({ menu: e, toolbar: t, registry: n, dispatcher: r, eventBus: i, onCh
 			command: n
 		});
 	}
-	function S() {
+	function S(t) {
+		let n = t.dataset.cmd, r = {
+			"format:bold": "btn-bold",
+			"format:italic": "btn-italic",
+			"format:underline": "btn-underline",
+			"format:strikethrough": "btn-strike"
+		}[n], i = (r ? document.getElementById(r) : e.querySelector("[data-cmd=\"" + n + "\"]"))?.classList.contains("active") || !1;
+		t.setAttribute("aria-pressed", String(i)), t.classList.toggle("active", i);
+	}
+	function C() {
 		p = 0;
-		let t = l.get(f);
-		if (!t) return;
+		let e = l.get(f);
+		if (!e) return;
 		f === "format" && x();
-		let n = [...t.querySelectorAll("button[data-cmd]")], i = r.getEnabledStates(n.map((e) => e.dataset.cmd));
-		for (let t of n) {
-			let n = i.get(t.dataset.cmd) === !0;
-			if (t.disabled === n && (t.disabled = !n), t.setAttribute("aria-disabled", String(!n)), t.hasAttribute("aria-pressed")) {
-				let n = t.dataset.cmd, r = {
-					"format:bold": "btn-bold",
-					"format:italic": "btn-italic",
-					"format:underline": "btn-underline",
-					"format:strikethrough": "btn-strike"
-				}[n], i = (r ? document.getElementById(r) : e.querySelector("[data-cmd=\"" + n + "\"]"))?.classList.contains("active") || !1;
-				t.setAttribute("aria-pressed", String(i)), t.classList.toggle("active", i);
-			}
+		let t = [...e.querySelectorAll("button[data-cmd]")], n = r.getEnabledStates(t.map((e) => e.dataset.cmd));
+		for (let e of t) {
+			let t = n.get(e.dataset.cmd) === !0;
+			e.disabled === t && (e.disabled = !t), e.setAttribute("aria-disabled", String(!t)), e.hasAttribute("aria-pressed") && S(e);
 		}
 	}
-	let C = () => {
-		p ||= requestAnimationFrame(S);
+	let w = () => {
+		p ||= requestAnimationFrame(C);
 	};
+	i.on("command-state-changed", (e) => {
+		if (typeof e == "string") for (let t of l.get(f)?.querySelectorAll("button[data-cmd][aria-pressed]") ?? []) t.dataset.cmd === e && S(t);
+		w();
+	});
 	for (let e of [
-		"command-state-changed",
 		"document-loaded",
 		"selection-changed",
 		"cell-selection-phase-changed",
@@ -5168,23 +5173,23 @@ function Ze({ menu: e, toolbar: t, registry: n, dispatcher: r, eventBus: i, onCh
 		"cursor-para-changed",
 		"table-object-selection-changed",
 		"picture-object-selection-changed"
-	]) i.on(e, C);
-	function w() {
+	]) i.on(e, w);
+	function T() {
 		_.hidden = !0, g.setAttribute("aria-expanded", "false");
 	}
-	function T() {
+	function E() {
 		let e = u.get(f)?.parentElement;
 		if (!e) return;
 		let t = e.getBoundingClientRect(), n = h.getBoundingClientRect();
 		t.left < n.left ? h.scrollLeft -= n.left - t.left : t.right > n.right && (h.scrollLeft += t.right - n.right);
 	}
-	function E(e) {
+	function D(e) {
 		if (l.has(e)) {
 			f = e;
 			for (let [t, n] of l) n.dataset.active = String(t === e), n.setAttribute("aria-hidden", String(t !== e));
 			for (let [t, n] of u) n.setAttribute("aria-selected", String(t === e)), n.tabIndex = t === e ? 0 : -1, n.parentElement?.classList.toggle("pwh-ribbon-selected", t === e);
 			for (let t of _.querySelectorAll("[data-tab]")) t.setAttribute("aria-checked", String(t.dataset.tab === e));
-			T(), t.dataset.ribbonTab = e, S(), a?.();
+			E(), t.dataset.ribbonTab = e, C(), a?.();
 		}
 	}
 	g.addEventListener("mousedown", (e) => e.preventDefault()), g.addEventListener("click", () => {
@@ -5194,10 +5199,10 @@ function Ze({ menu: e, toolbar: t, registry: n, dispatcher: r, eventBus: i, onCh
 			_.style.right = Math.max(4, innerWidth - e.right) + "px", _.style.top = e.bottom + "px", _.querySelector("[aria-checked=\"true\"]")?.focus();
 		}
 	}), document.addEventListener("mousedown", (e) => {
-		!g.contains(e.target) && !_.contains(e.target) && w();
+		!g.contains(e.target) && !_.contains(e.target) && T();
 	}), _.addEventListener("keydown", (e) => {
 		if (e.key === "Escape") {
-			e.preventDefault(), e.stopPropagation(), w(), g.focus();
+			e.preventDefault(), e.stopPropagation(), T(), g.focus();
 			return;
 		}
 		if (![
@@ -5210,17 +5215,17 @@ function Ze({ menu: e, toolbar: t, registry: n, dispatcher: r, eventBus: i, onCh
 		let t = [..._.querySelectorAll("button")], n = t.indexOf(document.activeElement);
 		t[e.key === "Home" ? 0 : e.key === "End" ? t.length - 1 : (n + (e.key === "ArrowDown" ? 1 : -1) + t.length) % t.length]?.focus();
 	}), new ResizeObserver(() => {
-		g.hidden = h.scrollWidth <= h.clientWidth + 1, T();
+		g.hidden = h.scrollWidth <= h.clientWidth + 1, E();
 	}).observe(h);
-	let D = null, O = () => {
-		D?.remove(), D = null;
+	let O = null, ee = () => {
+		O?.remove(), O = null;
 	};
 	for (let i of [
 		e,
 		t,
 		document.getElementById("style-bar")
 	]) i?.addEventListener("contextmenu", (e) => {
-		e.preventDefault(), e.stopPropagation(), O();
+		e.preventDefault(), e.stopPropagation(), ee();
 		let t = document.createElement("div");
 		t.className = "pwh-tools-popup", t.setAttribute("role", "menu"), t.setAttribute("aria-label", "도구 상자 설정");
 		for (let [e, i, a] of [
@@ -5250,12 +5255,12 @@ function Ze({ menu: e, toolbar: t, registry: n, dispatcher: r, eventBus: i, onCh
 			o.type = "button";
 			let s = a && document.documentElement.dataset[a] !== "hidden";
 			o.textContent = (a && s ? "✓  " : "　 ") + i, o.setAttribute("role", a ? "menuitemcheckbox" : "menuitem"), a && o.setAttribute("aria-checked", String(s)), o.addEventListener("mousedown", (e) => e.preventDefault()), o.addEventListener("click", () => {
-				O(), r.dispatch(e);
+				ee(), r.dispatch(e);
 			}), t.append(o);
 		}
-		document.body.append(t), D = t, t.style.left = Math.max(8, Math.min(e.clientX, innerWidth - t.offsetWidth - 8)) + "px", t.style.top = Math.max(8, Math.min(e.clientY, innerHeight - t.offsetHeight - 8)) + "px", t.querySelector("button")?.focus({ preventScroll: !0 }), t.addEventListener("keydown", (e) => {
+		document.body.append(t), O = t, t.style.left = Math.max(8, Math.min(e.clientX, innerWidth - t.offsetWidth - 8)) + "px", t.style.top = Math.max(8, Math.min(e.clientY, innerHeight - t.offsetHeight - 8)) + "px", t.querySelector("button")?.focus({ preventScroll: !0 }), t.addEventListener("keydown", (e) => {
 			if (e.key === "Escape") {
-				e.preventDefault(), e.stopPropagation(), O();
+				e.preventDefault(), e.stopPropagation(), ee();
 				return;
 			}
 			if (e.key === "ArrowDown" || e.key === "ArrowUp") {
@@ -5266,9 +5271,9 @@ function Ze({ menu: e, toolbar: t, registry: n, dispatcher: r, eventBus: i, onCh
 		});
 	});
 	return document.addEventListener("mousedown", (e) => {
-		D && !D.contains(e.target) && O();
-	}), E(f), {
-		select: E,
+		O && !O.contains(e.target) && ee();
+	}), D(f), {
+		select: D,
 		get active() {
 			return f;
 		}
@@ -27025,6 +27030,21 @@ var Js = class {
 			this.doc.endBatch();
 		}
 	}
+	editSectionBoundary(e, t) {
+		if (!this.doc) throw Error("문서를 열어 주세요.");
+		let n = e.paragraphIndex;
+		for (let t = 0; t < e.sectionIndex; t++) n += this.getParagraphCount(t);
+		let r = JSON.parse(this.doc.breakAtCursor(0, n, this.bodyPositionToLogical(e), t));
+		if (!r.ok) throw Error("구역 경계를 변경하지 못했습니다.");
+		return this.invalidatePwhSelectionLayout(), {
+			sectionIndex: r.sectionIndex,
+			paragraphIndex: r.paragraphIndex,
+			charOffset: r.charOffset
+		};
+	}
+	sectionBoundaryParagraphLength(e, t) {
+		return this.doc?.getLogicalLength(e, t) ?? 0;
+	}
 	getSectionCount() {
 		return this.doc?.getSectionCount() ?? 0;
 	}
@@ -39945,8 +39965,54 @@ function f_(e) {
 	}
 }
 //#endregion
+//#region @rhwp/studio/src/pwh-section-edit.ts
+function p_() {
+	return globalThis.__PWH_SECTION_EDIT__ === !0;
+}
+function m_(e) {
+	return p_() && e.hasDocument && e.isEditable && !e.isFormMode && !e.inField && !e.inTable && !e.inCellSelectionMode && !e.inTableObjectSelection && !e.inPictureObjectSelection && !e.hasSelection;
+}
+function h_(e, t) {
+	let n = e.getInputHandler();
+	if (!n || !n.canEditHyperlink() || !m_(e.getContext())) return !1;
+	let r = n.getPosition();
+	return r.isTextBox || r.parentParaIndex !== void 0 || r.cellPath?.length ? !1 : __(n, e.wasm, r, "pwhSection", t);
+}
+function g_(e, t, n, r) {
+	if (!p_()) return !1;
+	let i = n.sectionIndex, a = t.bodyPositionToLogical(n);
+	if (r === "Backspace") {
+		if (i === 0 || n.paragraphIndex !== 0 || a !== 0) return !1;
+	} else {
+		if (i + 1 >= t.getSectionCount() || n.paragraphIndex !== t.getParagraphCount(i) - 1 || a !== t.sectionBoundaryParagraphLength(i, n.paragraphIndex)) return !1;
+		i++;
+	}
+	return __(e, t, {
+		sectionIndex: i,
+		paragraphIndex: 0,
+		charOffset: 0
+	}, "pwhJoinSection");
+}
+function __(e, t, n, r, i) {
+	let a = t.getSectionCount();
+	return e.executeOperation({
+		kind: "snapshot",
+		operationType: r === "pwhSection" ? "sectionBreak" : "sectionJoin",
+		operation: (e) => {
+			let t = e.editSectionBoundary(n, r);
+			return i && e.setSectionDef(t.sectionIndex, i), t;
+		},
+		meta: {
+			actionId: "page:section-break",
+			domain: "page",
+			refresh: "full",
+			dirtyScope: "document"
+		}
+	}), t.getSectionCount() !== a;
+}
+//#endregion
 //#region @rhwp/studio/src/engine/pwh-table-create-shortcut.mjs
-var p_ = /* @__PURE__ */ new WeakMap(), m_ = {
+var v_ = /* @__PURE__ */ new WeakMap(), y_ = {
 	n: {
 		t: "table:create",
 		a: "table:split",
@@ -39999,15 +40065,15 @@ var p_ = /* @__PURE__ */ new WeakMap(), m_ = {
 		q: "view:zoom-100"
 	},
 	v: { t: "view:border-transparent" }
-}, h_ = Object.fromEntries([..."ㅁㅠㅊㅇㄷㄹㅎㅗㅑㅓㅏㅣㅡㅜㅐㅔㅂㄱㄴㅅㅕㅍㅈㅌㅛㅋ"].map((e, t) => [e, String.fromCharCode(97 + t)])), g_ = (e) => /^Key[A-Z]$/.test(e.code || "") ? e.code.slice(-1).toLowerCase() : h_[e.key] ?? e.key?.toLowerCase();
-function __(e) {
-	let t = p_.get(e);
-	p_.delete(e), t?.cleanup?.();
+}, b_ = Object.fromEntries([..."ㅁㅠㅊㅇㄷㄹㅎㅗㅑㅓㅏㅣㅡㅜㅐㅔㅂㄱㄴㅅㅕㅍㅈㅌㅛㅋ"].map((e, t) => [e, String.fromCharCode(97 + t)])), x_ = (e) => /^Key[A-Z]$/.test(e.code || "") ? e.code.slice(-1).toLowerCase() : b_[e.key] ?? e.key?.toLowerCase();
+function S_(e) {
+	let t = v_.get(e);
+	v_.delete(e), t?.cleanup?.();
 }
-function v_(e, t, n, r, i) {
-	__(e);
-	let a = r.target || e.textarea, o = a?.ownerDocument?.defaultView, s = () => __(e);
-	a?.addEventListener?.("blur", s, { once: !0 }), o?.addEventListener?.("blur", s, { once: !0 }), p_.set(e, {
+function C_(e, t, n, r, i) {
+	S_(e);
+	let a = r.target || e.textarea, o = a?.ownerDocument?.defaultView, s = () => S_(e);
+	a?.addEventListener?.("blur", s, { once: !0 }), o?.addEventListener?.("blur", s, { once: !0 }), v_.set(e, {
 		key: t,
 		modifier: n,
 		until: i + 2500,
@@ -40016,7 +40082,7 @@ function v_(e, t, n, r, i) {
 		}
 	});
 }
-function y_(e, t) {
+function w_(e, t) {
 	return e.shiftKey ? null : e.altKey && !e.ctrlKey && !e.metaKey && t === "v" ? "alt" : e.altKey ? null : e.ctrlKey && !e.metaKey && [
 		"n",
 		"q",
@@ -40029,33 +40095,33 @@ function y_(e, t) {
 		"g"
 	].includes(t) ? "meta" : null;
 }
-function b_(e, t) {
+function T_(e, t) {
 	return e.shiftKey ? !1 : t.modifier === "alt" ? !e.ctrlKey && !e.metaKey : t.modifier === "meta" ? !e.ctrlKey && !e.altKey : !e.metaKey && !e.altKey;
 }
-function x_(e, t, n = Date.now()) {
-	if (e.connectorDrawingMode || e.polygonDrawingMode || e.imagePlacementMode || e.textboxPlacementMode) return __(e), !1;
-	let r = g_(t);
+function E_(e, t, n = Date.now()) {
+	if (e.connectorDrawingMode || e.polygonDrawingMode || e.imagePlacementMode || e.textboxPlacementMode) return S_(e), !1;
+	let r = x_(t);
 	if ([
 		"Control",
 		"Shift",
 		"Alt",
 		"Meta"
 	].includes(t.key)) return !1;
-	let i = p_.get(e), a = y_(t, r);
+	let i = v_.get(e), a = w_(t, r);
 	if (i) {
 		if (t.repeat && r === i.key && a === i.modifier) return t.preventDefault(), !0;
-		__(e);
-		let o = n <= i.until && !t.repeat && b_(t, i) && Object.hasOwn(m_[i.key], r) ? m_[i.key][r] : null;
+		S_(e);
+		let o = n <= i.until && !t.repeat && T_(t, i) && Object.hasOwn(y_[i.key], r) ? y_[i.key][r] : null;
 		if (o) return t.preventDefault(), e._cellBlockLetterImeGuard?.arm(t), o === "table:create" ? e.dispatcher?.dispatch(o, { pwhDetailed: !0 }) : e.dispatcher?.dispatch(o), !0;
 	}
-	return a ? (t.preventDefault(), t.repeat || v_(e, r, a, t, n), !0) : !1;
+	return a ? (t.preventDefault(), t.repeat || C_(e, r, a, t, n), !0) : !1;
 }
 //#endregion
 //#region @rhwp/studio/src/engine/pwh-clipboard-structure.mjs
-function S_({ inCell: e, internalControl: t = !1, hasTables: n = !1, hasObjects: r = !1 }) {
+function D_({ inCell: e, internalControl: t = !1, hasTables: n = !1, hasObjects: r = !1 }) {
 	return !!(e && (t || n || r));
 }
-function C_(e) {
+function O_(e) {
 	if (typeof e != "string" || !e) return !1;
 	try {
 		return !!new DOMParser().parseFromString(e, "text/html").querySelector("table");
@@ -40063,7 +40129,7 @@ function C_(e) {
 		return !1;
 	}
 }
-function w_(e, t, n = !1) {
+function k_(e, t, n = !1) {
 	let r = e.parentParaIndex !== void 0 || (e.cellPath?.length ?? 0) > 0;
 	if (!r) return null;
 	let i = !1, a = !1;
@@ -40073,7 +40139,7 @@ function w_(e, t, n = !1) {
 	} catch {
 		return "셀 안에 붙일 서식 구조를 확인하지 못했습니다. 기존 내용은 유지했습니다.";
 	}
-	return S_({
+	return D_({
 		inCell: r,
 		internalControl: n,
 		hasTables: i,
@@ -40082,25 +40148,25 @@ function w_(e, t, n = !1) {
 }
 //#endregion
 //#region @rhwp/studio/src/engine/navigation-keymap.ts
-function T_(e) {
+function A_(e) {
 	return e.key !== "ArrowUp" && e.key !== "ArrowDown" && e.key !== "ArrowLeft" && e.key !== "ArrowRight" ? null : e.ctrlKey || e.metaKey ? "resize" : "navigate";
 }
-function E_() {
+function j_() {
 	let e = globalThis.__rhwpTestPlatformKind;
 	return e === "mac" || e === "other" ? e : null;
 }
-function D_(e) {
-	let t = E_();
+function M_(e) {
+	let t = j_();
 	if (t) return t;
 	let n = e ?? (typeof navigator > "u" ? void 0 : navigator), r = n?.userAgentData?.platform || n?.platform || "", i = n?.userAgent || "";
 	return /mac|iphone|ipad|ipod/i.test(r) || /mac os x|iphone|ipad|ipod/i.test(i) ? "mac" : "other";
 }
-function O_(e) {
+function N_(e) {
 	let t = e.key || "";
 	return t === "ArrowLeft" || t === "ArrowRight" || t === "ArrowUp" || t === "ArrowDown" || t === "Home" || t === "End" ? t : e.code || t;
 }
-function k_(e, t = D_()) {
-	let n = O_(e);
+function P_(e, t = M_()) {
+	let n = N_(e);
 	if (!e.ctrlKey && !e.metaKey && !e.altKey) return n === "Home" ? "lineStart" : n === "End" ? "lineEnd" : null;
 	if (t === "mac") {
 		if (e.altKey && !e.ctrlKey && !e.metaKey) {
@@ -40121,16 +40187,21 @@ function k_(e, t = D_()) {
 	}
 	return null;
 }
-function A_(e, t = D_()) {
-	let n = O_(e);
+function F_(e, t = M_()) {
+	let n = N_(e);
 	return t === "other" && e.altKey && !e.ctrlKey && !e.metaKey && (n === "ArrowLeft" || n === "ArrowRight");
 }
-function j_(e, t = D_()) {
+function I_(e, t = M_()) {
 	return t === "mac" ? e.replace(/\bCtrl\+/g, "⌘").replace(/\bAlt\+/g, "⌥").replace(/\bShift\+/g, "⇧") : e;
 }
 //#endregion
 //#region @rhwp/studio/src/command/shortcut-map.ts
-var M_ = [
+var L_ = [
+	[{
+		key: "enter",
+		alt: !0,
+		shift: !0
+	}, "page:section-break"],
 	[{
 		key: "z",
 		ctrl: !0
@@ -40593,14 +40664,14 @@ var M_ = [
 		shift: !0
 	}, "table:block-product"]
 ];
-function N_(e, t, n = D_()) {
+function R_(e, t, n = M_()) {
 	let r = e.ctrlKey || e.metaKey, i = e.key.toLowerCase(), a = (e.code ?? "").toLowerCase();
 	for (let [o, s] of t) if (!(o.platform && o.platform !== n) && (!o.ctrl || r) && (o.ctrl || !r) && (o.shift ?? !1) === e.shiftKey && (o.alt ?? !1) === e.altKey && (i === o.key || o.code && a === o.code.toLowerCase())) return s;
 	return null;
 }
 //#endregion
 //#region @rhwp/studio/src/command/contextual-shortcut.ts
-var P_ = class {
+var z_ = class {
 	state = "idle";
 	ghostText = "";
 	arm(e) {
@@ -40624,7 +40695,7 @@ var P_ = class {
 		this.state = "idle", this.ghostText = "";
 	}
 };
-function F_(e, t) {
+function B_(e, t) {
 	let n = e.ctrlKey || e.metaKey, r = e.key.toLowerCase() === "s" || e.key === "ㄴ" || e.code.toLowerCase() === "keys";
 	return !n || !e.shiftKey || e.altKey || !r || !t.inCellSelectionMode ? null : t.saveAsEnabled ? t.blockSumEnabled ? {
 		kind: "dispatch",
@@ -40634,7 +40705,7 @@ function F_(e, t) {
 		commandId: "file:save-as"
 	} : { kind: "consume" };
 }
-function I_(e, t) {
+function V_(e, t) {
 	if (!t.inCellSelectionMode || e.ctrlKey || e.metaKey || e.altKey) return null;
 	let n = e.key.toLowerCase(), r = e.code.toLowerCase();
 	return n === "s" || e.key === "ㄴ" || r === "keys" ? {
@@ -40671,19 +40742,19 @@ function I_(e, t) {
 }
 //#endregion
 //#region @rhwp/studio/src/engine/office-clipboard-images.ts
-var L_ = 80, R_ = 81, z_ = 14;
-function B_(e) {
+var H_ = 80, U_ = 81, W_ = 14;
+function G_(e) {
 	let t = e.length >> 1, n = new Uint8Array(t);
 	for (let r = 0; r < t; r++) n[r] = parseInt(e.substr(r * 2, 2), 16);
 	return n;
 }
-function V_(e, t) {
+function K_(e, t) {
 	let n = /* @__PURE__ */ new Uint8Array(14), r = new DataView(n.buffer);
 	n[0] = 66, n[1] = 77, r.setUint32(2, 14 + e.byteLength + t.byteLength, !0), r.setUint32(10, 14 + e.byteLength, !0);
 	let i = new Uint8Array(n.byteLength + e.byteLength + t.byteLength);
 	return i.set(n, 0), i.set(e, n.byteLength), i.set(t, n.byteLength + e.byteLength), i;
 }
-function H_(e) {
+function q_(e) {
 	let t = [];
 	if (e.byteLength < 44) return {
 		dibs: t,
@@ -40698,12 +40769,12 @@ function H_(e) {
 	for (; c + 8 <= e.byteLength;) {
 		let r = n.getUint32(c, !0), i = n.getUint32(c + 4, !0);
 		if (i < 8 || c + i > e.byteLength) break;
-		if (r === R_ || r === L_) {
-			let i = n.getInt32(c + 24, !0), a = n.getInt32(c + 28, !0), o = n.getUint32(c + 48, !0), s = n.getUint32(c + 52, !0), l = n.getUint32(c + 56, !0), u = n.getUint32(c + 60, !0), d = r === R_ && c + 80 <= e.byteLength ? n.getInt32(c + 72, !0) : 0, f = r === R_ && c + 80 <= e.byteLength ? n.getInt32(c + 76, !0) : 0;
+		if (r === U_ || r === H_) {
+			let i = n.getInt32(c + 24, !0), a = n.getInt32(c + 28, !0), o = n.getUint32(c + 48, !0), s = n.getUint32(c + 52, !0), l = n.getUint32(c + 56, !0), u = n.getUint32(c + 60, !0), d = r === U_ && c + 80 <= e.byteLength ? n.getInt32(c + 72, !0) : 0, f = r === U_ && c + 80 <= e.byteLength ? n.getInt32(c + 76, !0) : 0;
 			if (s >= 12 && u > 0 && c + o + s <= e.byteLength && c + l + u <= e.byteLength) {
 				let n = e.subarray(c + o, c + o + s), r = e.subarray(c + l, c + l + u), p = new DataView(n.buffer, n.byteOffset, n.byteLength), m = Math.abs(p.getInt32(4, !0)), h = Math.abs(p.getInt32(8, !0));
 				m > 0 && h > 0 && t.push({
-					bmp: V_(n, r),
+					bmp: K_(n, r),
 					x: i,
 					y: a,
 					w: d > 0 ? d : m,
@@ -40711,15 +40782,15 @@ function H_(e) {
 				});
 			}
 		}
-		if (c += i, r === z_) break;
+		if (c += i, r === W_) break;
 	}
 	return {
 		dibs: t,
 		bounds: s
 	};
 }
-async function U_(e) {
-	let { dibs: t, bounds: n } = H_(e);
+async function J_(e) {
+	let { dibs: t, bounds: n } = q_(e);
 	if (t.length === 0) return null;
 	let r = [];
 	try {
@@ -40752,12 +40823,12 @@ async function U_(e) {
 		for (let { bmp: e } of r) e.close?.();
 	}
 }
-function W_(e) {
+function Y_(e) {
 	let t = [], n = /\\pict([\s\S]*?)\}/g, r;
 	for (; (r = n.exec(e)) !== null;) {
 		let e = r[1], n = /\\pngblip\b/.test(e), i = /\\jpegblip\b/.test(e), a = /\\(?:wmetafile\d*|emfblip)\b/.test(e), o = e.replace(/\\[a-zA-Z]+-?\d*\s?/g, "").replace(/[^0-9a-fA-F]/g, "");
 		if (o.length < 32) continue;
-		let s = B_(o.slice(0, o.length - o.length % 2));
+		let s = G_(o.slice(0, o.length - o.length % 2));
 		n ? t.push({
 			bytes: s,
 			mime: "image/png"
@@ -40774,17 +40845,17 @@ function W_(e) {
 	}
 	return t;
 }
-async function G_(e, t) {
+async function X_(e, t) {
 	if (!e.byteLength || !t) return null;
 	let n = new Uint8Array(e.byteLength);
 	n.set(e);
-	let r = new Blob([n.buffer], { type: t }), i = t === "image/emf" ? await U_(e) : t === "image/bmp" ? await K_(r) : r;
+	let r = new Blob([n.buffer], { type: t }), i = t === "image/emf" ? await J_(e) : t === "image/bmp" ? await Z_(r) : r;
 	return i ? await new Promise((e) => {
 		let t = new FileReader();
 		t.onload = () => e(typeof t.result == "string" ? t.result : null), t.onerror = () => e(null), t.readAsDataURL(i);
 	}) : null;
 }
-async function K_(e) {
+async function Z_(e) {
 	try {
 		let t = await createImageBitmap(e), n = document.createElement("canvas");
 		n.width = t.width, n.height = t.height;
@@ -40794,9 +40865,9 @@ async function K_(e) {
 		return console.warn("[paste] BMP → PNG 변환 실패:", e), null;
 	}
 }
-async function q_(e, t) {
+async function Q_(e, t) {
 	if (!t || !/\\pict/.test(t)) return e;
-	let n = W_(t);
+	let n = Y_(t);
 	if (n.length === 0) return e;
 	let r = e.match(/<img\b[^>]*>/gi) ?? [];
 	if (r.length === 0) return e;
@@ -40812,16 +40883,16 @@ async function q_(e, t) {
 			i.push(null);
 			continue;
 		}
-		let r = await G_(t.bytes, t.mime);
+		let r = await X_(t.bytes, t.mime);
 		i.push(r), r && o++;
 	}
 	let s = 0, c = e.replace(/<img\b[^>]*>/gi, (e) => {
 		let t = i[s++];
 		return t ? (o++, /src\s*=\s*["'][^"']*["']/i.test(e) ? e.replace(/src\s*=\s*["'][^"']*["']/i, `src="${t}"`) : e.replace(/<img\b/i, `<img src="${t}"`)) : e;
 	});
-	return console.log(`[paste] 클립보드 그림 ${o}/${r.length}개 삽입(pict ${n.length})`), J_(c);
+	return console.log(`[paste] 클립보드 그림 ${o}/${r.length}개 삽입(pict ${n.length})`), $_(c);
 }
-function J_(e) {
+function $_(e) {
 	if (!/<img\b/i.test(e) || typeof DOMParser > "u") return e;
 	try {
 		let t = new DOMParser().parseFromString(e, "text/html").body;
@@ -40847,20 +40918,20 @@ function J_(e) {
 		return console.warn("[paste] 그림 위치 정리 실패 — 원본 HTML 사용:", t), e;
 	}
 }
-function Y_(e, t) {
+function ev(e, t) {
 	return !e || !t || !/\\pict/.test(t) ? !1 : /<img\b[^>]*src\s*=\s*["'](?!data:)/i.test(e);
 }
 //#endregion
 //#region @rhwp/studio/src/engine/office-html-sanitize.ts
-var X_ = [
+var tv = [
 	"script",
 	"style",
 	"xml"
-], Z_ = "<![endif]>";
-function Q_(e) {
+], nv = "<![endif]>";
+function rv(e) {
 	return Number.isNaN(e) || e === 62 || e === 47 || e <= 32;
 }
-function $_(e, t, n, r) {
+function iv(e, t, n, r) {
 	let i = e.indexOf(">", n);
 	if (i < 0) return e.length;
 	if (e.charCodeAt(i - 1) === 47) return i + 1;
@@ -40875,7 +40946,7 @@ function $_(e, t, n, r) {
 		a = n + 2 + r.length;
 	}
 }
-function ev(e) {
+function av(e) {
 	let t = e.toLowerCase(), n = "", r = 0;
 	for (; r < e.length;) {
 		let i = e.indexOf("<", r);
@@ -40889,13 +40960,13 @@ function ev(e) {
 			continue;
 		}
 		if (t.startsWith("<![if", i)) {
-			let n = t.indexOf(Z_, i);
+			let n = t.indexOf(nv, i);
 			r = n < 0 ? e.length : n + 10;
 			continue;
 		}
-		let a = X_.find((e) => t.startsWith(`<${e}`, i) && Q_(t.charCodeAt(i + 1 + e.length)));
+		let a = tv.find((e) => t.startsWith(`<${e}`, i) && rv(t.charCodeAt(i + 1 + e.length)));
 		if (a) {
-			r = $_(e, t, i, a);
+			r = iv(e, t, i, a);
 			continue;
 		}
 		n += "<", r = i + 1;
@@ -40904,7 +40975,7 @@ function ev(e) {
 }
 //#endregion
 //#region @rhwp/studio/src/engine/input-handler-keyboard.ts
-var tv = /<!--\s*rhwp-studio-clipboard:([A-Za-z0-9._:-]+)\s*-->/, nv = /* @__PURE__ */ new Set([
+var ov = /<!--\s*rhwp-studio-clipboard:([A-Za-z0-9._:-]+)\s*-->/, sv = /* @__PURE__ */ new Set([
 	"ArrowLeft",
 	"ArrowRight",
 	"ArrowUp",
@@ -40916,7 +40987,7 @@ var tv = /<!--\s*rhwp-studio-clipboard:([A-Za-z0-9._:-]+)\s*-->/, nv = /* @__PUR
 	"Enter",
 	"Tab",
 	"Escape"
-]), rv = /* @__PURE__ */ new Set([
+]), cv = /* @__PURE__ */ new Set([
 	"edit:delete",
 	"edit:undo",
 	"edit:redo",
@@ -40935,71 +41006,71 @@ var tv = /<!--\s*rhwp-studio-clipboard:([A-Za-z0-9._:-]+)\s*-->/, nv = /* @__PUR
 	"format:para-shape",
 	"format:style-dialog"
 ]);
-function iv(e) {
+function lv(e) {
 	if (!this.dispatcher) return !1;
-	let t = N_(e, M_);
-	return !t || !rv.has(t) ? !1 : (e.preventDefault(), this.dispatcher.dispatch(t), !0);
+	let t = R_(e, L_);
+	return !t || !cv.has(t) ? !1 : (e.preventDefault(), this.dispatcher.dispatch(t), !0);
 }
-var av = /* @__PURE__ */ new Set([
+var uv = /* @__PURE__ */ new Set([
 	"edit:undo",
 	"edit:redo",
 	"edit:goto",
 	"edit:select-all"
 ]);
-function ov(e) {
+function dv(e) {
 	return e.key === "Enter" && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey && !this.isComposing && !this.isFormMode?.() && !this.cursor.isInHeaderFooter() && !this.cursor.isInFootnote() && !this.cursor.isInPictureObjectSelection() && !this.cursor.isInTableObjectSelection() && !this.cursor.isInBlockSelectionMode() && !this.cursor.isInCellSelectionMode() && !this.cursor.hasSelection() && this.cursor.isInCell();
 }
-function sv(e) {
+function fv(e) {
 	if (!this.dispatcher) return !1;
-	let t = N_(e, M_);
-	return !t || !av.has(t) ? !1 : (e.preventDefault(), this.dispatcher.dispatch(t), !0);
+	let t = R_(e, L_);
+	return !t || !uv.has(t) ? !1 : (e.preventDefault(), this.dispatcher.dispatch(t), !0);
 }
-function cv(e) {
+function pv(e) {
 	if (!this.dispatcher) return !1;
-	let t = F_(e, {
+	let t = B_(e, {
 		inCellSelectionMode: this.cursor.isInCellSelectionMode(),
 		blockSumEnabled: this.dispatcher.isEnabled("table:block-sum"),
 		saveAsEnabled: this.dispatcher.isEnabled("file:save-as")
 	});
 	return t ? (e.preventDefault(), t.kind === "dispatch" && this.dispatcher.dispatch(t.commandId), !0) : !1;
 }
-function lv(e) {
+function mv(e) {
 	if (!this.dispatcher) return !1;
-	let t = I_(e, { inCellSelectionMode: this.cursor.isInCellSelectionMode() });
+	let t = V_(e, { inCellSelectionMode: this.cursor.isInCellSelectionMode() });
 	return t ? (this._cellBlockLetterImeGuard?.arm(e), e.preventDefault(), this.dispatcher.dispatch(t.commandId), !0) : !1;
 }
-function uv() {
+function hv() {
 	try {
 		if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
 	} catch {}
 	return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 }
-function dv(e) {
+function gv(e) {
 	return e.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
-function fv(e) {
-	return `<html><body>\n<!--StartFragment-->\n${(e || "").split(/\r?\n/).map((e) => `<p>${dv(e)}</p>`).join("\n")}\n<!--EndFragment-->\n</body></html>`;
+function _v(e) {
+	return `<html><body>\n<!--StartFragment-->\n${(e || "").split(/\r?\n/).map((e) => `<p>${gv(e)}</p>`).join("\n")}\n<!--EndFragment-->\n</body></html>`;
 }
-function pv(e, t) {
-	let n = `<!--rhwp-studio-clipboard:${t}-->`, r = e || fv("");
-	return tv.test(r) ? r.replace(tv, n) : r.includes("<!--StartFragment-->") ? r.replace("<!--StartFragment-->", `${n}\n<!--StartFragment-->`) : `${n}\n${r}`;
+function vv(e, t) {
+	let n = `<!--rhwp-studio-clipboard:${t}-->`, r = e || _v("");
+	return ov.test(r) ? r.replace(ov, n) : r.includes("<!--StartFragment-->") ? r.replace("<!--StartFragment-->", `${n}\n<!--StartFragment-->`) : `${n}\n${r}`;
 }
-function mv(e) {
-	return tv.exec(e)?.[1] ?? null;
+function yv(e) {
+	return ov.exec(e)?.[1] ?? null;
 }
-function hv(e, t) {
-	let n = mv(t);
+function bv(e, t) {
+	let n = yv(t);
 	return !!n && n === e.rhwpClipboardToken;
 }
-function gv(e) {
+function xv(e) {
 	return e.parentParaIndex !== void 0 && (e.cellPath?.length ?? 0) > 1;
 }
-function _v(e) {
+function Sv(e) {
 	let t = /* @__PURE__ */ new Set(), n = [];
 	for (let r of e) t.has(r.cellIdx) || (t.add(r.cellIdx), n.push(r));
 	return n.sort((e, t) => e.row === t.row ? e.col - t.col : e.row - t.row), n;
 }
-function vv(e, t) {
+function Cv(e, t) {
 	return {
 		sectionIndex: e.sectionIndex,
 		paragraphIndex: 0,
@@ -41010,11 +41081,11 @@ function vv(e, t) {
 		cellParaIndex: 0
 	};
 }
-function yv() {
+function wv() {
 	let e = this.cursor.getPosition(), t = e.sectionIndex, n = e.parentParaIndex, r = e.controlIndex, i = e.cellIndex;
-	if (n === void 0 || r === void 0 || i === void 0 || gv(e)) return !1;
+	if (n === void 0 || r === void 0 || i === void 0 || xv(e)) return !1;
 	try {
-		let a = _v(this.wasm.getTableCellBboxes(t, n, r));
+		let a = Sv(this.wasm.getTableCellBboxes(t, n, r));
 		if (a.length === 0 || a[a.length - 1].cellIdx !== i) return !1;
 		let o = this.wasm.getCellInfo(t, n, r, i), s = o.row + Math.max(1, o.rowSpan || 1) - 1;
 		return this.executeOperation({
@@ -41022,15 +41093,15 @@ function yv() {
 			operationType: "insertTableRow",
 			operation: (a) => {
 				a.insertTableRow(t, n, r, s, !0);
-				let o = _v(a.getTableCellBboxes(t, n, r)), c = s + 1, l = o.find((e) => e.row === c) ?? o.find((e) => e.row > s) ?? o[o.length - 1];
-				return vv(e, l?.cellIdx ?? i);
+				let o = Sv(a.getTableCellBboxes(t, n, r)), c = s + 1, l = o.find((e) => e.row === c) ?? o.find((e) => e.row > s) ?? o[o.length - 1];
+				return Cv(e, l?.cellIdx ?? i);
 			}
 		}), !0;
 	} catch (e) {
 		return console.warn("[InputHandler] 마지막 셀 Tab 행 추가 실패:", e), !1;
 	}
 }
-function bv(e) {
+function Tv(e) {
 	return {
 		key: e.key,
 		code: e.code,
@@ -41040,7 +41111,7 @@ function bv(e) {
 		altKey: e.altKey
 	};
 }
-function xv(e, t) {
+function Ev(e, t) {
 	switch (t ? this.cursor.setAnchor() : this.cursor.clearSelection(), e) {
 		case "wordBackward":
 			this.cursor.moveToWordBoundary(-1);
@@ -41061,11 +41132,11 @@ function xv(e, t) {
 	}
 	this.updateCaret(), t && this.updateSelection();
 }
-function Sv(e) {
-	let t = bv(e), n = D_(), r = k_(t, n);
-	return r ? (e.preventDefault(), xv.call(this, r, e.shiftKey), !0) : A_(t, n) ? (e.preventDefault(), !0) : !1;
+function Dv(e) {
+	let t = Tv(e), n = M_(), r = P_(t, n);
+	return r ? (e.preventDefault(), Ev.call(this, r, e.shiftKey), !0) : F_(t, n) ? (e.preventDefault(), !0) : !1;
 }
-function Cv(e, t) {
+function Ov(e, t) {
 	switch (t ? this.cursor.setHfAnchor() : this.cursor.clearSelection(), e) {
 		case "wordBackward":
 			this.cursor.moveToWordBoundaryInHf(-1);
@@ -41086,17 +41157,17 @@ function Cv(e, t) {
 	}
 	this.updateCaret();
 }
-function wv(e) {
-	let t = bv(e), n = D_(), r = k_(t, n);
-	if (r) return e.preventDefault(), Cv.call(this, r, e.shiftKey), !0;
+function kv(e) {
+	let t = Tv(e), n = M_(), r = P_(t, n);
+	if (r) return e.preventDefault(), Ov.call(this, r, e.shiftKey), !0;
 	if (e.metaKey && !e.ctrlKey && !e.altKey && (e.key === "ArrowUp" || e.key === "ArrowDown") || (e.ctrlKey || e.metaKey) && !e.altKey && (e.key === "Home" || e.key === "End")) {
 		e.preventDefault(), e.shiftKey ? this.cursor.setHfAnchor() : this.cursor.clearSelection();
 		let t = e.key === "ArrowUp" || e.key === "Home";
 		return this.cursor.moveToHeaderFooterBoundary(t ? -1 : 1), this.updateCaret(), !0;
 	}
-	return A_(t, n) ? (e.preventDefault(), !0) : !1;
+	return F_(t, n) ? (e.preventDefault(), !0) : !1;
 }
-function Tv(e, t) {
+function Av(e, t) {
 	let n = {
 		sectionIndex: e.sectionIndex,
 		paragraphIndex: t.paraIdx ?? e.paragraphIndex,
@@ -41111,10 +41182,10 @@ function Tv(e, t) {
 	}
 	return n;
 }
-function Ev(e, t, n) {
+function jv(e, t, n) {
 	t && (e.cursor.clearSelection(), t.anchor.parentParaIndex === void 0 ? e.cursor.selectRange(t.anchor, t.focus, n) : (e.cursor.moveTo(t.anchor), e.cursor.setAnchor(), e.cursor.moveTo(t.focus)), e.updateSelection());
 }
-function Dv(e, t) {
+function Mv(e, t) {
 	if (!e) return;
 	let n = e.split(/\r?\n/), r = t ? this.cursor.getSelectionOrdered() : null;
 	if (t && !r) return;
@@ -41153,14 +41224,14 @@ function Dv(e, t) {
 			}
 		});
 	} catch (e) {
-		a ? Ev(this, a, s) : this.cursor.moveTo(o), console.warn("[paste] 선택 영역 교체 실패:", e);
+		a ? jv(this, a, s) : this.cursor.moveTo(o), console.warn("[paste] 선택 영역 교체 실패:", e);
 	}
 }
-function Ov(e, t, n = "") {
-	let r = uv();
-	return e.rhwpClipboardToken = r, pv(t || fv(n), r);
+function Nv(e, t, n = "") {
+	let r = hv();
+	return e.rhwpClipboardToken = r, vv(t || _v(n), r);
 }
-async function kv(e, t) {
+async function Pv(e, t) {
 	if (typeof ClipboardItem > "u" || !navigator.clipboard?.write) {
 		await navigator.clipboard.writeText(e);
 		return;
@@ -41171,7 +41242,7 @@ async function kv(e, t) {
 	});
 	await navigator.clipboard.write([n]);
 }
-async function Av(e, t) {
+async function Fv(e, t) {
 	let n = new Uint8Array(e);
 	if (t === "image/png") return new Blob([n], { type: "image/png" });
 	let r = new Image(), i = URL.createObjectURL(new Blob([n], { type: t }));
@@ -41183,11 +41254,11 @@ async function Av(e, t) {
 		URL.revokeObjectURL(i);
 	}
 }
-function jv(e) {
+function Iv(e) {
 	return e && e.cellPath && e.cellPath.length > 0 ? JSON.stringify(e.cellPath) : "";
 }
-async function Mv(e, t, n, r, i, a, o = "", s = () => !0) {
-	let c = await Av(e.getControlImageData(t, n, r, o), e.getControlImageMime(t, n, r, o));
+async function Lv(e, t, n, r, i, a, o = "", s = () => !0) {
+	let c = await Fv(e.getControlImageData(t, n, r, o), e.getControlImageMime(t, n, r, o));
 	if (!s()) return;
 	let l = new ClipboardItem({
 		"text/plain": new Blob([i], { type: "text/plain" }),
@@ -41196,31 +41267,31 @@ async function Mv(e, t, n, r, i, a, o = "", s = () => !0) {
 	});
 	await navigator.clipboard.write([l]);
 }
-function Nv(e, t) {
-	let n = Fv.call(this), r = Rl(this.virtualScroll, this.viewportManager, e);
-	return r.moved ? (n && Iv.call(this, n, r.deltaX, r.deltaY, t), !0) : !1;
+function Rv(e, t) {
+	let n = Bv.call(this), r = Rl(this.virtualScroll, this.viewportManager, e);
+	return r.moved ? (n && Vv.call(this, n, r.deltaX, r.deltaY, t), !0) : !1;
 }
-function Pv(e) {
+function zv(e) {
 	let t = this.cursor.getRect?.() ?? null;
 	if (!t) return;
 	let n = this.viewportManager.getZoom(), r = this.viewportManager.getViewportSize().height, i = Math.max(0, this.virtualScroll.getTotalHeight() - r), a = this.virtualScroll.getPageOffset(t.pageIndex) + t.y * n;
 	e < 0 ? a + t.height * n <= r && this.viewportManager.setScrollTop(0) : a >= i && this.viewportManager.setScrollTop(i);
 }
-function Fv() {
+function Bv() {
 	let e = this.cursor;
 	return this.isFormMode?.() || e.isInHeaderFooter?.() || e.isInFootnote?.() || e.isInPictureObjectSelection?.() || e.isInTableObjectSelection?.() || e.isInBlockSelectionMode?.() || e.isInCellSelectionMode?.() ? null : e.getRect?.() ?? null;
 }
-function Iv(e, t, n, r) {
-	let i = Lv.call(this, e, t, n);
+function Vv(e, t, n, r) {
+	let i = Hv.call(this, e, t, n);
 	i && (r ? this.cursor.setAnchor() : this.cursor.clearSelection(), this.cursor.moveToHit(i), this.cursor.resetPreferredX(), this.updateCaretNoScroll(), r && this.updateSelection());
 }
-function Lv(e, t, n) {
+function Hv(e, t, n) {
 	let r = this.container.querySelector("#scroll-content");
 	if (!r) return null;
 	let i = this.viewportManager.getZoom(), a = this.virtualScroll.getPageLeftResolved(e.pageIndex, r.clientWidth) + e.x * i, o = this.virtualScroll.getPageOffset(e.pageIndex) + (e.y + e.height / 2) * i, s = r.getBoundingClientRect();
 	return this.hitTestFromClientPoint(s.left + a + t, s.top + o + n);
 }
-function Rv(e) {
+function Uv(e) {
 	if (!this.active || bf(this, e)) return;
 	if ([
 		"Delete",
@@ -41231,7 +41302,7 @@ function Rv(e) {
 		e.preventDefault();
 		return;
 	}
-	if (x_(this, e)) return;
+	if (E_(this, e)) return;
 	if (this._cellBlockLetterImeGuard?.reset(), this.connectorDrawingMode) {
 		if (e.key === "Escape") {
 			e.preventDefault(), rf.call(this);
@@ -41262,10 +41333,10 @@ function Rv(e) {
 		e.preventDefault(), this.cancelTextboxPlacement();
 		return;
 	}
-	if (cv.call(this, e) || lv.call(this, e)) return;
+	if (pv.call(this, e) || mv.call(this, e)) return;
 	if (e.isComposing || e.keyCode === 229) {
 		if ((e.ctrlKey || e.metaKey) && this.dispatcher) {
-			let t = N_(e, M_);
+			let t = R_(e, L_);
 			if (t) {
 				e.preventDefault(), this.dispatcher.dispatch(t);
 				return;
@@ -41293,13 +41364,13 @@ function Rv(e) {
 		});
 		return;
 	}
-	let t = nv.has(e.key) && ov.call(this, e);
-	if (nv.has(e.key) && (t ? this.cancelDeferredPaginationForOwnedMutation() : this.flushDeferredPaginationIfNeeded("before-navigation", !1)), (e.key === "PageUp" || e.key === "PageDown") && !e.ctrlKey && !e.metaKey && !e.altKey) {
-		e.preventDefault(), Nv.call(this, e.key === "PageUp" ? -1 : 1, e.shiftKey);
+	let t = sv.has(e.key) && dv.call(this, e);
+	if (sv.has(e.key) && (t ? this.cancelDeferredPaginationForOwnedMutation() : this.flushDeferredPaginationIfNeeded("before-navigation", !1)), (e.key === "PageUp" || e.key === "PageDown") && !e.ctrlKey && !e.metaKey && !e.altKey) {
+		e.preventDefault(), Rv.call(this, e.key === "PageUp" ? -1 : 1, e.shiftKey);
 		return;
 	}
 	if (this.cursor.isInHeaderFooter()) {
-		if (sv.call(this, e)) return;
+		if (fv.call(this, e)) return;
 		if (e.key === "Escape") {
 			if (e.preventDefault(), !e.shiftKey && this.cursor.hasHeaderFooterSelection()) {
 				this.cursor.clearSelection(), this.updateCaret();
@@ -41314,7 +41385,7 @@ function Rv(e) {
 			this.afterEdit(), this.textarea?.focus();
 			return;
 		}
-		if (wv.call(this, e)) return;
+		if (kv.call(this, e)) return;
 		if (e.key === "ArrowLeft" || e.key === "ArrowRight" || e.key === "ArrowUp" || e.key === "ArrowDown") {
 			e.preventDefault(), e.shiftKey ? this.cursor.setHfAnchor() : this.cursor.clearSelection(), e.key === "ArrowLeft" || e.key === "ArrowRight" ? this.cursor.moveHorizontalInHf(e.key === "ArrowLeft" ? -1 : 1) : this.cursor.moveVerticalInHf(e.key === "ArrowUp" ? -1 : 1), this.updateCaret();
 			return;
@@ -41365,7 +41436,7 @@ function Rv(e) {
 		return;
 	}
 	if (this.cursor.isInFootnote()) {
-		if (sv.call(this, e)) return;
+		if (fv.call(this, e)) return;
 		if (e.key === "Escape") {
 			e.preventDefault(), this.cursor.exitFootnoteMode(), this.eventBus.emit("footnoteModeChanged", !1), this.afterEdit(), this.textarea?.focus();
 			return;
@@ -41492,7 +41563,7 @@ function Rv(e) {
 			}
 		}
 		{
-			let t = N_(e, M_);
+			let t = R_(e, L_);
 			if (t && this.dispatcher?.isEnabled?.(t)) {
 				e.preventDefault(), this.dispatcher.dispatch(t);
 				return;
@@ -41530,7 +41601,7 @@ function Rv(e) {
 			return;
 		}
 		if (e.key === "Shift" || e.key === "Control" || e.key === "Alt" || e.key === "Meta") return;
-		let t = N_(e, M_);
+		let t = R_(e, L_);
 		if (t === "format:object-properties" && this.dispatcher?.isEnabled?.(t)) {
 			e.preventDefault(), this.dispatcher.dispatch(t);
 			return;
@@ -41541,7 +41612,7 @@ function Rv(e) {
 		e.preventDefault(), this.cursor.exitBlockSelectionMode(), this.selectionRenderer.clear(), this.updateCaret();
 		return;
 	}
-	if (D_() === "other" && !e.metaKey && !e.altKey && !e.shiftKey && e.ctrlKey && e.key === "Backspace" && this.cursor.isInCell() && !this.cursor.isInTextBox()) {
+	if (M_() === "other" && !e.metaKey && !e.altKey && !e.shiftKey && e.ctrlKey && e.key === "Backspace" && this.cursor.isInCell() && !this.cursor.isInTextBox()) {
 		if (e.preventDefault(), e.repeat || this.cursor.isProtectedCellSelectionMode() || this.isFormMode?.()) return;
 		this.cursor.getPosition(), this.dispatcher?.dispatch("table:delete-row");
 		return;
@@ -41564,13 +41635,13 @@ function Rv(e) {
 			this.cursor.setCellSelectionAnchor(r ? 0 : t.row, r ? t.col : 0), this.cursor.advanceCellSelectionPhase(), this.cursor.setCellSelectionFocus(r ? n.rowCount - 1 : t.row, r ? t.col : n.colCount - 1), this.updateCellSelection();
 			return;
 		}
-		if (iv.call(this, e)) return;
+		if (lv.call(this, e)) return;
 		if (e.key === "Delete" && !e.ctrlKey && !e.metaKey && !e.altKey) {
 			e.preventDefault(), this.cursor.isProtectedCellSelectionMode() || jf(this);
 			return;
 		}
-		let t = T_(e);
-		if (t && D_() === "other" && e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+		let t = A_(e);
+		if (t && M_() === "other" && e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
 			e.preventDefault(), this.resizeCellByKeyboard(e.key, !0);
 			return;
 		}
@@ -41585,7 +41656,7 @@ function Rv(e) {
 			return;
 		}
 		if (e.altKey && !e.ctrlKey && !e.metaKey) {
-			let t = N_(e, M_);
+			let t = R_(e, L_);
 			if (t === "edit:format-copy") {
 				e.preventDefault(), this.dispatcher?.dispatch(t);
 				return;
@@ -41611,22 +41682,22 @@ function Rv(e) {
 			return;
 		}
 	}
-	if (D_() === "other" && !e.metaKey && !e.ctrlKey && !e.shiftKey && e.altKey && this.cursor.isInCell() && !this.cursor.isInTextBox() && (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight")) {
+	if (M_() === "other" && !e.metaKey && !e.ctrlKey && !e.shiftKey && e.altKey && this.cursor.isInCell() && !this.cursor.isInTextBox() && (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight")) {
 		e.preventDefault(), this.cursor.moveBetweenCells(e.key === "ArrowUp" ? -1 : +(e.key === "ArrowDown"), e.key === "ArrowLeft" ? -1 : +(e.key === "ArrowRight")), this.updateCaret();
 		return;
 	}
-	if (Sv.call(this, e)) return;
+	if (Dv.call(this, e)) return;
 	if (e.ctrlKey || e.metaKey) {
 		this.handleCtrlKey(e);
 		return;
 	}
-	if (D_() === "other" && e.altKey && !e.shiftKey && (e.code === "KeyY" || e.key.toLowerCase() === "y")) {
-		e.preventDefault(), zv.call(this, !1);
+	if (M_() === "other" && e.altKey && !e.shiftKey && (e.code === "KeyY" || e.key.toLowerCase() === "y")) {
+		e.preventDefault(), Wv.call(this, !1);
 		return;
 	}
 	let n = e.altKey && (e.key === "Backspace" || e.key === "Delete" && !this.cursor.isInCell());
 	if (e.altKey && !n && this.dispatcher) {
-		let t = N_(e, M_);
+		let t = R_(e, L_);
 		if (t) {
 			e.preventDefault(), this.dispatcher.dispatch(t);
 			return;
@@ -41650,7 +41721,10 @@ function Rv(e) {
 		case "Backspace":
 		case "Delete":
 			if (e.preventDefault(), this.isFormMode?.() && e.altKey) return;
-			this.cursor.hasSelection() ? this.deleteSelection() : e.altKey ? (this.cursor.setAnchor(), this.cursor.moveToWordBoundary(e.key === "Backspace" ? -1 : 1), this.cursor.hasSelection() && this.deleteSelection()) : e.key === "Backspace" ? this.handleBackspace(r, i) : this.handleDelete(r, i);
+			if (this.cursor.hasSelection()) this.deleteSelection();
+			else if (e.altKey) this.cursor.setAnchor(), this.cursor.moveToWordBoundary(e.key === "Backspace" ? -1 : 1), this.cursor.hasSelection() && this.deleteSelection();
+			else if (!i && !e.ctrlKey && !e.metaKey && !e.shiftKey && !this.isFormMode?.() && this.canEditHyperlink() && g_(this, this.wasm, r, e.key)) return;
+			else e.key === "Backspace" ? this.handleBackspace(r, i) : this.handleDelete(r, i);
 			break;
 		case "Enter":
 			if (e.preventDefault(), this.isFormMode?.()) return;
@@ -41708,7 +41782,7 @@ function Rv(e) {
 				return;
 			}
 			if (this.cursor.isInCell() && !this.cursor.isInTextBox()) {
-				e.shiftKey ? this.cursor.moveToCellPrev() : yv.call(this) || this.cursor.moveToCellNext(), this.updateCaret();
+				e.shiftKey ? this.cursor.moveToCellPrev() : wv.call(this) || this.cursor.moveToCellNext(), this.updateCaret();
 				break;
 			}
 			if (e.shiftKey) {
@@ -41724,7 +41798,7 @@ function Rv(e) {
 			e.preventDefault(), this.insertMode = !this.insertMode, this.eventBus.emit("insert-mode-changed", this.insertMode);
 			break;
 		default: if (this.dispatcher) {
-			let t = N_(e, M_);
+			let t = R_(e, L_);
 			if (t) {
 				if (t === "format:object-properties" && !this.cursor.isInPictureObjectSelection() && !this.cursor.isInTableObjectSelection()) break;
 				let n = this.dispatcher.dispatchWithResult(t);
@@ -41733,7 +41807,7 @@ function Rv(e) {
 		}
 	}
 }
-function zv(e) {
+function Wv(e) {
 	if (this.isFormMode?.() || (this.cursor.getPosition().cellPath?.length ?? 0) > 1) return;
 	this.cursor.clearSelection(), e && this.cursor.moveToLineStart();
 	let t = this.cursor.getPosition();
@@ -41760,9 +41834,9 @@ function zv(e) {
 	}
 	n.charOffset > t.charOffset ? this.deleteSelection() : (this.cursor.clearSelection(), this.updateCaret());
 }
-function Bv(e) {
-	if (D_() === "other" && e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && (e.code === "KeyY" || e.key.toLowerCase() === "y")) {
-		e.preventDefault(), zv.call(this, !0);
+function Gv(e) {
+	if (M_() === "other" && e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey && (e.code === "KeyY" || e.key.toLowerCase() === "y")) {
+		e.preventDefault(), Wv.call(this, !0);
 		return;
 	}
 	if (e.key === "/" && !e.shiftKey && !e.altKey) {
@@ -41770,7 +41844,7 @@ function Bv(e) {
 		return;
 	}
 	if (this.dispatcher) {
-		let t = N_(e, M_);
+		let t = R_(e, L_);
 		if (t) {
 			e.preventDefault(), this.dispatcher.dispatch(t);
 			return;
@@ -41784,19 +41858,19 @@ function Bv(e) {
 			break;
 		case "t":
 		case "delete":
-			if (!e.ctrlKey || t === "t" && (D_() === "mac" || e.metaKey || e.shiftKey || e.altKey)) break;
+			if (!e.ctrlKey || t === "t" && (M_() === "mac" || e.metaKey || e.shiftKey || e.altKey)) break;
 			if (e.preventDefault(), this.isFormMode?.()) return;
 			this.cursor.hasSelection() ? this.deleteSelection() : (this.cursor.setAnchor(), this.cursor.moveToWordBoundary(1), this.cursor.hasSelection() && this.deleteSelection());
 			break;
 		case "pageup":
 		case "home":
-			if (t === "pageup" && (D_() === "mac" || !e.ctrlKey || e.metaKey || e.altKey || e.shiftKey)) break;
-			e.preventDefault(), e.shiftKey ? (this.cursor.setAnchor(), this.cursor.moveToDocumentStart()) : (this.cursor.clearSelection(), this.cursor.moveToDocumentStart()), this.updateCaret(), Pv.call(this, -1);
+			if (t === "pageup" && (M_() === "mac" || !e.ctrlKey || e.metaKey || e.altKey || e.shiftKey)) break;
+			e.preventDefault(), e.shiftKey ? (this.cursor.setAnchor(), this.cursor.moveToDocumentStart()) : (this.cursor.clearSelection(), this.cursor.moveToDocumentStart()), this.updateCaret(), zv.call(this, -1);
 			break;
 		case "pagedown":
 		case "end":
-			if (t === "pagedown" && (D_() === "mac" || !e.ctrlKey || e.metaKey || e.altKey || e.shiftKey)) break;
-			e.preventDefault(), e.shiftKey ? (this.cursor.setAnchor(), this.cursor.moveToDocumentEnd()) : (this.cursor.clearSelection(), this.cursor.moveToDocumentEnd()), this.updateCaret(), Pv.call(this, 1);
+			if (t === "pagedown" && (M_() === "mac" || !e.ctrlKey || e.metaKey || e.altKey || e.shiftKey)) break;
+			e.preventDefault(), e.shiftKey ? (this.cursor.setAnchor(), this.cursor.moveToDocumentEnd()) : (this.cursor.clearSelection(), this.cursor.moveToDocumentEnd()), this.updateCaret(), zv.call(this, 1);
 			break;
 		case "arrowleft":
 			e.preventDefault(), e.shiftKey ? this.cursor.setAnchor() : this.cursor.clearSelection(), this.cursor.moveToLineStart(), this.updateCaret();
@@ -41810,7 +41884,7 @@ function Bv(e) {
 		case "arrowdown": e.preventDefault(), e.shiftKey ? this.cursor.setAnchor() : this.cursor.clearSelection(), e.metaKey && !e.ctrlKey ? this.cursor.moveToDocumentEnd() : this.cursor.moveToParagraphBoundary(1), this.updateCaret();
 	}
 }
-function Vv() {
+function Kv() {
 	if (this.cursor.isInHeaderFooter()) {
 		this.cursor.selectAllInHeaderFooter(), this.updateCaret(!0);
 		return;
@@ -41825,32 +41899,32 @@ function Vv() {
 		charOffset: 0
 	}), this.cursor.setAnchor(), this.cursor.moveToDocumentEnd(), this.updateCaret(!0);
 }
-function Hv(e) {
+function qv(e) {
 	let t = this.getNonEmptyHeaderFooterSelection();
 	if (!t || (e.preventDefault(), !e.clipboardData)) return !1;
 	try {
 		let n = this.wasm.copySelectionInHeaderFooter(t.start.sectionIdx, t.start.isHeader, t.start.applyTo, t.start.paraIdx, t.start.charOffset, t.end.paraIdx, t.end.charOffset);
-		return n.ok === !0 && (e.clipboardData.setData("text/plain", n.text), e.clipboardData.setData("text/html", Ov(this, "", n.text)), !0);
+		return n.ok === !0 && (e.clipboardData.setData("text/plain", n.text), e.clipboardData.setData("text/html", Nv(this, "", n.text)), !0);
 	} catch (e) {
 		return console.warn("[InputHandler] HF 선택 복사 실패:", e), !1;
 	}
 }
-function Uv(e, t = !1) {
+function Jv(e, t = !1) {
 	if (!this.active) return !1;
-	if (this.cursor.isInHeaderFooter() && this.getNonEmptyHeaderFooterSelection()) return Hv.call(this, e);
+	if (this.cursor.isInHeaderFooter() && this.getNonEmptyHeaderFooterSelection()) return qv.call(this, e);
 	if (this.cursor.isInPictureObjectSelection()) {
 		let t = this.cursor.getSelectedPictureRef();
 		if (t) {
 			if (e.preventDefault(), !e.clipboardData) return !1;
 			try {
-				let n = jv(t), r = this.wasm.copyControl(t.sec, t.ppi, t.ci, n);
+				let n = Iv(t), r = this.wasm.copyControl(t.sec, t.ppi, t.ci, n);
 				if (JSON.parse(r).ok !== !0) return !1;
 				let i = this.wasm.getClipboardText() || "[그림]", a = "";
 				try {
 					a = this.wasm.exportControlHtml(t.sec, t.ppi, t.ci, n) || "";
 				} catch {}
-				let o = Ov(this, a, i);
-				return e.clipboardData.setData("text/plain", i), e.clipboardData.setData("text/html", o), t.type === "image" && Mv(this.wasm, t.sec, t.ppi, t.ci, i, o, n).catch(() => {}), !0;
+				let o = Nv(this, a, i);
+				return e.clipboardData.setData("text/plain", i), e.clipboardData.setData("text/html", o), t.type === "image" && Lv(this.wasm, t.sec, t.ppi, t.ci, i, o, n).catch(() => {}), !0;
 			} catch (e) {
 				console.warn("[InputHandler] 개체 복사 실패:", e);
 			}
@@ -41863,16 +41937,16 @@ function Uv(e, t = !1) {
 	let { start: r, end: i } = n;
 	try {
 		let n;
-		if (n = gv(r) ? this.wasm.copySelectionInCellByPath(r.sectionIndex, r.parentParaIndex, JSON.stringify(r.cellPath), Xf(r), r.charOffset, Xf(i), i.charOffset) : r.parentParaIndex === void 0 ? this.wasm.copyBodySelection(r, i) : this.wasm.copySelectionInCell(r.sectionIndex, r.parentParaIndex, r.controlIndex, r.cellIndex, r.cellParaIndex, r.charOffset, i.cellParaIndex, i.charOffset), JSON.parse(n).ok !== !0) return !1;
+		if (n = xv(r) ? this.wasm.copySelectionInCellByPath(r.sectionIndex, r.parentParaIndex, JSON.stringify(r.cellPath), Xf(r), r.charOffset, Xf(i), i.charOffset) : r.parentParaIndex === void 0 ? this.wasm.copyBodySelection(r, i) : this.wasm.copySelectionInCell(r.sectionIndex, r.parentParaIndex, r.controlIndex, r.cellIndex, r.cellParaIndex, r.charOffset, i.cellParaIndex, i.charOffset), JSON.parse(n).ok !== !0) return !1;
 		let a = this.wasm.getClipboardText();
 		if (e.clipboardData) {
 			e.clipboardData.setData("text/plain", a);
 			let n = "";
 			try {
-				n = gv(r) ? this.wasm.exportSelectionInCellHtmlByPath(r.sectionIndex, r.parentParaIndex, JSON.stringify(r.cellPath), Xf(r), r.charOffset, Xf(i), i.charOffset) : r.parentParaIndex === void 0 ? this.wasm.exportSelectionHtml(r.sectionIndex, r.paragraphIndex, r.charOffset, i.paragraphIndex, i.charOffset) : this.wasm.exportSelectionInCellHtml(r.sectionIndex, r.parentParaIndex, r.controlIndex, r.cellIndex, r.cellParaIndex, r.charOffset, i.cellParaIndex, i.charOffset);
+				n = xv(r) ? this.wasm.exportSelectionInCellHtmlByPath(r.sectionIndex, r.parentParaIndex, JSON.stringify(r.cellPath), Xf(r), r.charOffset, Xf(i), i.charOffset) : r.parentParaIndex === void 0 ? this.wasm.exportSelectionHtml(r.sectionIndex, r.paragraphIndex, r.charOffset, i.paragraphIndex, i.charOffset) : this.wasm.exportSelectionInCellHtml(r.sectionIndex, r.parentParaIndex, r.controlIndex, r.cellIndex, r.cellParaIndex, r.charOffset, i.cellParaIndex, i.charOffset);
 			} catch {}
 			if (t && !n) return !1;
-			let o = Ov(this, n, a);
+			let o = Nv(this, n, a);
 			e.clipboardData.setData("text/html", o);
 		}
 		return !0;
@@ -41880,7 +41954,7 @@ function Uv(e, t = !1) {
 		return console.warn("[InputHandler] 복사 실패:", e), !1;
 	}
 }
-function Wv(e) {
+function Yv(e) {
 	if (this.active) {
 		if (this.cursor.hasSelection() && this.canDeleteSelectionInFormMode?.() === !1) {
 			e.preventDefault();
@@ -41891,7 +41965,7 @@ function Wv(e) {
 			return;
 		}
 		if (this.cursor.isInHeaderFooter() && this.getNonEmptyHeaderFooterSelection()) {
-			Hv.call(this, e) && this.deleteSelection();
+			qv.call(this, e) && this.deleteSelection();
 			return;
 		}
 		if (this.cursor.isInPictureObjectSelection() || this.cursor.isInTableObjectSelection()) {
@@ -41901,7 +41975,7 @@ function Wv(e) {
 		this.cursor.hasSelection() && this.onCopy(e, !0) && this.deleteSelection();
 	}
 }
-function Gv(e) {
+function Xv(e) {
 	let t = window.pwhEditor?.context?.();
 	return {
 		state: t ? JSON.stringify([
@@ -41913,7 +41987,7 @@ function Gv(e) {
 		wasm: e.wasm
 	};
 }
-function Kv(e, t) {
+function Zv(e, t) {
 	let n = window.pwhEditor?.context?.();
 	return !!t.state && !!n && e.wasm === t.wasm && e.active && JSON.stringify([
 		n.documentState,
@@ -41921,7 +41995,7 @@ function Kv(e, t) {
 		n.selection
 	]) === t.state && t.target?.isConnected && t.target.ownerDocument.activeElement === t.target && t.target.ownerDocument.hasFocus();
 }
-function qv(e) {
+function Qv(e) {
 	if (!this.active || (e.preventDefault(), this.cursor.hasSelection() && this.canDeleteSelectionInFormMode?.() === !1) || this.isFormMode?.()) return;
 	this.cursor.isInPictureObjectSelection() && (this.cursor.moveOutOfSelectedPicture(), this.pictureObjectRenderer?.clear(), this.eventBus.emit("picture-object-selection-changed", !1)), this.cursor.isInTableObjectSelection() && (this.cursor.moveOutOfSelectedTable(), this.eventBus.emit("table-object-selection-changed", !1));
 	let t = this.cursor.hasSelection(), n = this.cursor.getPosition(), r = e.clipboardData, i = r?.getData("text/html") || "", a = r?.getData("text/plain") || "", o = r?.getData("text/rtf") || "";
@@ -41932,9 +42006,9 @@ function qv(e) {
 		});
 		return;
 	}
-	let s = hv(this, i), c = this.wasm.getClipboardText?.() || "", l = this.wasm.clipboardHasControl?.() === !0 && !!c && a === c, u = this.wasm.hasInternalClipboard() && (!r || s || l);
+	let s = bv(this, i), c = this.wasm.getClipboardText?.() || "", l = this.wasm.clipboardHasControl?.() === !0 && !!c && a === c, u = this.wasm.hasInternalClipboard() && (!r || s || l);
 	if (u) {
-		let e = w_(n, i, this.wasm.clipboardHasControl());
+		let e = k_(n, i, this.wasm.clipboardHasControl());
 		if (e) {
 			j({
 				message: e,
@@ -41970,46 +42044,46 @@ function qv(e) {
 			operation: (e) => {
 				this.pastedFieldEndOutsidePending = !1, t && this.deleteSelection({ deferRecord: !0 });
 				let n = this.cursor.getPosition(), r;
-				r = gv(n) ? e.pasteInternalInCellByPath(n.sectionIndex, n.parentParaIndex, JSON.stringify(n.cellPath), n.charOffset) : n.parentParaIndex === void 0 ? e.pasteInternal(n.sectionIndex, n.paragraphIndex, n.charOffset) : e.pasteInternalInCell(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex, n.cellParaIndex, n.charOffset);
+				r = xv(n) ? e.pasteInternalInCellByPath(n.sectionIndex, n.parentParaIndex, JSON.stringify(n.cellPath), n.charOffset) : n.parentParaIndex === void 0 ? e.pasteInternal(n.sectionIndex, n.paragraphIndex, n.charOffset) : e.pasteInternalInCell(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex, n.cellParaIndex, n.charOffset);
 				let i = JSON.parse(r);
-				return i.ok ? (i.containsField === !0 && (this.pastedFieldEndOutsidePending = !0), Tv(n, i)) : n;
+				return i.ok ? (i.containsField === !0 && (this.pastedFieldEndOutsidePending = !0), Av(n, i)) : n;
 			}
 		});
 		return;
 	}
 	let d = r?.items;
-	if (d && !C_(i) && !Jv(i)) for (let e = 0; e < d.length; e++) {
+	if (d && !O_(i) && !$v(i)) for (let e = 0; e < d.length; e++) {
 		let n = d[e];
 		if (n.kind === "file" && n.type.startsWith("image/")) {
 			let e = n.getAsFile();
 			if (e) {
-				Zv.call(this, e, t);
+				ny.call(this, e, t);
 				return;
 			}
 		}
 	}
 	if (i) {
-		let e = Jv(i);
-		if (e && Yv.call(this, e, t)) return;
-		if (Y_(i, o)) {
-			let e = Gv(this);
+		let e = $v(i);
+		if (e && ey.call(this, e, t)) return;
+		if (ev(i, o)) {
+			let e = Xv(this);
 			(async () => {
 				let n = i;
 				try {
-					n = await q_(i, o);
+					n = await Q_(i, o);
 				} catch (e) {
 					console.warn("[paste] RTF 그림 삽입 실패 — 그림 없이 붙여넣기:", e);
 				}
-				Kv(this, e) && Xv.call(this, n, a, t);
+				Zv(this, e) && ty.call(this, n, a, t);
 			})();
 			return;
 		}
-		Xv.call(this, J_(i), a, t);
+		ty.call(this, $_(i), a, t);
 		return;
 	}
-	Dv.call(this, a, t);
+	Mv.call(this, a, t);
 }
-function Jv(e) {
+function $v(e) {
 	let t = e.indexOf("[data-hwpjson]");
 	if (t < 0) return null;
 	let n = e.indexOf("{", t);
@@ -42017,7 +42091,7 @@ function Jv(e) {
 	let r = e.indexOf("-->", n), i = (r < 0 ? e.slice(n) : e.slice(n, r)).trim();
 	return i.length < 2 || i[0] !== "{" ? null : i;
 }
-function Yv(e, t) {
+function ey(e, t) {
 	let n = !1, r = this.cursor.getSelection(), i = this.cursor.blockSelectionPhase();
 	try {
 		this.executeOperation({
@@ -42031,16 +42105,16 @@ function Yv(e, t) {
 				console.debug("[paste] pasteHwpJson 결과:", String(a).slice(0, 200));
 				let o = JSON.parse(a);
 				if (!o.ok) throw Error("Document model was rejected");
-				return n = !0, Tv(i, o);
+				return n = !0, Av(i, o);
 			}
 		});
 	} catch (e) {
-		return Ev(this, r, i), console.warn("[paste] 문서모델 붙여넣기 실패 — HTML 경로로 되돌아감:", e), !1;
+		return jv(this, r, i), console.warn("[paste] 문서모델 붙여넣기 실패 — HTML 경로로 되돌아감:", e), !1;
 	}
 	return n || console.debug("[paste] 문서모델 경로 미적용 — HTML 경로로 되돌아감"), n;
 }
-function Xv(e, t, n) {
-	let r = this.cursor.getSelection(), i = this.cursor.blockSelectionPhase(), a = w_(this.cursor.getPosition(), e);
+function ty(e, t, n) {
+	let r = this.cursor.getSelection(), i = this.cursor.blockSelectionPhase(), a = k_(this.cursor.getPosition(), e);
 	if (a) {
 		j({
 			message: a,
@@ -42048,7 +42122,7 @@ function Xv(e, t, n) {
 		});
 		return;
 	}
-	let o = ev(e);
+	let o = av(e);
 	console.debug(`[paste] HTML 붙여넣기 시작: 원본 ${e.length}자 → 정리 ${o.length}자, img ${(o.match(/<img\b/gi) ?? []).length}개`);
 	let s = !1, c = !1;
 	try {
@@ -42058,22 +42132,22 @@ function Xv(e, t, n) {
 			operation: (e) => {
 				n && (this.deleteSelection({ deferRecord: !0 }), c = !0);
 				let t = this.cursor.getPosition(), r;
-				r = gv(t) ? e.pasteHtmlInCellByPath(t.sectionIndex, t.parentParaIndex, JSON.stringify(t.cellPath), t.charOffset, o) : t.parentParaIndex === void 0 ? e.pasteHtml(t.sectionIndex, t.paragraphIndex, t.charOffset, o) : e.pasteHtmlInCell(t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, t.cellParaIndex, t.charOffset, o);
+				r = xv(t) ? e.pasteHtmlInCellByPath(t.sectionIndex, t.parentParaIndex, JSON.stringify(t.cellPath), t.charOffset, o) : t.parentParaIndex === void 0 ? e.pasteHtml(t.sectionIndex, t.paragraphIndex, t.charOffset, o) : e.pasteHtmlInCell(t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, t.cellParaIndex, t.charOffset, o);
 				let i = JSON.parse(r);
-				if (console.debug("[paste] pasteHtml 결과:", String(r).slice(0, 200)), i.ok) return s = !0, Tv(t, i);
+				if (console.debug("[paste] pasteHtml 결과:", String(r).slice(0, 200)), i.ok) return s = !0, Av(t, i);
 				throw Error("HTML paste was rejected");
 			}
 		});
 	} catch (e) {
-		c &&= (Ev(this, r, i), !1), console.warn("[paste] HTML 붙여넣기 실패 — 텍스트로 폴백:", e);
+		c &&= (jv(this, r, i), !1), console.warn("[paste] HTML 붙여넣기 실패 — 텍스트로 폴백:", e);
 	}
-	!s && t && Dv.call(this, t, n && !c);
+	!s && t && Mv.call(this, t, n && !c);
 }
-async function Zv(e, t) {
-	let n = Gv(this);
+async function ny(e, t) {
+	let n = Xv(this);
 	try {
 		let r = new Uint8Array(await e.arrayBuffer()), i = (e.type.split("/")[1] || "png").replace("jpeg", "jpg"), a = await createImageBitmap(e), o = a.width, s = a.height;
-		if (a.close(), !Kv(this, n)) return;
+		if (a.close(), !Zv(this, n)) return;
 		let c = Math.round(o * 75), l = Math.round(s * 75), u = this.cursor.getPosition();
 		try {
 			let e = this.wasm.getPageDef(u.sectionIndex), t = e.width - e.marginLeft - e.marginRight;
@@ -42100,10 +42174,10 @@ async function Zv(e, t) {
 		console.warn("[InputHandler] 클립보드 이미지 삽입 실패:", e);
 	}
 }
-function Qv(e) {
+function ry(e) {
 	e.cursor.isInTableObjectSelection() && (e.cursor.exitTableObjectSelection(), e.tableObjectRenderer?.clear()), e.cursor.isInPictureObjectSelection() && (e.cursor.exitPictureObjectSelection(), e.pictureObjectRenderer?.clear()), e.cursor.hasSelection() && e.cursor.clearSelection();
 }
-function $v() {
+function iy() {
 	try {
 		let e, t, n;
 		if (this.cursor.isInTableObjectSelection()) {
@@ -42122,7 +42196,7 @@ function $v() {
 		let r = this.wasm.findNearestControlBackward(e, t, n);
 		if (r.type === "none") {
 			let n = this.cursor.isInTableObjectSelection() || this.cursor.isInPictureObjectSelection() || this.cursor.hasSelection();
-			if (Qv(this), n) {
+			if (ry(this), n) {
 				let n = this.wasm.getParagraphCount(e), r = Math.min(t + 1, n - 1);
 				try {
 					this.cursor.moveTo({
@@ -42135,7 +42209,7 @@ function $v() {
 			this.updateCaret();
 			return;
 		}
-		if (Qv(this), r.type === "table") {
+		if (ry(this), r.type === "table") {
 			let e = this.wasm.getParagraphCount(r.sec), t = Math.min(r.para + 1, e - 1);
 			try {
 				this.cursor.moveTo({
@@ -42203,7 +42277,7 @@ function $v() {
 		console.warn("[F11] error:", e);
 	}
 }
-function ey() {
+function ay() {
 	try {
 		let e, t, n;
 		if (this.cursor.isInTableObjectSelection()) {
@@ -42219,7 +42293,7 @@ function ey() {
 		let r = this.wasm.findNearestControlForward(e, t, n);
 		if (r.type === "none") {
 			let n = this.cursor.isInTableObjectSelection() || this.cursor.isInPictureObjectSelection();
-			if (Qv(this), n) {
+			if (ry(this), n) {
 				let n = this.wasm.getParagraphCount(e), r = Math.min(t + 1, n - 1);
 				try {
 					this.cursor.moveTo({
@@ -42232,7 +42306,7 @@ function ey() {
 			this.updateCaret();
 			return;
 		}
-		if (Qv(this), r.type === "table") {
+		if (ry(this), r.type === "table") {
 			let e = this.wasm.getParagraphCount(r.sec), t = Math.min(r.para + 1, e - 1);
 			try {
 				this.cursor.moveTo({
@@ -42270,7 +42344,7 @@ function ey() {
 }
 //#endregion
 //#region @rhwp/studio/src/control-marker-delete.mjs
-function ty(e, t, n) {
+function oy(e, t, n) {
 	let r = e.wasm, i = e.cursor;
 	if (n || i.isInHeaderFooter() || i.isInFootnote() || i.isInTextBox() || i.hasSelection() || e.isFormMode?.() || !r.getShowControlCodes()) return !1;
 	let a = !1;
@@ -42295,7 +42369,7 @@ function ty(e, t, n) {
 }
 //#endregion
 //#region @rhwp/studio/src/ui/hyperlink-delete-dialog.ts
-var ny = class extends A {
+var sy = class extends A {
 	remove;
 	cancel;
 	accepted = !1;
@@ -42316,14 +42390,14 @@ var ny = class extends A {
 		super.hide(), this.accepted ? this.remove() : this.cancel();
 	}
 };
-function ry(e, t) {
-	new ny(e, t).show();
+function cy(e, t) {
+	new sy(e, t).show();
 }
 //#endregion
 //#region @rhwp/studio/src/engine/input-handler-hyperlink-delete.ts
-var iy = /* @__PURE__ */ new WeakSet();
-function ay(e, t, n = "forward") {
-	if (iy.has(e)) return !0;
+var ly = /* @__PURE__ */ new WeakSet();
+function uy(e, t, n = "forward") {
+	if (ly.has(e)) return !0;
 	let r = () => !!e.canEditHyperlink?.() && !e.isFormMode?.() && e.isActive?.() !== !1;
 	if (!r()) return !1;
 	let i = structuredClone(t), a = i.charOffset - +(n === "backward");
@@ -42337,9 +42411,9 @@ function ay(e, t, n = "forward") {
 	let c = s.links.find((e) => e.start <= a && a < e.end);
 	if (!c) return !1;
 	let l = e.wasm.documentGeneration, u = JSON.stringify(s), d = () => {
-		iy.delete(e), e.focusTextarea();
+		ly.delete(e), e.focusTextarea();
 	};
-	return iy.add(e), ry(() => {
+	return ly.add(e), cy(() => {
 		try {
 			if (!r() || e.wasm.documentGeneration !== l || JSON.stringify(e.wasm.getHyperlinkContext(o)) !== u) throw Error("편집 상태가 바뀌었습니다. 하이퍼링크를 다시 선택해 주세요.");
 			e.executeOperation({
@@ -42370,17 +42444,17 @@ function ay(e, t, n = "forward") {
 }
 //#endregion
 //#region @rhwp/studio/src/engine/input-handler-text.ts
-function oy(e) {
+function dy(e) {
 	return [...e].length;
 }
-var sy = typeof Intl.Segmenter == "function" ? new Intl.Segmenter(void 0, { granularity: "grapheme" }) : null;
-function cy(e) {
-	return sy ? Array.from(sy.segment(e), (e) => e.segment) : [...e];
+var fy = typeof Intl.Segmenter == "function" ? new Intl.Segmenter(void 0, { granularity: "grapheme" }) : null;
+function py(e) {
+	return fy ? Array.from(fy.segment(e), (e) => e.segment) : [...e];
 }
-function ly(e, t) {
+function my(e, t) {
 	if (this.insertMode !== !1 || !t || this.cursor.isInHeaderFooter() || this.cursor.isInFootnote()) return "";
 	try {
-		let n = cy(t).length, r = this.wasm.getFieldInfoAt(e), i = Infinity;
+		let n = py(t).length, r = this.wasm.getFieldInfoAt(e), i = Infinity;
 		if (r.inField && r.fieldType === "clickhere") {
 			if (this.isAtExitedFieldStart?.(e, r)) return "";
 			this.isAtExitedFieldEnd?.(e, r) || (i = r.endCharIdx ?? 0);
@@ -42388,12 +42462,12 @@ function ly(e, t) {
 		let a;
 		for (let t = n + 1;; t *= 2) {
 			let r = this.getTextAt(e, t);
-			if (a = cy(r), a.length > n || oy(r) < t) break;
+			if (a = py(r), a.length > n || dy(r) < t) break;
 		}
 		let o = e.parentParaIndex === void 0, s = (t) => this.wasm.textToLogicalOffset(e.sectionIndex, e.paragraphIndex, t), c = e.charOffset, l = o ? s(c) : 0, u = r, d = "";
 		for (let t of a.slice(0, n)) {
 			if (t < " ") break;
-			let n = c + oy(t);
+			let n = c + dy(t);
 			if (n > i) break;
 			if (i === Infinity) {
 				let t = this.wasm.getFieldInfoAt({
@@ -42415,8 +42489,8 @@ function ly(e, t) {
 		return "";
 	}
 }
-var uy = "각주·미주 삭제", dy = "이 각주·미주와 연결된 주석 내용을 삭제할까요?";
-function fy(e, t) {
+var hy = "각주·미주 삭제", gy = "이 각주·미주와 연결된 주석 내용을 삭제할까요?";
+function _y(e, t) {
 	if (this.isFormMode?.()) return !1;
 	try {
 		let n = this.wasm.getFieldInfoAt(e);
@@ -42427,7 +42501,7 @@ function fy(e, t) {
 		return !1;
 	}
 }
-function py(e, t) {
+function vy(e, t) {
 	switch (t ? this.cursor.setAnchor() : this.cursor.clearSelection(), e) {
 		case "wordBackward":
 			this.cursor.moveToWordBoundary(-1);
@@ -42448,14 +42522,14 @@ function py(e, t) {
 	}
 	this.updateCaret(), t && this.updateSelection();
 }
-function my(e) {
+function yy(e) {
 	this.flushDeferredPaginationIfNeeded("before-navigation", !1);
-	let { code: t, shiftKey: n } = e, r = D_(), i = k_(e, r);
+	let { code: t, shiftKey: n } = e, r = M_(), i = P_(e, r);
 	if (i) {
-		py.call(this, i, n);
+		vy.call(this, i, n);
 		return;
 	}
-	if (!A_(e, r)) {
+	if (!F_(e, r)) {
 		if (t === "ArrowLeft" || t === "ArrowRight" || t === "ArrowUp" || t === "ArrowDown") {
 			let e = this.cursor.isInVerticalCell?.() ?? !1;
 			n ? this.cursor.setAnchor() : this.cursor.clearSelection();
@@ -42480,13 +42554,13 @@ function my(e) {
 		} else t === "Home" ? (n ? this.cursor.setAnchor() : this.cursor.clearSelection(), this.cursor.moveToLineStart(), this.markCurrentFieldStartOutside?.(), this.updateCaret()) : t === "End" && (n ? this.cursor.setAnchor() : this.cursor.clearSelection(), this.cursor.moveToLineEnd(), this.markCurrentFieldEndOutside?.(), this.updateCaret());
 	}
 }
-function hy(e, t) {
+function by(e, t) {
 	if (e.parentParaIndex !== void 0 || e.cellPath || e.isTextBox) return !1;
 	try {
 		let n = this.wasm.getBodyFootnoteAtCursor(e, t);
 		if (!n.hit || n.controlIndex === void 0) return !1;
 		let r = n.sectionIndex ?? e.sectionIndex, i = n.paragraphIndex ?? e.paragraphIndex, a = n.controlIndex, o = this.wasm.documentGeneration, s = this.history.peekUndoTop(), c = () => JSON.stringify([this.cursor.getPosition(), this.cursor.getSelectionOrdered()], (e, t) => e === "cursorRect" ? void 0 : t), l = c(), u = () => this.wasm.documentGeneration === o && this.history.peekUndoTop() === s && c() === l;
-		return Bm(uy, dy).then((n) => {
+		return Bm(hy, gy).then((n) => {
 			if (!u()) return;
 			if (!n) {
 				this.textarea?.focus();
@@ -42512,7 +42586,7 @@ function hy(e, t) {
 		return !1;
 	}
 }
-function gy(e, t) {
+function xy(e, t) {
 	if (this.isFormMode?.() && !this.canEditCurrentFormField?.()) return;
 	if (this.cursor.isInHeaderFooter()) {
 		let e = this.cursor.headerFooterMode === "header", t = this.cursor.hfCharOffset, n = {
@@ -42537,14 +42611,14 @@ function gy(e, t) {
 		return;
 	}
 	let { charOffset: n } = e;
-	if (!ay(this, e, "backward")) {
+	if (!uy(this, e, "backward")) {
 		try {
 			let t = this.wasm.getFieldInfoAt(e);
 			if (!(t.inField && this.isAtExitedFieldStart?.(e, t)) && t.inField && n <= t.startCharIdx) {
-				fy.call(this, e, "backward");
+				_y.call(this, e, "backward");
 				return;
 			}
-			if (t.inField && this.isAtExitedFieldEnd?.(e, t) && fy.call(this, e, "backward")) return;
+			if (t.inField && this.isAtExitedFieldEnd?.(e, t) && _y.call(this, e, "backward")) return;
 		} catch {}
 		if (t) {
 			if (n > 0) {
@@ -42562,7 +42636,7 @@ function gy(e, t) {
 			});
 		} else {
 			let { sectionIndex: t, paragraphIndex: r } = e;
-			if (hy.call(this, e, "backward")) return;
+			if (by.call(this, e, "backward")) return;
 			if (n > 0) {
 				let t = {
 					...e,
@@ -42583,8 +42657,8 @@ function gy(e, t) {
 		}
 	}
 }
-function _y(e, t) {
-	if (ty(this, e, t) || this.isFormMode?.() && !this.canEditCurrentFormField?.()) return;
+function Sy(e, t) {
+	if (oy(this, e, t) || this.isFormMode?.() && !this.canEditCurrentFormField?.()) return;
 	if (this.cursor.isInHeaderFooter()) {
 		let e = this.cursor.headerFooterMode === "header", t = {
 			sectionIdx: this.cursor.hfSectionIdx,
@@ -42610,12 +42684,12 @@ function _y(e, t) {
 		} catch {}
 		return;
 	}
-	if (ay(this, e)) return;
+	if (uy(this, e)) return;
 	let { charOffset: n } = e;
 	try {
 		let t = this.wasm.getFieldInfoAt(e);
 		if (t.inField && n >= t.endCharIdx) {
-			fy.call(this, e, "forward");
+			_y.call(this, e, "forward");
 			return;
 		}
 	} catch {}
@@ -42634,7 +42708,7 @@ function _y(e, t) {
 		}
 	} else {
 		let { sectionIndex: t, paragraphIndex: r } = e;
-		if (hy.call(this, e, "forward")) return;
+		if (by.call(this, e, "forward")) return;
 		if (n < this.wasm.getParagraphLength(t, r)) this.executeOperation({
 			kind: "command",
 			command: new mp(e, 1, "forward")
@@ -42648,12 +42722,12 @@ function _y(e, t) {
 		}
 	}
 }
-function vy() {
+function Cy() {
 	this.textarea.value = "", this.isComposing = !1, this.compositionAnchor = null, this.compositionLength = 0, this._lastCompositionText = "", this._lastComposedText = "", this.caret.hideComposition(), this.resetRawTextMutationEffects();
 }
-function yy() {
+function wy() {
 	if (this._cellBlockLetterImeGuard?.consume("compositionstart")) {
-		vy.call(this);
+		Cy.call(this);
 		return;
 	}
 	if (this.resetRawTextMutationEffects(), this.headerFooterSelectionComposition = !1, this._compositionCovered = this.cursor.hasSelection() ? "" : null, this.cursor.isInHeaderFooter() && this.getNonEmptyHeaderFooterSelection()) {
@@ -42681,9 +42755,9 @@ function yy() {
 	}
 	this.isComposing = !0, this.compositionAnchor = (this.cursor.isInHeaderFooter() || this.cursor.isInFootnote(), e), this.compositionLength = 0;
 }
-function by() {
+function Ty() {
 	if (this._cellBlockLetterImeGuard?.consume("compositionend", this.textarea.value)) {
-		vy.call(this);
+		Cy.call(this);
 		return;
 	}
 	let e = this.compositionAnchor, t = this.compositionLength, n = this.headerFooterSelectionComposition === !0, r = this._compositionCovered || "", i = this._compositionFragment;
@@ -42727,20 +42801,20 @@ function by() {
 	}
 	if (n && this.finishHeaderFooterSelectionComposition(), this._pendingNavAfterIME) {
 		let e = this._pendingNavAfterIME;
-		this._pendingNavAfterIME = null, my.call(this, e);
+		this._pendingNavAfterIME = null, yy.call(this, e);
 	}
 }
-function xy(e, t) {
+function Ey(e, t) {
 	try {
 		return (e.cellPath?.length ?? 0) > 0 && e.parentParaIndex !== void 0 ? this.wasm.getTextInCellByPath(e.sectionIndex, e.parentParaIndex, JSON.stringify(e.cellPath), e.charOffset, t) : e.parentParaIndex === void 0 ? this.wasm.getTextRange(e.sectionIndex, e.paragraphIndex, e.charOffset, t) : this.wasm.getTextInCell(e.sectionIndex, e.parentParaIndex, e.controlIndex, e.cellIndex, e.cellParaIndex, e.charOffset, t);
 	} catch {
 		return "";
 	}
 }
-function Sy(e) {
+function Dy(e) {
 	if (!this.active) return;
 	if (this._cellBlockLetterImeGuard?.consume("input", this.textarea.value)) {
-		e?.preventDefault(), vy.call(this);
+		e?.preventDefault(), Cy.call(this);
 		return;
 	}
 	let t = this.textarea.value;
@@ -42753,11 +42827,11 @@ function Sy(e) {
 		this.resetRawTextMutationEffects();
 		let r = this._compositionCovered === null && t;
 		if (r) {
-			if (this._compositionCovered = ly.call(this, e, t), !this.cursor.isInHeaderFooter() && !this.cursor.isInFootnote() && (this._compositionFragment = this._compositionCovered ? op(this.wasm, e) : ap(this.wasm, e)), this._compositionCovered) {
+			if (this._compositionCovered = my.call(this, e, t), !this.cursor.isInHeaderFooter() && !this.cursor.isInFootnote() && (this._compositionFragment = this._compositionCovered ? op(this.wasm, e) : ap(this.wasm, e)), this._compositionCovered) {
 				let t = this.wasm.getFieldInfoAt(e);
 				this._compositionOutsideField = !t.inField || this.isAtExitedFieldEnd?.(e, t);
 			}
-			this.compositionLength += oy(this._compositionCovered);
+			this.compositionLength += dy(this._compositionCovered);
 		}
 		this._compositionCovered && this._compositionOutsideField && this.wasm.clearActiveField();
 		try {
@@ -42777,8 +42851,8 @@ function Sy(e) {
 				return;
 			}
 		}
-		this.compositionLength = oy(t), t && (this._lastCompositionText = t), this.applyPendingCharShapeToRange?.(e, oy(t));
-		let i = this.consumeRawTextMutationBeforeCursor(), a = e.charOffset + oy(t);
+		this.compositionLength = dy(t), t && (this._lastCompositionText = t), this.applyPendingCharShapeToRange?.(e, dy(t));
+		let i = this.consumeRawTextMutationBeforeCursor(), a = e.charOffset + dy(t);
 		this.cursor.isInHeaderFooter() ? this.cursor.setHfCursorPosition(this.cursor.hfParaIdx, a) : this.cursor.isInFootnote() ? this.cursor.setFnCursorPosition(this.cursor.fnInnerParaIdx, a) : this.cursor.moveTo({
 			...e,
 			charOffset: a
@@ -42802,7 +42876,7 @@ function Sy(e) {
 			this.textarea.value = "";
 			return;
 		}
-		this.resetRawTextMutationEffects(), this.replaceTextAtRaw(this._iosAnchor, this._iosLength, t), this._iosLength = oy(t);
+		this.resetRawTextMutationEffects(), this.replaceTextAtRaw(this._iosAnchor, this._iosLength, t), this._iosLength = dy(t);
 		let e = this.consumeRawTextMutationBeforeCursor();
 		this._iosRequiresFullRefresh = this._iosRequiresFullRefresh || e;
 		let n = this._iosAnchor.charOffset + (t?.length || 0);
@@ -42875,13 +42949,13 @@ function Sy(e) {
 		this.textarea.value = "";
 		return;
 	}
-	let a = i ? "" : ly.call(this, n, t);
+	let a = i ? "" : my.call(this, n, t);
 	this.executeOperation({
 		kind: "command",
 		command: new pp(n, t, void 0, this.getPendingCharShape?.(), a)
 	}), r && this.refreshClickHereAfterFirstInput?.();
 }
-function Cy(e, t) {
+function Oy(e, t) {
 	if (!this.canInsertTextInFormMode?.(e)) return H;
 	if (this.cursor.isInHeaderFooter()) {
 		let n = this.cursor.headerFooterMode === "header";
@@ -42889,13 +42963,13 @@ function Cy(e, t) {
 	}
 	return this.cursor.isInFootnote() ? (this.wasm.insertTextInFootnote(this.cursor.fnSectionIdx, this.cursor.fnParaIdx, this.cursor.fnControlIdx, this.cursor.fnInnerParaIdx, e.charOffset, t), Bf) : tp(this.wasm, e, t);
 }
-function wy(e, t, n) {
+function ky(e, t, n) {
 	if (!this.canInsertTextInFormMode?.(e) || t > 0 && !this.canDeleteTextInFormMode?.(e, t)) return H;
 	if (!this.cursor.isInHeaderFooter() && !this.cursor.isInFootnote()) return ip(this.wasm, e, t, n);
 	let r = new Vf();
-	return t > 0 && r.add(Ty.call(this, e, t)), n.length > 0 && r.add(Cy.call(this, e, n)), r.consume();
+	return t > 0 && r.add(Ay.call(this, e, t)), n.length > 0 && r.add(Oy.call(this, e, n)), r.consume();
 }
-function Ty(e, t) {
+function Ay(e, t) {
 	if (!this.canDeleteTextInFormMode?.(e, t)) return H;
 	if (this.cursor.isInHeaderFooter()) {
 		let n = this.cursor.headerFooterMode === "header";
@@ -42905,12 +42979,12 @@ function Ty(e, t) {
 }
 //#endregion
 //#region @rhwp/studio/src/engine/hanging-indent.ts
-function Ey(e, t) {
+function jy(e, t) {
 	return !Number.isFinite(e) || !Number.isFinite(t) ? 0 : Math.max(0, e - t);
 }
 //#endregion
 //#region @rhwp/studio/src/engine/deferred-pagination-runner.ts
-var Dy = class {
+var My = class {
 	client;
 	onComplete;
 	onFallback;
@@ -42994,7 +43068,7 @@ var Dy = class {
 };
 //#endregion
 //#region @rhwp/studio/src/engine/table-object-clipboard-target.ts
-function Oy(e) {
+function Ny(e) {
 	let t = e.cellPath ?? [];
 	return t.length > 1 ? {
 		controlIndex: t[t.length - 1].controlIndex,
@@ -43006,7 +43080,7 @@ function Oy(e) {
 }
 //#endregion
 //#region @rhwp/studio/src/engine/initial-caret-focus.ts
-function ky(e, t, n, r) {
+function Py(e, t, n, r) {
 	return e ? (n.show(e, t), r.emit("cursor-rect-updated", {
 		pageIndex: e.pageIndex,
 		x: e.x,
@@ -43015,18 +43089,18 @@ function ky(e, t, n, r) {
 }
 //#endregion
 //#region @rhwp/studio/src/engine/caret-layout-reveal.ts
-var Ay = /* @__PURE__ */ new Set([
+var Fy = /* @__PURE__ */ new Set([
 	"pageBreak",
 	"columnBreak",
 	"splitParagraph"
 ]);
-function jy(e) {
+function Iy(e) {
 	return e.startsWith("snapshot:") ? e.slice(9) : e;
 }
-var My = class {
+var Ly = class {
 	pending = !1;
 	requestFor(e) {
-		Ay.has(jy(e)) && (this.pending = !0);
+		Fy.has(Iy(e)) && (this.pending = !0);
 	}
 	clear() {
 		this.pending = !1;
@@ -43035,15 +43109,15 @@ var My = class {
 		let e = this.pending;
 		return this.pending = !1, e;
 	}
-}, Ny = "http://www.w3.org/2000/svg", Py = 48, Fy = 2, Iy = 150, Ly = 75, Ry = 120, zy = 100, By = 200, Vy = 25, Hy = class extends Error {
+}, Ry = "http://www.w3.org/2000/svg", zy = 48, By = 2, Vy = 150, Hy = 75, Uy = 120, Wy = 100, Gy = 200, Ky = 25, qy = class extends Error {
 	code = "RENDER_FAILED";
 	recovered;
 	cause;
 	constructor(e, t) {
 		super(t ? "document-agent render 실패 후 snapshot을 복구했습니다." : "document-agent render 실패 후 snapshot 복구도 실패했습니다."), this.name = "DocumentAgentRenderCommitError", this.recovered = t, this.cause = e;
 	}
-}, Uy = 30;
-function Wy(e, t) {
+}, Jy = 30;
+function Yy(e, t) {
 	if (e.sectionIndex !== t.sectionIndex || e.parentParaIndex !== t.parentParaIndex) return !1;
 	let n = Zf(e), r = Zf(t);
 	return n.length !== r.length || n.length === 0 ? !1 : n.every((e, t) => {
@@ -43051,7 +43125,7 @@ function Wy(e, t) {
 		return e.controlIndex === i.controlIndex && e.cellIndex === i.cellIndex && (t + 1 === n.length || e.cellParaIndex === i.cellParaIndex);
 	});
 }
-var Gy = /* @__PURE__ */ "fontSize.bold.italic.underline.strikethrough.textColor.shadeColor.emboss.engrave.fontId.fontIds.underlineType.underlineColor.outlineType.shadowType.shadowColor.shadowOffsetX.shadowOffsetY.strikeColor.subscript.superscript.ratios.spacings.relativeSizes.charOffsets.emphasisDot.underlineShape.strikeShape.kerning".split("."), Ky = [
+var Xy = /* @__PURE__ */ "fontSize.bold.italic.underline.strikethrough.textColor.shadeColor.emboss.engrave.fontId.fontIds.underlineType.underlineColor.outlineType.shadowType.shadowColor.shadowOffsetX.shadowOffsetY.strikeColor.subscript.superscript.ratios.spacings.relativeSizes.charOffsets.emphasisDot.underlineShape.strikeShape.kerning".split("."), Zy = [
 	"alignment",
 	"lineSpacing",
 	"lineSpacingType",
@@ -43076,23 +43150,23 @@ var Gy = /* @__PURE__ */ "fontSize.bold.italic.underline.strikethrough.textColor
 	"koreanBreakUnit",
 	"borderConnect",
 	"borderIgnoreMargin"
-], qy = [
+], Qy = [
 	...Cf,
 	...wf,
 	...Tf
 ];
-function Jy(e, t) {
+function $y(e, t) {
 	let n = {};
 	for (let r of t) e[r] !== void 0 && (n[r] = e[r]);
 	return n;
 }
-function Yy(e) {
-	return Math.round(e * Iy);
+function eb(e) {
+	return Math.round(e * Vy);
 }
-function Xy(e) {
-	return Math.round(e * Ly);
+function tb(e) {
+	return Math.round(e * Hy);
 }
-function Zy(e, t) {
+function nb(e, t) {
 	let n = Math.max(1, e.bodyRight - e.bodyLeft), r = e.columns?.filter((e) => e.width > 0) ?? [];
 	if (r.length === 0) return n;
 	let i = r.find((e) => t >= e.x && t <= e.x + e.width);
@@ -43103,13 +43177,13 @@ function Zy(e, t) {
 	}, r[0]);
 	return Math.min(a.width, n);
 }
-function Qy(e, t, n, r) {
-	let i = Math.round(e * Ly), a = Math.round(t * Ly);
+function rb(e, t, n, r) {
+	let i = Math.round(e * Hy), a = Math.round(t * Hy);
 	if (!n || i <= 0 || a <= 0) return {
 		width: i,
 		height: a
 	};
-	let o = Math.floor(Zy(n, r) * Ly), s = Math.floor(Math.max(1, n.height - n.marginTop - n.marginBottom) * Ly), c = Math.min(1, o / i, s / a);
+	let o = Math.floor(nb(n, r) * Hy), s = Math.floor(Math.max(1, n.height - n.marginTop - n.marginBottom) * Hy), c = Math.min(1, o / i, s / a);
 	return !Number.isFinite(c) || c <= 0 ? {
 		width: i,
 		height: a
@@ -43118,20 +43192,20 @@ function Qy(e, t, n, r) {
 		height: Math.max(1, Math.round(a * c))
 	};
 }
-function $y(e) {
+function ib(e) {
 	let t = { ...e };
-	return e.marginLeft !== void 0 && (t.marginLeft = Yy(e.marginLeft)), e.marginRight !== void 0 && (t.marginRight = Yy(e.marginRight)), e.indent !== void 0 && (t.indent = Yy(e.indent)), e.spacingBefore !== void 0 && (t.spacingBefore = Xy(e.spacingBefore)), e.spacingAfter !== void 0 && (t.spacingAfter = Xy(e.spacingAfter)), t;
+	return e.marginLeft !== void 0 && (t.marginLeft = eb(e.marginLeft)), e.marginRight !== void 0 && (t.marginRight = eb(e.marginRight)), e.indent !== void 0 && (t.indent = eb(e.indent)), e.spacingBefore !== void 0 && (t.spacingBefore = tb(e.spacingBefore)), e.spacingAfter !== void 0 && (t.spacingAfter = tb(e.spacingAfter)), t;
 }
-function eb() {
-	let e = document.createElementNS(Ny, "svg");
+function ab() {
+	let e = document.createElementNS(Ry, "svg");
 	return e.style.width = "100%", e.style.height = "100%", e.style.overflow = "visible", e;
 }
-function tb(e, t) {
+function ob(e, t) {
 	for (let [n, r] of Object.entries(t)) e.setAttribute(n, String(r));
 }
-function nb(e, t, n, r, i, a = !1) {
-	let o = document.createElementNS(Ny, "line");
-	tb(o, {
+function sb(e, t, n, r, i, a = !1) {
+	let o = document.createElementNS(Ry, "line");
+	ob(o, {
 		x1: t,
 		y1: n,
 		x2: r,
@@ -43140,11 +43214,11 @@ function nb(e, t, n, r, i, a = !1) {
 		"stroke-width": 2
 	}), a && o.setAttribute("stroke-dasharray", "6,3"), e.appendChild(o);
 }
-function rb(e, t, n) {
+function cb(e, t, n) {
 	let r = document.createElement("div");
 	return r.style.cssText = `position:fixed;left:${e}px;top:${t}px;background:rgba(0,0,0,0.75);color:#fff;font-size:11px;padding:2px 6px;border-radius:3px;white-space:nowrap;pointer-events:none`, r.textContent = n, r;
 }
-var ib = class {
+var lb = class {
 	container;
 	wasm;
 	eventBus;
@@ -43193,7 +43267,7 @@ var ib = class {
 	deferredPaginationRunner;
 	rawTextMutationEffects = new Vf();
 	pendingFocusedPagePatch = null;
-	caretLayoutReveal = new My();
+	caretLayoutReveal = new Ly();
 	isResizeDragging = !1;
 	resizeDragState = null;
 	isMoveDragging = !1;
@@ -43233,7 +43307,7 @@ var ib = class {
 	_lastComposedText = "";
 	headerFooterSelectionComposition = !1;
 	_pendingNavAfterIME = null;
-	_cellBlockLetterImeGuard = new P_();
+	_cellBlockLetterImeGuard = new z_();
 	_iosComposing = !1;
 	_iosAnchor = null;
 	_iosBeforePageIndex = void 0;
@@ -43257,7 +43331,7 @@ var ib = class {
 	onMouseUpBound;
 	onF11InterceptBound;
 	constructor(e, t, n, r, i) {
-		this.container = e, this.wasm = t, this.eventBus = n, this.virtualScroll = r, this.viewportManager = i, this.cursor = new lm(t), this.caret = new vm(e, r), this.fieldMarker = new xm(e, r), this.selectionRenderer = new Sm(e, r), this.history = new Dm(), this.deferredPaginationRunner = new Dy(t, (e) => this.completeResumablePagination(e.pageCount), () => this.fallbackFromResumablePagination());
+		this.container = e, this.wasm = t, this.eventBus = n, this.virtualScroll = r, this.viewportManager = i, this.cursor = new lm(t), this.caret = new vm(e, r), this.fieldMarker = new xm(e, r), this.selectionRenderer = new Sm(e, r), this.history = new Dm(), this.deferredPaginationRunner = new My(t, (e) => this.completeResumablePagination(e.pageCount), () => this.fallbackFromResumablePagination());
 		let a = /iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1, o = this.container.closest("main") ?? document.body;
 		if (a) {
 			let e = document.createElement("div");
@@ -43273,7 +43347,7 @@ var ib = class {
 		this.onClickBound = this.onClick.bind(this), this.onDblClickBound = this.onDblClick.bind(this), this.onKeyDownBound = this.onKeyDown.bind(this), this.onInputBound = this.onInput.bind(this), this.onCompositionStartBound = this.onCompositionStart.bind(this), this.onCompositionEndBound = this.onCompositionEnd.bind(this), this.onInputBlurBound = () => {
 			this.isPictureMoveDragging && (Wm(this), this.finishPictureMoveDrag()), this.flushDeferredPaginationIfNeeded("input-blur", !1);
 		}, this.onCopyBound = this.onCopy.bind(this), this.onCutBound = this.onCut.bind(this), this.onPasteBound = this.onPaste.bind(this), this.onContextMenuBound = this.onContextMenu.bind(this), this.onMouseMoveBound = this.onMouseMove.bind(this), this.onMouseUpBound = this.onMouseUp.bind(this), this.onF11InterceptBound = (e) => {
-			e.key === "F11" && (e.preventDefault(), e.stopPropagation(), e.shiftKey ? ey.call(this) : $v.call(this));
+			e.key === "F11" && (e.preventDefault(), e.stopPropagation(), e.shiftKey ? ay.call(this) : iy.call(this));
 		}, document.addEventListener("keydown", this.onF11InterceptBound, !0), e.addEventListener("mousedown", this.onClickBound), e.addEventListener("dblclick", this.onDblClickBound), e.addEventListener("contextmenu", this.onContextMenuBound), e.addEventListener("mousemove", this.onMouseMoveBound), this.textarea.addEventListener("keydown", this.onKeyDownBound), this.textarea.addEventListener("input", this.onInputBound), this.textarea.addEventListener("compositionstart", this.onCompositionStartBound), this.textarea.addEventListener("compositionend", this.onCompositionEndBound), this.textarea.addEventListener("blur", this.onInputBlurBound), this.textarea.addEventListener("copy", this.onCopyBound), this.textarea.addEventListener("cut", this.onCutBound), this.textarea.addEventListener("paste", this.onPasteBound), n.on("zoom-changed", () => this.updateViewportOverlayPositions()), n.on("document-view-changed", () => {
 			this.active && requestAnimationFrame(() => this.updateCaret(!0));
 		}), n.on("document-layout-refreshed", () => {
@@ -43365,7 +43439,7 @@ var ib = class {
 			ok: !1,
 			error: "그림을 넣을 문단을 찾지 못했습니다."
 		};
-		let l = c.sectionIndex, u = c.isTextBox === !0, d = (c.cellPath?.length ?? 0) > 0 && c.parentParaIndex !== void 0, f = d && !u, p = d && u, m = (f || p) && c.parentParaIndex !== void 0 ? c.parentParaIndex : c.paragraphIndex, h = f || p ? c.cellPath ?? [] : [], g = h.length > 0 ? JSON.stringify(h) : "", { width: _, height: v } = Qy(n, r, this.getPageInfoForDrop(s.pageIdx), s.pageX), y = `그림입니다.\r\n원본 그림의 이름: ${i}\r\n원본 그림의 크기: 가로 ${n}pixel, 세로 ${r}pixel`;
+		let l = c.sectionIndex, u = c.isTextBox === !0, d = (c.cellPath?.length ?? 0) > 0 && c.parentParaIndex !== void 0, f = d && !u, p = d && u, m = (f || p) && c.parentParaIndex !== void 0 ? c.parentParaIndex : c.paragraphIndex, h = f || p ? c.cellPath ?? [] : [], g = h.length > 0 ? JSON.stringify(h) : "", { width: _, height: v } = rb(n, r, this.getPageInfoForDrop(s.pageIdx), s.pageX), y = `그림입니다.\r\n원본 그림의 이름: ${i}\r\n원본 그림의 크기: 가로 ${n}pixel, 세로 ${r}pixel`;
 		try {
 			let i = null;
 			return this.executeOperation({
@@ -43429,13 +43503,13 @@ var ib = class {
 			this.polygonOverlay.replaceChildren();
 			return;
 		}
-		let r = eb();
-		for (let e = 0; e < n.length - 1; e++) nb(r, n[e].x, n[e].y, n[e + 1].x, n[e + 1].y);
+		let r = ab();
+		for (let e = 0; e < n.length - 1; e++) sb(r, n[e].x, n[e].y, n[e + 1].x, n[e + 1].y);
 		let i = n[n.length - 1];
-		nb(r, i.x, i.y, e, t, !0);
+		sb(r, i.x, i.y, e, t, !0);
 		for (let e of n) {
-			let t = document.createElementNS(Ny, "circle");
-			tb(t, {
+			let t = document.createElementNS(Ry, "circle");
+			ob(t, {
 				cx: e.x,
 				cy: e.y,
 				r: 3,
@@ -43444,7 +43518,7 @@ var ib = class {
 				"stroke-width": 1
 			}), r.appendChild(t);
 		}
-		let a = [...n.map((e) => e.x), e], o = [...n.map((e) => e.y), t], s = Math.min(...a), c = Math.max(...a), l = Math.min(...o), u = Math.max(...o), d = this.viewportManager.getZoom(), f = ((c - s) / d * 25.4 / 96).toFixed(1), p = ((u - l) / d * 25.4 / 96).toFixed(1), m = rb(c + 4, u + 4, `${f} × ${p} mm`);
+		let a = [...n.map((e) => e.x), e], o = [...n.map((e) => e.y), t], s = Math.min(...a), c = Math.max(...a), l = Math.min(...o), u = Math.max(...o), d = this.viewportManager.getZoom(), f = ((c - s) / d * 25.4 / 96).toFixed(1), p = ((u - l) / d * 25.4 / 96).toFixed(1), m = cb(c + 4, u + 4, `${f} × ${p} mm`);
 		this.polygonOverlay.replaceChildren(r, m);
 	}
 	finishPolygonDrawing() {
@@ -43490,19 +43564,19 @@ var ib = class {
 	}
 	showTextboxPlacementOverlay(e, t, n, r, i = !1) {
 		this.textboxPlacementOverlay || (this.textboxPlacementOverlay = document.createElement("div"), this.textboxPlacementOverlay.style.cssText = "position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;", document.body.appendChild(this.textboxPlacementOverlay));
-		let a = this.shapePlacementType, o = this.viewportManager.getZoom(), s = Math.min(e, n), c = Math.min(t, r), l = Math.abs(n - e), u = Math.abs(r - t), d = (l / o * 25.4 / 96).toFixed(1), f = (u / o * 25.4 / 96).toFixed(1), p = rb(s + l + 4, c + u + 4, `${d} × ${f} mm`), m = eb(), h = null;
+		let a = this.shapePlacementType, o = this.viewportManager.getZoom(), s = Math.min(e, n), c = Math.min(t, r), l = Math.abs(n - e), u = Math.abs(r - t), d = (l / o * 25.4 / 96).toFixed(1), f = (u / o * 25.4 / 96).toFixed(1), p = cb(s + l + 4, c + u + 4, `${d} × ${f} mm`), m = ab(), h = null;
 		if (a === "line") {
 			let a = n, s = r;
 			if (i) {
 				let i = n - e, o = r - t, c = Math.round(Math.atan2(o, i) / (Math.PI / 4)) * (Math.PI / 4), l = Math.sqrt(i * i + o * o);
 				a = e + l * Math.cos(c), s = t + l * Math.sin(c);
 			}
-			this.textboxPlacementDrag && i && (this.textboxPlacementDrag.currentClientX = a, this.textboxPlacementDrag.currentClientY = s), nb(m, e, t, a, s, !0);
+			this.textboxPlacementDrag && i && (this.textboxPlacementDrag.currentClientX = a, this.textboxPlacementDrag.currentClientY = s), sb(m, e, t, a, s, !0);
 			let c = (Math.hypot(a - e, s - t) / o * 25.4 / 96).toFixed(1), l = (e + a) / 2, u = (t + s) / 2;
-			h = rb(l + 8, u + 8, `${c} mm`);
+			h = cb(l + 8, u + 8, `${c} mm`);
 		} else if (a === "ellipse") {
-			let e = s + l / 2, t = c + u / 2, n = document.createElementNS(Ny, "ellipse");
-			tb(n, {
+			let e = s + l / 2, t = c + u / 2, n = document.createElementNS(Ry, "ellipse");
+			ob(n, {
 				cx: e,
 				cy: t,
 				rx: l / 2,
@@ -43515,16 +43589,16 @@ var ib = class {
 		} else if (a === "arc") {
 			let e = l / 2, t = u / 2;
 			if (e > 1 && t > 1) {
-				let n = s + l / 2, r = c + u / 2, i = document.createElementNS(Ny, "path");
-				tb(i, {
+				let n = s + l / 2, r = c + u / 2, i = document.createElementNS(Ry, "path");
+				ob(i, {
 					d: `M ${n} ${c} A ${e} ${t} 0 0 1 ${s + l} ${r}`,
 					fill: "none",
 					stroke: "#333",
 					"stroke-width": 2,
 					"stroke-dasharray": "6,3"
 				}), m.appendChild(i);
-				let a = document.createElementNS(Ny, "rect");
-				tb(a, {
+				let a = document.createElementNS(Ry, "rect");
+				ob(a, {
 					x: s,
 					y: c,
 					width: l,
@@ -43536,8 +43610,8 @@ var ib = class {
 				}), m.appendChild(a);
 			}
 		} else if (a === "polygon") {
-			let e = s + l / 2, t = c, n = document.createElementNS(Ny, "polygon");
-			tb(n, {
+			let e = s + l / 2, t = c, n = document.createElementNS(Ry, "polygon");
+			ob(n, {
 				points: `${e},${t} ${s + l},${c + u} ${s},${c + u}`,
 				fill: "rgba(0,0,0,0.05)",
 				stroke: "#333",
@@ -43545,8 +43619,8 @@ var ib = class {
 				"stroke-dasharray": "6,3"
 			}), m.appendChild(n);
 		} else {
-			let e = document.createElementNS(Ny, "rect");
-			tb(e, {
+			let e = document.createElementNS(Ry, "rect");
+			ob(e, {
 				x: s,
 				y: c,
 				width: l,
@@ -43747,12 +43821,12 @@ var ib = class {
 		this.isDragging = !1, this.cellSelectionDragCandidate = null, document.removeEventListener("mousemove", this.onMouseMoveBound), this.stopTextSelectionDragAutoScroll();
 	}
 	getTextSelectionDragScrollDeltaY() {
-		let e = this.container.getBoundingClientRect(), t = e.top + Py, n = e.top + this.container.clientHeight - Py, r = this.dragLastClientY;
+		let e = this.container.getBoundingClientRect(), t = e.top + zy, n = e.top + this.container.clientHeight - zy, r = this.dragLastClientY;
 		return r < t ? -this.scaleTextSelectionDragScrollStep(t - r) : r > n ? this.scaleTextSelectionDragScrollStep(r - n) : 0;
 	}
 	scaleTextSelectionDragScrollStep(e) {
-		let t = Math.min(1, Math.max(0, e / Py));
-		return Math.round(Fy + 18 * t);
+		let t = Math.min(1, Math.max(0, e / zy));
+		return Math.round(By + 18 * t);
 	}
 	updateTextSelectionDragAutoScroll() {
 		if (!this.isDragging) {
@@ -44136,25 +44210,25 @@ var ib = class {
 			}
 			Wm(this), this.finishPictureMoveDrag();
 		}
-		Rv.call(this, e);
+		Uv.call(this, e);
 	}
 	handleDocumentNavigationKey(e) {
-		this.active && Rv.call(this, e);
+		this.active && Uv.call(this, e);
 	}
 	handleCtrlKey(e) {
-		Bv.call(this, e);
+		Gv.call(this, e);
 	}
 	handleSelectAll() {
-		Vv.call(this);
+		Kv.call(this);
 	}
 	onCopy(e, t = !1) {
-		return Uv.call(this, e, t);
+		return Jv.call(this, e, t);
 	}
 	onCut(e) {
-		Wv.call(this, e);
+		Yv.call(this, e);
 	}
 	onPaste(e) {
-		qv.call(this, e);
+		Qv.call(this, e);
 	}
 	applyCharFormat(e) {
 		if (this.cursor.isInHeaderFooter()) {
@@ -44431,7 +44505,7 @@ var ib = class {
 	getParaFormatTargetsForRange(e, t) {
 		if (this.cursor.isInHeaderFooter() || this.cursor.isInFootnote() || e.isTextBox || t.isTextBox) return [];
 		if ((e.cellPath?.length ?? 0) > 1 || (t.cellPath?.length ?? 0) > 1) {
-			if (e.parentParaIndex === void 0 || !Wy(e, t)) return [];
+			if (e.parentParaIndex === void 0 || !Yy(e, t)) return [];
 			let n = e.cellPath, r = n[n.length - 1], i = t.cellPath[t.cellPath.length - 1], a = [];
 			for (let t = Math.min(r.cellParaIndex, i.cellParaIndex); t <= Math.max(r.cellParaIndex, i.cellParaIndex); t++) a.push({
 				kind: "cellPath",
@@ -44480,7 +44554,7 @@ var ib = class {
 					let r = JSON.stringify(e.cellPath);
 					n = this.wasm.getCursorRectByPath(e.sectionIndex, e.parentParaIndex, r, s.charStart), t ??= this.wasm.getCursorRectByPath(e.sectionIndex, e.parentParaIndex, r, e.charOffset);
 				} else n = this.wasm.getCursorRectInCell(e.sectionIndex, e.parentParaIndex, i, a, o, s.charStart), t ??= this.wasm.getCursorRectInCell(e.sectionIndex, e.parentParaIndex, i, a, o, e.charOffset);
-				let c = Ey(t.x, n.x);
+				let c = jy(t.x, n.x);
 				return this.executeParaFormatCommand([{
 					kind: "cell",
 					sec: e.sectionIndex,
@@ -44488,16 +44562,16 @@ var ib = class {
 					controlIdx: i,
 					cellIdx: a,
 					cellParaIdx: o
-				}], { indent: -Yy(c) }), !0;
+				}], { indent: -eb(c) }), !0;
 			}
 			let r = this.wasm.getLineInfo(e.sectionIndex, e.paragraphIndex, 0);
 			n = this.wasm.getCursorRect(e.sectionIndex, e.paragraphIndex, r.charStart), t ??= this.wasm.getCursorRect(e.sectionIndex, e.paragraphIndex, e.charOffset);
-			let i = Ey(t.x, n.x);
+			let i = jy(t.x, n.x);
 			return this.executeParaFormatCommand([{
 				kind: "body",
 				sec: e.sectionIndex,
 				para: e.paragraphIndex
-			}], { indent: -Yy(i) }), !0;
+			}], { indent: -eb(i) }), !0;
 		} catch (e) {
 			return console.warn("[InputHandler] Shift+Tab hanging indent 실패:", e), !1;
 		}
@@ -44739,9 +44813,9 @@ var ib = class {
 				if (!e) throw Error("복구할 최신 snapshot을 찾을 수 없습니다.");
 				this.cursor.moveTo(e), this.cursor.resetPreferredX(), await t(), this.updateCaret();
 			} catch (t) {
-				throw new Hy(AggregateError([e, t]), !1);
+				throw new qy(AggregateError([e, t]), !1);
 			}
-			throw new Hy(e, !0);
+			throw new qy(e, !0);
 		}
 		try {
 			this.eventBus.emit("document-mutated", "document-agent");
@@ -44755,31 +44829,31 @@ var ib = class {
 		}
 	}
 	handleBackspace(e, t) {
-		gy.call(this, e, t);
+		xy.call(this, e, t);
 	}
 	handleDelete(e, t) {
-		_y.call(this, e, t);
+		Sy.call(this, e, t);
 	}
 	onCompositionStart() {
-		yy.call(this);
+		wy.call(this);
 	}
 	onCompositionEnd() {
-		by.call(this);
+		Ty.call(this);
 	}
 	getTextAt(e, t) {
-		return xy.call(this, e, t);
+		return Ey.call(this, e, t);
 	}
 	onInput(e) {
-		Sy.call(this, e);
+		Dy.call(this, e);
 	}
 	insertTextAtRaw(e, t) {
-		this.rawTextMutationEffects.add(Cy.call(this, e, t));
+		this.rawTextMutationEffects.add(Oy.call(this, e, t));
 	}
 	replaceTextAtRaw(e, t, n) {
-		this.rawTextMutationEffects.add(wy.call(this, e, t, n));
+		this.rawTextMutationEffects.add(ky.call(this, e, t, n));
 	}
 	deleteTextAt(e, t) {
-		this.rawTextMutationEffects.add(Ty.call(this, e, t));
+		this.rawTextMutationEffects.add(Ay.call(this, e, t));
 	}
 	focusTextarea() {
 		this.textarea.focus();
@@ -44810,10 +44884,10 @@ var ib = class {
 	scheduleDeferredPaginationFlush() {
 		this.cancelDeferredPaginationFlush(), this.deferredPaginationPending = !0, this.shouldAutoFlushDeferredPagination() && (this.deferredPaginationFlushTimer = setTimeout(() => {
 			this.flushDeferredPaginationIfNeeded("idle-auto");
-		}, Ry));
+		}, Uy));
 	}
 	shouldAutoFlushDeferredPagination() {
-		return !this.deferredPaginationRunner.hasPendingWork() && this.wasm.pageCount <= Uy;
+		return !this.deferredPaginationRunner.hasPendingWork() && this.wasm.pageCount <= Jy;
 	}
 	cancelDeferredPaginationFlush() {
 		this.deferredPaginationFlushTimer &&= (clearTimeout(this.deferredPaginationFlushTimer), null);
@@ -44824,7 +44898,7 @@ var ib = class {
 		if (e.focusedCursorGeometry ? this.cursor.prepareFocusedCellCursorGeometry(e.focusedCursorGeometry) : t && this.cursor.invalidateFocusedCellCursorGeometry(), e.paginationCompleted && (this.cancelDeferredPaginationFlush(), this.deferredPaginationRunner.cancel(), this.deferredPaginationPending = !1), e.flowChanged && e.paginationCompleted) return !0;
 		if (!e.documentPaginationPending) return !1;
 		let n = this.deferredPaginationRunner.hasPendingWork();
-		return this.cancelDeferredPaginationFlush(), this.deferredPaginationPending = !0, !e.flowChanged && !n ? !1 : (this.deferredPaginationRunner.requestStart(By, zy, Vy), !0);
+		return this.cancelDeferredPaginationFlush(), this.deferredPaginationPending = !0, !e.flowChanged && !n ? !1 : (this.deferredPaginationRunner.requestStart(Gy, Wy, Ky), !0);
 	}
 	completeResumablePagination(e) {
 		this.cancelDeferredPaginationFlush(), this.deferredPaginationPending = !1, this.lastCellKey = null, this.protectedCellHitCache = null, this.eventBus.emit("document-mutated", "input-handler-resumable-pagination"), this.eventBus.emit("document-changed", "deferred-pagination-complete");
@@ -45108,7 +45182,7 @@ var ib = class {
 		let { start: r, end: i } = n, a = this.viewportManager.getZoom();
 		try {
 			let e, t = r.parentParaIndex !== void 0, n = i.parentParaIndex !== void 0;
-			if (t && n && Wy(r, i)) {
+			if (t && n && Yy(r, i)) {
 				let t = r.cursorRect && i.cursorRect ? {
 					startPageHint: r.cursorRect.pageIndex,
 					endPageHint: i.cursorRect.pageIndex
@@ -45292,13 +45366,13 @@ var ib = class {
 				sectionIndex: 0,
 				paragraphIndex: 0,
 				charOffset: 0
-			}), this.cursor.resetPreferredX(), this.active = !0, ky(this.cursor.getRect(), this.viewportManager.getZoom(), this.caret, this.eventBus), this.emitCursorFormatState(), this.focusTextarea();
+			}), this.cursor.resetPreferredX(), this.active = !0, Py(this.cursor.getRect(), this.viewportManager.getZoom(), this.caret, this.eventBus), this.emitCursorFormatState(), this.focusTextarea();
 		} catch (e) {
 			console.warn("[InputHandler] 캐럿 자동 배치 실패:", e), this.cursor.moveTo({
 				sectionIndex: 0,
 				paragraphIndex: 0,
 				charOffset: 0
-			}), this.active = !0, ky(this.cursor.getRect(), this.viewportManager.getZoom(), this.caret, this.eventBus), this.focusTextarea();
+			}), this.active = !0, Py(this.cursor.getRect(), this.viewportManager.getZoom(), this.caret, this.eventBus), this.focusTextarea();
 		}
 	}
 	focus() {
@@ -45872,17 +45946,17 @@ var ib = class {
 		if (this.cursor.isInPictureObjectSelection()) {
 			let n = this.cursor.getSelectedPictureRef();
 			if (n) try {
-				let r = jv(n), i = this.wasm.copyControl(n.sec, n.ppi, n.ci, r);
+				let r = Iv(n), i = this.wasm.copyControl(n.sec, n.ppi, n.ci, r);
 				if (JSON.parse(i).ok !== !0) return !1;
 				let a = this.wasm.getClipboardText() || "[그림]", o = "";
 				try {
 					o = this.wasm.exportControlHtml(n.sec, n.ppi, n.ci, r) || "";
 				} catch {}
-				let s = Ov(this, o, a);
-				return !e() || t && (!o || typeof ClipboardItem > "u" || !navigator.clipboard?.write) ? !1 : (n.type === "image" ? await Mv(this.wasm, n.sec, n.ppi, n.ci, a, s, r, e).catch((n) => {
+				let s = Nv(this, o, a);
+				return !e() || t && (!o || typeof ClipboardItem > "u" || !navigator.clipboard?.write) ? !1 : (n.type === "image" ? await Lv(this.wasm, n.sec, n.ppi, n.ci, a, s, r, e).catch((n) => {
 					if (t) throw n;
 					if (e()) return navigator.clipboard.writeText(a);
-				}) : await kv(a, s).catch((n) => {
+				}) : await Pv(a, s).catch((n) => {
 					if (t) throw n;
 					if (e()) return navigator.clipboard.writeText(a);
 				}), e());
@@ -45894,14 +45968,14 @@ var ib = class {
 		if (this.cursor.isInTableObjectSelection()) {
 			let n = this.cursor.getSelectedTableRef();
 			if (n) try {
-				let r = Oy(n), i = this.wasm.copyControl(n.sec, n.ppi, r.controlIndex, r.ownerCellPathJson);
+				let r = Ny(n), i = this.wasm.copyControl(n.sec, n.ppi, r.controlIndex, r.ownerCellPathJson);
 				if (JSON.parse(i).ok !== !0) return !1;
 				let a = this.wasm.getClipboardText() || "[표]", o = "";
 				try {
 					o = this.wasm.exportControlHtml(n.sec, n.ppi, r.controlIndex, r.ownerCellPathJson) || "";
 				} catch {}
-				let s = Ov(this, o, a);
-				return !e() || t && (!o || typeof ClipboardItem > "u" || !navigator.clipboard?.write) ? !1 : (await kv(a, s).catch((n) => {
+				let s = Nv(this, o, a);
+				return !e() || t && (!o || typeof ClipboardItem > "u" || !navigator.clipboard?.write) ? !1 : (await Pv(a, s).catch((n) => {
 					if (t) throw n;
 					if (e()) return navigator.clipboard.writeText(a);
 				}), e());
@@ -45937,8 +46011,8 @@ var ib = class {
 		if (!r) return;
 		let i = this.wasm.documentGeneration, a = this.history.peekUndoTop(), o = document.activeElement, s = document.defaultView, c = n.sec, l = n.ppi, u = e?.type, d = e ? {
 			controlIndex: e.ci,
-			ownerCellPathJson: jv(e)
-		} : Oy(t), f = !1, p = this.eventBus.on("document-mutated", () => g()), m = this.eventBus.on("document-changed", () => g()), h = (e) => {
+			ownerCellPathJson: Iv(e)
+		} : Ny(t), f = !1, p = this.eventBus.on("document-mutated", () => g()), m = this.eventBus.on("document-changed", () => g()), h = (e) => {
 			e.target === o && g();
 		}, g = () => {
 			f = !0, this.cancelPendingObjectCut === g && (this.cancelPendingObjectCut = null), document.removeEventListener("focusout", h, !0), p(), m(), s?.removeEventListener("blur", g);
@@ -45948,8 +46022,8 @@ var ib = class {
 			if (f || !document.hasFocus() || document.activeElement !== o || this.cancelPendingObjectCut !== g || !this.active || this.isFormMode() || this.wasm.documentGeneration !== i || this.wasm.borrowDocumentHandle() !== r || this.history.peekUndoTop() !== a || (e ? !this.cursor.isInPictureObjectSelection() || this.cursor.getSelectedPictureRef() !== e : !this.cursor.isInTableObjectSelection() || this.cursor.getSelectedTableRef() !== t)) return !1;
 			let s = e ? {
 				controlIndex: e.ci,
-				ownerCellPathJson: jv(e)
-			} : Oy(t);
+				ownerCellPathJson: Iv(e)
+			} : Ny(t);
 			return n.sec === c && n.ppi === l && e?.type === u && s.controlIndex === d.controlIndex && s.ownerCellPathJson === d.ownerCellPathJson;
 		};
 		try {
@@ -46038,7 +46112,7 @@ var ib = class {
 		}), o && (this.formatCopyState = null, this.focusTextarea(), this.eventBus.emit("command-state-changed")), o;
 	}
 	captureFormatAtCursor() {
-		let e = this.getCharProperties(), t = Jy(e, Gy);
+		let e = this.getCharProperties(), t = $y(e, Xy);
 		if (t.fontIds === void 0 && t.fontId === void 0) {
 			let n = e.fontFamily;
 			if (n) {
@@ -46046,7 +46120,7 @@ var ib = class {
 				e >= 0 && (t.fontId = e);
 			}
 		}
-		let n = $y(Jy(this.getParaProperties(), Ky)), r = this.cursor.getPosition(), i = r.parentParaIndex !== void 0 && (r.cellPath?.length ?? 0) <= 1 ? Jy(this.wasm.getCellOwnProperties(r.sectionIndex, r.parentParaIndex, r.controlIndex, r.cellIndex), qy) : void 0;
+		let n = ib($y(this.getParaProperties(), Zy)), r = this.cursor.getPosition(), i = r.parentParaIndex !== void 0 && (r.cellPath?.length ?? 0) <= 1 ? $y(this.wasm.getCellOwnProperties(r.sectionIndex, r.parentParaIndex, r.controlIndex, r.cellIndex), Qy) : void 0;
 		return {
 			charProps: JSON.parse(JSON.stringify(t)),
 			paraProps: JSON.parse(JSON.stringify(n)),
@@ -46358,7 +46432,7 @@ var ib = class {
 			o.focus(), o.select();
 		});
 	}
-}, ab = [
+}, ub = [
 	"함초롬바탕",
 	"함초롬돋움",
 	"맑은 고딕",
@@ -46366,7 +46440,7 @@ var ib = class {
 	"바탕",
 	"돋움",
 	"궁서"
-], ob = [
+], db = [
 	{
 		id: "all",
 		label: g("dialog.toolbar.label")
@@ -46387,7 +46461,7 @@ var ib = class {
 		id: "system",
 		label: g("dialog.toolbar.label.x8a1767")
 	}
-], sb = class {
+], fb = class {
 	container;
 	wasm;
 	eventBus;
@@ -46760,7 +46834,7 @@ var ib = class {
 	}
 	initFontDropdown(e) {
 		this.lastFontFamilies = e ? [...e] : void 0, this.fontMenuDocumentFonts = this.normalizeFontNames(e ?? []), this.fontMenuCategory = this.fontMenuDocumentFonts.length > 0 ? "document" : "current", this.closeFontMenu(), this.fontName.replaceChildren();
-		for (let e of ab) this.ensureFontOption(e);
+		for (let e of ub) this.ensureFontOption(e);
 		if (e?.length) for (let t of e) this.ensureFontOption(t);
 		this.populateFontSetOptions();
 	}
@@ -46873,7 +46947,7 @@ var ib = class {
 		e.className = "font-picker-menu", e.setAttribute("role", "dialog"), e.setAttribute("aria-label", g("dialog.toolbar.openFontMenu.label"));
 		let t = document.createElement("div");
 		t.className = "font-picker-categories", t.setAttribute("role", "tablist");
-		for (let n of ob) {
+		for (let n of db) {
 			let r = document.createElement("button");
 			r.type = "button", r.className = "font-picker-category", r.dataset.category = n.id, r.textContent = n.label, r.setAttribute("role", "tab"), r.addEventListener("click", () => {
 				this.fontMenuCategory = n.id, this.renderFontMenu(e);
@@ -46903,7 +46977,7 @@ var ib = class {
 	renderFontMenu(e) {
 		let t = e.querySelector("[data-role=\"heading\"]"), n = e.querySelector("[data-role=\"list\"]");
 		if (!t || !n) return;
-		let r = ob.find((e) => e.id === this.fontMenuCategory), i = this.getFontMenuEntries(this.fontMenuCategory);
+		let r = db.find((e) => e.id === this.fontMenuCategory), i = this.getFontMenuEntries(this.fontMenuCategory);
 		t.textContent = `${r.label} (${i.length})`;
 		for (let t of e.querySelectorAll(".font-picker-category")) {
 			let e = t.dataset.category === this.fontMenuCategory;
@@ -46926,7 +47000,7 @@ var ib = class {
 		}] : [], n = this.fontMenuDocumentFonts.map((e) => ({
 			value: e,
 			label: e
-		})), r = ab.map((e) => ({
+		})), r = ub.map((e) => ({
 			value: e,
 			label: e
 		})), i = V.getAllFontSets().map((e) => ({
@@ -46981,11 +47055,11 @@ var ib = class {
 		}
 		this.eventBus.emit("format-char", { fontIds: n });
 	}
-}, cb = ".tb-split-item:not([disabled])";
-function lb(e) {
-	return Array.from(e.querySelectorAll(cb));
+}, pb = ".tb-split-item:not([disabled])";
+function mb(e) {
+	return Array.from(e.querySelectorAll(pb));
 }
-function ub(e, t, n = {}) {
+function hb(e, t, n = {}) {
 	let r = e.querySelector(".tb-split-arrow"), i = e.querySelector(".tb-split-menu");
 	if (e.classList.toggle("open", t), r?.setAttribute("aria-expanded", String(t)), !t) {
 		n.returnFocus && r?.focus({ preventScroll: !0 });
@@ -46994,44 +47068,44 @@ function ub(e, t, n = {}) {
 	if (!i) return;
 	let a = e.getBoundingClientRect(), o = i.getBoundingClientRect(), s = Math.min(Math.max(4, a.left), Math.max(4, window.innerWidth - o.width - 4)), c = a.bottom + 2, l = c + o.height <= window.innerHeight - 4 ? c : Math.max(4, a.top - o.height - 2);
 	if (i.style.left = `${s}px`, i.style.top = `${l}px`, n.focus) {
-		let t = lb(e), r = n.focus === "first" ? t[0] : t.at(-1);
+		let t = mb(e), r = n.focus === "first" ? t[0] : t.at(-1);
 		requestAnimationFrame(() => r?.focus({ preventScroll: !0 }));
 	}
 }
-function db(e, t) {
+function gb(e, t) {
 	e.querySelectorAll(".tb-split.open").forEach((e) => {
-		e !== t && ub(e, !1);
+		e !== t && hb(e, !1);
 	});
 }
-function fb(e, t, n) {
-	let r = lb(e), i = r.indexOf(t);
+function _b(e, t, n) {
+	let r = mb(e), i = r.indexOf(t);
 	i < 0 || r.length === 0 || r[(i + n + r.length) % r.length]?.focus({ preventScroll: !0 });
 }
 //#endregion
 //#region @rhwp/studio/src/ui/icon-toolbar-scroller.ts
-var pb = 1, mb = 240, hb = "tb-scroll-nav-transitioning-out", gb = ":scope > .tb-sep, :scope > .pwh-ribbon-panel[data-active=\"true\"] > .pwh-ribbon-section";
-function _b(e, t) {
-	return e - t > pb;
+var vb = 1, yb = 240, bb = "tb-scroll-nav-transitioning-out", xb = ":scope > .tb-sep, :scope > .pwh-ribbon-panel[data-active=\"true\"] > .pwh-ribbon-section";
+function Sb(e, t) {
+	return e - t > vb;
 }
-function vb(e, t, n) {
+function Cb(e, t, n) {
 	return n ? Math.max(0, Math.min(e, t)) : 0;
 }
-function yb(e, t, n) {
+function wb(e, t, n) {
 	return {
-		atStart: n || e <= pb,
-		atEnd: n || e >= t - pb
+		atStart: n || e <= vb,
+		atEnd: n || e >= t - vb
 	};
 }
-function bb(e, t, n, r) {
+function Tb(e, t, n, r) {
 	let i = n > 0 ? r : 0;
-	if (n > 0) i = e.find((e) => e > t + pb) ?? i;
-	else for (let n = e.length - 1; n >= 0; n--) if (e[n] < t - pb) {
+	if (n > 0) i = e.find((e) => e > t + vb) ?? i;
+	else for (let n = e.length - 1; n >= 0; n--) if (e[n] < t - vb) {
 		i = e[n];
 		break;
 	}
 	return Math.max(0, Math.min(i, r));
 }
-var xb = class {
+var Eb = class {
 	root;
 	viewport;
 	track;
@@ -47054,10 +47128,10 @@ var xb = class {
 	};
 	onScroll = () => {
 		if (!this.overflowing) {
-			Math.abs(this.viewport.scrollLeft) > pb && (this.viewport.scrollLeft = 0);
+			Math.abs(this.viewport.scrollLeft) > vb && (this.viewport.scrollLeft = 0);
 			return;
 		}
-		db(this.track), this.updateNavigationState();
+		gb(this.track), this.updateNavigationState();
 	};
 	onPreviousClick = () => {
 		this.previousButton.getAttribute("aria-disabled") !== "true" && this.scrollToAdjacentDivider(-1);
@@ -47091,14 +47165,14 @@ var xb = class {
 		}));
 	}
 	refresh() {
-		let e = _b(this.track.scrollWidth, this.viewport.clientWidth);
+		let e = Sb(this.track.scrollWidth, this.viewport.clientWidth);
 		this.overflowing = e, this.viewport.classList.toggle("tb-scroll-viewport-enabled", e), this.previousButton.hidden = !e, this.nextButton.hidden = !e;
 		let t = this.maxScrollLeft();
-		this.viewport.scrollLeft = vb(this.viewport.scrollLeft, t, e), this.updateNavigationState(t);
+		this.viewport.scrollLeft = Cb(this.viewport.scrollLeft, t, e), this.updateNavigationState(t);
 	}
 	visibleDividerBoundaries(e) {
 		let t = this.track.getBoundingClientRect().left, n = this.viewport.getBoundingClientRect().left, r = e > 0 ? this.nextButton.getBoundingClientRect() : this.previousButton.getBoundingClientRect(), i = this.navigationEdgeGap(), a = e > 0 ? r.left - i - n : r.right + i - n;
-		return Array.from(this.track.querySelectorAll(gb)).filter((e) => !e.hidden && getComputedStyle(e).display !== "none" && e.offsetWidth > 0).map((n) => {
+		return Array.from(this.track.querySelectorAll(xb)).filter((e) => !e.hidden && getComputedStyle(e).display !== "none" && e.offsetWidth > 0).map((n) => {
 			let r = n.getBoundingClientRect();
 			return e > 0 ? r.right - t - a : r.left - t - a;
 		}).sort((e, t) => e - t);
@@ -47108,7 +47182,7 @@ var xb = class {
 	}
 	scrollToAdjacentDivider(e) {
 		if (!this.overflowing) return;
-		let t = this.viewport.scrollLeft, n = bb(this.visibleDividerBoundaries(e), t, e, this.maxScrollLeft());
+		let t = this.viewport.scrollLeft, n = Tb(this.visibleDividerBoundaries(e), t, e, this.maxScrollLeft());
 		this.scrollTo(n);
 	}
 	scrollTo(e) {
@@ -47117,15 +47191,15 @@ var xb = class {
 			return;
 		}
 		let t = Math.max(0, Math.min(e, this.maxScrollLeft())), n = this.viewport.scrollLeft, r = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-		if (this.cancelScrollAnimation(), r || Math.abs(t - n) <= pb) {
+		if (this.cancelScrollAnimation(), r || Math.abs(t - n) <= vb) {
 			this.viewport.scrollLeft = t, this.updateNavigationState(this.maxScrollLeft());
 			return;
 		}
-		let i = this.maxScrollLeft(), a = t <= pb ? this.previousButton : t >= i - pb ? this.nextButton : null;
-		a && (this.exitingButton = a, a.style.setProperty("--tb-scroll-exit-duration", `${mb}ms`), a.classList.add(hb));
+		let i = this.maxScrollLeft(), a = t <= vb ? this.previousButton : t >= i - vb ? this.nextButton : null;
+		a && (this.exitingButton = a, a.style.setProperty("--tb-scroll-exit-duration", `${yb}ms`), a.classList.add(bb));
 		let o = null, s = t - n, c = (e) => {
 			o ??= e;
-			let r = Math.min(1, (e - o) / mb), a = 1 - (1 - r) ** 3;
+			let r = Math.min(1, (e - o) / yb), a = 1 - (1 - r) ** 3;
 			if (this.viewport.scrollLeft = n + s * a, this.updateNavigationState(i), r < 1) {
 				this.scrollAnimationFrame = requestAnimationFrame(c);
 				return;
@@ -47135,7 +47209,7 @@ var xb = class {
 		this.scrollAnimationFrame = requestAnimationFrame(c);
 	}
 	finishScrollExit() {
-		this.exitingButton &&= (this.exitingButton.classList.remove(hb), this.exitingButton.style.removeProperty("--tb-scroll-exit-duration"), null);
+		this.exitingButton &&= (this.exitingButton.classList.remove(bb), this.exitingButton.style.removeProperty("--tb-scroll-exit-duration"), null);
 	}
 	cancelScrollAnimation() {
 		this.scrollAnimationFrame !== null && (cancelAnimationFrame(this.scrollAnimationFrame), this.scrollAnimationFrame = null), this.finishScrollExit();
@@ -47149,7 +47223,7 @@ var xb = class {
 		e.getAttribute("aria-disabled") !== n && e.setAttribute("aria-disabled", n), e.getAttribute("aria-hidden") !== n && e.setAttribute("aria-hidden", n);
 	}
 	updateNavigationState(e = this.maxScrollLeft()) {
-		let t = this.previousButton.hasAttribute("hidden") || this.nextButton.hasAttribute("hidden"), n = this.viewport.scrollLeft, { atStart: r, atEnd: i } = yb(n, e, t);
+		let t = this.previousButton.hasAttribute("hidden") || this.nextButton.hasAttribute("hidden"), n = this.viewport.scrollLeft, { atStart: r, atEnd: i } = wb(n, e, t);
 		this.syncNavigationButton(this.previousButton, r), this.syncNavigationButton(this.nextButton, i);
 	}
 	resetToStart() {
@@ -47159,12 +47233,12 @@ var xb = class {
 		this.animationFrame !== null && cancelAnimationFrame(this.animationFrame), this.cancelScrollAnimation(), this.resizeObserver.disconnect(), this.modeObserver.disconnect(), this.previousButton.removeEventListener("click", this.onPreviousClick), this.nextButton.removeEventListener("click", this.onNextClick), this.viewport.removeEventListener("scroll", this.onScroll), this.viewport.removeEventListener("keydown", this.onViewportKeyDown), this.viewport.removeEventListener("focusin", this.onViewportFocusIn);
 	}
 };
-function Sb(e) {
+function Db(e) {
 	if (!e) return null;
 	let t = e.querySelector("#icon-toolbar-viewport"), n = e.querySelector(".tb-scroll-track"), r = e.querySelector("#icon-toolbar-prev"), i = e.querySelector("#icon-toolbar-next");
-	return !t || !n || !r || !i ? null : new xb(e, t, n, r, i);
+	return !t || !n || !r || !i ? null : new Eb(e, t, n, r, i);
 }
-var Cb = "(max-width: 459px), (min-width: 808px) and (max-width: 961px)", wb = "(max-width: 459px), (min-width: 828px) and (max-width: 981px)", Tb = ".sb-paragraph-ribbon-group .sb-btn", Eb = "sb-al-left", Db = [
+var Ob = "(max-width: 459px), (min-width: 808px) and (max-width: 961px)", kb = "(max-width: 459px), (min-width: 828px) and (max-width: 981px)", Ab = ".sb-paragraph-ribbon-group .sb-btn", jb = "sb-al-left", Mb = [
 	"sb-al-left",
 	"sb-al-center",
 	"sb-al-right",
@@ -47172,10 +47246,10 @@ var Cb = "(max-width: 459px), (min-width: 808px) and (max-width: 961px)", wb = "
 	"sb-al-distribute",
 	"sb-al-split"
 ];
-function Ob(e, t) {
+function Nb(e, t) {
 	return e && !t;
 }
-var kb = class {
+var Pb = class {
 	container;
 	host;
 	trigger;
@@ -47203,8 +47277,8 @@ var kb = class {
 	};
 	onPanelClick = (e) => {
 		let t = e.target;
-		if (!(t instanceof Element) || !t.closest(Tb)) return;
-		let n = Ob(this.openedFromKeyboard, this.panelPointerActivation);
+		if (!(t instanceof Element) || !t.closest(Ab)) return;
+		let n = Nb(this.openedFromKeyboard, this.panelPointerActivation);
 		this.panelPointerActivation = !1, this.openedFromKeyboard = !1, this.setOpen(!1, !1, n);
 	};
 	onDocumentPointerDown = (e) => {
@@ -47218,7 +47292,7 @@ var kb = class {
 		this.syncLayoutMode();
 	};
 	constructor(e, t, n, r, i, a = window.matchMedia.bind(window)) {
-		this.container = e, this.host = t, this.trigger = n, this.triggerIcon = r, this.panel = i, this.mediaQuery = a(p() === "en" ? wb : Cb), this.paragraphButtons = Array.from(i.querySelectorAll(Tb)), this.stateObserver = new MutationObserver(() => this.syncIndicator()), n.addEventListener("pointerdown", this.onTriggerPointerDown), n.addEventListener("click", this.onTriggerClick), n.addEventListener("keydown", this.onTriggerKeyDown), i.addEventListener("pointerdown", this.onPanelPointerDown), i.addEventListener("click", this.onPanelClick), document.addEventListener("pointerdown", this.onDocumentPointerDown, !0), window.addEventListener("keydown", this.onWindowKeyDown, !0), this.mediaQuery.addEventListener("change", this.onMediaChange), this.stateObserver.observe(i, {
+		this.container = e, this.host = t, this.trigger = n, this.triggerIcon = r, this.panel = i, this.mediaQuery = a(p() === "en" ? kb : Ob), this.paragraphButtons = Array.from(i.querySelectorAll(Ab)), this.stateObserver = new MutationObserver(() => this.syncIndicator()), n.addEventListener("pointerdown", this.onTriggerPointerDown), n.addEventListener("click", this.onTriggerClick), n.addEventListener("keydown", this.onTriggerKeyDown), i.addEventListener("pointerdown", this.onPanelPointerDown), i.addEventListener("click", this.onPanelClick), document.addEventListener("pointerdown", this.onDocumentPointerDown, !0), window.addEventListener("keydown", this.onWindowKeyDown, !0), this.mediaQuery.addEventListener("change", this.onMediaChange), this.stateObserver.observe(i, {
 			attributes: !0,
 			subtree: !0,
 			attributeFilter: [
@@ -47239,8 +47313,8 @@ var kb = class {
 		this.open = r, this.host.classList.toggle("open", r), this.trigger.setAttribute("aria-expanded", String(r)), this.panel.hidden = this.mediaQuery.matches ? !r : !1, r && t ? requestAnimationFrame(() => this.paragraphButtons.find((e) => !e.disabled)?.focus()) : !r && n && this.trigger.focus({ preventScroll: !0 });
 	}
 	syncIndicator() {
-		let e = this.paragraphButtons.find((e) => e.classList.contains("active") || e.getAttribute("aria-pressed") === "true"), t = e?.querySelector(".sb-align"), n = Db.find((e) => t?.classList.contains(e)) ?? Eb, r = this.container.getAttribute("aria-disabled") === "true";
-		this.triggerIcon.classList.remove(...Db), this.triggerIcon.classList.add(n), this.trigger.disabled = r;
+		let e = this.paragraphButtons.find((e) => e.classList.contains("active") || e.getAttribute("aria-pressed") === "true"), t = e?.querySelector(".sb-align"), n = Mb.find((e) => t?.classList.contains(e)) ?? jb, r = this.container.getAttribute("aria-disabled") === "true";
+		this.triggerIcon.classList.remove(...Mb), this.triggerIcon.classList.add(n), this.trigger.disabled = r;
 		let i = e?.title, a = i ? g("ui.styleToolbarOverflow.alignMoreCurrent", { p1: i }) : g("ui.styleToolbarOverflow.alignMore");
 		this.trigger.setAttribute("aria-label", a), this.trigger.title = i ? g("dialog.styleToolbarOverflow.trigger.tooltip", { p1: i }) : g("dialog.styleToolbarOverflow.syncIndicator.tooltip");
 	}
@@ -47248,14 +47322,14 @@ var kb = class {
 		this.setOpen(!1), this.trigger.removeEventListener("pointerdown", this.onTriggerPointerDown), this.trigger.removeEventListener("click", this.onTriggerClick), this.trigger.removeEventListener("keydown", this.onTriggerKeyDown), this.panel.removeEventListener("pointerdown", this.onPanelPointerDown), this.panel.removeEventListener("click", this.onPanelClick), document.removeEventListener("pointerdown", this.onDocumentPointerDown, !0), window.removeEventListener("keydown", this.onWindowKeyDown, !0), this.mediaQuery.removeEventListener("change", this.onMediaChange), this.stateObserver.disconnect();
 	}
 };
-function Ab(e) {
+function Fb(e) {
 	if (!e) return null;
 	let t = e.querySelector(".sb-overflow-host"), n = e.querySelector("#btn-style-overflow"), r = e.querySelector("#style-overflow-current-icon"), i = e.querySelector("#style-overflow-panel");
-	return !t || !n || !r || !i ? null : new kb(e, t, n, r, i);
+	return !t || !n || !r || !i ? null : new Pb(e, t, n, r, i);
 }
 //#endregion
 //#region @rhwp/studio/src/ui/menu-shortcut-labels.ts
-function jb(e, t) {
+function Ib(e, t) {
 	let n = e.querySelectorAll(".md-item[data-cmd]");
 	for (let e of n) {
 		let n = e, r = n.dataset.cmd;
@@ -47263,12 +47337,12 @@ function jb(e, t) {
 		let i = t.get(r)?.shortcutLabel;
 		if (!i) continue;
 		let a = n.querySelector(".md-shortcut");
-		a || (a = document.createElement("span"), a.className = "md-shortcut", n.appendChild(a)), a.textContent = j_(i);
+		a || (a = document.createElement("span"), a.className = "md-shortcut", n.appendChild(a)), a.textContent = I_(i);
 	}
 }
 //#endregion
 //#region @rhwp/studio/src/ui/menu-bar.ts
-var Mb = class {
+var Lb = class {
 	container;
 	eventBus;
 	dispatcher;
@@ -47278,7 +47352,7 @@ var Mb = class {
 	onMenuOpen;
 	onTabSelect;
 	constructor(e, t, n, r, i = {}) {
-		this.container = e, this.eventBus = t, this.dispatcher = n, this.onMenuOpen = i.onMenuOpen, this.onTabSelect = i.onTabSelect, this.menuItems = Array.from(e.querySelectorAll(".menu-item")), jb(e, r), this.setupTitleClicks(), this.setupTitleHover(), this.setupItemClicks(), this.setupOutsideClose(), this.setupKeyboardClose();
+		this.container = e, this.eventBus = t, this.dispatcher = n, this.onMenuOpen = i.onMenuOpen, this.onTabSelect = i.onTabSelect, this.menuItems = Array.from(e.querySelectorAll(".menu-item")), Ib(e, r), this.setupTitleClicks(), this.setupTitleHover(), this.setupItemClicks(), this.setupOutsideClose(), this.setupKeyboardClose();
 	}
 	setupTitleClicks() {
 		for (let e of this.menuItems) {
@@ -47391,65 +47465,65 @@ var Mb = class {
 };
 //#endregion
 //#region @rhwp/studio/src/core/extension-settings.ts
-function Nb() {
+function Rb() {
 	return !0;
 }
-function Pb() {
-	return { disableExternalWebFonts: Nb() };
+function zb() {
+	return { disableExternalWebFonts: Rb() };
 }
-function Fb() {
-	return { disableExternalWebFonts: Pb().disableExternalWebFonts };
+function Bb() {
+	return { disableExternalWebFonts: zb().disableExternalWebFonts };
 }
-function Ib() {
+function Vb() {
 	return globalThis.chrome ?? null;
 }
-function Lb() {
+function Hb() {
 	return globalThis.browser ?? null;
 }
-function Rb() {
-	return Ib()?.runtime?.lastError?.message ?? null;
+function Ub() {
+	return Vb()?.runtime?.lastError?.message ?? null;
 }
-function zb(e) {
+function Wb(e) {
 	return !!e && typeof e.then == "function";
 }
-function Bb(e, t) {
+function Gb(e, t) {
 	return new Promise((n, r) => {
 		let i = !1, a = (e) => {
 			i || (i = !0, e());
 		};
 		try {
 			let i = e.get(t, (e) => {
-				let t = Rb();
+				let t = Ub();
 				a(t ? () => r(Error(t)) : () => n(e ?? {}));
 			});
-			zb(i) && i.then((e) => a(() => n(e ?? {})), (e) => a(() => r(e)));
+			Wb(i) && i.then((e) => a(() => n(e ?? {})), (e) => a(() => r(e)));
 		} catch (e) {
 			a(() => r(e));
 		}
 	});
 }
-async function Vb(e, t) {
+async function Kb(e, t) {
 	let n = e.get(t);
-	return zb(n) ? n ?? {} : {};
+	return Wb(n) ? n ?? {} : {};
 }
-function Hb(e) {
+function qb(e) {
 	return { disableExternalWebFonts: e.disableExternalWebFonts === !0 };
 }
-async function Ub(e, t) {
+async function Jb(e, t) {
 	if (!e) return null;
 	try {
-		return Hb(t === "chrome-callback" ? await Bb(e, Fb()) : await Vb(e, Fb()));
+		return qb(t === "chrome-callback" ? await Gb(e, Bb()) : await Kb(e, Bb()));
 	} catch (e) {
 		return console.warn("[extension-settings] 확장 설정 로드 실패:", e), null;
 	}
 }
-async function Wb() {
-	let e = Ib()?.storage, t = Lb()?.storage;
-	return await Ub(e?.sync, "chrome-callback") ?? await Ub(t?.sync, "promise") ?? await Ub(t?.local, "promise") ?? await Ub(e?.local, "chrome-callback") ?? Pb();
+async function Yb() {
+	let e = Vb()?.storage, t = Hb()?.storage;
+	return await Jb(e?.sync, "chrome-callback") ?? await Jb(t?.sync, "promise") ?? await Jb(t?.local, "promise") ?? await Jb(e?.local, "chrome-callback") ?? zb();
 }
 //#endregion
 //#region @rhwp/studio/src/command/registry.ts
-var Gb = class {
+var Xb = class {
 	commands = /* @__PURE__ */ new Map();
 	register(e) {
 		this.commands.set(e.id, e);
@@ -47474,48 +47548,48 @@ var Gb = class {
 	getAllIds() {
 		return Array.from(this.commands.keys());
 	}
-}, Kb = ".menu-item", qb = ".menu-title", Jb = ".menu-dropdown", Yb = ".md-item", Xb = ".md-sub", Zb = ".md-sub-panel", Qb = ".md-label";
-function $b(e) {
-	return (e.querySelector(Qb)?.textContent ?? e.textContent ?? "").trim();
+}, Zb = ".menu-item", Qb = ".menu-title", $b = ".menu-dropdown", ex = ".md-item", tx = ".md-sub", nx = ".md-sub-panel", rx = ".md-label";
+function ix(e) {
+	return (e.querySelector(rx)?.textContent ?? e.textContent ?? "").trim();
 }
-function ex(e, t) {
+function ax(e, t) {
 	let n = [];
 	for (let r of Array.from(e.children)) {
-		if (r.classList.contains(Xb.slice(1))) {
-			let e = r.querySelector(Zb);
+		if (r.classList.contains(tx.slice(1))) {
+			let e = r.querySelector(nx);
 			n.push({
-				label: $b(r),
+				label: ix(r),
 				enabled: !r.classList.contains("disabled"),
-				submenu: e ? ex(e, t) : []
+				submenu: e ? ax(e, t) : []
 			});
 			continue;
 		}
-		if (!r.classList.contains(Yb.slice(1))) continue;
+		if (!r.classList.contains(ex.slice(1))) continue;
 		let e = r.dataset.cmd;
 		n.push({
 			commandId: e,
-			label: $b(r),
+			label: ix(r),
 			enabled: e ? t(e) : !r.classList.contains("disabled")
 		});
 	}
 	return n;
 }
-function tx(e, t) {
+function ox(e, t) {
 	let n = [];
-	for (let r of Array.from(e.querySelectorAll(Kb))) {
-		let e = r.dataset.menu ?? "", i = r.querySelector(Jb);
+	for (let r of Array.from(e.querySelectorAll(Zb))) {
+		let e = r.dataset.menu ?? "", i = r.querySelector($b);
 		n.push({
 			menuId: e,
-			label: (r.querySelector(qb)?.textContent ?? e).trim(),
-			items: i ? ex(i, t) : []
+			label: (r.querySelector(Qb)?.textContent ?? e).trim(),
+			items: i ? ax(i, t) : []
 		});
 	}
 	return n;
 }
-function nx(e, t) {
-	return e.querySelector(`${Kb}[data-menu="${t}"] ${Jb}`);
+function sx(e, t) {
+	return e.querySelector(`${Zb}[data-menu="${t}"] ${$b}`);
 }
-function rx(e, t, n, r, i = "bottom") {
+function cx(e, t, n, r, i = "bottom") {
 	let a = document.createElement("div");
 	a.className = "md-item", a.dataset.cmd = t;
 	let o = document.createElement("span");
@@ -47525,25 +47599,25 @@ function rx(e, t, n, r, i = "bottom") {
 	}
 	return i === "top" ? e.prepend(a) : e.appendChild(a), a;
 }
-function ix(e, t) {
-	e.querySelectorAll(`${Yb}[data-cmd="${t}"]`).forEach((e) => e.remove());
+function lx(e, t) {
+	e.querySelectorAll(`${ex}[data-cmd="${t}"]`).forEach((e) => e.remove());
 }
 //#endregion
 //#region @rhwp/studio/src/automation/types.ts
-var ax = "ext:", ox = {
+var ux = "ext:", dx = {
 	menu: "rhwp-chrome-no-menu",
 	toolbar: "rhwp-chrome-no-toolbar",
 	statusbar: "rhwp-chrome-no-status"
 };
 //#endregion
 //#region @rhwp/studio/src/automation/host.ts
-function sx(e) {
+function fx(e) {
 	if (!e.startsWith("ext:")) {
-		let t = /* @__PURE__ */ Error(`확장 커맨드 ID 는 "${ax}" 접두사가 필요합니다: ${e}`);
+		let t = /* @__PURE__ */ Error(`확장 커맨드 ID 는 "${ux}" 접두사가 필요합니다: ${e}`);
 		throw t.code = "EXT_PREFIX_REQUIRED", t;
 	}
 }
-var cx = class {
+var px = class {
 	options;
 	ownedMenuItems = /* @__PURE__ */ new Set();
 	ownedCommands = /* @__PURE__ */ new Set();
@@ -47566,7 +47640,7 @@ var cx = class {
 	}
 	getMenuModel() {
 		let e = this.options.getMenuContainer();
-		return e ? tx(e, (e) => this.options.dispatcher.isEnabled(e)) : [];
+		return e ? ox(e, (e) => this.options.dispatcher.isEnabled(e)) : [];
 	}
 	isEnabled(e) {
 		return this.options.dispatcher.isEnabled(e);
@@ -47582,14 +47656,14 @@ var cx = class {
 		return this.options.getContext();
 	}
 	registerCommand(e) {
-		sx(e.id), this.options.registry.register(e), this.ownedCommands.add(e.id);
+		fx(e.id), this.options.registry.register(e), this.ownedCommands.add(e.id);
 	}
 	unregisterCommand(e) {
 		e.startsWith("ext:") && (this.removeMenuItem(e), this.options.registry.unregister(e), this.ownedCommands.delete(e));
 	}
 	addMenuItem(e) {
-		sx(e.commandId);
-		let t = this.options.getMenuContainer(), n = t ? nx(t, e.menuId) : null;
+		fx(e.commandId);
+		let t = this.options.getMenuContainer(), n = t ? sx(t, e.menuId) : null;
 		if (!n) {
 			let t = /* @__PURE__ */ Error(`메뉴를 찾을 수 없습니다: ${e.menuId}`);
 			throw t.code = "UNKNOWN_MENU", t;
@@ -47599,44 +47673,44 @@ var cx = class {
 			let t = /* @__PURE__ */ Error(`미등록 커맨드: ${e.commandId}`);
 			throw t.code = "UNKNOWN_COMMAND", t;
 		}
-		ix(n, e.commandId), rx(n, e.commandId, r.label, r.shortcutLabel ? j_(r.shortcutLabel) : void 0, e.position), this.ownedMenuItems.add(e.commandId);
+		lx(n, e.commandId), cx(n, e.commandId, r.label, r.shortcutLabel ? I_(r.shortcutLabel) : void 0, e.position), this.ownedMenuItems.add(e.commandId);
 	}
 	removeMenuItem(e) {
 		let t = this.options.getMenuContainer();
-		t && ix(t, e), this.ownedMenuItems.delete(e);
+		t && lx(t, e), this.ownedMenuItems.delete(e);
 	}
 	disposeOwned() {
 		for (let e of Array.from(this.ownedMenuItems)) this.removeMenuItem(e);
 		for (let e of Array.from(this.ownedCommands)) this.unregisterCommand(e);
 	}
-}, lx = "studio-root";
-function ux() {
-	return document.getElementById(lx);
+}, mx = "studio-root";
+function hx() {
+	return document.getElementById(mx);
 }
-function dx() {
-	let e = ux(), t = (t) => !e || !e.classList.contains(ox[t]);
+function gx() {
+	let e = hx(), t = (t) => !e || !e.classList.contains(dx[t]);
 	return {
 		menu: t("menu"),
 		toolbar: t("toolbar"),
 		statusbar: t("statusbar")
 	};
 }
-function fx(e) {
-	let t = ux();
-	if (t) for (let n of Object.keys(ox)) {
+function _x(e) {
+	let t = hx();
+	if (t) for (let n of Object.keys(dx)) {
 		let r = e[n];
-		typeof r == "boolean" && t.classList.toggle(ox[n], !r);
+		typeof r == "boolean" && t.classList.toggle(dx[n], !r);
 	}
-	return dx();
+	return gx();
 }
 //#endregion
 //#region @rhwp/studio/src/plugin/host.ts
-function px(e, t) {
+function vx(e, t) {
 	let n = Error(t);
 	return n.code = e, n;
 }
-var mx = 2e3, hx = 20;
-function gx() {
+var yx = 2e3, bx = 20;
+function xx() {
 	return {
 		commands: /* @__PURE__ */ new Set(),
 		menuItems: /* @__PURE__ */ new Set(),
@@ -47645,7 +47719,7 @@ function gx() {
 		activeTx: 0
 	};
 }
-var _x = class {
+var Sx = class {
 	pluginId;
 	deps;
 	ledger;
@@ -47664,9 +47738,9 @@ var _x = class {
 		return this.deps.wasm.documentGeneration;
 	}
 	transaction(e, t) {
-		if (this.ledger.activeTx > 0) throw px("NESTED_TX", `트랜잭션 중첩은 허용하지 않습니다: ${e}`);
+		if (this.ledger.activeTx > 0) throw vx("NESTED_TX", `트랜잭션 중첩은 허용하지 않습니다: ${e}`);
 		let n = this.deps.getInputHandler();
-		if (!n) throw px("DOCUMENT_RELEASED", "문서가 로드되지 않았습니다");
+		if (!n) throw vx("DOCUMENT_RELEASED", "문서가 로드되지 않았습니다");
 		let r = !1, i = !1, a, o = {
 			doc: () => this.requireDocument(),
 			deferPagination: () => {
@@ -47685,7 +47759,7 @@ var _x = class {
 				this.deps.wasm.cancelDeferredPagination();
 			} catch {}
 		}
-		if (!i) throw px("DOCUMENT_RELEASED", `현재 편집 모드에서 거절된 작업입니다: ${e}`);
+		if (!i) throw vx("DOCUMENT_RELEASED", `현재 편집 모드에서 거절된 작업입니다: ${e}`);
 		return a;
 	}
 	read(e) {
@@ -47740,10 +47814,10 @@ var _x = class {
 	}
 	requireDocument() {
 		let e = this.deps.wasm.borrowDocumentHandle();
-		if (!e || e.__wbg_ptr === 0) throw px("DOCUMENT_RELEASED", "문서가 이미 해제되었습니다");
+		if (!e || e.__wbg_ptr === 0) throw vx("DOCUMENT_RELEASED", "문서가 이미 해제되었습니다");
 		return e;
 	}
-}, vx = class {
+}, Cx = class {
 	deps;
 	loaded = /* @__PURE__ */ new Map();
 	constructor(e) {
@@ -47769,14 +47843,14 @@ var _x = class {
 		try {
 			n = await this.deps.resolve(e);
 		} catch {
-			throw px("PLUGIN_NOT_ALLOWED", `허용되지 않은 플러그인입니다: ${e}`);
+			throw vx("PLUGIN_NOT_ALLOWED", `허용되지 않은 플러그인입니다: ${e}`);
 		}
-		if (n.apiVersion !== 1) throw px("PLUGIN_ACTIVATE_FAILED", `지원하지 않는 플러그인 API 세대: ${n.apiVersion} (지원 1)`);
-		let r = gx(), i = new _x(n.id, this.deps, r), a;
+		if (n.apiVersion !== 1) throw vx("PLUGIN_ACTIVATE_FAILED", `지원하지 않는 플러그인 API 세대: ${n.apiVersion} (지원 1)`);
+		let r = xx(), i = new Sx(n.id, this.deps, r), a;
 		try {
 			a = await n.activate(i);
 		} catch (e) {
-			throw this.reclaim(r), px("PLUGIN_ACTIVATE_FAILED", e instanceof Error ? e.message : String(e));
+			throw this.reclaim(r), vx("PLUGIN_ACTIVATE_FAILED", e instanceof Error ? e.message : String(e));
 		}
 		return this.loaded.set(n.id, {
 			plugin: n,
@@ -47790,11 +47864,11 @@ var _x = class {
 	}
 	async unload(e) {
 		let t = this.loaded.get(e);
-		if (!t) throw px("PLUGIN_NOT_LOADED", `올라와 있지 않은 플러그인입니다: ${e}`);
-		let n = Date.now() + mx;
+		if (!t) throw vx("PLUGIN_NOT_LOADED", `올라와 있지 않은 플러그인입니다: ${e}`);
+		let n = Date.now() + yx;
 		for (; t.ledger.activeTx > 0;) {
-			if (Date.now() > n) throw px("TX_TIMEOUT", `진행 중인 트랜잭션이 끝나지 않았습니다: ${e}`);
-			await new Promise((e) => setTimeout(e, hx));
+			if (Date.now() > n) throw vx("TX_TIMEOUT", `진행 중인 트랜잭션이 끝나지 않았습니다: ${e}`);
+			await new Promise((e) => setTimeout(e, bx));
 		}
 		try {
 			t.plugin.deactivate?.();
@@ -47805,7 +47879,7 @@ var _x = class {
 	}
 	invoke(e, t, n) {
 		let r = this.loaded.get(e);
-		if (!r) throw px("PLUGIN_NOT_LOADED", `올라와 있지 않은 플러그인입니다: ${e}`);
+		if (!r) throw vx("PLUGIN_NOT_LOADED", `올라와 있지 않은 플러그인입니다: ${e}`);
 		let i = r.surface[t];
 		if (typeof i != "function") throw Error(`${e} 플러그인에 없는 메서드입니다: ${t}`);
 		return i(...n);
@@ -47831,23 +47905,23 @@ var _x = class {
 		for (let t of Array.from(e.commands)) this.deps.automation.unregisterCommand(t);
 		e.swapUnsubs.length = 0, e.eventUnsubs.length = 0, e.menuItems.clear(), e.commands.clear();
 	}
-}, yx = /* @__PURE__ */ new Set([
+}, wx = /* @__PURE__ */ new Set([
 	"edit:cut",
 	"edit:paste",
 	"edit:delete",
 	"field:edit",
 	"field:remove",
 	"file:page-setup"
-]), bx = [
+]), Tx = [
 	"format:",
 	"insert:",
 	"table:",
 	"page:"
 ];
-function xx(e, t) {
-	return t.isFormMode ? yx.has(e) ? !0 : bx.some((t) => e.startsWith(t)) : !1;
+function Ex(e, t) {
+	return t.isFormMode ? wx.has(e) ? !0 : Tx.some((t) => e.startsWith(t)) : !1;
 }
-var Sx = class {
+var Dx = class {
 	registry;
 	services;
 	eventBus;
@@ -47864,7 +47938,7 @@ var Sx = class {
 			reason: "unregistered"
 		};
 		let r = this.services.getContext();
-		if (xx(e, r)) return {
+		if (Ex(e, r)) return {
 			ok: !1,
 			reason: "blocked-in-form-mode"
 		};
@@ -47873,7 +47947,7 @@ var Sx = class {
 			reason: "disabled"
 		};
 		try {
-			return n.execute(this.services, t), this.eventBus.emit("command-state-changed"), { ok: !0 };
+			return n.execute(this.services, t), this.eventBus.emit("command-state-changed", e), { ok: !0 };
 		} catch (t) {
 			return console.error(`[CommandDispatcher] 커맨드 실행 실패: ${e}`, t), {
 				ok: !1,
@@ -47884,7 +47958,7 @@ var Sx = class {
 	}
 	enabledInContext(e, t) {
 		let n = this.registry.get(e);
-		return !!n && !xx(e, t) && (!n.canExecute || n.canExecute(t));
+		return !!n && !Ex(e, t) && (!n.canExecute || n.canExecute(t));
 	}
 	getEnabledStates(e) {
 		let t = this.services.getContext();
@@ -47896,7 +47970,7 @@ var Sx = class {
 };
 //#endregion
 //#region @rhwp/studio/src/command/document-shortcut-guard.ts
-function Cx(e) {
+function Ox(e) {
 	let t = e;
 	for (; t;) {
 		if (["INPUT", "TEXTAREA"].includes(t.tagName) || t.isContentEditable || t.getAttribute?.("role") === "textbox") return !0;
@@ -47904,8 +47978,8 @@ function Cx(e) {
 	}
 	return !1;
 }
-function wx(e) {
-	if (Cx(e)) return !0;
+function kx(e) {
+	if (Ox(e)) return !0;
 	let t = e;
 	for (; t;) {
 		if (t.tagName === "SELECT") return !0;
@@ -47913,13 +47987,13 @@ function wx(e) {
 	}
 	return !1;
 }
-function Tx(e, t, n, r) {
-	return t?.isConnected || wx(e.target) ? !1 : (e.preventDefault(), n(), r(), !0);
+function Ax(e, t, n, r) {
+	return t?.isConnected || kx(e.target) ? !1 : (e.preventDefault(), n(), r(), !0);
 }
 //#endregion
 //#region @rhwp/studio/src/local-font-face.mjs
-var Ex = 1e3;
-function Dx(e) {
+var jx = 1e3;
+function Mx(e) {
 	let t = "";
 	for (let n of e) {
 		let e = n.codePointAt(0);
@@ -47927,7 +48001,7 @@ function Dx(e) {
 	}
 	return "\"" + t + "\"";
 }
-async function Ox(e, t, n = globalThis.FontFace) {
+async function Nx(e, t, n = globalThis.FontFace) {
 	if (typeof n != "function" || typeof e != "string" || !e || !t) return null;
 	let r = [...new Set([t.fullName, t.postscriptName].filter((e) => typeof e == "string" && e.trim() && e.length <= 1024))];
 	if (!r.length) return null;
@@ -47939,12 +48013,12 @@ async function Ox(e, t, n = globalThis.FontFace) {
 	].includes(a)) return null;
 	let o;
 	try {
-		let t = new n(e, r.map((e) => "local(" + Dx(e) + ")").join(", "), {
+		let t = new n(e, r.map((e) => "local(" + Mx(e) + ")").join(", "), {
 			weight: String(i),
 			style: a
 		}), s = Promise.resolve().then(() => t.load()).then(() => t.status === "loaded" ? t : null);
 		return await Promise.race([s, new Promise((e) => {
-			o = setTimeout(() => e(null), Ex);
+			o = setTimeout(() => e(null), jx);
 		})]);
 	} catch {
 		return null;
@@ -47954,7 +48028,7 @@ async function Ox(e, t, n = globalThis.FontFace) {
 }
 //#endregion
 //#region @rhwp/studio/src/print-font-substitutions.mjs
-async function kx(e, t, { records: n, resolve: r, load: i, normalize: a }) {
+async function Px(e, t, { records: n, resolve: r, load: i, normalize: a }) {
 	let o = [...new Set(t.map(([, e]) => e))], s = (e) => [e.fullName, e.postscriptName].filter(Boolean), c = (e) => e.normalize("NFC").toLowerCase(), l = (await Promise.all(o.map(async (t) => {
 		let o = [];
 		for (let [l, u] of [
@@ -47973,7 +48047,7 @@ async function kx(e, t, { records: n, resolve: r, load: i, normalize: a }) {
 				f.postscriptName
 			].filter(Boolean).some((e) => c(e) === c(t))) {
 				if (!o.length && !d.length) {
-					let n = await Ox(t, {
+					let n = await Nx(t, {
 						fullName: t,
 						weight: l,
 						slant: u
@@ -47983,7 +48057,7 @@ async function kx(e, t, { records: n, resolve: r, load: i, normalize: a }) {
 				if (!o.length) return null;
 				continue;
 			}
-			let p = (e) => n.filter((t) => s(t).some((t) => c(e) === c(t))).length === 1, m = await Ox(t, {
+			let p = (e) => n.filter((t) => s(t).some((t) => c(e) === c(t))).length === 1, m = await Nx(t, {
 				fullName: f.fullName && p(f.fullName) ? f.fullName : void 0,
 				postscriptName: f.postscriptName && p(f.postscriptName) ? f.postscriptName : void 0,
 				weight: l,
@@ -48014,7 +48088,7 @@ async function kx(e, t, { records: n, resolve: r, load: i, normalize: a }) {
 }
 //#endregion
 //#region @rhwp/studio/src/command/commands/pwh-print-preview-view.mjs
-function Ax(e, t = []) {
+function Fx(e, t = []) {
 	if (new URLSearchParams(e.location.search).get("pwhDirect") === "1") return;
 	let n = e.document, r = n.querySelector(".print-preview-bar"), i = [...n.querySelectorAll("body > .page")];
 	if (!r || !i.length || r.querySelector("[data-pwh-preview-controls]")) return;
@@ -48077,7 +48151,7 @@ function Ax(e, t = []) {
 }
 //#endregion
 //#region @rhwp/studio/src/print-plan.mjs
-var jx = {
+var Ix = {
 	A3: [297, 420],
 	A4: [210, 297],
 	A5: [148, 210],
@@ -48085,7 +48159,7 @@ var jx = {
 	B5: [182, 257],
 	Letter: [215.9, 279.4],
 	Legal: [215.9, 355.6]
-}, Mx = {
+}, Lx = {
 	1: [1, 1],
 	2: [2, 1],
 	4: [2, 2],
@@ -48093,7 +48167,7 @@ var jx = {
 	9: [3, 3],
 	16: [4, 4]
 };
-function Nx(e, t) {
+function Rx(e, t) {
 	if (!Number.isInteger(t) || t < 1 || t > 1e4) throw Error("문서의 쪽 수를 확인하지 못했습니다.");
 	let n = /* @__PURE__ */ new Set();
 	for (let r of String(e).split(",")) {
@@ -48105,7 +48179,7 @@ function Nx(e, t) {
 	}
 	return [...n].sort((e, t) => e - t);
 }
-function Px(e, t, n = "") {
+function zx(e, t, n = "") {
 	let r = t.pages.length, i = Math.min(Math.max(t.currentPage || 0, 0), r - 1), a = Array.from({ length: r }, (e, t) => t);
 	if (e === "all") return a;
 	if (e === "current") return [i];
@@ -48117,23 +48191,23 @@ function Px(e, t, n = "") {
 		if (e.length) return e;
 		throw Error("문서에서 선택한 쪽이 없습니다.");
 	}
-	if (e === "custom") return Nx(n, r);
+	if (e === "custom") return Rx(n, r);
 	throw Error("인쇄할 쪽을 선택해 주세요.");
 }
-function Fx(e, t, { paper: n = "document", orientation: r = "document", fit: i = "fit", perSheet: a = 1 } = {}) {
+function Bx(e, t, { paper: n = "document", orientation: r = "document", fit: i = "fit", perSheet: a = 1 } = {}) {
 	if (!e.length || !t.length || t.some((t) => !Number.isInteger(t) || t < 0 || t >= e.length)) throw Error("인쇄할 쪽을 확인해 주세요.");
 	if (e.some((e) => !Number.isFinite(e.widthMm) || !Number.isFinite(e.heightMm) || e.widthMm < 1 || e.heightMm < 1 || e.widthMm > 2e3 || e.heightMm > 2e3)) throw Error("문서의 용지 크기를 확인하지 못했습니다.");
-	if (!Object.hasOwn(Mx, a)) throw Error("모아 찍기 설정을 확인해 주세요.");
+	if (!Object.hasOwn(Lx, a)) throw Error("모아 찍기 설정을 확인해 주세요.");
 	if (![
 		"document",
 		"portrait",
 		"landscape"
 	].includes(r) || !["fit", "actual"].includes(i)) throw Error("인쇄 방향과 크기를 확인해 주세요.");
-	let o = n === "document" ? [e[0].widthMm, e[0].heightMm] : jx[n];
+	let o = n === "document" ? [e[0].widthMm, e[0].heightMm] : Ix[n];
 	if (!o) throw Error("용지 크기를 확인해 주세요.");
 	let [s, c] = o;
 	r === "portrait" && ([s, c] = [Math.min(...o), Math.max(...o)]), r === "landscape" && ([s, c] = [Math.max(...o), Math.min(...o)]);
-	let [l, u] = Mx[a], d = s / l, f = c / u, p = [];
+	let [l, u] = Lx[a], d = s / l, f = c / u, p = [];
 	for (let n = 0; n < t.length; n += a) {
 		let r = t.slice(n, n + a).map((t, n) => {
 			let r = e[t], o = i === "actual" && a === 1 ? 1 : Math.min(d / r.widthMm, f / r.heightMm);
@@ -48161,8 +48235,8 @@ function Fx(e, t, { paper: n = "document", orientation: r = "document", fit: i =
 }
 //#endregion
 //#region @rhwp/studio/src/pwh-desktop-print-preview.mjs
-var Ix = "\nbody.pwh-print-ui{margin:0;padding:0;display:block;background:#eef1f3;color:#183c4d;font:13px/1.5 \"Malgun Gothic\",\"Segoe UI\",sans-serif}\n.pwh-print-ui *{box-sizing:border-box}\n.pwh-print-ui [hidden]{display:none!important}\n.pwh-print-shell{position:fixed;inset:0;display:grid;grid-template-columns:300px minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;background:#fff}\n.pwh-print-settings{overflow:auto;padding:24px;border-right:1px solid #e0e7eb}\n.pwh-print-settings h1{font-size:21px;line-height:1.4;margin:0 0 6px;font-weight:700}\n.pwh-print-filename{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#6c8390;margin-bottom:22px}\n.pwh-print-field{display:block;margin:0 0 16px;font-weight:600}\n.pwh-print-field>span{display:block;margin-bottom:6px}\n.pwh-print-field select,.pwh-print-field input{width:100%;height:36px;border:1px solid #d5dfe4;background:#fff;color:#183c4d;border-radius:6px;padding:0 9px;font:inherit;font-weight:400}\n.pwh-print-field input[type=checkbox]{width:16px;height:16px;accent-color:#183c4d;vertical-align:middle;margin-right:7px}\n.pwh-print-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}\n.pwh-print-ui button{font:inherit;cursor:pointer;border:1px solid #cad8df;border-radius:6px;background:#fff;color:#183c4d;padding:8px 15px}\n.pwh-print-ui button:disabled{opacity:.45;cursor:default}\n.pwh-print-ui button:focus-visible,.pwh-print-ui input:focus-visible,.pwh-print-ui select:focus-visible{outline:2px solid #5b9caf;outline-offset:2px}\n.pwh-print-details{border-top:1px solid #e4eaed;padding-top:12px;margin-top:6px}\n.pwh-print-details summary{cursor:pointer;margin-bottom:12px;color:#527889}\n.pwh-print-message{min-height:20px;color:#6c8390;overflow-wrap:anywhere;font-size:12px}\n.pwh-print-message[role=alert]{color:#a32d2d}\n.pwh-print-preview{min-width:0;display:flex;flex-direction:column;background:#edf0f2;overflow:hidden}\n.pwh-print-toolbar{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px;min-height:56px;padding:8px 16px;border-bottom:1px solid #dde4e8;background:#f7f9fa}\n.pwh-print-toolbar button{height:32px;padding:3px 10px}\n.pwh-print-toolbar select{font:inherit;color:inherit;background:transparent;border:1px solid #d3dfe5;border-radius:4px;padding:5px}\n.pwh-print-canvas{flex:1;min-height:0;overflow:auto;padding:24px;display:flex;align-items:flex-start;justify-content:center}\n.pwh-print-paper-holder{flex:none;position:relative}\n.pwh-print-sheet{position:relative;overflow:hidden;background:#fff;color:#000;transform-origin:top left;box-shadow:0 1px 8px #17364d24}\nbody.pwh-print-ui .pwh-print-sheet .page{position:absolute!important;break-after:auto!important;page-break-after:auto!important;page:auto!important;box-shadow:none!important;transform-origin:top left;overflow:hidden;margin:0!important;padding:0!important}\n.pwh-print-footer{grid-column:1/-1;display:flex;align-items:center;gap:10px;justify-content:flex-end;padding:14px 24px;border-top:1px solid #e0e7eb;background:#fff}\n.pwh-print-footer .pwh-print-total{flex:1;color:#6c8390;font-size:12px}\n.pwh-print-footer .pwh-print-submit{background:#183c4d;border-color:#183c4d;color:white;min-width:88px}\n#pwh-print-output,#pwh-print-source{display:none}\n@media(max-width:820px){.pwh-print-shell{grid-template-columns:260px minmax(0,1fr)}.pwh-print-settings{padding:18px}.pwh-print-canvas{padding:16px}}\n@media print{\n body.pwh-print-ui{display:block;background:white;margin:0!important;padding:0!important}\n .pwh-print-shell,#pwh-print-source{display:none!important}\n #pwh-print-output{display:block!important}\n .pwh-print-sheet{box-shadow:none!important;transform:none!important;break-after:page;page-break-after:always;break-inside:avoid;page-break-inside:avoid}\n .pwh-print-sheet:last-child{break-after:auto;page-break-after:auto}\n}\n";
-async function Lx(e, t = {}) {
+var Vx = "\nbody.pwh-print-ui{margin:0;padding:0;display:block;background:#eef1f3;color:#183c4d;font:13px/1.5 \"Malgun Gothic\",\"Segoe UI\",sans-serif}\n.pwh-print-ui *{box-sizing:border-box}\n.pwh-print-ui [hidden]{display:none!important}\n.pwh-print-shell{position:fixed;inset:0;display:grid;grid-template-columns:300px minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;background:#fff}\n.pwh-print-settings{overflow:auto;padding:24px;border-right:1px solid #e0e7eb}\n.pwh-print-settings h1{font-size:21px;line-height:1.4;margin:0 0 6px;font-weight:700}\n.pwh-print-filename{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#6c8390;margin-bottom:22px}\n.pwh-print-field{display:block;margin:0 0 16px;font-weight:600}\n.pwh-print-field>span{display:block;margin-bottom:6px}\n.pwh-print-field select,.pwh-print-field input{width:100%;height:36px;border:1px solid #d5dfe4;background:#fff;color:#183c4d;border-radius:6px;padding:0 9px;font:inherit;font-weight:400}\n.pwh-print-field input[type=checkbox]{width:16px;height:16px;accent-color:#183c4d;vertical-align:middle;margin-right:7px}\n.pwh-print-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}\n.pwh-print-ui button{font:inherit;cursor:pointer;border:1px solid #cad8df;border-radius:6px;background:#fff;color:#183c4d;padding:8px 15px}\n.pwh-print-ui button:disabled{opacity:.45;cursor:default}\n.pwh-print-ui button:focus-visible,.pwh-print-ui input:focus-visible,.pwh-print-ui select:focus-visible{outline:2px solid #5b9caf;outline-offset:2px}\n.pwh-print-details{border-top:1px solid #e4eaed;padding-top:12px;margin-top:6px}\n.pwh-print-details summary{cursor:pointer;margin-bottom:12px;color:#527889}\n.pwh-print-message{min-height:20px;color:#6c8390;overflow-wrap:anywhere;font-size:12px}\n.pwh-print-message[role=alert]{color:#a32d2d}\n.pwh-print-preview{min-width:0;display:flex;flex-direction:column;background:#edf0f2;overflow:hidden}\n.pwh-print-toolbar{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px;min-height:56px;padding:8px 16px;border-bottom:1px solid #dde4e8;background:#f7f9fa}\n.pwh-print-toolbar button{height:32px;padding:3px 10px}\n.pwh-print-toolbar select{font:inherit;color:inherit;background:transparent;border:1px solid #d3dfe5;border-radius:4px;padding:5px}\n.pwh-print-canvas{flex:1;min-height:0;overflow:auto;padding:24px;display:flex;align-items:flex-start;justify-content:center}\n.pwh-print-paper-holder{flex:none;position:relative}\n.pwh-print-sheet{position:relative;overflow:hidden;background:#fff;color:#000;transform-origin:top left;box-shadow:0 1px 8px #17364d24}\nbody.pwh-print-ui .pwh-print-sheet .page{position:absolute!important;break-after:auto!important;page-break-after:auto!important;page:auto!important;box-shadow:none!important;transform-origin:top left;overflow:hidden;margin:0!important;padding:0!important}\n.pwh-print-footer{grid-column:1/-1;display:flex;align-items:center;gap:10px;justify-content:flex-end;padding:14px 24px;border-top:1px solid #e0e7eb;background:#fff}\n.pwh-print-footer .pwh-print-total{flex:1;color:#6c8390;font-size:12px}\n.pwh-print-footer .pwh-print-submit{background:#183c4d;border-color:#183c4d;color:white;min-width:88px}\n#pwh-print-output,#pwh-print-source{display:none}\n@media(max-width:820px){.pwh-print-shell{grid-template-columns:260px minmax(0,1fr)}.pwh-print-settings{padding:18px}.pwh-print-canvas{padding:16px}}\n@media print{\n body.pwh-print-ui{display:block;background:white;margin:0!important;padding:0!important}\n .pwh-print-shell,#pwh-print-source{display:none!important}\n #pwh-print-output{display:block!important}\n .pwh-print-sheet{box-shadow:none!important;transform:none!important;break-after:page;page-break-after:always;break-inside:avoid;page-break-inside:avoid}\n .pwh-print-sheet:last-child{break-after:auto;page-break-after:auto}\n}\n";
+async function Hx(e, t = {}) {
 	let n = e.document, r = e.pwhNative;
 	if (!r?.getPrinters || !r?.printDocument) throw Error("Pwh 인쇄 연결을 확인하지 못했습니다.");
 	let i = [...n.querySelectorAll("body>.page")];
@@ -48184,7 +48258,7 @@ async function Lx(e, t = {}) {
 	}, c = t.name || n.title.replace(/\s*[—–-]\s*인쇄.*$/, "");
 	n.title = "인쇄", n.body.className = "pwh-print-ui";
 	let l = n.createElement("style");
-	l.textContent = Ix, n.head.append(l);
+	l.textContent = Vx, n.head.append(l);
 	let u = n.createElement("div");
 	u.id = "pwh-print-source", u.append(...i), n.body.replaceChildren(u);
 	let d = n.createElement("main");
@@ -48240,8 +48314,8 @@ async function Lx(e, t = {}) {
 			try {
 				let e = Number(p("pwh-copies").value);
 				if (!Number.isInteger(e) || e < 1 || e > 999) throw Error("인쇄 매수는 1~999를 입력해 주세요.");
-				let t = Px(p("pwh-range").value, o, p("pwh-range-text").value);
-				y = Fx(o.pages, t, {
+				let t = zx(p("pwh-range").value, o, p("pwh-range-text").value);
+				y = Bx(o.pages, t, {
 					paper: p("pwh-paper").value,
 					orientation: p("pwh-orientation").value,
 					fit: p("pwh-fit").value,
@@ -48343,7 +48417,7 @@ async function Lx(e, t = {}) {
 }
 //#endregion
 //#region @rhwp/studio/src/command/export-html.ts
-var Rx = {
+var Ux = {
 	html: {
 		extension: "html",
 		mimeType: "text/html;charset=utf-8",
@@ -48355,18 +48429,18 @@ var Rx = {
 		label: "Word 문서(.doc)"
 	}
 };
-function zx(e) {
+function Wx(e) {
 	let t = e.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
 	return (t ? t[1] : e).replace(/<!--StartFragment-->/gi, "").replace(/<!--EndFragment-->/gi, "").trim();
 }
-function Bx(e) {
+function Gx(e) {
 	let t = Math.max(0, e.getSectionCount()), n = [];
 	for (let r = 0; r < t; r += 1) {
 		let t = e.getParagraphCount(r);
 		if (t <= 0) continue;
 		let i = t - 1;
 		try {
-			let t = e.getParagraphLength(r, i), a = zx(e.exportSelectionHtml(r, 0, 0, i, t) ?? "");
+			let t = e.getParagraphLength(r, i), a = Wx(e.exportSelectionHtml(r, 0, 0, i, t) ?? "");
 			a && n.push(a);
 		} catch (e) {
 			let t = e instanceof Error ? e.message : String(e);
@@ -48375,37 +48449,37 @@ function Bx(e) {
 	}
 	return n.join("\n");
 }
-function Vx(e) {
+function Kx(e) {
 	return e.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
-function Hx(e, t) {
+function qx(e, t) {
 	return `<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="utf-8" />
-<title>${Vx(t)}</title>
+<title>${Kx(t)}</title>
 </head>
 <body>
 ${e}
 </body>
 </html>`;
 }
-function Ux(e, t) {
+function Jx(e, t) {
 	return `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
 <head>
 <meta charset="utf-8" />
-<title>${Vx(t)}</title>
+<title>${Kx(t)}</title>
 </head>
 <body>
 ${e}
 </body>
 </html>`;
 }
-function Wx(e) {
+function Yx(e) {
 	return ((e ?? "").trim() || "문서").replace(/\.(hwpx?|hml|html?|doc)$/i, "");
 }
-function Gx(e, t, n) {
-	let r = Rx[t], i = Wx(n), a = Bx(e), o = t === "doc" ? Ux(a, i) : Hx(a, i);
+function Xx(e, t, n) {
+	let r = Ux[t], i = Yx(n), a = Gx(e), o = t === "doc" ? Jx(a, i) : qx(a, i);
 	return {
 		fileName: `${i}.${r.extension}`,
 		content: o,
@@ -48414,7 +48488,7 @@ function Gx(e, t, n) {
 }
 //#endregion
 //#region @rhwp/studio/src/ui/pwh-page-margin-layout.ts
-var Kx = /* @__PURE__ */ new WeakMap(), qx = {
+var Zx = /* @__PURE__ */ new WeakMap(), Qx = {
 	marginTop: "위쪽",
 	marginBottom: "아래쪽",
 	marginLeft: "왼쪽",
@@ -48422,12 +48496,12 @@ var Kx = /* @__PURE__ */ new WeakMap(), qx = {
 	marginHeader: "머리말",
 	marginFooter: "꼬리말",
 	marginGutter: "제본"
-}, Jx = "\n.pwh-margin-map{display:grid;grid-template-columns:minmax(105px,1fr) minmax(140px,210px) minmax(105px,1fr);gap:9px 12px;align-items:center;padding:8px 0}\n.pwh-margin-map .pwh-margin-above{grid-column:2;grid-row:1;display:grid;gap:6px}\n.pwh-margin-map .pwh-margin-below{grid-column:2;grid-row:3;display:grid;gap:6px}\n.pwh-margin-map .pwh-margin-left{grid-column:1;grid-row:2;display:grid;gap:16px}\n.pwh-margin-map .pwh-margin-right{grid-column:3;grid-row:2}\n.pwh-margin-map .pwh-margin-paper{grid-column:2;grid-row:2;display:block;width:100%;height:190px}\n.pwh-margin-map label{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center;color:#294b5a;font-size:12px}\n.pwh-margin-map label>span:first-child{min-width:40px}.pwh-margin-map input{width:65px!important;min-width:0;box-sizing:border-box}\n.pwh-margin-map label:focus-within{color:#086c83;font-weight:600}.pwh-margin-map .pwh-margin-unit{color:#6e858d;font-weight:400}\n.pwh-margin-paper [data-margin]{fill:#e9f0f2;stroke:#b9cdd4;stroke-width:.5;cursor:pointer}\n.pwh-margin-paper [data-margin].active{fill:#9ad8e3;stroke:#16758a;stroke-width:1.5}\n.pwh-margin-paper [data-margin]:focus-visible{outline:2px solid #16758a;outline-offset:1px}\n.pwh-margin-note{font-size:11px;color:#677e88;margin:6px 0 0;line-height:1.5}\n@media(max-width:520px){.pwh-margin-map{gap:6px;grid-template-columns:minmax(85px,1fr) minmax(110px,1.3fr) minmax(85px,1fr)}.pwh-margin-map input{width:58px!important}.pwh-margin-map .pwh-margin-paper{height:170px}}\n";
-function Yx(e) {
+}, $x = "\n.pwh-margin-map{display:grid;grid-template-columns:minmax(105px,1fr) minmax(140px,210px) minmax(105px,1fr);gap:9px 12px;align-items:center;padding:8px 0}\n.pwh-margin-map .pwh-margin-above{grid-column:2;grid-row:1;display:grid;gap:6px}\n.pwh-margin-map .pwh-margin-below{grid-column:2;grid-row:3;display:grid;gap:6px}\n.pwh-margin-map .pwh-margin-left{grid-column:1;grid-row:2;display:grid;gap:16px}\n.pwh-margin-map .pwh-margin-right{grid-column:3;grid-row:2}\n.pwh-margin-map .pwh-margin-paper{grid-column:2;grid-row:2;display:block;width:100%;height:190px}\n.pwh-margin-map label{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center;color:#294b5a;font-size:12px}\n.pwh-margin-map label>span:first-child{min-width:40px}.pwh-margin-map input{width:65px!important;min-width:0;box-sizing:border-box}\n.pwh-margin-map label:focus-within{color:#086c83;font-weight:600}.pwh-margin-map .pwh-margin-unit{color:#6e858d;font-weight:400}\n.pwh-margin-paper [data-margin]{fill:#e9f0f2;stroke:#b9cdd4;stroke-width:.5;cursor:pointer}\n.pwh-margin-paper [data-margin].active{fill:#9ad8e3;stroke:#16758a;stroke-width:1.5}\n.pwh-margin-paper [data-margin]:focus-visible{outline:2px solid #16758a;outline-offset:1px}\n.pwh-margin-note{font-size:11px;color:#677e88;margin:6px 0 0;line-height:1.5}\n@media(max-width:520px){.pwh-margin-map{gap:6px;grid-template-columns:minmax(85px,1fr) minmax(110px,1.3fr) minmax(85px,1fr)}.pwh-margin-map input{width:58px!important}.pwh-margin-map .pwh-margin-paper{height:170px}}\n";
+function eS(e) {
 	let t = e.width.ownerDocument;
 	if (!t.getElementById("pwh-page-margin-style")) {
 		let e = t.createElement("style");
-		e.id = "pwh-page-margin-style", e.textContent = Jx, t.head.append(e);
+		e.id = "pwh-page-margin-style", e.textContent = $x, t.head.append(e);
 	}
 	let n = t.createElement("div");
 	n.className = "pwh-margin-map";
@@ -48435,9 +48509,9 @@ function Yx(e) {
 		let r = t.createElement("div");
 		return r.className = "pwh-margin-" + e, n.append(r), r;
 	}, i = r("above"), a = r("left"), o = r("right"), s = r("below"), c = {};
-	for (let n of Object.keys(qx)) {
+	for (let n of Object.keys(Qx)) {
 		let r = t.createElement("label"), i = t.createElement("span"), a = t.createElement("span");
-		i.textContent = qx[n], a.textContent = "mm", a.className = "pwh-margin-unit", e.inputs[n].setAttribute("aria-label", qx[n] + " 여백(mm)"), r.append(i, e.inputs[n], a), c[n] = r;
+		i.textContent = Qx[n], a.textContent = "mm", a.className = "pwh-margin-unit", e.inputs[n].setAttribute("aria-label", Qx[n] + " 여백(mm)"), r.append(i, e.inputs[n], a), c[n] = r;
 	}
 	i.append(c.marginTop, c.marginHeader), a.append(c.marginLeft, c.marginGutter), o.append(c.marginRight), s.append(c.marginFooter, c.marginBottom);
 	let l = "http://www.w3.org/2000/svg", u = t.createElementNS(l, "svg");
@@ -48454,12 +48528,12 @@ function Yx(e) {
 		m = e;
 		for (let [e, t] of Object.entries(p)) t.classList.toggle("active", e === m);
 	};
-	for (let t of Object.keys(qx)) {
+	for (let t of Object.keys(Qx)) {
 		let n = d("rect", {
 			"data-margin": t,
 			tabindex: 0,
 			role: "button",
-			"aria-label": qx[t] + " 여백 선택"
+			"aria-label": Qx[t] + " 여백 선택"
 		}), r = () => {
 			e.inputs[t].focus(), e.inputs[t].select();
 		};
@@ -48505,27 +48579,27 @@ function Yx(e) {
 		...e.orientation,
 		...e.binding
 	]) t.addEventListener("input", b), t.addEventListener("change", b);
-	return Kx.set(n, b), b(), n;
+	return Zx.set(n, b), b(), n;
 }
-function Xx(e) {
-	e.querySelectorAll(".pwh-margin-map").forEach((e) => Kx.get(e)?.());
+function tS(e) {
+	e.querySelectorAll(".pwh-margin-map").forEach((e) => Zx.get(e)?.());
 }
 //#endregion
 //#region @rhwp/studio/src/ui/dom-utils.ts
-var Zx = "svg";
-function Qx(e, t) {
+var nS = "svg";
+function rS(e, t) {
 	let n = new DOMParser().parseFromString(t, "image/svg+xml");
 	if (n.querySelector("parsererror")) return;
 	let r = n.documentElement;
-	r.nodeName.toLowerCase() === Zx && e.appendChild(document.importNode(r, !0));
+	r.nodeName.toLowerCase() === nS && e.appendChild(document.importNode(r, !0));
 }
-function $x(e, t) {
+function iS(e, t) {
 	let n = document.createElement("option");
 	return n.value = e, n.textContent = t, n;
 }
 //#endregion
 //#region @rhwp/studio/src/ui/dialog-apply.ts
-function eS(e) {
+function aS(e) {
 	let { services: t, label: n, command: r, fallback: i } = e;
 	try {
 		let e = t?.getInputHandler();
@@ -48534,7 +48608,7 @@ function eS(e) {
 		return console.warn(`[${n}] 적용 실패:`, e), !1;
 	}
 }
-function tS(e) {
+function oS(e) {
 	let { services: t, label: n, operationType: r, operation: i, fallback: a } = e;
 	try {
 		let e = t?.getInputHandler();
@@ -48547,8 +48621,8 @@ function tS(e) {
 		return console.warn(`[${n}] 적용 실패:`, e), !1;
 	}
 }
-var nS = 7200 / 25.4;
-function rS(e) {
+var sS = 7200 / 25.4;
+function cS(e) {
 	return e.landscape ? {
 		width: e.height,
 		height: e.width
@@ -48557,33 +48631,33 @@ function rS(e) {
 		height: e.height
 	};
 }
-function iS(e) {
-	let t = rS(e);
+function lS(e) {
+	let t = cS(e);
 	return {
 		width: t.width - e.marginLeft - e.marginRight - e.marginGutter,
 		height: t.height - e.marginTop - e.marginBottom - e.marginHeader - e.marginFooter
 	};
 }
-function aS(e) {
-	let t = 10 * nS, n = iS(e), r = (e) => (e / nS).toFixed(1);
+function uS(e) {
+	let t = 10 * sS, n = lS(e), r = (e) => (e / sS).toFixed(1);
 	return n.width < t ? `좌우 여백이 너무 커서 본문이 남지 않습니다 (본문 너비 ${r(n.width)}mm, 최소 10mm). 왼쪽·오른쪽·제본 여백을 줄여주세요.` : n.height < t ? `위아래 여백이 너무 커서 본문이 남지 않습니다 (본문 높이 ${r(n.height)}mm, 최소 10mm). 위쪽·아래쪽·머리말·꼬리말 여백을 줄여주세요.` : null;
 }
 //#endregion
 //#region @rhwp/studio/src/ui/page-setup-dialog.ts
-var oS = 7200 / 25.4, sS = 3;
-function cS(e) {
+var dS = 7200 / 25.4, fS = 3;
+function pS(e) {
 	return Math.round(e * 25.4 / 7200 * 10) / 10;
 }
-function lS(e) {
-	return Math.round(e * oS);
+function mS(e) {
+	return Math.round(e * dS);
 }
-function uS(e, t) {
-	return Math.abs(e - t) <= sS;
+function hS(e, t) {
+	return Math.abs(e - t) <= fS;
 }
-function dS(e, t, n, r) {
-	return uS(e, n) && uS(t, r) || uS(e, r) && uS(t, n);
+function gS(e, t, n, r) {
+	return hS(e, n) && hS(t, r) || hS(e, r) && hS(t, n);
 }
-var fS = [
+var _S = [
 	[
 		"A4",
 		59528,
@@ -48614,14 +48688,14 @@ var fS = [
 		62208,
 		102816
 	]
-], pS = {
+], vS = {
 	portrait: "<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"orient-icon orient-icon-portrait\" width=\"28\" height=\"36\" viewBox=\"0 0 28 36\" aria-hidden=\"true\" focusable=\"false\"><rect x=\"1\" y=\"1\" width=\"26\" height=\"34\" rx=\"2\" fill=\"#fff\" stroke=\"#748bc9\" stroke-width=\"1.5\"/><line x1=\"6\" y1=\"8\" x2=\"22\" y2=\"8\" stroke=\"#aab\" stroke-width=\"1.2\"/><line x1=\"6\" y1=\"12\" x2=\"22\" y2=\"12\" stroke=\"#aab\" stroke-width=\"1.2\"/><line x1=\"6\" y1=\"16\" x2=\"18\" y2=\"16\" stroke=\"#aab\" stroke-width=\"1.2\"/></svg>",
 	landscape: "<svg xmlns=\"http://www.w3.org/2000/svg\" class=\"orient-icon orient-icon-landscape\" width=\"40\" height=\"28\" viewBox=\"0 0 40 28\" aria-hidden=\"true\" focusable=\"false\"><rect x=\"1\" y=\"1\" width=\"38\" height=\"26\" rx=\"2\" fill=\"#fff\" stroke=\"#748bc9\" stroke-width=\"1.5\"/><line x1=\"7\" y1=\"7\" x2=\"33\" y2=\"7\" stroke=\"#aab\" stroke-width=\"1.2\"/><line x1=\"7\" y1=\"11\" x2=\"33\" y2=\"11\" stroke=\"#aab\" stroke-width=\"1.2\"/><line x1=\"7\" y1=\"15\" x2=\"29\" y2=\"15\" stroke=\"#aab\" stroke-width=\"1.2\"/><line x1=\"7\" y1=\"19\" x2=\"23\" y2=\"19\" stroke=\"#c5cce0\" stroke-width=\"1.1\"/></svg>"
-}, mS = {
+}, yS = {
 	single: "<svg width=\"24\" height=\"32\" viewBox=\"0 0 24 32\"><rect x=\"1\" y=\"1\" width=\"22\" height=\"30\" rx=\"1.5\" fill=\"#fff\" stroke=\"#748bc9\" stroke-width=\"1.2\"/><line x1=\"5\" y1=\"7\" x2=\"19\" y2=\"7\" stroke=\"#bbc\" stroke-width=\"1\"/><line x1=\"5\" y1=\"10\" x2=\"19\" y2=\"10\" stroke=\"#bbc\" stroke-width=\"1\"/><line x1=\"5\" y1=\"13\" x2=\"15\" y2=\"13\" stroke=\"#bbc\" stroke-width=\"1\"/></svg>",
 	duplex: "<svg width=\"32\" height=\"32\" viewBox=\"0 0 32 32\"><rect x=\"1\" y=\"1\" width=\"13\" height=\"30\" rx=\"1.5\" fill=\"#fff\" stroke=\"#748bc9\" stroke-width=\"1.2\"/><rect x=\"18\" y=\"1\" width=\"13\" height=\"30\" rx=\"1.5\" fill=\"#fff\" stroke=\"#748bc9\" stroke-width=\"1.2\"/><line x1=\"14\" y1=\"4\" x2=\"14\" y2=\"28\" stroke=\"#335095\" stroke-width=\"1.5\" stroke-dasharray=\"2,2\"/></svg>",
 	top: "<svg width=\"24\" height=\"32\" viewBox=\"0 0 24 32\"><rect x=\"1\" y=\"1\" width=\"22\" height=\"13\" rx=\"1.5\" fill=\"#fff\" stroke=\"#748bc9\" stroke-width=\"1.2\"/><rect x=\"1\" y=\"18\" width=\"22\" height=\"13\" rx=\"1.5\" fill=\"#fff\" stroke=\"#748bc9\" stroke-width=\"1.2\"/><line x1=\"4\" y1=\"15\" x2=\"20\" y2=\"15\" stroke=\"#335095\" stroke-width=\"1.5\" stroke-dasharray=\"2,2\"/></svg>"
-}, hS = class extends A {
+}, bS = class extends A {
 	services;
 	wasm;
 	eventBus;
@@ -48638,12 +48712,12 @@ var fS = [
 		super(g("dialog.pageSetup.matchesPaperPreset.title"), 580), this.services = r, this.wasm = e, this.eventBus = t, this.sectionIdx = n;
 	}
 	show() {
-		super.show(), this.pageDef = this.wasm.getPageDef(this.sectionIdx), this.populateFields(), Xx(this.dialog);
+		super.show(), this.pageDef = this.wasm.getPageDef(this.sectionIdx), this.populateFields(), tS(this.dialog);
 	}
 	createBody() {
 		let e = document.createElement("div"), t = this.createSection(g("dialog.pageSetup.createSection.label")), n = this.row();
 		this.paperSelect = document.createElement("select"), this.paperSelect.className = "dialog-select", this.paperSelect.style.width = "100px";
-		for (let [e] of fS) {
+		for (let [e] of _S) {
 			let t = document.createElement("option");
 			t.value = e, t.textContent = e, this.paperSelect.appendChild(t);
 		}
@@ -48654,14 +48728,14 @@ var fS = [
 		let a = document.createElement("div");
 		a.className = "page-setup-sections";
 		let o = this.createSection(g("dialog.pageSetup.createSection.label.x78ea53")), s = document.createElement("div");
-		s.className = "dialog-icon-radio-group", this.landscapeRadios = [this.iconRadio("orient", "세로", "false", pS.portrait, s), this.iconRadio("orient", "가로", "true", pS.landscape, s)];
+		s.className = "dialog-icon-radio-group", this.landscapeRadios = [this.iconRadio("orient", "세로", "false", vS.portrait, s), this.iconRadio("orient", "가로", "true", vS.landscape, s)];
 		for (let e of this.landscapeRadios) e.addEventListener("change", () => this.onOrientChange());
 		o.appendChild(s);
 		let c = this.createSection(g("dialog.pageSetup.createSection.label.x0a5a7c")), l = document.createElement("div");
 		l.className = "dialog-icon-radio-group", this.bindingRadios = [
-			this.iconRadio("binding", "한쪽", "0", mS.single, l),
-			this.iconRadio("binding", "맞쪽", "1", mS.duplex, l),
-			this.iconRadio("binding", "위로", "2", mS.top, l)
+			this.iconRadio("binding", "한쪽", "0", yS.single, l),
+			this.iconRadio("binding", "맞쪽", "1", yS.duplex, l),
+			this.iconRadio("binding", "위로", "2", yS.top, l)
 		], c.appendChild(l), a.appendChild(o), a.appendChild(c), e.appendChild(a);
 		let u = this.createSection(g("dialog.pageSetup.createSection.label.xebb638")), d = document.createElement("div");
 		d.className = "margin-grid", this.marginInputs = {};
@@ -48680,7 +48754,7 @@ var fS = [
 			[4, 5],
 			[6, null]
 		]) d.appendChild(this.label(f[e][1])), this.marginInputs[f[e][0]] = this.numberInput(), d.appendChild(this.marginInputs[f[e][0]]), d.appendChild(this.unit("mm")), t !== null && (d.appendChild(this.label(f[t][1])), this.marginInputs[f[t][0]] = this.numberInput(), d.appendChild(this.marginInputs[f[t][0]]), d.appendChild(this.unit("mm")));
-		u.appendChild(Yx({
+		u.appendChild(eS({
 			inputs: this.marginInputs,
 			width: this.widthInput,
 			height: this.heightInput,
@@ -48697,24 +48771,24 @@ var fS = [
 		return p.appendChild(this.scopeSelect), p.style.marginTop = "4px", e.appendChild(p), e;
 	}
 	onConfirm() {
-		let e = this.landscapeRadios[1].checked, t = lS(parseFloat(this.widthInput.value) || 0), n = lS(parseFloat(this.heightInput.value) || 0);
+		let e = this.landscapeRadios[1].checked, t = mS(parseFloat(this.widthInput.value) || 0), n = mS(parseFloat(this.heightInput.value) || 0);
 		e && ([t, n] = [n, t]);
 		let r = {
 			width: t,
 			height: n,
-			marginLeft: lS(parseFloat(this.marginInputs.marginLeft.value) || 0),
-			marginRight: lS(parseFloat(this.marginInputs.marginRight.value) || 0),
-			marginTop: lS(parseFloat(this.marginInputs.marginTop.value) || 0),
-			marginBottom: lS(parseFloat(this.marginInputs.marginBottom.value) || 0),
-			marginHeader: lS(parseFloat(this.marginInputs.marginHeader.value) || 0),
-			marginFooter: lS(parseFloat(this.marginInputs.marginFooter.value) || 0),
-			marginGutter: lS(parseFloat(this.marginInputs.marginGutter.value) || 0),
+			marginLeft: mS(parseFloat(this.marginInputs.marginLeft.value) || 0),
+			marginRight: mS(parseFloat(this.marginInputs.marginRight.value) || 0),
+			marginTop: mS(parseFloat(this.marginInputs.marginTop.value) || 0),
+			marginBottom: mS(parseFloat(this.marginInputs.marginBottom.value) || 0),
+			marginHeader: mS(parseFloat(this.marginInputs.marginHeader.value) || 0),
+			marginFooter: mS(parseFloat(this.marginInputs.marginFooter.value) || 0),
+			marginGutter: mS(parseFloat(this.marginInputs.marginGutter.value) || 0),
 			landscape: e,
 			binding: parseInt(this.bindingRadios.find((e) => e.checked)?.value ?? "0")
-		}, i = aS(r);
+		}, i = uS(r);
 		if (i) return alert(i), !1;
 		let a = () => this.wasm.setPageDef(this.sectionIdx, r);
-		return tS({
+		return oS({
 			services: this.services,
 			label: "PageSetupDialog",
 			operationType: "pageSetup",
@@ -48727,16 +48801,16 @@ var fS = [
 	populateFields() {
 		let e = this.pageDef, t = e.width, n = e.height;
 		e.landscape && ([t, n] = [n, t]);
-		let r = fS.find(([, t, n]) => dS(e.width, e.height, t, n));
-		this.paperSelect.value = r ? r[0] : "custom", this.widthInput.value = cS(t).toFixed(1), this.heightInput.value = cS(n).toFixed(1), this.widthInput.disabled = !!r, this.heightInput.disabled = !!r, this.landscapeRadios[+!!e.landscape].checked = !0, this.updateIconRadioState("orient");
+		let r = _S.find(([, t, n]) => gS(e.width, e.height, t, n));
+		this.paperSelect.value = r ? r[0] : "custom", this.widthInput.value = pS(t).toFixed(1), this.heightInput.value = pS(n).toFixed(1), this.widthInput.disabled = !!r, this.heightInput.disabled = !!r, this.landscapeRadios[+!!e.landscape].checked = !0, this.updateIconRadioState("orient");
 		let i = Math.min(e.binding, 2);
-		this.bindingRadios[i].checked = !0, this.updateIconRadioState("binding"), this.marginInputs.marginTop.value = cS(e.marginTop).toFixed(1), this.marginInputs.marginBottom.value = cS(e.marginBottom).toFixed(1), this.marginInputs.marginLeft.value = cS(e.marginLeft).toFixed(1), this.marginInputs.marginRight.value = cS(e.marginRight).toFixed(1), this.marginInputs.marginHeader.value = cS(e.marginHeader).toFixed(1), this.marginInputs.marginFooter.value = cS(e.marginFooter).toFixed(1), this.marginInputs.marginGutter.value = cS(e.marginGutter).toFixed(1);
+		this.bindingRadios[i].checked = !0, this.updateIconRadioState("binding"), this.marginInputs.marginTop.value = pS(e.marginTop).toFixed(1), this.marginInputs.marginBottom.value = pS(e.marginBottom).toFixed(1), this.marginInputs.marginLeft.value = pS(e.marginLeft).toFixed(1), this.marginInputs.marginRight.value = pS(e.marginRight).toFixed(1), this.marginInputs.marginHeader.value = pS(e.marginHeader).toFixed(1), this.marginInputs.marginFooter.value = pS(e.marginFooter).toFixed(1), this.marginInputs.marginGutter.value = pS(e.marginGutter).toFixed(1);
 	}
 	onPaperChange() {
-		let e = this.paperSelect.value, t = fS.find(([t]) => t === e);
+		let e = this.paperSelect.value, t = _S.find(([t]) => t === e);
 		if (t) {
 			let [e, n] = this.landscapeRadios[1].checked ? [t[2], t[1]] : [t[1], t[2]];
-			this.widthInput.value = cS(e).toFixed(1), this.heightInput.value = cS(n).toFixed(1), this.widthInput.disabled = !0, this.heightInput.disabled = !0;
+			this.widthInput.value = pS(e).toFixed(1), this.heightInput.value = pS(n).toFixed(1), this.widthInput.disabled = !0, this.heightInput.disabled = !0;
 		} else this.widthInput.disabled = !1, this.heightInput.disabled = !1;
 	}
 	onOrientChange() {
@@ -48784,11 +48858,11 @@ var fS = [
 		let o = document.createElement("input");
 		o.type = "radio", o.name = e, o.value = n, o.className = "icon-radio-input", o.addEventListener("change", () => this.updateIconRadioState(e));
 		let s = document.createElement("span");
-		s.className = "icon-radio-icon", Qx(s, r);
+		s.className = "icon-radio-icon", rS(s, r);
 		let c = document.createElement("span");
 		return c.className = "icon-radio-text", c.textContent = t, a.appendChild(o), a.appendChild(s), a.appendChild(c), i.appendChild(a), o;
 	}
-}, gS = [
+}, xS = [
 	{
 		name: "Pwh — STOOM Lab",
 		license: "MIT"
@@ -48861,7 +48935,7 @@ var fS = [
 		name: "console_error_panic_hook",
 		license: "MIT / Apache-2.0"
 	}
-], _S = class extends A {
+], SS = class extends A {
 	constructor() {
 		super(g("dialog.about.title"), 460);
 	}
@@ -48874,7 +48948,7 @@ var fS = [
 		let n = document.createElement("div");
 		n.className = "about-product-name-ko", n.textContent = "한글에 익숙한 오픈소스 한글 문서 편집기", e.appendChild(n);
 		let r = document.createElement("div");
-		r.className = "about-version", r.textContent = document.getElementById("pwh-version")?.textContent || "Pwh 0.6.68", e.appendChild(r);
+		r.className = "about-version", r.textContent = document.getElementById("pwh-version")?.textContent || "Pwh 0.6.69", e.appendChild(r);
 		let i = document.createElement("div");
 		i.className = "about-tech", i.textContent = "기반 엔진 rhwp 0.8.7 · Pwh 공통 코어 r32", e.appendChild(i);
 		let a = document.createElement("div");
@@ -48898,7 +48972,7 @@ var fS = [
 		l.className = "about-license-title", l.textContent = g("dialog.about.licenseTitle.text"), e.appendChild(l);
 		let u = document.createElement("table");
 		u.className = "about-license-table";
-		for (let e of gS) {
+		for (let e of xS) {
 			let t = document.createElement("tr"), n = document.createElement("td");
 			n.textContent = e.name;
 			let r = document.createElement("td");
@@ -48920,7 +48994,7 @@ var fS = [
 			t.className = "dialog-btn dialog-btn-primary", t.textContent = g("dialog.about.closeBtn.text"), t.addEventListener("click", () => this.hide()), e.appendChild(t);
 		}
 	}
-}, vS = {
+}, CS = {
 	hml: {
 		extension: ".hml",
 		mimeType: "application/xml",
@@ -48945,41 +49019,41 @@ var fS = [
 			accept: { "application/hwp+zip": [".hwpx"] }
 		}
 	}
-}, yS = /* @__PURE__ */ new WeakSet();
-function bS(e) {
-	e && yS.add(e);
+}, wS = /* @__PURE__ */ new WeakSet();
+function TS(e) {
+	e && wS.add(e);
 }
-function xS(e) {
-	e && yS.delete(e);
+function ES(e) {
+	e && wS.delete(e);
 }
-function SS(e) {
+function DS(e) {
 	let t = e.trim().toLowerCase();
 	return t.endsWith(".hml") ? "hml" : t.endsWith(".hwpx") ? "hwpx" : t.endsWith(".hwp") ? "hwp" : null;
 }
-function CS(e, t) {
-	let n = vS[t].extension, r = e.trim() || `document${n}`;
+function OS(e, t) {
+	let n = CS[t].extension, r = e.trim() || `document${n}`;
 	return /\.(hwp|hwpx|hml)$/i.test(r) ? r.replace(/\.(hwp|hwpx|hml)$/i, n) : `${r}${n}`;
 }
-function wS(e, t) {
+function kS(e, t) {
 	return e.forceSaveAs || e.format === "hml" && !t;
 }
-function TS(e, t, n) {
-	let r = e === "hml" && n != null && yS.has(n);
+function AS(e, t, n) {
+	let r = e === "hml" && n != null && wS.has(n);
 	if (e === "hml" && !r) return {
 		format: "hml",
 		forceSaveAs: !0,
-		suggestedName: CS(t, "hml")
+		suggestedName: OS(t, "hml")
 	};
-	let i = n?.name ?? t, a = (r ? SS(i) : null) ?? (e === "hwpx" ? "hwpx" : "hwp");
+	let i = n?.name ?? t, a = (r ? DS(i) : null) ?? (e === "hwpx" ? "hwpx" : "hwp");
 	return {
 		format: a,
 		forceSaveAs: !1,
-		suggestedName: CS(t, a)
+		suggestedName: OS(t, a)
 	};
 }
 //#endregion
 //#region @rhwp/studio/src/ui/save-as-dialog.ts
-var ES = class extends A {
+var jS = class extends A {
 	format;
 	allowPassword;
 	inheritPassword;
@@ -49022,7 +49096,7 @@ var ES = class extends A {
 	}
 	confirmValue() {
 		let e = this.input.value.trim();
-		return e ? CS(e, this.format) : (this.input.focus(), null);
+		return e ? OS(e, this.format) : (this.input.focus(), null);
 	}
 	onConfirm() {
 		let e = this.confirmValue();
@@ -49045,12 +49119,12 @@ var ES = class extends A {
 		});
 	}
 };
-function DS(e, t = "hwp", n = {}) {
-	return new ES(e, t, n.allowPassword === !0, n.inheritPassword === !0).showAsync();
+function MS(e, t = "hwp", n = {}) {
+	return new jS(e, t, n.allowPassword === !0, n.inheritPassword === !0).showAsync();
 }
 //#endregion
 //#region @rhwp/studio/src/ui/hwp-password-dialog.ts
-var OS = class extends A {
+var NS = class extends A {
 	fileName;
 	errorMessage;
 	input;
@@ -49090,10 +49164,10 @@ var OS = class extends A {
 		});
 	}
 };
-function kS(e, t) {
-	return new OS(e, t).showAsync();
+function PS(e, t) {
+	return new NS(e, t).showAsync();
 }
-var AS = class extends A {
+var FS = class extends A {
 	fileName;
 	passwordInput;
 	confirmationInput;
@@ -49138,12 +49212,12 @@ var AS = class extends A {
 		});
 	}
 };
-function jS(e) {
-	return new AS(e).showAsync();
+function IS(e) {
+	return new FS(e).showAsync();
 }
 //#endregion
 //#region @rhwp/studio/src/ui/unsaved-changes-dialog.ts
-var MS = class extends A {
+var LS = class extends A {
 	options;
 	resolve;
 	constructor(e) {
@@ -49179,29 +49253,29 @@ var MS = class extends A {
 		});
 	}
 };
-function NS(e) {
-	return new MS(e).showAsync();
+function RS(e) {
+	return new LS(e).showAsync();
 }
 //#endregion
 //#region @rhwp/studio/src/ui/hml-save-format-message.ts
-var PS = 3;
-function FS(e, t) {
+var zS = 3;
+function BS(e, t) {
 	let n = Ss(e, t);
 	if (n.hmlEnabled) return "HML로 의미를 보존해 저장할 수 있지만 원본 바이트와 동일하지는 않습니다.\n저장할 형식을 선택하세요.";
 	let r = [`${n.diagnostic ?? "HML 저장을 사용할 수 없습니다."}\nHWP 또는 HWPX로 저장할 수 있습니다.`], i = bs(e)?.saveBlockers ?? [];
-	for (let e of i.slice(0, PS)) r.push(`${e.xmlPath}: ${e.message}`);
-	return i.length > PS && r.push(`그 외 ${i.length - PS}건`), r.join("\n");
+	for (let e of i.slice(0, zS)) r.push(`${e.xmlPath}: ${e.message}`);
+	return i.length > zS && r.push(`그 외 ${i.length - zS}건`), r.join("\n");
 }
 //#endregion
 //#region @rhwp/studio/src/ui/hml-save-format-dialog.ts
-var IS = class extends A {
+var VS = class extends A {
 	resolve;
 	hmlEnabled;
 	message;
 	constructor(e, t) {
 		super(g("dialog.hmlSaveFormat.title"), 440);
 		let n = Ss(e, t);
-		this.hmlEnabled = n.hmlEnabled, this.message = FS(e, t);
+		this.hmlEnabled = n.hmlEnabled, this.message = BS(e, t);
 	}
 	createBody() {
 		let e = document.createElement("div");
@@ -49231,33 +49305,33 @@ var IS = class extends A {
 		});
 	}
 };
-function LS(e = null, t = !1) {
-	return new IS(e, t).showAsync();
+function HS(e = null, t = !1) {
+	return new VS(e, t).showAsync();
 }
 //#endregion
 //#region @rhwp/studio/src/command/save-document-format.ts
-function RS(e, t) {
+function US(e, t) {
 	return t === "hml" ? {
 		bytes: e.exportHml(),
 		contentLoss: null
 	} : t === "hwpx" ? e.exportHwpxWithReport() : e.exportHwpWithReport();
 }
-function zS(e, t, n) {
+function WS(e, t, n) {
 	return t === "hwpx" ? e.exportHwpxWithPasswordAndReport(n) : e.exportHwpWithPasswordAndReport(n);
 }
 //#endregion
 //#region @rhwp/studio/src/command/print-pages.ts
-var BS = "브라우저 인쇄 창에서 ‘대상 → PDF로 저장’을 선택합니다.";
-function VS(e) {
+var GS = "브라우저 인쇄 창에서 ‘대상 → PDF로 저장’을 선택합니다.";
+function KS(e) {
 	return e.trim().replace(/\.(hwp|hwpx|hml)$/i, "").trim() || "문서";
 }
-function HS(e, t, n) {
+function qS(e, t, n) {
 	return `${e === "pdf" ? "PDF 준비 중…" : "인쇄 준비 중…"} (${t}/${n})`;
 }
-function US(e) {
-	return e === "pdf" ? `PDF 준비 완료 — ${BS}` : "인쇄 미리보기 준비 완료";
+function JS(e) {
+	return e === "pdf" ? `PDF 준비 완료 — ${GS}` : "인쇄 미리보기 준비 완료";
 }
-var WS = [
+var YS = [
 	148,
 	182,
 	210,
@@ -49269,38 +49343,38 @@ var WS = [
 	364,
 	420,
 	431.8
-], GS = .05;
-function KS(e) {
-	for (let t of WS) if (Math.abs(e - t) <= GS) return t;
+], XS = .05;
+function ZS(e) {
+	for (let t of YS) if (Math.abs(e - t) <= XS) return t;
 	return e;
 }
-function qS(e) {
-	return KS(Math.round(e * 25.4 / 96 * 1e3) / 1e3);
+function QS(e) {
+	return ZS(Math.round(e * 25.4 / 96 * 1e3) / 1e3);
 }
-function JS(e) {
+function $S(e) {
 	return Number.isInteger(e) ? String(e) : e.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
 }
-function YS(e, t, n) {
+function eC(e, t, n) {
 	return {
 		svg: e,
-		widthMm: qS(t.width),
-		heightMm: qS(t.height),
+		widthMm: QS(t.width),
+		heightMm: QS(t.height),
 		pageName: `rhwp-print-page-${n + 1}`,
 		className: `rhwp-print-page-${n + 1}`
 	};
 }
-function XS(e) {
+function tC(e) {
 	return e.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
-function ZS(e, t) {
+function nC(e, t) {
 	let n = e;
 	for (let [e, r] of t) {
-		let t = XS(e);
+		let t = tC(e);
 		n = n.replace(RegExp(`url\\((['"]?)#${t}\\1\\)`, "g"), () => `url(#${r})`), n === `#${e}` && (n = `#${r}`);
 	}
 	return n;
 }
-function QS(e, t) {
+function rC(e, t) {
 	let n = [...e.hasAttribute("id") ? [e] : [], ...Array.from(e.querySelectorAll("[id]"))], r = /* @__PURE__ */ new Map();
 	for (let e of n) {
 		let n = e.getAttribute("id");
@@ -49314,17 +49388,17 @@ function QS(e, t) {
 			n && e.setAttribute(t.name, n);
 			continue;
 		}
-		let n = ZS(t.value, r);
+		let n = nC(t.value, r);
 		n !== t.value && e.setAttribute(t.name, n);
 	}
 }
-function $S(e) {
+function iC(e) {
 	return `
-${e.map((e) => `@page ${e.pageName} { size: ${JS(e.widthMm)}mm ${JS(e.heightMm)}mm; margin: 0; }`).join("\n")}
+${e.map((e) => `@page ${e.pageName} { size: ${$S(e.widthMm)}mm ${$S(e.heightMm)}mm; margin: 0; }`).join("\n")}
 * { margin: 0; padding: 0; }
 body { background: #fff; }
 .page { break-after: page; page-break-after: always; overflow: hidden; }
-${e.map((e) => `.${e.className} { page: ${e.pageName}; width: ${JS(e.widthMm)}mm; height: ${JS(e.heightMm)}mm; }`).join("\n")}
+${e.map((e) => `.${e.className} { page: ${e.pageName}; width: ${$S(e.widthMm)}mm; height: ${$S(e.heightMm)}mm; }`).join("\n")}
 .page:last-child { break-after: auto; page-break-after: auto; }
 .page svg { width: 100%; height: 100%; }
 @media screen {
@@ -49371,34 +49445,34 @@ ${e.map((e) => `.${e.className} { page: ${e.pageName}; width: ${JS(e.widthMm)}mm
 @media print { .print-preview-bar { display: none !important; } }
 `;
 }
-function eC(e, t) {
+function aC(e, t) {
 	let n = e.createElement("style");
-	n.textContent = $S(t), e.head.appendChild(n);
+	n.textContent = iC(t), e.head.appendChild(n);
 }
-function tC(e, t, n) {
+function oC(e, t, n) {
 	let r = e.createElement("div");
 	r.className = `page ${n.className}`;
 	let i = new DOMParser().parseFromString(n.svg, "image/svg+xml"), a = i.querySelector("parsererror");
 	if (a) throw Error(`인쇄용 SVG 파싱 실패: ${a.textContent || "parsererror"}`);
-	QS(i.documentElement, n.pageName), r.appendChild(e.importNode(i.documentElement, !0)), t.appendChild(r);
+	rC(i.documentElement, n.pageName), r.appendChild(e.importNode(i.documentElement, !0)), t.appendChild(r);
 }
 //#endregion
 //#region @rhwp/studio/src/command/print-surface.ts
-var nC = "print.html", rC = 1e4, iC = "rhwp-print-surface", aC = class extends Error {
+var sC = "print.html", cC = 1e4, lC = "rhwp-print-surface", uC = class extends Error {
 	constructor() {
 		super("인쇄 미리보기 팝업이 차단되었습니다."), this.name = "PrintPreviewBlockedError";
 	}
 };
-function oC(e, t = nC) {
+function dC(e, t = sC) {
 	return new URL(t, e).href;
 }
-async function sC(e = {}) {
+async function fC(e = {}) {
 	let t = e.hostDocument ?? document, n = t.defaultView;
 	if (!n || !t.body) throw Error("인쇄 surface를 만들 수 없습니다.");
-	t.getElementById(iC)?.remove();
+	t.getElementById(lC)?.remove();
 	let r = t.createElement("iframe");
-	r.id = iC, r.title = "인쇄 문서", r.setAttribute("aria-hidden", "true"), r.style.position = "fixed", r.style.inset = "0", r.style.width = "100vw", r.style.height = "100vh", r.style.border = "0", r.style.opacity = "0", r.style.pointerEvents = "none", r.style.zIndex = "-1";
-	let i = oC(t.baseURI, e.surfacePath ?? nC), a = e.timeoutMs ?? rC;
+	r.id = lC, r.title = "인쇄 문서", r.setAttribute("aria-hidden", "true"), r.style.position = "fixed", r.style.inset = "0", r.style.width = "100vw", r.style.height = "100vh", r.style.border = "0", r.style.opacity = "0", r.style.pointerEvents = "none", r.style.zIndex = "-1";
+	let i = dC(t.baseURI, e.surfacePath ?? sC), a = e.timeoutMs ?? cC;
 	await new Promise((e, o) => {
 		let s = !1, c = (t) => {
 			s || (s = !0, n.clearTimeout(d), r.removeEventListener("load", l), r.removeEventListener("error", u), t ? o(t) : e());
@@ -49420,8 +49494,8 @@ async function sC(e = {}) {
 		}
 	};
 }
-function cC(e = {}) {
-	let t = e.hostWindow ?? window, n = oC(t.document.baseURI, e.surfacePath ?? nC), r = e.timeoutMs ?? rC, i = t.open(n, "_blank");
+function pC(e = {}) {
+	let t = e.hostWindow ?? window, n = dC(t.document.baseURI, e.surfacePath ?? sC), r = e.timeoutMs ?? cC, i = t.open(n, "_blank");
 	return i ? new Promise((e, a) => {
 		let o = !1, s = (n) => {
 			if (!o) {
@@ -49445,18 +49519,18 @@ function cC(e = {}) {
 			}
 		}, c = () => s(), l = t.setTimeout(() => s(/* @__PURE__ */ Error("인쇄 미리보기 준비 시간이 초과되었습니다.")), r);
 		i.addEventListener("load", c), i.location.href === n && i.document.readyState === "complete" && t.queueMicrotask(c);
-	}) : Promise.reject(new aC());
+	}) : Promise.reject(new uC());
 }
-function lC(e) {
+function mC(e) {
 	return new Promise((t) => {
 		e.requestAnimationFrame(() => t());
 	});
 }
-async function uC(e) {
+async function hC(e) {
 	let t = e.document.fonts;
-	t && await t.ready, await lC(e.window), await lC(e.window), e.document.documentElement.getBoundingClientRect();
+	t && await t.ready, await mC(e.window), await mC(e.window), e.document.documentElement.getBoundingClientRect();
 }
-var dC = [{
+var gC = [{
 	description: "HWP/HWPX/HML 문서",
 	accept: {
 		"application/x-hwp": [".hwp"],
@@ -49465,52 +49539,52 @@ var dC = [{
 		"text/xml": [".hml"]
 	}
 }];
-function fC(e) {
-	return [vS[e].pickerType];
+function _C(e) {
+	return [CS[e].pickerType];
 }
-function pC(e) {
+function vC(e) {
 	return e instanceof DOMException && e.name === "AbortError";
 }
-function mC(e) {
+function yC(e) {
 	return /\.(hwp|hwpx|hml)$/i.test(e.trim());
 }
-function hC(e) {
+function bC(e) {
 	return typeof e.showOpenFilePicker == "function";
 }
-async function gC(e, t) {
+async function xC(e, t) {
 	let n = await e.createWritable();
 	await n.write(t), await n.close();
 }
-function _C(e) {
-	return vS[e].extension;
+function SC(e) {
+	return CS[e].extension;
 }
-async function vC(e, t, n) {
+async function CC(e, t, n) {
 	if (n && (e === n || await e.isSameEntry?.(n) === !0)) throw Error("HML 원본 파일은 저장 대상으로 선택할 수 없습니다.");
 	if (!e.name.toLowerCase().endsWith(t)) throw Error(`${t} 확장자를 가진 파일을 선택해야 합니다.`);
 }
-async function yC(e) {
-	if (!hC(e)) return null;
+async function wC(e) {
+	if (!bC(e)) return null;
 	try {
 		return (await e.showOpenFilePicker({
 			excludeAcceptAllOption: !0,
 			multiple: !1,
-			types: dC
+			types: gC
 		}))[0] ?? null;
 	} catch (e) {
-		if (pC(e)) return null;
+		if (vC(e)) return null;
 		throw e;
 	}
 }
-async function bC(e) {
+async function TC(e) {
 	let t = await e.getFile();
 	return {
 		name: t.name,
 		bytes: new Uint8Array(await t.arrayBuffer())
 	};
 }
-async function xC(e) {
-	let { blob: t, suggestedName: n, currentHandle: r, windowLike: i, forceSaveAs: a, saveFormat: o } = e, s = fC(o);
-	if (r && !a) return await vC(r, _C(o), null), await gC(r, t), {
+async function EC(e) {
+	let { blob: t, suggestedName: n, currentHandle: r, windowLike: i, forceSaveAs: a, saveFormat: o } = e, s = _C(o);
+	if (r && !a) return await CC(r, SC(o), null), await xC(r, t), {
 		method: "current-handle",
 		handle: r,
 		fileName: r.name
@@ -49521,7 +49595,7 @@ async function xC(e) {
 			suggestedName: n,
 			types: s
 		});
-		return await vC(e, _C(o), a ? r : null), await gC(e, t), {
+		return await CC(e, SC(o), a ? r : null), await xC(e, t), {
 			method: "save-picker",
 			handle: e,
 			fileName: e.name
@@ -49535,11 +49609,11 @@ async function xC(e) {
 }
 //#endregion
 //#region @rhwp/studio/src/command/file-open-picker.ts
-async function SC(e) {
+async function DC(e) {
 	if (!await e.canReplace()) return;
-	let t = hC(e.windowLike), n = null;
+	let t = bC(e.windowLike), n = null;
 	if (t) try {
-		n = await yC(e.windowLike);
+		n = await wC(e.windowLike);
 	} catch (n) {
 		e.warn("[file:open] File System Access API 실패, 폴백:", n), t = !1;
 	}
@@ -49550,7 +49624,7 @@ async function SC(e) {
 		return;
 	}
 	try {
-		let { bytes: t, name: r } = await bC(n);
+		let { bytes: t, name: r } = await TC(n);
 		e.emitOpenDocument({
 			bytes: t,
 			fileName: r,
@@ -49564,7 +49638,7 @@ async function SC(e) {
 }
 //#endregion
 //#region @rhwp/studio/src/ui/pdf-print-dialog.ts
-var CC = class extends A {
+var OC = class extends A {
 	pageCount;
 	showGuidance;
 	state = "confirm";
@@ -49590,7 +49664,7 @@ var CC = class extends A {
 		let r = document.createElement("strong");
 		r.textContent = g("dialog.pdfPrint.guidanceTitle.text");
 		let i = document.createElement("span");
-		i.textContent = g("dialog.pdfPrint.guidanceText.text", { p1: BS }), n.append(r, i);
+		i.textContent = g("dialog.pdfPrint.guidanceText.text", { p1: GS }), n.append(r, i);
 		let a = document.createElement("p");
 		a.className = "dialog-pdf-note", a.textContent = g("dialog.pdfPrint.stateNote.text");
 		let o = document.createElement("div");
@@ -49626,7 +49700,7 @@ var CC = class extends A {
 		});
 	}
 	updateProgress(e) {
-		let t = Math.max(0, Math.min(e, this.pageCount)), n = HS("pdf", t, this.pageCount);
+		let t = Math.max(0, Math.min(e, this.pageCount)), n = qS("pdf", t, this.pageCount);
 		this.progressMessage.textContent = n, this.progressTrack.setAttribute("aria-valuenow", String(t));
 		let r = this.pageCount > 0 ? t / this.pageCount * 100 : 0;
 		this.progressBar.style.width = `${r}%`;
@@ -49639,24 +49713,24 @@ var CC = class extends A {
 		let t = this.dialog.querySelector(".dialog-pdf-progress");
 		t && (t.hidden = !0), this.errorMessage.hidden = !1, this.errorMessage.textContent = g("dialog.pdfPrint.errorMessage.text", { p1: e }), this.confirmButton && (this.confirmButton.hidden = !0), this.cancelButton && (this.cancelButton.textContent = g("dialog.pdfPrint.cancelButton.text"), this.cancelButton.disabled = !1, this.cancelButton.focus()), this.closeButton && (this.closeButton.hidden = !1);
 	}
-}, wC = "rhwpStudioRecent", TC = 1, EC = "recent", DC = 20, OC = /* @__PURE__ */ new Map();
-function kC() {
+}, kC = "rhwpStudioRecent", AC = 1, jC = "recent", MC = 20, NC = /* @__PURE__ */ new Map();
+function PC() {
 	return typeof indexedDB < "u";
 }
-function AC() {
+function FC() {
 	return globalThis.crypto?.randomUUID?.() ?? `recent_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 }
-function jC() {
-	return kC() ? new Promise((e) => {
-		let t = indexedDB.open(wC, TC);
+function IC() {
+	return PC() ? new Promise((e) => {
+		let t = indexedDB.open(kC, AC);
 		t.onerror = () => e(null), t.onsuccess = () => e(t.result), t.onupgradeneeded = () => {
 			let e = t.result;
-			e.objectStoreNames.contains(EC) || e.createObjectStore(EC, { keyPath: "id" });
+			e.objectStoreNames.contains(jC) || e.createObjectStore(jC, { keyPath: "id" });
 		};
 	}) : Promise.resolve(null);
 }
-async function MC(e, t) {
-	let n = await jC();
+async function LC(e, t) {
+	let n = await IC();
 	if (!n) return t();
 	try {
 		return await e(n);
@@ -49664,79 +49738,79 @@ async function MC(e, t) {
 		n.close();
 	}
 }
-function NC(e) {
+function RC(e) {
 	return new Promise((t, n) => {
-		let r = e.transaction(EC, "readonly").objectStore(EC).getAll();
+		let r = e.transaction(jC, "readonly").objectStore(jC).getAll();
 		r.onsuccess = () => t(r.result ?? []), r.onerror = () => n(r.error);
 	});
 }
-function PC(e, t) {
+function zC(e, t) {
 	return new Promise((n, r) => {
-		let i = e.transaction(EC, "readwrite");
-		i.objectStore(EC).put(t), i.oncomplete = () => n(), i.onerror = () => r(i.error);
+		let i = e.transaction(jC, "readwrite");
+		i.objectStore(jC).put(t), i.oncomplete = () => n(), i.onerror = () => r(i.error);
 	});
 }
-function FC(e, t) {
+function BC(e, t) {
 	return new Promise((n, r) => {
-		let i = e.transaction(EC, "readwrite");
-		i.objectStore(EC).delete(t), i.oncomplete = () => n(), i.onerror = () => r(i.error);
+		let i = e.transaction(jC, "readwrite");
+		i.objectStore(jC).delete(t), i.oncomplete = () => n(), i.onerror = () => r(i.error);
 	});
 }
-async function IC(e, t) {
+async function VC(e, t) {
 	let n = e.handle, r = t.handle;
 	if (n && r && typeof n.isSameEntry == "function") try {
 		return await n.isSameEntry(r);
 	} catch {}
 	return e.fileName === t.fileName;
 }
-function LC(e) {
-	return e.sort((e, t) => t.openedAt - e.openedAt).slice(0, DC);
+function HC(e) {
+	return e.sort((e, t) => t.openedAt - e.openedAt).slice(0, MC);
 }
-async function RC(e) {
+async function UC(e) {
 	let t = {
-		id: AC(),
+		id: FC(),
 		fileName: e.fileName,
 		sourceFormat: e.sourceFormat,
 		openedAt: Date.now(),
 		...e.handle ? { handle: e.handle } : {}
 	};
-	await MC(async (n) => {
-		let r = await NC(n);
-		for (let t of r) await IC(e, t) && await FC(n, t.id);
+	await LC(async (n) => {
+		let r = await RC(n);
+		for (let t of r) await VC(e, t) && await BC(n, t.id);
 		try {
-			await PC(n, t);
+			await zC(n, t);
 		} catch {
 			try {
 				let { handle: e, ...r } = t;
-				await PC(n, r);
+				await zC(n, r);
 			} catch {
 				return;
 			}
 		}
-		let i = LC(await NC(n)), a = new Set(i.map((e) => e.id));
-		for (let e of await NC(n)) a.has(e.id) || await FC(n, e.id);
+		let i = HC(await RC(n)), a = new Set(i.map((e) => e.id));
+		for (let e of await RC(n)) a.has(e.id) || await BC(n, e.id);
 	}, async () => {
-		for (let [t, n] of OC) await IC(e, n) && OC.delete(t);
-		OC.set(t.id, t);
-		let n = new Set(LC([...OC.values()]).map((e) => e.id));
-		for (let e of [...OC.keys()]) n.has(e) || OC.delete(e);
+		for (let [t, n] of NC) await VC(e, n) && NC.delete(t);
+		NC.set(t.id, t);
+		let n = new Set(HC([...NC.values()]).map((e) => e.id));
+		for (let e of [...NC.keys()]) n.has(e) || NC.delete(e);
 	});
 }
-async function zC() {
-	return MC(async (e) => LC(await NC(e)), async () => LC([...OC.values()]));
+async function WC() {
+	return LC(async (e) => HC(await RC(e)), async () => HC([...NC.values()]));
 }
-async function BC(e) {
-	OC.delete(e), await MC(async (t) => FC(t, e), async () => {});
+async function GC(e) {
+	NC.delete(e), await LC(async (t) => BC(t, e), async () => {});
 }
-async function VC() {
-	OC.clear(), await MC(async (e) => new Promise((t, n) => {
-		let r = e.transaction(EC, "readwrite");
-		r.objectStore(EC).clear(), r.oncomplete = () => t(), r.onerror = () => n(r.error);
+async function KC() {
+	NC.clear(), await LC(async (e) => new Promise((t, n) => {
+		let r = e.transaction(jC, "readwrite");
+		r.objectStore(jC).clear(), r.oncomplete = () => t(), r.onerror = () => n(r.error);
 	}), async () => {});
 }
 //#endregion
 //#region @rhwp/studio/src/recent/recent-open.ts
-async function HC(e, t) {
+async function qC(e, t) {
 	if (!e.handle) return t.toast(`"${e.fileName}"은(는) 핸들 없이 열려 자동 재열기가 불가합니다. 파일을 다시 선택하세요.`, 4e3), t.requestReopen?.(), "needs-pick";
 	let n = e.handle, r = !1;
 	try {
@@ -49758,9 +49832,9 @@ async function HC(e, t) {
 }
 //#endregion
 //#region @rhwp/studio/src/command/commands/file.ts
-async function UC(e) {
-	await SC({
-		canReplace: () => uw(e),
+async function JC(e) {
+	await DC({
+		canReplace: () => hw(e),
 		windowLike: window,
 		findFileInput: () => document.getElementById("file-input"),
 		emitOpenDocument: (t) => e.eventBus.emit("open-document-bytes", t),
@@ -49768,37 +49842,37 @@ async function UC(e) {
 		alert: (e) => alert(e)
 	});
 }
-async function WC(e) {
+async function YC(e) {
 	try {
 		return typeof e.queryPermission == "function" && await e.queryPermission({ mode: "read" }) === "granted" || typeof e.requestPermission != "function" || await e.requestPermission({ mode: "read" }) === "granted";
 	} catch {
 		return !1;
 	}
 }
-function GC(e) {
+function XC(e) {
 	return e instanceof DOMException && (e.name === "AbortError" || e.name === "NotAllowedError");
 }
-function KC(e, t) {
-	return CS(e, t).replace(/\.(hwp|hwpx|hml)$/i, "");
+function ZC(e, t) {
+	return OS(e, t).replace(/\.(hwp|hwpx|hml)$/i, "");
 }
-function qC(e, t) {
+function QC(e, t) {
 	let n = e.getInputHandler();
 	if (n && (n.flushDeferredPaginationIfNeeded(t), n.hasDeferredPaginationPending())) throw Error(`출력 전 페이지네이션을 완료하지 못했습니다 (${t})`);
 }
-async function JC(e) {
+async function $C(e) {
 	let t = e.wasm.getSourceFormat();
 	if (t !== "hml") return t === "hwpx" ? "hwpx" : "hwp";
-	let n = $C(e);
-	return LS(n.metadata, n.exporterAvailable);
+	let n = iw(e);
+	return HS(n.metadata, n.exporterAvailable);
 }
-function YC(e, t, n) {
-	let r = n === void 0 ? RS(e.wasm, t) : zS(e.wasm, ZC(t), n);
+function ew(e, t, n) {
+	let r = n === void 0 ? US(e.wasm, t) : WS(e.wasm, nw(t), n);
 	return {
-		blob: new Blob([r.bytes], { type: vS[t].mimeType }),
+		blob: new Blob([r.bytes], { type: CS[t].mimeType }),
 		contentLoss: r.contentLoss
 	};
 }
-function XC(e) {
+function tw(e) {
 	let t = Ls(e);
 	t && j({
 		message: t,
@@ -49806,20 +49880,20 @@ function XC(e) {
 		confirmLabel: g("command.file.showExportContentLoss.message")
 	});
 }
-function ZC(e) {
+function nw(e) {
 	if (e === "hml") throw Error("암호 설정 저장은 HWP 또는 HWPX 형식에서만 지원합니다.");
 	return e;
 }
-function QC(e) {
-	let t = $C(e);
+function rw(e) {
+	let t = iw(e);
 	return Ss(t.metadata, t.exporterAvailable).hmlEnabled;
 }
-function $C(e) {
+function iw(e) {
 	return xs(() => e.wasm.getHmlOpenMetadata(), () => e.wasm.hasHmlExportCapability());
 }
-async function ew(e, t, n, r, i, a) {
+async function aw(e, t, n, r, i, a) {
 	try {
-		return await xC({
+		return await EC({
 			blob: n,
 			suggestedName: r,
 			currentHandle: a,
@@ -49828,25 +49902,25 @@ async function ew(e, t, n, r, i, a) {
 			saveFormat: t
 		});
 	} catch (e) {
-		return GC(e) ? "cancelled" : (console.warn("[file:save] File System Access API 실패, 폴백:", e), {
+		return XC(e) ? "cancelled" : (console.warn("[file:save] File System Access API 실패, 폴백:", e), {
 			method: "fallback",
 			handle: null,
 			fileName: r
 		});
 	}
 }
-function tw(e, t, n, r, i, a = !1) {
-	t === "hml" && bS(r.handle), e.wasm.currentFileHandle = r.handle, e.wasm.fileName = r.fileName, RC({
+function ow(e, t, n, r, i, a = !1) {
+	t === "hml" && TS(r.handle), e.wasm.currentFileHandle = r.handle, e.wasm.fileName = r.fileName, UC({
 		fileName: r.fileName,
 		sourceFormat: n,
 		handle: r.handle
 	}).catch(() => void 0), e.refreshDocumentStatus(), e.wasm.requiresPasswordForSave = a, e.documentState.markClean(i);
 }
-function nw(e, t) {
-	let n = Rx[t].label;
+function sw(e, t) {
+	let n = Ux[t].label;
 	try {
-		let n = Gx(e.wasm, t, e.wasm.fileName);
-		rw(new Blob([n.content], { type: n.mimeType }), n.fileName);
+		let n = Xx(e.wasm, t, e.wasm.fileName);
+		cw(new Blob([n.content], { type: n.mimeType }), n.fileName);
 	} catch (e) {
 		let t = e instanceof Error ? e.message : String(e);
 		alert(g("command.file.exportHtmlBasedFile.message", {
@@ -49855,7 +49929,7 @@ function nw(e, t) {
 		}));
 	}
 }
-function rw(e, t) {
+function cw(e, t) {
 	let n = URL.createObjectURL(e), r = document.createElement("a");
 	r.href = n, r.download = t;
 	try {
@@ -49864,11 +49938,11 @@ function rw(e, t) {
 		setTimeout(() => URL.revokeObjectURL(n), 1e3);
 	}
 }
-async function iw(e, t) {
-	return (await DS(KC(e, t), t, { allowPassword: !1 }))?.fileName ?? null;
+async function lw(e, t) {
+	return (await MS(ZC(e, t), t, { allowPassword: !1 }))?.fileName ?? null;
 }
-async function aw(e, t) {
-	let n = e.wasm.requiresPasswordForSave, r = t !== "hml", i = await DS(KC(e.wasm.fileName, t), t, {
+async function uw(e, t) {
+	let n = e.wasm.requiresPasswordForSave, r = t !== "hml", i = await MS(ZC(e.wasm.fileName, t), t, {
 		allowPassword: r,
 		inheritPassword: n && r
 	});
@@ -49881,103 +49955,103 @@ async function aw(e, t) {
 		fileName: i.fileName,
 		password: null
 	};
-	let a = await jS(i.fileName);
+	let a = await IS(i.fileName);
 	return a === null ? null : {
 		fileName: i.fileName,
 		password: a
 	};
 }
-async function ow(e, t) {
+async function dw(e, t) {
 	let n = null;
 	try {
-		let r = e.wasm.getSourceFormat(), i = await aw(e, t);
+		let r = e.wasm.getSourceFormat(), i = await uw(e, t);
 		if (i === null) return;
-		n = i.password, qC(e, "save-as");
-		let a = i.fileName, o = YC(e, t, n ?? void 0), s = r === "hml" ? e.wasm.currentFileHandle : null, c = await zs(o.contentLoss, () => ew(e, t, o.blob, a, !0, s), (e) => e !== "cancelled" && e.method !== "fallback", (i) => tw(e, r, t, i, "save-as", n !== null), XC);
+		n = i.password, QC(e, "save-as");
+		let a = i.fileName, o = ew(e, t, n ?? void 0), s = r === "hml" ? e.wasm.currentFileHandle : null, c = await zs(o.contentLoss, () => aw(e, t, o.blob, a, !0, s), (e) => e !== "cancelled" && e.method !== "fallback", (i) => ow(e, r, t, i, "save-as", n !== null), tw);
 		if (c === "cancelled" || c.method !== "fallback") return;
-		let l = await iw(a, t);
+		let l = await lw(a, t);
 		if (!l) return;
-		Bs(o.contentLoss, () => rw(o.blob, l), () => {
-			e.wasm.fileName = l, RC({
+		Bs(o.contentLoss, () => cw(o.blob, l), () => {
+			e.wasm.fileName = l, UC({
 				fileName: l,
 				sourceFormat: t,
 				handle: null
 			}).catch(() => void 0), e.refreshDocumentStatus(), e.wasm.requiresPasswordForSave = n !== null, e.documentState.markClean("save-as");
-		}, XC);
+		}, tw);
 	} catch (e) {
-		sw("file:save-as", e);
+		fw("file:save-as", e);
 	} finally {
 		n = "";
 	}
 }
-function sw(e, t) {
+function fw(e, t) {
 	let n = t instanceof Error ? t.message : String(t);
 	console.error(`[${e}] 저장 실패:`, n), alert(g("command.file.reportSaveError.message", { p1: n }));
 }
-async function cw(e) {
+async function pw(e) {
 	let t = null;
 	try {
-		qC(e, "save");
-		let n = e.wasm.getSourceFormat(), r = TS(n, e.wasm.fileName, e.wasm.currentFileHandle), i = r.format !== "hml" || QC(e);
-		if (wS(r, i)) {
-			let t = await JC(e);
+		QC(e, "save");
+		let n = e.wasm.getSourceFormat(), r = AS(n, e.wasm.fileName, e.wasm.currentFileHandle), i = r.format !== "hml" || rw(e);
+		if (kS(r, i)) {
+			let t = await $C(e);
 			if (t === null) return "cancelled";
 			r = {
 				...r,
 				format: t,
 				forceSaveAs: r.forceSaveAs || t !== r.format,
-				suggestedName: CS(e.wasm.fileName, t)
+				suggestedName: OS(e.wasm.fileName, t)
 			};
 		}
 		if (e.wasm.requiresPasswordForSave) {
-			let n = ZC(r.format);
-			if (t = await jS(CS(e.wasm.fileName, n)), t === null) return "cancelled";
+			let n = nw(r.format);
+			if (t = await IS(OS(e.wasm.fileName, n)), t === null) return "cancelled";
 		}
-		let a = YC(e, r.format, t ?? void 0), o = await zs(a.contentLoss, () => ew(e, r.format, a.blob, r.suggestedName, r.forceSaveAs, e.wasm.currentFileHandle), (e) => e !== "cancelled" && e.method !== "fallback", (i) => tw(e, n, r.format, i, "save", t !== null), XC);
+		let a = ew(e, r.format, t ?? void 0), o = await zs(a.contentLoss, () => aw(e, r.format, a.blob, r.suggestedName, r.forceSaveAs, e.wasm.currentFileHandle), (e) => e !== "cancelled" && e.method !== "fallback", (i) => ow(e, n, r.format, i, "save", t !== null), tw);
 		if (o === "cancelled") return "cancelled";
 		if (o.method !== "fallback") return "saved";
-		let s = await lw(e, r);
-		return s ? (Bs(a.contentLoss, () => rw(a.blob, s), () => {
+		let s = await mw(e, r);
+		return s ? (Bs(a.contentLoss, () => cw(a.blob, s), () => {
 			e.wasm.requiresPasswordForSave = t !== null, e.documentState.markClean("save");
-		}, XC), "saved") : "cancelled";
+		}, tw), "saved") : "cancelled";
 	} catch (e) {
-		return sw("file:save", e), "failed";
+		return fw("file:save", e), "failed";
 	} finally {
 		t = "";
 	}
 }
-async function lw(e, t) {
+async function mw(e, t) {
 	if (!e.wasm.isNewDocument && !t.forceSaveAs) return t.suggestedName;
-	let n = await iw(t.suggestedName, t.format);
+	let n = await lw(t.suggestedName, t.format);
 	return n ? (e.wasm.fileName = n, t.forceSaveAs && (e.wasm.currentFileHandle = null), n) : null;
 }
-async function uw(e, t = {}) {
+async function hw(e, t = {}) {
 	let n = e.getContext();
 	if (!n.hasDocument || !n.isDirty) return !0;
-	let r = t.allowLocalSave !== !1, i = await NS({
+	let r = t.allowLocalSave !== !1, i = await RS({
 		fileName: e.wasm.fileName,
 		canSave: r,
 		...r ? {} : { saveUnavailableReason: "저장은 호스트 애플리케이션이 담당합니다." }
 	});
-	return i === "cancel" ? !1 : i === "discard" ? !0 : r ? await cw(e) === "saved" : !1;
+	return i === "cancel" ? !1 : i === "discard" ? !0 : r ? await pw(e) === "saved" : !1;
 }
-async function dw(e, t, n, r = null) {
+async function gw(e, t, n, r = null) {
 	e.documentElement.lang = "ko", e.head.replaceChildren();
 	let i = e.createElement("meta");
 	i.setAttribute("charset", "UTF-8");
 	let a = e.createElement("meta");
-	if (a.name = "viewport", a.content = "width=device-width, initial-scale=1.0", e.head.append(i, a), e.title = r ? g("command.file.doc.tooltip", { p1: t }) : VS(t), eC(e, n), e.body.replaceChildren(), e.body.className = r ? "rhwp-print-preview" : "", r) {
-		fw(e, r, t, n.length);
+	if (a.name = "viewport", a.content = "width=device-width, initial-scale=1.0", e.head.append(i, a), e.title = r ? g("command.file.doc.tooltip", { p1: t }) : KS(t), aC(e, n), e.body.replaceChildren(), e.body.className = r ? "rhwp-print-preview" : "", r) {
+		_w(e, r, t, n.length);
 		let i = e.getElementById("print-btn");
 		i && (i.hidden = !0);
 	}
 	for (let t = 0; t < n.length; t++) {
 		if (r?.closed) return;
-		tC(e, e.body, n[t]), r && t === 0 && Ax(r, n), r && t % 4 == 0 && await new Promise((e) => setTimeout(e, 0));
+		oC(e, e.body, n[t]), r && t === 0 && Fx(r, n), r && t % 4 == 0 && await new Promise((e) => setTimeout(e, 0));
 	}
-	r && Ax(r);
+	r && Fx(r);
 }
-function fw(e, t, n, r) {
+function _w(e, t, n, r) {
 	let i = e.createElement("div");
 	i.className = "print-preview-bar", i.setAttribute("role", "toolbar"), i.setAttribute("aria-label", g("command.file.appendPrintPreviewBar.label"));
 	let a = e.createElement("button");
@@ -49990,19 +50064,19 @@ function fw(e, t, n, r) {
 		p2: r
 	}), i.append(a, o, s), e.body.appendChild(i);
 }
-function pw() {
+function vw() {
 	return new Promise((e) => {
 		window.requestAnimationFrame(() => e());
 	});
 }
-async function mw() {
-	await pw(), await pw();
+async function yw() {
+	await vw(), await vw();
 }
-function hw(e, t) {
+function bw(e, t) {
 	let n = e.document.getElementById("print-loading-message");
 	n && (n.textContent = t);
 }
-async function gw(e, t, n, r) {
+async function xw(e, t, n, r) {
 	let i = e.wasm, a = r ?? Array.from({ length: i.pageCount }, (e, t) => t);
 	if (!a.length || a.some((e) => !Number.isInteger(e) || e < 0 || e >= i.pageCount)) throw Error("인쇄할 쪽 범위를 확인해 주세요.");
 	let o = i.withPortableMetrics(() => a.map((e) => ({
@@ -50012,25 +50086,25 @@ async function gw(e, t, n, r) {
 	for (let e = 0; e < s; e++) {
 		n(e + 1, s);
 		let { svg: t, info: r } = o[e];
-		c.push(YS(t, r, e)), e % 5 == 0 && await new Promise((e) => setTimeout(e, 0));
+		c.push(eC(t, r, e)), e % 5 == 0 && await new Promise((e) => setTimeout(e, 0));
 	}
 	return c;
 }
-var _w = !1;
-function vw() {
-	return _w ? (j({
+var Sw = !1;
+function Cw() {
+	return Sw ? (j({
 		message: g("command.file.beginPrintJob.message"),
 		durationMs: 2500
-	}), !1) : (_w = !0, !0);
+	}), !1) : (Sw = !0, !0);
 }
-async function yw(e) {
-	if (!vw()) return;
+async function ww(e) {
+	if (!Cw()) return;
 	let t = e.wasm, n = document.getElementById("sb-message"), r = n?.textContent || "", i = null, a = null, o = !0, s = !1, c = null;
 	try {
-		qC(e, "print-pdf");
+		QC(e, "print-pdf");
 		let r = t.pageCount;
 		if (r === 0) return;
-		i = new CC(r, V.getShowPdfPrintGuidance()), s = !0;
+		i = new OC(r, V.getShowPdfPrintGuidance()), s = !0;
 		let o = await i.showAsync();
 		if (!o.confirmed) return;
 		if (o.hideFutureGuidance) try {
@@ -50038,13 +50112,13 @@ async function yw(e) {
 		} catch (e) {
 			console.warn("[file:print-to-pdf] 안내 표시 설정을 저장하지 못했습니다:", e);
 		}
-		let l = HS("pdf", 0, r);
-		n && (n.textContent = l), i.updateProgress(0), await mw(), a = await sC();
-		let u = await gw(e, "pdf", (e, t) => {
-			n && (n.textContent = HS("pdf", e, t)), i?.updateProgress(e);
+		let l = qS("pdf", 0, r);
+		n && (n.textContent = l), i.updateProgress(0), await yw(), a = await fC();
+		let u = await xw(e, "pdf", (e, t) => {
+			n && (n.textContent = qS("pdf", e, t)), i?.updateProgress(e);
 		});
-		if (await dw(a.document, t.fileName, u), a.window.closed) return;
-		await uC(a), n && (n.textContent = US("pdf")), i.closeBeforePrint(), s = !1, await mw(), console.info(`[file:print-to-pdf] 브라우저 인쇄 호출 (surface=iframe, pages=${r}, profile=print)`), c = document.title, document.title = VS(t.fileName), a.window.print();
+		if (await gw(a.document, t.fileName, u), a.window.closed) return;
+		await hC(a), n && (n.textContent = JS("pdf")), i.closeBeforePrint(), s = !1, await yw(), console.info(`[file:print-to-pdf] 브라우저 인쇄 호출 (surface=iframe, pages=${r}, profile=print)`), c = document.title, document.title = KS(t.fileName), a.window.print();
 	} catch (e) {
 		o = !1;
 		let t = e instanceof Error ? e.message : String(e);
@@ -50053,29 +50127,29 @@ async function yw(e) {
 			durationMs: 5e3
 		});
 	} finally {
-		c !== null && (document.title = c), a?.dispose(), _w = !1, o && n && (n.textContent = r);
+		c !== null && (document.title = c), a?.dispose(), Sw = !1, o && n && (n.textContent = r);
 	}
 }
-async function bw(e, t, n = !1, r) {
-	if (!vw()) return;
+async function Tw(e, t, n = !1, r) {
+	if (!Cw()) return;
 	let i = e.wasm, a = document.getElementById("sb-message"), o = a?.textContent || "", s = null, c = !1, l = !0;
 	try {
-		qC(e, "print");
+		QC(e, "print");
 		let o = i.pageCount;
 		if (o === 0) return;
-		let l = cC(n ? { surfacePath: "print.html?pwhDirect=1" } : void 0), u = HS("print", 0, o);
+		let l = pC(n ? { surfacePath: "print.html?pwhDirect=1" } : void 0), u = qS("print", 0, o);
 		if (a && (a.textContent = u), s = await l, !s) return;
-		hw(s, u);
-		let d = await gw(e, "print", (e, t) => {
-			let n = HS("print", e, t);
-			a && (a.textContent = n), s && hw(s, n);
+		bw(s, u);
+		let d = await xw(e, "print", (e, t) => {
+			let n = qS("print", e, t);
+			a && (a.textContent = n), s && bw(s, n);
 		}, t);
-		if (await dw(s.document, i.fileName, d, s.window), s.window.closed) return;
-		if (await uC(s), a && (a.textContent = US("print")), c = !0, n) {
+		if (await gw(s.document, i.fileName, d, s.window), s.window.closed) return;
+		if (await hC(s), a && (a.textContent = JS("print")), c = !0, n) {
 			let e = s;
 			if (e.window.pwhNative?.getPrinters) {
 				let n = t ? null : i.createPwhPrintFontJob(), a = !0, o = n && (async (e) => {
-					let t = await kx(e, n.pairs, {
+					let t = await Px(e, n.pairs, {
 						records: Wr({ includeRegistered: !0 }),
 						resolve: di,
 						load: fi,
@@ -50086,8 +50160,8 @@ async function bw(e, t, n = !1, r) {
 					let r = n.snapshot;
 					r.setFontEnvironment(JSON.stringify(t.environment));
 					let i = e.document.createElement("div"), o = Array.from({ length: r.pageCount() }, (t, n) => {
-						let a = JSON.parse(r.getPageInfo(n)), o = YS(r.renderPageSvgWithProfile(n, "print"), a, n);
-						return tC(e.document, i, o), {
+						let a = JSON.parse(r.getPageInfo(n)), o = eC(r.renderPageSvgWithProfile(n, "print"), a, n);
+						return oC(e.document, i, o), {
 							widthMm: o.widthMm,
 							heightMm: o.heightMm,
 							sectionIndex: a.sectionIndex ?? 0
@@ -50103,7 +50177,7 @@ async function bw(e, t, n = !1, r) {
 					};
 				}), s;
 				try {
-					s = await Lx(e.window, {
+					s = await Hx(e.window, {
 						...r,
 						fontSubstitutes: o,
 						printPages: d.map((e) => ({
@@ -50127,15 +50201,15 @@ async function bw(e, t, n = !1, r) {
 		n && window.dispatchEvent(new CustomEvent("pwh-print-result", { detail: {
 			ok: !1,
 			message: t
-		} })), console.error("[file:print]", t), a && (a.textContent = g("command.file.statusEl.text.x2f5125", { p1: t })), e instanceof aC ? alert(g("command.file.runPrintPreview.message")) : j({
+		} })), console.error("[file:print]", t), a && (a.textContent = g("command.file.statusEl.text.x2f5125", { p1: t })), e instanceof uC ? alert(g("command.file.runPrintPreview.message")) : j({
 			message: g("command.file.runPrintPreview.message.xc4753b", { p1: t }),
 			durationMs: 5e3
 		});
 	} finally {
-		c || s?.close(), _w = !1, l && a && (a.textContent = o);
+		c || s?.close(), Sw = !1, l && a && (a.textContent = o);
 	}
 }
-var xw = [
+var Ew = [
 	{
 		id: "file:new-doc",
 		label: g("command.file.newDoc.label"),
@@ -50149,7 +50223,7 @@ var xw = [
 	{
 		id: "file:open",
 		label: g("command.file.open.label"),
-		execute: UC
+		execute: JC
 	},
 	{
 		id: "file:open-recent",
@@ -50157,7 +50231,7 @@ var xw = [
 		async execute(e, t) {
 			let n = typeof t?.id == "string" ? t.id : void 0;
 			if (!n) return;
-			let r = (await zC()).find((e) => e.id === n);
+			let r = (await WC()).find((e) => e.id === n);
 			if (!r) {
 				j({
 					message: g("command.file.execute.message"),
@@ -50165,17 +50239,17 @@ var xw = [
 				});
 				return;
 			}
-			await HC(r, {
-				ensurePermission: WC,
-				readFile: bC,
-				remove: BC,
+			await qC(r, {
+				ensurePermission: YC,
+				readFile: TC,
+				remove: GC,
 				toast: (e, t) => j({
 					message: e,
 					durationMs: t
 				}),
 				emitOpen: (t) => e.eventBus.emit("open-document-bytes", t),
 				requestReopen: () => {
-					UC(e);
+					JC(e);
 				}
 			});
 		}
@@ -50184,7 +50258,7 @@ var xw = [
 		id: "file:clear-recent",
 		label: g("command.file.clearRecent.registryLabel"),
 		async execute() {
-			confirm(g("command.file.execute.message.xb74439")) && (await VC(), j({
+			confirm(g("command.file.execute.message.xb74439")) && (await KC(), j({
 				message: g("command.file.execute.message.x93673a"),
 				durationMs: 2200
 			}));
@@ -50197,7 +50271,7 @@ var xw = [
 		shortcutLabel: "Ctrl+S",
 		canExecute: (e) => e.hasDocument,
 		async execute(e) {
-			await cw(e);
+			await pw(e);
 		}
 	},
 	{
@@ -50206,8 +50280,8 @@ var xw = [
 		shortcutLabel: "Ctrl+Shift+S",
 		canExecute: (e) => e.hasDocument,
 		async execute(e) {
-			let t = await JC(e);
-			t !== null && await ow(e, t);
+			let t = await $C(e);
+			t !== null && await dw(e, t);
 		}
 	},
 	{
@@ -50215,7 +50289,7 @@ var xw = [
 		label: g("command.file.saveAsHwp.registryLabel"),
 		canExecute: (e) => e.hasDocument,
 		async execute(e) {
-			await ow(e, "hwp");
+			await dw(e, "hwp");
 		}
 	},
 	{
@@ -50223,7 +50297,7 @@ var xw = [
 		label: g("command.file.saveAsHwpx.registryLabel"),
 		canExecute: (e) => e.hasDocument,
 		async execute(e) {
-			await ow(e, "hwpx");
+			await dw(e, "hwpx");
 		}
 	},
 	{
@@ -50234,7 +50308,7 @@ var xw = [
 		shortcutLabel: "F7",
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			new hS(e.wasm, e.eventBus, 0, e).show();
+			new bS(e.wasm, e.eventBus, 0, e).show();
 		}
 	},
 	{
@@ -50242,7 +50316,7 @@ var xw = [
 		label: g("command.file.printToPdf.label"),
 		canExecute: (e) => e.hasDocument,
 		async execute(e) {
-			await yw(e);
+			await ww(e);
 		}
 	},
 	{
@@ -50250,7 +50324,7 @@ var xw = [
 		label: g("command.file.exportHtml.label"),
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			nw(e, "html");
+			sw(e, "html");
 		}
 	},
 	{
@@ -50258,7 +50332,7 @@ var xw = [
 		label: g("command.file.exportDoc.label"),
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			nw(e, "doc");
+			sw(e, "doc");
 		}
 	},
 	{
@@ -50268,7 +50342,7 @@ var xw = [
 		shortcutLabel: "Ctrl+P",
 		canExecute: (e) => e.hasDocument,
 		async execute(e, t) {
-			await bw(e, t?.pwhPages, t?.pwhDirectPrint === !0, t?.pwhPrintOptions);
+			await Tw(e, t?.pwhPages, t?.pwhDirectPrint === !0, t?.pwhPrintOptions);
 		}
 	},
 	{
@@ -50277,10 +50351,10 @@ var xw = [
 		label: g("command.file.about.label"),
 		icon: "icon-help",
 		execute() {
-			new _S().show();
+			new SS().show();
 		}
 	}
-], Sw = 1e3, Cw = class extends A {
+], Dw = 1e3, Ow = class extends A {
 	guideInput;
 	memoInput;
 	nameInput;
@@ -50314,7 +50388,7 @@ var xw = [
 		let i = document.createElement("label");
 		i.className = "field-edit-label", i.textContent = g("dialog.fieldEdit.guideLabel.text"), r.appendChild(i), this.guideInput = document.createElement("input"), this.guideInput.type = "text", this.guideInput.className = "field-edit-input", this.guideInput.maxLength = 250, r.appendChild(this.guideInput), this.guideErrorLabel = document.createElement("div"), this.guideErrorLabel.className = "field-edit-error", this.guideErrorLabel.style.color = "#c00", this.guideErrorLabel.style.fontSize = "11px", this.guideErrorLabel.style.display = "none", this.guideErrorLabel.textContent = g("dialog.fieldEdit.guideErrorLabel.text", { p1: 250 }), r.appendChild(this.guideErrorLabel);
 		let a = document.createElement("label");
-		a.className = "field-edit-label", a.textContent = g("dialog.fieldEdit.memoLabel.text"), r.appendChild(a), this.memoInput = document.createElement("textarea"), this.memoInput.className = "field-edit-textarea", this.memoInput.rows = 4, this.memoInput.maxLength = Sw, r.appendChild(this.memoInput), this.memoErrorLabel = document.createElement("div"), this.memoErrorLabel.className = "field-edit-error", this.memoErrorLabel.style.color = "#c00", this.memoErrorLabel.style.fontSize = "11px", this.memoErrorLabel.style.display = "none", this.memoErrorLabel.textContent = g("dialog.fieldEdit.memoErrorLabel.text", { p1: Sw }), r.appendChild(this.memoErrorLabel);
+		a.className = "field-edit-label", a.textContent = g("dialog.fieldEdit.memoLabel.text"), r.appendChild(a), this.memoInput = document.createElement("textarea"), this.memoInput.className = "field-edit-textarea", this.memoInput.rows = 4, this.memoInput.maxLength = Dw, r.appendChild(this.memoInput), this.memoErrorLabel = document.createElement("div"), this.memoErrorLabel.className = "field-edit-error", this.memoErrorLabel.style.color = "#c00", this.memoErrorLabel.style.fontSize = "11px", this.memoErrorLabel.style.display = "none", this.memoErrorLabel.textContent = g("dialog.fieldEdit.memoErrorLabel.text", { p1: Dw }), r.appendChild(this.memoErrorLabel);
 		let o = document.createElement("label");
 		o.className = "field-edit-label", o.textContent = g("dialog.fieldEdit.nameLabel.text"), r.appendChild(o), this.nameInput = document.createElement("input"), this.nameInput.type = "text", this.nameInput.className = "field-edit-input", this.nameInput.maxLength = 250, r.appendChild(this.nameInput), this.nameErrorLabel = document.createElement("div"), this.nameErrorLabel.className = "field-edit-error", this.nameErrorLabel.style.color = "#c00", this.nameErrorLabel.style.fontSize = "11px", this.nameErrorLabel.style.display = "none", this.nameErrorLabel.textContent = g("dialog.fieldEdit.nameErrorLabel.text", { p1: 250 }), r.appendChild(this.nameErrorLabel);
 		let s = document.createElement("label");
@@ -50348,7 +50422,7 @@ var xw = [
 };
 //#endregion
 //#region @rhwp/studio/src/ui/find-dialog.ts
-function ww(e, t) {
+function kw(e, t) {
 	if (!e || !t.found) return;
 	let n = t.cellContext, r = n ? {
 		sectionIndex: t.sec,
@@ -50368,7 +50442,7 @@ function ww(e, t) {
 	}, a = e.cursor;
 	n ? (a?.clearSelection(), a?.moveTo(r)) : e.moveCursorTo(r), a && (a.setAnchor(), a.moveTo(i)), e.updateCaret?.();
 }
-var Tw = class e {
+var Aw = class e {
 	static lastQuery = "";
 	static lastCaseSensitive = !1;
 	_open = !1;
@@ -50545,7 +50619,7 @@ var Tw = class e {
 		this.matchCountLabel && (this.matchCountLabel.textContent = "", this.matchCountLabel.hidden = !0);
 	}
 	navigateToHit(e) {
-		ww(this.services.getInputHandler(), e);
+		kw(this.services.getInputHandler(), e);
 	}
 	doReplace() {
 		if (!this.currentHit || !this.currentHit.found) {
@@ -50583,7 +50657,7 @@ var Tw = class e {
 			document.addEventListener("mousemove", o), document.addEventListener("mouseup", s);
 		});
 	}
-}, Ew = class extends A {
+}, jw = class extends A {
 	services;
 	pageInput;
 	statusLabel;
@@ -50689,11 +50763,11 @@ var Tw = class e {
 };
 //#endregion
 //#region @rhwp/studio/src/compare/diff-location-label.ts
-function Dw(e) {
+function Mw(e) {
 	let t = (e ?? "").trim();
 	return t === "" || t === "(없음)";
 }
-function Ow(e, t) {
+function Nw(e, t) {
 	let n;
 	if (t === "left" && e.severity === "added") {
 		if (!e.contextOnLeft) return null;
@@ -50708,48 +50782,48 @@ function Ow(e, t) {
 	let i = t === "left" ? e.leftAnchor : e.rightAnchor;
 	return i ? `제 ${n + 1}구역, ${i.pageIndex + 1}쪽` : `제 ${n + 1}구역`;
 }
-function kw(e) {
-	let t = Ow(e, "left"), n = Ow(e, "right");
+function Pw(e) {
+	let t = Nw(e, "left"), n = Nw(e, "right");
 	return !t && !n ? null : t && n ? `좌 ${t}, 우 ${n}` : t ?? n;
 }
 //#endregion
 //#region @rhwp/studio/src/compare/compare-debug.ts
-function Aw() {
+function Fw() {
 	try {
 		if (typeof globalThis < "u" && globalThis.__RHWP_COMPARE_DEBUG__ || typeof window < "u" && (new URLSearchParams(window.location.search).get("compareDebug") === "1" || window.localStorage?.getItem("rhwp:compareDebug") === "1")) return !0;
 	} catch {}
 	return !1;
 }
-function jw(...e) {
-	Aw() && console.log("[rhwp:compare]", ...e);
+function Iw(...e) {
+	Fw() && console.log("[rhwp:compare]", ...e);
 }
 //#endregion
 //#region @rhwp/studio/src/compare/diff-engine.ts
-var Mw = 32, Nw = 20, Pw = 5, Fw = 10, Iw = 4, Lw = 3, Rw = .86, zw = .7, Bw = 4, Vw = .4, Hw = .12, Uw = .4, Ww = 1.5, Gw = .35, Kw = .28, qw = 12, Jw = 24, Yw = 28e4, Xw = 96e3, Zw = 14e6, Qw = .62, $w = 6, eT = 1.9, tT = 18e4, nT = 2600, rT = 96, iT = 45e4, aT = 48, oT = 2.35, sT = 4.38, cT = 4.25, lT = .74, uT = .36, dT = null, fT = null;
-function pT(e, t) {
-	let n = fT;
-	fT = e;
+var Lw = 32, Rw = 20, zw = 5, Bw = 10, Vw = 4, Hw = 3, Uw = .86, Ww = .7, Gw = 4, Kw = .4, qw = .12, Jw = .4, Yw = 1.5, Xw = .35, Zw = .28, Qw = 12, $w = 24, eT = 28e4, tT = 96e3, nT = 14e6, rT = .62, iT = 6, aT = 1.9, oT = 18e4, sT = 2600, cT = 96, lT = 45e4, uT = 48, dT = 2.35, fT = 4.38, pT = 4.25, mT = .74, hT = .36, gT = null, _T = null;
+function vT(e, t) {
+	let n = _T;
+	_T = e;
 	try {
 		return t();
 	} finally {
-		fT = n;
+		_T = n;
 	}
 }
-function mT(e) {
+function yT(e) {
 	return {
-		minTextLen: e.anchorTuning?.minTextLen ?? Nw,
-		minUniqueChars: e.anchorTuning?.minUniqueChars ?? $w,
-		maxWhitespaceRatio: e.anchorTuning?.maxWhitespaceRatio ?? Qw,
-		minEntropy: e.anchorTuning?.minEntropy ?? eT
+		minTextLen: e.anchorTuning?.minTextLen ?? Rw,
+		minUniqueChars: e.anchorTuning?.minUniqueChars ?? iT,
+		maxWhitespaceRatio: e.anchorTuning?.maxWhitespaceRatio ?? rT,
+		minEntropy: e.anchorTuning?.minEntropy ?? aT
 	};
 }
-function hT(e) {
+function bT(e) {
 	return {
-		maxComputeMs: e.performanceTuning?.maxComputeMs ?? nT,
-		hardSegmentCells: e.performanceTuning?.hardSegmentCells ?? tT
+		maxComputeMs: e.performanceTuning?.maxComputeMs ?? sT,
+		hardSegmentCells: e.performanceTuning?.hardSegmentCells ?? oT
 	};
 }
-function gT(e) {
+function xT(e) {
 	if (!e) return 0;
 	let t = /* @__PURE__ */ new Map();
 	for (let n of e) t.set(n, (t.get(n) ?? 0) + 1);
@@ -50760,17 +50834,17 @@ function gT(e) {
 	}
 	return n;
 }
-function _T(e, t) {
+function ST(e, t) {
 	let n = e.trim();
-	return n.length >= Pw && n.length < t.minTextLen && vT(n) ? !0 : e.length < t.minTextLen || (e.match(/\s/g) ?? []).length / Math.max(1, e.length) > t.maxWhitespaceRatio || new Set(e).size < t.minUniqueChars ? !1 : gT(e) >= t.minEntropy;
+	return n.length >= zw && n.length < t.minTextLen && CT(n) ? !0 : e.length < t.minTextLen || (e.match(/\s/g) ?? []).length / Math.max(1, e.length) > t.maxWhitespaceRatio || new Set(e).size < t.minUniqueChars ? !1 : xT(e) >= t.minEntropy;
 }
-function vT(e) {
+function CT(e) {
 	return e ? !!(/^\[[^\]]+\]$/.test(e) || /^\[[^\]]+:[^\]]+\]$/.test(e) || /^\d+\.\s+/.test(e)) : !1;
 }
-function yT() {
-	return dT ? dT.bailedOut ? !0 : Date.now() <= dT.deadline ? !1 : (dT.bailedOut = !0, !0) : !1;
+function wT() {
+	return gT ? gT.bailedOut ? !0 : Date.now() <= gT.deadline ? !1 : (gT.bailedOut = !0, !0) : !1;
 }
-function bT(e, t) {
+function TT(e, t) {
 	let n = 0, r = Math.min(e.length, t.length);
 	for (; n < r && e.charCodeAt(n) === t.charCodeAt(n);) n += 1;
 	let i = 0;
@@ -50780,7 +50854,7 @@ function bT(e, t) {
 		b: t.slice(n, t.length - i)
 	};
 }
-function xT(e, t) {
+function ET(e, t) {
 	let n = e.length, r = t.length;
 	if (n === 0) return r;
 	if (r === 0) return n;
@@ -50798,7 +50872,7 @@ function xT(e, t) {
 	}
 	return i[r];
 }
-function ST(e, t, n) {
+function DT(e, t, n) {
 	let r = n.length;
 	if (t <= 0) {
 		let e = Array(r + 1);
@@ -50819,7 +50893,7 @@ function ST(e, t, n) {
 	}
 	return i;
 }
-function CT(e, t, n) {
+function OT(e, t, n) {
 	let r = e.length, i = n.length, a = Array(i + 1);
 	for (let e = 0; e <= i; e += 1) a[e] = i - e;
 	for (let o = r - 1; o >= t; --o) {
@@ -50834,7 +50908,7 @@ function CT(e, t, n) {
 	}
 	return a;
 }
-function wT(e, t) {
+function kT(e, t) {
 	let n = e.length, r = t.length, i = Array.from({ length: n + 1 }, () => Array(r + 1).fill(0));
 	for (let e = 0; e <= n; e += 1) i[e][0] = e;
 	for (let e = 0; e <= r; e += 1) i[0][e] = e;
@@ -50846,61 +50920,61 @@ function wT(e, t) {
 	for (; a > 0 || o > 0;) a > 0 && o > 0 && e.charCodeAt(a - 1) === t.charCodeAt(o - 1) ? (s.push("="), --a, --o) : a > 0 && i[a][o] === i[a - 1][o] + 1 ? (s.push("-"), --a) : o > 0 && i[a][o] === i[a][o - 1] + 1 ? (s.push("+"), --o) : a > 0 && o > 0 ? (s.push("×"), --a, --o) : a > 0 ? (s.push("-"), --a) : (s.push("+"), --o);
 	return s.reverse(), s.join("");
 }
-function TT(e, t) {
+function AT(e, t) {
 	let n = e.length, r = t.length;
 	if (n === 0) return "+".repeat(r);
 	if (r === 0) return "-".repeat(n);
-	if (n * r <= Yw) return wT(e, t);
-	let i = Math.max(1, Math.floor(n / 2)), a = ST(e, i, t), o = CT(e, i, t), s = 0, c = Infinity;
+	if (n * r <= eT) return kT(e, t);
+	let i = Math.max(1, Math.floor(n / 2)), a = DT(e, i, t), o = OT(e, i, t), s = 0, c = Infinity;
 	for (let e = 0; e <= r; e += 1) {
 		let t = a[e] + o[e];
 		(t < c || t === c && e < s) && (c = t, s = e);
 	}
-	return TT(e.slice(0, i), t.slice(0, s)) + TT(e.slice(i), t.slice(s));
+	return AT(e.slice(0, i), t.slice(0, s)) + AT(e.slice(i), t.slice(s));
 }
-function ET(e, t) {
+function jT(e, t) {
 	if (e.length === 0 && t.length === 0) return "";
-	if (e.length + t.length > Xw) return `문자 diff 요약 생략(길이: ${e.length}+${t.length})`;
-	let { a: n, b: r } = bT(e, t), i = n.length, a = r.length;
-	return i === 0 && a === 0 ? "" : i * a > Zw ? `문자 diff 요약 생략(과대: ${i}×${a})` : `편집거리 ${xT(n, r)} · ${TT(n, r).replace(/=+/g, "·").slice(0, 100)}`;
+	if (e.length + t.length > tT) return `문자 diff 요약 생략(길이: ${e.length}+${t.length})`;
+	let { a: n, b: r } = TT(e, t), i = n.length, a = r.length;
+	return i === 0 && a === 0 ? "" : i * a > nT ? `문자 diff 요약 생략(과대: ${i}×${a})` : `편집거리 ${ET(n, r)} · ${AT(n, r).replace(/=+/g, "·").slice(0, 100)}`;
 }
-function DT(e, t) {
+function MT(e, t) {
 	let n = t.ignoreWhitespace ? e.replace(/\s+/g, " ").trim() : e;
 	return t.caseSensitive ? n : n.toLowerCase();
 }
-function OT(e) {
+function NT(e) {
 	let t = 2166136261;
 	for (let n = 0; n < e.length; n += 1) t ^= e.charCodeAt(n), t = Math.imul(t, 16777619);
 	return (t >>> 0).toString(16);
 }
-function kT(e) {
+function PT(e) {
 	let t = 2166136261;
 	for (let n = 0; n < e.length; n += 1) t ^= e[n], t = Math.imul(t, 16777619);
 	return (t >>> 0).toString(16);
 }
-function AT(e, t) {
+function FT(e, t) {
 	return `${e}:${t}`;
 }
-function jT(e, t) {
+function IT(e, t) {
 	return e === "table" ? "table" : e === "image" ? "image" : e === "shape" || e === "group" ? t.toLowerCase().includes("chart") ? "chart" : "shape" : t.toLowerCase().includes("chart") ? "chart" : "paragraphMeta";
 }
-function MT(e) {
+function LT(e) {
 	let t = e.key.match(/^(sid:[^:]+:\d+|loc:-?\d+:-?\d+:\d+):[^:]+$/);
 	if (!t) return `${e.kind}::${e.key}`;
 	let n = t[1];
 	return e.kind === "shape" || e.kind === "chart" ? `${e.kind}::${n}:shape` : e.kind === "table" ? `${e.kind}::${n}:table` : `${e.kind}::${n}:image`;
 }
-function NT(e) {
+function RT(e) {
 	let t = 0;
 	return e.summary.includes("text=\"") && !e.summary.includes("text=\"(없음)\"") && (t += 4), e.summary.includes("pix=nopix") || (t += 2), e.summary.includes("nobox") || (t += 1), e.type === "shape" && (t += 1), t;
 }
-function PT(e) {
+function zT(e) {
 	return e === "table" ? "표" : e === "shape" ? "도형" : e === "image" ? "이미지" : e === "chart" ? "그래프" : e === "text" ? "텍스트" : "메타";
 }
-function FT(e, t, n, r, i) {
+function BT(e, t, n, r, i) {
 	let a = "nosig";
 	try {
-		a = OT(e.getTableSignature(n, r, i));
+		a = NT(e.getTableSignature(n, r, i));
 	} catch {}
 	let o = e.getTableDimensions(n, r, i), s = Math.max(0, o.rowCount * o.colCount), c = [], l = [], u = [];
 	for (let a = 0; a < s; a += 1) {
@@ -50913,18 +50987,18 @@ function FT(e, t, n, r, i) {
 		let d = [];
 		for (let o = 0; o < s; o += 1) try {
 			let s = e.getCellParagraphLength(n, r, i, a, o), c = s > 0 ? e.getTextInCell(n, r, i, a, o, 0, s) : "";
-			c && d.push(DT(c, t));
+			c && d.push(MT(c, t));
 		} catch {}
 		let f = d.join("|");
 		if (c.push(f), f && l.length < 240) {
 			let e = f.replaceAll("\"", "'").replaceAll("\r\n", "\n").replaceAll("\n", " ↵ ").replace(/\s{2,}/g, " ").trim().slice(0, 180), t = `r${o.colCount > 0 ? Math.floor(a / o.colCount) + 1 : 1}c${o.colCount > 0 ? a % o.colCount + 1 : a + 1}`;
-			l.push(`${t}=${encodeURIComponent(e)}`), u.push(`${t}=${OT(f)}`);
+			l.push(`${t}=${encodeURIComponent(e)}`), u.push(`${t}=${NT(f)}`);
 		}
 	}
-	let d = OT(c.join("||")), f = c.filter(Boolean).slice(0, 2).map((e) => e.replaceAll("\"", "'").replace(/\s+/g, " ").trim()).join(" | ").slice(0, 80), p = "";
+	let d = NT(c.join("||")), f = c.filter(Boolean).slice(0, 2).map((e) => e.replaceAll("\"", "'").replace(/\s+/g, " ").trim()).join(" | ").slice(0, 80), p = "";
 	try {
 		let t = e.getTableProperties(n, r, i);
-		p = OT(JSON.stringify(t));
+		p = NT(JSON.stringify(t));
 	} catch {
 		p = "noprops";
 	}
@@ -50938,19 +51012,19 @@ function FT(e, t, n, r, i) {
 	let h = l.join("&"), g = u.join("&");
 	return `table r=${o.rowCount} c=${o.colCount} tprev="${f || "(없음)"}" cprev="${h || "(없음)"}" csha="${g || "(없음)"}" txt=${d} props=${p} box=${m} sig=${a}`;
 }
-function IT(e) {
+function VT(e) {
 	let t = e.match(/:(\d+):[^:]+$/);
 	return t && Number.isFinite(Number(t[1])) ? Number(t[1]) : null;
 }
-function LT(e) {
+function HT(e) {
 	return `${e.section}:${e.paragraph}`;
 }
-function RT(e) {
+function UT(e) {
 	let t = /* @__PURE__ */ new Map();
-	for (let { left: n, right: r } of e) n && r && t.set(LT(r), n);
+	for (let { left: n, right: r } of e) n && r && t.set(HT(r), n);
 	return t;
 }
-function zT(e) {
+function WT(e) {
 	let t = {};
 	for (let n of e.matchAll(/([a-z]+)=("([^"]*)"|[^\s]+)/g)) {
 		let e = n[2] ?? "";
@@ -50958,7 +51032,7 @@ function zT(e) {
 	}
 	return t;
 }
-function BT(e, t) {
+function GT(e, t) {
 	let n = (e) => {
 		let t = /* @__PURE__ */ new Map();
 		if (!e || e === "(없음)") return t;
@@ -50973,10 +51047,10 @@ function BT(e, t) {
 	for (let e of a) (r.get(e) ?? "") !== (i.get(e) ?? "") && (o += 1);
 	return o;
 }
-function VT(e, t, n) {
-	let r = zT(e.summary), i = zT(t.summary), a = [], o = PT(e.kind), s = (r, i, o, s, c = !1) => {
+function KT(e, t, n) {
+	let r = WT(e.summary), i = WT(t.summary), a = [], o = zT(e.kind), s = (r, i, o, s, c = !1) => {
 		(c || o !== s) && a.push({
-			id: AT(e.kind, `${n}:${r}`),
+			id: FT(e.kind, `${n}:${r}`),
 			kind: e.kind,
 			severity: "modified",
 			path: {
@@ -50994,7 +51068,7 @@ function VT(e, t, n) {
 	if (e.type === "table" && t.type === "table") {
 		let e = r.cprev && r.cprev !== "(없음)" || i.cprev && i.cprev !== "(없음)" || r.tprev && r.tprev !== "(없음)" || i.tprev && i.tprev !== "(없음)" ? "표" : "테이블", t = (r.r ?? "") !== (i.r ?? "") || (r.c ?? "") !== (i.c ?? "");
 		s("rows-cols", `${e} 행/열 변경`, `r=${r.r ?? "(없음)"} c=${r.c ?? "(없음)"}`, `r=${i.r ?? "(없음)"} c=${i.c ?? "(없음)"}`), s("size", `${e} 크기 변경`, `box=${r.box ?? "(없음)"}`, `box=${i.box ?? "(없음)"}`);
-		let n = `cprev="${r.cprev ?? r.tprev ?? "(없음)"}"`, o = `cprev="${i.cprev ?? i.tprev ?? "(없음)"}"`, c = (r.txt ?? "") !== (i.txt ?? "") || n !== o, l = BT(r.csha ?? "", i.csha ?? "");
+		let n = `cprev="${r.cprev ?? r.tprev ?? "(없음)"}"`, o = `cprev="${i.cprev ?? i.tprev ?? "(없음)"}"`, c = (r.txt ?? "") !== (i.txt ?? "") || n !== o, l = GT(r.csha ?? "", i.csha ?? "");
 		return s("text", t ? `${e} 텍스트 변경(구조변경 동반${l > 0 ? `, ${l}셀` : ""})` : `${e} 텍스트 변경${l > 0 ? `(${l}셀)` : ""}`, n, o, c), a;
 	}
 	if (e.type === "image" && t.type === "image") {
@@ -51009,7 +51083,7 @@ function VT(e, t, n) {
 	}
 	return s("generic", `${o} 속성 변경`, e.summary, t.summary), a;
 }
-function HT(e) {
+function qT(e) {
 	let t = (e) => e == null || Number.isNaN(e) ? 0 : Math.round(e / 2) * 2;
 	return JSON.stringify({
 		a: e.alignment ?? "",
@@ -51020,7 +51094,7 @@ function HT(e) {
 		ml: t(e.marginLeft)
 	});
 }
-function UT(e, t, n, r) {
+function JT(e, t, n, r) {
 	let i = /* @__PURE__ */ new Set([0]);
 	r > 0 && (i.add(1), i.add(Math.max(0, r - 1)), r > 2 && i.add(Math.floor(r / 2)));
 	for (let r of i) try {
@@ -51034,7 +51108,7 @@ function UT(e, t, n, r) {
 		};
 	} catch {}
 }
-function WT(e, t, n, r) {
+function YT(e, t, n, r) {
 	let i = /* @__PURE__ */ new Map();
 	for (let n = 0; n < t.pageCount; n += 1) {
 		let t;
@@ -51062,7 +51136,7 @@ function WT(e, t, n, r) {
 		t && (e.anchor = t, e.sectionPage = r.get(t.pageIndex) ?? t.pageIndex + 1);
 	}
 }
-function GT(e, t) {
+function XT(e, t) {
 	for (let n of e) {
 		if (n.anchor) continue;
 		let r, i = !1;
@@ -51101,7 +51175,7 @@ function GT(e, t) {
 		}
 	}
 }
-function KT(e, t, n, r) {
+function ZT(e, t, n, r) {
 	e.refreshLayout();
 	let i = /* @__PURE__ */ new Map();
 	for (let n = 0; n < t.pageCount; n += 1) try {
@@ -51112,16 +51186,16 @@ function KT(e, t, n, r) {
 	for (let n = 0; n < t.sectionCount; n += 1) {
 		let t = e.getParagraphCount(n);
 		for (let c = 0; c < t; c += 1) {
-			let t = e.getParagraphLength(n, c), l = t > 0 ? e.getTextRange(n, c, 0, t) : "", u = e.getControlTextPositions(n, c), d = DT(l, r), f = "";
+			let t = e.getParagraphLength(n, c), l = t > 0 ? e.getTextRange(n, c, 0, t) : "", u = e.getControlTextPositions(n, c), d = MT(l, r), f = "";
 			try {
 				let t = e.getParaPropertiesAt(n, c);
-				f = OT(HT(t));
+				f = NT(qT(t));
 				let r = t.headType ?? "None";
 				o.set(`${n}:${c}`, r === "Outline" || r === "Number");
 			} catch {
 				f = "", o.set(`${n}:${c}`, !1);
 			}
-			let p = OT(`${d}|cc:${u.length}${f ? `|ps:${f}` : ""}`), m = e.getParagraphStableId(n, c), h = UT(e, n, c, t), g = h ? i.get(h.pageIndex) ?? h.pageIndex + 1 : 1;
+			let p = NT(`${d}|cc:${u.length}${f ? `|ps:${f}` : ""}`), m = e.getParagraphStableId(n, c), h = JT(e, n, c, t), g = h ? i.get(h.pageIndex) ?? h.pageIndex + 1 : 1;
 			a.push({
 				section: n,
 				paragraph: c,
@@ -51137,16 +51211,16 @@ function KT(e, t, n, r) {
 			}), s += 1;
 		}
 	}
-	WT(e, t, a, i), GT(a, i);
-	let c = mT(r), l = /* @__PURE__ */ new Map();
+	YT(e, t, a, i), XT(a, i);
+	let c = yT(r), l = /* @__PURE__ */ new Map();
 	for (let e of a) l.set(e.signature, (l.get(e.signature) ?? 0) + 1);
 	for (let e of a) {
 		if ((l.get(e.signature) ?? 0) > 1) {
 			e.isAnchorCandidate = !1;
 			continue;
 		}
-		let t = e.normalizedText.trim(), n = o.get(`${e.section}:${e.paragraph}`) ?? !1, r = t.length >= Pw && t.length < c.minTextLen && vT(t), i = n && t.length >= 3 && t.length < c.minTextLen;
-		e.isAnchorCandidate = _T(e.normalizedText, c) || r || i;
+		let t = e.normalizedText.trim(), n = o.get(`${e.section}:${e.paragraph}`) ?? !1, r = t.length >= zw && t.length < c.minTextLen && CT(t), i = n && t.length >= 3 && t.length < c.minTextLen;
+		e.isAnchorCandidate = ST(e.normalizedText, c) || r || i;
 	}
 	let u = /* @__PURE__ */ new Map(), d = /* @__PURE__ */ new Map();
 	for (let e of a) u.set(`${e.section}:${e.paragraph}`, e.stableId), d.set(`${e.section}:${e.paragraph}`, e.normalizedText.slice(0, 48));
@@ -51156,7 +51230,7 @@ function KT(e, t, n, r) {
 		for (let i of t.controls) {
 			let t = i.secIdx ?? -1, a = i.paraIdx ?? -1, o = i.controlIdx ?? -1, s = t >= 0 && a >= 0 ? u.get(`${t}:${a}`) : void 0, c = s ? `sid:${s}:${o}:${i.type}` : `loc:${t}:${a}:${o}:${i.type}`, l = `${i.type} ${Math.round(i.w)}x${Math.round(i.h)}`;
 			try {
-				if (i.type === "table" && t >= 0 && a >= 0 && o >= 0) l = FT(e, r, t, a, o);
+				if (i.type === "table" && t >= 0 && a >= 0 && o >= 0) l = BT(e, r, t, a, o);
 				else if (i.type === "image" && t >= 0 && a >= 0 && o >= 0) {
 					let n = e.getPictureProperties(t, a, o), r = Math.round(n.width), i = Math.round(n.height), s = [
 						n.cropLeft,
@@ -51165,7 +51239,7 @@ function KT(e, t, n, r) {
 						n.cropBottom
 					].map((e) => Math.round(e)).join(","), c = `${n.effect}:${n.rotationAngle ?? 0}`, u = `${n.brightness ?? 0}/${n.contrast ?? 0}`, f = d.get(`${t}:${a}`) ?? "", p = ((n.description ?? "").trim() || f).replaceAll("\"", "'").slice(0, 48), m = "nopix";
 					try {
-						m = kT(e.getControlImageData(t, a, o));
+						m = PT(e.getControlImageData(t, a, o));
 					} catch {
 						m = "nopix";
 					}
@@ -51180,7 +51254,7 @@ function KT(e, t, n, r) {
 					}
 					let g = (h.trim() || (n.description ?? "").trim() || m).replaceAll("\"", "'").slice(0, 120), _ = !h.trim() && !!(n.description ?? "").trim(), v = !h.trim() && !(n.description ?? "").trim() && !!m.trim(), y = "nopix";
 					try {
-						y = kT(e.getControlImageData(t, a, o));
+						y = PT(e.getControlImageData(t, a, o));
 					} catch {
 						y = "nopix";
 					}
@@ -51203,7 +51277,7 @@ function KT(e, t, n, r) {
 				section: t,
 				paragraph: a,
 				summary: l,
-				kind: jT(i.type, l),
+				kind: IT(i.type, l),
 				anchor: {
 					pageIndex: n,
 					x: i.x,
@@ -51217,7 +51291,7 @@ function KT(e, t, n, r) {
 	for (let t of a) {
 		let n = e.getControlTextPositions(t.section, t.paragraph).length;
 		for (let i = 0; i < n; i += 1) try {
-			let n = FT(e, r, t.section, t.paragraph, i), a = t.stableId ? `sid:${t.stableId}:${i}:table` : `loc:${t.section}:${t.paragraph}:${i}:table`, o = t.anchor ?? {
+			let n = BT(e, r, t.section, t.paragraph, i), a = t.stableId ? `sid:${t.stableId}:${i}:table` : `loc:${t.section}:${t.paragraph}:${i}:table`, o = t.anchor ?? {
 				pageIndex: 0,
 				x: 0,
 				y: 0,
@@ -51247,26 +51321,26 @@ function KT(e, t, n, r) {
 	}
 	let m = /* @__PURE__ */ new Map();
 	for (let e of f) {
-		let t = MT(e), n = m.get(t);
+		let t = LT(e), n = m.get(t);
 		if (!n) {
 			m.set(t, e);
 			continue;
 		}
-		NT(e) > NT(n) && m.set(t, e);
+		RT(e) > RT(n) && m.set(t, e);
 	}
-	if (Aw()) {
+	if (Fw()) {
 		let e = p, t = {
 			layout: e.filter((e) => e.source === "layout").length,
 			direct: e.filter((e) => e.source === "direct").length
 		}, n = e.filter((e) => e.shapeTextLen > 0).length, r = e.filter((e) => e.usedDescription).length, i = e.filter((e) => e.usedParaFallback).length, a = e.filter((e) => e.hasPix).length;
-		jw("[shape-text-debug] 수집 요약", {
+		Iw("[shape-text-debug] 수집 요약", {
 			total: e.length,
 			bySource: t,
 			withShapeText: n,
 			withDescription: r,
 			withParaFallback: i,
 			withPix: a
-		}), jw("[shape-text-debug] 샘플(최대 20)", e.slice(0, 20).map((e) => ({
+		}), Iw("[shape-text-debug] 샘플(최대 20)", e.slice(0, 20).map((e) => ({
 			src: e.source,
 			sec: e.sec,
 			para: e.para,
@@ -51276,7 +51350,7 @@ function KT(e, t, n, r) {
 			desc: e.usedDescription,
 			paraFallback: e.usedParaFallback,
 			pix: e.hasPix
-		}))), jw("[shape-text-debug] 미추출 대상(shapeTextLen=0)", e.filter((e) => e.shapeTextLen === 0).map((e) => ({
+		}))), Iw("[shape-text-debug] 미추출 대상(shapeTextLen=0)", e.filter((e) => e.shapeTextLen === 0).map((e) => ({
 			src: e.source,
 			sec: e.sec,
 			para: e.para,
@@ -51298,14 +51372,14 @@ function KT(e, t, n, r) {
 		controls: [...m.values()]
 	};
 }
-async function qT(e, t, n) {
+async function QT(e, t, n) {
 	let r = new Js();
-	return await r.initialize(), KT(r, r.loadDocument(e, t), t, n);
+	return await r.initialize(), ZT(r, r.loadDocument(e, t), t, n);
 }
-function JT(e, t, n) {
-	return KT(e, e.getDocumentInfo(), t, n);
+function $T(e, t, n) {
+	return ZT(e, e.getDocumentInfo(), t, n);
 }
-function YT(e) {
+function eE(e) {
 	let t = /* @__PURE__ */ new Map(), n = /* @__PURE__ */ new Map();
 	for (let r of e.paragraphs) {
 		if (!r.stableId) return null;
@@ -51316,20 +51390,20 @@ function YT(e) {
 	}
 	return t;
 }
-function XT(e) {
+function tE(e) {
 	return e.replace(/[\u200b-\u200d\ufeff]/g, "").replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim().length === 0;
 }
-function ZT(e) {
-	return e.controlCount === 0 && XT(e.normalizedText);
+function nE(e) {
+	return e.controlCount === 0 && tE(e.normalizedText);
 }
-function QT(e) {
-	return e.filter((e) => e.kind === "r" ? !ZT(e.r) : e.kind !== "l" || !ZT(e.l));
+function rE(e) {
+	return e.filter((e) => e.kind === "r" ? !nE(e.r) : e.kind !== "l" || !nE(e.l));
 }
-function $T(e) {
+function iE(e) {
 	return `구역 ${e.section}, 문단 ${e.paragraph}`;
 }
-function eE(e, t, n) {
-	let r = YT(e), i = YT(t);
+function aE(e, t, n) {
+	let r = eE(e), i = eE(t);
 	if (!r || !i) return [];
 	let a = [.../* @__PURE__ */ new Set([...r.keys(), ...i.keys()])];
 	a.sort((e, t) => {
@@ -51340,8 +51414,8 @@ function eE(e, t, n) {
 	for (let e of a) {
 		let t = r.get(e), a = i.get(e);
 		if (t && !a) {
-			ZT(t) || o.push({
-				id: AT("text", `id-removed:${e}`),
+			nE(t) || o.push({
+				id: FT("text", `id-removed:${e}`),
 				kind: "text",
 				severity: "removed",
 				path: {
@@ -51356,8 +51430,8 @@ function eE(e, t, n) {
 			continue;
 		}
 		if (!t && a) {
-			ZT(a) || o.push({
-				id: AT("text", `id-added:${e}`),
+			nE(a) || o.push({
+				id: FT("text", `id-added:${e}`),
 				kind: "text",
 				severity: "added",
 				path: {
@@ -51372,31 +51446,31 @@ function eE(e, t, n) {
 			continue;
 		}
 		t && a && (t.normalizedText !== a.normalizedText && o.push({
-			id: AT("text", `id-modified:${e}`),
+			id: FT("text", `id-modified:${e}`),
 			kind: "text",
 			severity: "modified",
-			path: iE(t, a),
+			path: lE(t, a),
 			title: "텍스트 변경",
 			leftPreview: t.text,
 			rightPreview: a.text,
 			leftAnchor: t.anchor,
 			rightAnchor: a.anchor,
-			inlineTextDiff: ET(t.text, a.text)
-		}), n.includes("paragraphMeta") && t.signature === a.signature && Math.abs(t.globalIndex - a.globalIndex) > Lw && o.push({
-			id: AT("paragraphMeta", `id-moved:${e}`),
+			inlineTextDiff: jT(t.text, a.text)
+		}), n.includes("paragraphMeta") && t.signature === a.signature && Math.abs(t.globalIndex - a.globalIndex) > Hw && o.push({
+			id: FT("paragraphMeta", `id-moved:${e}`),
 			kind: "paragraphMeta",
 			severity: "modified",
-			path: iE(t, a),
+			path: lE(t, a),
 			title: "문단 순서 이동",
 			leftPreview: `A idx=${t.globalIndex}`,
 			rightPreview: `B idx=${a.globalIndex}`,
 			leftAnchor: t.anchor,
 			rightAnchor: a.anchor
 		}), n.includes("paragraphMeta") && t.controlCount !== a.controlCount && o.push({
-			id: AT("paragraphMeta", `id-ctrlcount:${e}`),
+			id: FT("paragraphMeta", `id-ctrlcount:${e}`),
 			kind: "paragraphMeta",
 			severity: "modified",
-			path: iE(t, a),
+			path: lE(t, a),
 			title: "문단 개체 수 변경",
 			leftPreview: `controls=${t.controlCount}`,
 			rightPreview: `controls=${a.controlCount}`,
@@ -51406,15 +51480,15 @@ function eE(e, t, n) {
 	}
 	return o;
 }
-function tE(e, t, n) {
-	let r = !!(YT(t) && YT(n));
+function oE(e, t, n) {
+	let r = !!(eE(t) && eE(n));
 	return e === "identity" && r ? "identity" : "alignment";
 }
-function nE(e) {
+function sE(e) {
 	return e.kind === "paragraphMeta" && (e.id.includes("moved:") || e.id.includes("id-moved:"));
 }
-function rE(e, t, n) {
-	let r = YT(t), i = YT(n);
+function cE(e, t, n) {
+	let r = eE(t), i = eE(n);
 	if (!r || !i) return e;
 	let a = t.paragraphs.map((e) => e.stableId).filter((e) => e && i.has(e)), o = n.paragraphs.map((e) => e.stableId).filter((e) => e && r.has(e)), s = /* @__PURE__ */ new Map(), c = /* @__PURE__ */ new Map();
 	a.forEach((e, t) => s.set(e, t)), o.forEach((e, t) => c.set(e, t));
@@ -51423,7 +51497,7 @@ function rE(e, t, n) {
 	let u = Array(t.paragraphs.length + 1).fill(0);
 	for (let e = 0; e < t.paragraphs.length; e += 1) u[e + 1] = u[e] + +!i.has(t.paragraphs[e].stableId);
 	return e.filter((e) => {
-		if (!nE(e)) return !0;
+		if (!sE(e)) return !0;
 		let n, a, o = e.id.includes("id-moved:") ? e.id.split("id-moved:")[1] : "";
 		if (o ? (n = r.get(o), a = i.get(o)) : (n = t.paragraphs.find((t) => t.section === e.path.section && t.paragraph === e.path.paragraph), a = n ? i.get(n.stableId) : void 0), !n || !a) return !0;
 		let d = a.globalIndex - n.globalIndex;
@@ -51438,7 +51512,7 @@ function rE(e, t, n) {
 		return !0;
 	});
 }
-function iE(e, t) {
+function lE(e, t) {
 	return t ? {
 		section: t.section,
 		paragraph: t.paragraph
@@ -51450,7 +51524,7 @@ function iE(e, t) {
 		paragraph: 0
 	};
 }
-function aE(e, t, n) {
+function uE(e, t, n) {
 	let r = /* @__PURE__ */ new Map(), i = /* @__PURE__ */ new Map();
 	for (let t of e) r.set(t.signature, (r.get(t.signature) ?? 0) + 1);
 	for (let e of t) i.set(e.signature, (i.get(e.signature) ?? 0) + 1);
@@ -51473,7 +51547,7 @@ function aE(e, t, n) {
 	}
 	return o;
 }
-function oE(e) {
+function dE(e) {
 	let t = /* @__PURE__ */ new Map();
 	for (let n of e) {
 		let e = n.normalizedText.trim();
@@ -51481,13 +51555,13 @@ function oE(e) {
 	}
 	return t;
 }
-function sE(e, t) {
-	let n = oE(e), r = oE(t), i = /* @__PURE__ */ new Set();
+function fE(e, t) {
+	let n = dE(e), r = dE(t), i = /* @__PURE__ */ new Set();
 	for (let [e, t] of n) t === 1 && r.get(e) === 1 && i.add(e);
 	return i;
 }
-function cE(e, t, n) {
-	let r = sE(e, t), i = /* @__PURE__ */ new Map();
+function pE(e, t, n) {
+	let r = fE(e, t), i = /* @__PURE__ */ new Map();
 	for (let e = 0; e < t.length; e += 1) {
 		let n = t[e];
 		n.isAnchorCandidate && (i.has(n.signature) || i.set(n.signature, []), i.get(n.signature).push(e));
@@ -51508,7 +51582,7 @@ function cE(e, t, n) {
 	}
 	return a;
 }
-function lE(e, t) {
+function mE(e, t) {
 	let n = Array.from(e), r = Array.from(t);
 	if (n.length < 2 || r.length < 2) return 0;
 	let i = /* @__PURE__ */ new Set(), a = /* @__PURE__ */ new Set();
@@ -51519,7 +51593,7 @@ function lE(e, t) {
 	for (let e of i) a.has(e) && (o += 1);
 	return 2 * o / (i.size + a.size);
 }
-function uE(e, t) {
+function hE(e, t) {
 	if (!e && !t) return 1;
 	if (!e || !t) return 0;
 	if (e === t) return 1;
@@ -51527,48 +51601,48 @@ function uE(e, t) {
 		let e = 0;
 		for (let t of n) r.has(t) && (e += 1);
 		return 2 * e / (n.size + r.size);
-	})(), a = lE(e.replace(/\s+/g, ""), t.replace(/\s+/g, "")), o = e.length <= t.length ? e : t, s = e.length <= t.length ? t : e, c = o.length >= 4 && s.includes(o) ? .96 : 0, l = i * .2 + a * .8;
+	})(), a = mE(e.replace(/\s+/g, ""), t.replace(/\s+/g, "")), o = e.length <= t.length ? e : t, s = e.length <= t.length ? t : e, c = o.length >= 4 && s.includes(o) ? .96 : 0, l = i * .2 + a * .8;
 	return Math.max(l, c);
 }
-function dE(e, t) {
+function gE(e, t) {
 	if (e.section !== t.section || Math.abs(e.paragraph - t.paragraph) > 1 || e.controlCount !== t.controlCount) return !1;
-	if (fT) {
-		let n = e.globalIndex - fT.leftBaseGi, r = t.globalIndex - fT.rightBaseGi;
+	if (_T) {
+		let n = e.globalIndex - _T.leftBaseGi, r = t.globalIndex - _T.rightBaseGi;
 		return Math.abs(n - r) <= 2;
 	}
 	return Math.abs(e.globalIndex - t.globalIndex) <= 2;
 }
-function fE(e, t) {
+function _E(e, t) {
 	let n = e.normalizedText.replace(/\s+/g, "").length, r = t.normalizedText.replace(/\s+/g, "").length;
 	return n > 15 && r > 15;
 }
-function pE(e, t) {
-	return dE(e, t) ? fE(e, t) ? .25 : .45 : zw;
+function vE(e, t) {
+	return gE(e, t) ? _E(e, t) ? .25 : .45 : Ww;
 }
-function mE(e, t) {
-	let n = uE(e.normalizedText, t.normalizedText);
-	return !dE(e, t) || !fE(e, t) ? n : n > Hw ? Math.max(n, Vw) : n;
+function yE(e, t) {
+	let n = hE(e.normalizedText, t.normalizedText);
+	return !gE(e, t) || !_E(e, t) ? n : n > qw ? Math.max(n, Kw) : n;
 }
-function hE(e, t) {
+function bE(e, t) {
 	if (e.signature === t.signature) return 0;
-	let n = mE(e, t);
-	if (n < pE(e, t)) return Bw;
+	let n = yE(e, t);
+	if (n < vE(e, t)) return Gw;
 	let r = 1 - n;
-	return e.controlCount !== t.controlCount && (r += .35), dE(e, t) && (r = Math.max(0, r - Uw)), r;
+	return e.controlCount !== t.controlCount && (r += .35), gE(e, t) && (r = Math.max(0, r - Jw)), r;
 }
-function gE(e) {
-	let t = e.normalizedText.trim(), n = t ? OT(t) : "empty";
+function xE(e) {
+	let t = e.normalizedText.trim(), n = t ? NT(t) : "empty";
 	return {
 		...e,
 		signature: `nh:${n}`
 	};
 }
-function _E(e, t, n, r) {
-	if (e.length + t.length < aT) return null;
-	let i = aE(e.map(gE), t.map(gE), 0);
-	return i.length === 0 ? null : vE(e, t, i, n, r);
+function SE(e, t, n, r) {
+	if (e.length + t.length < uT) return null;
+	let i = uE(e.map(xE), t.map(xE), 0);
+	return i.length === 0 ? null : CE(e, t, i, n, r);
 }
-function vE(e, t, n, r, i) {
+function CE(e, t, n, r, i) {
 	let a = [
 		{
 			li: -1,
@@ -51587,17 +51661,17 @@ function vE(e, t, n, r, i) {
 			right: t[s.ri]
 		});
 		let l = e.slice(s.li + 1, c.li), u = t.slice(s.ri + 1, c.ri);
-		(l.length !== 0 || u.length !== 0) && o.push(...xE(l, u, r + 1, i));
+		(l.length !== 0 || u.length !== 0) && o.push(...EE(l, u, r + 1, i));
 	}
 	return o;
 }
-function yE(e, t, n, r) {
-	let i = aE(e, t, n >= 1 ? Iw : Fw);
-	return i.length === 0 ? [] : vE(e, t, i, n, r);
+function wE(e, t, n, r) {
+	let i = uE(e, t, n >= 1 ? Vw : Bw);
+	return i.length === 0 ? [] : CE(e, t, i, n, r);
 }
-function bE(e, t) {
+function TE(e, t) {
 	let n = e.length, r = t.length;
-	if (n === 0 || r === 0 || n * r > iT) return null;
+	if (n === 0 || r === 0 || n * r > lT) return null;
 	let i = 0, a = 0, o = 0;
 	for (let s = 0; s < n; s += 1) for (let c = 0; c < r; c += 1) {
 		if (e[s].signature !== t[c].signature) continue;
@@ -51611,63 +51685,63 @@ function bE(e, t) {
 		len: i
 	};
 }
-function xE(e, t, n = 0, r = null) {
-	let i = e.length, a = t.length, o = hT(IE ?? FE);
+function EE(e, t, n = 0, r = null) {
+	let i = e.length, a = t.length, o = bT(VE ?? BE);
 	return i === 0 && a === 0 ? [] : i === 0 ? t.map((e) => ({
 		left: null,
 		right: e
 	})) : a === 0 ? e.map((e) => ({
 		left: e,
 		right: null
-	})) : pT(r ? {
+	})) : vT(r ? {
 		leftBaseGi: r.leftAnchorGi,
 		rightBaseGi: r.rightAnchorGi
 	} : {
 		leftBaseGi: e[0].globalIndex,
 		rightBaseGi: t[0].globalIndex
 	}, () => {
-		if (yT()) return wE(e, t);
-		if (n >= rT) return i * a <= 22500 && i * a <= o.hardSegmentCells ? SE(e, t) : wE(e, t);
-		if (aE(e, t, n >= 1 ? Iw : Fw).length > 0) return yE(e, t, n, r);
-		let s = _E(e, t, n, r);
+		if (wT()) return kE(e, t);
+		if (n >= cT) return i * a <= 22500 && i * a <= o.hardSegmentCells ? DE(e, t) : kE(e, t);
+		if (uE(e, t, n >= 1 ? Vw : Bw).length > 0) return wE(e, t, n, r);
+		let s = SE(e, t, n, r);
 		if (s) return s;
-		if (i * a <= 22500 && i * a <= o.hardSegmentCells) return SE(e, t);
-		let c = bE(e, t);
-		if (c && n + 1 < rT) {
+		if (i * a <= 22500 && i * a <= o.hardSegmentCells) return DE(e, t);
+		let c = TE(e, t);
+		if (c && n + 1 < cT) {
 			let { li0: i, ri0: a, len: o } = c, s = [];
-			s.push(...xE(e.slice(0, i), t.slice(0, a), n + 1, r));
+			s.push(...EE(e.slice(0, i), t.slice(0, a), n + 1, r));
 			for (let n = 0; n < o; n += 1) s.push({
 				left: e[i + n],
 				right: t[a + n]
 			});
-			return s.push(...xE(e.slice(i + o), t.slice(a + o), n + 1, r)), s;
+			return s.push(...EE(e.slice(i + o), t.slice(a + o), n + 1, r)), s;
 		}
-		return wE(e, t);
+		return kE(e, t);
 	});
 }
-function SE(e, t) {
-	if (yT()) return wE(e, t);
+function DE(e, t) {
+	if (wT()) return kE(e, t);
 	let n = e.length, r = t.length, i = 1e9, a = 1.05, o = 1.05, s = Array.from({ length: n + 1 }, () => Array(r + 1).fill(i));
 	s[0][0] = 0;
 	for (let e = 1; e <= n; e += 1) s[e][0] = s[e - 1][0] + a;
 	for (let e = 1; e <= r; e += 1) s[0][e] = s[0][e - 1] + o;
 	for (let i = 1; i <= n; i += 1) {
-		if (i % 12 == 0 && yT()) return wE(e, t);
+		if (i % 12 == 0 && wT()) return kE(e, t);
 		for (let n = 1; n <= r; n += 1) {
-			let r = hE(e[i - 1], t[n - 1]);
+			let r = bE(e[i - 1], t[n - 1]);
 			s[i][n] = Math.min(s[i - 1][n - 1] + r, s[i - 1][n] + a, s[i][n - 1] + o);
 		}
 	}
 	let c = 1e-5, l = [], u = n, d = r;
 	for (; u > 0 || d > 0;) {
-		let n = u > 0 && d > 0 ? s[u - 1][d - 1] + hE(e[u - 1], t[d - 1]) : i, r = u > 0 ? s[u - 1][d] + a : i, f = d > 0 ? s[u][d - 1] + o : i, p = s[u][d];
+		let n = u > 0 && d > 0 ? s[u - 1][d - 1] + bE(e[u - 1], t[d - 1]) : i, r = u > 0 ? s[u - 1][d] + a : i, f = d > 0 ? s[u][d - 1] + o : i, p = s[u][d];
 		if (u > 0 && d > 0 && Math.abs(n - p) < c) {
 			for (l.push({
 				left: e[u - 1],
 				right: t[d - 1]
 			}), --u, --d; u > 0 && d > 0;) {
 				let n = e[u - 1], r = t[d - 1];
-				if (hE(n, r) !== 0 || Math.abs(s[u][d] - s[u - 1][d - 1]) >= c) break;
+				if (bE(n, r) !== 0 || Math.abs(s[u][d] - s[u - 1][d - 1]) >= c) break;
 				let i = s[u - 1][d] + a, f = s[u][d - 1] + o;
 				if (i < s[u][d] - c || f < s[u][d] - c) break;
 				l.push({
@@ -51696,18 +51770,18 @@ function SE(e, t) {
 	}
 	return l.reverse(), l;
 }
-function CE(e, t) {
-	let n = mE(e, t);
-	if (e.signature !== t.signature && n < pE(e, t)) return -1;
+function OE(e, t) {
+	let n = yE(e, t);
+	if (e.signature !== t.signature && n < vE(e, t)) return -1;
 	let r = 0;
-	return e.signature === t.signature && (r += 5), e.controlCount === t.controlCount && (r += 1), dE(e, t) && (r += Ww), r + n * 3;
+	return e.signature === t.signature && (r += 5), e.controlCount === t.controlCount && (r += 1), gE(e, t) && (r += Yw), r + n * 3;
 }
-function wE(e, t) {
+function kE(e, t) {
 	let n = [], r = /* @__PURE__ */ new Set(), i = 0, a = 3.45, o = (t, n, i) => {
 		let a = -1, o = -1, s = -1, c = Math.max(0, n), l = Math.min(e.length - 1, i);
 		for (let n = c; n <= l; n += 1) {
 			if (r.has(n)) continue;
-			let i = CE(e[n], t);
+			let i = OE(e[n], t);
 			i < 0 || (i > o ? (s = o, o = i, a = n) : i > s && (s = i));
 		}
 		return {
@@ -51717,7 +51791,7 @@ function wE(e, t) {
 		};
 	};
 	for (let s = 0; s < t.length; s += 1) {
-		if (s % 32 == 0 && yT()) {
+		if (s % 32 == 0 && wT()) {
 			for (let e = s; e < t.length; e += 1) n.push({
 				left: null,
 				right: t[e]
@@ -51728,12 +51802,12 @@ function wE(e, t) {
 			});
 			return n;
 		}
-		let c = t[s], { bestLi: l, bestScore: u, secondScore: d } = o(c, Math.max(i, 0), Math.min(e.length - 1, i + Mw + Mw));
+		let c = t[s], { bestLi: l, bestScore: u, secondScore: d } = o(c, Math.max(i, 0), Math.min(e.length - 1, i + Lw + Lw));
 		if (l < 0 || u < a) {
 			let t = o(c, 0, e.length - 1);
 			t.bestScore > u && (l = t.bestLi, u = t.bestScore, d = t.secondScore);
 		}
-		let f = !(l >= 0 && dE(e[l], c)) && l >= 0 && d >= 0 && u - d < Gw;
+		let f = !(l >= 0 && gE(e[l], c)) && l >= 0 && d >= 0 && u - d < Xw;
 		l >= 0 && u >= a && !f ? (r.add(l), n.push({
 			left: e[l],
 			right: c
@@ -51748,39 +51822,39 @@ function wE(e, t) {
 	});
 	return n;
 }
-function TE(e, t, n) {
+function AE(e, t, n) {
 	let r = `${t.normalizedText} ${n.normalizedText}`.trim();
 	if (!r) return !1;
 	let i = e.normalizedText.replace(/\s+/g, " ").trim(), a = r.replace(/\s+/g, " ").trim();
 	if (!i) return !1;
 	let o = Math.max(2, Math.ceil(i.length * .06));
-	return a.length > i.length + o ? !1 : uE(e.normalizedText, r) >= Rw;
+	return a.length > i.length + o ? !1 : hE(e.normalizedText, r) >= Uw;
 }
-function EE(e, t, n, r) {
+function jE(e, t, n, r) {
 	if (e.section !== t.section || Math.abs(e.paragraph - t.paragraph) > 2 || Math.abs(e.globalIndex - t.globalIndex) > 4 || e.controlCount !== t.controlCount || e.normalizedText.length === 0 == (t.normalizedText.length === 0)) return !1;
 	let i = new Map(n.map((e) => [e.globalIndex, e])), a = new Map(r.map((e) => [e.globalIndex, e])), o = i.get(e.globalIndex - 1) ?? null, s = i.get(e.globalIndex + 1) ?? null, c = a.get(t.globalIndex - 1) ?? null, l = a.get(t.globalIndex + 1) ?? null, u = (e) => !!e && e.normalizedText.length === 0;
 	if ((u(o) || u(s) || u(c) || u(l)) && !(Math.abs(e.paragraph - t.paragraph) <= 2 && Math.abs(e.globalIndex - t.globalIndex) <= 4)) return !1;
 	let d = !!o && !!c && o.section === c.section && o.signature === c.signature, f = !!s && !!l && s.section === l.section && s.signature === l.signature;
 	return !(!d && !f && !(Math.abs(e.paragraph - t.paragraph) <= 2 && Math.abs(e.globalIndex - t.globalIndex) <= 4));
 }
-function DE(e, t) {
-	return e.section !== t.section || e.controlCount !== t.controlCount || Math.abs(e.paragraph - t.paragraph) > qw || Math.abs(e.globalIndex - t.globalIndex) > Jw ? !1 : uE(e.normalizedText, t.normalizedText) >= Kw;
+function ME(e, t) {
+	return e.section !== t.section || e.controlCount !== t.controlCount || Math.abs(e.paragraph - t.paragraph) > Qw || Math.abs(e.globalIndex - t.globalIndex) > $w ? !1 : hE(e.normalizedText, t.normalizedText) >= Zw;
 }
-function OE(e, t) {
+function NE(e, t) {
 	for (let n = t - 1; n >= 0; n--) {
 		let t = e[n];
 		if (t.kind === "lr" || t.kind === "l") return t.l;
 	}
 	return null;
 }
-function kE(e, t) {
+function PE(e, t) {
 	for (let n = t - 1; n >= 0; n--) {
 		let t = e[n];
 		if (t.kind === "lr" || t.kind === "r") return t.r;
 	}
 	return null;
 }
-function AE(e) {
+function FE(e) {
 	let t = [];
 	for (let n of e) {
 		let { left: e, right: r } = n;
@@ -51798,17 +51872,17 @@ function AE(e) {
 	}
 	return t;
 }
-function jE(e, t, n) {
+function IE(e, t, n) {
 	let r = [], i = 0;
 	for (; i < e.length;) {
 		let a = e[i], o = i + 1 < e.length ? e[i + 1] : null;
-		if (a.kind === "l" && o?.kind === "r" && EE(a.l, o.r, t, n)) {
+		if (a.kind === "l" && o?.kind === "r" && jE(a.l, o.r, t, n)) {
 			r.push({
-				id: AT("text", `modified-empty-edit:${a.l.section}:${a.l.paragraph}`),
+				id: FT("text", `modified-empty-edit:${a.l.section}:${a.l.paragraph}`),
 				kind: "text",
 				severity: "modified",
-				path: iE(a.l, o.r),
-				title: `텍스트 변경 (${$T(a.l)})`,
+				path: lE(a.l, o.r),
+				title: `텍스트 변경 (${iE(a.l)})`,
 				leftPreview: a.l.text,
 				rightPreview: o.r.text,
 				leftAnchor: a.l.anchor,
@@ -51816,13 +51890,13 @@ function jE(e, t, n) {
 			}), i += 2;
 			continue;
 		}
-		if (a.kind === "r" && o?.kind === "l" && EE(o.l, a.r, t, n)) {
+		if (a.kind === "r" && o?.kind === "l" && jE(o.l, a.r, t, n)) {
 			r.push({
-				id: AT("text", `modified-empty-edit:${o.l.section}:${o.l.paragraph}`),
+				id: FT("text", `modified-empty-edit:${o.l.section}:${o.l.paragraph}`),
 				kind: "text",
 				severity: "modified",
-				path: iE(o.l, a.r),
-				title: `텍스트 변경 (${$T(o.l)})`,
+				path: lE(o.l, a.r),
+				title: `텍스트 변경 (${iE(o.l)})`,
 				leftPreview: o.l.text,
 				rightPreview: a.r.text,
 				leftAnchor: o.l.anchor,
@@ -51830,14 +51904,14 @@ function jE(e, t, n) {
 			}), i += 2;
 			continue;
 		}
-		if (a.kind === "l" && o?.kind === "r" && DE(a.l, o.r)) {
+		if (a.kind === "l" && o?.kind === "r" && ME(a.l, o.r)) {
 			let e = o.r;
 			r.push({
-				id: AT("text", `modified-merged:${a.l.section}:${a.l.paragraph}`),
+				id: FT("text", `modified-merged:${a.l.section}:${a.l.paragraph}`),
 				kind: "text",
 				severity: "modified",
-				path: iE(a.l, e),
-				title: `텍스트 변경 (${$T(e)})`,
+				path: lE(a.l, e),
+				title: `텍스트 변경 (${iE(e)})`,
 				leftPreview: a.l.text,
 				rightPreview: e.text,
 				leftAnchor: a.l.anchor,
@@ -51847,14 +51921,14 @@ function jE(e, t, n) {
 			}), i += 2;
 			continue;
 		}
-		if (a.kind === "r" && o?.kind === "l" && DE(o.l, a.r)) {
+		if (a.kind === "r" && o?.kind === "l" && ME(o.l, a.r)) {
 			let e = o.l;
 			r.push({
-				id: AT("text", `modified-merged:${e.section}:${e.paragraph}`),
+				id: FT("text", `modified-merged:${e.section}:${e.paragraph}`),
 				kind: "text",
 				severity: "modified",
-				path: iE(e, a.r),
-				title: `텍스트 변경 (${$T(a.r)})`,
+				path: lE(e, a.r),
+				title: `텍스트 변경 (${iE(a.r)})`,
 				leftPreview: e.text,
 				rightPreview: a.r.text,
 				leftAnchor: e.anchor,
@@ -51864,29 +51938,29 @@ function jE(e, t, n) {
 			}), i += 2;
 			continue;
 		}
-		if (a.kind === "r" && o?.kind === "lr" && TE(o.l, a.r, o.r)) {
+		if (a.kind === "r" && o?.kind === "lr" && AE(o.l, a.r, o.r)) {
 			let e = o.l, t = a.r, n = o.r;
 			r.push({
-				id: AT("text", `modified:${e.section}:${e.paragraph}`),
+				id: FT("text", `modified:${e.section}:${e.paragraph}`),
 				kind: "text",
 				severity: "modified",
-				path: iE(e, t),
-				title: `텍스트 변경 (${$T(t)})`,
+				path: lE(e, t),
+				title: `텍스트 변경 (${iE(t)})`,
 				leftPreview: e.text,
 				rightPreview: t.text,
 				leftAnchor: e.anchor,
 				rightAnchor: t.anchor,
 				leftSectionPage: e.sectionPage,
 				rightSectionPage: t.sectionPage
-			}, ...ZT(n) ? [] : [{
-				id: AT("text", `added:${n.section}:${n.paragraph}`),
+			}, ...nE(n) ? [] : [{
+				id: FT("text", `added:${n.section}:${n.paragraph}`),
 				kind: "text",
 				severity: "added",
 				path: {
 					section: n.section,
 					paragraph: n.paragraph
 				},
-				title: `문단 추가 (${$T(n)})`,
+				title: `문단 추가 (${iE(n)})`,
 				leftPreview: "",
 				rightPreview: n.text,
 				rightAnchor: n.anchor,
@@ -51900,17 +51974,17 @@ function jE(e, t, n) {
 		}
 		if (a.kind === "r") {
 			let t = a.r;
-			if (!ZT(t)) {
-				let n = OE(e, i);
+			if (!nE(t)) {
+				let n = NE(e, i);
 				r.push({
-					id: AT("text", `added:${t.section}:${t.paragraph}`),
+					id: FT("text", `added:${t.section}:${t.paragraph}`),
 					kind: "text",
 					severity: "added",
 					path: {
 						section: t.section,
 						paragraph: t.paragraph
 					},
-					title: `문단 추가 (${$T(t)})`,
+					title: `문단 추가 (${iE(t)})`,
 					leftPreview: "",
 					rightPreview: t.text,
 					rightAnchor: t.anchor,
@@ -51926,14 +52000,14 @@ function jE(e, t, n) {
 		}
 		if (a.kind === "l") {
 			let t = a.l;
-			if (!ZT(t)) {
-				let n = kE(e, i);
+			if (!nE(t)) {
+				let n = PE(e, i);
 				r.push({
-					id: AT("text", `removed:${t.section}:${t.paragraph}`),
+					id: FT("text", `removed:${t.section}:${t.paragraph}`),
 					kind: "text",
 					severity: "removed",
-					path: iE(t, null),
-					title: `문단 삭제 (${$T(t)})`,
+					path: lE(t, null),
+					title: `문단 삭제 (${iE(t)})`,
 					leftPreview: t.text,
 					rightPreview: "",
 					leftAnchor: t.anchor,
@@ -51949,37 +52023,37 @@ function jE(e, t, n) {
 		}
 		let s = a.l, c = a.r;
 		s.normalizedText !== c.normalizedText && r.push({
-			id: AT("text", `modified:${s.section}:${s.paragraph}`),
+			id: FT("text", `modified:${s.section}:${s.paragraph}`),
 			kind: "text",
 			severity: "modified",
-			path: iE(s, c),
-			title: `텍스트 변경 (${$T(s)})`,
+			path: lE(s, c),
+			title: `텍스트 변경 (${iE(s)})`,
 			leftPreview: s.text,
 			rightPreview: c.text,
 			leftAnchor: s.anchor,
 			rightAnchor: c.anchor
-		}), s.signature === c.signature && Math.abs(s.globalIndex - c.globalIndex) > Lw && r.push({
-			id: AT("paragraphMeta", `moved:${s.section}:${s.paragraph}`),
+		}), s.signature === c.signature && Math.abs(s.globalIndex - c.globalIndex) > Hw && r.push({
+			id: FT("paragraphMeta", `moved:${s.section}:${s.paragraph}`),
 			kind: "paragraphMeta",
 			severity: "modified",
 			path: {
 				section: s.section,
 				paragraph: s.paragraph
 			},
-			title: `문단 이동 감지 (${$T(s)})`,
+			title: `문단 이동 감지 (${iE(s)})`,
 			leftPreview: `A idx=${s.globalIndex}`,
 			rightPreview: `B idx=${c.globalIndex}`,
 			leftAnchor: s.anchor,
 			rightAnchor: c.anchor
 		}), s.controlCount !== c.controlCount && r.push({
-			id: AT("paragraphMeta", `ctrlcount:${s.section}:${s.paragraph}`),
+			id: FT("paragraphMeta", `ctrlcount:${s.section}:${s.paragraph}`),
 			kind: "paragraphMeta",
 			severity: "modified",
 			path: {
 				section: s.section,
 				paragraph: s.paragraph
 			},
-			title: `문단 개체 수 변경 (${$T(s)})`,
+			title: `문단 개체 수 변경 (${iE(s)})`,
 			leftPreview: `controls=${s.controlCount}`,
 			rightPreview: `controls=${c.controlCount}`,
 			leftAnchor: s.anchor,
@@ -51988,9 +52062,9 @@ function jE(e, t, n) {
 	}
 	return r;
 }
-function ME(e, t) {
-	let n = e.paragraphs, r = t.paragraphs, i = mT(IE ?? FE), a = cE(n, r, i);
-	Aw() && jw("[③ 앵커] 시그니처 유일 + 품질필터(길이/공백비율/엔트로피). 빈 줄·패턴 문장이 많으면 구간이 어긋날 수 있음.", `앵커 ${a.length}쌍 (앞 20개)`, a.slice(0, 20).map(({ li: e, ri: t }) => ({
+function LE(e, t) {
+	let n = e.paragraphs, r = t.paragraphs, i = yT(VE ?? BE), a = pE(n, r, i);
+	Fw() && Iw("[③ 앵커] 시그니처 유일 + 품질필터(길이/공백비율/엔트로피). 빈 줄·패턴 문장이 많으면 구간이 어긋날 수 있음.", `앵커 ${a.length}쌍 (앞 20개)`, a.slice(0, 20).map(({ li: e, ri: t }) => ({
 		li: e,
 		ri: t,
 		left: n[e].text.slice(0, 44),
@@ -52022,15 +52096,15 @@ function ME(e, t) {
 			leftAnchorGi: n[t.li].globalIndex,
 			rightAnchorGi: r[t.ri].globalIndex
 		} : null;
-		s.push(...xE(a, c, 0, l));
+		s.push(...EE(a, c, 0, l));
 	}
-	let c = RT(s);
+	let c = UT(s);
 	return {
-		diffs: jE(QT(AE(s)), n, r),
+		diffs: IE(rE(FE(s)), n, r),
 		rightToLeftPara: c
 	};
 }
-function NE(e, t) {
+function RE(e, t) {
 	let n = [], r = e.filter((e) => e.type === "table"), i = t.filter((e) => e.type === "table");
 	if (r.length === 0 || i.length === 0) return {
 		pins: [],
@@ -52038,10 +52112,10 @@ function NE(e, t) {
 		restRight: t
 	};
 	let a = (e) => {
-		let t = zT(e.summary), n = (t.txt ?? "").trim();
+		let t = WT(e.summary), n = (t.txt ?? "").trim();
 		if (n) return `t:${n}`;
 		let r = (t.sig ?? "").trim();
-		return r ? `s:${r}` : `h:${OT(e.summary)}`;
+		return r ? `s:${r}` : `h:${NT(e.summary)}`;
 	}, o = /* @__PURE__ */ new Map(), s = /* @__PURE__ */ new Map();
 	for (let e of r) {
 		let t = a(e), n = o.get(t);
@@ -52065,7 +52139,7 @@ function NE(e, t) {
 		restRight: t.filter((e) => !l.has(e))
 	};
 }
-function PE(e, t, n) {
+function zE(e, t, n) {
 	if (n.size === 0) return {
 		pairs: [],
 		restLeft: e,
@@ -52073,25 +52147,25 @@ function PE(e, t, n) {
 	};
 	let r = /* @__PURE__ */ new Map();
 	for (let t of e) {
-		let e = LT(t);
+		let e = HT(t);
 		r.has(e) || r.set(e, []), r.get(e).push(t);
 	}
-	for (let e of r.values()) e.sort((e, t) => (IT(e.key) ?? 0) - (IT(t.key) ?? 0));
-	let i = [...t].sort((e, t) => e.section === t.section ? e.paragraph === t.paragraph ? (IT(e.key) ?? 0) - (IT(t.key) ?? 0) : e.paragraph - t.paragraph : e.section - t.section), a = /* @__PURE__ */ new Set(), o = /* @__PURE__ */ new Set(), s = [];
+	for (let e of r.values()) e.sort((e, t) => (VT(e.key) ?? 0) - (VT(t.key) ?? 0));
+	let i = [...t].sort((e, t) => e.section === t.section ? e.paragraph === t.paragraph ? (VT(e.key) ?? 0) - (VT(t.key) ?? 0) : e.paragraph - t.paragraph : e.section - t.section), a = /* @__PURE__ */ new Set(), o = /* @__PURE__ */ new Set(), s = [];
 	for (let e of i) {
-		let t = n.get(LT(e));
+		let t = n.get(HT(e));
 		if (!t) continue;
-		let i = r.get(LT(t));
+		let i = r.get(HT(t));
 		if (!i?.length) continue;
 		let c = null, l = -1;
 		for (let t of i) {
 			if (a.has(t)) continue;
-			let n = VE(t, e);
+			let n = KE(t, e);
 			if (n < 0) continue;
-			let r = n + oT;
+			let r = n + dT;
 			r > l && (l = r, c = t);
 		}
-		c && l >= sT && (a.add(c), o.add(e), s.push({
+		c && l >= fT && (a.add(c), o.add(e), s.push({
 			left: c,
 			right: e
 		}));
@@ -52102,7 +52176,7 @@ function PE(e, t, n) {
 		restRight: t.filter((e) => !o.has(e))
 	};
 }
-var FE = {
+var BE = {
 	caseSensitive: !0,
 	ignoreWhitespace: !0,
 	kinds: [
@@ -52113,32 +52187,32 @@ var FE = {
 		"chart",
 		"paragraphMeta"
 	]
-}, IE = null;
-function LE(e, t, n) {
+}, VE = null;
+function HE(e, t, n) {
 	let r = [], i = new Map(e.controls.map((e) => [`${e.kind}::${e.key}`, e])), a = new Map(t.controls.map((e) => [`${e.kind}::${e.key}`, e])), o = [], s = [], c = /* @__PURE__ */ new Set([...i.keys(), ...a.keys()]);
 	for (let e of c) {
 		let t = i.get(e), n = a.get(e);
 		if (t && n) {
-			(t.summary !== n.summary || t.kind !== n.kind) && r.push(...VT(t, n, `modified:${e}`));
+			(t.summary !== n.summary || t.kind !== n.kind) && r.push(...KT(t, n, `modified:${e}`));
 			continue;
 		}
 		t && o.push(t), n && s.push(n);
 	}
-	let { pins: l, restLeft: u, restRight: d } = NE(o, s);
-	for (let { left: e, right: t } of l) (e.summary !== t.summary || e.kind !== t.kind) && r.push(...VT(e, t, `table-pin:${e.key}=>${t.key}`));
+	let { pins: l, restLeft: u, restRight: d } = RE(o, s);
+	for (let { left: e, right: t } of l) (e.summary !== t.summary || e.kind !== t.kind) && r.push(...KT(e, t, `table-pin:${e.key}=>${t.key}`));
 	let f = u, p = d;
 	if (n && n.size > 0) {
-		let e = PE(u, d, n);
-		for (let { left: t, right: n } of e.pairs) (t.summary !== n.summary || t.kind !== n.kind) && r.push(...VT(t, n, `align-slot:${t.key}=>${n.key}`));
+		let e = zE(u, d, n);
+		for (let { left: t, right: n } of e.pairs) (t.summary !== n.summary || t.kind !== n.kind) && r.push(...KT(t, n, `align-slot:${t.key}=>${n.key}`));
 		f = e.restLeft, p = e.restRight;
 	}
-	let m = RE(f, p), h = new Set(m.map((e) => e.left)), g = new Set(m.map((e) => e.right));
-	for (let { left: e, right: t } of m) (e.summary !== t.summary || e.type !== t.type || e.kind !== t.kind) && r.push(...VT(e, t, `fallback-modified:${e.key}=>${t.key}`));
+	let m = UE(f, p), h = new Set(m.map((e) => e.left)), g = new Set(m.map((e) => e.right));
+	for (let { left: e, right: t } of m) (e.summary !== t.summary || e.type !== t.type || e.kind !== t.kind) && r.push(...KT(e, t, `fallback-modified:${e.key}=>${t.key}`));
 	for (let e of p) {
 		if (g.has(e)) continue;
 		let t = `${e.kind}::${e.key}`;
 		r.push({
-			id: AT(e.kind, `added:${t}`),
+			id: FT(e.kind, `added:${t}`),
 			kind: e.kind,
 			severity: "added",
 			path: {
@@ -52146,7 +52220,7 @@ function LE(e, t, n) {
 				paragraph: e.paragraph,
 				controlKey: t
 			},
-			title: `${PT(e.kind)} 추가`,
+			title: `${zT(e.kind)} 추가`,
 			leftPreview: "",
 			rightPreview: e.summary,
 			rightAnchor: e.anchor
@@ -52156,7 +52230,7 @@ function LE(e, t, n) {
 		if (h.has(e)) continue;
 		let t = `${e.kind}::${e.key}`;
 		r.push({
-			id: AT(e.kind, `removed:${t}`),
+			id: FT(e.kind, `removed:${t}`),
 			kind: e.kind,
 			severity: "removed",
 			path: {
@@ -52164,7 +52238,7 @@ function LE(e, t, n) {
 				paragraph: e.paragraph,
 				controlKey: t
 			},
-			title: `${PT(e.kind)} 삭제`,
+			title: `${zT(e.kind)} 삭제`,
 			leftPreview: e.summary,
 			rightPreview: "",
 			leftAnchor: e.anchor
@@ -52172,13 +52246,13 @@ function LE(e, t, n) {
 	}
 	return r;
 }
-function RE(e, t) {
+function UE(e, t) {
 	let n = [], r = /* @__PURE__ */ new Set();
 	for (let i = 0; i < t.length; i += 1) {
 		let a = t[i], o = -1, s = -1;
 		for (let t = 0; t < e.length; t += 1) {
 			if (r.has(t)) continue;
-			let n = e[t], i = VE(n, a);
+			let n = e[t], i = KE(n, a);
 			i > s && (s = i, o = t);
 		}
 		o >= 0 && s >= 2.75 && (r.add(o), n.push({
@@ -52188,8 +52262,8 @@ function RE(e, t) {
 	}
 	return n;
 }
-function zE(e, t) {
-	let n = zT(e.summary), r = zT(t.summary);
+function WE(e, t) {
+	let n = WT(e.summary), r = WT(t.summary);
 	if ((n.r ?? "") !== (r.r ?? "") || (n.c ?? "") !== (r.c ?? "")) return .08;
 	let i = (e) => {
 		let t = e.cprev;
@@ -52197,15 +52271,15 @@ function zE(e, t) {
 		let n = e.tprev;
 		return n && n !== "(없음)" ? n : e.txt ?? "";
 	}, a = i(n), o = i(r);
-	if (a || o) return uE(a, o);
+	if (a || o) return hE(a, o);
 	let s = n.csha ?? "", c = r.csha ?? "";
-	return s && c && s === c ? 1 : uE(e.summary.replace(/\s+/g, " "), t.summary.replace(/\s+/g, " "));
+	return s && c && s === c ? 1 : hE(e.summary.replace(/\s+/g, " "), t.summary.replace(/\s+/g, " "));
 }
-function BE(e, t) {
-	let n = zE(e, t);
-	return n >= lT ? 0 : n <= uT ? 1 : (lT - n) / .38;
+function GE(e, t) {
+	let n = WE(e, t);
+	return n >= mT ? 0 : n <= hT ? 1 : (mT - n) / .38;
 }
-function VE(e, t) {
+function KE(e, t) {
 	if (e.kind !== t.kind) return -1;
 	let n = 0;
 	if (e.type === t.type && (n += 1.2), e.summary === t.summary) n += 2.6;
@@ -52213,18 +52287,18 @@ function VE(e, t) {
 		let r = e.summary.toLowerCase(), i = t.summary.toLowerCase();
 		r.includes("table") && i.includes("table") && (n += 1), r.includes("shape") && i.includes("shape") && (n += .8);
 	}
-	let r = IT(e.key), i = IT(t.key);
+	let r = VT(e.key), i = VT(t.key);
 	r != null && i != null && r === i && (n += 1.15), e.section === t.section && (n += .45);
 	let a = Math.abs(e.anchor.pageIndex - t.anchor.pageIndex);
 	a === 0 ? n += .9 : a === 1 && (n += .45);
 	let o = Math.abs(e.anchor.x - t.anchor.x), s = Math.abs(e.anchor.y - t.anchor.y), c = Math.abs(e.anchor.width - t.anchor.width), l = Math.abs(e.anchor.height - t.anchor.height);
 	if (o < 120 ? n += .35 : o < 260 && (n += .18), s < 80 ? n += .6 : s < 180 && (n += .3), c < 45 && l < 45 ? n += .45 : c < 120 && l < 120 && (n += .22), e.kind === "table" && t.kind === "table" && e.summary !== t.summary) {
-		let r = BE(e, t);
-		n -= cT * r;
+		let r = GE(e, t);
+		n -= pT * r;
 	}
 	return n;
 }
-function HE(e, t, n) {
+function qE(e, t, n) {
 	let r = /* @__PURE__ */ new Map(), i = /* @__PURE__ */ new Map(), a = /* @__PURE__ */ new Map(), o = /* @__PURE__ */ new Map();
 	for (let e of t.paragraphs) r.set(`${e.section}:${e.paragraph}`, e), a.set(e.stableId, e);
 	for (let e of n.paragraphs) i.set(`${e.section}:${e.paragraph}`, e), o.set(e.stableId, e);
@@ -52262,18 +52336,18 @@ function HE(e, t, n) {
 		}
 	}
 }
-function UE(e, t, n) {
-	IE = n;
-	let r = n.strategy ?? "alignment", i = hT(n);
-	dT = {
+function JE(e, t, n) {
+	VE = n;
+	let r = n.strategy ?? "alignment", i = bT(n);
+	gT = {
 		deadline: Date.now() + i.maxComputeMs,
 		bailedOut: !1
 	};
-	let a = tE(r, e, t);
-	if (Aw()) {
-		let n = YT(e), i = YT(t), o = 0;
+	let a = oE(r, e, t);
+	if (Fw()) {
+		let n = eE(e), i = eE(t), o = 0;
 		if (n && i) for (let e of n.keys()) i.has(e) && (o += 1);
-		jw("[① stable_id] 스냅샷 요약", {
+		Iw("[① stable_id] 스냅샷 요약", {
 			left: e.meta.name,
 			right: t.meta.name,
 			leftParas: e.paragraphs.length,
@@ -52290,7 +52364,7 @@ function UE(e, t, n) {
 				id: e.stableId ? `${e.stableId.slice(0, 14)}…` : "(빈)",
 				t: e.text.slice(0, 32)
 			}))
-		}), jw("[② 전략·폴백]", {
+		}), Iw("[② 전략·폴백]", {
 			optionsStrategy: r,
 			textMode: a,
 			mapsBuildOk: !!(n && i),
@@ -52299,10 +52373,10 @@ function UE(e, t, n) {
 		});
 	}
 	let o = a === "identity" ? {
-		diffs: eE(e, t, n.kinds),
+		diffs: aE(e, t, n.kinds),
 		rightToLeftPara: /* @__PURE__ */ new Map()
-	} : ME(e, t), s = rE([...o.diffs, ...LE(e, t, o.rightToLeftPara)].filter((e) => n.kinds.includes(e.kind)), e, t);
-	HE(s, e, t), Aw() && dT?.bailedOut && jw("[성능 가드레일] 타임버짓 초과로 일부 구간을 greedy/fallback으로 처리했습니다."), s.sort((e, t) => {
+	} : LE(e, t), s = cE([...o.diffs, ...HE(e, t, o.rightToLeftPara)].filter((e) => n.kinds.includes(e.kind)), e, t);
+	qE(s, e, t), Fw() && gT?.bailedOut && Iw("[성능 가드레일] 타임버짓 초과로 일부 구간을 greedy/fallback으로 처리했습니다."), s.sort((e, t) => {
 		let n = e.path.section ?? 0, r = t.path.section ?? 0;
 		return n === r ? (e.path.paragraph ?? 0) - (t.path.paragraph ?? 0) : n - r;
 	});
@@ -52317,29 +52391,29 @@ function UE(e, t, n) {
 			textCompareStrategyUsed: a
 		};
 	} finally {
-		dT = null, IE = null;
+		gT = null, VE = null;
 	}
 }
-async function WE(e, t, n, r, i) {
-	return UE(await qT(e, t, i), await qT(n, r, i), i);
+async function YE(e, t, n, r, i) {
+	return JE(await QT(e, t, i), await QT(n, r, i), i);
 }
 //#endregion
 //#region @rhwp/studio/src/history/idb-store.ts
-var GE = "rhwpStudioDocHistory", KE = 1, qE = "historyMeta", JE = "historyBlobs", YE = 24, XE = /* @__PURE__ */ new Map();
-function ZE() {
+var XE = "rhwpStudioDocHistory", ZE = 1, QE = "historyMeta", $E = "historyBlobs", eD = 24, tD = /* @__PURE__ */ new Map();
+function nD() {
 	return typeof indexedDB < "u";
 }
-function QE() {
-	return ZE() ? new Promise((e) => {
-		let t = indexedDB.open(GE, KE);
+function rD() {
+	return nD() ? new Promise((e) => {
+		let t = indexedDB.open(XE, ZE);
 		t.onerror = () => e(null), t.onsuccess = () => e(t.result), t.onupgradeneeded = () => {
 			let e = t.result;
-			e.objectStoreNames.contains(qE) || e.createObjectStore(qE, { keyPath: "id" }), e.objectStoreNames.contains(JE) || e.createObjectStore(JE, { keyPath: "id" });
+			e.objectStoreNames.contains(QE) || e.createObjectStore(QE, { keyPath: "id" }), e.objectStoreNames.contains($E) || e.createObjectStore($E, { keyPath: "id" });
 		};
 	}) : Promise.resolve(null);
 }
-async function $E(e, t) {
-	let n = await QE();
+async function iD(e, t) {
+	let n = await rD();
 	if (!n) return t();
 	try {
 		return await e(n);
@@ -52347,27 +52421,27 @@ async function $E(e, t) {
 		n.close();
 	}
 }
-async function eD() {
-	return [...XE.values()].map((e) => e.meta).sort((e, t) => t.createdAt - e.createdAt);
+async function aD() {
+	return [...tD.values()].map((e) => e.meta).sort((e, t) => t.createdAt - e.createdAt);
 }
-async function tD() {
-	return $E(async (e) => new Promise((t, n) => {
-		let r = e.transaction(qE, "readonly").objectStore(qE).getAll();
+async function oD() {
+	return iD(async (e) => new Promise((t, n) => {
+		let r = e.transaction(QE, "readonly").objectStore(QE).getAll();
 		r.onsuccess = () => {
 			t((r.result ?? []).sort((e, t) => t.createdAt - e.createdAt));
 		}, r.onerror = () => n(r.error);
-	}), eD);
+	}), aD);
 }
-async function nD(e) {
-	let t = XE.get(e);
+async function sD(e) {
+	let t = tD.get(e);
 	return t ? t.irSnapshot ? {
 		kind: "ir",
 		snapshot: t.irSnapshot
 	} : t.legacyBytes ? {
 		kind: "legacy",
 		bytes: t.legacyBytes
-	} : null : $E(async (t) => new Promise((n, r) => {
-		let i = t.transaction(JE, "readonly").objectStore(JE).get(e);
+	} : null : iD(async (t) => new Promise((n, r) => {
+		let i = t.transaction($E, "readonly").objectStore($E).get(e);
 		i.onsuccess = () => {
 			let e = i.result;
 			if (!e) {
@@ -52396,23 +52470,23 @@ async function nD(e) {
 		}, i.onerror = () => r(i.error);
 	}), async () => null);
 }
-async function rD(e) {
+async function cD(e) {
 	let t = await new Promise((t, n) => {
-		let r = e.transaction(qE, "readonly").objectStore(qE).getAll();
+		let r = e.transaction(QE, "readonly").objectStore(QE).getAll();
 		r.onsuccess = () => t(r.result ?? []), r.onerror = () => n(r.error);
 	});
-	if (t.length < YE) return;
+	if (t.length < eD) return;
 	t.sort((e, t) => e.createdAt - t.createdAt);
-	let n = t.slice(0, t.length - YE + 1);
+	let n = t.slice(0, t.length - eD + 1);
 	for (let t of n) await new Promise((n, r) => {
-		let i = e.transaction([qE, JE], "readwrite");
-		i.objectStore(qE).delete(t.id), i.objectStore(JE).delete(t.id), i.oncomplete = () => n(), i.onerror = () => r(i.error);
+		let i = e.transaction([QE, $E], "readwrite");
+		i.objectStore(QE).delete(t.id), i.objectStore($E).delete(t.id), i.oncomplete = () => n(), i.onerror = () => r(i.error);
 	});
 }
-function iD(e) {
+function lD(e) {
 	return JSON.parse(JSON.stringify(e));
 }
-async function aD(e, t, n) {
+async function uD(e, t, n) {
 	let r = globalThis.crypto?.randomUUID?.() ?? `h_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`, i = Date.now(), a = JSON.stringify(n), o = new TextEncoder().encode(a).length, s = {
 		id: r,
 		label: e.trim() || `스냅샷 ${new Date(i).toLocaleString("ko-KR")}`,
@@ -52420,21 +52494,21 @@ async function aD(e, t, n) {
 		sourceFileName: t,
 		byteLength: o,
 		storageKind: "ir"
-	}, c = await QE();
+	}, c = await rD();
 	if (!c) {
-		for (; XE.size >= YE;) {
-			let e = [...XE.entries()].sort((e, t) => e[1].meta.createdAt - t[1].meta.createdAt)[0];
-			e && XE.delete(e[0]);
+		for (; tD.size >= eD;) {
+			let e = [...tD.entries()].sort((e, t) => e[1].meta.createdAt - t[1].meta.createdAt)[0];
+			e && tD.delete(e[0]);
 		}
-		return XE.set(r, {
+		return tD.set(r, {
 			meta: s,
-			irSnapshot: iD(n)
+			irSnapshot: lD(n)
 		}), s;
 	}
 	try {
-		return await rD(c), await new Promise((e, t) => {
-			let n = c.transaction([qE, JE], "readwrite");
-			n.objectStore(qE).put(s), n.objectStore(JE).put({
+		return await cD(c), await new Promise((e, t) => {
+			let n = c.transaction([QE, $E], "readwrite");
+			n.objectStore(QE).put(s), n.objectStore($E).put({
 				id: r,
 				snapshotJson: a
 			}), n.oncomplete = () => e(), n.onerror = () => t(n.error);
@@ -52443,21 +52517,21 @@ async function aD(e, t, n) {
 		c.close();
 	}
 }
-async function oD(e) {
-	XE.delete(e), await $E(async (t) => new Promise((n, r) => {
-		let i = t.transaction([qE, JE], "readwrite");
-		i.objectStore(qE).delete(e), i.objectStore(JE).delete(e), i.oncomplete = () => n(), i.onerror = () => r(i.error);
+async function dD(e) {
+	tD.delete(e), await iD(async (t) => new Promise((n, r) => {
+		let i = t.transaction([QE, $E], "readwrite");
+		i.objectStore(QE).delete(e), i.objectStore($E).delete(e), i.oncomplete = () => n(), i.onerror = () => r(i.error);
 	}), async () => {});
 }
-async function sD() {
-	XE.clear(), await $E(async (e) => new Promise((t, n) => {
-		let r = e.transaction([qE, JE], "readwrite");
-		r.objectStore(qE).clear(), r.objectStore(JE).clear(), r.oncomplete = () => t(), r.onerror = () => n(r.error);
+async function fD() {
+	tD.clear(), await iD(async (e) => new Promise((t, n) => {
+		let r = e.transaction([QE, $E], "readwrite");
+		r.objectStore(QE).clear(), r.objectStore($E).clear(), r.oncomplete = () => t(), r.onerror = () => n(r.error);
 	}), async () => {});
 }
 //#endregion
 //#region @rhwp/studio/src/ui/history-dialog.ts
-var cD = {
+var pD = {
 	caseSensitive: !0,
 	ignoreWhitespace: !0,
 	kinds: [
@@ -52470,7 +52544,7 @@ var cD = {
 	],
 	strategy: "identity",
 	performanceTuning: { maxComputeMs: 3e3 }
-}, lD = class {
+}, mD = class {
 	services;
 	compareSessionStore;
 	_open = !1;
@@ -52523,7 +52597,7 @@ var cD = {
 		f.className = "compare-kinds-title", f.textContent = g("dialog.history.resTitle.text"), n.appendChild(f), this.resultMetaEl = document.createElement("span"), this.resultMetaEl.className = "compare-result-meta", this.resultMetaEl.textContent = g("dialog.history.resultMetaEl.text"), this.resultListEl = document.createElement("ul"), this.resultListEl.className = "compare-result-list", n.appendChild(this.resultMetaEl), n.appendChild(this.resultListEl), this.wrap.appendChild(n);
 	}
 	async refreshList() {
-		this.entries = await tD(), this.listEl.replaceChildren();
+		this.entries = await oD(), this.listEl.replaceChildren();
 		for (let e of this.entries) {
 			let t = document.createElement("li");
 			t.className = "history-entry", e.id === this.selectedId && t.classList.add("selected"), t.dataset.id = e.id;
@@ -52537,8 +52611,8 @@ var cD = {
 	async onSaveSnapshot() {
 		let { wasm: e } = this.services;
 		try {
-			let t = this.labelInput.value.trim() || (/* @__PURE__ */ new Date()).toLocaleString("ko-KR"), n = JT(e, t, cD);
-			await aD(t, e.fileName, n), this.labelInput.value = "", await this.refreshList(), this.resultMetaEl.textContent = g("dialog.history.resultMetaEl.text.xf2c8ca");
+			let t = this.labelInput.value.trim() || (/* @__PURE__ */ new Date()).toLocaleString("ko-KR"), n = $T(e, t, pD);
+			await uD(t, e.fileName, n), this.labelInput.value = "", await this.refreshList(), this.resultMetaEl.textContent = g("dialog.history.resultMetaEl.text.xf2c8ca");
 		} catch (e) {
 			let t = e instanceof Error ? e.message : String(e);
 			this.resultMetaEl.textContent = g("dialog.history.resultMetaEl.text.xa25915", { p1: t });
@@ -52549,10 +52623,10 @@ var cD = {
 			this.resultMetaEl.textContent = g("dialog.history.resultMetaEl.text.x907c5c");
 			return;
 		}
-		await oD(this.selectedId), this.selectedId = null, await this.refreshList(), this.resultMetaEl.textContent = g("dialog.history.resultMetaEl.text.xcb9669"), this.resultListEl.replaceChildren();
+		await dD(this.selectedId), this.selectedId = null, await this.refreshList(), this.resultMetaEl.textContent = g("dialog.history.resultMetaEl.text.xcb9669"), this.resultListEl.replaceChildren();
 	}
 	async onClearAll() {
-		window.confirm(g("dialog.history.onClearAll.message")) && (await sD(), this.selectedId = null, await this.refreshList(), this.resultMetaEl.textContent = g("dialog.history.resultMetaEl.text.xfa846c"), this.resultListEl.replaceChildren());
+		window.confirm(g("dialog.history.onClearAll.message")) && (await fD(), this.selectedId = null, await this.refreshList(), this.resultMetaEl.textContent = g("dialog.history.resultMetaEl.text.xfa846c"), this.resultListEl.replaceChildren());
 	}
 	async onCompareWithCurrent() {
 		let { wasm: e } = this.services;
@@ -52560,7 +52634,7 @@ var cD = {
 			this.resultMetaEl.textContent = g("dialog.history.resultMetaEl.text.x63539d");
 			return;
 		}
-		let t = await nD(this.selectedId);
+		let t = await sD(this.selectedId);
 		if (!t) {
 			this.resultMetaEl.textContent = g("dialog.history.resultMetaEl.text.xe65823");
 			return;
@@ -52570,8 +52644,8 @@ var cD = {
 		try {
 			let i;
 			if (t.kind === "ir") {
-				let n = JT(e, r, cD);
-				i = UE(t.snapshot, n, cD);
+				let n = $T(e, r, pD);
+				i = JE(t.snapshot, n, pD);
 			} else {
 				let a;
 				try {
@@ -52580,7 +52654,7 @@ var cD = {
 					this.resultMetaEl.textContent = g("dialog.history.resultMetaEl.text.x3aca78");
 					return;
 				}
-				i = await WE(t.bytes, n, a, r, cD);
+				i = await YE(t.bytes, n, a, r, pD);
 			}
 			console.log("[rhwp:history] 최종 Diff 배열", i.diffItems), this.compareSessionStore.set(i);
 			let a = i.textCompareStrategyUsed === "identity" ? g("dialog.history.onCompareWithCurrent.text.x9cae02") : g("dialog.history.onCompareWithCurrent.text.x09d3e7");
@@ -52600,7 +52674,7 @@ var cD = {
 		for (let [t, n] of e.entries()) {
 			let e = document.createElement("li");
 			e.className = "compare-result-item", e.dataset.diffId = n.id;
-			let r = kw(n), i = this.formatPreviewText(this.sanitizeControlPreview(n.leftPreview)), a = this.formatPreviewText(this.sanitizeControlPreview(n.rightPreview)), o = n.kind === "text" || n.severity !== "modified" ? `<div class="compare-result-preview">L: ${this.escape(i)} / R: ${this.escape(a)}</div>` : "", s = n.inlineTextDiff !== void 0 && n.inlineTextDiff !== "" ? `<div class="compare-result-inline-diff">${this.escape(this.formatInlineDiffText(n.inlineTextDiff))}</div>` : "", c = this.renderValueDiff(n);
+			let r = Pw(n), i = this.formatPreviewText(this.sanitizeControlPreview(n.leftPreview)), a = this.formatPreviewText(this.sanitizeControlPreview(n.rightPreview)), o = n.kind === "text" || n.severity !== "modified" ? `<div class="compare-result-preview">L: ${this.escape(i)} / R: ${this.escape(a)}</div>` : "", s = n.inlineTextDiff !== void 0 && n.inlineTextDiff !== "" ? `<div class="compare-result-inline-diff">${this.escape(this.formatInlineDiffText(n.inlineTextDiff))}</div>` : "", c = this.renderValueDiff(n);
 			e.innerHTML = `<strong>[${this.escape(this.kindLabel(n.kind))}] ${this.escape(n.title)}${r ? ` <span class="compare-result-location">(${this.escape(r)})</span>` : ""}</strong>${o}${c}${s}`, e.addEventListener("click", () => {
 				this.compareSessionStore.gotoDiff(t), this.resultListEl.querySelectorAll(".compare-result-item.active").forEach((e) => e.classList.remove("active")), e.classList.add("active"), e.scrollIntoView({ block: "nearest" });
 			}), this.resultListEl.appendChild(e);
@@ -52768,7 +52842,42 @@ var cD = {
 	kindLabel(e) {
 		return e === "table" ? "표" : e === "shape" ? "도형" : e === "image" ? "이미지" : e === "chart" ? "그래프" : e === "text" ? "텍스트" : "메타";
 	}
-}, uD = class {
+}, hD = class {
+	eventBus;
+	session = null;
+	constructor(e) {
+		this.eventBus = e;
+	}
+	set(e) {
+		this.session = e, this.eventBus.emit("compare:session-changed", e);
+	}
+	clear() {
+		this.session = null, this.eventBus.emit("compare:session-cleared");
+	}
+	get() {
+		return this.session;
+	}
+	nextDiff() {
+		if (!this.session || this.session.diffItems.length === 0) return null;
+		let e = Math.min(this.session.currentDiffIndex + 1, this.session.diffItems.length - 1);
+		this.session.currentDiffIndex = e;
+		let t = this.session.diffItems[e];
+		return this.eventBus.emit("compare:navigate-diff", t, e, this.session.diffItems.length), t;
+	}
+	prevDiff() {
+		if (!this.session || this.session.diffItems.length === 0) return null;
+		let e = Math.max(this.session.currentDiffIndex - 1, 0);
+		this.session.currentDiffIndex = e;
+		let t = this.session.diffItems[e];
+		return this.eventBus.emit("compare:navigate-diff", t, e, this.session.diffItems.length), t;
+	}
+	gotoDiff(e) {
+		if (!this.session || this.session.diffItems.length === 0 || e < 0 || e >= this.session.diffItems.length) return null;
+		this.session.currentDiffIndex = e;
+		let t = this.session.diffItems[e];
+		return this.eventBus.emit("compare:navigate-diff", t, e, this.session.diffItems.length), t;
+	}
+}, gD = class {
 	_open = !1;
 	wrap;
 	titleEl;
@@ -52815,7 +52924,7 @@ var cD = {
 		let t = this.session.diffItems[e];
 		if (!t) return;
 		await this.ensureCompareDocumentsLoaded();
-		let n = kw(t);
+		let n = Pw(t);
 		this.metaEl.textContent = n ? `[${t.kind}] ${t.title}\n${n}` : `[${t.kind}] ${t.title}`, this.leftPane.innerHTML = this.highlightPreview(t, "left"), this.rightPane.innerHTML = this.highlightPreview(t, "right"), this.renderRealDocumentPreview(t);
 	}
 	build() {
@@ -52850,7 +52959,7 @@ var cD = {
 			t ? (r = t.left, i = t.right) : (r = this.formatInspectorText(e.leftPreview || "(없음)"), i = this.formatInspectorText(e.rightPreview || "(없음)"));
 		} else r = this.formatInspectorText(e.leftPreview || "(없음)"), i = this.formatInspectorText(e.rightPreview || "(없음)");
 		let a = t === "left" ? e.leftPreview : e.rightPreview, o = t === "left" ? r : i;
-		if (Dw(a)) return `<pre>${this.escape(o)}</pre>`;
+		if (Mw(a)) return `<pre>${this.escape(o)}</pre>`;
 		if (n === "added" && t === "right" || n === "removed" && t === "left") return `<pre><mark>${this.escape(o)}</mark></pre>`;
 		if (n !== "modified") return `<pre>${this.escape(o)}</pre>`;
 		let s = r, c = i, l = 0, u = Math.min(s.length, c.length);
@@ -53001,7 +53110,7 @@ var cD = {
 		}
 		let o = this.resolveRenderAnchor(t, a, e);
 		if (!o) {
-			let t = Ow(a, e), o = g(e === "left" ? "dialog.compareResult.renderSidePage.text" : "dialog.compareResult.renderSidePage.text.xf4ba2c");
+			let t = Nw(a, e), o = g(e === "left" ? "dialog.compareResult.renderSidePage.text" : "dialog.compareResult.renderSidePage.text.xf4ba2c");
 			i.textContent = t ? `${t} · ${o}` : o;
 			let s = n.getContext("2d");
 			s && s.clearRect(0, 0, n.width, n.height), r.style.display = "none";
@@ -53012,7 +53121,7 @@ var cD = {
 			let o = t.getPageInfo(s.pageIndex), l = e === "left" ? this.leftCanvasWrap : this.rightCanvasWrap, u = Math.max(260, l.clientWidth - 10), d = Math.max(.25, Math.min(1.25, u / Math.max(1, o.width))), f = s.pageIndex, p = () => {
 				try {
 					n.width = Math.max(1, Math.ceil(o.width * d)), n.height = Math.max(1, Math.ceil(o.height * d)), t.renderPageToCanvasFiltered(f, n, d, "all");
-					let u = Ow(a, e), p = g("dialog.compareResult.renderSidePage.text.xe4e036", { p1: s.pageIndex + 1 }), m = c ? "" : g("dialog.compareResult.renderSidePage.text.x86b17f");
+					let u = Nw(a, e), p = g("dialog.compareResult.renderSidePage.text.xe4e036", { p1: s.pageIndex + 1 }), m = c ? "" : g("dialog.compareResult.renderSidePage.text.x86b17f");
 					c ? (r.style.display = "block", r.style.left = `${Math.max(0, Math.floor(s.x * d))}px`, r.style.top = `${Math.max(0, Math.floor(s.y * d))}px`, r.style.width = `${Math.max(14, Math.floor(s.width * d))}px`, r.style.height = `${Math.max(14, Math.floor(s.height * d))}px`) : r.style.display = "none", i.textContent = g("dialog.compareResult.statusEl.text.x124792", {
 						p1: u ? `${u} · ` : "",
 						p2: p,
@@ -53029,7 +53138,7 @@ var cD = {
 			i.textContent = g("dialog.compareResult.statusEl.text.x85cf7a", { p1: e instanceof Error ? e.message : String(e) }), r.style.display = "none";
 		}
 	}
-}, dD = {
+}, _D = {
 	caseSensitive: !0,
 	ignoreWhitespace: !0,
 	kinds: [
@@ -53050,9 +53159,10 @@ var cD = {
 		maxComputeMs: 2200,
 		hardSegmentCells: 16e4
 	}
-}, fD = class {
+}, vD = class {
 	services;
-	compareSessionStore;
+	compareSessionStore = new hD(new Xs());
+	picking = !1;
 	_open = !1;
 	running = !1;
 	wrap;
@@ -53066,20 +53176,22 @@ var cD = {
 	leftFile = null;
 	rightFile = null;
 	resultWindow = null;
-	constructor(e, t) {
-		this.services = e, this.compareSessionStore = t;
+	constructor(e) {
+		this.services = e;
 	}
 	isOpen() {
 		return this._open;
 	}
 	show() {
-		this._open || (this._open = !0, this.build(), document.body.appendChild(this.wrap));
+		this._open || (this._open = !0, this.build(), document.body.appendChild(this.wrap), this.wrap.querySelector(".compare-row button")?.focus());
 	}
 	hide() {
-		this._open = !1, this.wrap?.remove();
+		this._open = !1, this.resultWindow?.hide(), this.resultWindow = null, this.compareSessionStore.clear(), this.leftFile = null, this.rightFile = null, this.wrap?.remove(), this.services.getInputHandler()?.focus();
 	}
 	build() {
-		this.wrap = document.createElement("div"), this.wrap.className = "compare-dialog doc-compare-dialog";
+		this.wrap = document.createElement("div"), this.wrap.className = "compare-dialog doc-compare-dialog", this.wrap.setAttribute("role", "dialog"), this.wrap.setAttribute("aria-label", "문서 비교"), this.wrap.addEventListener("keydown", (e) => {
+			e.key === "Escape" && (e.preventDefault(), this.hide()), e.stopPropagation();
+		});
 		let e = document.createElement("div");
 		e.className = "compare-dialog-title", e.innerHTML = "<span>문서 비교</span>";
 		let t = document.createElement("button");
@@ -53087,7 +53199,7 @@ var cD = {
 		let n = document.createElement("div");
 		n.className = "compare-dialog-body";
 		let r = document.createElement("p");
-		r.className = "history-hint", r.textContent = g("dialog.compare.hint.text"), n.appendChild(r);
+		r.className = "history-hint", r.textContent = "HWP 또는 HWPX 문서 두 개를 비교합니다. 현재 문서는 비교 대상으로 복사되며 편집 탭은 유지됩니다.", n.appendChild(r);
 		let i = document.createElement("div");
 		i.className = "compare-row";
 		let a = document.createElement("span");
@@ -53105,7 +53217,7 @@ var cD = {
 		let d = document.createElement("div");
 		d.className = "compare-strategy-row";
 		let f = document.createElement("label");
-		f.className = "compare-checkbox", this.caseSensitiveCheck = document.createElement("input"), this.caseSensitiveCheck.type = "checkbox", this.caseSensitiveCheck.id = "doc-compare-case-sensitive", this.caseSensitiveCheck.checked = dD.caseSensitive;
+		f.className = "compare-checkbox", this.caseSensitiveCheck = document.createElement("input"), this.caseSensitiveCheck.type = "checkbox", this.caseSensitiveCheck.id = "doc-compare-case-sensitive", this.caseSensitiveCheck.checked = _D.caseSensitive;
 		let p = document.createElement("span");
 		p.textContent = g("dialog.compare.caseSpan.text"), f.append(this.caseSensitiveCheck, p), d.appendChild(f), u.appendChild(d), n.appendChild(u);
 		let m = document.createElement("div");
@@ -53119,61 +53231,67 @@ var cD = {
 		if (this.rightFile) return;
 		let e = this.services.wasm;
 		if (e.hasLoadedDocument()) try {
-			let t = e.getSourceFormat() === "hwpx" ? e.exportHwpx() : e.exportHwp(), n = new Uint8Array(t);
+			let t = new Uint8Array(e.exportHwpx());
 			this.rightFile = {
-				bytes: n,
+				bytes: t,
 				fileName: e.fileName
 			}, this.rightFileNameEl.textContent = e.fileName;
 		} catch {}
 	}
 	async pickFile(e) {
+		if (this.running || this.picking) return;
+		this.picking = !0;
 		let t = document.createElement("input");
-		t.type = "file", t.accept = ".hwp,.hwpx", t.style.display = "none", document.body.appendChild(t), t.click();
-		let n = await new Promise((e) => {
-			t.onchange = () => e(t.files?.[0] ?? null);
-		});
-		if (t.remove(), !n) return;
-		let r = n.name.toLowerCase();
-		if (!r.endsWith(".hwp") && !r.endsWith(".hwpx")) {
-			this.resultMetaEl.textContent = g("dialog.compare.resultMetaEl.text.xf8be59");
-			return;
+		t.type = "file", t.accept = ".hwp,.hwpx", t.hidden = !0, document.body.append(t);
+		try {
+			let n = await new Promise((e) => {
+				t.addEventListener("change", () => e(t.files?.[0] ?? null), { once: !0 }), t.addEventListener("cancel", () => e(null), { once: !0 }), t.click();
+			});
+			if (!n || !this._open) return;
+			if (!/\.hwpx?$/i.test(n.name)) {
+				this.resultMetaEl.textContent = "HWP 또는 HWPX 문서를 선택해 주세요.";
+				return;
+			}
+			let r = new Uint8Array(await n.arrayBuffer());
+			if (!this._open) return;
+			let i = {
+				bytes: r,
+				fileName: n.name
+			};
+			this.resultWindow?.hide(), this.compareSessionStore.clear(), this.openTwoPaneBtn.disabled = !0, this.resultListEl.replaceChildren(), this.resultMetaEl.textContent = g("dialog.compare.resultMetaEl.text"), e === "left" ? (this.leftFile = i, this.leftFileNameEl.textContent = n.name) : (this.rightFile = i, this.rightFileNameEl.textContent = n.name);
+		} catch {
+			this.resultMetaEl.textContent = "선택한 비교 문서를 읽지 못했습니다.";
+		} finally {
+			t.remove(), this.picking = !1;
 		}
-		let i = {
-			bytes: new Uint8Array(await n.arrayBuffer()),
-			fileName: n.name
-		};
-		e === "left" ? (this.leftFile = i, this.leftFileNameEl.textContent = n.name) : (this.rightFile = i, this.rightFileNameEl.textContent = n.name);
 	}
 	async onRunCompare() {
-		if (this.running) return;
-		if (!this.leftFile || !this.rightFile) {
-			this.resultMetaEl.textContent = g("dialog.compare.resultMetaEl.text.x619641");
-			return;
-		}
-		let e = this.services.getContext();
-		if (e.hasDocument) {
-			let t = e.canUndo ? g("dialog.compare.onRunCompare.text") : g("dialog.compare.onRunCompare.text.xea9d7d");
-			if (!window.confirm(g("dialog.compare.onRunCompare.message", { p1: t }))) return;
-		}
-		this.running = !0, this.runBtn.disabled = !0, this.openTwoPaneBtn.disabled = !0, this.runBtn.textContent = g("dialog.compare.runBtn.text.xba14a1"), this.resultMetaEl.textContent = g("dialog.compare.resultMetaEl.text.x642b28"), this.resultListEl.replaceChildren();
-		try {
-			let e = await WE(this.leftFile.bytes, this.leftFile.fileName, this.rightFile.bytes, this.rightFile.fileName, {
-				...dD,
-				caseSensitive: this.caseSensitiveCheck.checked
-			});
-			await this.loadRightDocumentToEditor(this.rightFile), this.compareSessionStore.set(e), this.services.eventBus.emit("compare:mode-changed", !0);
-			let t = e.textCompareStrategyUsed === "identity" ? g("dialog.compare.onRunCompare.text.x9cae02") : g("dialog.compare.onRunCompare.text.x09d3e7");
-			this.resultMetaEl.textContent = g("dialog.compare.resultMetaEl.text.x13744b", {
-				p1: e.diffItems.length,
-				p2: t,
-				p3: this.leftFile.fileName,
-				p4: this.rightFile.fileName
-			}), this.renderDiffList(e.diffItems), this.openTwoPaneBtn.disabled = e.diffItems.length === 0, e.diffItems.length > 0 && this.compareSessionStore.gotoDiff(0);
-		} catch (e) {
-			let t = e instanceof Error ? e.message : String(e);
-			this.resultMetaEl.textContent = g("dialog.compare.resultMetaEl.text.xb10c5b", { p1: t });
-		} finally {
-			this.running = !1, this.runBtn.disabled = !1, this.runBtn.textContent = g("dialog.compare.runBtn.text");
+		if (!(this.running || this.picking)) {
+			if (!this.leftFile || !this.rightFile) {
+				this.resultMetaEl.textContent = g("dialog.compare.resultMetaEl.text.x619641");
+				return;
+			}
+			this.running = !0, this.runBtn.disabled = !0, this.openTwoPaneBtn.disabled = !0, this.runBtn.textContent = g("dialog.compare.runBtn.text.xba14a1"), this.resultMetaEl.textContent = g("dialog.compare.resultMetaEl.text.x642b28"), this.resultListEl.replaceChildren();
+			try {
+				let e = await YE(this.leftFile.bytes, this.leftFile.fileName, this.rightFile.bytes, this.rightFile.fileName, {
+					..._D,
+					caseSensitive: this.caseSensitiveCheck.checked
+				});
+				if (!this._open) return;
+				this.compareSessionStore.set(e);
+				let t = e.textCompareStrategyUsed === "identity" ? g("dialog.compare.onRunCompare.text.x9cae02") : g("dialog.compare.onRunCompare.text.x09d3e7");
+				this.resultMetaEl.textContent = g("dialog.compare.resultMetaEl.text.x13744b", {
+					p1: e.diffItems.length,
+					p2: t,
+					p3: this.leftFile.fileName,
+					p4: this.rightFile.fileName
+				}), this.renderDiffList(e.diffItems), this.openTwoPaneBtn.disabled = e.diffItems.length === 0, e.diffItems.length > 0 && this.compareSessionStore.gotoDiff(0);
+			} catch (e) {
+				let t = e instanceof Error ? e.message : String(e);
+				this.resultMetaEl.textContent = g("dialog.compare.resultMetaEl.text.xb10c5b", { p1: t });
+			} finally {
+				this.running = !1, this.runBtn.disabled = !1, this.runBtn.textContent = g("dialog.compare.runBtn.text");
+			}
 		}
 	}
 	openResultWindow() {
@@ -53183,38 +53301,21 @@ var cD = {
 			return;
 		}
 		let t = Math.max(0, e.currentDiffIndex);
-		this.resultWindow ??= new uD(), this.leftFile && this.rightFile && this.resultWindow.show(e, this.compareSessionStore, t, {
+		this.resultWindow ??= new gD(), this.leftFile && this.rightFile && this.resultWindow.show(e, this.compareSessionStore, t, {
 			left: this.leftFile,
 			right: this.rightFile
 		});
-	}
-	async loadRightDocumentToEditor(e) {
-		let t = `cmp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`, n = new Promise((e, n) => {
-			let r = this.services.eventBus.on("open-document-bytes:done", (i) => {
-				let a = i;
-				a.requestId === t && (r(), a.ok ? e() : n(Error(a.error || "오른쪽 문서 로드 실패")));
-			});
-			setTimeout(() => {
-				r(), n(/* @__PURE__ */ Error("오른쪽 문서 로드 타임아웃"));
-			}, 9e4);
-		});
-		this.services.eventBus.emit("open-document-bytes", {
-			bytes: new Uint8Array(e.bytes),
-			fileName: e.fileName,
-			fileHandle: null,
-			requestId: t
-		}), await n;
 	}
 	renderDiffList(e) {
 		this.resultListEl.replaceChildren();
 		for (let [t, n] of e.entries()) {
 			let e = document.createElement("li");
 			e.className = "compare-result-item", e.dataset.diffId = n.id;
-			let r = kw(n), i = this.renderValueDiff(n), a = this.formatPreviewText(this.sanitizeControlPreview(n.leftPreview)), o = this.formatPreviewText(this.sanitizeControlPreview(n.rightPreview)), s = n.kind === "text" || n.severity !== "modified" ? `<div class="compare-result-preview">L: ${this.escape(a)} / R: ${this.escape(o)}</div>` : "";
+			let r = Pw(n), i = this.renderValueDiff(n), a = this.formatPreviewText(this.sanitizeControlPreview(n.leftPreview)), o = this.formatPreviewText(this.sanitizeControlPreview(n.rightPreview)), s = n.kind === "text" || n.severity !== "modified" ? `<div class="compare-result-preview">L: ${this.escape(a)} / R: ${this.escape(o)}</div>` : "";
 			e.innerHTML = `<strong>[${this.escape(this.kindLabel(n.kind))}] ${this.escape(n.title)}${r ? ` <span class="compare-result-location">(${this.escape(r)})</span>` : ""}</strong>${s}${i}`, e.addEventListener("click", () => {
 				this.compareSessionStore.gotoDiff(t);
 				let n = this.compareSessionStore.get();
-				n && (this.resultWindow ??= new uD(), this.leftFile && this.rightFile ? this.resultWindow.show(n, this.compareSessionStore, t, {
+				n && (this.resultWindow ??= new gD(), this.leftFile && this.rightFile ? this.resultWindow.show(n, this.compareSessionStore, t, {
 					left: this.leftFile,
 					right: this.rightFile
 				}) : this.resultWindow.show(n, this.compareSessionStore, t)), this.resultListEl.querySelectorAll(".compare-result-item.active").forEach((e) => e.classList.remove("active")), e.classList.add("active"), e.scrollIntoView({ block: "nearest" });
@@ -53371,50 +53472,15 @@ var cD = {
 	kindLabel(e) {
 		return e === "table" ? "표" : e === "shape" ? "도형" : e === "image" ? "이미지" : e === "chart" ? "그래프" : e === "text" ? "텍스트" : "메타";
 	}
-}, pD = class {
-	eventBus;
-	session = null;
-	constructor(e) {
-		this.eventBus = e;
-	}
-	set(e) {
-		this.session = e, this.eventBus.emit("compare:session-changed", e);
-	}
-	clear() {
-		this.session = null, this.eventBus.emit("compare:session-cleared");
-	}
-	get() {
-		return this.session;
-	}
-	nextDiff() {
-		if (!this.session || this.session.diffItems.length === 0) return null;
-		let e = Math.min(this.session.currentDiffIndex + 1, this.session.diffItems.length - 1);
-		this.session.currentDiffIndex = e;
-		let t = this.session.diffItems[e];
-		return this.eventBus.emit("compare:navigate-diff", t, e, this.session.diffItems.length), t;
-	}
-	prevDiff() {
-		if (!this.session || this.session.diffItems.length === 0) return null;
-		let e = Math.max(this.session.currentDiffIndex - 1, 0);
-		this.session.currentDiffIndex = e;
-		let t = this.session.diffItems[e];
-		return this.eventBus.emit("compare:navigate-diff", t, e, this.session.diffItems.length), t;
-	}
-	gotoDiff(e) {
-		if (!this.session || this.session.diffItems.length === 0 || e < 0 || e >= this.session.diffItems.length) return null;
-		this.session.currentDiffIndex = e;
-		let t = this.session.diffItems[e];
-		return this.eventBus.emit("compare:navigate-diff", t, e, this.session.diffItems.length), t;
-	}
 };
 //#endregion
 //#region @rhwp/studio/src/command/format-paste-availability.ts
-function mD(e) {
+function yD(e) {
 	return e.hasDocument && e.hasCopiedFormat && !e.isFormMode && (e.hasSelection || e.inCellSelectionMode);
 }
 //#endregion
 //#region @rhwp/studio/src/command/commands/edit.ts
-var hD = null, gD = null, _D = null, vD = null, yD = [
+var bD = null, xD = null, SD = null, CD = null, wD = [
 	{
 		id: "edit:undo",
 		label: g("command.edit.undo.label"),
@@ -53479,7 +53545,7 @@ var hD = null, gD = null, _D = null, vD = null, yD = [
 		id: "edit:format-paste",
 		label: g("command.edit.formatPaste.label"),
 		icon: "icon-format-copy",
-		canExecute: mD,
+		canExecute: yD,
 		execute(e) {
 			e.getInputHandler()?.performFormatPaste();
 		}
@@ -53512,11 +53578,11 @@ var hD = null, gD = null, _D = null, vD = null, yD = [
 		shortcutLabel: "Ctrl+F",
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			if (hD && hD.isOpen()) {
-				hD.focusInput();
+			if (bD && bD.isOpen()) {
+				bD.focusInput();
 				return;
 			}
-			hD = new Tw(e, "find"), hD.show();
+			bD = new Aw(e, "find"), bD.show();
 		}
 	},
 	{
@@ -53527,11 +53593,11 @@ var hD = null, gD = null, _D = null, vD = null, yD = [
 		shortcutLabel: "Ctrl+F2",
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			if (hD && hD.isOpen()) {
-				hD.switchMode("replace"), hD.focusInput();
+			if (bD && bD.isOpen()) {
+				bD.switchMode("replace"), bD.focusInput();
 				return;
 			}
-			hD = new Tw(e, "replace"), hD.show();
+			bD = new Aw(e, "replace"), bD.show();
 		}
 	},
 	{
@@ -53540,14 +53606,14 @@ var hD = null, gD = null, _D = null, vD = null, yD = [
 		shortcutLabel: "Ctrl+Q,L",
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			if (hD?.isOpen()) {
-				hD.findPrev();
+			if (bD?.isOpen()) {
+				bD.findPrev();
 				return;
 			}
 			let t = e.getInputHandler();
-			if (!t || !Tw.lastQuery) return;
+			if (!t || !Aw.lastQuery) return;
 			let n = t.getCursorPosition();
-			ww(t, e.wasm.searchText(Tw.lastQuery, n.sectionIndex, n.paragraphIndex, n.charOffset, !1, Tw.lastCaseSensitive, !0));
+			kw(t, e.wasm.searchText(Aw.lastQuery, n.sectionIndex, n.paragraphIndex, n.charOffset, !1, Aw.lastCaseSensitive, !0));
 		}
 	},
 	{
@@ -53556,12 +53622,12 @@ var hD = null, gD = null, _D = null, vD = null, yD = [
 		shortcutLabel: "Ctrl+L",
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			if (hD && hD.isOpen()) hD.findNext();
-			else if (Tw.lastQuery) {
+			if (bD && bD.isOpen()) bD.findNext();
+			else if (Aw.lastQuery) {
 				let t = e.getInputHandler();
 				if (!t) return;
 				let n = t.getCursorPosition();
-				ww(t, e.wasm.searchText(Tw.lastQuery, n.sectionIndex, n.paragraphIndex, n.charOffset, !0, Tw.lastCaseSensitive, !0));
+				kw(t, e.wasm.searchText(Aw.lastQuery, n.sectionIndex, n.paragraphIndex, n.charOffset, !0, Aw.lastCaseSensitive, !0));
 			}
 		}
 	},
@@ -53572,7 +53638,7 @@ var hD = null, gD = null, _D = null, vD = null, yD = [
 		shortcutLabel: "Alt+Shift+V",
 		canExecute: () => !0,
 		execute(e) {
-			vD ||= new pD(e.eventBus), gD?.isOpen() && gD.hide(), !(_D && _D.isOpen()) && (_D = new fD(e, vD), _D.show());
+			xD?.isOpen() && xD.hide(), !SD?.isOpen() && (SD = new vD(e), SD.show());
 		}
 	},
 	{
@@ -53582,7 +53648,7 @@ var hD = null, gD = null, _D = null, vD = null, yD = [
 		shortcutLabel: "Ctrl+Shift+H",
 		canExecute: () => !0,
 		execute(e) {
-			vD ||= new pD(e.eventBus), _D?.isOpen() && _D.hide(), !(gD && gD.isOpen()) && (gD = new lD(e, vD), gD.show());
+			CD ||= new hD(e.eventBus), SD?.isOpen() && SD.hide(), !(xD && xD.isOpen()) && (xD = new mD(e, CD), xD.show());
 		}
 	},
 	{
@@ -53592,7 +53658,7 @@ var hD = null, gD = null, _D = null, vD = null, yD = [
 		shortcutLabel: "Alt+G",
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			new Ew(e).show();
+			new jw(e).show();
 		}
 	},
 	{
@@ -53608,7 +53674,7 @@ var hD = null, gD = null, _D = null, vD = null, yD = [
 			if (console.log("[field:edit] fieldInfo:", n), !n || n.fieldId == null) return;
 			let r = e.wasm.getClickHereProps(n.fieldId);
 			if (console.log("[field:edit] props:", r), !r.ok) return;
-			let i = new Cw();
+			let i = new Ow();
 			i.onApply = (e) => {
 				console.log("[field:edit] apply:", e);
 				try {
@@ -53644,43 +53710,43 @@ var hD = null, gD = null, _D = null, vD = null, yD = [
 			t && t.confirmRemoveCurrentField?.();
 		}
 	}
-], bD = "(prefers-color-scheme: dark)", xD = "meta[name=\"theme-color\"]", SD = "meta[name=\"color-scheme\"]";
-function CD() {
-	return window.matchMedia?.(bD).matches ?? !1;
+], TD = "(prefers-color-scheme: dark)", ED = "meta[name=\"theme-color\"]", DD = "meta[name=\"color-scheme\"]";
+function OD() {
+	return window.matchMedia?.(TD).matches ?? !1;
 }
-function wD(e) {
-	let t = document.querySelector(xD);
+function kD(e) {
+	let t = document.querySelector(ED);
 	t && (t.content = getComputedStyle(e).getPropertyValue("--ui-bg-light").trim() || "#f5f5f5");
 }
-function TD(e, t) {
+function AD(e, t) {
 	let n = `only ${t}`;
 	e.style.colorScheme = n;
-	let r = document.querySelector(SD);
+	let r = document.querySelector(DD);
 	r && (r.content = n);
 }
-function ED() {
+function jD() {
 	return V.getThemeSettings().mode;
 }
-function DD(e = ED()) {
-	return e === "dark" ? "dark" : e === "light" ? "light" : CD() ? "dark" : "light";
+function MD(e = jD()) {
+	return e === "dark" ? "dark" : e === "light" ? "light" : OD() ? "dark" : "light";
 }
-function OD() {
+function ND() {
 	return V.getThemeSettings().skin;
 }
-function kD(e = ED()) {
-	let t = DD(e), n = document.documentElement;
-	return n.dataset.themeMode = e, n.dataset.themeEffective = t, AD(n), TD(n, t), wD(n), t;
+function PD(e = jD()) {
+	let t = MD(e), n = document.documentElement;
+	return n.dataset.themeMode = e, n.dataset.themeEffective = t, FD(n), AD(n, t), kD(n), t;
 }
-function AD(e, t = OD()) {
+function FD(e, t = ND()) {
 	t === "default" ? delete e.dataset.themeSkin : e.dataset.themeSkin = t;
 }
-function jD(e) {
-	return V.setThemeMode(e), kD(e);
+function ID(e) {
+	return V.setThemeMode(e), PD(e);
 }
-function MD(e) {
-	return V.setThemeSkin(e), kD();
+function LD(e) {
+	return V.setThemeSkin(e), PD();
 }
-function ND(e = ED(), t = OD()) {
+function RD(e = jD(), t = ND()) {
 	for (let t of document.querySelectorAll("[data-theme-mode-choice]")) {
 		let n = t.dataset.themeModeChoice === e;
 		t.classList.toggle("active", n), t.setAttribute("aria-checked", String(n));
@@ -53690,22 +53756,22 @@ function ND(e = ED(), t = OD()) {
 		e.classList.toggle("active", n), e.setAttribute("aria-checked", String(n));
 	}
 }
-function PD(e) {
+function zD(e) {
 	let t = () => {
-		let t = ED(), n = kD(t);
-		ND(t), e?.(n, t);
+		let t = jD(), n = PD(t);
+		RD(t), e?.(n, t);
 	};
 	t();
-	let n = window.matchMedia?.(bD);
+	let n = window.matchMedia?.(TD);
 	if (!n) return () => {};
 	let r = () => {
-		ED() === "system" && t();
+		jD() === "system" && t();
 	};
 	return typeof n.addEventListener == "function" ? (n.addEventListener("change", r), () => n.removeEventListener("change", r)) : (n.addListener(r), () => n.removeListener(r));
 }
 //#endregion
 //#region @rhwp/studio/src/ui/grid-settings-dialog.ts
-var FD = class extends A {
+var BD = class extends A {
 	visibleInput;
 	horizontalInput;
 	verticalInput;
@@ -53809,7 +53875,7 @@ var FD = class extends A {
 	clampMoveStep(e) {
 		return Number.isFinite(e) ? Math.min(50, Math.max(.5, e)) : this.currentMoveStepMm;
 	}
-}, ID = 7200 / 25.4, LD = [{
+}, VD = 7200 / 25.4, HD = [{
 	key: "basic",
 	cmd: "view:toolbox-basic",
 	nameKey: "ui.toolbox.basic",
@@ -53826,13 +53892,13 @@ var FD = class extends A {
 	attribute: "data-toolbox-format",
 	elementId: "style-bar"
 }];
-function RD(e) {
+function UD(e) {
 	return e ? "shown" : "hidden";
 }
-function zD(e, t) {
-	for (let n of LD) {
+function WD(e, t) {
+	for (let n of HD) {
 		let r = t[n.key];
-		e.documentElement.dataset[n.datasetKey] = RD(r);
+		e.documentElement.dataset[n.datasetKey] = UD(r);
 		for (let t of e.querySelectorAll(`[data-cmd="${n.cmd}"]`)) if (t.classList.toggle("active", r), t.getAttribute("aria-controls") === n.elementId) {
 			let e = g(r ? "ui.toolbox.collapseLabel" : "ui.toolbox.expandLabel", { p1: g(n.nameKey) });
 			t.setAttribute("aria-expanded", String(r)), t.setAttribute("aria-label", e), t.setAttribute("title", n.shortcut ? `${e} (${n.shortcut})` : e);
@@ -53841,24 +53907,24 @@ function zD(e, t) {
 }
 //#endregion
 //#region @rhwp/studio/src/view/zoom-dialog-state.ts
-var BD = [
+var GD = [
 	100,
 	125,
 	150,
 	200,
 	300,
 	500
-], VD = dc * 100, HD = 500, UD = .005;
-function WD(e) {
+], KD = dc * 100, qD = 500, JD = .005;
+function YD(e) {
 	let t = e.trim();
 	if (t === "") return {
 		valid: !1,
 		message: "사용자 정의 배율을 입력하세요."
 	};
 	let n = Number(t);
-	return Number.isFinite(n) ? Number.isInteger(n) ? n < VD || n > HD ? {
+	return Number.isFinite(n) ? Number.isInteger(n) ? n < KD || n > qD ? {
 		valid: !1,
-		message: `${VD}~${HD}% 사이의 배율을 입력하세요.`
+		message: `${KD}~${qD}% 사이의 배율을 입력하세요.`
 	} : {
 		valid: !0,
 		percent: n
@@ -53870,26 +53936,26 @@ function WD(e) {
 		message: "사용자 정의 배율은 숫자로 입력하세요."
 	};
 }
-function GD(e) {
-	return Number.isFinite(e) ? Math.max(VD, Math.min(HD, Math.round(e))) : 100;
+function XD(e) {
+	return Number.isFinite(e) ? Math.max(KD, Math.min(qD, Math.round(e))) : 100;
 }
-function KD(e, t) {
-	for (let t of BD) if (Math.abs(e - t / 100) <= UD) return {
+function ZD(e, t) {
+	for (let t of GD) if (Math.abs(e - t / 100) <= JD) return {
 		kind: "preset",
 		percent: t
 	};
-	return Math.abs(e - t.fitWidth) <= UD ? { kind: "fitWidth" } : Math.abs(e - t.fitPage) <= UD ? { kind: "fitPage" } : {
+	return Math.abs(e - t.fitWidth) <= JD ? { kind: "fitWidth" } : Math.abs(e - t.fitPage) <= JD ? { kind: "fitPage" } : {
 		kind: "custom",
-		percent: GD(e * 100)
+		percent: XD(e * 100)
 	};
 }
-function qD(e) {
+function QD(e) {
 	return e.kind === "fitWidth" || e.kind === "fitPage" ? e.kind : "none";
 }
-function JD(e) {
-	return pc(e.arrangement).kind === "multiple" ? "fitPage" : qD(e.zoomChoice);
+function $D(e) {
+	return pc(e.arrangement).kind === "multiple" ? "fitPage" : QD(e.zoomChoice);
 }
-function YD(e) {
+function eO(e) {
 	let t = pc(e.arrangement);
 	if (t.kind === "multiple") return Du("fitPage", {
 		containerWidth: e.viewportWidth,
@@ -53910,12 +53976,12 @@ function YD(e) {
 			pageGap: e.pageGap
 		}) ?? 1;
 		case "preset":
-		case "custom": return GD(e.zoomChoice.percent) / 100;
+		case "custom": return XD(e.zoomChoice.percent) / 100;
 	}
 }
 //#endregion
 //#region @rhwp/studio/src/ui/zoom-dialog.ts
-var XD = "zoom-dialog-custom-error", ZD = class extends A {
+var tO = "zoom-dialog-custom-error", nO = class extends A {
 	initialChoice;
 	initialArrangement;
 	initialPageMovement;
@@ -53927,7 +53993,7 @@ var XD = "zoom-dialog-custom-error", ZD = class extends A {
 	wheelHorizontalInput;
 	inputEnterHandler = null;
 	constructor(e) {
-		super(g("dialog.zoom.title"), 540), this.initialChoice = KD(e.currentZoom, e.fitZooms), this.initialArrangement = pc(e.arrangement), this.initialPageMovement = yl(e.pageMovement), this.callback = e.onConfirm;
+		super(g("dialog.zoom.title"), 540), this.initialChoice = ZD(e.currentZoom, e.fitZooms), this.initialArrangement = pc(e.arrangement), this.initialPageMovement = yl(e.pageMovement), this.callback = e.onConfirm;
 	}
 	show() {
 		super.show(), this.dialog.classList.add("zoom-dialog");
@@ -53946,7 +54012,7 @@ var XD = "zoom-dialog-custom-error", ZD = class extends A {
 	onConfirm() {
 		let e = this.selectedValue("zoom-choice"), t;
 		if (e === "custom" && !this.customInput.disabled) {
-			let e = WD(this.customInput.value);
+			let e = YD(this.customInput.value);
 			if (!e.valid) return this.showCustomZoomError(e.message), !1;
 			t = e.percent, this.clearCustomZoomError();
 		}
@@ -53965,14 +54031,14 @@ var XD = "zoom-dialog-custom-error", ZD = class extends A {
 		t.className = "zoom-dialog-grid";
 		let n = document.createElement("div"), r = document.createElement("div");
 		n.className = "zoom-dialog-choice-column", r.className = "zoom-dialog-choice-column";
-		for (let e of BD) n.appendChild(this.radioRow("zoom-choice", `preset:${e}`, `${e}%`, this.initialChoice.kind === "preset" && this.initialChoice.percent === e));
+		for (let e of GD) n.appendChild(this.radioRow("zoom-choice", `preset:${e}`, `${e}%`, this.initialChoice.kind === "preset" && this.initialChoice.percent === e));
 		r.append(this.radioRow("zoom-choice", "fitWidth", g("dialog.zoom.radioRow.label"), this.initialChoice.kind === "fitWidth"), this.radioRow("zoom-choice", "fitPage", g("dialog.zoom.radioRow.label.xc096df"), this.initialChoice.kind === "fitPage"));
 		let i = this.radioRow("zoom-choice", "custom", g("dialog.zoom.radioRow.label.x0b64ca"), this.initialChoice.kind === "custom");
-		this.customInput = this.numberInput(this.initialChoice.kind === "custom" ? this.initialChoice.percent : 100, VD, HD, g("dialog.zoom.createZoomSection.label")), this.customInput.setAttribute("aria-describedby", XD), this.customInput.setAttribute("aria-invalid", "false"), this.customInput.addEventListener("input", () => {
-			WD(this.customInput.value).valid && this.clearCustomZoomError();
+		this.customInput = this.numberInput(this.initialChoice.kind === "custom" ? this.initialChoice.percent : 100, KD, qD, g("dialog.zoom.createZoomSection.label")), this.customInput.setAttribute("aria-describedby", tO), this.customInput.setAttribute("aria-invalid", "false"), this.customInput.addEventListener("input", () => {
+			YD(this.customInput.value).valid && this.clearCustomZoomError();
 		});
 		let a = document.createElement("span");
-		return a.className = "dialog-unit", a.textContent = "%", i.append(this.customInput, a), this.customError = document.createElement("p"), this.customError.id = XD, this.customError.className = "zoom-dialog-custom-error", this.customError.setAttribute("role", "alert"), this.customError.hidden = !0, r.append(i, this.customError), t.append(n, r), e.appendChild(t), e.addEventListener("change", () => this.updateDependentInputs()), queueMicrotask(() => this.updateDependentInputs()), e;
+		return a.className = "dialog-unit", a.textContent = "%", i.append(this.customInput, a), this.customError = document.createElement("p"), this.customError.id = tO, this.customError.className = "zoom-dialog-custom-error", this.customError.setAttribute("role", "alert"), this.customError.hidden = !0, r.append(i, this.customError), t.append(n, r), e.appendChild(t), e.addEventListener("change", () => this.updateDependentInputs()), queueMicrotask(() => this.updateDependentInputs()), e;
 	}
 	createMovementSection() {
 		let e = this.section(g("dialog.zoom.section.label.xbd5df6")), t = document.createElement("div");
@@ -54022,10 +54088,10 @@ var XD = "zoom-dialog-custom-error", ZD = class extends A {
 	zoomChoiceFromValue(e, t) {
 		return e.startsWith("preset:") ? {
 			kind: "preset",
-			percent: GD(Number(e.slice(7)))
+			percent: XD(Number(e.slice(7)))
 		} : e === "fitWidth" ? { kind: "fitWidth" } : e === "fitPage" ? { kind: "fitPage" } : {
 			kind: "custom",
-			percent: t ?? GD(Number(this.customInput.value))
+			percent: t ?? XD(Number(this.customInput.value))
 		};
 	}
 	showCustomZoomError(e) {
@@ -54056,8 +54122,8 @@ var XD = "zoom-dialog-custom-error", ZD = class extends A {
 			e.disabled = t;
 		}), this.customInput.disabled = t || this.selectedValue("zoom-choice") !== "custom", this.customInput.disabled && this.clearCustomZoomError(), this.columnsInput.disabled = !t, this.rowsInput.disabled = !t, this.wheelHorizontalInput.disabled = !e;
 	}
-}, QD = 10;
-function $D(e, t) {
+}, rO = 10;
+function iO(e, t) {
 	if (e.wasm.pageCount === 0) return null;
 	let n = document.getElementById("scroll-container");
 	if (!n) return null;
@@ -54068,18 +54134,18 @@ function $D(e, t) {
 		pageWidth: r.width,
 		pageHeight: r.height,
 		arrangement: t,
-		pageGap: QD
+		pageGap: rO
 	};
 }
-function eO(e, t) {
+function aO(e, t) {
 	let n = e.getViewportManager();
 	if (!n) return;
-	let r = $D(e, V.getViewSettings().pageArrangement);
+	let r = iO(e, V.getViewSettings().pageArrangement);
 	if (!r) return;
 	let i = Du(t, r);
 	i !== null && n.setZoom(i, ml, t);
 }
-function tO(e, t) {
+function oO(e, t) {
 	return {
 		id: `view:zoom-${e}`,
 		label: `${e}%`,
@@ -54089,65 +54155,65 @@ function tO(e, t) {
 		}
 	};
 }
-function nO(e, t) {
+function sO(e, t) {
 	return {
 		id: `view:theme-${e}`,
 		label: t,
 		execute(t) {
-			let n = jD(e);
-			ND(e), t.eventBus.emit("theme-changed", {
+			let n = ID(e);
+			RD(e), t.eventBus.emit("theme-changed", {
 				mode: e,
 				effective: n
 			}), t.eventBus.emit("document-view-changed");
 		}
 	};
 }
-function rO(e, t) {
+function cO(e, t) {
 	return {
 		id: `view:skin-${e}`,
 		label: t,
 		execute(t) {
-			let n = MD(e);
-			ND(), t.eventBus.emit("theme-changed", {
+			let n = LD(e);
+			RD(), t.eventBus.emit("theme-changed", {
 				mode: V.getThemeSettings().mode,
 				effective: n
 			}), t.eventBus.emit("document-view-changed");
 		}
 	};
 }
-function iO(e, t) {
+function lO(e, t) {
 	document.querySelectorAll("[data-cmd=\"view:ctrl-mark\"]").forEach((t) => {
 		t.classList.toggle("active", e);
 	}), document.querySelectorAll("[data-cmd=\"view:para-mark\"]").forEach((e) => {
 		e.classList.toggle("active", t);
 	});
 }
-var aO = !V.getViewSettings().clipView;
-function oO(e) {
-	aO = e, document.querySelectorAll("[data-cmd=\"view:toggle-clip\"]").forEach((t) => {
+var uO = !V.getViewSettings().clipView;
+function dO(e) {
+	uO = e, document.querySelectorAll("[data-cmd=\"view:toggle-clip\"]").forEach((t) => {
 		t.classList.toggle("active", !e);
 	});
 }
-function sO() {
+function fO() {
 	let e = V.getViewSettings();
-	zD(document, {
+	WD(document, {
 		basic: e.toolbarBasic,
 		format: e.toolbarFormat
 	});
 }
-function cO(e) {
+function pO(e) {
 	let t = e.getInputHandler();
 	t?.updateCaret?.(!0), requestAnimationFrame(() => t?.updateCaret?.(!0));
 }
-function lO(e) {
+function mO(e) {
 	let t = 0, n = e.getInputHandler(), r = n ? n.cursor : null;
 	typeof r?.rect?.pageIndex == "number" && (t = r.rect.pageIndex);
-	let i = e.wasm.getPageInfo(t), a = e.wasm.getDocumentInfo(), o = e.wasm.getSectionDef(i.sectionIndex ?? 0), s = e.wasm.getPageBorderFill(i.sectionIndex ?? 0), c = e.wasm.getPageDef(i.sectionIndex ?? 0), l = uO(c.marginLeft / ID), u = uO((c.marginTop + c.marginHeader) / ID), d = a.hwp3Variant && s.basis === "page" ? uO(o.columnSpacing / ID) : 0, f = d > 0 ? uO(uO(c.marginTop / ID) + uO(c.marginHeader / ID) + d) : u;
+	let i = e.wasm.getPageInfo(t), a = e.wasm.getDocumentInfo(), o = e.wasm.getSectionDef(i.sectionIndex ?? 0), s = e.wasm.getPageBorderFill(i.sectionIndex ?? 0), c = e.wasm.getPageDef(i.sectionIndex ?? 0), l = hO(c.marginLeft / VD), u = hO((c.marginTop + c.marginHeader) / VD), d = a.hwp3Variant && s.basis === "page" ? hO(o.columnSpacing / VD) : 0, f = d > 0 ? hO(hO(c.marginTop / VD) + hO(c.marginHeader / VD) + d) : u;
 	return {
 		defaults: {
 			page: {
 				x: 0,
-				y: uO(f - u)
+				y: hO(f - u)
 			},
 			paper: {
 				x: l,
@@ -54166,11 +54232,11 @@ function lO(e) {
 		}
 	};
 }
-function uO(e) {
+function hO(e) {
 	return Math.round(e * 100) / 100;
 }
-function dO(e, t) {
-	if (!fO(e.offsetXmm, 0) || !fO(e.offsetYmm, 0)) return e;
+function gO(e, t) {
+	if (!_O(e.offsetXmm, 0) || !_O(e.offsetYmm, 0)) return e;
 	let n = t[e.origin];
 	return {
 		...e,
@@ -54178,10 +54244,10 @@ function dO(e, t) {
 		offsetYmm: n.y
 	};
 }
-function fO(e, t) {
+function _O(e, t) {
 	return Number.isFinite(e) && Math.abs(e - t) < .01;
 }
-var pO = [
+var vO = [
 	{
 		id: "view:zoom-in",
 		label: g("command.view.zoomIn.label"),
@@ -54210,28 +54276,28 @@ var pO = [
 		execute(e) {
 			let t = e.getViewportManager();
 			if (!t) return;
-			let n = V.getViewSettings(), r = n.pageArrangement, i = $D(e, r);
+			let n = V.getViewSettings(), r = n.pageArrangement, i = iO(e, r);
 			if (!i) return;
 			let a = {
 				fitWidth: Du("fitWidth", i) ?? 1,
 				fitPage: Du("fitPage", i) ?? 1
 			};
-			new ZD({
+			new nO({
 				currentZoom: t.getZoom(),
 				fitZooms: a,
 				arrangement: r,
 				pageMovement: n.pageMovement,
 				onConfirm(t) {
-					let n = $D(e, t.arrangement);
+					let n = iO(e, t.arrangement);
 					if (!n) return;
-					let r = YD({
+					let r = eO({
 						...t,
 						viewportWidth: n.containerWidth,
 						viewportHeight: n.containerHeight,
 						pageWidth: n.pageWidth,
 						pageHeight: n.pageHeight,
 						pageGap: n.pageGap
-					}), i = JD(t);
+					}), i = $D(t);
 					V.setPageViewSettings(t.arrangement, t.pageMovement, i);
 					let a = V.getViewSettings(), o = {
 						arrangement: a.pageArrangement,
@@ -54252,7 +54318,7 @@ var pO = [
 		label: g("command.view.zoomFitPage.label"),
 		shortcutLabel: "Ctrl+G,P",
 		execute(e) {
-			eO(e, "fitPage");
+			aO(e, "fitPage");
 		}
 	},
 	{
@@ -54260,23 +54326,23 @@ var pO = [
 		label: g("command.view.zoomFitWidth.label"),
 		shortcutLabel: "Ctrl+G,W",
 		execute(e) {
-			eO(e, "fitWidth");
+			aO(e, "fitWidth");
 		}
 	},
-	tO(50),
-	tO(75),
-	tO(100, "Ctrl+G,Q"),
-	tO(125),
-	tO(150),
-	tO(200),
-	tO(300),
-	tO(500),
-	nO("system", g("command.view.themeModeCommand.system")),
-	nO("light", g("command.view.themeModeCommand.light")),
-	nO("dark", g("command.view.themeModeCommand.dark")),
-	rO("oldschool", g("command.view.themeSkinCommand.oldschool")),
-	rO("default", g("command.view.themeSkinCommand.default")),
-	rO("flat", g("command.view.themeSkinCommand.flat")),
+	oO(50),
+	oO(75),
+	oO(100, "Ctrl+G,Q"),
+	oO(125),
+	oO(150),
+	oO(200),
+	oO(300),
+	oO(500),
+	sO("system", g("command.view.themeModeCommand.system")),
+	sO("light", g("command.view.themeModeCommand.light")),
+	sO("dark", g("command.view.themeModeCommand.dark")),
+	cO("oldschool", g("command.view.themeSkinCommand.oldschool")),
+	cO("default", g("command.view.themeSkinCommand.default")),
+	cO("flat", g("command.view.themeSkinCommand.flat")),
 	{
 		id: "view:form-mode",
 		label: g("command.view.formMode.registryLabel"),
@@ -54294,7 +54360,7 @@ var pO = [
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
 			let t = !e.getContext().showControlCodes;
-			e.wasm.setShowControlCodes(t), e.wasm.setShowParagraphMarks(t), V.setShowControlCodes(t), V.setShowParagraphMarks(t), iO(t, t), cO(e), e.eventBus.emit("document-view-changed");
+			e.wasm.setShowControlCodes(t), e.wasm.setShowParagraphMarks(t), V.setShowControlCodes(t), V.setShowParagraphMarks(t), lO(t, t), pO(e), e.eventBus.emit("document-view-changed");
 		}
 	},
 	{
@@ -54305,7 +54371,7 @@ var pO = [
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
 			let t = e.getContext(), n = !t.showParagraphMarks;
-			e.wasm.setShowParagraphMarks(n), V.setShowParagraphMarks(n), iO(t.showControlCodes, n), cO(e), e.eventBus.emit("document-view-changed");
+			e.wasm.setShowParagraphMarks(n), V.setShowParagraphMarks(n), lO(t.showControlCodes, n), pO(e), e.eventBus.emit("document-view-changed");
 		}
 	},
 	{
@@ -54325,8 +54391,8 @@ var pO = [
 		label: g("command.view.toggleClip.label"),
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			let t = !aO;
-			e.wasm.setClipEnabled(t), V.setClipView(!t), oO(t), e.eventBus.emit("document-view-changed");
+			let t = !uO;
+			e.wasm.setClipEnabled(t), V.setClipView(!t), dO(t), e.eventBus.emit("document-view-changed");
 		}
 	},
 	{
@@ -54348,8 +54414,8 @@ var pO = [
 		icon: "icon-grid",
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			let t = e.getInputHandler(), n = lO(e);
-			new FD(dO(su(), n.defaults), n.bases, t?.getGridStepMm() ?? 3, (n, r) => {
+			let t = e.getInputHandler(), n = mO(e);
+			new BD(gO(su(), n.defaults), n.bases, t?.getGridStepMm() ?? 3, (n, r) => {
 				let i = cu(n);
 				t?.setGridStep(r), document.querySelectorAll("[data-cmd=\"view:toggle-grid\"]").forEach((e) => {
 					e.classList.toggle("active", i.visible);
@@ -54362,17 +54428,17 @@ var pO = [
 		label: g("command.view.toolboxBasic.label"),
 		shortcutLabel: "Ctrl+F1",
 		execute() {
-			V.setToolbarBasic(!V.getViewSettings().toolbarBasic), sO();
+			V.setToolbarBasic(!V.getViewSettings().toolbarBasic), fO();
 		}
 	},
 	{
 		id: "view:toolbox-format",
 		label: g("command.view.toolboxFormat.label"),
 		execute() {
-			V.setToolbarFormat(!V.getViewSettings().toolbarFormat), sO();
+			V.setToolbarFormat(!V.getViewSettings().toolbarFormat), fO();
 		}
 	}
-], mO = null, hO = [], gO = [
+], yO = null, bO = [], xO = [
 	"●",
 	"·",
 	"■",
@@ -54393,9 +54459,9 @@ var pO = [
 	"→",
 	"-"
 ];
-function _O(e, t, n) {
-	if (mO) {
-		mO();
+function SO(e, t, n) {
+	if (yO) {
+		yO();
 		return;
 	}
 	let r = e.getInputHandler();
@@ -54403,7 +54469,7 @@ function _O(e, t, n) {
 	let i = document.createElement("div");
 	i.className = "pwh-bullet-gallery", i.setAttribute("role", "dialog"), i.setAttribute("aria-label", "글머리표 선택");
 	let a = () => {
-		i.remove(), document.removeEventListener("mousedown", o), window.removeEventListener("resize", a), mO = null;
+		i.remove(), document.removeEventListener("mousedown", o), window.removeEventListener("resize", a), yO = null;
 	}, o = (e) => {
 		!i.contains(e.target) && !t?.contains(e.target) && a();
 	}, s = (e, t, n = !1) => {
@@ -54425,8 +54491,8 @@ function _O(e, t, n) {
 			t.addEventListener("mousedown", (e) => e.preventDefault()), t.addEventListener("click", () => {
 				if (a(), e) {
 					r.applyBullet(e);
-					let t = hO.indexOf(e);
-					t >= 0 && hO.splice(t, 1), hO.unshift(e), hO.splice(6);
+					let t = bO.indexOf(e);
+					t >= 0 && bO.splice(t, 1), bO.unshift(e), bO.splice(6);
 				} else r.applyParaPropsAtCursor({
 					headType: "None",
 					numberingId: 0
@@ -54435,7 +54501,7 @@ function _O(e, t, n) {
 			}), s.append(t);
 		}
 	};
-	hO.length && s("최근 사용한 항목", hO), s("글머리표", gO, !0), s("확인용 글머리표", [
+	bO.length && s("최근 사용한 항목", bO), s("글머리표", xO, !0), s("확인용 글머리표", [
 		"□",
 		"☑",
 		"○",
@@ -54449,7 +54515,7 @@ function _O(e, t, n) {
 	let l = document.querySelector("[data-menu=\"format\"] .menu-title") || document.getElementById("menu-bar"), u = t?.getBoundingClientRect(), d = u && u.width > 0 && u.height > 0 ? u : l.getBoundingClientRect(), f = Math.min(360, innerWidth - 16);
 	i.style.width = f + "px", i.style.left = Math.max(8, Math.min(d.left, innerWidth - f - 8)) + "px";
 	let p = Math.max(8, Math.min(d.bottom + 3, innerHeight - 200));
-	i.style.top = p + "px", i.style.maxHeight = Math.max(160, innerHeight - p - 8) + "px", mO = a, document.addEventListener("mousedown", o), window.addEventListener("resize", a), i.querySelector(".pwh-bullet-choice")?.focus({ preventScroll: !0 }), i.addEventListener("keydown", (e) => {
+	i.style.top = p + "px", i.style.maxHeight = Math.max(160, innerHeight - p - 8) + "px", yO = a, document.addEventListener("mousedown", o), window.addEventListener("resize", a), i.querySelector(".pwh-bullet-choice")?.focus({ preventScroll: !0 }), i.addEventListener("keydown", (e) => {
 		if (e.key === "Escape") {
 			e.preventDefault(), e.stopPropagation(), a(), r.focus();
 			return;
@@ -54467,10 +54533,10 @@ function _O(e, t, n) {
 }
 //#endregion
 //#region @rhwp/studio/src/ui/pwh-path-table-properties.mjs
-function vO(e, t) {
+function CO(e, t) {
 	return Object.fromEntries(Object.entries(e).filter(([e, n]) => JSON.stringify(n) !== JSON.stringify(t[e])));
 }
-function yO(e) {
+function wO(e) {
 	if (!Array.isArray(e) || e.length < 2 || e.some((e) => !e || [
 		"controlIndex",
 		"cellIndex",
@@ -54487,8 +54553,8 @@ function yO(e) {
 		cellParaIndex: 0
 	}, JSON.stringify(t);
 }
-function bO(e, t) {
-	let n = yO(t);
+function TO(e, t) {
+	let n = wO(t);
 	for (let t of [
 		"getTablePropertiesByPath",
 		"setTablePropertiesByPath",
@@ -54582,20 +54648,20 @@ function bO(e, t) {
 }
 //#endregion
 //#region @rhwp/studio/src/ui/table-cell-props-dialog.ts
-var xO = 7200 / 25.4;
-function SO(e) {
+var EO = 7200 / 25.4;
+function DO(e) {
 	return Math.round(e * 25.4 / 7200 * 10) / 10;
 }
-function CO(e) {
-	return Math.round(e * xO);
+function OO(e) {
+	return Math.round(e * EO);
 }
-function wO(e) {
+function kO(e) {
 	return Math.round(e * 25.4 / 7200 * 10) / 10;
 }
-function TO(e) {
-	return Math.round(e * xO);
+function AO(e) {
+	return Math.round(e * EO);
 }
-var EO = "var(--doc-paper)", DO = "var(--ui-border-light)", OO = "currentColor", kO = class extends A {
+var jO = "var(--doc-paper)", MO = "var(--ui-border-light)", NO = "currentColor", PO = class extends A {
 	wasm;
 	eventBus;
 	tableCtx;
@@ -54672,7 +54738,7 @@ var EO = "var(--doc-paper)", DO = "var(--ui-border-light)", OO = "currentColor",
 	tableProps;
 	services;
 	constructor(e, t, n, r, i = "cell", a) {
-		super(g("dialog.tableCellProps.mmToHwp16.title"), 480), this.wasm = n.cellPath?.length ? bO(e, n.cellPath) : e, this.eventBus = t, this.tableCtx = n, this.cellIdx = r, this.mode = i, this.services = a;
+		super(g("dialog.tableCellProps.mmToHwp16.title"), 480), this.wasm = n.cellPath?.length ? TO(e, n.cellPath) : e, this.eventBus = t, this.tableCtx = n, this.cellIdx = r, this.mode = i, this.services = a;
 	}
 	show() {
 		super.show(), this.dialog.classList.add("tcp-dialog");
@@ -54998,7 +55064,7 @@ var EO = "var(--doc-paper)", DO = "var(--ui-border-light)", OO = "currentColor",
 			}
 		].forEach((e) => {
 			let t = document.createElement("button");
-			t.type = "button", t.className = "tcp-caption-item", Qx(t, e.svg), t.dataset.dir = String(e.dir), t.dataset.sub = String(e.sub), t.addEventListener("click", () => {
+			t.type = "button", t.className = "tcp-caption-item", rS(t, e.svg), t.dataset.dir = String(e.dir), t.dataset.sub = String(e.sub), t.addEventListener("click", () => {
 				this.captionPosBtns.forEach((e) => e.classList.remove("active")), t.classList.add("active");
 				let n = e.dir === -1;
 				this.captionFieldsWrap.classList.toggle("tcp-disabled", n), n || (this.captionDirSelect.value = String(e.dir)), this.updateCaptionWidthState();
@@ -55106,14 +55172,14 @@ var EO = "var(--doc-paper)", DO = "var(--ui-border-light)", OO = "currentColor",
 				let e = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 				e.setAttribute("viewBox", "0 0 48 10");
 				let n = document.createElementNS("http://www.w3.org/2000/svg", "line");
-				n.setAttribute("x1", "0"), n.setAttribute("y1", "3"), n.setAttribute("x2", "48"), n.setAttribute("y2", "3"), n.setAttribute("stroke", OO), n.setAttribute("stroke-width", "1");
+				n.setAttribute("x1", "0"), n.setAttribute("y1", "3"), n.setAttribute("x2", "48"), n.setAttribute("y2", "3"), n.setAttribute("stroke", NO), n.setAttribute("stroke-width", "1");
 				let r = document.createElementNS("http://www.w3.org/2000/svg", "line");
-				r.setAttribute("x1", "0"), r.setAttribute("y1", "7"), r.setAttribute("x2", "48"), r.setAttribute("y2", "7"), r.setAttribute("stroke", OO), r.setAttribute("stroke-width", "1"), e.appendChild(n), e.appendChild(r), t.appendChild(e);
+				r.setAttribute("x1", "0"), r.setAttribute("y1", "7"), r.setAttribute("x2", "48"), r.setAttribute("y2", "7"), r.setAttribute("stroke", NO), r.setAttribute("stroke-width", "1"), e.appendChild(n), e.appendChild(r), t.appendChild(e);
 			} else {
 				let n = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 				n.setAttribute("viewBox", "0 0 48 10");
 				let r = document.createElementNS("http://www.w3.org/2000/svg", "line");
-				r.setAttribute("x1", "0"), r.setAttribute("y1", "5"), r.setAttribute("x2", "48"), r.setAttribute("y2", "5"), r.setAttribute("stroke", OO), r.setAttribute("stroke-width", "1.5"), e.dash && r.setAttribute("stroke-dasharray", e.dash), n.appendChild(r), t.appendChild(n);
+				r.setAttribute("x1", "0"), r.setAttribute("y1", "5"), r.setAttribute("x2", "48"), r.setAttribute("y2", "5"), r.setAttribute("stroke", NO), r.setAttribute("stroke-width", "1.5"), e.dash && r.setAttribute("stroke-dasharray", e.dash), n.appendChild(r), t.appendChild(n);
 			}
 			t.addEventListener("click", () => {
 				this.borderLineTypeGrid.querySelectorAll(".tcp-line-type-item").forEach((e) => e.classList.remove("active")), t.classList.add("active"), this.borderSelectedLineType = e.type;
@@ -55221,11 +55287,11 @@ var EO = "var(--doc-paper)", DO = "var(--ui-border-light)", OO = "currentColor",
 		if (!e) return;
 		for (; e.firstChild;) e.removeChild(e.firstChild);
 		let t = "http://www.w3.org/2000/svg", n = document.createElementNS(t, "rect");
-		n.setAttribute("x", "0"), n.setAttribute("y", "0"), n.setAttribute("width", "120"), n.setAttribute("height", "100"), n.style.setProperty("fill", EO), e.appendChild(n);
+		n.setAttribute("x", "0"), n.setAttribute("y", "0"), n.setAttribute("width", "120"), n.setAttribute("height", "100"), n.style.setProperty("fill", jO), e.appendChild(n);
 		let r = document.createElementNS(t, "line");
-		r.setAttribute("x1", "60"), r.setAttribute("y1", "5"), r.setAttribute("x2", "60"), r.setAttribute("y2", "95"), r.style.setProperty("stroke", DO), r.setAttribute("stroke-width", "0.5"), r.setAttribute("stroke-dasharray", "3,2"), e.appendChild(r);
+		r.setAttribute("x1", "60"), r.setAttribute("y1", "5"), r.setAttribute("x2", "60"), r.setAttribute("y2", "95"), r.style.setProperty("stroke", MO), r.setAttribute("stroke-width", "0.5"), r.setAttribute("stroke-dasharray", "3,2"), e.appendChild(r);
 		let i = document.createElementNS(t, "line");
-		i.setAttribute("x1", "5"), i.setAttribute("y1", "50"), i.setAttribute("x2", "115"), i.setAttribute("y2", "50"), i.style.setProperty("stroke", DO), i.setAttribute("stroke-width", "0.5"), i.setAttribute("stroke-dasharray", "3,2"), e.appendChild(i);
+		i.setAttribute("x1", "5"), i.setAttribute("y1", "50"), i.setAttribute("x2", "115"), i.setAttribute("y2", "50"), i.style.setProperty("stroke", MO), i.setAttribute("stroke-width", "0.5"), i.setAttribute("stroke-dasharray", "3,2"), e.appendChild(i);
 		let a = (n, r, i, a, o) => {
 			if (o.type === 0) return;
 			let s = Math.max(.5, (o.width + 1) * .7), c = {
@@ -55335,7 +55401,7 @@ var EO = "var(--doc-paper)", DO = "var(--ui-border-light)", OO = "currentColor",
 	}
 	updateBgPreview() {
 		if (!this.bgColorRadio.checked) {
-			this.bgPreviewBox.style.background = EO;
+			this.bgPreviewBox.style.background = jO;
 			return;
 		}
 		let e = this.bgColorPicker.value, t = parseInt(this.bgPatternTypeSelect.value, 10);
@@ -55355,20 +55421,20 @@ var EO = "var(--doc-paper)", DO = "var(--ui-border-light)", OO = "currentColor",
 	}
 	populateFields() {
 		let e = this.cellProps, t = this.tableProps;
-		if (this.cellWidthInput.value = SO(e.width).toFixed(1), this.cellHeightInput.value = SO(e.height).toFixed(1), this.updateCellSizeState(), this.cellPaddingInputs.left.value = wO(e.paddingLeft).toFixed(1), this.cellPaddingInputs.right.value = wO(e.paddingRight).toFixed(1), this.cellPaddingInputs.top.value = wO(e.paddingTop).toFixed(1), this.cellPaddingInputs.bottom.value = wO(e.paddingBottom).toFixed(1), this.cellPaddingCheck.checked = e.applyInnerMargin ?? !1, this.updateCellPaddingState(), this.setButtonGroupActive(this.cellVAlignBtns, e.verticalAlign), this.setButtonGroupActive(this.cellTextDirBtns, e.textDirection), this.cellHeaderCheck.checked = e.isHeader, this.cellProtectCheck.checked = e.cellProtect ?? !1, this.cellFieldNameInput.value = e.fieldName ?? "", this.cellEditableCheck.checked = e.editableInForm ?? !1, this.tablePageBreakSelect.value = String(t.pageBreak ?? 0), this.tableRepeatHeaderCheck.checked = t.repeatHeader, this.tablePaddingInputs.left.value = wO(t.paddingLeft).toFixed(1), this.tablePaddingInputs.right.value = wO(t.paddingRight).toFixed(1), this.tablePaddingInputs.top.value = wO(t.paddingTop).toFixed(1), this.tablePaddingInputs.bottom.value = wO(t.paddingBottom).toFixed(1), t.tableWidth != null && (this.basicWidthInput.value = SO(t.tableWidth).toFixed(1), this.basicWidthInput.readOnly = !0, this.basicWidthInput.style.removeProperty("background")), t.tableHeight != null && (this.basicHeightInput.value = SO(t.tableHeight).toFixed(1), this.basicHeightInput.readOnly = !0, this.basicHeightInput.style.removeProperty("background")), this.treatAsCharCheck.checked = t.treatAsChar ?? !0, this.selectWrap(this.wrapValues.indexOf(t.textWrap ?? "Square")), this.horzRelSelect.value = t.horzRelTo ?? "Paper", this.horzAlignSelect.value = t.horzAlign ?? "Left", this.horzOffsetInput.value = SO(t.horzOffset ?? 0).toFixed(1), this.vertRelSelect.value = t.vertRelTo ?? "Paper", this.vertAlignSelect.value = t.vertAlign ?? "Top", this.vertOffsetInput.value = SO(t.vertOffset ?? 0).toFixed(1), this.restrictInPageCheck.checked = t.restrictInPage ?? !0, this.allowOverlapCheck.checked = t.allowOverlap ?? !1, this.keepWithAnchorCheck.checked = t.keepWithAnchor ?? !1, this.updatePositionVisibility(), this.marginOuterInputs.left.value = wO(t.outerLeft ?? 0).toFixed(1), this.marginOuterInputs.right.value = wO(t.outerRight ?? 0).toFixed(1), this.marginOuterInputs.top.value = wO(t.outerTop ?? 0).toFixed(1), this.marginOuterInputs.bottom.value = wO(t.outerBottom ?? 0).toFixed(1), this.captionSpacingInput.value = "3.0", this.captionWidthInput.value = "30.0", t.hasCaption) {
+		if (this.cellWidthInput.value = DO(e.width).toFixed(1), this.cellHeightInput.value = DO(e.height).toFixed(1), this.updateCellSizeState(), this.cellPaddingInputs.left.value = kO(e.paddingLeft).toFixed(1), this.cellPaddingInputs.right.value = kO(e.paddingRight).toFixed(1), this.cellPaddingInputs.top.value = kO(e.paddingTop).toFixed(1), this.cellPaddingInputs.bottom.value = kO(e.paddingBottom).toFixed(1), this.cellPaddingCheck.checked = e.applyInnerMargin ?? !1, this.updateCellPaddingState(), this.setButtonGroupActive(this.cellVAlignBtns, e.verticalAlign), this.setButtonGroupActive(this.cellTextDirBtns, e.textDirection), this.cellHeaderCheck.checked = e.isHeader, this.cellProtectCheck.checked = e.cellProtect ?? !1, this.cellFieldNameInput.value = e.fieldName ?? "", this.cellEditableCheck.checked = e.editableInForm ?? !1, this.tablePageBreakSelect.value = String(t.pageBreak ?? 0), this.tableRepeatHeaderCheck.checked = t.repeatHeader, this.tablePaddingInputs.left.value = kO(t.paddingLeft).toFixed(1), this.tablePaddingInputs.right.value = kO(t.paddingRight).toFixed(1), this.tablePaddingInputs.top.value = kO(t.paddingTop).toFixed(1), this.tablePaddingInputs.bottom.value = kO(t.paddingBottom).toFixed(1), t.tableWidth != null && (this.basicWidthInput.value = DO(t.tableWidth).toFixed(1), this.basicWidthInput.readOnly = !0, this.basicWidthInput.style.removeProperty("background")), t.tableHeight != null && (this.basicHeightInput.value = DO(t.tableHeight).toFixed(1), this.basicHeightInput.readOnly = !0, this.basicHeightInput.style.removeProperty("background")), this.treatAsCharCheck.checked = t.treatAsChar ?? !0, this.selectWrap(this.wrapValues.indexOf(t.textWrap ?? "Square")), this.horzRelSelect.value = t.horzRelTo ?? "Paper", this.horzAlignSelect.value = t.horzAlign ?? "Left", this.horzOffsetInput.value = DO(t.horzOffset ?? 0).toFixed(1), this.vertRelSelect.value = t.vertRelTo ?? "Paper", this.vertAlignSelect.value = t.vertAlign ?? "Top", this.vertOffsetInput.value = DO(t.vertOffset ?? 0).toFixed(1), this.restrictInPageCheck.checked = t.restrictInPage ?? !0, this.allowOverlapCheck.checked = t.allowOverlap ?? !1, this.keepWithAnchorCheck.checked = t.keepWithAnchor ?? !1, this.updatePositionVisibility(), this.marginOuterInputs.left.value = kO(t.outerLeft ?? 0).toFixed(1), this.marginOuterInputs.right.value = kO(t.outerRight ?? 0).toFixed(1), this.marginOuterInputs.top.value = kO(t.outerTop ?? 0).toFixed(1), this.marginOuterInputs.bottom.value = kO(t.outerBottom ?? 0).toFixed(1), this.captionSpacingInput.value = "3.0", this.captionWidthInput.value = "30.0", t.hasCaption) {
 			let e = t.captionDirection ?? 3, n = t.captionVertAlign ?? 0;
-			this.captionDirSelect.value = String(e), this.captionSpacingInput.value = wO(t.captionSpacing ?? 0).toFixed(1), this.captionWidthInput.value = SO(t.captionWidth ?? 0).toFixed(1);
+			this.captionDirSelect.value = String(e), this.captionSpacingInput.value = kO(t.captionSpacing ?? 0).toFixed(1), this.captionWidthInput.value = DO(t.captionWidth ?? 0).toFixed(1);
 			let r = this.captionPosBtns.find((t) => t.dataset.dir === String(e) && t.dataset.sub === String(n));
 			r && r.classList.add("active"), this.captionFieldsWrap.classList.remove("tcp-disabled");
 		} else {
 			let e = this.captionPosBtns.find((e) => e.dataset.dir === "-1");
 			e && e.classList.add("active"), this.captionFieldsWrap.classList.add("tcp-disabled");
 		}
-		this.updateCaptionWidthState(), this.borderCellSpacingInput && (this.borderCellSpacingInput.value = wO(t.cellSpacing).toFixed(1), this.populateBorderFromTarget()), this.bgNoneRadio && this.populateBgFromTarget();
+		this.updateCaptionWidthState(), this.borderCellSpacingInput && (this.borderCellSpacingInput.value = kO(t.cellSpacing).toFixed(1), this.populateBorderFromTarget()), this.bgNoneRadio && this.populateBgFromTarget();
 	}
 	pwhCurrentCellProps() {
 		let e = {};
-		this.cellApplySizeCheck.checked && (e.width = CO(parseFloat(this.cellWidthInput.value) || 0), e.height = CO(parseFloat(this.cellHeightInput.value) || 0)), e.applyInnerMargin = this.cellPaddingCheck.checked, this.cellPaddingCheck.checked && (e.paddingLeft = TO(parseFloat(this.cellPaddingInputs.left.value) || 0), e.paddingRight = TO(parseFloat(this.cellPaddingInputs.right.value) || 0), e.paddingTop = TO(parseFloat(this.cellPaddingInputs.top.value) || 0), e.paddingBottom = TO(parseFloat(this.cellPaddingInputs.bottom.value) || 0));
+		this.cellApplySizeCheck.checked && (e.width = OO(parseFloat(this.cellWidthInput.value) || 0), e.height = OO(parseFloat(this.cellHeightInput.value) || 0)), e.applyInnerMargin = this.cellPaddingCheck.checked, this.cellPaddingCheck.checked && (e.paddingLeft = AO(parseFloat(this.cellPaddingInputs.left.value) || 0), e.paddingRight = AO(parseFloat(this.cellPaddingInputs.right.value) || 0), e.paddingTop = AO(parseFloat(this.cellPaddingInputs.top.value) || 0), e.paddingBottom = AO(parseFloat(this.cellPaddingInputs.bottom.value) || 0));
 		let t = this.cellVAlignBtns.findIndex((e) => e.classList.contains("active"));
 		t >= 0 && (e.verticalAlign = t);
 		let n = this.cellTextDirBtns.findIndex((e) => e.classList.contains("active"));
@@ -55380,29 +55446,29 @@ var EO = "var(--doc-paper)", DO = "var(--ui-border-light)", OO = "currentColor",
 			textWrap: this.getSelectedWrap(),
 			vertRelTo: this.vertRelSelect.value,
 			vertAlign: this.vertAlignSelect.value,
-			vertOffset: CO(parseFloat(this.vertOffsetInput.value) || 0),
+			vertOffset: OO(parseFloat(this.vertOffsetInput.value) || 0),
 			horzRelTo: this.horzRelSelect.value,
 			horzAlign: this.horzAlignSelect.value,
-			horzOffset: CO(parseFloat(this.horzOffsetInput.value) || 0),
+			horzOffset: OO(parseFloat(this.horzOffsetInput.value) || 0),
 			restrictInPage: this.restrictInPageCheck.checked,
 			allowOverlap: this.allowOverlapCheck.checked,
 			keepWithAnchor: this.keepWithAnchorCheck.checked,
 			pageBreak: e,
 			repeatHeader: this.tableRepeatHeaderCheck.checked,
-			paddingLeft: TO(parseFloat(this.tablePaddingInputs.left.value) || 0),
-			paddingRight: TO(parseFloat(this.tablePaddingInputs.right.value) || 0),
-			paddingTop: TO(parseFloat(this.tablePaddingInputs.top.value) || 0),
-			paddingBottom: TO(parseFloat(this.tablePaddingInputs.bottom.value) || 0),
-			cellSpacing: this.borderCellSpacingInput ? TO(parseFloat(this.borderCellSpacingInput.value) || 0) : this.tableProps.cellSpacing,
-			outerLeft: TO(parseFloat(this.marginOuterInputs.left.value) || 0),
-			outerRight: TO(parseFloat(this.marginOuterInputs.right.value) || 0),
-			outerTop: TO(parseFloat(this.marginOuterInputs.top.value) || 0),
-			outerBottom: TO(parseFloat(this.marginOuterInputs.bottom.value) || 0)
+			paddingLeft: AO(parseFloat(this.tablePaddingInputs.left.value) || 0),
+			paddingRight: AO(parseFloat(this.tablePaddingInputs.right.value) || 0),
+			paddingTop: AO(parseFloat(this.tablePaddingInputs.top.value) || 0),
+			paddingBottom: AO(parseFloat(this.tablePaddingInputs.bottom.value) || 0),
+			cellSpacing: this.borderCellSpacingInput ? AO(parseFloat(this.borderCellSpacingInput.value) || 0) : this.tableProps.cellSpacing,
+			outerLeft: AO(parseFloat(this.marginOuterInputs.left.value) || 0),
+			outerRight: AO(parseFloat(this.marginOuterInputs.right.value) || 0),
+			outerTop: AO(parseFloat(this.marginOuterInputs.top.value) || 0),
+			outerBottom: AO(parseFloat(this.marginOuterInputs.bottom.value) || 0)
 		}, n = this.captionPosBtns.find((e) => e.classList.contains("active")), r = n ? parseInt(n.dataset.dir, 10) : -1;
 		if (t.hasCaption = r !== -1, r !== -1) {
 			t.captionDirection = parseInt(this.captionDirSelect.value, 10);
 			let e = this.captionPosBtns.find((e) => e.classList.contains("active"));
-			t.captionVertAlign = e ? parseInt(e.dataset.sub, 10) : 0, t.captionSpacing = TO(parseFloat(this.captionSpacingInput.value) || 0), t.captionWidth = CO(parseFloat(this.captionWidthInput.value) || 0);
+			t.captionVertAlign = e ? parseInt(e.dataset.sub, 10) : 0, t.captionSpacing = AO(parseFloat(this.captionSpacingInput.value) || 0), t.captionWidth = OO(parseFloat(this.captionWidthInput.value) || 0);
 		}
 		return this.mode === "table" && this.borderTarget === "table" && this.borderEdits && (t.borderLeft = this.borderEdits[0], t.borderRight = this.borderEdits[1], t.borderTop = this.borderEdits[2], t.borderBottom = this.borderEdits[3]), this.mode === "table" && this.bgTarget === "table" && this.bgColorRadio && (this.bgColorRadio.checked ? (t.fillType = "solid", t.fillColor = this.bgColorPicker.value, t.patternColor = this.bgPatternColorPicker.value, t.patternType = parseInt(this.bgPatternTypeSelect.value, 10)) : t.fillType = "none"), t;
 	}
@@ -55412,11 +55478,11 @@ var EO = "var(--doc-paper)", DO = "var(--ui-border-light)", OO = "currentColor",
 		let i = this.services?.getInputHandler();
 		if (this.mode === "cell" && i?.isInCellSelectionMode?.()) {
 			let a = i.getSelectedCellBlock?.(), o = this.tableCtx.cellPath;
-			if (!(a && a.sec === e && a.ppi === t && (o ? a.cellPath && yO(a.cellPath) === yO(o) : !a.cellPath && a.ci === n)) || !a.cellIndices?.length) return j({
+			if (!(a && a.sec === e && a.ppi === t && (o ? a.cellPath && wO(a.cellPath) === wO(o) : !a.cellPath && a.ci === n)) || !a.cellIndices?.length) return j({
 				message: "이 셀 선택의 속성은 아직 변경할 수 없습니다.",
 				durationMs: 7e3
 			}), !1;
-			let s = Object.fromEntries(Object.entries(r).filter(([e, t]) => JSON.stringify(t) !== JSON.stringify(this.pwhInitialCellProps[e]))), c = vO(this.pwhCurrentTableProps(), this.pwhInitialTableProps);
+			let s = Object.fromEntries(Object.entries(r).filter(([e, t]) => JSON.stringify(t) !== JSON.stringify(this.pwhInitialCellProps[e]))), c = CO(this.pwhCurrentTableProps(), this.pwhInitialTableProps);
 			if (!Object.keys(s).length && !Object.keys(c).length) return !0;
 			let l = i.getCursorPosition();
 			return i.executeOperation({
@@ -55430,7 +55496,7 @@ var EO = "var(--doc-paper)", DO = "var(--ui-border-light)", OO = "currentColor",
 				}), l)
 			}), !0;
 		}
-		let a = this.pwhCurrentTableProps(), o = vO(r, this.pwhInitialCellProps), s = vO(a, this.pwhInitialTableProps);
+		let a = this.pwhCurrentTableProps(), o = CO(r, this.pwhInitialCellProps), s = CO(a, this.pwhInitialTableProps);
 		if (!Object.keys(o).length && !Object.keys(s).length) return !0;
 		let c = () => this.wasm.runInBatch(() => {
 			if (Object.keys(o).length && !this.wasm.setCellProperties(e, t, n, this.cellIdx, o)?.ok) throw Error("셀 속성을 적용하지 못했습니다.");
@@ -55494,7 +55560,7 @@ var EO = "var(--doc-paper)", DO = "var(--ui-border-light)", OO = "currentColor",
 	setButtonGroupActive(e, t) {
 		e.forEach((e, n) => e.classList.toggle("active", n === t));
 	}
-}, AO = class extends A {
+}, FO = class extends A {
 	initial;
 	apply;
 	textInput;
@@ -55561,7 +55627,7 @@ var EO = "var(--doc-paper)", DO = "var(--ui-border-light)", OO = "currentColor",
 		};
 		this.uriInput.addEventListener("input", t), this.textInput.addEventListener("input", t), t(), this.uriInput.focus(), this.uriInput.select();
 	}
-}, jO = class extends A {
+}, IO = class extends A {
 	edit;
 	cancel;
 	accepted = !1;
@@ -55582,12 +55648,12 @@ var EO = "var(--doc-paper)", DO = "var(--ui-border-light)", OO = "currentColor",
 		super.hide(), this.accepted ? this.edit() : this.cancel();
 	}
 };
-function MO(e, t) {
-	new jO(e, t).show();
+function LO(e, t) {
+	new IO(e, t).show();
 }
 //#endregion
 //#region @rhwp/studio/src/command/commands/hyperlink.ts
-var NO = {
+var RO = {
 	id: "insert:hyperlink",
 	label: g("command.insert.hyperlink.label"),
 	icon: "icon-hyperlink",
@@ -55648,7 +55714,7 @@ var NO = {
 			}
 			let m = () => {
 				if (e.wasm.documentGeneration !== l || e.getInputHandler() !== n) return;
-				let t = new AO({
+				let t = new FO({
 					text: f,
 					uri: u?.uri ?? "",
 					existing: !!u,
@@ -55656,57 +55722,57 @@ var NO = {
 				}, p);
 				t.afterClose = () => n.focus(), t.show();
 			};
-			u && t?.action !== "edit" ? MO(m, () => n.focus()) : m();
+			u && t?.action !== "edit" ? LO(m, () => n.focus()) : m();
 		} catch (e) {
 			j({ message: e instanceof Error ? e.message : String(e) });
 		}
 	}
-}, PO = {
-	...NO,
+}, zO = {
+	...RO,
 	id: "hyperlink:edit",
 	label: g("command.hyperlink.edit.registryLabel"),
 	shortcutLabel: void 0,
-	execute: (e) => NO.execute(e, { action: "edit" })
-}, FO = {
-	...NO,
+	execute: (e) => RO.execute(e, { action: "edit" })
+}, BO = {
+	...RO,
 	id: "hyperlink:remove",
 	label: g("command.hyperlink.remove.registryLabel"),
 	shortcutLabel: void 0,
 	opensDialog: !1,
-	execute: (e) => NO.execute(e, { action: "remove" })
-}, IO = 7200 / 25.4;
-function LO(e, t) {
+	execute: (e) => RO.execute(e, { action: "remove" })
+}, VO = 7200 / 25.4;
+function HO(e, t) {
 	return parseFloat(e ?? "") || t;
 }
-function RO(e, t) {
+function UO(e, t) {
 	return parseInt(e ?? "") || t;
 }
-function zO(e) {
-	return Math.round(LO(e, 0) * IO);
-}
-function BO(e) {
-	return (e / IO).toFixed(2);
-}
-function VO(e, t) {
-	return Number(LO(e, 0).toFixed(2)) === Number(BO(t));
-}
-function HO(e, t, n, r) {
-	VO(n, r) || (e[t] = Math.max(0, zO(n)));
-}
-function UO(e, t, n, r) {
-	VO(n, r) || (e[t] = zO(n));
-}
 function WO(e) {
+	return Math.round(HO(e, 0) * VO);
+}
+function GO(e) {
+	return (e / VO).toFixed(2);
+}
+function KO(e, t) {
+	return Number(HO(e, 0).toFixed(2)) === Number(GO(t));
+}
+function qO(e, t, n, r) {
+	KO(n, r) || (e[t] = Math.max(0, WO(n)));
+}
+function JO(e, t, n, r) {
+	KO(n, r) || (e[t] = WO(n));
+}
+function YO(e) {
 	let t = e.replace("#", ""), n = parseInt(t.substring(0, 2), 16), r = parseInt(t.substring(2, 4), 16);
 	return parseInt(t.substring(4, 6), 16) << 16 | r << 8 | n;
 }
 function W(e, t, n, r) {
 	n !== r && (e[t] = n);
 }
-function GO(e, t, n) {
+function XO(e, t, n) {
 	e[t] = n;
 }
-function KO(e) {
+function ZO(e) {
 	let t = e % 3, n = Math.floor(e / 3);
 	return t === 0 ? {
 		direction: "Left",
@@ -55719,75 +55785,75 @@ function KO(e) {
 		vertAlign: "Top"
 	};
 }
-function qO(e, t, n) {
-	W(e, "sizeProtect", n.sizeProtect, t.sizeProtect ?? !1), !n.sizeProtect && (HO(e, "width", n.width, t.width), HO(e, "height", n.height, t.height));
-}
-function JO(e, t, n) {
-	W(e, "treatAsChar", n.treatAsChar, t.treatAsChar), !n.treatAsChar && (W(e, "textWrap", n.horzRelTo === "TakePlace" ? "TopAndBottom" : n.textWrap, t.textWrap), n.horzRelTo !== "TakePlace" && W(e, "horzRelTo", n.horzRelTo, t.horzRelTo), W(e, "horzAlign", n.horzAlign, t.horzAlign), UO(e, "horzOffset", n.horzOffset, t.horzOffset), W(e, "vertRelTo", n.vertRelTo, t.vertRelTo), W(e, "vertAlign", n.vertAlign, t.vertAlign), UO(e, "vertOffset", n.vertOffset, t.vertOffset), W(e, "restrictInPage", n.restrictInPage, t.restrictInPage ?? !0), W(e, "allowOverlap", n.allowOverlap, t.allowOverlap ?? !1));
-}
-function YO(e, t, n) {
-	n.rotation && !n.rotation.disabled && W(e, "rotationAngle", RO(n.rotation.value, 0), t.rotationAngle ?? 0), n.horzFlip && !n.horzFlip.disabled && W(e, "horzFlip", n.horzFlip.value, !!t.horzFlip), n.vertFlip && !n.vertFlip.disabled && W(e, "vertFlip", n.vertFlip.value, !!t.vertFlip);
-}
-function XO(e, t, n) {
-	n.left !== void 0 && W(e, "outerMarginLeft", zO(n.left), t.outerMarginLeft ?? 0), n.right !== void 0 && W(e, "outerMarginRight", zO(n.right), t.outerMarginRight ?? 0), n.top !== void 0 && W(e, "outerMarginTop", zO(n.top), t.outerMarginTop ?? 0), n.bottom !== void 0 && W(e, "outerMarginBottom", zO(n.bottom), t.outerMarginBottom ?? 0);
-}
-function ZO(e, t) {
-	if (!t.present) return;
-	let n = t.activeIndex >= 0 && t.activeIndex !== 4;
-	if (GO(e, "hasCaption", n), !n) return;
-	let r = KO(t.activeIndex);
-	GO(e, "captionDirection", r.direction), GO(e, "captionVertAlign", r.vertAlign), GO(e, "captionWidth", zO(t.size)), GO(e, "captionSpacing", zO(t.gap)), GO(e, "captionIncludeMargin", t.includeMargin);
-}
 function QO(e, t, n) {
-	n.color !== void 0 && W(e, "borderColor", WO(n.color), t.borderColor ?? 0), n.width !== void 0 && W(e, "borderWidth", zO(n.width), t.borderWidth ?? 0);
+	W(e, "sizeProtect", n.sizeProtect, t.sizeProtect ?? !1), !n.sizeProtect && (qO(e, "width", n.width, t.width), qO(e, "height", n.height, t.height));
 }
-function $O(e, t, n, r) {
-	QO(e, t, n), n.type !== void 0 && W(e, "lineType", RO(n.type, 0), t.lineType ?? 1), n.end !== void 0 && W(e, "lineEndShape", RO(n.end, 0), t.lineEndShape ?? 0), r && (n.arrowStart !== void 0 && W(e, "arrowStart", RO(n.arrowStart, 0), t.arrowStart ?? 0), n.arrowEnd !== void 0 && W(e, "arrowEnd", RO(n.arrowEnd, 0), t.arrowEnd ?? 0), n.arrowStartSize !== void 0 && W(e, "arrowStartSize", RO(n.arrowStartSize, 0), t.arrowStartSize ?? 0), n.arrowEndSize !== void 0 && W(e, "arrowEndSize", RO(n.arrowEndSize, 0), t.arrowEndSize ?? 0));
+function $O(e, t, n) {
+	W(e, "treatAsChar", n.treatAsChar, t.treatAsChar), !n.treatAsChar && (W(e, "textWrap", n.horzRelTo === "TakePlace" ? "TopAndBottom" : n.textWrap, t.textWrap), n.horzRelTo !== "TakePlace" && W(e, "horzRelTo", n.horzRelTo, t.horzRelTo), W(e, "horzAlign", n.horzAlign, t.horzAlign), JO(e, "horzOffset", n.horzOffset, t.horzOffset), W(e, "vertRelTo", n.vertRelTo, t.vertRelTo), W(e, "vertAlign", n.vertAlign, t.vertAlign), JO(e, "vertOffset", n.vertOffset, t.vertOffset), W(e, "restrictInPage", n.restrictInPage, t.restrictInPage ?? !0), W(e, "allowOverlap", n.allowOverlap, t.allowOverlap ?? !1));
 }
 function ek(e, t, n) {
-	W(e, "tbMarginLeft", zO(n.marginLeft), t.tbMarginLeft ?? 0), W(e, "tbMarginRight", zO(n.marginRight), t.tbMarginRight ?? 0), W(e, "tbMarginTop", zO(n.marginTop), t.tbMarginTop ?? 0), W(e, "tbMarginBottom", zO(n.marginBottom), t.tbMarginBottom ?? 0), W(e, "tbVerticalAlign", n.verticalAlign ?? "Top", t.tbVerticalAlign ?? "Top");
+	n.rotation && !n.rotation.disabled && W(e, "rotationAngle", UO(n.rotation.value, 0), t.rotationAngle ?? 0), n.horzFlip && !n.horzFlip.disabled && W(e, "horzFlip", n.horzFlip.value, !!t.horzFlip), n.vertFlip && !n.vertFlip.disabled && W(e, "vertFlip", n.vertFlip.value, !!t.vertFlip);
 }
 function tk(e, t, n) {
-	let r = 0;
-	n.customChecked && n.customValue !== void 0 ? r = RO(n.customValue, 0) : n.activeIndex === 1 ? r = 20 : n.activeIndex === 2 && (r = 50), W(e, "roundRate", r, t.roundRate ?? 0);
+	n.left !== void 0 && W(e, "outerMarginLeft", WO(n.left), t.outerMarginLeft ?? 0), n.right !== void 0 && W(e, "outerMarginRight", WO(n.right), t.outerMarginRight ?? 0), n.top !== void 0 && W(e, "outerMarginTop", WO(n.top), t.outerMarginTop ?? 0), n.bottom !== void 0 && W(e, "outerMarginBottom", WO(n.bottom), t.outerMarginBottom ?? 0);
 }
-function nk(e) {
-	return e.solidChecked ? "solid" : e.gradientChecked ? "gradient" : "none";
+function nk(e, t) {
+	if (!t.present) return;
+	let n = t.activeIndex >= 0 && t.activeIndex !== 4;
+	if (XO(e, "hasCaption", n), !n) return;
+	let r = ZO(t.activeIndex);
+	XO(e, "captionDirection", r.direction), XO(e, "captionVertAlign", r.vertAlign), XO(e, "captionWidth", WO(t.size)), XO(e, "captionSpacing", WO(t.gap)), XO(e, "captionIncludeMargin", t.includeMargin);
 }
-function rk(e, t) {
-	t.solidColors && (GO(e, "fillBgColor", WO(t.solidColors.face)), GO(e, "fillPatColor", WO(t.solidColors.pattern)), t.patternType !== void 0 && GO(e, "fillPatType", RO(t.patternType, -1)));
+function rk(e, t, n) {
+	n.color !== void 0 && W(e, "borderColor", YO(n.color), t.borderColor ?? 0), n.width !== void 0 && W(e, "borderWidth", WO(n.width), t.borderWidth ?? 0);
 }
-function ik(e, t) {
-	t.gradientType !== void 0 && GO(e, "gradientType", RO(t.gradientType, 1)), t.gradientAngle !== void 0 && GO(e, "gradientAngle", RO(t.gradientAngle, 0)), t.gradientCenterX !== void 0 && GO(e, "gradientCenterX", RO(t.gradientCenterX, 0)), t.gradientCenterY !== void 0 && GO(e, "gradientCenterY", RO(t.gradientCenterY, 0)), t.gradientBlur !== void 0 && GO(e, "gradientBlur", RO(t.gradientBlur, 0));
+function ik(e, t, n, r) {
+	rk(e, t, n), n.type !== void 0 && W(e, "lineType", UO(n.type, 0), t.lineType ?? 1), n.end !== void 0 && W(e, "lineEndShape", UO(n.end, 0), t.lineEndShape ?? 0), r && (n.arrowStart !== void 0 && W(e, "arrowStart", UO(n.arrowStart, 0), t.arrowStart ?? 0), n.arrowEnd !== void 0 && W(e, "arrowEnd", UO(n.arrowEnd, 0), t.arrowEnd ?? 0), n.arrowStartSize !== void 0 && W(e, "arrowStartSize", UO(n.arrowStartSize, 0), t.arrowStartSize ?? 0), n.arrowEndSize !== void 0 && W(e, "arrowEndSize", UO(n.arrowEndSize, 0), t.arrowEndSize ?? 0));
 }
 function ak(e, t, n) {
-	let r = nk(n);
-	W(e, "fillType", r, t.fillType ?? "none"), r === "solid" && rk(e, n), r === "gradient" && ik(e, n), n.transparency !== void 0 && (r === "solid" || r === "gradient") && GO(e, "fillAlpha", Math.round(RO(n.transparency, 0) * 255 / 100));
+	W(e, "tbMarginLeft", WO(n.marginLeft), t.tbMarginLeft ?? 0), W(e, "tbMarginRight", WO(n.marginRight), t.tbMarginRight ?? 0), W(e, "tbMarginTop", WO(n.marginTop), t.tbMarginTop ?? 0), W(e, "tbMarginBottom", WO(n.marginBottom), t.tbMarginBottom ?? 0), W(e, "tbVerticalAlign", n.verticalAlign ?? "Top", t.tbVerticalAlign ?? "Top");
 }
-function ok(e, t) {
+function ok(e, t, n) {
+	let r = 0;
+	n.customChecked && n.customValue !== void 0 ? r = UO(n.customValue, 0) : n.activeIndex === 1 ? r = 20 : n.activeIndex === 2 && (r = 50), W(e, "roundRate", r, t.roundRate ?? 0);
+}
+function sk(e) {
+	return e.solidChecked ? "solid" : e.gradientChecked ? "gradient" : "none";
+}
+function ck(e, t) {
+	t.solidColors && (XO(e, "fillBgColor", YO(t.solidColors.face)), XO(e, "fillPatColor", YO(t.solidColors.pattern)), t.patternType !== void 0 && XO(e, "fillPatType", UO(t.patternType, -1)));
+}
+function lk(e, t) {
+	t.gradientType !== void 0 && XO(e, "gradientType", UO(t.gradientType, 1)), t.gradientAngle !== void 0 && XO(e, "gradientAngle", UO(t.gradientAngle, 0)), t.gradientCenterX !== void 0 && XO(e, "gradientCenterX", UO(t.gradientCenterX, 0)), t.gradientCenterY !== void 0 && XO(e, "gradientCenterY", UO(t.gradientCenterY, 0)), t.gradientBlur !== void 0 && XO(e, "gradientBlur", UO(t.gradientBlur, 0));
+}
+function uk(e, t, n) {
+	let r = sk(n);
+	W(e, "fillType", r, t.fillType ?? "none"), r === "solid" && ck(e, n), r === "gradient" && lk(e, n), n.transparency !== void 0 && (r === "solid" || r === "gradient") && XO(e, "fillAlpha", Math.round(UO(n.transparency, 0) * 255 / 100));
+}
+function dk(e, t) {
 	if (!t.present) return;
 	let n = t.activeIndex > 0 ? t.activeIndex : 0;
-	GO(e, "shadowType", n), n > 0 ? (GO(e, "shadowColor", WO(t.color)), GO(e, "shadowOffsetX", zO(t.offsetX)), GO(e, "shadowOffsetY", zO(t.offsetY))) : (GO(e, "shadowOffsetX", 0), GO(e, "shadowOffsetY", 0));
+	XO(e, "shadowType", n), n > 0 ? (XO(e, "shadowColor", YO(t.color)), XO(e, "shadowOffsetX", WO(t.offsetX)), XO(e, "shadowOffsetY", WO(t.offsetY))) : (XO(e, "shadowOffsetX", 0), XO(e, "shadowOffsetY", 0));
 }
-function sk(e, t, n, r) {
-	XO(e, t, r.outerMargin), ZO(e, r.caption), $O(e, n, r.line, !1);
+function fk(e, t, n, r) {
+	tk(e, t, r.outerMargin), nk(e, r.caption), ik(e, n, r.line, !1);
 }
-function ck(e, t, n) {
-	ek(e, t, n.shapeTextBox), YO(e, t, n.transform), $O(e, t, n.line, !0), tk(e, t, n.shapeCorner), ak(e, t, n.shapeFill), ok(e, n.shapeShadow);
+function pk(e, t, n) {
+	ak(e, t, n.shapeTextBox), ek(e, t, n.transform), ik(e, t, n.line, !0), ok(e, t, n.shapeCorner), uk(e, t, n.shapeFill), dk(e, n.shapeShadow);
 }
-function lk(e, t, n) {
+function mk(e, t, n) {
 	if (n.common.sizeProtect || !n.image.scale || !(t.originalWidth > 0)) return;
-	let r = Math.max(1, Math.min(1e3, LO(n.image.scale.x, 100))), i = Math.max(1, Math.min(1e3, LO(n.image.scale.y, 100))), a = Math.round(t.originalWidth * r / 100), o = Math.round(t.originalHeight * i / 100);
+	let r = Math.max(1, Math.min(1e3, HO(n.image.scale.x, 100))), i = Math.max(1, Math.min(1e3, HO(n.image.scale.y, 100))), a = Math.round(t.originalWidth * r / 100), o = Math.round(t.originalHeight * i / 100);
 	W(e, "width", a, t.width), W(e, "height", o, t.height);
 }
-function uk(e, t, n, r) {
-	t && (W(e, n[0], Math.max(0, zO(t.left)), r[0]), W(e, n[1], Math.max(0, zO(t.top)), r[1]), W(e, n[2], Math.max(0, zO(t.right)), r[2]), W(e, n[3], Math.max(0, zO(t.bottom)), r[3]));
+function hk(e, t, n, r) {
+	t && (W(e, n[0], Math.max(0, WO(t.left)), r[0]), W(e, n[1], Math.max(0, WO(t.top)), r[1]), W(e, n[2], Math.max(0, WO(t.right)), r[2]), W(e, n[3], Math.max(0, WO(t.bottom)), r[3]));
 }
-function dk(e, t, n) {
-	n.effectControlsPresent && n.selectedEffect !== void 0 && W(e, "effect", n.selectedEffect === "Original" ? "RealPic" : n.selectedEffect, t.effect ?? "RealPic"), n.brightness !== void 0 && W(e, "brightness", Math.max(-100, Math.min(100, RO(n.brightness, 0))), t.brightness ?? 0), n.contrast !== void 0 && W(e, "contrast", Math.max(-100, Math.min(100, RO(n.contrast, 0))), t.contrast ?? 0), n.transparency !== void 0 && W(e, "transparency", Math.max(0, Math.min(100, RO(n.transparency, 0))), t.transparency ?? 0);
+function gk(e, t, n) {
+	n.effectControlsPresent && n.selectedEffect !== void 0 && W(e, "effect", n.selectedEffect === "Original" ? "RealPic" : n.selectedEffect, t.effect ?? "RealPic"), n.brightness !== void 0 && W(e, "brightness", Math.max(-100, Math.min(100, UO(n.brightness, 0))), t.brightness ?? 0), n.contrast !== void 0 && W(e, "contrast", Math.max(-100, Math.min(100, UO(n.contrast, 0))), t.contrast ?? 0), n.transparency !== void 0 && W(e, "transparency", Math.max(0, Math.min(100, UO(n.transparency, 0))), t.transparency ?? 0);
 }
-function fk(e, t, n) {
-	YO(e, t, n.transform), XO(e, t, n.outerMargin), ZO(e, n.caption), QO(e, t, n.line), lk(e, t, n), uk(e, n.image.crop, [
+function _k(e, t, n) {
+	ek(e, t, n.transform), tk(e, t, n.outerMargin), nk(e, n.caption), rk(e, t, n.line), mk(e, t, n), hk(e, n.image.crop, [
 		"cropLeft",
 		"cropTop",
 		"cropRight",
@@ -55797,7 +55863,7 @@ function fk(e, t, n) {
 		t.cropTop ?? 0,
 		t.cropRight ?? 0,
 		t.cropBottom ?? 0
-	]), uk(e, n.image.padding, [
+	]), hk(e, n.image.padding, [
 		"paddingLeft",
 		"paddingTop",
 		"paddingRight",
@@ -55807,13 +55873,13 @@ function fk(e, t, n) {
 		t.paddingTop ?? 0,
 		t.paddingRight ?? 0,
 		t.paddingBottom ?? 0
-	]), dk(e, t, n.image);
+	]), gk(e, t, n.image);
 }
-function pk(e, t, n, r) {
+function vk(e, t, n, r) {
 	let i = {};
-	return qO(i, t, r.common), JO(i, t, r.common), W(i, "description", r.common.description, t.description), e === "image" ? fk(i, t, r) : n && (e === "ole" ? sk(i, t, n, r) : ck(i, n, r)), i;
+	return QO(i, t, r.common), $O(i, t, r.common), W(i, "description", r.common.description, t.description), e === "image" ? _k(i, t, r) : n && (e === "ole" ? fk(i, t, n, r) : pk(i, n, r)), i;
 }
-function mk(e, t) {
+function yk(e, t) {
 	return e === "image" ? t.headerFooter ? {
 		kind: "header-footer-picture",
 		sec: t.sec,
@@ -55847,11 +55913,11 @@ function mk(e, t) {
 }
 //#endregion
 //#region @rhwp/studio/src/ui/picture-props-dialog.ts
-var hk = 7200 / 25.4;
+var bk = 7200 / 25.4;
 function G(e) {
-	return e / hk;
+	return e / bk;
 }
-function gk(e) {
+function xk(e) {
 	let t = e >> 16 & 255, n = e >> 8 & 255;
 	return "#" + [
 		e & 255,
@@ -55859,7 +55925,7 @@ function gk(e) {
 		t
 	].map((e) => e.toString(16).padStart(2, "0")).join("");
 }
-var _k = {
+var Sk = {
 	basic: g("dialog.pictureProps.tab.basic"),
 	margin: g("dialog.pictureProps.tab.margin"),
 	line: g("dialog.pictureProps.tab.line"),
@@ -55870,7 +55936,7 @@ var _k = {
 	reflection: g("dialog.pictureProps.tab.reflection"),
 	glow: g("dialog.pictureProps.tab.glow"),
 	softEdge: g("dialog.pictureProps.tab.softEdge")
-}, vk = [
+}, Ck = [
 	"basic",
 	"margin",
 	"line",
@@ -55879,23 +55945,23 @@ var _k = {
 	"reflection",
 	"glow",
 	"softEdge"
-], yk = [
+], wk = [
 	"basic",
 	"margin",
 	"line",
 	"fill",
 	"textbox",
 	"shadow"
-], bk = [
+], Tk = [
 	"basic",
 	"margin",
 	"line"
-], xk = [
+], Ek = [
 	"basic",
 	"margin",
 	"line",
 	"shadow"
-], Sk = 4e3, Ck = class {
+], Dk = 4e3, Ok = class {
 	overlay;
 	dialog;
 	built = !1;
@@ -56069,10 +56135,10 @@ var _k = {
 	}
 	rebuildTabs() {
 		this.tabGroup.replaceChildren(), this.body.replaceChildren(), this.tabs = [], this.panels = [], this.sizeLockControls = [];
-		let e = this.objectType === "ole" ? bk : this.objectType === "line" ? xk : this.objectType === "shape" || this.objectType === "group" ? yk : vk;
+		let e = this.objectType === "ole" ? Tk : this.objectType === "line" ? Ek : this.objectType === "shape" || this.objectType === "group" ? wk : Ck;
 		e.forEach((e, t) => {
 			let n = document.createElement("button");
-			n.className = "dialog-tab", n.dataset.tab = e, n.textContent = _k[e], n.addEventListener("click", () => this.switchTab(t)), this.tabGroup.appendChild(n), this.tabs.push(n);
+			n.className = "dialog-tab", n.dataset.tab = e, n.textContent = Sk[e], n.addEventListener("click", () => this.switchTab(t)), this.tabGroup.appendChild(n), this.tabs.push(n);
 		});
 		let t = {
 			basic: () => this.buildBasicPanel(),
@@ -56087,7 +56153,7 @@ var _k = {
 			softEdge: () => this.buildSoftEdgePanel()
 		};
 		e.forEach((e) => {
-			let n = t[e], r = n ? n() : this.buildStubPanel(_k[e]);
+			let n = t[e], r = n ? n() : this.buildStubPanel(Sk[e]);
 			r.dataset.tab = e, this.panels.push(r), this.body.appendChild(r);
 		});
 	}
@@ -56999,7 +57065,7 @@ var _k = {
 		}
 	}
 	applyPropertyPatch(e) {
-		let t = mk(this.objectType, {
+		let t = yk(this.objectType, {
 			sec: this.sec,
 			para: this.para,
 			ci: this.ci,
@@ -57022,12 +57088,12 @@ var _k = {
 			this.showDescriptionPrompt();
 			return;
 		}
-		let e = pk(this.objectType, this.props, this.shapeProps, this.captureApplyForm());
+		let e = vk(this.objectType, this.props, this.shapeProps, this.captureApplyForm());
 		Object.keys(e).length > 0 && this.applyPropertyPatch(e), this.hide();
 	}
 	populateFromProps() {
 		if (this.props) {
-			if (this.picFileNameInput && this.picEmbedCheck && (this.props.externalPath ? (this.picFileNameInput.value = this.props.externalPath, this.picEmbedCheck.checked = !1) : (this.picFileNameInput.value = g("dialog.pictureProps.picFileNameInput.value"), this.picEmbedCheck.checked = !0)), this.widthInput.value = BO(this.props.width), this.heightInput.value = BO(this.props.height), this.sizeFixedCheck.checked = this.props.sizeProtect ?? !1, this.treatAsCharCheck.checked = this.props.treatAsChar, this.selectWrap(this.wrapValues.indexOf(this.props.textWrap)), this.horzRelSelect.value = this.props.textWrap === "TopAndBottom" ? "TakePlace" : this.props.horzRelTo, this.horzAlignSelect.value = this.props.horzAlign, this.horzOffsetInput.value = BO(this.props.horzOffset), this.vertRelSelect.value = this.props.vertRelTo, this.vertAlignSelect.value = this.props.vertAlign, this.vertOffsetInput.value = BO(this.props.vertOffset), this.pageAreaLimitCheck.checked = this.props.restrictInPage ?? !0, this.overlapAllowCheck.checked = this.props.allowOverlap ?? !1, this.descInput.value = this.props.description, this.skewHInput.value = "0", this.skewVInput.value = "0", this.updatePositionVisibility(), this.updateOverlapOption(), (this.objectType === "shape" || this.objectType === "line" || this.objectType === "group" || this.objectType === "ole") && this.shapeProps) {
+			if (this.picFileNameInput && this.picEmbedCheck && (this.props.externalPath ? (this.picFileNameInput.value = this.props.externalPath, this.picEmbedCheck.checked = !1) : (this.picFileNameInput.value = g("dialog.pictureProps.picFileNameInput.value"), this.picEmbedCheck.checked = !0)), this.widthInput.value = GO(this.props.width), this.heightInput.value = GO(this.props.height), this.sizeFixedCheck.checked = this.props.sizeProtect ?? !1, this.treatAsCharCheck.checked = this.props.treatAsChar, this.selectWrap(this.wrapValues.indexOf(this.props.textWrap)), this.horzRelSelect.value = this.props.textWrap === "TopAndBottom" ? "TakePlace" : this.props.horzRelTo, this.horzAlignSelect.value = this.props.horzAlign, this.horzOffsetInput.value = GO(this.props.horzOffset), this.vertRelSelect.value = this.props.vertRelTo, this.vertAlignSelect.value = this.props.vertAlign, this.vertOffsetInput.value = GO(this.props.vertOffset), this.pageAreaLimitCheck.checked = this.props.restrictInPage ?? !0, this.overlapAllowCheck.checked = this.props.allowOverlap ?? !1, this.descInput.value = this.props.description, this.skewHInput.value = "0", this.skewVInput.value = "0", this.updatePositionVisibility(), this.updateOverlapOption(), (this.objectType === "shape" || this.objectType === "line" || this.objectType === "group" || this.objectType === "ole") && this.shapeProps) {
 				let e = this.shapeProps, t = this.objectType === "ole";
 				if (this.rotationInput && (this.rotationInput.value = String(e.rotationAngle ?? 0), this.rotationInput.disabled = t), this.horzFlipCheck && (this.horzFlipCheck.checked = !!e.horzFlip, this.horzFlipCheck.disabled = t), this.vertFlipCheck && (this.vertFlipCheck.checked = !!e.vertFlip, this.vertFlipCheck.disabled = t), t) {
 					if (this.outerMarginLeftInput && (this.outerMarginLeftInput.value = G(this.props.outerMarginLeft ?? 0).toFixed(2)), this.outerMarginRightInput && (this.outerMarginRightInput.value = G(this.props.outerMarginRight ?? 0).toFixed(2)), this.outerMarginTopInput && (this.outerMarginTopInput.value = G(this.props.outerMarginTop ?? 0).toFixed(2)), this.outerMarginBottomInput && (this.outerMarginBottomInput.value = G(this.props.outerMarginBottom ?? 0).toFixed(2)), this.captionBtns.length > 0) {
@@ -57041,7 +57107,7 @@ var _k = {
 					let t = e.tbVerticalAlign ?? "Top";
 					this.tbVertAlignBtns.forEach((e) => e.classList.toggle("active", e.dataset.value === t));
 				}
-				if (this.lineColorInput && e.borderColor !== void 0 && (this.lineColorInput.value = gk(e.borderColor)), this.lineWidthInput && e.borderWidth !== void 0 && (this.lineWidthInput.value = G(e.borderWidth).toFixed(2)), this.lineTypeSelect && e.lineType !== void 0 && (this.lineTypeSelect.value = String(e.lineType)), this.lineEndSelect && e.lineEndShape !== void 0 && (this.lineEndSelect.value = String(e.lineEndShape)), !t && this.arrowStartSelect && e.arrowStart !== void 0 && (this.arrowStartSelect.value = String(e.arrowStart)), !t && this.arrowEndSelect && e.arrowEnd !== void 0 && (this.arrowEndSelect.value = String(e.arrowEnd)), !t && this.arrowStartSizeSelect && e.arrowStartSize !== void 0 && (this.arrowStartSizeSelect.value = String(e.arrowStartSize)), !t && this.arrowEndSizeSelect && e.arrowEndSize !== void 0 && (this.arrowEndSizeSelect.value = String(e.arrowEndSize)), this.cornerBtns.forEach((n) => {
+				if (this.lineColorInput && e.borderColor !== void 0 && (this.lineColorInput.value = xk(e.borderColor)), this.lineWidthInput && e.borderWidth !== void 0 && (this.lineWidthInput.value = G(e.borderWidth).toFixed(2)), this.lineTypeSelect && e.lineType !== void 0 && (this.lineTypeSelect.value = String(e.lineType)), this.lineEndSelect && e.lineEndShape !== void 0 && (this.lineEndSelect.value = String(e.lineEndShape)), !t && this.arrowStartSelect && e.arrowStart !== void 0 && (this.arrowStartSelect.value = String(e.arrowStart)), !t && this.arrowEndSelect && e.arrowEnd !== void 0 && (this.arrowEndSelect.value = String(e.arrowEnd)), !t && this.arrowStartSizeSelect && e.arrowStartSize !== void 0 && (this.arrowStartSizeSelect.value = String(e.arrowStartSize)), !t && this.arrowEndSizeSelect && e.arrowEndSize !== void 0 && (this.arrowEndSizeSelect.value = String(e.arrowEndSize)), this.cornerBtns.forEach((n) => {
 					n.disabled = t || e.roundRate === void 0;
 				}), this.cornerCustomRadio.disabled = t || e.roundRate === void 0, this.cornerCustomInput.disabled = !0, this.arcBtns.forEach((e) => {
 					e.disabled = !0;
@@ -57051,7 +57117,7 @@ var _k = {
 				}
 				if (!t) {
 					let t = e.fillType ?? "none";
-					if (this.fillNoneRadio && (this.fillNoneRadio.checked = t === "none"), this.fillSolidRadio && (this.fillSolidRadio.checked = t === "solid"), this.fillGradientRadio && (this.fillGradientRadio.checked = t === "gradient"), this.solidFaceColor && e.fillBgColor !== void 0 && (this.solidFaceColor.value = gk(e.fillBgColor)), this.solidPatColor && e.fillPatColor !== void 0 && (this.solidPatColor.value = gk(e.fillPatColor)), this.solidPatternSelect && e.fillPatType, this.gradTypeSelect && e.gradientType, this.gradCenterXInput && e.gradientCenterX !== void 0 && (this.gradCenterXInput.value = String(e.gradientCenterX)), this.gradCenterYInput && e.gradientCenterY !== void 0 && (this.gradCenterYInput.value = String(e.gradientCenterY)), this.gradBlurInput && e.gradientBlur !== void 0 && (this.gradBlurInput.value = String(e.gradientBlur)), this.gradTiltInput && e.gradientAngle !== void 0 && (this.gradTiltInput.value = String(e.gradientAngle)), this.fillTransInput && e.fillAlpha !== void 0) {
+					if (this.fillNoneRadio && (this.fillNoneRadio.checked = t === "none"), this.fillSolidRadio && (this.fillSolidRadio.checked = t === "solid"), this.fillGradientRadio && (this.fillGradientRadio.checked = t === "gradient"), this.solidFaceColor && e.fillBgColor !== void 0 && (this.solidFaceColor.value = xk(e.fillBgColor)), this.solidPatColor && e.fillPatColor !== void 0 && (this.solidPatColor.value = xk(e.fillPatColor)), this.solidPatternSelect && e.fillPatType, this.gradTypeSelect && e.gradientType, this.gradCenterXInput && e.gradientCenterX !== void 0 && (this.gradCenterXInput.value = String(e.gradientCenterX)), this.gradCenterYInput && e.gradientCenterY !== void 0 && (this.gradCenterYInput.value = String(e.gradientCenterY)), this.gradBlurInput && e.gradientBlur !== void 0 && (this.gradBlurInput.value = String(e.gradientBlur)), this.gradTiltInput && e.gradientAngle !== void 0 && (this.gradTiltInput.value = String(e.gradientAngle)), this.fillTransInput && e.fillAlpha !== void 0) {
 						let t = Math.round(e.fillAlpha * 100 / 255);
 						this.fillTransInput.value = String(t), this.fillTransInput.disabled = !1;
 					}
@@ -57059,7 +57125,7 @@ var _k = {
 						let t = e.shadowType ?? 0;
 						this.shadowTypeBtns.forEach((e, n) => e.classList.toggle("active", n === t));
 						let n = t > 0;
-						this.shadowColorInput.disabled = !n, this.shadowHInput.disabled = !n, this.shadowVInput.disabled = !n, this.shadowDirBtns.forEach((e) => e.disabled = !n), e.shadowColor !== void 0 && (this.shadowColorInput.value = gk(e.shadowColor)), e.shadowOffsetX !== void 0 && (this.shadowHInput.value = G(e.shadowOffsetX).toFixed(1)), e.shadowOffsetY !== void 0 && (this.shadowVInput.value = G(e.shadowOffsetY).toFixed(1));
+						this.shadowColorInput.disabled = !n, this.shadowHInput.disabled = !n, this.shadowVInput.disabled = !n, this.shadowDirBtns.forEach((e) => e.disabled = !n), e.shadowColor !== void 0 && (this.shadowColorInput.value = xk(e.shadowColor)), e.shadowOffsetX !== void 0 && (this.shadowHInput.value = G(e.shadowOffsetX).toFixed(1)), e.shadowOffsetY !== void 0 && (this.shadowVInput.value = G(e.shadowOffsetY).toFixed(1));
 					}
 					if (this.solidArea) {
 						let e = t === "solid", n = t === "gradient";
@@ -57074,7 +57140,7 @@ var _k = {
 						this.captionBtns.forEach((e, n) => e.classList.toggle("active", n === t)), this.captionSizeInput.value = G(e.captionWidth ?? 0).toFixed(2), this.captionGapInput.value = G(e.captionSpacing ?? 0).toFixed(2), this.captionExpandCheck.checked = !!e.captionIncludeMargin;
 					} else this.captionBtns.forEach((e) => e.classList.remove("active")), this.captionSizeInput.value = "30.00", this.captionGapInput.value = "3.00", this.captionExpandCheck.checked = !1;
 				}
-				if (this.lineColorInput && e.borderColor !== void 0 && (this.lineColorInput.value = gk(e.borderColor)), this.lineWidthInput && e.borderWidth !== void 0 && (this.lineWidthInput.value = G(e.borderWidth).toFixed(2)), this.picScaleXInput && e.originalWidth > 0 && (this.picScaleXInput.value = (e.width / e.originalWidth * 100).toFixed(2), this.picScaleYInput.value = (e.height / e.originalHeight * 100).toFixed(2)), this.picCropLeftInput && (this.picCropLeftInput.value = G(e.cropLeft ?? 0).toFixed(2), this.picCropTopInput.value = G(e.cropTop ?? 0).toFixed(2), this.picCropRightInput.value = G(e.cropRight ?? 0).toFixed(2), this.picCropBottomInput.value = G(e.cropBottom ?? 0).toFixed(2)), this.picPadLeftInput && (this.picPadLeftInput.value = G(e.paddingLeft ?? 0).toFixed(2), this.picPadTopInput.value = G(e.paddingTop ?? 0).toFixed(2), this.picPadRightInput.value = G(e.paddingRight ?? 0).toFixed(2), this.picPadBottomInput.value = G(e.paddingBottom ?? 0).toFixed(2)), this.picEffectRadios.length > 0) {
+				if (this.lineColorInput && e.borderColor !== void 0 && (this.lineColorInput.value = xk(e.borderColor)), this.lineWidthInput && e.borderWidth !== void 0 && (this.lineWidthInput.value = G(e.borderWidth).toFixed(2)), this.picScaleXInput && e.originalWidth > 0 && (this.picScaleXInput.value = (e.width / e.originalWidth * 100).toFixed(2), this.picScaleYInput.value = (e.height / e.originalHeight * 100).toFixed(2)), this.picCropLeftInput && (this.picCropLeftInput.value = G(e.cropLeft ?? 0).toFixed(2), this.picCropTopInput.value = G(e.cropTop ?? 0).toFixed(2), this.picCropRightInput.value = G(e.cropRight ?? 0).toFixed(2), this.picCropBottomInput.value = G(e.cropBottom ?? 0).toFixed(2)), this.picPadLeftInput && (this.picPadLeftInput.value = G(e.paddingLeft ?? 0).toFixed(2), this.picPadTopInput.value = G(e.paddingTop ?? 0).toFixed(2), this.picPadRightInput.value = G(e.paddingRight ?? 0).toFixed(2), this.picPadBottomInput.value = G(e.paddingBottom ?? 0).toFixed(2)), this.picEffectRadios.length > 0) {
 					let t = e.effect ?? "RealPic";
 					this.picEffectRadios.forEach((n) => {
 						n.checked = n.value === t || n.value === "Original" && t === "RealPic" && (e.brightness !== 0 || e.contrast !== 0);
@@ -57127,9 +57193,9 @@ var _k = {
 		let o = document.createElement("div");
 		o.className = "cs-left-col";
 		let s = document.createElement("textarea");
-		s.className = "pp-desc-textarea", s.maxLength = Sk, s.value = this.descInput.value, o.appendChild(s);
+		s.className = "pp-desc-textarea", s.maxLength = Dk, s.value = this.descInput.value, o.appendChild(s);
 		let c = document.createElement("div");
-		c.className = "pp-desc-error", c.style.color = "#c00", c.style.fontSize = "11px", c.style.display = "none", c.textContent = g("dialog.pictureProps.errorLabel.text", { p1: Sk }), o.appendChild(c);
+		c.className = "pp-desc-error", c.style.color = "#c00", c.style.fontSize = "11px", c.style.display = "none", c.textContent = g("dialog.pictureProps.errorLabel.text", { p1: Dk }), o.appendChild(c);
 		let l = document.createElement("div");
 		l.className = "cs-right-col";
 		let u = document.createElement("button");
@@ -57194,7 +57260,7 @@ var _k = {
 		let n = document.createElement("input");
 		return n.type = "checkbox", t.appendChild(n), t.appendChild(document.createTextNode(` ${e}`)), t;
 	}
-}, wk = class {
+}, kk = class {
 	el = null;
 	keyHandler = null;
 	outsideHandler = null;
@@ -57235,19 +57301,19 @@ var _k = {
 		this.hide();
 	}
 };
-function Tk() {
+function Ak() {
 	return {
 		text: "0",
 		origin: { kind: "new" }
 	};
 }
-function Ek(e) {
+function jk(e) {
 	return {
 		text: e === "scatter" ? "0" : "",
 		origin: "new"
 	};
 }
-function Dk(e) {
+function Mk(e) {
 	let t = e.series ?? [], n = e.labels ?? [], r = e.axis === "scatter" ? "scatter" : "category", i = Math.max(n.length, ...t.map((e) => e.values.length), 0);
 	return {
 		axis: r,
@@ -57288,14 +57354,14 @@ function Dk(e) {
 		}))
 	};
 }
-function Ok(e) {
+function Nk(e) {
 	return {
 		source: e.source,
 		name: e.name,
 		cells: [...e.cells]
 	};
 }
-function kk(e, t, n) {
+function Pk(e, t, n) {
 	return {
 		...e,
 		series: t,
@@ -57303,8 +57369,8 @@ function kk(e, t, n) {
 		rowCount: n.length
 	};
 }
-function Ak(e, t, n, r) {
-	let i = e.series.map(Ok), a = i[t]?.cells;
+function Fk(e, t, n, r) {
+	let i = e.series.map(Nk), a = i[t]?.cells;
 	return !a || !a[n] ? e : (a[n] = {
 		...a[n],
 		text: r
@@ -57313,14 +57379,14 @@ function Ak(e, t, n, r) {
 		series: i
 	});
 }
-function jk(e, t, n) {
-	let r = e.series.map(Ok);
+function Ik(e, t, n) {
+	let r = e.series.map(Nk);
 	return r[t] ? (r[t].name = n, {
 		...e,
 		series: r
 	}) : e;
 }
-function Mk(e, t, n) {
+function Lk(e, t, n) {
 	let r = [...e.labels];
 	return r[t] ? (r[t] = {
 		...r[t],
@@ -57330,20 +57396,20 @@ function Mk(e, t, n) {
 		labels: r
 	}) : e;
 }
-function Nk(e, t) {
-	let n = Rk(t, 0, e.rowCount), r = e.series.map((e) => {
+function Rk(e, t) {
+	let n = Uk(t, 0, e.rowCount), r = e.series.map((e) => {
 		let t = [...e.cells];
-		return t.splice(n, 0, Tk()), {
+		return t.splice(n, 0, Ak()), {
 			source: e.source,
 			name: e.name,
 			cells: t
 		};
 	}), i = [...e.labels];
-	return i.splice(n, 0, Ek(e.axis)), kk(e, r, i);
+	return i.splice(n, 0, jk(e.axis)), Pk(e, r, i);
 }
-function Pk(e, t) {
+function zk(e, t) {
 	if (e.rowCount <= 1) return e;
-	let n = Rk(t, 0, e.rowCount - 1), r = e.series.map((e) => {
+	let n = Uk(t, 0, e.rowCount - 1), r = e.series.map((e) => {
 		let t = [...e.cells];
 		return t.splice(n, 1), {
 			source: e.source,
@@ -57351,52 +57417,52 @@ function Pk(e, t) {
 			cells: t
 		};
 	}), i = [...e.labels];
-	return i.splice(n, 1), kk(e, r, i);
+	return i.splice(n, 1), Pk(e, r, i);
 }
-function Fk(e, t) {
-	let n = Rk(t, 0, e.series.length), r = e.series.map(Ok);
+function Bk(e, t) {
+	let n = Uk(t, 0, e.series.length), r = e.series.map(Nk);
 	return r.splice(n, 0, {
 		source: null,
-		name: e.templateNamed ? Lk(e, n) : null,
-		cells: Array.from({ length: e.rowCount }, Tk)
+		name: e.templateNamed ? Hk(e, n) : null,
+		cells: Array.from({ length: e.rowCount }, Ak)
 	}), {
 		...e,
 		series: r
 	};
 }
-function Ik(e, t) {
+function Vk(e, t) {
 	if (e.series.length <= 1) return e;
-	let n = Rk(t, 0, e.series.length - 1), r = e.series.map(Ok);
+	let n = Uk(t, 0, e.series.length - 1), r = e.series.map(Nk);
 	return r.splice(n, 1), {
 		...e,
 		series: r
 	};
 }
-function Lk(e, t) {
+function Hk(e, t) {
 	let n = new Set(e.series.map((e) => e.name).filter((e) => e !== null)), r = t + 1;
 	for (; n.has(`계열 ${r}`);) r += 1;
 	return `계열 ${r}`;
 }
-function Rk(e, t, n) {
+function Uk(e, t, n) {
 	return e < t ? t : e > n ? n : e;
 }
-function zk(e) {
+function Wk(e) {
 	return e.series.map((e) => e.cells.map((e) => e.text));
 }
-function Bk(e) {
+function Gk(e) {
 	return e.labels.map((e) => e.text);
 }
-function Vk(e) {
+function Kk(e) {
 	return e.series.map((e) => e.name);
 }
 //#endregion
 //#region @rhwp/studio/src/ui/chart-data-dialog.ts
-var Hk = "원본이 빈 값(결측)이라 이 자리는 고칠 수 없습니다 — 행을 새로 넣으면 값을 쓸 수 있습니다.", Uk = "원본에 이 계열의 값이 없던 자리입니다.", Wk = "이 계열은 이름 칸(c:tx)이 없어 이름을 넣을 자리가 없습니다.", Gk = "셀을 우클릭하면 행·계열을 넣거나 지울 수 있습니다.", Kk = "원형 차트는 첫 계열만 그리므로, 추가한 계열은 화면에 나타나지 않습니다.", qk = "주식형 캔들은 첫·끝 계열을 몸통으로 삼습니다 — 양끝을 바꾸면 그림이 깨집니다.";
-function Jk(e, t) {
+var qk = "원본이 빈 값(결측)이라 이 자리는 고칠 수 없습니다 — 행을 새로 넣으면 값을 쓸 수 있습니다.", Jk = "원본에 이 계열의 값이 없던 자리입니다.", Yk = "이 계열은 이름 칸(c:tx)이 없어 이름을 넣을 자리가 없습니다.", Xk = "셀을 우클릭하면 행·계열을 넣거나 지울 수 있습니다.", Zk = "원형 차트는 첫 계열만 그리므로, 추가한 계열은 화면에 나타나지 않습니다.", Qk = "주식형 캔들은 첫·끝 계열을 몸통으로 삼습니다 — 양끝을 바꾸면 그림이 깨집니다.";
+function $k(e, t) {
 	let n = e.container ?? [], r = t.container ?? [];
 	return e.section === t.section && e.paragraph === t.paragraph && e.control === t.control && n.length === r.length && n.every((e, t) => e.kind === r[t].kind && e.control === r[t].control && e.paragraph === r[t].paragraph && e.cell === r[t].cell);
 }
-var Yk = class extends A {
+var eA = class extends A {
 	wasm;
 	eventBus;
 	services;
@@ -57405,19 +57471,19 @@ var Yk = class extends A {
 	model = null;
 	gridWrap;
 	errorEl;
-	menu = new wk();
+	menu = new kk();
 	constructor(e, t, n) {
 		super(g("dialog.chartData.sameChartAddress.title"), 560, !1), this.wasm = e, this.eventBus = t, this.services = n;
 	}
 	open(e) {
 		let t = this.wasm.getChartDataByIndex(e.index);
-		return !t.ok || !t.series || t.series.length === 0 ? !1 : (this.chart = e, this.data = t, this.model = Dk(t), this.show(), this.renderGrid(), !0);
+		return !t.ok || !t.series || t.series.length === 0 ? !1 : (this.chart = e, this.data = t, this.model = Mk(t), this.show(), this.renderGrid(), !0);
 	}
 	createBody() {
 		let e = document.createElement("div");
 		e.className = "chart-data-body", this.gridWrap = document.createElement("div"), this.gridWrap.className = "chart-data-grid-wrap", e.appendChild(this.gridWrap), this.errorEl = document.createElement("div"), this.errorEl.className = "chart-data-error", this.errorEl.style.display = "none", e.appendChild(this.errorEl);
 		let t = document.createElement("div");
-		return t.className = "chart-data-note", t.textContent = Gk, e.appendChild(t), e;
+		return t.className = "chart-data-note", t.textContent = Xk, e.appendChild(t), e;
 	}
 	applyModel(e) {
 		e !== this.model && (this.model = e, this.renderGrid());
@@ -57431,11 +57497,11 @@ var Yk = class extends A {
 		let i = r.createTHead().insertRow(), a = document.createElement("th");
 		a.textContent = t ? "X" : g("dialog.chartData.corner.text"), i.appendChild(a), e.series.forEach((e, t) => {
 			let n = document.createElement("th");
-			if (n.dataset.series = String(t), e.name === null) n.className = "chart-data-series-locked", n.textContent = g("dialog.chartData.th.text", { p1: t + 1 }), n.title = Wk;
+			if (n.dataset.series = String(t), e.name === null) n.className = "chart-data-series-locked", n.textContent = g("dialog.chartData.th.text", { p1: t + 1 }), n.title = Yk;
 			else {
 				let r = this.textInput(e.name, g("dialog.chartData.textInput.label"));
 				r.addEventListener("input", () => {
-					this.markText(r), this.model = jk(this.model, t, r.value);
+					this.markText(r), this.model = Ik(this.model, t, r.value);
 				}), n.appendChild(r);
 			}
 			i.appendChild(n);
@@ -57446,15 +57512,15 @@ var Yk = class extends A {
 			if (a.dataset.row = String(r), n) {
 				let n = e.labels[r], i = t ? this.numberInput(n.text) : this.textInput(n.text, g(t ? "dialog.chartData.renderGrid.label" : "dialog.chartData.renderGrid.label.xc19837"));
 				n.origin === "new" && i.classList.add("chart-data-new"), i.addEventListener("input", () => {
-					t ? this.markCell(i) : this.markText(i), this.model = Mk(this.model, r, i.value);
+					t ? this.markCell(i) : this.markText(i), this.model = Lk(this.model, r, i.value);
 				}), a.appendChild(i);
 			} else a.textContent = e.labels[r].text || String(r + 1), a.title = g(t ? "dialog.chartData.labelCell.tooltip" : "dialog.chartData.labelCell.tooltip.x3df2db");
 			i.appendChild(a), e.series.forEach((e, t) => {
 				let n = i.insertCell();
 				n.dataset.series = String(t), n.dataset.row = String(r);
 				let a = e.cells[r], o = this.numberInput(a.text);
-				a.origin.kind === "empty" || a.origin.kind === "absent" ? (o.disabled = !0, o.title = a.origin.kind === "empty" ? Hk : Uk) : (a.origin.kind === "new" && o.classList.add("chart-data-new"), o.addEventListener("input", () => {
-					this.markCell(o), this.model = Ak(this.model, t, r, o.value);
+				a.origin.kind === "empty" || a.origin.kind === "absent" ? (o.disabled = !0, o.title = a.origin.kind === "empty" ? qk : Jk) : (a.origin.kind === "new" && o.classList.add("chart-data-new"), o.addEventListener("input", () => {
+					this.markCell(o), this.model = Fk(this.model, t, r, o.value);
 				})), n.appendChild(o);
 			});
 		}
@@ -57483,37 +57549,37 @@ var Yk = class extends A {
 			type: "command",
 			label: g("dialog.chartData.menuItems.label"),
 			disabledReason: a,
-			run: () => this.applyModel(Nk(e, n))
+			run: () => this.applyModel(Rk(e, n))
 		}, {
 			type: "command",
 			label: g("dialog.chartData.menuItems.label.x3b565a"),
 			disabledReason: a,
-			run: () => this.applyModel(Nk(e, n + 1))
+			run: () => this.applyModel(Rk(e, n + 1))
 		}, {
 			type: "command",
 			label: g("dialog.chartData.menuItems.label.x928e00"),
 			disabledReason: a ?? (e.rowCount <= 1 ? "마지막 행은 지울 수 없습니다." : void 0),
-			run: () => this.applyModel(Pk(e, n))
+			run: () => this.applyModel(zk(e, n))
 		}), r !== null) {
 			i.length > 0 && i.push({ type: "separator" });
-			let n = e.series.length - 1, a = t.hasUpDownBars === !0, o = t.plot === "pie" || t.plot === "ofPie" ? Kk : void 0;
+			let n = e.series.length - 1, a = t.hasUpDownBars === !0, o = t.plot === "pie" || t.plot === "ofPie" ? Zk : void 0;
 			i.push({
 				type: "command",
 				label: g("dialog.chartData.menuItems.label.x49f4ca"),
-				disabledReason: a && r === 0 ? qk : void 0,
+				disabledReason: a && r === 0 ? Qk : void 0,
 				note: o,
-				run: () => this.applyModel(Fk(e, r))
+				run: () => this.applyModel(Bk(e, r))
 			}, {
 				type: "command",
 				label: g("dialog.chartData.menuItems.label.x1e0262"),
-				disabledReason: a && r === n ? qk : void 0,
+				disabledReason: a && r === n ? Qk : void 0,
 				note: o,
-				run: () => this.applyModel(Fk(e, r + 1))
+				run: () => this.applyModel(Bk(e, r + 1))
 			}, {
 				type: "command",
 				label: g("dialog.chartData.menuItems.label.xb8a829"),
-				disabledReason: e.series.length <= 1 ? "마지막 계열은 지울 수 없습니다." : a && (r === 0 || r === n) ? qk : void 0,
-				run: () => this.applyModel(Ik(e, r))
+				disabledReason: e.series.length <= 1 ? "마지막 계열은 지울 수 없습니다." : a && (r === 0 || r === n) ? Qk : void 0,
+				run: () => this.applyModel(Vk(e, r))
 			});
 		}
 		return i;
@@ -57546,7 +57612,7 @@ var Yk = class extends A {
 	onConfirm() {
 		let e = this.chart, t = this.data, n = this.model;
 		if (!e || !t || !n) return;
-		let r = zk(n), i = n.labelsUsable ? Bk(n) : void 0, a = Vk(n);
+		let r = Wk(n), i = n.labelsUsable ? Gk(n) : void 0, a = Kk(n);
 		if (this.hasBrokenInput()) return this.showError(g("dialog.chartData.showError.label")), !1;
 		if (!Pm(t, r, i, a)) return;
 		let o = Mm(t, r, i, a), s = Nm(t, r, i, o ? {
@@ -57570,7 +57636,7 @@ var Yk = class extends A {
 			kind: "snapshot",
 			operationType: "objectProps",
 			operation: () => {
-				let t = this.wasm.listCharts().find((t) => Jk(t, e));
+				let t = this.wasm.listCharts().find((t) => $k(t, e));
 				if (!t) return null;
 				let n = this.wasm.setChartDataByIndex(t.index, s);
 				return n.ok ? (n.changedCount ?? 0) === 0 ? (u.outcome = "noop", null) : (u.outcome = "applied", l.getCursorPosition()) : (u.outcome = "refused", u.invalid = n.invalid ?? [], null);
@@ -57578,7 +57644,7 @@ var Yk = class extends A {
 		}), u.outcome === "refused") return this.showInvalid(u.invalid), !1;
 		if (u.outcome === "notFound") return this.showError(g("dialog.chartData.showError.label.xc15233")), !1;
 	}
-}, Xk = 8e3, Zk = [
+}, tA = 8e3, nA = [
 	{
 		id: "struct",
 		name: g("dialog.equationEditor.label"),
@@ -58332,9 +58398,9 @@ var Yk = class extends A {
 		]
 	}
 ];
-function Qk() {
+function rA() {
 	let e = [];
-	for (let t of Zk) for (let n of t.items) {
+	for (let t of nA) for (let n of t.items) {
 		let r = n.hwp.split(/[\s{}_^]/).find((e) => e.length > 0) || n.label;
 		e.push({
 			name: r,
@@ -58346,7 +58412,7 @@ function Qk() {
 	}
 	return e;
 }
-var $k = Qk(), eA = class {
+var iA = rA(), aA = class {
 	services;
 	wasm;
 	eventBus;
@@ -58389,7 +58455,7 @@ var $k = Qk(), eA = class {
 			console.warn("[EquationEditor] 수식 속성 가져오기 실패:", e);
 			return;
 		}
-		this.scriptArea.value = this.origProps.script || "", this.scriptErrorLabel.style.display = "none", this.fontSizeInput.value = String(Math.round(this.origProps.fontSize / 100)), this.colorInput.value = tA(this.origProps.color), this.searchInput.value = "", this.searchResults.style.display = "none", this.origProps.script && /\\[a-zA-Z]/.test(this.origProps.script) ? this.setMode("latex") : this.setMode("hwp"), document.body.appendChild(this.overlay), setTimeout(() => {
+		this.scriptArea.value = this.origProps.script || "", this.scriptErrorLabel.style.display = "none", this.fontSizeInput.value = String(Math.round(this.origProps.fontSize / 100)), this.colorInput.value = oA(this.origProps.color), this.searchInput.value = "", this.searchResults.style.display = "none", this.origProps.script && /\\[a-zA-Z]/.test(this.origProps.script) ? this.setMode("latex") : this.setMode("hwp"), document.body.appendChild(this.overlay), setTimeout(() => {
 			this.scriptArea.focus(), this.updatePreview();
 		}, 50);
 	}
@@ -58414,9 +58480,9 @@ var $k = Qk(), eA = class {
 			e.preventDefault(), this.setMode("latex");
 		}), this.latexHint.appendChild(o), r.appendChild(this.latexHint), this.previewContainer = document.createElement("div"), this.previewContainer.className = "eq-preview", r.appendChild(this.previewContainer);
 		let s = document.createElement("div");
-		s.className = "eq-script-wrap", this.scriptArea = document.createElement("textarea"), this.scriptArea.className = "eq-script", this.scriptArea.rows = 4, this.scriptArea.spellcheck = !1, this.scriptArea.maxLength = Xk, this.scriptArea.addEventListener("input", () => {
+		s.className = "eq-script-wrap", this.scriptArea = document.createElement("textarea"), this.scriptArea.className = "eq-script", this.scriptArea.rows = 4, this.scriptArea.spellcheck = !1, this.scriptArea.maxLength = tA, this.scriptArea.addEventListener("input", () => {
 			this.schedulePreview(), this.onScriptInput();
-		}), this.scriptArea.addEventListener("keydown", (e) => this.onScriptKeydown(e)), this.acDropdown = document.createElement("div"), this.acDropdown.className = "eq-autocomplete", this.acDropdown.style.display = "none", s.append(this.scriptArea, this.acDropdown), r.appendChild(s), this.scriptErrorLabel = document.createElement("div"), this.scriptErrorLabel.className = "eq-script-error", this.scriptErrorLabel.style.color = "#c00", this.scriptErrorLabel.style.fontSize = "11px", this.scriptErrorLabel.style.display = "none", this.scriptErrorLabel.textContent = g("dialog.equationEditor.scriptErrorLabel.text", { p1: Xk }), r.appendChild(this.scriptErrorLabel);
+		}), this.scriptArea.addEventListener("keydown", (e) => this.onScriptKeydown(e)), this.acDropdown = document.createElement("div"), this.acDropdown.className = "eq-autocomplete", this.acDropdown.style.display = "none", s.append(this.scriptArea, this.acDropdown), r.appendChild(s), this.scriptErrorLabel = document.createElement("div"), this.scriptErrorLabel.className = "eq-script-error", this.scriptErrorLabel.style.color = "#c00", this.scriptErrorLabel.style.fontSize = "11px", this.scriptErrorLabel.style.display = "none", this.scriptErrorLabel.textContent = g("dialog.equationEditor.scriptErrorLabel.text", { p1: tA }), r.appendChild(this.scriptErrorLabel);
 		let c = document.createElement("div");
 		c.className = "dialog-row eq-props-row";
 		let l = document.createElement("span");
@@ -58449,7 +58515,7 @@ var $k = Qk(), eA = class {
 	}
 	buildTabs() {
 		this.tabContainer.replaceChildren();
-		for (let e of Zk) {
+		for (let e of nA) {
 			let t = document.createElement("button");
 			t.className = "eq-tab" + (e.id === this.activeTabId ? " eq-tab-active" : ""), t.textContent = e.name, t.dataset.tabId = e.id, t.addEventListener("click", () => {
 				this.activeTabId = e.id, this.tabContainer.querySelectorAll(".eq-tab").forEach((e) => e.classList.remove("eq-tab-active")), t.classList.add("eq-tab-active"), this.refreshToolbar();
@@ -58459,7 +58525,7 @@ var $k = Qk(), eA = class {
 	}
 	refreshToolbar() {
 		this.toolbarContent.replaceChildren();
-		let e = Zk.find((e) => e.id === this.activeTabId);
+		let e = nA.find((e) => e.id === this.activeTabId);
 		if (e) for (let t of e.items) {
 			let e = document.createElement("button");
 			e.className = "eq-toolbar-btn", e.textContent = t.label;
@@ -58475,7 +58541,7 @@ var $k = Qk(), eA = class {
 			this.hideAutocomplete();
 			return;
 		}
-		let i = r[1].toLowerCase(), a = $k.filter((e) => e.name.toLowerCase().startsWith(i) || e.display.includes(i)).slice(0, 8);
+		let i = r[1].toLowerCase(), a = iA.filter((e) => e.name.toLowerCase().startsWith(i) || e.display.includes(i)).slice(0, 8);
 		if (a.length === 0) {
 			this.hideAutocomplete();
 			return;
@@ -58512,7 +58578,7 @@ var $k = Qk(), eA = class {
 			this.searchResults.style.display = "none";
 			return;
 		}
-		let t = $k.filter((t) => t.name.toLowerCase().includes(e) || t.display.includes(e) || t.group.toLowerCase().includes(e)).slice(0, 12);
+		let t = iA.filter((t) => t.name.toLowerCase().includes(e) || t.display.includes(e) || t.group.toLowerCase().includes(e)).slice(0, 12);
 		if (t.length === 0) {
 			this.searchResults.style.display = "none";
 			return;
@@ -58547,10 +58613,10 @@ var $k = Qk(), eA = class {
 			this.showPreviewMessage("eq-preview-empty", g("dialog.equationEditor.showPreviewMessage.label"));
 			return;
 		}
-		let t = (parseInt(this.fontSizeInput.value, 10) || 10) * 100, n = nA(this.colorInput.value);
+		let t = (parseInt(this.fontSizeInput.value, 10) || 10) * 100, n = sA(this.colorInput.value);
 		try {
 			let r = this.wasm.renderEquationPreview(e, t, n);
-			this.previewContainer.replaceChildren(), Qx(this.previewContainer, r);
+			this.previewContainer.replaceChildren(), rS(this.previewContainer, r);
 		} catch (e) {
 			this.showPreviewMessage("eq-preview-error", g("dialog.equationEditor.showPreviewMessage.label.xf1847f")), console.warn("[EquationEditor] 미리보기 오류:", e);
 		}
@@ -58567,7 +58633,7 @@ var $k = Qk(), eA = class {
 			return;
 		}
 		this.scriptErrorLabel.style.display = "none";
-		let t = (parseInt(this.fontSizeInput.value, 10) || 10) * 100, n = nA(this.colorInput.value), r = {};
+		let t = (parseInt(this.fontSizeInput.value, 10) || 10) * 100, n = sA(this.colorInput.value), r = {};
 		if (e !== this.origProps.script && (r.script = e), t !== this.origProps.fontSize && (r.fontSize = t), n !== this.origProps.color && (r.color = n), Object.keys(r).length > 0) {
 			let e = () => {
 				this.noteRef ? this.wasm.setNoteEquationProperties(this.noteRef, r) : this.wasm.setEquationProperties(this.sec, this.para, this.ci, this.cellIdx, this.cellParaIdx, r);
@@ -58586,46 +58652,46 @@ var $k = Qk(), eA = class {
 		this.hide();
 	}
 };
-function tA(e) {
+function oA(e) {
 	return "#" + [
 		e & 255,
 		e >> 8 & 255,
 		e >> 16 & 255
 	].map((e) => e.toString(16).padStart(2, "0")).join("");
 }
-function nA(e) {
+function sA(e) {
 	let t = e.replace("#", ""), n = parseInt(t.substring(0, 2), 16), r = parseInt(t.substring(2, 4), 16);
 	return parseInt(t.substring(4, 6), 16) << 16 | r << 8 | n;
 }
 //#endregion
 //#region @rhwp/studio/src/ui/equation-props-dialog.ts
-var rA = [
+var cA = [
 	"basic",
 	"margin",
 	"equation"
-], iA = {
+], lA = {
 	basic: g("dialog.equationProps.tab.basic"),
 	margin: g("dialog.equationProps.tab.margin"),
 	equation: g("dialog.equationProps.tab.equation")
 };
-function aA(e) {
+function uA(e) {
 	return e * 25.4 / 7200;
 }
-function oA(e) {
-	return typeof e == "number" && Number.isFinite(e) ? aA(e).toFixed(2) : "";
+function dA(e) {
+	return typeof e == "number" && Number.isFinite(e) ? uA(e).toFixed(2) : "";
 }
-function sA(e) {
+function fA(e) {
 	return "#" + [
 		e & 255,
 		e >> 8 & 255,
 		e >> 16 & 255
 	].map((e) => e.toString(16).padStart(2, "0")).join("");
 }
-function cA(e) {
+function pA(e) {
 	let t = e.replace("#", ""), n = parseInt(t.substring(0, 2), 16), r = parseInt(t.substring(2, 4), 16);
 	return parseInt(t.substring(4, 6), 16) << 16 | r << 8 | n;
 }
-var lA = class {
+var mA = class {
 	wasm;
 	eventBus;
 	services;
@@ -58699,9 +58765,9 @@ var lA = class {
 		}), i(this.dialog, e);
 	}
 	rebuildTabs() {
-		this.tabGroup.replaceChildren(), this.body.replaceChildren(), this.tabs = [], this.panels = [], rA.forEach((e, t) => {
+		this.tabGroup.replaceChildren(), this.body.replaceChildren(), this.tabs = [], this.panels = [], cA.forEach((e, t) => {
 			let n = document.createElement("button");
-			n.className = "dialog-tab", n.dataset.tab = e, n.textContent = iA[e], n.addEventListener("click", () => this.switchTab(t)), this.tabGroup.appendChild(n), this.tabs.push(n);
+			n.className = "dialog-tab", n.dataset.tab = e, n.textContent = lA[e], n.addEventListener("click", () => this.switchTab(t)), this.tabGroup.appendChild(n), this.tabs.push(n);
 			let r = e === "basic" ? this.buildBasicPanel() : e === "margin" ? this.buildMarginCaptionPanel() : this.buildEquationPanel();
 			r.dataset.tab = e, this.body.appendChild(r), this.panels.push(r);
 		}), this.switchTab(0);
@@ -58742,11 +58808,11 @@ var lA = class {
 		return this.scriptArea = document.createElement("textarea"), this.scriptArea.className = "eq-props-script", this.scriptArea.rows = 6, this.scriptArea.readOnly = !0, n.appendChild(this.scriptArea), e.appendChild(n), e;
 	}
 	populate() {
-		this.props && (this.widthInput.value = oA(this.props.width), this.heightInput.value = oA(this.props.height), this.treatAsCharInput.checked = this.props.treatAsChar ?? !0, this.horzOffsetInput.value = oA(this.props.horzOffset ?? 0), this.vertOffsetInput.value = oA(this.props.vertOffset ?? 0), this.outerMarginLeftInput.value = oA(this.props.outerMarginLeft ?? 0), this.outerMarginRightInput.value = oA(this.props.outerMarginRight ?? 0), this.outerMarginTopInput.value = oA(this.props.outerMarginTop ?? 0), this.outerMarginBottomInput.value = oA(this.props.outerMarginBottom ?? 0), this.captionPositionSelect.value = this.captionPositionLabel(), this.captionWidthInput.value = this.props.hasCaption ? oA(this.props.captionWidth ?? 0) : "", this.captionSpacingInput.value = this.props.hasCaption ? oA(this.props.captionSpacing ?? 0) : "", this.fontNameInput.value = this.props.fontName || "", this.fontSizeInput.value = String(Math.round(this.props.fontSize / 100)), this.colorInput.value = sA(this.props.color), this.baselineInput.value = String(this.props.baseline ?? 0), this.scriptArea.value = this.props.script || "", this.switchTab(0));
+		this.props && (this.widthInput.value = dA(this.props.width), this.heightInput.value = dA(this.props.height), this.treatAsCharInput.checked = this.props.treatAsChar ?? !0, this.horzOffsetInput.value = dA(this.props.horzOffset ?? 0), this.vertOffsetInput.value = dA(this.props.vertOffset ?? 0), this.outerMarginLeftInput.value = dA(this.props.outerMarginLeft ?? 0), this.outerMarginRightInput.value = dA(this.props.outerMarginRight ?? 0), this.outerMarginTopInput.value = dA(this.props.outerMarginTop ?? 0), this.outerMarginBottomInput.value = dA(this.props.outerMarginBottom ?? 0), this.captionPositionSelect.value = this.captionPositionLabel(), this.captionWidthInput.value = this.props.hasCaption ? dA(this.props.captionWidth ?? 0) : "", this.captionSpacingInput.value = this.props.hasCaption ? dA(this.props.captionSpacing ?? 0) : "", this.fontNameInput.value = this.props.fontName || "", this.fontSizeInput.value = String(Math.round(this.props.fontSize / 100)), this.colorInput.value = fA(this.props.color), this.baselineInput.value = String(this.props.baseline ?? 0), this.scriptArea.value = this.props.script || "", this.switchTab(0));
 	}
 	handleOk() {
 		if (!this.props) return;
-		let e = Math.max(1, Math.min(127, parseInt(this.fontSizeInput.value, 10) || 10)) * 100, t = cA(this.colorInput.value), n = parseInt(this.baselineInput.value, 10) || 0, r = this.fontNameInput.value.trim(), i = {};
+		let e = Math.max(1, Math.min(127, parseInt(this.fontSizeInput.value, 10) || 10)) * 100, t = pA(this.colorInput.value), n = parseInt(this.baselineInput.value, 10) || 0, r = this.fontNameInput.value.trim(), i = {};
 		if (e !== this.props.fontSize && (i.fontSize = e), t !== this.props.color && (i.color = t), n !== this.props.baseline && (i.baseline = n), r && r !== this.props.fontName && (i.fontName = r), Object.keys(i).length > 0) {
 			let e = () => {
 				this.noteRef ? this.wasm.setNoteEquationProperties(this.noteRef, i) : this.wasm.setEquationProperties(this.sec, this.para, this.ci, this.cellIdx, this.cellParaIdx, i);
@@ -58765,7 +58831,7 @@ var lA = class {
 		this.hide();
 	}
 	openEditor() {
-		this.hide(), new eA(this.wasm, this.eventBus, this.services).open(this.sec, this.para, this.ci, this.cellIdx, this.cellParaIdx, this.noteRef);
+		this.hide(), new aA(this.wasm, this.eventBus, this.services).open(this.sec, this.para, this.ci, this.cellIdx, this.cellParaIdx, this.noteRef);
 	}
 	captionPositionLabel() {
 		if (!this.props?.hasCaption) return "없음";
@@ -58828,7 +58894,7 @@ var lA = class {
 		let e = document.createElement("button");
 		return e.className = "pp-wrap-btn", e.type = "button", e.textContent = "▤", e.disabled = !0, e;
 	}
-}, uA = [
+}, hA = [
 	{
 		name: g("dialog.symbols.label"),
 		start: 32,
@@ -59029,11 +59095,11 @@ var lA = class {
 		start: 65280,
 		end: 65519
 	}
-], dA = 16, fA = /[\p{Cc}\p{Cs}\p{Cn}]/u;
-function pA(e) {
+], gA = 16, _A = /[\p{Cc}\p{Cs}\p{Cn}]/u;
+function vA(e) {
 	return /\p{Z}/u.test(e) ? "␣" : /\p{Cf}/u.test(e) ? "◇" : /\p{M}/u.test(e) ? "◌" + e : e;
 }
-var mA = "rhwp-symbols-recent", hA = 32, gA = class {
+var yA = "rhwp-symbols-recent", bA = 32, xA = class {
 	services;
 	_open = !1;
 	overlay;
@@ -59044,7 +59110,7 @@ var mA = "rhwp-symbols-recent", hA = 32, gA = class {
 	previewCell;
 	recentGrid;
 	selectedChar = null;
-	currentBlock = uA[0];
+	currentBlock = hA[0];
 	captureHandler = null;
 	constructor(e) {
 		this.services = e;
@@ -59078,7 +59144,7 @@ var mA = "rhwp-symbols-recent", hA = 32, gA = class {
 		a.className = "sym-block-col";
 		let o = document.createElement("div");
 		o.className = "sym-label", o.textContent = g("dialog.symbols.blockLabel.text"), a.appendChild(o), this.blockList = document.createElement("div"), this.blockList.className = "sym-block-list";
-		for (let e of uA) {
+		for (let e of hA) {
 			let t = document.createElement("div");
 			t.className = "sym-block-item", t.textContent = e.name, t.addEventListener("click", () => this.selectBlock(e)), this.blockList.appendChild(t);
 		}
@@ -59104,19 +59170,19 @@ var mA = "rhwp-symbols-recent", hA = 32, gA = class {
 	}
 	selectBlock(e) {
 		this.currentBlock = e;
-		let t = this.blockList.querySelectorAll(".sym-block-item"), n = uA.indexOf(e);
+		let t = this.blockList.querySelectorAll(".sym-block-item"), n = hA.indexOf(e);
 		t.forEach((e, t) => {
 			e.classList.toggle("selected", t === n);
 		}), t[n]?.scrollIntoView({ block: "nearest" }), this.renderGrid(e), this.selectedChar = null, this.codeLabel.textContent = this.charGrid.firstElementChild?.getAttribute("data-code") ?? "", this.previewCell.textContent = "";
 	}
 	renderGrid(e) {
 		this.charGrid.replaceChildren();
-		let t = Array.from({ length: e.end - e.start + 1 }, (t, n) => String.fromCodePoint(e.start + n)).filter((e) => !fA.test(e)), n = t.length, r = Math.ceil(n / dA);
-		for (let e = 0; e < r; e++) for (let n = 0; n < dA; n++) {
-			let r = t[e * dA + n], i = document.createElement("div");
+		let t = Array.from({ length: e.end - e.start + 1 }, (t, n) => String.fromCodePoint(e.start + n)).filter((e) => !_A.test(e)), n = t.length, r = Math.ceil(n / gA);
+		for (let e = 0; e < r; e++) for (let n = 0; n < gA; n++) {
+			let r = t[e * gA + n], i = document.createElement("div");
 			if (i.className = "sym-cell", r !== void 0) {
 				let e = r.codePointAt(0);
-				i.dataset.code = e.toString(16).toUpperCase().padStart(4, "0"), i.textContent = pA(r), i.title = `U+${e.toString(16).toUpperCase().padStart(4, "0")}`, i.addEventListener("click", () => this.selectChar(r, e)), i.addEventListener("dblclick", () => {
+				i.dataset.code = e.toString(16).toUpperCase().padStart(4, "0"), i.textContent = vA(r), i.title = `U+${e.toString(16).toUpperCase().padStart(4, "0")}`, i.addEventListener("click", () => this.selectChar(r, e)), i.addEventListener("dblclick", () => {
 					this.selectChar(r, e), this.doInsert();
 				});
 			} else i.classList.add("empty");
@@ -59124,7 +59190,7 @@ var mA = "rhwp-symbols-recent", hA = 32, gA = class {
 		}
 	}
 	selectChar(e, t) {
-		this.selectedChar = e, this.codeLabel.textContent = t.toString(16).toUpperCase().padStart(4, "0"), this.previewCell.textContent = pA(e), this.charGrid.querySelectorAll(".sym-cell.selected").forEach((e) => e.classList.remove("selected")), this.charGrid.querySelector("[data-code=\"" + this.codeLabel.textContent + "\"]")?.classList.add("selected");
+		this.selectedChar = e, this.codeLabel.textContent = t.toString(16).toUpperCase().padStart(4, "0"), this.previewCell.textContent = vA(e), this.charGrid.querySelectorAll(".sym-cell.selected").forEach((e) => e.classList.remove("selected")), this.charGrid.querySelector("[data-code=\"" + this.codeLabel.textContent + "\"]")?.classList.add("selected");
 	}
 	doInsert() {
 		if (!this.selectedChar) return;
@@ -59138,15 +59204,15 @@ var mA = "rhwp-symbols-recent", hA = 32, gA = class {
 	}
 	getRecentChars() {
 		try {
-			let e = localStorage.getItem(mA), t = e ? JSON.parse(e) : [];
-			return Array.isArray(t) ? t.filter((e) => typeof e == "string" && Array.from(e).length === 1 && !fA.test(e)) : [];
+			let e = localStorage.getItem(yA), t = e ? JSON.parse(e) : [];
+			return Array.isArray(t) ? t.filter((e) => typeof e == "string" && Array.from(e).length === 1 && !_A.test(e)) : [];
 		} catch {
 			return [];
 		}
 	}
 	addToRecent(e) {
 		let t = this.getRecentChars().filter((t) => t !== e);
-		t.unshift(e), t.length > hA && (t.length = hA), localStorage.setItem(mA, JSON.stringify(t));
+		t.unshift(e), t.length > bA && (t.length = bA), localStorage.setItem(yA, JSON.stringify(t));
 	}
 	updateRecent() {
 		this.recentGrid.replaceChildren();
@@ -59158,14 +59224,14 @@ var mA = "rhwp-symbols-recent", hA = 32, gA = class {
 		}
 		for (let t of e) {
 			let e = document.createElement("div");
-			e.className = "sym-cell sym-recent-cell", e.textContent = pA(t);
+			e.className = "sym-cell sym-recent-cell", e.textContent = vA(t);
 			let n = t.codePointAt(0) ?? 0;
 			e.title = `U+${n.toString(16).toUpperCase().padStart(4, "0")}`, e.addEventListener("click", () => this.selectChar(t, n)), e.addEventListener("dblclick", () => {
 				this.selectChar(t, n), this.doInsert();
 			}), this.recentGrid.appendChild(e);
 		}
 	}
-}, _A = class {
+}, SA = class {
 	services;
 	_open = !1;
 	overlay;
@@ -59362,7 +59428,7 @@ var mA = "rhwp-symbols-recent", hA = 32, gA = class {
 			}
 		}), r ? this.refreshList() : (this.statusLabel.style.color = "#c00", this.statusLabel.textContent = i ?? g("dialog.bookmark.statusLabel.text.x3ec6b4"));
 	}
-}, vA = [
+}, CA = [
 	{
 		value: "1",
 		label: g("dialog.endnoteShape.label"),
@@ -59418,7 +59484,7 @@ var mA = "rhwp-symbols-recent", hA = 32, gA = class {
 		label: g("dialog.endnoteShape.label.xd07f40"),
 		css: "double"
 	}
-], yA = [
+], wA = [
 	{
 		value: "0",
 		label: "0.1mm",
@@ -59499,12 +59565,12 @@ var mA = "rhwp-symbols-recent", hA = 32, gA = class {
 		label: "5mm",
 		px: 10.5
 	}
-], bA = /* @__PURE__ */ "#000000.#ffffff.#ff0000.#ff7f00.#ffff00.#00b050.#00b0f0.#0000ff.#7030a0.#808080.#c0c0c0.#c00000.#ffc000.#92d050.#00b050.#00b0f0.#002060.#7030a0.#f4cccc.#fce5cd.#fff2cc.#d9ead3.#d9eaf7.#d9d2e9.#eadcf8.#e6e6e6.#f9cb9c.#ffe599.#b6d7a8.#76a5af.#6fa8dc.#8e7cc3".split("."), xA = 0;
-function SA(e) {
+], TA = /* @__PURE__ */ "#000000.#ffffff.#ff0000.#ff7f00.#ffff00.#00b050.#00b0f0.#0000ff.#7030a0.#808080.#c0c0c0.#c00000.#ffc000.#92d050.#00b050.#00b0f0.#002060.#7030a0.#f4cccc.#fce5cd.#fff2cc.#d9ead3.#d9eaf7.#d9d2e9.#eadcf8.#e6e6e6.#f9cb9c.#ffe599.#b6d7a8.#76a5af.#6fa8dc.#8e7cc3".split("."), EA = 0;
+function DA(e) {
 	let t = (e || "").trim();
 	return /^#[0-9a-fA-F]{6}$/.test(t) ? t.toLowerCase() : "#000000";
 }
-function CA(e) {
+function OA(e) {
 	switch ((e || "").trim()) {
 		case "sectionEnd":
 		case "belowText":
@@ -59513,7 +59579,7 @@ function CA(e) {
 		default: return "documentEnd";
 	}
 }
-function wA(e) {
+function kA(e) {
 	switch ((e || "").trim()) {
 		case "restartSection":
 		case "restartPage":
@@ -59524,18 +59590,18 @@ function wA(e) {
 		default: return "continue";
 	}
 }
-function TA(e) {
-	return Math.round(e / ID * 10) / 10;
+function AA(e) {
+	return Math.round(e / VD * 10) / 10;
 }
-function EA(e, t = 300) {
-	return Number.isFinite(e) ? Math.round(Math.min(t, Math.max(0, e)) * ID) : 0;
+function jA(e, t = 300) {
+	return Number.isFinite(e) ? Math.round(Math.min(t, Math.max(0, e)) * VD) : 0;
 }
-var DA = class extends A {
+var MA = class extends A {
 	wasm;
 	eventBus;
 	sectionIdx;
 	services;
-	radioNameSuffix = ++xA;
+	radioNameSuffix = ++EA;
 	settings;
 	numberFormatSelect;
 	prefixInput;
@@ -59588,14 +59654,14 @@ var DA = class extends A {
 			separatorLineType: this.separatorCheck.checked ? parseInt(this.lineTypeSelect.value, 10) : 0,
 			separatorLineWidth: this.separatorCheck.checked ? parseInt(this.lineWidthSelect.value, 10) : 0,
 			separatorColor: this.lineColorInput.value,
-			separatorLength: this.separatorCheck.checked ? EA(parseFloat(this.separatorLengthInput.value) || 0) : 0,
-			separatorMarginTop: EA(parseFloat(this.marginTopInput.value) || 0),
-			noteSpacing: EA(parseFloat(this.noteSpacingInput.value) || 0),
-			separatorMarginBottom: EA(parseFloat(this.marginBottomInput.value) || 0),
+			separatorLength: this.separatorCheck.checked ? jA(parseFloat(this.separatorLengthInput.value) || 0) : 0,
+			separatorMarginTop: jA(parseFloat(this.marginTopInput.value) || 0),
+			noteSpacing: jA(parseFloat(this.noteSpacingInput.value) || 0),
+			separatorMarginBottom: jA(parseFloat(this.marginBottomInput.value) || 0),
 			numbering: this.numberingRestart.checked ? "restartSection" : "continue",
 			placement: this.placementSection.checked ? "sectionEnd" : "documentEnd"
 		}, t = Object.keys(e).every((t) => e[t] === this.settings[t]), n = () => this.wasm.applyEndnoteShape(this.sectionIdx, e);
-		return tS({
+		return oS({
 			services: this.services,
 			label: "EndnoteShapeDialog",
 			operationType: "endnoteShape",
@@ -59606,7 +59672,7 @@ var DA = class extends A {
 		});
 	}
 	populate() {
-		this.numberFormatSelect.value = this.settings.numberFormat || "digit", this.prefixInput.value = this.settings.prefixChar || "", this.suffixInput.value = this.settings.suffixChar || ")", this.separatorCheck.checked = this.settings.separatorEnabled !== !1, this.setLineTypeValue(this.settings.separatorLineType ?? 1), this.setLineWidthValue(this.settings.separatorLineWidth ?? 1), this.setSeparatorColor(this.settings.separatorColor), this.updateLineTypePreview(), this.updateLineWidthPreview(), this.separatorLengthModeSelect.value = "custom", this.separatorLengthInput.value = String(TA(this.settings.separatorLength || EA(50))), this.marginTopInput.value = String(TA(this.settings.separatorMarginTop || 0)), this.noteSpacingInput.value = String(TA(this.settings.noteSpacing || 0)), this.marginBottomInput.value = String(TA(this.settings.separatorMarginBottom || 0)), this.setNumberingRadio(wA(this.settings.numbering)), this.setPlacementRadio(CA(this.settings.placement)), this.updateSeparatorEnabled();
+		this.numberFormatSelect.value = this.settings.numberFormat || "digit", this.prefixInput.value = this.settings.prefixChar || "", this.suffixInput.value = this.settings.suffixChar || ")", this.separatorCheck.checked = this.settings.separatorEnabled !== !1, this.setLineTypeValue(this.settings.separatorLineType ?? 1), this.setLineWidthValue(this.settings.separatorLineWidth ?? 1), this.setSeparatorColor(this.settings.separatorColor), this.updateLineTypePreview(), this.updateLineWidthPreview(), this.separatorLengthModeSelect.value = "custom", this.separatorLengthInput.value = String(AA(this.settings.separatorLength || jA(50))), this.marginTopInput.value = String(AA(this.settings.separatorMarginTop || 0)), this.noteSpacingInput.value = String(AA(this.settings.noteSpacing || 0)), this.marginBottomInput.value = String(AA(this.settings.separatorMarginBottom || 0)), this.setNumberingRadio(kA(this.settings.numbering)), this.setPlacementRadio(OA(this.settings.placement)), this.updateSeparatorEnabled();
 	}
 	numberGroup() {
 		let e = this.group(g("dialog.endnoteShape.group.label"));
@@ -59731,8 +59797,8 @@ var DA = class extends A {
 		return t.style.cssText = "display:inline-flex;align-items:center;gap:8px;min-width:0;", t.append(...e), t;
 	}
 	buildLineTypeControl() {
-		this.lineTypeSelect = this.hiddenSelect(vA.map((e) => [e.value, e.label])), this.lineTypeButton = this.previewButton(), this.lineTypeMenu = this.popupMenu(178);
-		for (let e of vA) {
+		this.lineTypeSelect = this.hiddenSelect(CA.map((e) => [e.value, e.label])), this.lineTypeButton = this.previewButton(), this.lineTypeMenu = this.popupMenu(178);
+		for (let e of CA) {
 			let t = this.menuOption(() => {
 				this.setLineTypeValue(e.value), this.updateLineTypePreview(), this.closePopupMenus();
 			});
@@ -59743,8 +59809,8 @@ var DA = class extends A {
 		}), this.updateLineTypePreview();
 	}
 	buildLineWidthControl() {
-		this.lineWidthSelect = this.hiddenSelect(yA.map((e) => [e.value, e.label])), this.lineWidthButton = this.previewButton(), this.lineWidthMenu = this.popupMenu(136);
-		for (let e of yA) {
+		this.lineWidthSelect = this.hiddenSelect(wA.map((e) => [e.value, e.label])), this.lineWidthButton = this.previewButton(), this.lineWidthMenu = this.popupMenu(136);
+		for (let e of wA) {
 			let t = this.menuOption(() => {
 				this.setLineWidthValue(e.value), this.updateLineWidthPreview(), this.closePopupMenus();
 			}), n = document.createElement("span");
@@ -59756,7 +59822,7 @@ var DA = class extends A {
 	}
 	buildColorControl() {
 		this.lineColorInput = document.createElement("input"), this.lineColorInput.type = "color", this.lineColorInput.value = "#000000", this.lineColorInput.style.cssText = ["position:absolute;left:0;top:0;width:1px;height:1px;opacity:0;", "pointer-events:none;border:0;padding:0;"].join(""), this.lineColorInput.addEventListener("input", () => this.setSeparatorColor(this.lineColorInput.value)), this.lineColorInput.addEventListener("change", () => this.setSeparatorColor(this.lineColorInput.value)), this.lineColorButton = this.previewButton(), this.lineColorButton.style.width = "74px", this.lineColorMenu = this.popupMenu(220), this.lineColorMenu.style.display = "none", this.lineColorMenu.dataset.display = "grid", this.lineColorMenu.style.gridTemplateColumns = "repeat(8, 20px)", this.lineColorMenu.style.gap = "4px", this.lineColorMenu.style.padding = "8px";
-		for (let e of bA) {
+		for (let e of TA) {
 			let t = document.createElement("button");
 			t.type = "button", t.title = e, t.dataset.color = e, t.style.cssText = ["width:20px;height:20px;border:1px solid var(--color-border);background:var(--color-surface);padding:0;", "display:flex;align-items:center;justify-content:center;cursor:pointer;"].join("");
 			let n = document.createElement("span");
@@ -59820,28 +59886,28 @@ var DA = class extends A {
 		return n.style.cssText = ["display:block;width:62px;height:0;border-top-style:solid;", `border-top-width:${e.px}px;border-top-color:var(--color-text);`].join(""), t.appendChild(n), t;
 	}
 	updateLineTypePreview() {
-		let e = vA.find((e) => e.value === this.lineTypeSelect.value) ?? vA[0];
+		let e = CA.find((e) => e.value === this.lineTypeSelect.value) ?? CA[0];
 		this.setLineTypeValue(e.value), this.replaceButtonPreview(this.lineTypeButton, this.linePreview(e, 2, "var(--color-text)"));
 	}
 	updateLineWidthPreview() {
-		let e = yA.find((e) => e.value === this.lineWidthSelect.value) ?? yA[0];
+		let e = wA.find((e) => e.value === this.lineWidthSelect.value) ?? wA[0];
 		this.setLineWidthValue(e.value), this.replaceButtonPreview(this.lineWidthButton, this.widthPreview(e));
 	}
 	setLineTypeValue(e) {
-		let t = String(e ?? ""), n = vA.find((e) => e.value === t) ?? vA[0];
+		let t = String(e ?? ""), n = CA.find((e) => e.value === t) ?? CA[0];
 		this.lineTypeSelect.value = n.value;
 	}
 	setLineWidthValue(e) {
-		let t = String(e ?? ""), n = yA.find((e) => e.value === t) ?? yA[0];
+		let t = String(e ?? ""), n = wA.find((e) => e.value === t) ?? wA[0];
 		this.lineWidthSelect.value = n.value;
 	}
 	setSeparatorColor(e) {
-		this.lineColorInput.value = SA(e), this.updateColorPreview();
+		this.lineColorInput.value = DA(e), this.updateColorPreview();
 	}
 	updateColorPreview() {
-		let e = SA(this.lineColorInput.value), t = document.createElement("span");
+		let e = DA(this.lineColorInput.value), t = document.createElement("span");
 		t.style.cssText = [`display:block;width:44px;height:16px;background:${e};`, "border:1px solid var(--color-border-dark);"].join(""), this.replaceButtonPreview(this.lineColorButton, t), this.lineColorMenu?.querySelectorAll("button[data-color]").forEach((t) => {
-			let n = SA(t.dataset.color) === e;
+			let n = DA(t.dataset.color) === e;
 			t.style.outline = n ? "2px solid var(--color-primary)" : "none", t.style.outlineOffset = n ? "1px" : "0";
 		});
 	}
@@ -59891,7 +59957,7 @@ var DA = class extends A {
 		let n = document.createElement("label");
 		return n.style.cssText = "display:inline-flex;align-items:center;gap:6px;margin:4px 14px 4px 0;font-size:13px;", n.append(e, document.createTextNode(t)), n;
 	}
-}, OA = class extends A {
+}, NA = class extends A {
 	guideInput;
 	memoInput;
 	nameInput;
@@ -59915,7 +59981,7 @@ var DA = class extends A {
 		let i = document.createElement("label");
 		i.className = "field-edit-label", i.textContent = g("dialog.fieldInsert.guideLabel.text"), r.appendChild(i), this.guideInput = document.createElement("input"), this.guideInput.type = "text", this.guideInput.className = "field-edit-input", this.guideInput.value = "입력하세요", this.guideInput.maxLength = 250, r.appendChild(this.guideInput), this.guideErrorLabel = document.createElement("div"), this.guideErrorLabel.className = "field-edit-error", this.guideErrorLabel.style.color = "#c00", this.guideErrorLabel.style.fontSize = "11px", this.guideErrorLabel.style.display = "none", this.guideErrorLabel.textContent = g("dialog.fieldInsert.guideErrorLabel.text", { p1: 250 }), r.appendChild(this.guideErrorLabel);
 		let a = document.createElement("label");
-		a.className = "field-edit-label", a.textContent = g("dialog.fieldInsert.memoLabel.text"), r.appendChild(a), this.memoInput = document.createElement("textarea"), this.memoInput.className = "field-edit-textarea", this.memoInput.rows = 4, this.memoInput.maxLength = Sw, r.appendChild(this.memoInput), this.memoErrorLabel = document.createElement("div"), this.memoErrorLabel.className = "field-edit-error", this.memoErrorLabel.style.color = "#c00", this.memoErrorLabel.style.fontSize = "11px", this.memoErrorLabel.style.display = "none", this.memoErrorLabel.textContent = g("dialog.fieldInsert.memoErrorLabel.text", { p1: Sw }), r.appendChild(this.memoErrorLabel);
+		a.className = "field-edit-label", a.textContent = g("dialog.fieldInsert.memoLabel.text"), r.appendChild(a), this.memoInput = document.createElement("textarea"), this.memoInput.className = "field-edit-textarea", this.memoInput.rows = 4, this.memoInput.maxLength = Dw, r.appendChild(this.memoInput), this.memoErrorLabel = document.createElement("div"), this.memoErrorLabel.className = "field-edit-error", this.memoErrorLabel.style.color = "#c00", this.memoErrorLabel.style.fontSize = "11px", this.memoErrorLabel.style.display = "none", this.memoErrorLabel.textContent = g("dialog.fieldInsert.memoErrorLabel.text", { p1: Dw }), r.appendChild(this.memoErrorLabel);
 		let o = document.createElement("label");
 		o.className = "field-edit-label", o.textContent = g("dialog.fieldInsert.nameLabel.text"), r.appendChild(o), this.nameInput = document.createElement("input"), this.nameInput.type = "text", this.nameInput.className = "field-edit-input", this.nameInput.maxLength = 250, r.appendChild(this.nameInput), this.nameErrorLabel = document.createElement("div"), this.nameErrorLabel.className = "field-edit-error", this.nameErrorLabel.style.color = "#c00", this.nameErrorLabel.style.fontSize = "11px", this.nameErrorLabel.style.display = "none", this.nameErrorLabel.textContent = g("dialog.fieldInsert.nameErrorLabel.text", { p1: 250 }), r.appendChild(this.nameErrorLabel);
 		let s = document.createElement("label");
@@ -59942,19 +60008,19 @@ var DA = class extends A {
 		}
 		this.guideInput.value = "입력하세요", this.memoInput.value = "", this.nameInput.value = "", this.editableCheckbox.checked = !0, this.guideInput.focus(), this.guideInput.select();
 	}
-}, kA = null, AA = null;
-function jA(e = !0) {
-	kA?.remove(), kA = null, document.removeEventListener("mousedown", MA, !0), document.removeEventListener("keydown", NA, !0), e && AA?.isConnected && AA.focus({ preventScroll: !0 }), AA = null;
+}, PA = null, FA = null;
+function IA(e = !0) {
+	PA?.remove(), PA = null, document.removeEventListener("mousedown", LA, !0), document.removeEventListener("keydown", RA, !0), e && FA?.isConnected && FA.focus({ preventScroll: !0 }), FA = null;
 }
-function MA(e) {
-	kA && !kA.contains(e.target) && jA(!1);
+function LA(e) {
+	PA && !PA.contains(e.target) && IA(!1);
 }
-function NA(e) {
-	if (!kA || e.ctrlKey || e.metaKey || e.altKey) return;
+function RA(e) {
+	if (!PA || e.ctrlKey || e.metaKey || e.altKey) return;
 	e.stopPropagation(), e.preventDefault();
-	let t = [...kA.querySelectorAll("button")], n = t.indexOf(document.activeElement);
+	let t = [...PA.querySelectorAll("button")], n = t.indexOf(document.activeElement);
 	if (e.key === "Escape" || e.key === "Tab") {
-		jA();
+		IA();
 		return;
 	}
 	if (e.key === "Enter" || e.key === " ") {
@@ -59969,7 +60035,7 @@ function NA(e) {
 		"ArrowUp"
 	].includes(e.key)) && t[o]?.focus();
 }
-function PA(e, t) {
+function zA(e, t) {
 	let n = "http://www.w3.org/2000/svg", r = document.createElementNS(n, "svg");
 	r.setAttribute("viewBox", "0 0 28 28"), r.setAttribute("aria-hidden", "true");
 	let i = document.createElementNS(n, "path");
@@ -59983,12 +60049,12 @@ function PA(e, t) {
 	}
 	return r;
 }
-function FA(e, t) {
-	if (kA) {
-		jA();
+function BA(e, t) {
+	if (PA) {
+		IA();
 		return;
 	}
-	AA = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+	FA = document.activeElement instanceof HTMLElement ? document.activeElement : null;
 	let n = document.createElement("div");
 	n.className = "shape-picker pwh-shape-picker", n.setAttribute("role", "menu"), n.setAttribute("aria-label", "도형과 연결선"), n.addEventListener("mousedown", (e) => e.preventDefault());
 	for (let [e, r, i] of [[
@@ -60006,20 +60072,20 @@ function FA(e, t) {
 		o.className = "shape-picker-grid " + (i ? "pwh-connector-grid" : "pwh-drawing-grid");
 		for (let e of r) {
 			let n = document.createElement("button");
-			n.type = "button", n.className = "shape-picker-btn", n.dataset.shape = e.type, n.title = e.label, n.setAttribute("aria-label", e.label), n.setAttribute("role", "menuitem"), n.append(PA(e.type, e.path)), n.addEventListener("click", () => {
-				jA(!1), t.onSelect(e.type);
+			n.type = "button", n.className = "shape-picker-btn", n.dataset.shape = e.type, n.title = e.label, n.setAttribute("aria-label", e.label), n.setAttribute("role", "menuitem"), n.append(zA(e.type, e.path)), n.addEventListener("click", () => {
+				IA(!1), t.onSelect(e.type);
 			}), o.append(n);
 		}
 		n.append(o);
 	}
 	let r = document.createElement("div");
-	r.className = "pwh-shape-hint", r.textContent = "도형을 고른 뒤 문서에서 그리세요.", n.append(r), document.body.append(n), kA = n;
+	r.className = "pwh-shape-hint", r.textContent = "도형을 고른 뒤 문서에서 그리세요.", n.append(r), document.body.append(n), PA = n;
 	let i = e.getBoundingClientRect();
-	n.style.position = "fixed", n.style.left = Math.max(4, Math.min(i.left, innerWidth - n.offsetWidth - 4)) + "px", n.style.top = Math.max(4, Math.min(i.bottom + 2, innerHeight - n.offsetHeight - 4)) + "px", document.addEventListener("mousedown", MA, !0), document.addEventListener("keydown", NA, !0), n.querySelector("button")?.focus({ preventScroll: !0 });
+	n.style.position = "fixed", n.style.left = Math.max(4, Math.min(i.left, innerWidth - n.offsetWidth - 4)) + "px", n.style.top = Math.max(4, Math.min(i.bottom + 2, innerHeight - n.offsetHeight - 4)) + "px", document.addEventListener("mousedown", LA, !0), document.addEventListener("keydown", RA, !0), n.querySelector("button")?.focus({ preventScroll: !0 });
 }
 //#endregion
 //#region @rhwp/studio/src/command/commands/insert.ts
-function IA(e, t, n, r) {
+function VA(e, t, n, r) {
 	return {
 		id: e,
 		label: t,
@@ -60029,14 +60095,14 @@ function IA(e, t, n, r) {
 		execute() {}
 	};
 }
-var LA = null, RA = null, zA = null, BA = null, VA = null, HA = null, UA = null, WA = null;
-function GA(e, t, n, r, i) {
+var HA = null, UA = null, WA = null, GA = null, KA = null, qA = null, JA = null, YA = null;
+function XA(e, t, n, r, i) {
 	let a = e.wasm.getNoteEditInfo(n, r, i);
 	if (!a?.ok) return;
 	let o = t.cursor;
 	o?.enterFootnoteMode && (o.enterFootnoteMode(n, r, i, a.footnoteIndex ?? 0, a.pageNum ?? 0), o.setFnCursorPosition(a.fnParaIndex ?? 0, a.charOffset ?? 2), e.eventBus.emit("footnoteModeChanged", !0), t.active = !0, t.updateCaret?.(), t.textarea?.focus());
 }
-function KA(e, t) {
+function ZA(e, t) {
 	let n = e.getInputHandler();
 	if (!n) return;
 	let r = n.getCursorPosition();
@@ -60052,9 +60118,9 @@ function KA(e, t) {
 			if (i = t === "footnote" ? e.insertFootnote(r.sectionIndex, r.paragraphIndex, r.charOffset) : e.insertEndnote(r.sectionIndex, r.paragraphIndex, r.charOffset), !i.ok) throw Error(`[insert:${t}] 삽입 실패`);
 			return r;
 		}
-	}), i && GA(e, n, r.sectionIndex, i.paraIdx, i.controlIdx);
+	}), i && XA(e, n, r.sectionIndex, i.paraIdx, i.controlIdx);
 }
-var qA = [
+var QA = [
 	{
 		id: "insert:shape",
 		label: g("command.insert.shape.label"),
@@ -60062,7 +60128,7 @@ var qA = [
 		canExecute: (e) => e.hasDocument && e.isEditable && !e.isFormMode,
 		execute(e, t) {
 			let n = t?.anchorEl, r = n instanceof HTMLElement && n.getClientRects().length ? n : [...document.querySelectorAll("[data-cmd=\"insert:shape\"]")].find((e) => e.getClientRects().length > 0) ?? null;
-			r && FA(r, { onSelect(t) {
+			r && BA(r, { onSelect(t) {
 				let n = e.getInputHandler();
 				n && n.enterShapePlacementMode(t);
 			} });
@@ -60136,7 +60202,7 @@ var qA = [
 					if (r = e.insertEquation(n.sectionIndex, n.paragraphIndex, n.charOffset, "", 1e3, 0), !r.ok) throw Error("[insert:equation] 삽입 실패");
 					return n;
 				}
-			}), r && (zA ??= new eA(e.wasm, e.eventBus, e), zA.open(n.sectionIndex, r.paraIdx, r.controlIdx));
+			}), r && (WA ??= new aA(e.wasm, e.eventBus, e), WA.open(n.sectionIndex, r.paraIdx, r.controlIdx));
 		}
 	},
 	{
@@ -60149,7 +60215,7 @@ var qA = [
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getCursorPosition();
-			WA = new OA(), WA.onApply = (r) => {
+			YA = new NA(), YA.onApply = (r) => {
 				try {
 					t.executeOperation({
 						kind: "snapshot",
@@ -60166,27 +60232,27 @@ var qA = [
 				} catch (e) {
 					console.warn("[insert:field] 누름틀 삽입 실패:", e);
 				}
-			}, WA.show();
+			}, YA.show();
 		}
 	},
-	IA("insert:caption-top", g("command.insert.captionTop.registryLabel")),
-	IA("insert:caption-lt", g("command.insert.captionLt.registryLabel")),
-	IA("insert:caption-lm", g("command.insert.captionLm.registryLabel")),
-	IA("insert:caption-lb", g("command.insert.captionLb.registryLabel")),
-	IA("insert:caption-rt", g("command.insert.captionRt.registryLabel")),
-	IA("insert:caption-rm", g("command.insert.captionRm.registryLabel")),
-	IA("insert:caption-rb", g("command.insert.captionRb.registryLabel")),
-	IA("insert:caption-bottom", g("command.insert.captionBottom.registryLabel")),
-	IA("insert:caption-none", g("command.insert.captionNone.label")),
-	IA("insert:para-band", g("command.insert.paraBand.label")),
-	IA("insert:comment", g("command.insert.comment.label"), "icon-comment"),
+	VA("insert:caption-top", g("command.insert.captionTop.registryLabel")),
+	VA("insert:caption-lt", g("command.insert.captionLt.registryLabel")),
+	VA("insert:caption-lm", g("command.insert.captionLm.registryLabel")),
+	VA("insert:caption-lb", g("command.insert.captionLb.registryLabel")),
+	VA("insert:caption-rt", g("command.insert.captionRt.registryLabel")),
+	VA("insert:caption-rm", g("command.insert.captionRm.registryLabel")),
+	VA("insert:caption-rb", g("command.insert.captionRb.registryLabel")),
+	VA("insert:caption-bottom", g("command.insert.captionBottom.registryLabel")),
+	VA("insert:caption-none", g("command.insert.captionNone.label")),
+	VA("insert:para-band", g("command.insert.paraBand.label")),
+	VA("insert:comment", g("command.insert.comment.label"), "icon-comment"),
 	{
 		id: "insert:footnote",
 		label: g("command.insert.footnote.label"),
 		icon: "icon-footnote",
 		canExecute: (e) => e.hasDocument && !e.inTable,
 		execute(e) {
-			KA(e, "footnote");
+			ZA(e, "footnote");
 		}
 	},
 	{
@@ -60195,7 +60261,7 @@ var qA = [
 		icon: "icon-endnote",
 		canExecute: (e) => e.hasDocument && !e.inTable,
 		execute(e) {
-			KA(e, "endnote");
+			ZA(e, "endnote");
 		}
 	},
 	{
@@ -60218,7 +60284,7 @@ var qA = [
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
 			let t = e.getInputHandler()?.getPosition()?.sectionIndex ?? 0;
-			UA = new DA(e.wasm, e.eventBus, t, e), UA.show();
+			JA = new MA(e.wasm, e.eventBus, t, e), JA.show();
 		}
 	},
 	{
@@ -60229,12 +60295,12 @@ var qA = [
 		shortcutLabel: "Ctrl+F10",
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			VA ||= new gA(e), VA.show();
+			KA ||= new xA(e), KA.show();
 		}
 	},
-	NO,
-	PO,
-	FO,
+	RO,
+	zO,
+	BO,
 	{
 		id: "insert:bookmark",
 		opensDialog: !0,
@@ -60242,7 +60308,7 @@ var qA = [
 		shortcutLabel: "Ctrl+K,B",
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			HA ||= new _A(e), HA.show();
+			qA ||= new SA(e), qA.show();
 		}
 	},
 	{
@@ -60256,16 +60322,16 @@ var qA = [
 			let n = t.getSelectedPictureRef();
 			if (!n) return;
 			if (n.type === "equation") {
-				BA ||= new lA(e.wasm, e.eventBus, e), BA.open(n.sec, n.ppi, n.ci, n.cellIdx, n.cellParaIdx, n.noteRef);
+				GA ||= new mA(e.wasm, e.eventBus, e), GA.open(n.sec, n.ppi, n.ci, n.cellIdx, n.cellParaIdx, n.noteRef);
 				return;
 			}
-			LA ||= new Ck(e.wasm, e.eventBus, e);
+			HA ||= new Ok(e.wasm, e.eventBus, e);
 			let r = n.cellPath ?? (n.cellIdx !== void 0 && n.cellParaIdx !== void 0 && n.outerTableControlIdx !== void 0 && (n.type === "shape" || n.type === "line" || n.type === "image" || n.type === "ole") ? [{
 				controlIdx: n.outerTableControlIdx,
 				cellIdx: n.cellIdx,
 				cellParaIdx: n.cellParaIdx
 			}] : void 0);
-			LA.open(n.sec, n.ppi, n.ci, n.type, n.headerFooter, r, r ? n.ci : void 0);
+			HA.open(n.sec, n.ppi, n.ci, n.type, n.headerFooter, r, r ? n.ci : void 0);
 		}
 	},
 	{
@@ -60286,9 +60352,9 @@ var qA = [
 			} catch {
 				return;
 			}
-			i && (RA ||= new Yk(e.wasm, e.eventBus, e), RA.afterClose = () => {
+			i && (UA ||= new eA(e.wasm, e.eventBus, e), UA.afterClose = () => {
 				requestAnimationFrame(() => t.focus());
-			}, RA.open(i));
+			}, UA.open(i));
 		}
 	},
 	{
@@ -60303,7 +60369,7 @@ var qA = [
 			if (!(!n || n.type !== "equation" && n.type !== "ole")) {
 				if (n.type === "ole") {
 					let e = n, r;
-					if (YA(t, "promoteOleEquation", (t) => {
+					if (ej(t, "promoteOleEquation", (t) => {
 						if (r = t.promoteOleEquation(e.sec, e.ppi, e.ci), !r?.ok) throw Error("[insert:equation-edit] 레거시 OLE 수식 전환 실패");
 					}), !r) return;
 					t.selectPictureObject(e.sec, r.paraIdx, r.controlIdx, "equation"), n = {
@@ -60313,7 +60379,7 @@ var qA = [
 						type: "equation"
 					};
 				}
-				zA ||= new eA(e.wasm, e.eventBus, e), zA.open(n.sec, n.ppi, n.ci, n.cellIdx, n.cellParaIdx, n.noteRef);
+				WA ||= new aA(e.wasm, e.eventBus, e), WA.open(n.sec, n.ppi, n.ci, n.cellIdx, n.cellParaIdx, n.noteRef);
 			}
 		}
 	},
@@ -60328,7 +60394,7 @@ var qA = [
 			if (!n || n.type === "equation" || n.type === "group") return;
 			let r;
 			try {
-				r = JA(e, n);
+				r = $A(e, n);
 			} catch {
 				return;
 			}
@@ -60361,7 +60427,7 @@ var qA = [
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getSelectedPictureRef();
-			n && n.type === "shape" && ZA(t, n, "front");
+			n && n.type === "shape" && nj(t, n, "front");
 		}
 	},
 	{
@@ -60372,7 +60438,7 @@ var qA = [
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getSelectedPictureRef();
-			n && n.type === "shape" && ZA(t, n, "forward");
+			n && n.type === "shape" && nj(t, n, "forward");
 		}
 	},
 	{
@@ -60383,7 +60449,7 @@ var qA = [
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getSelectedPictureRef();
-			n && n.type === "shape" && ZA(t, n, "backward");
+			n && n.type === "shape" && nj(t, n, "backward");
 		}
 	},
 	{
@@ -60394,7 +60460,7 @@ var qA = [
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getSelectedPictureRef();
-			n && n.type === "shape" && ZA(t, n, "back");
+			n && n.type === "shape" && nj(t, n, "back");
 		}
 	},
 	{
@@ -60405,9 +60471,9 @@ var qA = [
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getSelectedPictureRef();
-			n && (YA(t, "deleteObject", (e) => {
+			n && (ej(t, "deleteObject", (e) => {
 				n.type === "shape" || n.type === "line" || n.type === "group" || n.type === "ole" ? e.deleteShapeControl(n.sec, n.ppi, n.ci) : n.type === "equation" ? e.deleteEquationControl(n.sec, n.ppi, n.ci) : n.cellPath && n.cellPath.length > 0 ? e.deleteCellPictureControlByPath(n.sec, n.ppi, n.cellPath, n.ci) : e.deletePictureControl(n.sec, n.ppi, n.ci);
-			}, XA), t.exitPictureObjectSelectionAndAfterEdit());
+			}, tj), t.exitPictureObjectSelectionAndAfterEdit());
 		}
 	},
 	{
@@ -60425,9 +60491,9 @@ var qA = [
 			}));
 			try {
 				let e;
-				YA(t, "groupShapes", (t) => {
+				ej(t, "groupShapes", (t) => {
 					e = t.groupShapes(r, i);
-				}, XA), t.exitPictureObjectSelectionAndAfterEdit(), e && t.selectPictureObject(r, e.paraIdx, e.controlIdx, "group");
+				}, tj), t.exitPictureObjectSelectionAndAfterEdit(), e && t.selectPictureObject(r, e.paraIdx, e.controlIdx, "group");
 			} catch (e) {
 				console.warn("[group-shapes] 개체 묶기 실패:", e);
 			}
@@ -60442,9 +60508,9 @@ var qA = [
 			if (!t) return;
 			let n = t.getSelectedPictureRef();
 			if (n && n.type === "group") try {
-				YA(t, "ungroupShape", (e) => {
+				ej(t, "ungroupShape", (e) => {
 					e.ungroupShape(n.sec, n.ppi, n.ci);
-				}, XA), t.exitPictureObjectSelectionAndAfterEdit();
+				}, tj), t.exitPictureObjectSelectionAndAfterEdit();
 			} catch (e) {
 				console.warn("[ungroup-shapes] 개체 풀기 실패:", e);
 			}
@@ -60455,7 +60521,7 @@ var qA = [
 		label: g("command.insert.rotateCw.label"),
 		canExecute: (e) => e.inPictureObjectSelection,
 		execute(e) {
-			tj(e, 90);
+			oj(e, 90);
 		}
 	},
 	{
@@ -60463,7 +60529,7 @@ var qA = [
 		label: g("command.insert.rotateCcw.label"),
 		canExecute: (e) => e.inPictureObjectSelection,
 		execute(e) {
-			tj(e, -90);
+			oj(e, -90);
 		}
 	},
 	{
@@ -60471,7 +60537,7 @@ var qA = [
 		label: g("command.insert.flipHorz.label"),
 		canExecute: (e) => e.inPictureObjectSelection,
 		execute(e) {
-			nj(e, "horzFlip");
+			sj(e, "horzFlip");
 		}
 	},
 	{
@@ -60479,14 +60545,14 @@ var qA = [
 		label: g("command.insert.flipVert.label"),
 		canExecute: (e) => e.inPictureObjectSelection,
 		execute(e) {
-			nj(e, "vertFlip");
+			sj(e, "vertFlip");
 		}
 	}
 ];
-function JA(e, t) {
+function $A(e, t) {
 	return af(e.wasm, t);
 }
-function YA(e, t, n, r) {
+function ej(e, t, n, r) {
 	let i = e.getPositionOutsideSelectedPicture() ?? e.getCursorPosition();
 	e.executeOperation({
 		kind: "snapshot",
@@ -60495,57 +60561,57 @@ function YA(e, t, n, r) {
 		meta: r?.refresh ? { refresh: r.refresh } : void 0
 	});
 }
-var XA = { refresh: "none" };
-function ZA(e, t, n) {
+var tj = { refresh: "none" };
+function nj(e, t, n) {
 	let r = e.getPositionOutsideSelectedPicture() ?? e.getCursorPosition();
 	e.executeOperation({
 		kind: "command",
 		command: new $p(t.sec, t.ppi, t.ci, n, r),
-		meta: XA
+		meta: tj
 	}), e.exitPictureObjectSelectionAndAfterEdit();
 }
-function QA(e, t, n, r) {
+function rj(e, t, n, r) {
 	e.executeOperation({
 		kind: "command",
 		command: new Zp(t, n, r),
 		meta: { refresh: "full" }
 	});
 }
-function $A(e) {
+function ij(e) {
 	return e.type === "shape";
 }
-function ej(e, t, n, r, i, a) {
-	if ($A(n)) {
-		QA(t, n, i, a);
+function aj(e, t, n, r, i, a) {
+	if (ij(n)) {
+		rj(t, n, i, a);
 		return;
 	}
-	YA(t, r, (e) => {
+	ej(t, r, (e) => {
 		of(e, n, a);
 	});
 }
-function tj(e, t) {
+function oj(e, t) {
 	let n = e.getInputHandler();
 	if (!n) return;
 	let r = n.getSelectedPictureRef();
 	if (!r || r.type === "equation" || r.type === "group" || r.type === "line") return;
-	let i = JA(e, r);
+	let i = $A(e, r);
 	if (i.sizeProtect) return;
 	let a = i.rotationAngle ?? 0, o = a + t;
-	o = (o % 360 + 360) % 360, o > 180 && (o -= 360), ej(e, n, r, "rotateObject", { rotationAngle: a }, { rotationAngle: o });
+	o = (o % 360 + 360) % 360, o > 180 && (o -= 360), aj(e, n, r, "rotateObject", { rotationAngle: a }, { rotationAngle: o });
 }
-function nj(e, t) {
+function sj(e, t) {
 	let n = e.getInputHandler();
 	if (!n) return;
 	let r = n.getSelectedPictureRef();
 	if (!r || r.type === "equation" || r.type === "group" || r.type === "line") return;
-	let i = JA(e, r);
+	let i = $A(e, r);
 	if (i.sizeProtect) return;
 	let a = !!i[t];
-	ej(e, n, r, "flipObject", { [t]: a }, { [t]: !a });
+	aj(e, n, r, "flipObject", { [t]: a }, { [t]: !a });
 }
 //#endregion
 //#region @rhwp/studio/src/command/commands/pwh-object-properties-target.mjs
-function rj(e, t = "table") {
+function cj(e, t = "table") {
 	if (!e) return null;
 	let n = e.isInTableObjectSelection?.() ? e.getSelectedTableRef?.() : null, r = e.getCursorPosition?.(), i = !n && e.getCellTableContext?.(), a = n || i;
 	if (!a || ![
@@ -60573,8 +60639,8 @@ function rj(e, t = "table") {
 }
 //#endregion
 //#region @rhwp/studio/src/command/commands/pwh-object-properties.ts
-function ij(e, t = "table") {
-	let n = rj(e.getInputHandler(), t);
+function lj(e, t = "table") {
+	let n = cj(e.getInputHandler(), t);
 	if (n) {
 		if (n.tableCtx?.cellPath && !e.wasm.hasTablePropertyPaths()) {
 			j({
@@ -60583,42 +60649,42 @@ function ij(e, t = "table") {
 			});
 			return;
 		}
-		!n.tableCtx || n.cellIdx === void 0 || n.mode !== "table" && n.mode !== "cell" || new kO(e.wasm, e.eventBus, n.tableCtx, n.cellIdx, n.mode, e).show();
+		!n.tableCtx || n.cellIdx === void 0 || n.mode !== "table" && n.mode !== "cell" || new PO(e.wasm, e.eventBus, n.tableCtx, n.cellIdx, n.mode, e).show();
 	}
 }
-function aj(e) {
+function uj(e) {
 	if (e.getInputHandler()?.isInPictureObjectSelection()) {
-		let t = qA.find((e) => e.id === "insert:picture-props");
+		let t = QA.find((e) => e.id === "insert:picture-props");
 		if (!t) throw Error("그림 속성 명령을 찾지 못했습니다.");
 		t.execute(e);
 		return;
 	}
-	ij(e);
+	lj(e);
 }
 //#endregion
 //#region @rhwp/studio/src/ui/pwh-format-property-changes.mjs
-var oj = [
+var dj = [
 	"fillType",
 	"fillColor",
 	"patternColor",
 	"patternType"
-], sj = [
+], fj = [
 	"borderLeft",
 	"borderRight",
 	"borderTop",
 	"borderBottom"
 ];
-function cj(e, t, n, r) {
-	for (let [r, i] of oj.entries()) t[r] === n[r] && delete e[i];
-	return oj.some((t) => Object.hasOwn(e, t)) && !Object.hasOwn(e, "fillType") && (e.fillType = n[0]), [...oj, ...sj].some((t) => Object.hasOwn(e, t)) && Number.isSafeInteger(r.borderFillId) && r.borderFillId >= 0 && (e.borderFillId = r.borderFillId), e;
+function pj(e, t, n, r) {
+	for (let [r, i] of dj.entries()) t[r] === n[r] && delete e[i];
+	return dj.some((t) => Object.hasOwn(e, t)) && !Object.hasOwn(e, "fillType") && (e.fillType = n[0]), [...dj, ...fj].some((t) => Object.hasOwn(e, t)) && Number.isSafeInteger(r.borderFillId) && r.borderFillId >= 0 && (e.borderFillId = r.borderFillId), e;
 }
-function lj(e, t) {
+function mj(e, t) {
 	for (let n of Object.keys(e)) Object.hasOwn(t, n) && JSON.stringify(e[n]) === JSON.stringify(t[n]) && delete e[n];
 	return e;
 }
 //#endregion
 //#region @rhwp/studio/src/ui/char-shape-dialog.ts
-var uj = [
+var hj = [
 	g("dialog.charShape.label"),
 	g("dialog.charShape.label.x885288"),
 	g("dialog.charShape.label.x8a6f8c"),
@@ -60628,10 +60694,10 @@ var uj = [
 	g("dialog.charShape.label.x35b98e"),
 	g("dialog.charShape.label.x2f0255")
 ];
-function dj() {
+function gj() {
 	return Array.from(an).sort((e, t) => e.localeCompare(t, "ko"));
 }
-var fj = [
+var _j = [
 	{
 		id: "bold",
 		title: g("dialog.charShape.buildFontList.tooltip")
@@ -60665,7 +60731,7 @@ var fj = [
 		title: g("dialog.charShape.buildFontList.tooltip.x6f4624")
 	}
 ];
-function pj(e) {
+function vj(e) {
 	let t = document.createElement("span");
 	switch (t.textContent = g("dialog.charShape.span.text"), e) {
 		case "bold":
@@ -60701,7 +60767,7 @@ function pj(e) {
 	}
 	return t;
 }
-var mj = class {
+var yj = class {
 	wasm;
 	eventBus;
 	overlay;
@@ -60807,7 +60873,7 @@ var mj = class {
 		let t = this.row();
 		t.appendChild(this.label(g("dialog.charShape.label.label"))), this.baseSizeInput = this.numberInput(1, 4096, .5), this.baseSizeInput.style.width = "60px", t.appendChild(this.baseSizeInput), t.appendChild(this.unit("pt")), e.appendChild(t);
 		let n = this.createFieldset(g("dialog.charShape.createFieldset.label")), r = this.row();
-		r.appendChild(this.label(g("dialog.charShape.label.label.x093fb3"))), this.langSelect = document.createElement("select"), this.langSelect.className = "dialog-select", this.langSelect.style.width = "72px", uj.forEach((e, t) => {
+		r.appendChild(this.label(g("dialog.charShape.label.label.x093fb3"))), this.langSelect = document.createElement("select"), this.langSelect.className = "dialog-select", this.langSelect.style.width = "72px", hj.forEach((e, t) => {
 			let n = document.createElement("option");
 			n.value = String(t), n.textContent = e, this.langSelect.appendChild(n);
 		}), this.langSelect.addEventListener("change", () => {
@@ -60816,7 +60882,7 @@ var mj = class {
 		let i = this.label(g("dialog.charShape.label.label.xd3c479"));
 		i.style.marginLeft = "12px", r.appendChild(i), this.fontSelect = document.createElement("select"), this.fontSelect.className = "dialog-select", this.fontSelect.style.width = "140px";
 		let a = document.createElement("optgroup");
-		a.label = "웹 글꼴", dj().forEach((e) => {
+		a.label = "웹 글꼴", gj().forEach((e) => {
 			let t = document.createElement("option");
 			t.value = e, t.textContent = e, a.appendChild(t);
 		}), this.fontSelect.appendChild(a);
@@ -60838,9 +60904,9 @@ var mj = class {
 		let u = this.label(g("dialog.charShape.label.label.x73fc3a"));
 		u.style.marginLeft = "16px", l.appendChild(u), this.langInputs["cs-spacing"] = this.numberInput(-50, 50), this.langInputs["cs-spacing"].style.width = "50px", l.appendChild(this.langInputs["cs-spacing"]), l.appendChild(this.unit("%")), n.appendChild(l), e.appendChild(n);
 		let d = this.createFieldset(g("dialog.charShape.createFieldset.label.xa49da9")), f = this.row();
-		f.style.gap = "2px", fj.forEach((e) => {
+		f.style.gap = "2px", _j.forEach((e) => {
 			let t = document.createElement("button");
-			t.className = "cs-icon-btn", t.title = e.title, t.appendChild(pj(e.id)), t.addEventListener("click", () => {
+			t.className = "cs-icon-btn", t.title = e.title, t.appendChild(vj(e.id)), t.addEventListener("click", () => {
 				e.id === "superscript" && !t.classList.contains("active") ? this.attrBtns.subscript?.classList.remove("active") : e.id === "subscript" && !t.classList.contains("active") && this.attrBtns.superscript?.classList.remove("active"), t.classList.toggle("active"), this.updatePreview();
 			}), f.appendChild(t), this.attrBtns[e.id] = t;
 		}), d.appendChild(f);
@@ -61234,12 +61300,12 @@ var mj = class {
 			e.borderLeft = t, e.borderRight = t, e.borderTop = t, e.borderBottom = t;
 		}
 		let S = this.faceColorSelect.value === "solid" ? "solid" : "none", C = this.faceColorPicker.value, w = this.patColorInput.value, T = parseInt(this.patShapeSelect.value), E = t.fillType || "none", D = t.fillColor || "#ffffff", O = t.patternColor || "#000000", ee = t.patternType || 0;
-		return S !== E && (e.fillType = S), C !== D && (e.fillColor = C), w !== O && (e.patternColor = w), T !== ee && (e.patternType = T), cj(e, this.pwhInitialFillUi, [
+		return S !== E && (e.fillType = S), C !== D && (e.fillColor = C), w !== O && (e.patternColor = w), T !== ee && (e.patternType = T), pj(e, this.pwhInitialFillUi, [
 			this.faceColorSelect.value,
 			this.faceColorPicker.value,
 			this.patColorInput.value,
 			this.patShapeSelect.value
-		], t), lj(e, this.pwhInitialUiMods), e;
+		], t), mj(e, this.pwhInitialUiMods), e;
 	}
 	handleOk() {
 		this.saveLangFields();
@@ -61281,42 +61347,42 @@ var mj = class {
 };
 //#endregion
 //#region @rhwp/studio/src/ui/para-shape-helpers.ts
-function hj(e) {
+function bj(e) {
 	let t = document.createElement("fieldset");
 	t.className = "cs-fieldset";
 	let n = document.createElement("legend");
 	return n.textContent = e, t.appendChild(n), t;
 }
-function gj() {
+function xj() {
 	let e = document.createElement("div");
 	return e.className = "dialog-row", e;
 }
-function _j(e) {
+function Sj(e) {
 	let t = document.createElement("span");
 	return t.className = "dialog-label", t.textContent = e, t;
 }
-function vj(e, t, n) {
+function Cj(e, t, n) {
 	let r = document.createElement("input");
 	return r.type = "number", r.className = "dialog-input", e !== void 0 && (r.min = String(e)), t !== void 0 && (r.max = String(t)), n !== void 0 && (r.step = String(n)), r;
 }
-function yj(e) {
+function wj(e) {
 	let t = document.createElement("span");
 	return t.className = "dialog-unit", t.textContent = e, t;
 }
 //#endregion
 //#region @rhwp/studio/src/ui/para-shape-tab-builders.ts
-function bj(e, t) {
+function Tj(e, t) {
 	let n = document.createElement("tr");
 	t.forEach((e) => {
 		let t = document.createElement("th");
 		t.textContent = e, n.appendChild(t);
 	}), e.appendChild(n);
 }
-function xj(e, t) {
+function Ej(e, t) {
 	let n = document.createElement("td");
 	n.textContent = t, e.appendChild(n);
 }
-function Sj(e) {
+function Dj(e) {
 	let t = [
 		g("dialog.paraShapeTabBuilders.appendTableCell.label.x8d60c4"),
 		g("dialog.paraShapeTabBuilders.appendTableCell.label.x19b0fb"),
@@ -61415,7 +61481,7 @@ function Sj(e) {
 	let y = document.createElement("table");
 	y.className = "ps-tab-table";
 	let b = document.createElement("thead");
-	bj(b, [g("dialog.paraShapeTabBuilders.appendTableCell.label.x2c24e8"), g("dialog.paraShapeTabBuilders.appendHeaderRow.label")]), y.appendChild(b);
+	Tj(b, [g("dialog.paraShapeTabBuilders.appendTableCell.label.x2c24e8"), g("dialog.paraShapeTabBuilders.appendHeaderRow.label")]), y.appendChild(b);
 	let x = document.createElement("tbody");
 	y.appendChild(x);
 	let S = document.createElement("div");
@@ -61433,7 +61499,7 @@ function Sj(e) {
 	let O = document.createElement("table");
 	O.className = "ps-tab-table";
 	let ee = document.createElement("thead");
-	bj(ee, [g("dialog.paraShapeTabBuilders.appendTableCell.label.x2c24e8"), g("dialog.paraShapeTabBuilders.appendHeaderRow.label")]), O.appendChild(ee);
+	Tj(ee, [g("dialog.paraShapeTabBuilders.appendTableCell.label.x2c24e8"), g("dialog.paraShapeTabBuilders.appendHeaderRow.label")]), O.appendChild(ee);
 	let k = document.createElement("tbody");
 	O.appendChild(k);
 	let te = document.createElement("div");
@@ -61489,7 +61555,7 @@ function Sj(e) {
 	function M() {
 		x.replaceChildren(), e.currentTabStops.forEach((n, r) => {
 			let i = document.createElement("tr");
-			r === e.selectedTabIndex && (i.className = "selected"), xj(i, `${(n.position / 100).toFixed(1)} pt`), xj(i, t[n.type] ?? "?"), i.addEventListener("click", () => {
+			r === e.selectedTabIndex && (i.className = "selected"), Ej(i, `${(n.position / 100).toFixed(1)} pt`), Ej(i, t[n.type] ?? "?"), i.addEventListener("click", () => {
 				e.selectedTabIndex = r, M();
 			}), x.appendChild(i);
 		});
@@ -61497,7 +61563,7 @@ function Sj(e) {
 	function ge() {
 		k.replaceChildren(), e.deletedTabStops.forEach((e, n) => {
 			let r = document.createElement("tr");
-			xj(r, `${(e.position / 100).toFixed(1)} pt`), xj(r, t[e.type] ?? "?"), r.addEventListener("dblclick", () => he(n)), r.title = g("dialog.paraShapeTabBuilders.tr.tooltip"), k.appendChild(r);
+			Ej(r, `${(e.position / 100).toFixed(1)} pt`), Ej(r, t[e.type] ?? "?"), r.addEventListener("dblclick", () => he(n)), r.title = g("dialog.paraShapeTabBuilders.tr.tooltip"), k.appendChild(r);
 		});
 	}
 	return {
@@ -61514,15 +61580,15 @@ function Sj(e) {
 		renderDeletedTabList: ge
 	};
 }
-function Cj(e, t) {
+function Oj(e, t) {
 	let n = document.createElement("div");
 	n.className = "dialog-tab-panel";
-	let r = hj(g("dialog.paraShapeTabBuilders.createFieldset.label")), i = document.createElement("div");
+	let r = bj(g("dialog.paraShapeTabBuilders.createFieldset.label")), i = document.createElement("div");
 	i.className = "ps-border-layout";
 	let a = document.createElement("div");
 	a.className = "ps-border-left";
-	let o = gj();
-	o.appendChild(_j(g("dialog.paraShapeTabBuilders.label.label")));
+	let o = xj();
+	o.appendChild(Sj(g("dialog.paraShapeTabBuilders.label.label")));
 	let s = document.createElement("select");
 	s.className = "dialog-select", s.style.width = "100px";
 	for (let [e, t] of [
@@ -61549,8 +61615,8 @@ function Cj(e, t) {
 		n.value = e, n.textContent = t, s.appendChild(n);
 	}
 	s.addEventListener("change", () => _e()), o.appendChild(s), a.appendChild(o);
-	let c = gj();
-	c.appendChild(_j(g("dialog.paraShapeTabBuilders.label.label.x53f378")));
+	let c = xj();
+	c.appendChild(Sj(g("dialog.paraShapeTabBuilders.label.label.x53f378")));
 	let l = document.createElement("select");
 	l.className = "dialog-select", l.style.width = "100px", [
 		"0.1 mm",
@@ -61573,15 +61639,15 @@ function Cj(e, t) {
 		let n = document.createElement("option");
 		n.value = String(t), n.textContent = e, l.appendChild(n);
 	}), l.addEventListener("change", () => _e()), c.appendChild(l), a.appendChild(c);
-	let u = gj();
-	u.appendChild(_j(g("dialog.paraShapeTabBuilders.label.label.xb7d4ad")));
+	let u = xj();
+	u.appendChild(Sj(g("dialog.paraShapeTabBuilders.label.label.xb7d4ad")));
 	let d = document.createElement("input");
 	d.type = "color", d.value = "#000000", d.className = "cs-color-btn", d.style.width = "100px", d.addEventListener("input", () => _e()), u.appendChild(d), a.appendChild(u);
-	let f = gj(), p = document.createElement("input");
+	let f = xj(), p = document.createElement("input");
 	p.type = "checkbox", p.id = "ps-bd-connect";
 	let m = document.createElement("label");
 	m.htmlFor = "ps-bd-connect", m.textContent = g("dialog.paraShapeTabBuilders.connectLabel.text"), f.appendChild(p), f.appendChild(m), a.appendChild(f);
-	let h = gj(), _ = document.createElement("input");
+	let h = xj(), _ = document.createElement("input");
 	_.type = "checkbox", _.id = "ps-bd-apply-imm", _.checked = !0;
 	let v = document.createElement("label");
 	v.htmlFor = "ps-bd-apply-imm", v.textContent = g("dialog.paraShapeTabBuilders.applyLabel.text"), h.appendChild(_), h.appendChild(v), a.appendChild(h), i.appendChild(a);
@@ -61625,8 +61691,8 @@ function Cj(e, t) {
 		r.className = "ps-preset-btn", r.textContent = e, r.title = t, r.addEventListener("click", n), S.appendChild(r);
 	}
 	y.appendChild(S), i.appendChild(y), r.appendChild(i), n.appendChild(r);
-	let w = hj(g("dialog.paraShapeTabBuilders.createFieldset.label.x807c30")), T = gj();
-	T.appendChild(_j(g("dialog.paraShapeTabBuilders.label.label.x18d3e6")));
+	let w = bj(g("dialog.paraShapeTabBuilders.createFieldset.label.x807c30")), T = xj();
+	T.appendChild(Sj(g("dialog.paraShapeTabBuilders.label.label.x18d3e6")));
 	let E = document.createElement("select");
 	E.className = "dialog-select", E.style.width = "100px";
 	for (let [e, t] of [["none", g("dialog.paraShapeTabBuilders.updateBdPreview.label.x5ab3b7")], ["solid", g("dialog.paraShapeTabBuilders.updateBdPreview.label.x013035")]]) {
@@ -61636,11 +61702,11 @@ function Cj(e, t) {
 	T.appendChild(E);
 	let D = document.createElement("input");
 	D.type = "color", D.value = "#ffffff", D.className = "cs-color-btn", D.style.marginLeft = "6px", T.appendChild(D), w.appendChild(T);
-	let O = gj();
-	O.appendChild(_j(g("dialog.paraShapeTabBuilders.label.label.x51d4f5")));
+	let O = xj();
+	O.appendChild(Sj(g("dialog.paraShapeTabBuilders.label.label.x51d4f5")));
 	let ee = document.createElement("input");
 	ee.type = "color", ee.value = "#000000", ee.className = "cs-color-btn", O.appendChild(ee);
-	let k = _j(g("dialog.paraShapeTabBuilders.label.label.xb8c7cc"));
+	let k = Sj(g("dialog.paraShapeTabBuilders.label.label.xb8c7cc"));
 	k.style.marginLeft = "10px", O.appendChild(k);
 	let te = document.createElement("select");
 	te.className = "dialog-select", te.style.width = "90px";
@@ -61657,13 +61723,13 @@ function Cj(e, t) {
 		n.value = e, n.textContent = t, te.appendChild(n);
 	}
 	O.appendChild(te), w.appendChild(O), n.appendChild(w);
-	let ne = hj(g("dialog.paraShapeTabBuilders.createFieldset.label.x0ad57d")), re = [], ie = document.createElement("div");
+	let ne = bj(g("dialog.paraShapeTabBuilders.createFieldset.label.x0ad57d")), re = [], ie = document.createElement("div");
 	ie.className = "ps-spacing-grid";
 	let ae = (e) => {
 		let t = document.createElement("div");
-		t.className = "ps-spacing-cell", t.appendChild(_j(e));
-		let n = vj(0, 999, .01);
-		return n.style.width = "55px", t.appendChild(n), t.appendChild(yj("mm")), [t, n];
+		t.className = "ps-spacing-cell", t.appendChild(Sj(e));
+		let n = Cj(0, 999, .01);
+		return n.style.width = "55px", t.appendChild(n), t.appendChild(wj("mm")), [t, n];
 	}, [oe, se] = ae(g("dialog.paraShapeTabBuilders.makeCell.label")), [ce, A] = ae(g("dialog.paraShapeTabBuilders.makeCell.label.x93c89b"));
 	re.push(se, A), ie.appendChild(oe), ie.appendChild(ce);
 	let [le, ue] = ae(g("dialog.paraShapeTabBuilders.makeCell.label.x34c256")), [de, fe] = ae(g("dialog.paraShapeTabBuilders.makeCell.label.x79dae2"));
@@ -61750,7 +61816,7 @@ function Cj(e, t) {
 }
 //#endregion
 //#region @rhwp/studio/src/ui/para-shape-dialog.ts
-var wj = [
+var kj = [
 	{
 		value: "justify",
 		label: g("dialog.paraShape.label"),
@@ -61781,7 +61847,7 @@ var wj = [
 		label: g("dialog.paraShape.label.x0ef550"),
 		cssClass: "sb-al-split"
 	}
-], Tj = [
+], Aj = [
 	{
 		value: "Percent",
 		label: g("dialog.paraShape.label.x48248d")
@@ -61798,26 +61864,26 @@ var wj = [
 		value: "Minimum",
 		label: g("dialog.paraShape.label.x153b4a")
 	}
-], Ej = 100;
-function Dj(e) {
+], jj = 100;
+function Mj(e) {
 	return e * 72 / 96;
 }
-function Oj(e) {
-	return Math.round(e * Ej * 2);
+function Nj(e) {
+	return Math.round(e * jj * 2);
 }
-function kj(e) {
-	return Math.round(e * Ej);
+function Pj(e) {
+	return Math.round(e * jj);
 }
-function Aj(e) {
+function Fj(e) {
 	return Math.max(0, Math.min(9999, e));
 }
-function jj(e) {
+function Ij(e) {
 	return Math.round(e * 150);
 }
-function Mj(e) {
+function Lj(e) {
 	return Math.round(e * 75);
 }
-var Nj = class {
+var Rj = class {
 	wasm;
 	eventBus;
 	overlay;
@@ -61953,8 +62019,8 @@ var Nj = class {
 	buildBasicPanel() {
 		let e = document.createElement("div");
 		e.className = "dialog-tab-panel";
-		let t = hj(g("dialog.paraShape.createFieldset.label")), n = document.createElement("div");
-		n.className = "ps-align-row", wj.forEach((e) => {
+		let t = bj(g("dialog.paraShape.createFieldset.label")), n = document.createElement("div");
+		n.className = "ps-align-row", kj.forEach((e) => {
 			let t = document.createElement("button");
 			t.className = "ps-align-btn", t.title = e.label;
 			let r = document.createElement("span");
@@ -61964,37 +62030,37 @@ var Nj = class {
 		}), t.appendChild(n), e.appendChild(t);
 		let r = document.createElement("div");
 		r.className = "ps-two-col";
-		let i = hj(g("dialog.paraShape.createFieldset.label.xcd8cef")), a = gj(), o = _j(g("dialog.paraShape.label.label"));
-		o.style.minWidth = "62px", o.style.textAlign = "right", a.appendChild(o), this.marginLeftInput = vj(0, 999, .1), this.marginLeftInput.style.width = "60px", a.appendChild(this.marginLeftInput), a.appendChild(yj("pt")), i.appendChild(a);
-		let s = gj(), c = _j(g("dialog.paraShape.label.label.x90513b"));
-		c.style.minWidth = "62px", c.style.textAlign = "right", s.appendChild(c), this.marginRightInput = vj(0, 999, .1), this.marginRightInput.style.width = "60px", s.appendChild(this.marginRightInput), s.appendChild(yj("pt")), i.appendChild(s);
-		let l = hj(g("dialog.paraShape.createFieldset.label.x89510d"));
+		let i = bj(g("dialog.paraShape.createFieldset.label.xcd8cef")), a = xj(), o = Sj(g("dialog.paraShape.label.label"));
+		o.style.minWidth = "62px", o.style.textAlign = "right", a.appendChild(o), this.marginLeftInput = Cj(0, 999, .1), this.marginLeftInput.style.width = "60px", a.appendChild(this.marginLeftInput), a.appendChild(wj("pt")), i.appendChild(a);
+		let s = xj(), c = Sj(g("dialog.paraShape.label.label.x90513b"));
+		c.style.minWidth = "62px", c.style.textAlign = "right", s.appendChild(c), this.marginRightInput = Cj(0, 999, .1), this.marginRightInput.style.width = "60px", s.appendChild(this.marginRightInput), s.appendChild(wj("pt")), i.appendChild(s);
+		let l = bj(g("dialog.paraShape.createFieldset.label.x89510d"));
 		this.firstLineRadios = [];
-		let u = gj(), d = document.createElement("input");
-		d.type = "radio", d.name = "ps-first-line", d.value = "normal", this.firstLineRadios.push(d), u.appendChild(d), u.appendChild(_j(g("dialog.paraShape.label.label.xecfda9"))), l.appendChild(u);
-		let f = gj();
+		let u = xj(), d = document.createElement("input");
+		d.type = "radio", d.name = "ps-first-line", d.value = "normal", this.firstLineRadios.push(d), u.appendChild(d), u.appendChild(Sj(g("dialog.paraShape.label.label.xecfda9"))), l.appendChild(u);
+		let f = xj();
 		f.style.whiteSpace = "nowrap";
 		let p = document.createElement("input");
 		p.type = "radio", p.name = "ps-first-line", p.value = "indent", this.firstLineRadios.push(p), f.appendChild(p);
-		let m = _j(g("dialog.paraShape.label.label.x5fd558"));
-		m.style.whiteSpace = "nowrap", f.appendChild(m), this.indentInput = vj(0, 999, .1), this.indentInput.style.width = "50px", f.appendChild(this.indentInput), f.appendChild(yj("pt")), l.appendChild(f);
-		let h = gj(), _ = document.createElement("input");
+		let m = Sj(g("dialog.paraShape.label.label.x5fd558"));
+		m.style.whiteSpace = "nowrap", f.appendChild(m), this.indentInput = Cj(0, 999, .1), this.indentInput.style.width = "50px", f.appendChild(this.indentInput), f.appendChild(wj("pt")), l.appendChild(f);
+		let h = xj(), _ = document.createElement("input");
 		_.type = "radio", _.name = "ps-first-line", _.value = "hanging", this.firstLineRadios.push(_), h.appendChild(_);
-		let v = _j(g("dialog.paraShape.label.label.x6b4a43"));
+		let v = Sj(g("dialog.paraShape.label.label.x6b4a43"));
 		v.style.whiteSpace = "nowrap", h.appendChild(v), l.appendChild(h), this.firstLineRadios.forEach((e) => {
 			e.addEventListener("change", () => {
 				this.indentInput.disabled = e.value === "normal" && e.checked, this.updatePreview();
 			});
 		}), r.appendChild(i), r.appendChild(l), e.appendChild(r);
-		let y = hj(g("dialog.paraShape.createFieldset.label.x0ad57d")), b = gj();
-		b.appendChild(_j(g("dialog.paraShape.label.label.x8f5075"))), this.lineSpacingTypeSelect = document.createElement("select"), this.lineSpacingTypeSelect.className = "dialog-select", this.lineSpacingTypeSelect.style.width = "100px", Tj.forEach((e) => {
+		let y = bj(g("dialog.paraShape.createFieldset.label.x0ad57d")), b = xj();
+		b.appendChild(Sj(g("dialog.paraShape.label.label.x8f5075"))), this.lineSpacingTypeSelect = document.createElement("select"), this.lineSpacingTypeSelect.className = "dialog-select", this.lineSpacingTypeSelect.style.width = "100px", Aj.forEach((e) => {
 			let t = document.createElement("option");
 			t.value = e.value, t.textContent = e.label, this.lineSpacingTypeSelect.appendChild(t);
-		}), this.lineSpacingTypeSelect.addEventListener("change", () => this.onLineSpacingTypeChange()), b.appendChild(this.lineSpacingTypeSelect), this.lineSpacingInput = vj(0, 9999, 1), this.lineSpacingInput.style.width = "55px", this.lineSpacingInput.style.marginLeft = "6px", b.appendChild(this.lineSpacingInput), this.lineSpacingUnitLabel = yj("%"), b.appendChild(this.lineSpacingUnitLabel), y.appendChild(b);
-		let x = gj();
-		x.appendChild(_j(g("dialog.paraShape.label.label.xbc6080"))), this.spacingBeforeInput = vj(0, 999, .1), this.spacingBeforeInput.setAttribute("aria-label", "문단 위 간격(pt)"), this.spacingBeforeInput.style.width = "55px", x.appendChild(this.spacingBeforeInput), x.appendChild(yj("pt"));
-		let S = _j(g("dialog.paraShape.label.label.x241c37"));
-		return S.style.marginLeft = "12px", x.appendChild(S), this.spacingAfterInput = vj(0, 999, .1), this.spacingAfterInput.setAttribute("aria-label", "문단 아래 간격(pt)"), this.spacingAfterInput.style.width = "55px", x.appendChild(this.spacingAfterInput), x.appendChild(yj("pt")), y.appendChild(x), e.appendChild(y), this.previewEl = document.createElement("div"), this.previewEl.className = "ps-preview", this.previewEl.textContent = g("dialog.paraShape.previewEl.text"), e.appendChild(this.previewEl), e;
+		}), this.lineSpacingTypeSelect.addEventListener("change", () => this.onLineSpacingTypeChange()), b.appendChild(this.lineSpacingTypeSelect), this.lineSpacingInput = Cj(0, 9999, 1), this.lineSpacingInput.style.width = "55px", this.lineSpacingInput.style.marginLeft = "6px", b.appendChild(this.lineSpacingInput), this.lineSpacingUnitLabel = wj("%"), b.appendChild(this.lineSpacingUnitLabel), y.appendChild(b);
+		let x = xj();
+		x.appendChild(Sj(g("dialog.paraShape.label.label.xbc6080"))), this.spacingBeforeInput = Cj(0, 999, .1), this.spacingBeforeInput.setAttribute("aria-label", "문단 위 간격(pt)"), this.spacingBeforeInput.style.width = "55px", x.appendChild(this.spacingBeforeInput), x.appendChild(wj("pt"));
+		let S = Sj(g("dialog.paraShape.label.label.x241c37"));
+		return S.style.marginLeft = "12px", x.appendChild(S), this.spacingAfterInput = Cj(0, 999, .1), this.spacingAfterInput.setAttribute("aria-label", "문단 아래 간격(pt)"), this.spacingAfterInput.style.width = "55px", x.appendChild(this.spacingAfterInput), x.appendChild(wj("pt")), y.appendChild(x), e.appendChild(y), this.previewEl = document.createElement("div"), this.previewEl.className = "ps-preview", this.previewEl.textContent = g("dialog.paraShape.previewEl.text"), e.appendChild(this.previewEl), e;
 	}
 	buildExtendedPanel() {
 		let e = document.createElement("div");
@@ -62053,15 +62119,15 @@ var Nj = class {
 			let n = document.createElement("option");
 			n.value = e, n.textContent = t, this.verticalAlignSelect.appendChild(n);
 		}), s.appendChild(c), s.appendChild(this.verticalAlignSelect), i.appendChild(s);
-		let l = hj(g("dialog.paraShape.createFieldset.label.x47b371")), u = gj();
-		u.appendChild(_j(g("dialog.paraShape.label.label.x631688"))), this.koreanBreakSelect = document.createElement("select"), this.koreanBreakSelect.className = "dialog-select", this.koreanBreakSelect.style.width = "100px";
+		let l = bj(g("dialog.paraShape.createFieldset.label.x47b371")), u = xj();
+		u.appendChild(Sj(g("dialog.paraShape.label.label.x631688"))), this.koreanBreakSelect = document.createElement("select"), this.koreanBreakSelect.className = "dialog-select", this.koreanBreakSelect.style.width = "100px";
 		for (let [e, t] of [["0", g("dialog.paraShape.buildExtendedPanel.label")], ["1", g("dialog.paraShape.buildExtendedPanel.label.xe09d1a")]]) {
 			let n = document.createElement("option");
 			n.value = e, n.textContent = t, this.koreanBreakSelect.appendChild(n);
 		}
 		u.appendChild(this.koreanBreakSelect), l.appendChild(u);
-		let d = gj();
-		d.appendChild(_j(g("dialog.paraShape.label.label.xd7f637"))), this.englishBreakSelect = document.createElement("select"), this.englishBreakSelect.className = "dialog-select", this.englishBreakSelect.style.width = "100px";
+		let d = xj();
+		d.appendChild(Sj(g("dialog.paraShape.label.label.xd7f637"))), this.englishBreakSelect = document.createElement("select"), this.englishBreakSelect.className = "dialog-select", this.englishBreakSelect.style.width = "100px";
 		for (let [e, t] of [
 			["0", g("dialog.paraShape.buildExtendedPanel.label.x88aa1c")],
 			["1", g("dialog.paraShape.buildExtendedPanel.label.x87dbf5")],
@@ -62073,10 +62139,10 @@ var Nj = class {
 		return d.appendChild(this.englishBreakSelect), l.appendChild(d), e.appendChild(l), e.appendChild(i), e;
 	}
 	buildTabSettingsPanel() {
-		return this.tabResult = Sj(this.tabState), this.tabResult.panel;
+		return this.tabResult = Dj(this.tabState), this.tabResult.panel;
 	}
 	buildBorderPanel() {
-		return this.borderResult = Cj(this.borderStates, this.bdSideToggles), this.borderResult.panel;
+		return this.borderResult = Oj(this.borderStates, this.bdSideToggles), this.borderResult.panel;
 	}
 	onLineSpacingTypeChange() {
 		this.lineSpacingTypeSelect.value === "Percent" ? (this.lineSpacingUnitLabel.textContent = "%", this.lineSpacingInput.step = "1") : (this.lineSpacingUnitLabel.textContent = "pt", this.lineSpacingInput.step = "0.1"), this.updatePreview();
@@ -62086,11 +62152,11 @@ var Nj = class {
 		if (!e) return;
 		Object.values(this.alignBtns).forEach((e) => e.classList.remove("active"));
 		let t = e.alignment || "justify";
-		this.alignBtns[t] && this.alignBtns[t].classList.add("active"), this.marginLeftInput.value = Dj(e.marginLeft ?? 0).toFixed(1), this.marginRightInput.value = Dj(e.marginRight ?? 0).toFixed(1);
+		this.alignBtns[t] && this.alignBtns[t].classList.add("active"), this.marginLeftInput.value = Mj(e.marginLeft ?? 0).toFixed(1), this.marginRightInput.value = Mj(e.marginRight ?? 0).toFixed(1);
 		let n = e.indent ?? 0;
-		n > 0 ? (this.firstLineRadios[1].checked = !0, this.indentInput.value = Dj(n).toFixed(1), this.indentInput.disabled = !1) : n < 0 ? (this.firstLineRadios[2].checked = !0, this.indentInput.value = Dj(Math.abs(n)).toFixed(1), this.indentInput.disabled = !1) : (this.firstLineRadios[0].checked = !0, this.indentInput.value = "0.0", this.indentInput.disabled = !0);
+		n > 0 ? (this.firstLineRadios[1].checked = !0, this.indentInput.value = Mj(n).toFixed(1), this.indentInput.disabled = !1) : n < 0 ? (this.firstLineRadios[2].checked = !0, this.indentInput.value = Mj(Math.abs(n)).toFixed(1), this.indentInput.disabled = !1) : (this.firstLineRadios[0].checked = !0, this.indentInput.value = "0.0", this.indentInput.disabled = !0);
 		let r = e.lineSpacingType || "Percent";
-		this.lineSpacingTypeSelect.value = r, r === "Percent" ? (this.lineSpacingInput.value = String(e.lineSpacing ?? 160), this.lineSpacingUnitLabel.textContent = "%", this.lineSpacingInput.step = "1") : (this.lineSpacingInput.value = Dj(e.lineSpacing ?? 0).toFixed(1), this.lineSpacingUnitLabel.textContent = "pt", this.lineSpacingInput.step = "0.1"), this.spacingBeforeInput.value = Dj((e.spacingBefore ?? 0) / 2).toFixed(1), this.spacingAfterInput.value = Dj((e.spacingAfter ?? 0) / 2).toFixed(1);
+		this.lineSpacingTypeSelect.value = r, r === "Percent" ? (this.lineSpacingInput.value = String(e.lineSpacing ?? 160), this.lineSpacingUnitLabel.textContent = "%", this.lineSpacingInput.step = "1") : (this.lineSpacingInput.value = Mj(e.lineSpacing ?? 0).toFixed(1), this.lineSpacingUnitLabel.textContent = "pt", this.lineSpacingInput.step = "0.1"), this.spacingBeforeInput.value = Mj((e.spacingBefore ?? 0) / 2).toFixed(1), this.spacingAfterInput.value = Mj((e.spacingAfter ?? 0) / 2).toFixed(1);
 		let i = e.headType || "None";
 		this.headTypeRadios.forEach((e) => {
 			e.checked = e.value === i;
@@ -62151,22 +62217,22 @@ var Nj = class {
 		if (!t) return e;
 		let n = this.getSelectedAlignment();
 		n !== (t.alignment || "justify") && (e.alignment = n);
-		let r = Oj(parseFloat(this.marginLeftInput.value) || 0);
-		r !== jj(t.marginLeft ?? 0) && (e.marginLeft = r);
-		let i = Oj(parseFloat(this.marginRightInput.value) || 0);
-		i !== jj(t.marginRight ?? 0) && (e.marginRight = i);
+		let r = Nj(parseFloat(this.marginLeftInput.value) || 0);
+		r !== Ij(t.marginLeft ?? 0) && (e.marginLeft = r);
+		let i = Nj(parseFloat(this.marginRightInput.value) || 0);
+		i !== Ij(t.marginRight ?? 0) && (e.marginRight = i);
 		let a = 0, o = this.firstLineRadios.find((e) => e.checked);
-		o?.value === "indent" ? a = Oj(parseFloat(this.indentInput.value) || 0) : o?.value === "hanging" && (a = -Oj(parseFloat(this.indentInput.value) || 0)), a !== jj(t.indent ?? 0) && (e.indent = a);
+		o?.value === "indent" ? a = Nj(parseFloat(this.indentInput.value) || 0) : o?.value === "hanging" && (a = -Nj(parseFloat(this.indentInput.value) || 0)), a !== Ij(t.indent ?? 0) && (e.indent = a);
 		let s = this.lineSpacingTypeSelect.value;
 		s !== (t.lineSpacingType || "Percent") && (e.lineSpacingType = s);
 		let c;
-		c = s === "Percent" ? Aj(parseInt(this.lineSpacingInput.value) || 160) : kj(Aj(parseFloat(this.lineSpacingInput.value) || 0));
-		let l = (t.lineSpacingType || "Percent") === "Percent" ? t.lineSpacing ?? 160 : Mj(t.lineSpacing ?? 0);
+		c = s === "Percent" ? Fj(parseInt(this.lineSpacingInput.value) || 160) : Pj(Fj(parseFloat(this.lineSpacingInput.value) || 0));
+		let l = (t.lineSpacingType || "Percent") === "Percent" ? t.lineSpacing ?? 160 : Lj(t.lineSpacing ?? 0);
 		c !== l && (e.lineSpacing = c);
-		let u = Oj(parseFloat(this.spacingBeforeInput.value) || 0);
-		u !== Mj(t.spacingBefore ?? 0) && (e.spacingBefore = u);
-		let d = Oj(parseFloat(this.spacingAfterInput.value) || 0);
-		d !== Mj(t.spacingAfter ?? 0) && (e.spacingAfter = d);
+		let u = Nj(parseFloat(this.spacingBeforeInput.value) || 0);
+		u !== Lj(t.spacingBefore ?? 0) && (e.spacingBefore = u);
+		let d = Nj(parseFloat(this.spacingAfterInput.value) || 0);
+		d !== Lj(t.spacingAfter ?? 0) && (e.spacingAfter = d);
 		let f = this.headTypeRadios.find((e) => e.checked)?.value || "None";
 		f !== (t.headType || "None") && (e.headType = f);
 		let p = parseInt(this.paraLevelSelect.value) || 0;
@@ -62272,12 +62338,12 @@ var Nj = class {
 		let ae = this.borderResult.bdConnectCb.checked;
 		ae !== (t.borderConnect ?? !1) && (e.borderConnect = ae);
 		let oe = this.borderResult.bdIgnoreMarginCb.checked;
-		return oe !== (t.borderIgnoreMargin ?? !1) && (e.borderIgnoreMargin = oe), cj(e, this.pwhInitialFillUi, [
+		return oe !== (t.borderIgnoreMargin ?? !1) && (e.borderIgnoreMargin = oe), pj(e, this.pwhInitialFillUi, [
 			this.borderResult.bgFillSelect.value,
 			this.borderResult.bgFillPicker.value,
 			this.borderResult.bgPatColorInput.value,
 			this.borderResult.bgPatShapeSelect.value
-		], t), lj(e, this.pwhInitialUiMods), e;
+		], t), mj(e, this.pwhInitialUiMods), e;
 	}
 	getSelectedAlignment() {
 		for (let [e, t] of Object.entries(this.alignBtns)) if (t.classList.contains("active")) return e;
@@ -62294,14 +62360,14 @@ var Nj = class {
 };
 //#endregion
 //#region @rhwp/studio/src/core/numbering-defaults.ts
-function Pj(e) {
+function zj(e) {
 	return e.split("[::]").filter((e, t, n) => t < n.length - 1);
 }
-function Fj(e) {
+function Bj(e) {
 	return e.split("[::]").filter((e, t, n) => t < n.length - 1);
 }
-Pj("^1.[::]^2.[::]^3)[::]^4)[::](^5)[::](^6)[::]^7[::]^8[::][::][::]"), Fj(";;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;9;;1;[::];;50;;1;1;10;;1;[::];;50;;1;1;3;;1;[::]"), Pj("^1.[::]^2.[::]^3)[::]^4)[::](^5)[::](^6)[::]^7[::]^8[::][::][::]"), Fj(";;50;;1;;0;;1;[::];;50;;1;;8;;1;[::];;50;;1;;0;;1;[::];;50;;1;;8;;1;[::];;50;;1;;0;;1;[::];;50;;1;;8;;1;[::];;50;;1;;1;;1;[::];;50;;1;;9;;1;[::];;50;;1;;0;;1;[::];;50;;1;;0;;1;[::]"), Pj("^1[::]^2[::]^3[::]^4[::](^5)[::](^6)[::]^7[::]^8[::][::][::]"), Fj(";;50;;1;1;2;;1;[::];;50;;1;1;4;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;7;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), Pj("^1.[::]^2.[::]▶[::](^4)[::](^5)[::]-[::]^7[::]^8[::][::][::]"), Fj(";;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;9;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), Pj("^1.[::]^2.[::]^3.[::]^4)[::](^5)[::](^6)[::]^7)[::][::][::][::]"), Fj(";;50;;1;1;2;;1;[::];;50;;1;1;4;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;3;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), Pj("^1.[::]^1.^2.[::]^1.^2.^3.[::]^1.^2.^3.^4.[::]^1.^2.^3.^4.^5.[::]^1.^2.^3.^4.^5.^6.[::]^1.^2.^3.^4.^5.^6.^7.[::]^1.^2.^3.^4.^5.^6.^7.^8.[::]^1.^2.^3.^4.^5.^6.^7.^8.^9.[::]^1.^2.^3.^4.^5.^6.^7.^8.^9.^:.[::]"), Fj(";;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), Pj("^1.[::]^1.^2[::]^1.^2.^3[::]^1.^2.^3.^4[::]^1.^2.^3.^4.^5[::]^1.^2.^3.^4.^5.^6[::]^1.^2.^3.^4.^5.^6.^7[::]^1.^2.^3.^4.^5.^6.^7.^8[::]^1.^2.^3.^4.^5.^6.^7.^8.^9[::]^1.^2.^3.^4.^5.^6.^7.^8.^9.^:[::]"), Fj(";;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), Pj("^1.[::]^2.[::]^3.[::]^4)[::](^5)[::](^6)[::]^7)[::][::][::][::]"), Fj(";;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;3;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), Pj("제^1장[::]제^2절[::]제^3항[::]-[::][::][::][::][::][::][::]"), Fj(";;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), Pj("[::][::]▶[::][::][::]▶[::]-[::]"), Fj(";;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), Pj("^1.[::][::][::][::][::][::][::][::][::][::]"), Fj(";;50;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::]"), Pj("[::][::][::][::][::][::][::][::][::][::]"), Fj(";;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::]"), Pj("^1.[::]^2.[::]^3)[::]^4)[::](^5)[::](^6)[::]^7[::]^8[::][::][::]"), Fj(";;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;9;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), Pj("(^1)[::](^2)[::](^3)[::]^4)[::]^5)[::]^6)[::]^7[::]^8[::]^9[::][::]"), Fj(";;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;9;;1;[::];;50;;1;1;7;;1;[::];;50;;1;1;0;;1;[::]"), Pj("^1)[::]^2)[::]^3)[::](^4)[::](^5)[::](^6)[::]^7[::]^8[::]^9[::][::]"), Fj(";;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;9;;1;[::];;50;;1;1;7;;1;[::];;50;;1;1;0;;1;[::]"), Pj("^1[::](^2)[::](^3)[::]^4)[::]^5)[::]^6)[::]-[::][::][::][::]"), Fj(";;50;;1;1;1;;1;[::];;50;;1;1;10;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;10;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), Pj("^1)[::]^2)[::](^3)[::](^4)[::](^5)[::]^6[::]-[::][::][::][::]"), Fj(";;50;;1;1;8;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), Pj("(^1)[::](^2)[::](^3)[::]^4)[::]^5)[::]^6[::]-[::][::][::][::]"), Fj(";;50;;1;1;10;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), Pj("^1.[::]^2.[::]^3.[::]^4)[::]^5)[::]^6)[::]^7[::]^8[::][::][::]"), Fj(";;50;;1;1;2;;1;[::];;50;;1;1;4;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;3;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;7;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), Pj("^1.[::]^2.[::](^3)[::](^4)[::]^5)[::]^6)[::]-[::][::][::][::]"), Fj(";;50;;1;1;3;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;3;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;3;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), Pj("^1.[::]^2.[::]^3,[::](^4)[::](^5)[::](^6)[::]^7[::]^8[::]^9[::][::]"), Fj(";;50;;1;1;4;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;7;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;9;;1;[::];;50;;1;1;0;;1;[::]"), Pj("^1.[::]^1.^2.[::]^1.^2.^3.[::]^1.^2.^3.^4.[::]^1.^2.^3.^4.^5.[::]^1.^2.^3.^4.^5.^6.[::]^1.^2.^3.^4.^5.^6.^7.[::]^1.^2.^3.^4.^5.^6.^7.^8.[::]^1.^2.^3.^4.^5.^6.^7.^8.^9.[::]^1.^2.^3.^4.^5.^6.^7.^8.^9.^:.[::]"), Fj(";;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]");
-var Ij = [
+zj("^1.[::]^2.[::]^3)[::]^4)[::](^5)[::](^6)[::]^7[::]^8[::][::][::]"), Bj(";;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;9;;1;[::];;50;;1;1;10;;1;[::];;50;;1;1;3;;1;[::]"), zj("^1.[::]^2.[::]^3)[::]^4)[::](^5)[::](^6)[::]^7[::]^8[::][::][::]"), Bj(";;50;;1;;0;;1;[::];;50;;1;;8;;1;[::];;50;;1;;0;;1;[::];;50;;1;;8;;1;[::];;50;;1;;0;;1;[::];;50;;1;;8;;1;[::];;50;;1;;1;;1;[::];;50;;1;;9;;1;[::];;50;;1;;0;;1;[::];;50;;1;;0;;1;[::]"), zj("^1[::]^2[::]^3[::]^4[::](^5)[::](^6)[::]^7[::]^8[::][::][::]"), Bj(";;50;;1;1;2;;1;[::];;50;;1;1;4;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;7;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), zj("^1.[::]^2.[::]▶[::](^4)[::](^5)[::]-[::]^7[::]^8[::][::][::]"), Bj(";;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;9;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), zj("^1.[::]^2.[::]^3.[::]^4)[::](^5)[::](^6)[::]^7)[::][::][::][::]"), Bj(";;50;;1;1;2;;1;[::];;50;;1;1;4;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;3;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), zj("^1.[::]^1.^2.[::]^1.^2.^3.[::]^1.^2.^3.^4.[::]^1.^2.^3.^4.^5.[::]^1.^2.^3.^4.^5.^6.[::]^1.^2.^3.^4.^5.^6.^7.[::]^1.^2.^3.^4.^5.^6.^7.^8.[::]^1.^2.^3.^4.^5.^6.^7.^8.^9.[::]^1.^2.^3.^4.^5.^6.^7.^8.^9.^:.[::]"), Bj(";;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), zj("^1.[::]^1.^2[::]^1.^2.^3[::]^1.^2.^3.^4[::]^1.^2.^3.^4.^5[::]^1.^2.^3.^4.^5.^6[::]^1.^2.^3.^4.^5.^6.^7[::]^1.^2.^3.^4.^5.^6.^7.^8[::]^1.^2.^3.^4.^5.^6.^7.^8.^9[::]^1.^2.^3.^4.^5.^6.^7.^8.^9.^:[::]"), Bj(";;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), zj("^1.[::]^2.[::]^3.[::]^4)[::](^5)[::](^6)[::]^7)[::][::][::][::]"), Bj(";;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;3;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), zj("제^1장[::]제^2절[::]제^3항[::]-[::][::][::][::][::][::][::]"), Bj(";;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), zj("[::][::]▶[::][::][::]▶[::]-[::]"), Bj(";;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), zj("^1.[::][::][::][::][::][::][::][::][::][::]"), Bj(";;50;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::]"), zj("[::][::][::][::][::][::][::][::][::][::]"), Bj(";;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::];;;;1;1;0;;1;[::]"), zj("^1.[::]^2.[::]^3)[::]^4)[::](^5)[::](^6)[::]^7[::]^8[::][::][::]"), Bj(";;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;9;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), zj("(^1)[::](^2)[::](^3)[::]^4)[::]^5)[::]^6)[::]^7[::]^8[::]^9[::][::]"), Bj(";;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;9;;1;[::];;50;;1;1;7;;1;[::];;50;;1;1;0;;1;[::]"), zj("^1)[::]^2)[::]^3)[::](^4)[::](^5)[::](^6)[::]^7[::]^8[::]^9[::][::]"), Bj(";;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;9;;1;[::];;50;;1;1;7;;1;[::];;50;;1;1;0;;1;[::]"), zj("^1[::](^2)[::](^3)[::]^4)[::]^5)[::]^6)[::]-[::][::][::][::]"), Bj(";;50;;1;1;1;;1;[::];;50;;1;1;10;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;10;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), zj("^1)[::]^2)[::](^3)[::](^4)[::](^5)[::]^6[::]-[::][::][::][::]"), Bj(";;50;;1;1;8;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), zj("(^1)[::](^2)[::](^3)[::]^4)[::]^5)[::]^6[::]-[::][::][::][::]"), Bj(";;50;;1;1;10;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), zj("^1.[::]^2.[::]^3.[::]^4)[::]^5)[::]^6)[::]^7[::]^8[::][::][::]"), Bj(";;50;;1;1;2;;1;[::];;50;;1;1;4;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;3;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;7;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), zj("^1.[::]^2.[::](^3)[::](^4)[::]^5)[::]^6)[::]-[::][::][::][::]"), Bj(";;50;;1;1;3;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;3;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;3;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]"), zj("^1.[::]^2.[::]^3,[::](^4)[::](^5)[::](^6)[::]^7[::]^8[::]^9[::][::]"), Bj(";;50;;1;1;4;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;5;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;8;;1;[::];;50;;1;1;7;;1;[::];;50;;1;1;1;;1;[::];;50;;1;1;9;;1;[::];;50;;1;1;0;;1;[::]"), zj("^1.[::]^1.^2.[::]^1.^2.^3.[::]^1.^2.^3.^4.[::]^1.^2.^3.^4.^5.[::]^1.^2.^3.^4.^5.^6.[::]^1.^2.^3.^4.^5.^6.^7.[::]^1.^2.^3.^4.^5.^6.^7.^8.[::]^1.^2.^3.^4.^5.^6.^7.^8.^9.[::]^1.^2.^3.^4.^5.^6.^7.^8.^9.^:.[::]"), Bj(";;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::];;50;;1;1;0;;1;[::]");
+var Vj = [
 	{
 		name: "●",
 		char: "",
@@ -62403,7 +62469,7 @@ var Ij = [
 	HANGUL_JAMO: 10,
 	HANGUL_MIXED: 8,
 	HANJA: 7
-}, Lj = [
+}, Hj = [
 	{
 		label: g("dialog.numbering.label"),
 		levelFormats: [
@@ -62552,12 +62618,12 @@ var Ij = [
 		]
 	}
 ];
-function Rj(e, t) {
+function Uj(e, t) {
 	switch (t) {
 		case K.DIGIT: return String(e);
 		case K.CIRCLE_DIGIT: return e >= 1 && e <= 20 ? "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳"[e - 1] : String(e);
-		case K.ROMAN_UPPER: return zj(e);
-		case K.ROMAN_LOWER: return zj(e).toLowerCase();
+		case K.ROMAN_UPPER: return Wj(e);
+		case K.ROMAN_LOWER: return Wj(e).toLowerCase();
 		case K.ALPHA_UPPER: return e >= 1 && e <= 26 ? String.fromCharCode(64 + e) : String(e);
 		case K.ALPHA_LOWER: return e >= 1 && e <= 26 ? String.fromCharCode(96 + e) : String(e);
 		case K.HANGUL_SYLLABLE:
@@ -62567,7 +62633,7 @@ function Rj(e, t) {
 		default: return String(e);
 	}
 }
-function zj(e) {
+function Wj(e) {
 	let t = [
 		1e3,
 		900,
@@ -62600,10 +62666,10 @@ function zj(e) {
 	for (let e = 0; e < t.length; e++) for (; i >= t[e];) r += n[e], i -= t[e];
 	return r;
 }
-function Bj(e, t) {
+function Gj(e, t) {
 	let n = [];
 	for (let r = 0; r < 7; r++) {
-		let i = "  ".repeat(r), a = e.levelFormats[r], o = Rj(t, e.numberFormats[r]), s = a.replace(`^${r + 1}`, o);
+		let i = "  ".repeat(r), a = e.levelFormats[r], o = Uj(t, e.numberFormats[r]), s = a.replace(`^${r + 1}`, o);
 		n.push(`${i}${g("dialog.numbering.previewLine", {
 			p1: r + 1,
 			p2: s
@@ -62611,7 +62677,7 @@ function Bj(e, t) {
 	}
 	return n.join("\n");
 }
-var Vj = class extends A {
+var Kj = class extends A {
 	wasm;
 	eventBus;
 	selectedPreset = 0;
@@ -62655,8 +62721,8 @@ var Vj = class extends A {
 		n.className = "nd-bullet-cell", n.textContent = g("dialog.numbering.noneCell.text"), n.addEventListener("click", () => {
 			t.querySelectorAll(".nd-bullet-cell").forEach((e) => e.classList.remove("selected")), n.classList.add("selected"), this.selectedBulletIdx = -1;
 		}), t.appendChild(n);
-		for (let e = 0; e < Ij.length; e++) {
-			let n = Ij[e], r = document.createElement("div");
+		for (let e = 0; e < Vj.length; e++) {
+			let n = Vj[e], r = document.createElement("div");
 			r.className = "nd-bullet-cell", this.currentBulletChar && n.char === this.currentBulletChar && (r.classList.add("selected"), this.selectedBulletIdx = e);
 			let i = document.createElement("span");
 			i.className = "nd-bullet-char", i.textContent = n.displayChar, r.appendChild(i), r.title = n.name, r.addEventListener("click", () => {
@@ -62674,8 +62740,8 @@ var Vj = class extends A {
 		r.className = "nd-radio-group";
 		let i = this.currentHeadType === "None" || this.currentNumberingId === 0 ? 0 : 1;
 		this.selectedPreset = i, this.restartMode = this.currentRestartMode;
-		for (let e = 0; e < Lj.length; e++) {
-			let t = Lj[e], n = document.createElement("label");
+		for (let e = 0; e < Hj.length; e++) {
+			let t = Hj[e], n = document.createElement("label");
 			n.className = "nd-radio-label";
 			let a = document.createElement("input");
 			a.type = "radio", a.name = "nd-preset", a.value = String(e), e === i && (a.checked = !0), a.addEventListener("change", () => {
@@ -62733,14 +62799,14 @@ var Vj = class extends A {
 	}
 	updatePreview() {
 		if (!this.previewEl) return;
-		let e = Lj[this.selectedPreset];
-		this.previewEl.textContent = Bj(e, this.startNumber);
+		let e = Hj[this.selectedPreset];
+		this.previewEl.textContent = Gj(e, this.startNumber);
 	}
 	onConfirm() {
 		if (this.activeTab === "bullet") {
 			if (this.selectedBulletIdx < 0) this.onApply?.(0, 0, 1);
 			else {
-				let e = Ij[this.selectedBulletIdx];
+				let e = Vj[this.selectedBulletIdx];
 				this.onApplyBullet?.(e.char);
 			}
 			return;
@@ -62749,7 +62815,7 @@ var Vj = class extends A {
 			this.onApply?.(0, 0, 1);
 			return;
 		}
-		let e = Lj[this.selectedPreset], t = JSON.stringify({
+		let e = Hj[this.selectedPreset], t = JSON.stringify({
 			levelFormats: e.levelFormats,
 			numberFormats: e.numberFormats,
 			startNumber: this.startNumber
@@ -62762,14 +62828,14 @@ var Vj = class extends A {
 	show() {
 		super.show();
 	}
-}, Hj = {
+}, qj = {
 	justify: g("dialog.style.label"),
 	left: g("dialog.style.label.x8d60c4"),
 	right: g("dialog.style.label.x19b0fb"),
 	center: g("dialog.style.label.x55b22e"),
 	distribute: g("dialog.style.label.x88b36c"),
 	split: g("dialog.style.label.xb68e8e")
-}, Uj = class extends A {
+}, Jj = class extends A {
 	wasm;
 	eventBus;
 	services;
@@ -62861,7 +62927,7 @@ var Vj = class extends A {
 		}), n.appendChild(i), this.infoPanel.appendChild(n);
 	}
 	buildParaInfo(e) {
-		let t = (e) => (e * 72 / 96).toFixed(1), n = Hj[e.alignment ?? "justify"] ?? e.alignment, r = e.lineSpacingType ?? "Percent", i = e.lineSpacing ?? 160, a = e.marginLeft == null ? "0.0" : t(e.marginLeft), o = e.marginRight == null ? "0.0" : t(e.marginRight), s = e.indent == null ? "0.0" : t(e.indent), c = parseFloat(s), l = c > 0 ? g("dialog.style.buildParaInfo.text", { p1: s }) : c < 0 ? g("dialog.style.buildParaInfo.text.xe1aaaa", { p1: Math.abs(c).toFixed(1) }) : g("dialog.style.buildParaInfo.text.xfaa1dd"), u = r === "Percent" ? `${i} %` : `${t(i)} pt`, d = this.styles.find((e) => e.id === this.selectedId), f = (d ? this.styles.find((e) => e.id === d.nextStyleId) : null)?.name ?? d?.name ?? "";
+		let t = (e) => (e * 72 / 96).toFixed(1), n = qj[e.alignment ?? "justify"] ?? e.alignment, r = e.lineSpacingType ?? "Percent", i = e.lineSpacing ?? 160, a = e.marginLeft == null ? "0.0" : t(e.marginLeft), o = e.marginRight == null ? "0.0" : t(e.marginRight), s = e.indent == null ? "0.0" : t(e.indent), c = parseFloat(s), l = c > 0 ? g("dialog.style.buildParaInfo.text", { p1: s }) : c < 0 ? g("dialog.style.buildParaInfo.text.xe1aaaa", { p1: Math.abs(c).toFixed(1) }) : g("dialog.style.buildParaInfo.text.xfaa1dd"), u = r === "Percent" ? `${i} %` : `${t(i)} pt`, d = this.styles.find((e) => e.id === this.selectedId), f = (d ? this.styles.find((e) => e.id === d.nextStyleId) : null)?.name ?? d?.name ?? "";
 		return [
 			`왼쪽 여백: ${a} pt&nbsp;&nbsp;&nbsp;첫 줄: ${l}`,
 			`오른쪽 여백: ${o} pt&nbsp;&nbsp;&nbsp;정렬 방식: ${n}`,
@@ -62919,7 +62985,7 @@ var Vj = class extends A {
 		let t = this.styles.find((t) => t.id === e);
 		this.currentStyleLabel && (this.currentStyleLabel.textContent = t?.name ?? ""), this.renderList(), this.updateInfo();
 	}
-}, Wj = class extends A {
+}, Yj = class extends A {
 	wasm;
 	eventBus;
 	services;
@@ -63005,14 +63071,14 @@ var Vj = class extends A {
 	}
 	openParaDialog() {
 		if (this.addMode && this.styleInfo.id < 0) {
-			let e = new Nj(this.wasm, this.eventBus);
+			let e = new Rj(this.wasm, this.eventBus);
 			e.onApply = (e) => {
 				this.paraModsJson = JSON.stringify(e);
 			}, e.show(this.baseInfo.paraProps ?? {});
 			return;
 		}
 		try {
-			let e = this.wasm.getStyleDetail(this.styleInfo.id), t = new Nj(this.wasm, this.eventBus);
+			let e = this.wasm.getStyleDetail(this.styleInfo.id), t = new Rj(this.wasm, this.eventBus);
 			t.onApply = (e) => {
 				this.paraModsJson = JSON.stringify(e);
 			}, t.show(e.paraProps);
@@ -63022,7 +63088,7 @@ var Vj = class extends A {
 	}
 	openCharDialog() {
 		if (this.addMode && this.styleInfo.id < 0) {
-			let e = new mj(this.wasm, this.eventBus);
+			let e = new yj(this.wasm, this.eventBus);
 			e.onApply = (e) => {
 				if (e.fontName) {
 					let t = this.wasm.findOrCreateFontId(e.fontName);
@@ -63033,7 +63099,7 @@ var Vj = class extends A {
 			return;
 		}
 		try {
-			let e = this.wasm.getStyleDetail(this.styleInfo.id), t = new mj(this.wasm, this.eventBus);
+			let e = this.wasm.getStyleDetail(this.styleInfo.id), t = new yj(this.wasm, this.eventBus);
 			t.onApply = (e) => {
 				if (e.fontName) {
 					let t = this.wasm.findOrCreateFontId(e.fontName);
@@ -63089,7 +63155,7 @@ var Vj = class extends A {
 	hide() {
 		super.hide(), this.onClose?.();
 	}
-}, Gj = [
+}, Xj = [
 	{
 		id: "format:quick-color-k",
 		label: "검정 글자색",
@@ -63400,7 +63466,7 @@ var Vj = class extends A {
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
-			let n = t.getCharProperties(), r = t.getSelection(), i = new mj(e.wasm, e.eventBus);
+			let n = t.getCharProperties(), r = t.getSelection(), i = new yj(e.wasm, e.eventBus);
 			i.onApply = (n) => {
 				if (n.fontName) {
 					let t = e.wasm.findOrCreateFontId(n.fontName);
@@ -63423,7 +63489,7 @@ var Vj = class extends A {
 			let n = t.getParaProperties(), r = t.getSelection(), i = t.getCursorPosition(), a = r ?? {
 				start: i,
 				end: i
-			}, o = new Nj(e.wasm, e.eventBus);
+			}, o = new Rj(e.wasm, e.eventBus);
 			o.onApply = (e) => {
 				t.applyParaPropsToRange(a.start, a.end, e);
 			}, o.onClose = () => t.focus(), o.show(n);
@@ -63472,7 +63538,7 @@ var Vj = class extends A {
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
-			let n = t.getParaProperties(), r = new Vj(e.wasm, e.eventBus);
+			let n = t.getParaProperties(), r = new Kj(e.wasm, e.eventBus);
 			if (r.currentHeadType = n.headType ?? "None", r.currentNumberingId = n.numberingId ?? 0, r.currentRestartMode = n.numberingRestartMode ?? 0, n.headType === "Bullet" && n.numberingId && n.numberingId > 0) try {
 				let t = e.wasm.getBulletList().find((e) => e.id === n.numberingId);
 				t && (r.currentBulletChar = t.rawCode ? String.fromCodePoint(t.rawCode) : t.char);
@@ -63496,8 +63562,8 @@ var Vj = class extends A {
 		label: g("command.format.bulletShape.label"),
 		canExecute: (e) => e.hasDocument,
 		execute(e, t) {
-			_O(e, t?.anchorEl, () => {
-				Gj.find((e) => e.id === "format:para-num-shape")?.execute(e);
+			SO(e, t?.anchorEl, () => {
+				Xj.find((e) => e.id === "format:para-num-shape")?.execute(e);
 			});
 		}
 	},
@@ -63528,11 +63594,11 @@ var Vj = class extends A {
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
-			let n = new Uj(e.wasm, e.eventBus, e);
+			let n = new Jj(e.wasm, e.eventBus, e);
 			n.onEditRequest = (t) => {
 				let r = e.wasm.getStyleList().find((e) => e.id === t);
 				if (!r) return;
-				let i = new Wj(e.wasm, e.eventBus, "edit", {
+				let i = new Yj(e.wasm, e.eventBus, "edit", {
 					id: r.id,
 					name: r.name,
 					englishName: r.englishName,
@@ -63550,7 +63616,7 @@ var Vj = class extends A {
 				} catch {
 					r = {};
 				}
-				let i = new Wj(e.wasm, e.eventBus, "add", void 0, r, e);
+				let i = new Yj(e.wasm, e.eventBus, "add", void 0, r, e);
 				i.onSave = () => n.refresh(), i.show();
 			}, n.onApply = (e) => {
 				t.applyStyle(e);
@@ -63567,21 +63633,21 @@ var Vj = class extends A {
 		shortcutLabel: "P",
 		canExecute: (e) => e.inPictureObjectSelection || e.inTableObjectSelection || e.inTable || e.inCellSelectionMode,
 		execute(e) {
-			aj(e);
+			uj(e);
 		}
 	}
-], Kj = 8, qj = 10, Jj = 16;
-function Yj(e) {
-	return Math.round(e * ID);
+], Zj = 8, Qj = 10, $j = 16;
+function eM(e) {
+	return Math.round(e * VD);
 }
-function Xj(e, t) {
+function tM(e, t) {
 	let n = Math.floor(e / t), r = e - n * t;
 	return Array.from({ length: t }, () => {
 		let e = n + +(r > 0);
 		return r -= +(r > 0), Math.max(1, e);
 	});
 }
-var Zj = class {
+var nM = class {
 	overlay;
 	popup;
 	label;
@@ -63616,9 +63682,9 @@ var Zj = class {
 		n.style.cssText = "padding:6px;";
 		let r = document.createElement("div");
 		r.style.cssText = "position:relative;width:178px;height:142px;cursor:pointer;", this.cells = [];
-		for (let e = 0; e < Kj; e++) for (let t = 0; t < qj; t++) {
+		for (let e = 0; e < Zj; e++) for (let t = 0; t < Qj; t++) {
 			let n = document.createElement("div");
-			n.style.cssText = `position:absolute;width:${Jj}px;height:${Jj}px;left:${t * 18}px;top:${e * 18}px;border:1px solid var(--color-border);box-sizing:border-box;background:var(--color-surface);`, n.dataset.row = String(e), n.dataset.col = String(t), r.appendChild(n), this.cells.push(n);
+			n.style.cssText = `position:absolute;width:${$j}px;height:${$j}px;left:${t * 18}px;top:${e * 18}px;border:1px solid var(--color-border);box-sizing:border-box;background:var(--color-surface);`, n.dataset.row = String(e), n.dataset.col = String(t), r.appendChild(n), this.cells.push(n);
 		}
 		r.addEventListener("mousemove", (e) => {
 			let t = r.getBoundingClientRect(), n = e.clientX - t.left, i = e.clientY - t.top, a = Math.min(9, Math.max(0, Math.floor(n / 18))), o = Math.min(7, Math.max(0, Math.floor(i / 18)));
@@ -63664,25 +63730,25 @@ var Zj = class {
 		a.className = "dialog-body", a.style.cssText = "display:flex;gap:16px;padding:12px 16px;";
 		let o = document.createElement("div");
 		o.style.cssText = "flex:1;";
-		let s = Qj(g("dialog.tableCreate.createSection.label")), c = $j(s, g("dialog.tableCreate.createSpinnerRow.label"), 5, 1, 256), l = $j(s, g("dialog.tableCreate.createSpinnerRow.label.x623beb"), 5, 1, 256);
+		let s = rM(g("dialog.tableCreate.createSection.label")), c = iM(s, g("dialog.tableCreate.createSpinnerRow.label"), 5, 1, 256), l = iM(s, g("dialog.tableCreate.createSpinnerRow.label.x623beb"), 5, 1, 256);
 		o.appendChild(s);
-		let u = Qj(g("dialog.tableCreate.createSection.label.x65cf09")), d = document.createElement("div");
-		d.className = "dialog-row", d.appendChild(eM(g("dialog.tableCreate.makeLabel.label")));
+		let u = rM(g("dialog.tableCreate.createSection.label.x65cf09")), d = document.createElement("div");
+		d.className = "dialog-row", d.appendChild(aM(g("dialog.tableCreate.makeLabel.label")));
 		let f = document.createElement("select");
-		f.className = "dialog-select", f.style.width = "90px", f.appendChild($x("fit", g("dialog.tableCreate.makeOption.label"))), f.appendChild($x("custom", g("dialog.tableCreate.makeOption.label.x5d9e2b"))), d.appendChild(f);
+		f.className = "dialog-select", f.style.width = "90px", f.appendChild(iS("fit", g("dialog.tableCreate.makeOption.label"))), f.appendChild(iS("custom", g("dialog.tableCreate.makeOption.label.x5d9e2b"))), d.appendChild(f);
 		let p = document.createElement("input");
-		p.className = "dialog-input", p.type = "number", p.step = "0.1", p.value = "148.0", p.style.cssText = "width:60px;margin-left:6px;", p.disabled = !0, d.appendChild(p), d.appendChild(tM("mm")), u.appendChild(d), f.addEventListener("change", () => {
+		p.className = "dialog-input", p.type = "number", p.step = "0.1", p.value = "148.0", p.style.cssText = "width:60px;margin-left:6px;", p.disabled = !0, d.appendChild(p), d.appendChild(oM("mm")), u.appendChild(d), f.addEventListener("change", () => {
 			p.disabled = f.value === "fit";
 		});
 		let m = document.createElement("div");
-		m.className = "dialog-row", m.appendChild(eM(g("dialog.tableCreate.makeLabel.label.x3cc869")));
+		m.className = "dialog-row", m.appendChild(aM(g("dialog.tableCreate.makeLabel.label.x3cc869")));
 		let h = document.createElement("select");
-		h.className = "dialog-select", h.style.width = "90px", h.appendChild($x("auto", g("dialog.tableCreate.makeOption.label.x53a1a1"))), h.appendChild($x("custom", g("dialog.tableCreate.makeOption.label.x5d9e2b"))), m.appendChild(h);
+		h.className = "dialog-select", h.style.width = "90px", h.appendChild(iS("auto", g("dialog.tableCreate.makeOption.label.x53a1a1"))), h.appendChild(iS("custom", g("dialog.tableCreate.makeOption.label.x5d9e2b"))), m.appendChild(h);
 		let _ = document.createElement("input");
-		_.className = "dialog-input", _.type = "number", _.step = "0.1", _.value = "22.6", _.style.cssText = "width:60px;margin-left:6px;", _.disabled = !0, m.appendChild(_), m.appendChild(tM("mm")), u.appendChild(m), h.addEventListener("change", () => {
+		_.className = "dialog-input", _.type = "number", _.step = "0.1", _.value = "22.6", _.style.cssText = "width:60px;margin-left:6px;", _.disabled = !0, m.appendChild(_), m.appendChild(oM("mm")), u.appendChild(m), h.addEventListener("change", () => {
 			_.disabled = h.value === "auto";
 		}), o.appendChild(u);
-		let v = Qj(g("dialog.tableCreate.createSection.label.x5babec")), y = document.createElement("div");
+		let v = rM(g("dialog.tableCreate.createSection.label.x5babec")), y = document.createElement("div");
 		y.className = "dialog-row";
 		let b = document.createElement("input");
 		b.type = "checkbox", b.id = "tc-treat-as-char", b.checked = !1;
@@ -63702,8 +63768,8 @@ var Zj = class {
 		}
 		function D() {
 			let e = Math.max(1, Math.min(256, parseInt(c.value, 10) || 2)), t = Math.max(1, Math.min(256, parseInt(l.value, 10) || 3)), n = { treatAsChar: b.checked };
-			if (f.value === "custom" && (n.colWidths = Xj(Yj(Math.max(1, parseFloat(p.value) || 148)), t)), h.value === "custom") {
-				let t = Yj(Math.max(1, parseFloat(_.value) || 22.6));
+			if (f.value === "custom" && (n.colWidths = tM(eM(Math.max(1, parseFloat(p.value) || 148)), t)), h.value === "custom") {
+				let t = eM(Math.max(1, parseFloat(_.value) || 22.6));
 				n.rowHeights = Array.from({ length: e }, () => t);
 			}
 			E(), T.onApply && T.onApply(e, t, n);
@@ -63711,34 +63777,34 @@ var Zj = class {
 		document.body.appendChild(e), c.focus(), c.select();
 	}
 };
-function Qj(e) {
+function rM(e) {
 	let t = document.createElement("div");
 	t.className = "dialog-section";
 	let n = document.createElement("div");
 	return n.className = "dialog-section-title", n.textContent = e, t.appendChild(n), t;
 }
-function $j(e, t, n, r, i) {
+function iM(e, t, n, r, i) {
 	let a = document.createElement("div");
 	a.className = "dialog-row";
-	let o = eM(t);
+	let o = aM(t);
 	a.appendChild(o);
 	let s = document.createElement("input");
 	return s.id = `pwh-table-count-${Math.random().toString(36).slice(2)}`, o.htmlFor = s.id, s.className = "dialog-input", s.type = "number", s.min = String(r), s.max = String(i), s.value = String(n), s.style.width = "70px", a.appendChild(s), e.appendChild(a), s;
 }
-function eM(e) {
+function aM(e) {
 	let t = document.createElement("label");
 	return t.className = "dialog-label", t.textContent = e, t;
 }
-function tM(e) {
+function oM(e) {
 	let t = document.createElement("span");
 	return t.className = "dialog-unit", t.textContent = e, t;
 }
 //#endregion
 //#region @rhwp/studio/src/command/commands/pwh-table-command-services.mjs
-function nM(e) {
+function sM(e) {
 	let t = e.getInputHandler(), n = t?.getCellTableContext?.(), r = t?.getCursorPosition?.(), i = n?.cellPath ?? r?.cellPath;
 	if (!i || i.length < 2) return e;
-	let a = i.map((e) => ({ ...e })), o = bO(e.wasm, a), s = new Proxy(t, { get(e, t) {
+	let a = i.map((e) => ({ ...e })), o = TO(e.wasm, a), s = new Proxy(t, { get(e, t) {
 		if (t === "executeOperation") return (t) => {
 			if (t.kind !== "snapshot" || typeof t.operation != "function") throw Error("이 중첩 표 명령의 실행 취소 경로가 연결되지 않았습니다.");
 			let n = /^(insertTable|deleteTableRow|deleteTableColumn|mergeTableCells|splitTableCell)/.test(t.operationType), r = e.getCursorPosition(), i = n ? o.getCellInfo(r.sectionIndex, r.parentParaIndex, 0, r.cellIndex) : null, s = n ? e.cursor?.captureCellSelection?.() : null, c = !1, l = e.executeOperation({
@@ -63748,7 +63814,7 @@ function nM(e) {
 					state: s
 				} } : {},
 				operation: (e) => {
-					let o = bO(e, a), s = t.operation(o);
+					let o = TO(e, a), s = t.operation(o);
 					if (!s) return s;
 					if (c = !0, !n) {
 						if (t.operationType === "cellNumberFormat") {
@@ -63788,7 +63854,7 @@ function nM(e) {
 }
 //#endregion
 //#region @rhwp/studio/src/command/commands/pwh-table-command-access.ts
-var rM = /* @__PURE__ */ new Set([
+var cM = /* @__PURE__ */ new Set([
 	"table:insert-row-col",
 	"table:delete-row-col",
 	"table:insert-row-above",
@@ -63806,7 +63872,11 @@ var rM = /* @__PURE__ */ new Set([
 	"table:thousand-sep",
 	"table:decimal-add",
 	"table:decimal-remove"
-]), iM = /* @__PURE__ */ new Set([
+]), lM = /* @__PURE__ */ new Set([
+	"table:block-sum",
+	"table:block-avg",
+	"table:block-product"
+]), uM = /* @__PURE__ */ new Set([
 	"table:delete",
 	"table:caption-toggle",
 	"table:split",
@@ -63815,15 +63885,13 @@ var rM = /* @__PURE__ */ new Set([
 	"table:transpose-paste",
 	"table:formula",
 	"table:block-formula",
-	"table:block-sum",
-	"table:block-avg",
-	"table:block-product"
+	...lM
 ]);
-function aM(e) {
+function dM(e) {
 	let t = e.getInputHandler();
 	return ((t?.getSelectedTableRef()?.cellPath ?? t?.getCellTableContext()?.cellPath ?? t?.getCursorPosition().cellPath)?.length ?? 0) > 1;
 }
-function oM(e, t) {
+function fM(e, t) {
 	let n = e.getInputHandler();
 	if (!n) return;
 	if (n.hasMultiCellSelection()) {
@@ -63839,7 +63907,7 @@ function oM(e, t) {
 		controlIndex: r.controlIndex,
 		cellIndex: r.cellIndex,
 		cellParaIndex: r.cellParaIndex ?? 0
-	}]).map((e) => ({ ...e })), a = e.wasm.documentGeneration, o = new Zj();
+	}]).map((e) => ({ ...e })), a = e.wasm.documentGeneration, o = new nM();
 	o.onApply = (t, o, s) => {
 		if (a !== e.wasm.documentGeneration) {
 			j({ message: "문서가 바뀌었습니다. 표를 넣을 위치를 다시 선택해 주세요." });
@@ -63886,18 +63954,18 @@ function oM(e, t) {
 		n.textarea?.focus();
 	}, t?.pwhDetailed ? o.showInputDialog() : o.show();
 }
-function sM(e) {
+function pM(e) {
 	return e.map((e) => e.id === "table:create" ? {
 		...e,
 		canExecute: (e) => e.hasDocument && !e.isFormMode && !e.hasMultiCellSelection,
 		execute(t, n) {
-			t.getInputHandler()?.getCursorPosition().parentParaIndex === void 0 ? e.execute(t, n) : oM(t, n);
+			t.getInputHandler()?.getCursorPosition().parentParaIndex === void 0 ? e.execute(t, n) : fM(t, n);
 		}
-	} : iM.has(e.id) ? {
+	} : uM.has(e.id) ? {
 		...e,
-		canExecute: (t) => !t.inNestedTable && (e.canExecute?.(t) ?? !0),
+		canExecute: (t) => !t.inNestedTable && (!lM.has(e.id) || t.hasMultiCellSelection) && (e.canExecute?.(t) ?? !0),
 		execute(t, n) {
-			if (aM(t)) {
+			if (dM(t)) {
 				j({
 					message: "이 명령의 중첩 표 편집은 아직 지원하지 않습니다.",
 					durationMs: 5e3
@@ -63906,11 +63974,11 @@ function sM(e) {
 			}
 			e.execute(t, n);
 		}
-	} : rM.has(e.id) ? {
+	} : cM.has(e.id) ? {
 		...e,
 		execute(t, n) {
 			try {
-				e.execute(nM(t), n);
+				e.execute(sM(t), n);
 			} catch (e) {
 				j({
 					message: e instanceof Error ? e.message : "표를 변경하지 못했습니다.",
@@ -63922,7 +63990,7 @@ function sM(e) {
 }
 //#endregion
 //#region @rhwp/studio/src/ui/cell-split-dialog.ts
-var cM = class {
+var mM = class {
 	onApply = null;
 	overlay = null;
 	dialog = null;
@@ -63999,19 +64067,19 @@ var cM = class {
 		let n = this.equalHeightCheck.checked, r = this.mergeFirstCheck.checked;
 		this.hide(), this.onApply && this.onApply(e, t, n, r);
 	}
-}, lM = [
+}, hM = [
 	"Left",
 	"Right",
 	"Top",
 	"Bottom"
-], uM = [
+], gM = [
 	"left",
 	"right",
 	"top",
 	"bottom",
 	"insideVertical",
 	"insideHorizontal"
-], dM = [
+], _M = [
 	"fillType",
 	"fillColor",
 	"patternColor",
@@ -64023,13 +64091,13 @@ var cM = class {
 	"diagonalColor",
 	"centerLine"
 ];
-function fM(e) {
+function vM(e) {
 	let t = {};
-	for (let n of dM) e[n] !== void 0 && (t[n] = e[n]);
-	for (let n of lM) t["border" + n] = e["border" + n];
+	for (let n of _M) e[n] !== void 0 && (t[n] = e[n]);
+	for (let n of hM) t["border" + n] = e["border" + n];
 	return t;
 }
-function pM(e, t, n) {
+function yM(e, t, n) {
 	if (!Array.isArray(e) || !t || !n) throw Error("셀 선택 범위를 확인할 수 없습니다.");
 	let { startRow: r, endRow: i, startCol: a, endCol: o } = t;
 	if (![
@@ -64038,7 +64106,7 @@ function pM(e, t, n) {
 		a,
 		o
 	].every(Number.isInteger) || r > i || a > o) throw Error("셀 선택 범위를 확인할 수 없습니다.");
-	for (let [e, t] of Object.entries(n)) if (!uM.includes(e) || !t || !Number.isInteger(t.type) || t.type < 0 || t.type > 8 || !Number.isInteger(t.width) || t.width < 0 || t.width > 15 || !/^#[0-9a-f]{6}$/i.test(t.color)) throw Error("선 모양을 확인해 주세요.");
+	for (let [e, t] of Object.entries(n)) if (!gM.includes(e) || !t || !Number.isInteger(t.type) || t.type < 0 || t.type > 8 || !Number.isInteger(t.width) || t.width < 0 || t.width > 15 || !/^#[0-9a-f]{6}$/i.test(t.color)) throw Error("선 모양을 확인해 주세요.");
 	let s = e.filter((e) => e.row <= i && e.row + e.rowSpan - 1 >= r && e.col <= o && e.col + e.colSpan - 1 >= a);
 	if (!s.length) throw Error("선택된 셀이 없습니다.");
 	if (s.some((e) => e.row < r || e.col < a || e.row + e.rowSpan - 1 > i || e.col + e.colSpan - 1 > o)) throw Error("병합 셀 전체를 선택한 뒤 다시 시도해 주세요.");
@@ -64050,7 +64118,7 @@ function pM(e, t, n) {
 			Top: e.row === r ? "top" : "insideHorizontal",
 			Bottom: e.row + e.rowSpan - 1 === i ? "bottom" : "insideHorizontal"
 		}, s = {};
-		for (let e of lM) n[t[e]] && (s[e] = { ...n[t[e]] });
+		for (let e of hM) n[t[e]] && (s[e] = { ...n[t[e]] });
 		Object.keys(s).length && c.push({
 			cellIndex: e.cellIdx,
 			borders: s
@@ -64066,23 +64134,23 @@ function pM(e, t, n) {
 	}
 	return c;
 }
-function mM(e, t, n) {
+function bM(e, t, n) {
 	if (!n.length) return !1;
 	let { sec: r, ppi: i, ci: a } = t;
 	return e.runInBatch(() => {
 		for (let t of n) {
-			let n = e.getCellOwnProperties(r, i, a, t.cellIndex), o = fM(n);
-			for (let e of lM) o["border" + e] = t.borders[e] ?? n["border" + e];
+			let n = e.getCellOwnProperties(r, i, a, t.cellIndex), o = vM(n);
+			for (let e of hM) o["border" + e] = t.borders[e] ?? n["border" + e];
 			if (!e.setCellProperties(r, i, a, t.cellIndex, o)?.ok) throw Error("셀 테두리를 적용하지 못했습니다.");
 		}
 	}), !0;
 }
-function hM(e, t, n, r) {
+function xM(e, t, n, r) {
 	let { sec: i, ppi: a, ci: o } = t;
 	e.runInBatch(() => {
 		for (let t of n) {
 			let n = {
-				...fM(e.getCellOwnProperties(i, a, o, t)),
+				...vM(e.getCellOwnProperties(i, a, o, t)),
 				...r
 			};
 			if (!e.setCellProperties(i, a, o, t, n)?.ok) throw Error("셀 테두리/배경을 적용하지 못했습니다.");
@@ -64091,14 +64159,14 @@ function hM(e, t, n, r) {
 }
 //#endregion
 //#region @rhwp/studio/src/ui/pwh-cell-border-dialog.ts
-var gM = [
+var SM = [
 	"left",
 	"right",
 	"top",
 	"bottom",
 	"insideVertical",
 	"insideHorizontal"
-], _M = {
+], CM = {
 	left: "Left",
 	right: "Right",
 	top: "Top",
@@ -64106,7 +64174,7 @@ var gM = [
 	insideVertical: "Right",
 	insideHorizontal: "Bottom"
 };
-function vM(e) {
+function wM(e) {
 	let { sec: t, ppi: n, ci: r } = e.tableCtx, i = e.wasm.getTableDimensions(t, n, r);
 	return {
 		dims: i,
@@ -64116,8 +64184,8 @@ function vM(e) {
 		}))
 	};
 }
-function yM(e, t) {
-	let n = t === "border" ? e.borderScopeRadios : t === "bg" ? e.bgScopeRadios : e.diagScopeRadios, { dims: r, boxes: i } = vM(e);
+function TM(e, t) {
+	let n = t === "border" ? e.borderScopeRadios : t === "bg" ? e.bgScopeRadios : e.diagScopeRadios, { dims: r, boxes: i } = wM(e);
 	if (n?.find((e) => e.checked)?.value === "all") return {
 		range: {
 			startRow: 0,
@@ -64143,29 +64211,29 @@ function yM(e, t) {
 		boxes: i
 	};
 }
-function bM(e, t) {
+function EM(e, t) {
 	return e.filter((e) => e.row <= t.endRow && e.row + e.rowSpan - 1 >= t.startRow && e.col <= t.endCol && e.col + e.colSpan - 1 >= t.startCol);
 }
-function xM(e, t, n, r) {
-	let i = bM(t, n).filter((e) => r === "left" ? e.col === n.startCol : r === "right" ? e.col + e.colSpan - 1 === n.endCol : r === "top" ? e.row === n.startRow : r === "bottom" ? e.row + e.rowSpan - 1 === n.endRow : r === "insideVertical" ? e.col + e.colSpan - 1 < n.endCol : e.row + e.rowSpan - 1 < n.endRow), { sec: a, ppi: o, ci: s } = e.tableCtx, c = i.map((t) => e.wasm.getCellOwnProperties(a, o, s, t.cellIdx)["border" + _M[r]]).filter(Boolean);
+function DM(e, t, n, r) {
+	let i = EM(t, n).filter((e) => r === "left" ? e.col === n.startCol : r === "right" ? e.col + e.colSpan - 1 === n.endCol : r === "top" ? e.row === n.startRow : r === "bottom" ? e.row + e.rowSpan - 1 === n.endRow : r === "insideVertical" ? e.col + e.colSpan - 1 < n.endCol : e.row + e.rowSpan - 1 < n.endRow), { sec: a, ppi: o, ci: s } = e.tableCtx, c = i.map((t) => e.wasm.getCellOwnProperties(a, o, s, t.cellIdx)["border" + CM[r]]).filter(Boolean);
 	if (!c.length) return null;
 	let l = JSON.stringify(c[0]);
 	return c.every((e) => JSON.stringify(e) === l) ? c[0] : null;
 }
-function SM(e, t) {
+function OM(e, t) {
 	let n = document.createElement(e);
 	return t && (n.className = t), n;
 }
-function CM(e, t) {
-	let n = SM("label", "pwh-border-field"), r = SM("span");
+function kM(e, t) {
+	let n = OM("label", "pwh-border-field"), r = OM("span");
 	return r.textContent = e, n.append(r, t), n;
 }
-function wM(e, t, n = "") {
-	let r = SM("button", n);
+function AM(e, t, n = "") {
+	let r = OM("button", n);
 	return r.type = "button", r.textContent = e, r.addEventListener("click", t), r;
 }
-function TM(e) {
-	let t = SM("div", "pwh-border-tab"), n = SM("div", "pwh-border-layout"), r = SM("div", "pwh-border-controls"), i = SM("select", "dialog-select");
+function jM(e) {
+	let t = OM("div", "pwh-border-tab"), n = OM("div", "pwh-border-layout"), r = OM("div", "pwh-border-controls"), i = OM("select", "dialog-select");
 	i.setAttribute("aria-label", "선 종류");
 	for (let [e, t] of [
 		[0, "없음"],
@@ -64178,11 +64246,11 @@ function TM(e) {
 		[7, "원형 파선"],
 		[8, "이중선"]
 	]) {
-		let n = SM("option");
+		let n = OM("option");
 		n.value = String(e), n.textContent = t, i.append(n);
 	}
 	i.value = "1";
-	let a = SM("select", "dialog-select");
+	let a = OM("select", "dialog-select");
 	a.setAttribute("aria-label", "선 굵기"), [
 		"0.1",
 		"0.12",
@@ -64201,16 +64269,16 @@ function TM(e) {
 		"4.0",
 		"5.0"
 	].forEach((e, t) => {
-		let n = SM("option");
+		let n = OM("option");
 		n.value = String(t), n.textContent = e + " mm", a.append(n);
 	}), a.value = "1";
-	let o = SM("input");
+	let o = OM("input");
 	o.type = "color", o.value = "#000000", o.setAttribute("aria-label", "선 색");
-	let s = SM("input");
+	let s = OM("input");
 	s.type = "checkbox", s.checked = !0;
-	let c = SM("label", "pwh-border-immediate");
-	c.append(s, document.createTextNode("선 모양 바로 적용")), r.append(CM("종류", i), CM("굵기", a), CM("색", o), c);
-	let l = SM("div", "pwh-border-preview-area"), u = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+	let c = OM("label", "pwh-border-immediate");
+	c.append(s, document.createTextNode("선 모양 바로 적용")), r.append(kM("종류", i), kM("굵기", a), kM("색", o), c);
+	let l = OM("div", "pwh-border-preview-area"), u = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 	u.setAttribute("viewBox", "0 0 180 180"), u.classList.add("pwh-border-preview"), u.setAttribute("aria-label", "셀 테두리 미리보기");
 	let d = {}, f = {
 		left: [
@@ -64250,7 +64318,7 @@ function TM(e) {
 			90
 		]
 	};
-	for (let e of gM) {
+	for (let e of SM) {
 		let t = document.createElementNS("http://www.w3.org/2000/svg", "line"), n = f[e];
 		[
 			"x1",
@@ -64275,10 +64343,10 @@ function TM(e) {
 		width: Number(a.value),
 		color: o.value
 	}), h = (t) => {
-		let n = new Set(EM(e));
+		let n = new Set(MM(e));
 		p.marked = new Set(t.filter((e) => n.has(e)));
 		for (let e of p.marked) p.actions[e] = m();
-		DM(e);
+		NM(e);
 	}, g = [
 		[
 			"left",
@@ -64310,24 +64378,24 @@ function TM(e) {
 			"안쪽 가로",
 			"inside-h"
 		]
-	], _ = SM("div", "pwh-border-board");
+	], _ = OM("div", "pwh-border-board");
 	_.append(u);
 	for (let [e, t, n] of g) {
-		let r = wM(t, () => h([e]), "pwh-edge pwh-edge-" + n);
+		let r = AM(t, () => h([e]), "pwh-edge pwh-edge-" + n);
 		r.setAttribute("aria-label", t + " 선"), r.dataset.edge = e, _.append(r);
 	}
 	l.append(_);
-	let v = SM("div", "pwh-border-presets");
-	v.append(wM("모두", () => h(gM)), wM("바깥쪽", () => h([
+	let v = OM("div", "pwh-border-presets");
+	v.append(AM("모두", () => h(SM)), AM("바깥쪽", () => h([
 		"left",
 		"right",
 		"top",
 		"bottom"
-	])), wM("안쪽", () => h(["insideVertical", "insideHorizontal"]))), l.append(v), n.append(r, l), t.append(n);
+	])), AM("안쪽", () => h(["insideVertical", "insideHorizontal"]))), l.append(v), n.append(r, l), t.append(n);
 	let y = () => {
 		if (s.checked) {
 			for (let e of p.marked) p.actions[e] = m();
-			DM(e);
+			NM(e);
 		}
 	};
 	for (let e of [
@@ -64336,19 +64404,19 @@ function TM(e) {
 		o
 	]) e.addEventListener("change", y);
 	o.addEventListener("input", y), t.append(e.buildScopeSection("border"));
-	for (let t of e.borderScopeRadios) t.addEventListener("change", () => DM(e));
+	for (let t of e.borderScopeRadios) t.addEventListener("change", () => NM(e));
 	return t;
 }
-function EM(e) {
-	let { range: t } = yM(e, "border");
-	return gM.filter((n) => n !== "insideVertical" || e.applyMode !== "asOne" && t.endCol > t.startCol).filter((n) => n !== "insideHorizontal" || e.applyMode !== "asOne" && t.endRow > t.startRow);
+function MM(e) {
+	let { range: t } = TM(e, "border");
+	return SM.filter((n) => n !== "insideVertical" || e.applyMode !== "asOne" && t.endCol > t.startCol).filter((n) => n !== "insideHorizontal" || e.applyMode !== "asOne" && t.endRow > t.startRow);
 }
-function DM(e) {
+function NM(e) {
 	let t = e.pwhBorderState;
 	if (!t || !e.cellProps) return;
-	let { range: n, boxes: r } = yM(e, "border"), i = new Set(EM(e));
-	for (let a of gM) {
-		let o = t.actions[a] ?? xM(e, r, n, a), s = t.lines[a];
+	let { range: n, boxes: r } = TM(e, "border"), i = new Set(MM(e));
+	for (let a of SM) {
+		let o = t.actions[a] ?? DM(e, r, n, a), s = t.lines[a];
 		s.setAttribute("stroke", o && o.type !== 0 ? o.color : "#cbd3d8"), s.setAttribute("stroke-width", o && o.type !== 0 ? String(o.type === 8 ? 1 : Math.max(1, Math.min(5, (o.width + 2) * .6))) : "1"), s.setAttribute("stroke-dasharray", o && o.type !== 0 ? {
 			2: "7 4",
 			3: "2 3",
@@ -64363,13 +64431,13 @@ function DM(e) {
 		l && (l.disabled = !i.has(a));
 	}
 }
-function OM(e) {
+function PM(e) {
 	let t = e.dialog.querySelector(".dialog-footer");
 	if (!t) return;
 	let n = t.querySelector(".dialog-btn-primary");
 	if (n && (n.textContent = "설정"), !t.querySelector("[data-pwh-apply]")) {
-		let n = wM("적용", () => {
-			kM(e) && DM(e);
+		let n = AM("적용", () => {
+			FM(e) && NM(e);
 		}, "dialog-btn");
 		n.dataset.pwhApply = "1", t.append(n);
 	}
@@ -64379,9 +64447,9 @@ function OM(e) {
 	};
 	r?.addEventListener("change", a("bgDirty")), r?.addEventListener("input", a("bgDirty")), i?.addEventListener("change", a("diagDirty")), i?.addEventListener("click", (t) => {
 		t.target.closest(".tcp-diag-btn") && (e.pwhBorderState.diagDirty = !0);
-	}), DM(e);
+	}), NM(e);
 }
-function kM(e) {
+function FM(e) {
 	let t = e.pwhBorderState, n = t.actions, r = Object.keys(n).length > 0;
 	if (!r && !t.bgDirty && !t.diagDirty) return !0;
 	try {
@@ -64389,7 +64457,7 @@ function kM(e) {
 		if (!a) throw Error("편집기를 다시 열고 시도해 주세요.");
 		if ((a.getCellTableContext?.()?.cellPath?.length ?? 0) > 1 && !e.wasm.pwhTablePropertiesPath) throw Error("선택한 중첩 표의 경로를 확인하지 못했습니다.");
 		if (a.hasExcludedCellSelection?.()) throw Error("선택에서 제외된 셀이 있습니다. 이어진 셀 영역을 선택해 주세요.");
-		let o = yM(e, "border"), s = r && e.applyMode !== "asOne" ? pM(o.boxes, o.range, n) : [], c = t.bgDirty ? yM(e, "bg") : null, l = t.diagDirty ? yM(e, "diag") : null, u = e.bgColorRadio.checked ? {
+		let o = TM(e, "border"), s = r && e.applyMode !== "asOne" ? yM(o.boxes, o.range, n) : [], c = t.bgDirty ? TM(e, "bg") : null, l = t.diagDirty ? TM(e, "diag") : null, u = e.bgColorRadio.checked ? {
 			fillType: "solid",
 			fillColor: e.bgColorPicker.value,
 			patternColor: e.bgPatternColorPicker.value,
@@ -64437,9 +64505,9 @@ function kM(e) {
 						s.set(r, a);
 					}
 				} else {
-					r && mM(t, i, s);
+					r && bM(t, i, s);
 					let e = (e, n) => {
-						e && hM(t, i, bM(e.boxes, e.range).map((e) => e.cellIdx), n);
+						e && xM(t, i, EM(e.boxes, e.range).map((e) => e.cellIdx), n);
 					};
 					e(c, u), e(l, d);
 				}
@@ -64455,7 +64523,7 @@ function kM(e) {
 }
 //#endregion
 //#region @rhwp/studio/src/ui/cell-border-bg-dialog.ts
-var AM = "var(--doc-paper)", jM = "var(--ui-border-light)", MM = [
+var IM = "var(--doc-paper)", LM = "var(--ui-border-light)", RM = [
 	["0", g("option.diagonalLineTypeOptions.0")],
 	["1", g("option.diagonalLineTypeOptions.1")],
 	["2", g("option.diagonalLineTypeOptions.2")],
@@ -64474,7 +64542,7 @@ var AM = "var(--doc-paper)", jM = "var(--ui-border-light)", MM = [
 	["15", g("option.diagonalLineTypeOptions.15")],
 	["16", g("option.diagonalLineTypeOptions.16")],
 	["17", g("option.diagonalLineTypeOptions.17")]
-], NM = [
+], zM = [
 	["0", "0.1mm"],
 	["1", "0.12mm"],
 	["2", "0.15mm"],
@@ -64491,7 +64559,7 @@ var AM = "var(--doc-paper)", jM = "var(--ui-border-light)", MM = [
 	["13", "3.0mm"],
 	["14", "4.0mm"],
 	["15", "5.0mm"]
-], PM = [
+], BM = [
 	.1,
 	.12,
 	.15,
@@ -64509,11 +64577,11 @@ var AM = "var(--doc-paper)", jM = "var(--ui-border-light)", MM = [
 	4,
 	5
 ];
-function FM(e) {
-	let t = PM[e] ?? PM[0];
+function VM(e) {
+	let t = BM[e] ?? BM[0];
 	return Math.min(8, Math.max(.8, t * 2.6));
 }
-var IM = class extends A {
+var HM = class extends A {
 	wasm;
 	eventBus;
 	tableCtx;
@@ -64576,7 +64644,7 @@ var IM = class extends A {
 	show(e = "border") {
 		super.show(), this.dialog.classList.add("tcp-border-bg-dialog");
 		let { sec: t, ppi: n, ci: r } = this.tableCtx;
-		this.cellProps = this.applyMode === "each" ? this.wasm.getCellOwnProperties(t, n, r, this.cellIdx) : this.wasm.getCellProperties(t, n, r, this.cellIdx), this.populateFields(), OM(this), e === "background" && this.switchTab(1);
+		this.cellProps = this.applyMode === "each" ? this.wasm.getCellOwnProperties(t, n, r, this.cellIdx) : this.wasm.getCellProperties(t, n, r, this.cellIdx), this.populateFields(), PM(this), e === "background" && this.switchTab(1);
 	}
 	createBody() {
 		let e = document.createElement("div");
@@ -64614,7 +64682,7 @@ var IM = class extends A {
 		for (let t = 0; t < this.tabs.length; t++) this.tabs[t].classList.toggle("active", t === e), this.panels[t].classList.toggle("active", t === e);
 	}
 	buildBorderTab() {
-		return TM(this);
+		return jM(this);
 	}
 	applyBorderDir(e) {
 		let t = {
@@ -64634,7 +64702,7 @@ var IM = class extends A {
 		if (!e) return;
 		for (; e.firstChild;) e.removeChild(e.firstChild);
 		let t = "http://www.w3.org/2000/svg", n = document.createElementNS(t, "rect");
-		n.setAttribute("x", "0"), n.setAttribute("y", "0"), n.setAttribute("width", "120"), n.setAttribute("height", "100"), n.style.setProperty("fill", AM), e.appendChild(n);
+		n.setAttribute("x", "0"), n.setAttribute("y", "0"), n.setAttribute("width", "120"), n.setAttribute("height", "100"), n.style.setProperty("fill", IM), e.appendChild(n);
 		for (let [n, r, i, a] of [[
 			"60",
 			"5",
@@ -64647,7 +64715,7 @@ var IM = class extends A {
 			"50"
 		]]) {
 			let o = document.createElementNS(t, "line");
-			o.setAttribute("x1", n), o.setAttribute("y1", r), o.setAttribute("x2", i), o.setAttribute("y2", a), o.style.setProperty("stroke", jM), o.setAttribute("stroke-width", "0.5"), o.setAttribute("stroke-dasharray", "3,2"), e.appendChild(o);
+			o.setAttribute("x1", n), o.setAttribute("y1", r), o.setAttribute("x2", i), o.setAttribute("y2", a), o.style.setProperty("stroke", LM), o.setAttribute("stroke-width", "0.5"), o.setAttribute("stroke-dasharray", "3,2"), e.appendChild(o);
 		}
 		let r = {
 			2: "6,3",
@@ -64703,7 +64771,7 @@ var IM = class extends A {
 	}
 	updateBgPreview() {
 		if (!this.bgColorRadio.checked) {
-			this.bgPreviewBox.style.background = AM;
+			this.bgPreviewBox.style.background = IM;
 			return;
 		}
 		let e = this.bgColorPicker.value, t = parseInt(this.bgPatternTypeSelect.value, 10);
@@ -64729,9 +64797,9 @@ var IM = class extends A {
 		let n = document.createElement("div");
 		n.className = "tcp-diag-controls";
 		let r = this.createSection(g("dialog.cellBorderBg.createSection.label.x6ac29f")), i = this.row();
-		i.appendChild(this.label(g("dialog.cellBorderBg.label.label.x2ec5ae"))), this.diagLineTypeSelect = this.selectOptions(MM), this.diagLineTypeSelect.addEventListener("change", () => this.updateDiagonalPreview()), i.appendChild(this.diagLineTypeSelect), r.appendChild(i);
+		i.appendChild(this.label(g("dialog.cellBorderBg.label.label.x2ec5ae"))), this.diagLineTypeSelect = this.selectOptions(RM), this.diagLineTypeSelect.addEventListener("change", () => this.updateDiagonalPreview()), i.appendChild(this.diagLineTypeSelect), r.appendChild(i);
 		let a = this.row();
-		a.appendChild(this.label(g("dialog.cellBorderBg.label.label"))), this.diagWidthSelect = this.selectOptions(NM), this.diagWidthSelect.addEventListener("change", () => this.updateDiagonalPreview()), a.appendChild(this.diagWidthSelect), r.appendChild(a);
+		a.appendChild(this.label(g("dialog.cellBorderBg.label.label"))), this.diagWidthSelect = this.selectOptions(zM), this.diagWidthSelect.addEventListener("change", () => this.updateDiagonalPreview()), a.appendChild(this.diagWidthSelect), r.appendChild(a);
 		let o = this.row();
 		o.appendChild(this.label(g("dialog.cellBorderBg.label.label.xa002ac"))), this.diagColorInput = document.createElement("input"), this.diagColorInput.type = "color", this.diagColorInput.value = "#000000", this.diagColorInput.style.width = "40px", this.diagColorInput.style.height = "22px", this.diagColorInput.addEventListener("input", () => this.updateDiagonalPreview()), o.appendChild(this.diagColorInput), r.appendChild(o), n.appendChild(r);
 		let s = this.createSection(g("dialog.cellBorderBg.createSection.label.xb76080")), c = this.row();
@@ -64936,10 +65004,10 @@ var IM = class extends A {
 		if (!e) return;
 		for (; e.firstChild;) e.removeChild(e.firstChild);
 		let t = "http://www.w3.org/2000/svg", n = document.createElementNS(t, "rect");
-		n.setAttribute("x", "20"), n.setAttribute("y", "16"), n.setAttribute("width", "120"), n.setAttribute("height", "88"), n.style.setProperty("fill", AM), n.setAttribute("stroke", "var(--color-border)"), e.appendChild(n);
+		n.setAttribute("x", "20"), n.setAttribute("y", "16"), n.setAttribute("width", "120"), n.setAttribute("height", "88"), n.style.setProperty("fill", IM), n.setAttribute("stroke", "var(--color-border)"), e.appendChild(n);
 		let r = parseInt(this.diagLineTypeSelect?.value ?? "0", 10);
 		if (r === 0) return;
-		let i = this.diagColorInput?.value ?? "#000000", a = FM(parseInt(this.diagWidthSelect?.value ?? "0", 10)), o = {
+		let i = this.diagColorInput?.value ?? "#000000", a = VM(parseInt(this.diagWidthSelect?.value ?? "0", 10)), o = {
 			2: "7,4",
 			3: "2,3",
 			4: "8,3,2,3",
@@ -64990,7 +65058,7 @@ var IM = class extends A {
 		return [...i];
 	}
 	onConfirm() {
-		return kM(this);
+		return FM(this);
 	}
 	createSection(e) {
 		let t = document.createElement("div");
@@ -65021,7 +65089,7 @@ var IM = class extends A {
 		}
 		return t;
 	}
-}, LM = [
+}, UM = [
 	{
 		name: "SUM",
 		desc: "합계"
@@ -65110,7 +65178,7 @@ var IM = class extends A {
 		name: "TAN",
 		desc: "탄젠트"
 	}
-], RM = [
+], WM = [
 	{
 		value: "",
 		label: g("dialog.formula.label")
@@ -65131,7 +65199,7 @@ var IM = class extends A {
 		value: "below",
 		label: g("dialog.formula.label.x73df79")
 	}
-], zM = [
+], GM = [
 	{
 		value: "default",
 		label: g("dialog.formula.label.xa5b30c")
@@ -65148,7 +65216,7 @@ var IM = class extends A {
 		value: "decimal2",
 		label: g("dialog.formula.label.xf5b781")
 	}
-], BM = class extends A {
+], KM = class extends A {
 	services;
 	wasm;
 	eventBus;
@@ -65163,7 +65231,7 @@ var IM = class extends A {
 	}
 	createBody() {
 		let e = document.createElement("div");
-		e.className = "formula-dialog-body", e.appendChild(this.createRow(g("dialog.formula.createRow.label"), () => (this.formulaInput = document.createElement("input"), this.formulaInput.type = "text", this.formulaInput.className = "formula-input", this.formulaInput.value = "=", this.formulaInput.placeholder = "=SUM(A1:A5)", this.formulaInput))), e.appendChild(this.createRow(g("dialog.formula.createRow.label.xe97392"), () => (this.funcSelect = document.createElement("select"), this.funcSelect.className = "formula-select", this.funcSelect.appendChild($x("", g("dialog.formula.makeOption.label"))), LM.forEach((e) => this.funcSelect.appendChild($x(e.name, `${e.name} - ${e.desc}`))), this.funcSelect.addEventListener("change", () => {
+		e.className = "formula-dialog-body", e.appendChild(this.createRow(g("dialog.formula.createRow.label"), () => (this.formulaInput = document.createElement("input"), this.formulaInput.type = "text", this.formulaInput.className = "formula-input", this.formulaInput.value = "=", this.formulaInput.placeholder = "=SUM(A1:A5)", this.formulaInput))), e.appendChild(this.createRow(g("dialog.formula.createRow.label.xe97392"), () => (this.funcSelect = document.createElement("select"), this.funcSelect.className = "formula-select", this.funcSelect.appendChild(iS("", g("dialog.formula.makeOption.label"))), UM.forEach((e) => this.funcSelect.appendChild(iS(e.name, `${e.name} - ${e.desc}`))), this.funcSelect.addEventListener("change", () => {
 			let e = this.funcSelect.value;
 			if (e) {
 				let t = this.formulaInput.selectionStart ?? this.formulaInput.value.length, n = this.formulaInput.value.substring(0, t), r = this.formulaInput.value.substring(t);
@@ -65171,13 +65239,13 @@ var IM = class extends A {
 			}
 		}), this.funcSelect))), e.appendChild(this.createRow(g("dialog.formula.createRow.label.x7dcf38"), () => {
 			let e = document.createElement("select");
-			return e.className = "formula-select", RM.forEach((t) => e.appendChild($x(t.value, t.label))), e.addEventListener("change", () => {
+			return e.className = "formula-select", WM.forEach((t) => e.appendChild(iS(t.value, t.label))), e.addEventListener("change", () => {
 				if (e.value) {
 					let t = this.formulaInput.selectionStart ?? this.formulaInput.value.length, n = this.formulaInput.value.substring(0, t), r = this.formulaInput.value.substring(t);
 					this.formulaInput.value = n + e.value + r, this.formulaInput.focus(), e.value = "";
 				}
 			}), e;
-		})), e.appendChild(this.createRow(g("dialog.formula.createRow.label.xb85e7a"), () => (this.formatSelect = document.createElement("select"), this.formatSelect.className = "formula-select", zM.forEach((e) => this.formatSelect.appendChild($x(e.value, e.label))), this.formatSelect)));
+		})), e.appendChild(this.createRow(g("dialog.formula.createRow.label.xb85e7a"), () => (this.formatSelect = document.createElement("select"), this.formatSelect.className = "formula-select", GM.forEach((e) => this.formatSelect.appendChild(iS(e.value, e.label))), this.formatSelect)));
 		let t = document.createElement("div");
 		t.className = "formula-row";
 		let n = document.createElement("label");
@@ -65236,7 +65304,7 @@ var IM = class extends A {
 };
 //#endregion
 //#region @rhwp/studio/src/command/block-calculation-plan.ts
-function VM(e) {
+function qM(e) {
 	if (!Number.isInteger(e) || e < 0) return null;
 	let t = e + 1, n = "";
 	for (; t > 0;) {
@@ -65245,20 +65313,20 @@ function VM(e) {
 	}
 	return n;
 }
-function HM(e, t) {
-	let n = VM(t);
+function JM(e, t) {
+	let n = qM(t);
 	return !n || !Number.isInteger(e) || e < 0 ? null : `${n}${e + 1}`;
 }
-function UM(e) {
+function YM(e) {
 	return e.some((e) => e.some((e) => (e.rowSpan ?? 1) !== 1 || (e.colSpan ?? 1) !== 1));
 }
-function WM(e) {
+function XM(e) {
 	let { range: t, cells: n } = e, r = t.endRow - t.startRow + 1, i = t.endCol - t.startCol + 1;
-	if (e.nested || e.hasExcludedCells || r <= 0 || i <= 0 || r * i <= 1 || n.length !== r || n.some((e) => e.length !== i) || UM(n)) return null;
+	if (e.nested || e.hasExcludedCells || r <= 0 || i <= 0 || r * i <= 1 || n.length !== r || n.some((e) => e.length !== i) || YM(n)) return null;
 	let a = i >= 2 && n.every((e) => e[i - 1].empty);
 	if (a === (r >= 2 && n[r - 1].every((e) => e.empty))) return null;
 	if (a) {
-		let n = VM(t.startCol), i = VM(t.endCol - 1);
+		let n = qM(t.startCol), i = qM(t.endCol - 1);
 		return !n || !i ? null : {
 			orientation: "horizontal",
 			jobs: Array.from({ length: r }, (r, a) => {
@@ -65273,7 +65341,7 @@ function WM(e) {
 	}
 	let o = [];
 	for (let n = t.startCol; n <= t.endCol; n += 1) {
-		let r = HM(t.startRow, n), i = HM(t.endRow - 1, n);
+		let r = JM(t.startRow, n), i = JM(t.endRow - 1, n);
 		if (!r || !i) return null;
 		o.push({
 			targetRow: t.endRow,
@@ -65286,7 +65354,7 @@ function WM(e) {
 		jobs: o
 	};
 }
-function GM(e, t) {
+function ZM(e, t) {
 	if (e.length === 0) return !1;
 	try {
 		return e.every((e) => t(e, !1).ok);
@@ -65296,12 +65364,12 @@ function GM(e, t) {
 }
 //#endregion
 //#region @rhwp/studio/src/ui/table-row-column-dialog.ts
-var KM = 63;
-function qM(e) {
+var QM = 63;
+function $M(e) {
 	let t = Number.parseInt(e, 10);
-	return Number.isFinite(t) ? Math.max(1, Math.min(KM, t)) : 1;
+	return Number.isFinite(t) ? Math.max(1, Math.min(QM, t)) : 1;
 }
-function JM(e, t, n, r, i) {
+function eN(e, t, n, r, i) {
 	let a = document.createElement("label");
 	a.style.display = "flex", a.style.alignItems = "center", a.style.gap = "6px", a.style.minHeight = "24px";
 	let o = document.createElement("input");
@@ -65309,7 +65377,7 @@ function JM(e, t, n, r, i) {
 		o.checked && i(t);
 	}), a.appendChild(o), a.appendChild(document.createTextNode(n)), a;
 }
-var YM = class extends A {
+var tN = class extends A {
 	onApply = null;
 	mode;
 	countInput;
@@ -65332,25 +65400,25 @@ var YM = class extends A {
 		let i = (e) => {
 			this.mode = e;
 		};
-		r.appendChild(JM(this.radioName, "row-above", "위쪽에 줄 추가하기", this.mode === "row-above", i)), r.appendChild(JM(this.radioName, "row-below", "아래쪽에 줄 추가하기", this.mode === "row-below", i)), r.appendChild(JM(this.radioName, "col-left", "왼쪽에 칸 추가하기", this.mode === "col-left", i)), r.appendChild(JM(this.radioName, "col-right", "오른쪽에 칸 추가하기", this.mode === "col-right", i)), t.appendChild(r);
+		r.appendChild(eN(this.radioName, "row-above", "위쪽에 줄 추가하기", this.mode === "row-above", i)), r.appendChild(eN(this.radioName, "row-below", "아래쪽에 줄 추가하기", this.mode === "row-below", i)), r.appendChild(eN(this.radioName, "col-left", "왼쪽에 칸 추가하기", this.mode === "col-left", i)), r.appendChild(eN(this.radioName, "col-right", "오른쪽에 칸 추가하기", this.mode === "col-right", i)), t.appendChild(r);
 		let a = document.createElement("div");
 		a.className = "dialog-row", a.style.marginTop = "10px";
 		let o = document.createElement("label");
-		o.className = "dialog-label", o.textContent = g("dialog.tableRowColumn.countLabel.text"), o.style.width = "78px", this.countInput = document.createElement("input"), this.countInput.type = "number", this.countInput.className = "dialog-input", this.countInput.min = "1", this.countInput.max = String(KM), this.countInput.value = "1", this.countInput.style.width = "64px", this.countInput.addEventListener("input", () => {
-			this.countInput.value = String(qM(this.countInput.value));
+		o.className = "dialog-label", o.textContent = g("dialog.tableRowColumn.countLabel.text"), o.style.width = "78px", this.countInput = document.createElement("input"), this.countInput.type = "number", this.countInput.className = "dialog-input", this.countInput.min = "1", this.countInput.max = String(QM), this.countInput.value = "1", this.countInput.style.width = "64px", this.countInput.addEventListener("input", () => {
+			this.countInput.value = String($M(this.countInput.value));
 		}), this.countInput.addEventListener("keydown", (e) => {
 			e.key === "Enter" && (e.preventDefault(), this.onConfirm(), this.hide());
 		});
 		let s = document.createElement("span");
-		return s.className = "dialog-unit", s.textContent = g("dialog.tableRowColumn.hint.text", { p1: KM }), a.appendChild(o), a.appendChild(this.countInput), a.appendChild(s), t.appendChild(a), e.appendChild(t), e;
+		return s.className = "dialog-unit", s.textContent = g("dialog.tableRowColumn.hint.text", { p1: QM }), a.appendChild(o), a.appendChild(this.countInput), a.appendChild(s), t.appendChild(a), e.appendChild(t), e;
 	}
 	onConfirm() {
 		this.onApply?.({
 			mode: this.mode,
-			count: qM(this.countInput.value)
+			count: $M(this.countInput.value)
 		});
 	}
-}, XM = class extends A {
+}, nN = class extends A {
 	onApply = null;
 	mode;
 	radioName = `table-delete-row-column-${Math.random().toString(36).slice(2)}`;
@@ -65372,13 +65440,13 @@ var YM = class extends A {
 		let i = (e) => {
 			this.mode = e;
 		};
-		return r.appendChild(JM(this.radioName, "row", "줄", this.mode === "row", i)), r.appendChild(JM(this.radioName, "col", "칸", this.mode === "col", i)), t.appendChild(r), e.appendChild(t), e;
+		return r.appendChild(eN(this.radioName, "row", "줄", this.mode === "row", i)), r.appendChild(eN(this.radioName, "col", "칸", this.mode === "col", i)), t.appendChild(r), e.appendChild(t), e;
 	}
 	onConfirm() {
 		this.onApply?.({ mode: this.mode });
 	}
-}, ZM = (e) => e.inTable, QM = (e) => e.inTable || e.inCellSelectionMode, $M = (e) => e.hasMultiCellSelection;
-function eN(e, t) {
+}, rN = (e) => e.inTable, iN = (e) => e.inTable || e.inCellSelectionMode, aN = (e) => e.hasMultiCellSelection;
+function oN(e, t) {
 	let n = e.getInputHandler();
 	if (!n || n.hasExcludedCellSelection()) return;
 	let { sectionIndex: r, parentParaIndex: i, controlIndex: a, cellIndex: o, cellPath: s } = n.getCursorPosition();
@@ -65388,9 +65456,9 @@ function eN(e, t) {
 		ppi: i,
 		ci: a
 	}, l = n.getSelectedCellRange();
-	new IM(e.wasm, e.eventBus, c, o, "each", l, e).show(t);
+	new HM(e.wasm, e.eventBus, c, o, "each", l, e).show(t);
 }
-function tN(e, t) {
+function sN(e, t) {
 	let n = e.getInputHandler();
 	if (!n?.hasMultiCellSelection() || n.hasExcludedCellSelection()) return;
 	let r = n.getCursorPosition();
@@ -65400,9 +65468,9 @@ function tN(e, t) {
 		ppi: r.parentParaIndex,
 		ci: r.controlIndex
 	};
-	new IM(e.wasm, e.eventBus, i, r.cellIndex, "asOne", n.getSelectedCellRange(), e).show(t);
+	new HM(e.wasm, e.eventBus, i, r.cellIndex, "asOne", n.getSelectedCellRange(), e).show(t);
 }
-function nN(e, t) {
+function cN(e, t) {
 	try {
 		e();
 	} catch (e) {
@@ -65412,17 +65480,17 @@ function nN(e, t) {
 		});
 	}
 }
-function rN(e, t, n, r, i) {
+function lN(e, t, n, r, i) {
 	let a = e.getCellParagraphCount(t, n, r, i);
 	for (let o = 0; o < a; o += 1) if (e.getCellParagraphLength(t, n, r, i, o) > 0) return !1;
 	return !0;
 }
-function iN(e, t, n, r, i, a) {
+function uN(e, t, n, r, i, a) {
 	if (i.startRow < 0 || i.startCol < 0 || i.endRow >= a.rowCount || i.endCol >= a.colCount) return null;
 	let o = /* @__PURE__ */ new Map();
 	for (let s = 0; s < a.cellCount; s += 1) {
 		let a = e.getCellInfo(t, n, r, s);
-		if (!sN(a, i)) continue;
+		if (!pN(a, i)) continue;
 		let c = `${a.row}:${a.col}`;
 		if (o.has(c)) return null;
 		o.set(c, {
@@ -65438,7 +65506,7 @@ function iN(e, t, n, r, i, a) {
 			let i = o.get(`${a}:${s}`);
 			if (!i) return null;
 			c.push({
-				empty: rN(e, t, n, r, i.cellIdx),
+				empty: lN(e, t, n, r, i.cellIdx),
 				rowSpan: i.rowSpan,
 				colSpan: i.colSpan
 			});
@@ -65447,22 +65515,22 @@ function iN(e, t, n, r, i, a) {
 	}
 	return s;
 }
-function aN(e) {
+function dN(e) {
 	return !!(e?.isInCellSelectionMode?.() && e.hasExcludedCellSelection?.());
 }
-function oN(e) {
+function fN(e) {
 	let t = e instanceof Error ? e.message : String(e);
 	return t.includes("표 크기") && t.includes("초과");
 }
-function sN(e, t) {
+function pN(e, t) {
 	return e.row >= t.startRow && e.row <= t.endRow && e.col >= t.startCol && e.col <= t.endCol;
 }
-function cN(e, t, n, r) {
+function mN(e, t, n, r) {
 	return {
 		id: e,
 		label: t,
 		shortcutLabel: r,
-		canExecute: ZM,
+		canExecute: rN,
 		execute(t) {
 			let r = t.getInputHandler();
 			if (!r) return;
@@ -65470,9 +65538,9 @@ function cN(e, t, n, r) {
 			if (i.parentParaIndex !== void 0 && i.controlIndex !== void 0 && i.cellIndex !== void 0) try {
 				let e = r.getCellTableContext(), a = r.getSelectedCellRange();
 				if (!e || !a || !r.isInCellSelectionMode() || (e.cellPath?.length ?? 0) > 1 || r.hasExcludedCellSelection()) return;
-				let { sec: o, ppi: s, ci: c } = e, l = t.wasm.getTableDimensions(o, s, c), u = iN(t.wasm, o, s, c, a, l);
+				let { sec: o, ppi: s, ci: c } = e, l = t.wasm.getTableDimensions(o, s, c), u = uN(t.wasm, o, s, c, a, l);
 				if (!u) return;
-				let d = WM({
+				let d = XM({
 					range: a,
 					cells: u,
 					functionName: n,
@@ -65481,8 +65549,8 @@ function cN(e, t, n, r) {
 				});
 				if (!d) return;
 				let f = (e, t, n) => JSON.parse(e.evaluateTableFormula(o, s, c, t.targetRow, t.targetCol, t.formula, n));
-				if (!GM(d.jobs, (e, n) => f(t.wasm, e, n))) return;
-				nN(() => r.executeOperation({
+				if (!ZM(d.jobs, (e, n) => f(t.wasm, e, n))) return;
+				cN(() => r.executeOperation({
 					kind: "snapshot",
 					operationType: "tableBlockCalc",
 					operation: (e) => {
@@ -65496,18 +65564,18 @@ function cN(e, t, n, r) {
 		}
 	};
 }
-function lN(e) {
+function hN(e) {
 	let t = e.getInputHandler();
 	if (!t) return;
 	let n = t.getCursorPosition();
-	n.parentParaIndex !== void 0 && n.controlIndex !== void 0 && n.cellIndex !== void 0 && new BM(e.wasm, e.eventBus, {
+	n.parentParaIndex !== void 0 && n.controlIndex !== void 0 && n.cellIndex !== void 0 && new KM(e.wasm, e.eventBus, {
 		sec: n.sectionIndex,
 		ppi: n.parentParaIndex,
 		ci: n.controlIndex,
 		cellIndex: n.cellIndex
 	}, e).show();
 }
-function uN(e) {
+function gN(e) {
 	let t = e.getInputHandler();
 	if (!t) return null;
 	let n = t.getCursorPosition();
@@ -65517,14 +65585,14 @@ function uN(e) {
 		cellInfo: e.wasm.getCellInfo(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex)
 	};
 }
-function dN(e) {
+function _N(e) {
 	e.textarea?.focus();
 }
-function fN(e, t, n) {
-	let r = uN(e);
+function vN(e, t, n) {
+	let r = gN(e);
 	if (!r) return;
 	let { ih: i, pos: a, cellInfo: o } = r;
-	nN(() => i.executeOperation({
+	cN(() => i.executeOperation({
 		kind: "snapshot",
 		operationType: t.startsWith("row") ? "insertTableRow" : "insertTableColumn",
 		operation: (e) => {
@@ -65549,9 +65617,9 @@ function fN(e, t, n) {
 			}
 			return a;
 		}
-	}), "줄/칸 추가"), dN(i);
+	}), "줄/칸 추가"), _N(i);
 }
-function pN(e, t, n, r, i, a, o, s) {
+function yN(e, t, n, r, i, a, o, s) {
 	if (o <= 0 || s <= 0) return null;
 	let c = Math.min(i, o - 1), l = Math.min(a, s - 1), u = e.getTableCellBboxes(t, n, r).find((e) => c >= e.row && c < e.row + e.rowSpan && l >= e.col && l < e.col + e.colSpan);
 	return {
@@ -65559,17 +65627,17 @@ function pN(e, t, n, r, i, a, o, s) {
 		cellParaIndex: 0
 	};
 }
-function mN(e, t) {
-	let n = uN(e);
+function bN(e, t) {
+	let n = gN(e);
 	if (!n) return;
 	let { ih: r, pos: i, cellInfo: a } = n;
-	nN(() => r.executeOperation({
+	cN(() => r.executeOperation({
 		kind: "snapshot",
 		operationType: t === "row" ? "deleteTableRow" : "deleteTableColumn",
 		operation: (e) => {
 			let n = t === "row" ? e.deleteTableRow(i.sectionIndex, i.parentParaIndex, i.controlIndex, a.row) : e.deleteTableColumn(i.sectionIndex, i.parentParaIndex, i.controlIndex, a.col);
 			if (!n.ok) return i;
-			let r = pN(e, i.sectionIndex, i.parentParaIndex, i.controlIndex, a.row, a.col, n.rowCount, n.colCount);
+			let r = yN(e, i.sectionIndex, i.parentParaIndex, i.controlIndex, a.row, a.col, n.rowCount, n.colCount);
 			if (!r) return {
 				sectionIndex: i.sectionIndex,
 				paragraphIndex: i.parentParaIndex ?? 0,
@@ -65587,9 +65655,9 @@ function mN(e, t) {
 				charOffset: 0
 			};
 		}
-	}), "줄/칸 지우기"), dN(r);
+	}), "줄/칸 지우기"), _N(r);
 }
-var hN = sM([
+var xN = pM([
 	{
 		id: "table:create",
 		label: g("command.table.create.label"),
@@ -65601,10 +65669,10 @@ var hN = sM([
 			if (!n) return;
 			let r = n.getCursorPosition();
 			if (r.parentParaIndex !== void 0) return;
-			let i = new Zj();
+			let i = new nM();
 			i.onApply = (t, n, i) => {
 				let a = e.getInputHandler();
-				a && (nN(() => a.executeOperation({
+				a && (cN(() => a.executeOperation({
 					kind: "snapshot",
 					operationType: "createTable",
 					operation: (e) => {
@@ -65627,7 +65695,7 @@ var hN = sM([
 						} : r;
 					}
 				}), "표 만들기"), a.textarea?.focus());
-			}, i.onClose = () => dN(n), t?.pwhDetailed ? i.showInputDialog() : i.show(t?.anchorEl);
+			}, i.onClose = () => _N(n), t?.pwhDetailed ? i.showInputDialog() : i.show(t?.anchorEl);
 		}
 	},
 	{
@@ -65636,43 +65704,43 @@ var hN = sM([
 		label: g("command.table.cellProps.label"),
 		canExecute: (e) => e.inTable || e.inCellSelectionMode || e.inTableObjectSelection,
 		execute(e) {
-			ij(e, "cell");
+			lj(e, "cell");
 		}
 	},
 	{
 		id: "table:background-each",
 		opensDialog: !0,
 		label: "각 셀 배경",
-		canExecute: QM,
+		canExecute: iN,
 		execute(e) {
-			eN(e, "background");
+			oN(e, "background");
 		}
 	},
 	{
 		id: "table:border-each",
 		opensDialog: !0,
 		label: "셀 테두리/배경",
-		canExecute: QM,
+		canExecute: iN,
 		execute(e) {
-			eN(e, "border");
+			oN(e, "border");
 		}
 	},
 	{
 		id: "table:background-one",
 		opensDialog: !0,
 		label: "여러 셀 배경",
-		canExecute: $M,
+		canExecute: aN,
 		execute(e) {
-			tN(e, "background");
+			sN(e, "background");
 		}
 	},
 	{
 		id: "table:border-one",
 		opensDialog: !0,
 		label: g("command.table.borderOne.registryLabel"),
-		canExecute: $M,
+		canExecute: aN,
 		execute(e) {
-			tN(e, "border");
+			sN(e, "border");
 		}
 	},
 	{
@@ -65680,12 +65748,12 @@ var hN = sM([
 		opensDialog: !0,
 		label: g("command.table.insertRowCol.label"),
 		shortcutLabel: "Alt+Enter",
-		canExecute: ZM,
+		canExecute: rN,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
-			let n = new YM();
-			n.onApply = ({ mode: t, count: n }) => fN(e, t, n), n.afterClose = () => dN(t), n.show();
+			let n = new tN();
+			n.onApply = ({ mode: t, count: n }) => vN(e, t, n), n.afterClose = () => _N(t), n.show();
 		}
 	},
 	{
@@ -65693,25 +65761,25 @@ var hN = sM([
 		opensDialog: !0,
 		label: g("command.table.deleteRowCol.label"),
 		shortcutLabel: "Alt+Delete",
-		canExecute: ZM,
+		canExecute: rN,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
-			let n = new XM();
-			n.onApply = ({ mode: t }) => mN(e, t), n.afterClose = () => dN(t), n.show();
+			let n = new nN();
+			n.onApply = ({ mode: t }) => bN(e, t), n.afterClose = () => _N(t), n.show();
 		}
 	},
 	{
 		id: "table:insert-row-above",
 		label: g("command.table.insertRowAbove.registryLabel"),
-		canExecute: ZM,
+		canExecute: rN,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getCursorPosition();
 			if (n.parentParaIndex === void 0 || n.controlIndex === void 0 || n.cellIndex === void 0) return;
 			let r = e.wasm.getCellInfo(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex);
-			nN(() => t.executeOperation({
+			cN(() => t.executeOperation({
 				kind: "snapshot",
 				operationType: "insertTableRow",
 				operation: (e) => (e.insertTableRow(n.sectionIndex, n.parentParaIndex, n.controlIndex, r.row, !1), n)
@@ -65721,14 +65789,14 @@ var hN = sM([
 	{
 		id: "table:insert-row-below",
 		label: g("command.table.insertRowBelow.registryLabel"),
-		canExecute: ZM,
+		canExecute: rN,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getCursorPosition();
 			if (n.parentParaIndex === void 0 || n.controlIndex === void 0 || n.cellIndex === void 0) return;
 			let r = e.wasm.getCellInfo(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex);
-			nN(() => t.executeOperation({
+			cN(() => t.executeOperation({
 				kind: "snapshot",
 				operationType: "insertTableRow",
 				operation: (e) => (e.insertTableRow(n.sectionIndex, n.parentParaIndex, n.controlIndex, r.row, !0), n)
@@ -65738,14 +65806,14 @@ var hN = sM([
 	{
 		id: "table:insert-col-left",
 		label: g("command.table.insertColLeft.registryLabel"),
-		canExecute: ZM,
+		canExecute: rN,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getCursorPosition();
 			if (n.parentParaIndex === void 0 || n.controlIndex === void 0 || n.cellIndex === void 0) return;
 			let r = e.wasm.getCellInfo(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex);
-			nN(() => t.executeOperation({
+			cN(() => t.executeOperation({
 				kind: "snapshot",
 				operationType: "insertTableColumn",
 				operation: (e) => (e.insertTableColumn(n.sectionIndex, n.parentParaIndex, n.controlIndex, r.col, !1), n)
@@ -65755,14 +65823,14 @@ var hN = sM([
 	{
 		id: "table:insert-col-right",
 		label: g("command.table.insertColRight.registryLabel"),
-		canExecute: ZM,
+		canExecute: rN,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getCursorPosition();
 			if (n.parentParaIndex === void 0 || n.controlIndex === void 0 || n.cellIndex === void 0) return;
 			let r = e.wasm.getCellInfo(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex);
-			nN(() => t.executeOperation({
+			cN(() => t.executeOperation({
 				kind: "snapshot",
 				operationType: "insertTableColumn",
 				operation: (e) => (e.insertTableColumn(n.sectionIndex, n.parentParaIndex, n.controlIndex, r.col, !0), n)
@@ -65775,20 +65843,20 @@ var hN = sM([
 		shortcutLabel: "Ctrl+Backspace",
 		canExecute: (e) => e.inTable && !e.isFormMode,
 		execute(e) {
-			e.getInputHandler()?.getCursorPosition() && mN(e, "row");
+			e.getInputHandler()?.getCursorPosition() && bN(e, "row");
 		}
 	},
 	{
 		id: "table:delete-col",
 		label: g("command.table.deleteCol.registryLabel"),
-		canExecute: ZM,
+		canExecute: rN,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getCursorPosition();
 			if (n.parentParaIndex === void 0 || n.controlIndex === void 0 || n.cellIndex === void 0) return;
 			let r = e.wasm.getCellInfo(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex);
-			nN(() => t.executeOperation({
+			cN(() => t.executeOperation({
 				kind: "snapshot",
 				operationType: "deleteTableColumn",
 				operation: (e) => (e.deleteTableColumn(n.sectionIndex, n.parentParaIndex, n.controlIndex, r.col), n)
@@ -65800,16 +65868,16 @@ var hN = sM([
 		opensDialog: !0,
 		label: g("command.table.cellSplit.label"),
 		shortcutLabel: "S",
-		canExecute: ZM,
+		canExecute: rN,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getCursorPosition();
 			if (n.parentParaIndex === void 0 || n.controlIndex === void 0 || n.cellIndex === void 0) return;
-			let r = t.getSelectedCellRange?.(), i = t.getCellTableContext?.(), a = r && i && (r.startRow !== r.endRow || r.startCol !== r.endCol), o = e.wasm.getCellInfo(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex), s = new cM(!a && (o.rowSpan > 1 || o.colSpan > 1));
+			let r = t.getSelectedCellRange?.(), i = t.getCellTableContext?.(), a = r && i && (r.startRow !== r.endRow || r.startCol !== r.endCol), o = e.wasm.getCellInfo(n.sectionIndex, n.parentParaIndex, n.controlIndex, n.cellIndex), s = new mM(!a && (o.rowSpan > 1 || o.colSpan > 1));
 			s.onApply = (t, s, c, l) => {
 				let u = e.getInputHandler();
-				u && (nN(() => u.executeOperation({
+				u && (cN(() => u.executeOperation({
 					kind: "snapshot",
 					operationType: "splitTableCell",
 					operation: (e) => (a && r && i ? e.splitTableCellsInRange(i.sec, i.ppi, i.ci, r.startRow, r.startCol, r.endRow, r.endCol, t, s, c) : e.splitTableCellInto(n.sectionIndex, n.parentParaIndex, n.controlIndex, o.row, o.col, t, s, c, l), n)
@@ -65826,7 +65894,7 @@ var hN = sM([
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getSelectedCellRange(), r = t.getCellTableContext();
-			n && r && (n.startRow !== n.endRow || n.startCol !== n.endCol) && (nN(() => t.executeOperation({
+			n && r && (n.startRow !== n.endRow || n.startCol !== n.endCol) && (cN(() => t.executeOperation({
 				kind: "snapshot",
 				operationType: "mergeTableCells",
 				operation: (e) => (e.mergeTableCells(r.sec, r.ppi, r.ci, n.startRow, n.startCol, n.endRow, n.endCol), t.getCursorPosition())
@@ -65841,9 +65909,9 @@ var hN = sM([
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getSelectedCellRange?.(), r = t.getCellTableContext?.();
-			n && r && (aN(t) || r.cellPath && r.cellPath.length > 1 || (nN(() => {
+			n && r && (dN(t) || r.cellPath && r.cellPath.length > 1 || (cN(() => {
 				e.wasm.copyTableCellsTransposed(r.sec, r.ppi, r.ci, n.startRow, n.startCol, n.endRow, n.endCol);
-			}, "행/열 바꿈 복사"), dN(t)));
+			}, "행/열 바꿈 복사"), _N(t)));
 		}
 	},
 	{
@@ -65854,7 +65922,7 @@ var hN = sM([
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getCursorPosition();
-			(n.cellPath?.length ?? 0) > 1 || (nN(() => t.executeOperation({
+			(n.cellPath?.length ?? 0) > 1 || (cN(() => t.executeOperation({
 				kind: "snapshot",
 				operationType: "pasteTableCellsTransposed",
 				operation: (r) => {
@@ -65893,7 +65961,7 @@ var hN = sM([
 								cellParaIndex: 0
 							};
 						} catch (e) {
-							if (!oN(e)) throw e;
+							if (!fN(e)) throw e;
 						}
 						return i(a.sec, a.ppi, 0);
 					}
@@ -65902,14 +65970,14 @@ var hN = sM([
 						try {
 							r.pasteTableCellsTransposed(n.sectionIndex, n.parentParaIndex, n.controlIndex, t.row, t.col);
 						} catch (e) {
-							if (!oN(e)) throw e;
+							if (!fN(e)) throw e;
 							return i(n.sectionIndex, n.parentParaIndex, 0);
 						}
 						return n;
 					}
 					return i(n.sectionIndex, n.paragraphIndex, n.charOffset);
 				}
-			}), "행/열 바꿈 붙여넣기"), dN(t));
+			}), "행/열 바꿈 붙여넣기"), _N(t));
 		}
 	},
 	{
@@ -65923,7 +65991,7 @@ var hN = sM([
 			let n = t.getCursorPosition();
 			if (n?.parentParaIndex === void 0 || n.controlIndex === void 0 || n.cellIndex === void 0 || (n.cellPath?.length ?? 0) > 1) return;
 			let { sectionIndex: r, parentParaIndex: i, controlIndex: a, cellIndex: o } = n;
-			nN(() => {
+			cN(() => {
 				let n = e.wasm.getCellInfo(r, i, a, o);
 				if (n.row === 0) {
 					console.warn("[table:split] 첫 번째 줄에서는 표 나누기를 할 수 없습니다.");
@@ -65963,7 +66031,7 @@ var hN = sM([
 				if (e?.parentParaIndex === void 0 || e.controlIndex === void 0 || (e.cellPath?.length ?? 0) > 1) return;
 				n = e.sectionIndex, r = e.parentParaIndex, i = e.controlIndex;
 			}
-			nN(() => {
+			cN(() => {
 				t.executeOperation({
 					kind: "snapshot",
 					operationType: "mergeTableWithNext",
@@ -65981,7 +66049,7 @@ var hN = sM([
 			if (!t) return;
 			let n = t.getSelectedTableRef();
 			if (n) {
-				nN(() => t.executeOperation({
+				cN(() => t.executeOperation({
 					kind: "snapshot",
 					operationType: "deleteTable",
 					operation: (e) => (e.deleteTableControl(n.sec, n.ppi, n.ci), {
@@ -65993,7 +66061,7 @@ var hN = sM([
 				return;
 			}
 			let r = t.getCursorPosition();
-			r.parentParaIndex !== void 0 && r.controlIndex !== void 0 && nN(() => t.executeOperation({
+			r.parentParaIndex !== void 0 && r.controlIndex !== void 0 && cN(() => t.executeOperation({
 				kind: "snapshot",
 				operationType: "deleteTable",
 				operation: (e) => (e.deleteTableControl(r.sectionIndex, r.parentParaIndex, r.controlIndex), {
@@ -66026,7 +66094,7 @@ var hN = sM([
 			}
 			if (!o) return;
 			let s = 0;
-			if (!o.hasCaption) nN(() => t.executeOperation({
+			if (!o.hasCaption) cN(() => t.executeOperation({
 				kind: "snapshot",
 				operationType: "toggleTableCaption",
 				operation: (e) => (s = e.setTableProperties(n, r, i, { hasCaption: !0 })?.captionCharOffset ?? 3, {
@@ -66047,7 +66115,7 @@ var hN = sM([
 		id: "table:cell-height-equal",
 		label: g("command.table.cellHeightEqual.label"),
 		shortcutLabel: "H",
-		canExecute: $M,
+		canExecute: aN,
 		execute(e) {
 			e.getInputHandler()?.equalizeSelectedCellSizes("height");
 		}
@@ -66056,7 +66124,7 @@ var hN = sM([
 		id: "table:cell-width-equal",
 		label: g("command.table.cellWidthEqual.label"),
 		shortcutLabel: "W",
-		canExecute: $M,
+		canExecute: aN,
 		execute(e) {
 			e.getInputHandler()?.equalizeSelectedCellSizes("width");
 		}
@@ -66065,26 +66133,26 @@ var hN = sM([
 		id: "table:formula",
 		label: g("command.table.formula.registryLabel"),
 		shortcutLabel: "Ctrl+M,F",
-		canExecute: ZM,
+		canExecute: rN,
 		execute(e) {
-			lN(e);
+			hN(e);
 		}
 	},
 	{
 		id: "table:block-formula",
 		label: g("command.table.blockFormula.label"),
-		canExecute: ZM,
+		canExecute: rN,
 		execute(e) {
-			lN(e);
+			hN(e);
 		}
 	},
-	cN("table:block-sum", g("command.table.blockSum.label"), "SUM", "Ctrl+Shift+S"),
-	cN("table:block-avg", g("command.table.blockAvg.label"), "AVERAGE", "Ctrl+Shift+A"),
-	cN("table:block-product", g("command.table.blockProduct.label"), "PRODUCT", "Ctrl+Shift+P"),
+	mN("table:block-sum", g("command.table.blockSum.label"), "SUM", "Ctrl+Shift+S"),
+	mN("table:block-avg", g("command.table.blockAvg.label"), "AVERAGE", "Ctrl+Shift+A"),
+	mN("table:block-product", g("command.table.blockProduct.label"), "PRODUCT", "Ctrl+Shift+P"),
 	{
 		id: "table:thousand-sep",
 		label: g("command.table.thousandSep.label"),
-		canExecute: ZM,
+		canExecute: rN,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
@@ -66113,7 +66181,7 @@ var hN = sM([
 	{
 		id: "table:decimal-add",
 		label: g("command.table.decimalAdd.label"),
-		canExecute: ZM,
+		canExecute: rN,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
@@ -66140,7 +66208,7 @@ var hN = sM([
 	{
 		id: "table:decimal-remove",
 		label: g("command.table.decimalRemove.label"),
-		canExecute: ZM,
+		canExecute: rN,
 		execute(e) {
 			let t = e.getInputHandler();
 			if (!t) return;
@@ -66164,19 +66232,19 @@ var hN = sM([
 			}
 		}
 	}
-]), gN = 7200 / 25.4;
-function _N(e) {
-	return Math.round(e / gN * 100) / 100;
+]), SN = 7200 / 25.4;
+function CN(e) {
+	return Math.round(e / SN * 100) / 100;
 }
-function vN(e) {
-	return Number.isFinite(e) ? Math.round(Math.min(25, Math.max(0, e)) * gN) : 0;
+function wN(e) {
+	return Number.isFinite(e) ? Math.round(Math.min(25, Math.max(0, e)) * SN) : 0;
 }
-var yN = [
+var TN = [
 	"Left",
 	"Right",
 	"Top",
 	"Bottom"
-], bN = "var(--doc-paper)", xN = "#d0d0d0", SN = class extends A {
+], EN = "var(--doc-paper)", DN = "#d0d0d0", ON = class extends A {
 	wasm;
 	eventBus;
 	sectionIdx;
@@ -66256,14 +66324,14 @@ var yN = [
 		let e = this.radioValue("page-border-apply", "all"), t = {
 			...this.settings,
 			basis: this.basisPaper.checked ? "paper" : "page",
-			spacingLeft: vN(parseFloat(this.spacingInputs.Left.value)),
-			spacingRight: vN(parseFloat(this.spacingInputs.Right.value)),
-			spacingTop: vN(parseFloat(this.spacingInputs.Top.value)),
-			spacingBottom: vN(parseFloat(this.spacingInputs.Bottom.value)),
-			borderLeft: this.borderNoneCheck.checked ? CN() : { ...this.borderEdits.Left },
-			borderRight: this.borderNoneCheck.checked ? CN() : { ...this.borderEdits.Right },
-			borderTop: this.borderNoneCheck.checked ? CN() : { ...this.borderEdits.Top },
-			borderBottom: this.borderNoneCheck.checked ? CN() : { ...this.borderEdits.Bottom },
+			spacingLeft: wN(parseFloat(this.spacingInputs.Left.value)),
+			spacingRight: wN(parseFloat(this.spacingInputs.Right.value)),
+			spacingTop: wN(parseFloat(this.spacingInputs.Top.value)),
+			spacingBottom: wN(parseFloat(this.spacingInputs.Bottom.value)),
+			borderLeft: this.borderNoneCheck.checked ? kN() : { ...this.borderEdits.Left },
+			borderRight: this.borderNoneCheck.checked ? kN() : { ...this.borderEdits.Right },
+			borderTop: this.borderNoneCheck.checked ? kN() : { ...this.borderEdits.Top },
+			borderBottom: this.borderNoneCheck.checked ? kN() : { ...this.borderEdits.Bottom },
 			fillType: this.bgColorRadio.checked ? "solid" : "none",
 			fillColor: this.bgColorInput.value,
 			patternColor: this.bgPatternColorInput.value,
@@ -66273,7 +66341,7 @@ var yN = [
 			hideFill: e === "exceptFirst",
 			applyPage: e === "exceptFirst" ? "exceptFirst" : "all"
 		}, n = () => this.wasm.setPageBorderFill(this.sectionIdx, t);
-		return tS({
+		return oS({
 			services: this.services,
 			label: "PageBorderDialog",
 			operationType: "pageBorder",
@@ -66293,7 +66361,7 @@ var yN = [
 		let a = this.row();
 		a.append(this.label(g("dialog.pageBorder.label.label.xa002ac")), this.buildColorInput()), this.immediateCheck = this.checkbox(g("dialog.pageBorder.checkbox.label")), this.immediateCheck.checked = !0, this.borderNoneCheck = this.checkbox(g("dialog.pageBorder.checkbox.label.xaae65c")), this.borderNoneCheck.addEventListener("change", () => this.handleBorderNoneChange()), r.append(i, a, this.checkboxRow(this.immediateCheck), this.checkboxRow(this.borderNoneCheck));
 		let o = document.createElement("div");
-		return o.style.cssText = "display:grid;grid-template-columns:28px 142px 28px;grid-template-rows:26px 112px 26px;gap:4px;align-items:center;justify-items:center;", this.previewSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg"), this.previewSvg.setAttribute("viewBox", "0 0 142 112"), this.previewSvg.style.cssText = `width:142px;height:112px;grid-column:2;grid-row:2;background:${bN};`, o.append(this.sideButton("위쪽", "Top", "2", "1"), this.sideButton("왼쪽", "Left", "1", "2"), this.previewSvg, this.sideButton("오른쪽", "Right", "3", "2"), this.sideButton("아래쪽", "Bottom", "2", "3"), this.sideButton("모두", "All", "3", "3")), n.append(r, o), t.appendChild(n), e.appendChild(t), e.appendChild(this.positionGroup()), e.appendChild(this.applyGroup()), e.appendChild(this.dialogConfigRow()), e;
+		return o.style.cssText = "display:grid;grid-template-columns:28px 142px 28px;grid-template-rows:26px 112px 26px;gap:4px;align-items:center;justify-items:center;", this.previewSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg"), this.previewSvg.setAttribute("viewBox", "0 0 142 112"), this.previewSvg.style.cssText = `width:142px;height:112px;grid-column:2;grid-row:2;background:${EN};`, o.append(this.sideButton("위쪽", "Top", "2", "1"), this.sideButton("왼쪽", "Left", "1", "2"), this.previewSvg, this.sideButton("오른쪽", "Right", "3", "2"), this.sideButton("아래쪽", "Bottom", "2", "3"), this.sideButton("모두", "All", "3", "3")), n.append(r, o), t.appendChild(n), e.appendChild(t), e.appendChild(this.positionGroup()), e.appendChild(this.applyGroup()), e.appendChild(this.dialogConfigRow()), e;
 	}
 	buildBackgroundTab() {
 		let e = this.tabContent();
@@ -66352,7 +66420,7 @@ var yN = [
 			e.checked = !0;
 		}), this.basisPaper.checked = this.settings.basis === "paper";
 		let e = this.dialog.querySelector("input[name=\"page-border-basis\"][value=\"page\"]");
-		e && (e.checked = this.settings.basis === "page"), this.spacingInputs.Left.value = String(_N(this.settings.spacingLeft)), this.spacingInputs.Right.value = String(_N(this.settings.spacingRight)), this.spacingInputs.Top.value = String(_N(this.settings.spacingTop)), this.spacingInputs.Bottom.value = String(_N(this.settings.spacingBottom));
+		e && (e.checked = this.settings.basis === "page"), this.spacingInputs.Left.value = String(CN(this.settings.spacingLeft)), this.spacingInputs.Right.value = String(CN(this.settings.spacingRight)), this.spacingInputs.Top.value = String(CN(this.settings.spacingTop)), this.spacingInputs.Bottom.value = String(CN(this.settings.spacingBottom));
 		let t = Object.values(this.borderEdits).some((e) => e.type !== 0);
 		this.borderNoneCheck.checked = !t;
 		let n = Object.values(this.borderEdits).find((e) => e.type !== 0) ?? this.settings.borderTop;
@@ -66503,31 +66571,31 @@ var yN = [
 		}), this.syncBorderNoneCheck(), this.updateBorderPreview();
 	}
 	applyToActiveSides() {
-		let e = yN.filter((e) => this.isSideActive(e));
+		let e = TN.filter((e) => this.isSideActive(e));
 		e.length !== 0 && this.applyToSides(e);
 	}
 	handleBorderNoneChange() {
 		this.borderNoneCheck.checked && this.clearAllSides(), this.updateBorderPreview();
 	}
 	toggleSide(e) {
-		this.isSideActive(e) ? this.borderEdits[e] = CN() : this.borderEdits[e] = { ...this.currentBorder() }, this.syncBorderNoneCheck(), this.updateBorderPreview();
+		this.isSideActive(e) ? this.borderEdits[e] = kN() : this.borderEdits[e] = { ...this.currentBorder() }, this.syncBorderNoneCheck(), this.updateBorderPreview();
 	}
 	toggleAllSides() {
-		let e = yN.every((e) => this.isSideActive(e)) ? CN() : this.currentBorder();
-		yN.forEach((t) => {
+		let e = TN.every((e) => this.isSideActive(e)) ? kN() : this.currentBorder();
+		TN.forEach((t) => {
 			this.borderEdits[t] = { ...e };
 		}), this.syncBorderNoneCheck(), this.updateBorderPreview();
 	}
 	clearAllSides() {
-		yN.forEach((e) => {
-			this.borderEdits[e] = CN();
+		TN.forEach((e) => {
+			this.borderEdits[e] = kN();
 		});
 	}
 	isSideActive(e) {
 		return this.borderEdits[e].type !== 0;
 	}
 	syncBorderNoneCheck() {
-		this.borderNoneCheck.checked = !yN.some((e) => this.isSideActive(e));
+		this.borderNoneCheck.checked = !TN.some((e) => this.isSideActive(e));
 	}
 	currentBorder() {
 		return {
@@ -66539,7 +66607,7 @@ var yN = [
 	updateBorderPreview() {
 		for (; this.previewSvg.firstChild;) this.previewSvg.removeChild(this.previewSvg.firstChild);
 		let e = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-		if (e.setAttribute("x", "12"), e.setAttribute("y", "8"), e.setAttribute("width", "118"), e.setAttribute("height", "96"), e.style.fill = bN, e.style.stroke = xN, this.previewSvg.appendChild(e), !this.borderNoneCheck.checked) for (let [e, t, n, r, i] of [
+		if (e.setAttribute("x", "12"), e.setAttribute("y", "8"), e.setAttribute("width", "118"), e.setAttribute("height", "96"), e.style.fill = EN, e.style.stroke = DN, this.previewSvg.appendChild(e), !this.borderNoneCheck.checked) for (let [e, t, n, r, i] of [
 			[
 				"Top",
 				12,
@@ -66573,7 +66641,7 @@ var yN = [
 			if (a.type === 0) continue;
 			let o = document.createElementNS("http://www.w3.org/2000/svg", "line");
 			o.setAttribute("x1", String(t)), o.setAttribute("y1", String(n)), o.setAttribute("x2", String(r)), o.setAttribute("y2", String(i)), o.setAttribute("stroke", a.color), o.setAttribute("stroke-width", String(Math.max(1, a.width + 1)));
-			let s = wN(a.type);
+			let s = AN(a.type);
 			s && o.setAttribute("stroke-dasharray", s), this.previewSvg.appendChild(o);
 		}
 	}
@@ -66581,14 +66649,14 @@ var yN = [
 		return this.dialog.querySelector(`input[name="${e}"]:checked`)?.value || t;
 	}
 };
-function CN() {
+function kN() {
 	return {
 		type: 0,
 		width: 0,
 		color: "#000000"
 	};
 }
-function wN(e) {
+function AN(e) {
 	switch (e) {
 		case 2: return "8,4";
 		case 3: return "2,4";
@@ -66600,14 +66668,14 @@ function wN(e) {
 }
 //#endregion
 //#region @rhwp/studio/src/ui/section-settings-dialog.ts
-var TN = 100;
-function EN(e) {
-	return Math.round(e / TN * 10) / 10;
+var jN = 100;
+function MN(e) {
+	return Math.round(e / jN * 10) / 10;
 }
-function DN(e) {
-	return Math.round(e * TN);
+function NN(e) {
+	return Math.round(e * jN);
 }
-var ON = "110px", kN = class extends A {
+var PN = "110px", FN = class extends A {
 	services;
 	wasm;
 	eventBus;
@@ -66640,12 +66708,12 @@ var ON = "110px", kN = class extends A {
 		let i = this.createSection(g("dialog.sectionSettings.createSection.label.xb1824b"));
 		this.applyScopeSelect = document.createElement("select"), this.applyScopeSelect.className = "dialog-select", this.applyScopeSelect.style.width = "160px";
 		for (let [e, t] of [
-			[g("dialog.sectionSettings.createBody.label"), "selection"],
+			["새 구역으로", "new"],
 			[g("dialog.sectionSettings.createBody.label.xa4076c"), "current"],
 			[g("dialog.sectionSettings.createBody.label.x7c2737"), "all"]
 		]) {
 			let n = document.createElement("option");
-			n.value = t, n.textContent = e, this.applyScopeSelect.appendChild(n);
+			n.value = t, t === "new" && (n.disabled = !this.services || !m_(this.services.getContext()) || !this.services.getInputHandler()?.canEditHyperlink()), n.textContent = e, this.applyScopeSelect.appendChild(n);
 		}
 		return this.applyScopeSelect.value = "current", i.appendChild(this.labeledRowSimple(g("dialog.sectionSettings.labeledRowSimple.label.x50fdb4"), this.applyScopeSelect)), e.appendChild(i), e;
 	}
@@ -66658,18 +66726,20 @@ var ON = "110px", kN = class extends A {
 			pictureNum: this.getNumComboValue(this.pictureNumCombo),
 			tableNum: this.getNumComboValue(this.tableNumCombo),
 			equationNum: this.getNumComboValue(this.equationNumCombo),
-			columnSpacing: Math.max(0, DN(parseFloat(this.columnSpacingInput.value) || 0)),
-			defaultTabSpacing: Math.max(0, DN(parseFloat(this.defaultTabSpacingInput.value) || 0)),
+			columnSpacing: Math.max(0, NN(parseFloat(this.columnSpacingInput.value) || 0)),
+			defaultTabSpacing: Math.max(0, NN(parseFloat(this.defaultTabSpacingInput.value) || 0)),
 			hideHeader: this.hideHeaderCheck.checked,
 			hideFooter: this.hideHeaderCheck.checked,
 			hideMasterPage: this.hideMasterPageCheck.checked,
 			hideBorder: this.hideBorderCheck.checked,
 			hideFill: this.hideBorderCheck.checked,
 			hideEmptyLine: this.hideEmptyLineCheck.checked
-		}, i = this.applyScopeSelect.value, a = () => i === "all" ? this.wasm.setSectionDefAll(r) : this.wasm.setSectionDef(this.sectionIdx, r);
+		}, i = this.applyScopeSelect.value;
+		if (i === "new") return !!this.services && h_(this.services, r);
+		let a = () => i === "all" ? this.wasm.setSectionDefAll(r) : this.wasm.setSectionDef(this.sectionIdx, r);
 		if (i !== "all") {
 			let e = this.wasm.getSectionDef(this.sectionIdx);
-			return eS({
+			return aS({
 				services: this.services,
 				label: "SectionSettingsDialog",
 				command: (t) => ({
@@ -66685,7 +66755,7 @@ var ON = "110px", kN = class extends A {
 			idx: t,
 			before: this.wasm.getSectionDef(t)
 		}));
-		return eS({
+		return aS({
 			services: this.services,
 			label: "SectionSettingsDialog",
 			command: (e) => ({
@@ -66699,7 +66769,7 @@ var ON = "110px", kN = class extends A {
 	}
 	populateFields() {
 		let e = this.sectionDef;
-		e.pageNum > 0 ? (this.pageNumCombo.select.value = "custom", this.pageNumCombo.input.value = String(e.pageNum), this.pageNumCombo.input.style.display = "") : e.pageNumType === 1 ? (this.pageNumCombo.select.value = "odd", this.pageNumCombo.input.style.display = "none") : e.pageNumType === 2 ? (this.pageNumCombo.select.value = "even", this.pageNumCombo.input.style.display = "none") : (this.pageNumCombo.select.value = "continue", this.pageNumCombo.input.style.display = "none"), this.setNumComboValue(this.pictureNumCombo, e.pictureNum), this.setNumComboValue(this.tableNumCombo, e.tableNum), this.setNumComboValue(this.equationNumCombo, e.equationNum), this.hideHeaderCheck.checked = e.hideHeader || e.hideFooter, this.hideMasterPageCheck.checked = e.hideMasterPage, this.hideBorderCheck.checked = e.hideBorder || e.hideFill, this.hideEmptyLineCheck.checked = e.hideEmptyLine, this.columnSpacingInput.value = EN(e.columnSpacing).toFixed(1), this.defaultTabSpacingInput.value = EN(e.defaultTabSpacing).toFixed(1);
+		e.pageNum > 0 ? (this.pageNumCombo.select.value = "custom", this.pageNumCombo.input.value = String(e.pageNum), this.pageNumCombo.input.style.display = "") : e.pageNumType === 1 ? (this.pageNumCombo.select.value = "odd", this.pageNumCombo.input.style.display = "none") : e.pageNumType === 2 ? (this.pageNumCombo.select.value = "even", this.pageNumCombo.input.style.display = "none") : (this.pageNumCombo.select.value = "continue", this.pageNumCombo.input.style.display = "none"), this.setNumComboValue(this.pictureNumCombo, e.pictureNum), this.setNumComboValue(this.tableNumCombo, e.tableNum), this.setNumComboValue(this.equationNumCombo, e.equationNum), this.hideHeaderCheck.checked = e.hideHeader || e.hideFooter, this.hideMasterPageCheck.checked = e.hideMasterPage, this.hideBorderCheck.checked = e.hideBorder || e.hideFill, this.hideEmptyLineCheck.checked = e.hideEmptyLine, this.columnSpacingInput.value = MN(e.columnSpacing).toFixed(1), this.defaultTabSpacingInput.value = MN(e.defaultTabSpacing).toFixed(1);
 	}
 	getNumComboValue(e) {
 		return e.select.value === "custom" ? Math.max(1, parseInt(e.input.value) || 1) : 0;
@@ -66717,13 +66787,13 @@ var ON = "110px", kN = class extends A {
 		let n = document.createElement("div");
 		n.className = "dialog-row";
 		let r = document.createElement("span");
-		return r.className = "dialog-label", r.style.minWidth = ON, r.textContent = e, n.appendChild(r), n.appendChild(t.select), n.appendChild(t.input), n;
+		return r.className = "dialog-label", r.style.minWidth = PN, r.textContent = e, n.appendChild(r), n.appendChild(t.select), n.appendChild(t.input), n;
 	}
 	labeledRowSimple(e, t, n) {
 		let r = document.createElement("div");
 		r.className = "dialog-row";
 		let i = document.createElement("span");
-		if (i.className = "dialog-label", i.style.minWidth = ON, i.textContent = e, r.appendChild(i), r.appendChild(t), n) {
+		if (i.className = "dialog-label", i.style.minWidth = PN, i.textContent = e, r.appendChild(i), r.appendChild(t), n) {
 			let e = document.createElement("span");
 			e.className = "dialog-unit", e.textContent = n, r.appendChild(e);
 		}
@@ -66776,14 +66846,14 @@ var ON = "110px", kN = class extends A {
 			input: t
 		};
 	}
-}, AN = 7200 / 25.4;
-function jN(e) {
-	return Math.round(e / AN * 10) / 10;
+}, IN = 7200 / 25.4;
+function LN(e) {
+	return Math.round(e / IN * 10) / 10;
 }
-function MN(e) {
-	return Math.round(e * AN);
+function RN(e) {
+	return Math.round(e * IN);
 }
-var NN = "80px", PN = class extends A {
+var zN = "80px", BN = class extends A {
 	services;
 	wasm;
 	eventBus;
@@ -66803,7 +66873,7 @@ var NN = "80px", PN = class extends A {
 			let n = document.createElement("div");
 			n.style.cssText = "display:flex;align-items:center;margin-bottom:10px;gap:8px;";
 			let r = document.createElement("label");
-			return r.textContent = t, r.style.cssText = `min-width:${NN};font-size:13px;`, n.appendChild(r), e.appendChild(n), n;
+			return r.textContent = t, r.style.cssText = `min-width:${zN};font-size:13px;`, n.appendChild(r), e.appendChild(n), n;
 		}, n = t(g("dialog.columnSettings.addRow.label"));
 		this.countInput = document.createElement("input"), this.countInput.type = "number", this.countInput.min = "1", this.countInput.max = "8", this.countInput.style.cssText = "width:60px;padding:4px 6px;font-size:13px;", n.appendChild(this.countInput);
 		let r = t(g("dialog.columnSettings.addRow.label.x2ec5ae"));
@@ -66825,14 +66895,14 @@ var NN = "80px", PN = class extends A {
 	populateFields() {
 		try {
 			let e = this.wasm.getColumnDef(this.sectionIdx);
-			this.countInput.value = String(Math.max(e.columnCount, 1)), this.typeSelect.value = String(e.columnType), this.sameWidthCheck.checked = e.sameWidth, this.spacingInput.value = String(jN(e.spacing));
+			this.countInput.value = String(Math.max(e.columnCount, 1)), this.typeSelect.value = String(e.columnType), this.sameWidthCheck.checked = e.sameWidth, this.spacingInput.value = String(LN(e.spacing));
 		} catch {
 			this.countInput.value = "1", this.typeSelect.value = "0", this.sameWidthCheck.checked = !0, this.spacingInput.value = "8";
 		}
 	}
 	onConfirm() {
-		let e = Math.max(1, Math.min(8, parseInt(this.countInput.value, 10) || 1)), t = Math.max(0, Math.min(2, parseInt(this.typeSelect.value, 10) || 0)), n = +!!this.sameWidthCheck.checked, r = Math.max(0, Math.min(32767, MN(parseFloat(this.spacingInput.value) || 0))), i = () => this.wasm.setColumnDef(this.sectionIdx, e, t, n, r);
-		return tS({
+		let e = Math.max(1, Math.min(8, parseInt(this.countInput.value, 10) || 1)), t = Math.max(0, Math.min(2, parseInt(this.typeSelect.value, 10) || 0)), n = +!!this.sameWidthCheck.checked, r = Math.max(0, Math.min(32767, RN(parseFloat(this.spacingInput.value) || 0))), i = () => this.wasm.setColumnDef(this.sectionIdx, e, t, n, r);
+		return oS({
 			services: this.services,
 			label: "ColumnSettingsDialog",
 			operationType: "columnSettings",
@@ -66842,7 +66912,7 @@ var NN = "80px", PN = class extends A {
 			}
 		});
 	}
-}, FN = class extends A {
+}, VN = class extends A {
 	services;
 	wasm;
 	eventBus;
@@ -66868,7 +66938,7 @@ var NN = "80px", PN = class extends A {
 		let e = parseInt(this.numInput.value, 10);
 		if (isNaN(e) || e < 1 || e > 65535) return !1;
 		let t = () => this.wasm.insertNewNumber(this.cursorPos.sec, this.cursorPos.para, this.cursorPos.offset, e);
-		return tS({
+		return oS({
 			services: this.services,
 			label: "NewNumberDialog",
 			operationType: "insertNewNumber",
@@ -66881,7 +66951,7 @@ var NN = "80px", PN = class extends A {
 };
 //#endregion
 //#region @rhwp/studio/src/command/commands/page.ts
-function IN(e, t, n, r, i) {
+function HN(e, t, n, r, i) {
 	let { sectionIndex: a, applyTo: o } = r;
 	JSON.parse(e.wasm.getHeaderFooter(a, i, o)).exists || t.executeOperation({
 		kind: "snapshot",
@@ -66889,15 +66959,15 @@ function IN(e, t, n, r, i) {
 		operation: (e) => (e.createHeaderFooter(a, i, o), n)
 	});
 }
-function LN(e, t) {
+function UN(e, t) {
 	let n = e.getInputHandler();
 	if (!n) return;
 	let r = n.cursor;
 	if (!r) return;
 	let i = r.rect?.pageIndex ?? 0, a = e.wasm.getHeaderFooterEditTarget(i, t);
-	IN(e, n, r.getPosition(), a, t), r.enterHeaderFooterMode(t, a.sectionIndex, a.applyTo, i), Ku(e.eventBus, r), n.updateCaret?.(), n.textarea?.focus();
+	HN(e, n, r.getPosition(), a, t), r.enterHeaderFooterMode(t, a.sectionIndex, a.applyTo, i), Ku(e.eventBus, r), n.updateCaret?.(), n.textarea?.focus();
 }
-function RN(e, t) {
+function WN(e, t) {
 	let n = e.getInputHandler();
 	if (!n) return;
 	let r = n.cursor;
@@ -66918,7 +66988,7 @@ function RN(e, t) {
 		console.warn("[page] 필드 삽입 실패:", e);
 	}
 }
-function zN(e, t) {
+function GN(e, t) {
 	let n = e.getInputHandler();
 	if (!n) return;
 	let r = n.cursor;
@@ -66926,7 +66996,7 @@ function zN(e, t) {
 	let i = r.rect?.pageIndex ?? 0, a = r.headerFooterMode === "header", o = e.wasm.navigateHeaderFooterByPage(i, a, t);
 	o.ok && (r.switchHeaderFooterTarget(o.isHeader, o.sectionIdx, o.applyTo, o.pageIndex), Ku(e.eventBus, r), n.updateCaret?.(), n.textarea?.focus());
 }
-function BN(e, t, n, r) {
+function KN(e, t, n, r) {
 	let i = e.getInputHandler();
 	if (!i) return;
 	let a = i.cursor, o;
@@ -66945,7 +67015,7 @@ function BN(e, t, n, r) {
 	let s = i.textarea;
 	s?.focus(), setTimeout(() => s?.focus(), 50);
 }
-var VN = [
+var qN = [
 	{
 		id: "page:setup",
 		opensDialog: !0,
@@ -66955,7 +67025,7 @@ var VN = [
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
 			let t = e.getInputHandler(), n = (t ? t.cursor : null)?.getPosition()?.sectionIndex ?? 0;
-			new hS(e.wasm, e.eventBus, n, e).show();
+			new bS(e.wasm, e.eventBus, n, e).show();
 		}
 	},
 	{
@@ -66965,7 +67035,7 @@ var VN = [
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
 			let t = e.getInputHandler(), n = (t ? t.cursor : null)?.getPosition()?.sectionIndex ?? 0;
-			new SN(e.wasm, e.eventBus, n, e).show();
+			new ON(e.wasm, e.eventBus, n, e).show();
 		}
 	},
 	{
@@ -66973,7 +67043,7 @@ var VN = [
 		label: g("command.page.headerCreate.registryLabel"),
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			LN(e, !0);
+			UN(e, !0);
 		}
 	},
 	{
@@ -66981,7 +67051,7 @@ var VN = [
 		label: g("command.page.footerCreate.registryLabel"),
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			LN(e, !1);
+			UN(e, !1);
 		}
 	},
 	{
@@ -67026,7 +67096,7 @@ var VN = [
 		label: g("command.page.headerfooterPrev.registryLabel"),
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			zN(e, -1);
+			GN(e, -1);
 		}
 	},
 	{
@@ -67034,7 +67104,7 @@ var VN = [
 		label: g("command.page.headerfooterNext.registryLabel"),
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			zN(e, 1);
+			GN(e, 1);
 		}
 	},
 	{
@@ -67048,7 +67118,7 @@ var VN = [
 			let n = t.cursor;
 			if (!n) return;
 			let r = n.getPosition(), i = e.wasm, a = e.eventBus;
-			i && a && new FN(i, a, {
+			i && a && new VN(i, a, {
 				sec: r.sectionIndex,
 				para: r.paragraphIndex,
 				offset: r.charOffset
@@ -67097,7 +67167,7 @@ var VN = [
 		label: g("command.page.insertFieldPagenum.registryLabel"),
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			RN(e, 1);
+			WN(e, 1);
 		}
 	},
 	{
@@ -67105,7 +67175,7 @@ var VN = [
 		label: g("command.page.insertFieldTotalpage.registryLabel"),
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			RN(e, 2);
+			WN(e, 2);
 		}
 	},
 	{
@@ -67113,7 +67183,7 @@ var VN = [
 		label: g("command.page.insertFieldFilename.registryLabel"),
 		canExecute: (e) => e.hasDocument,
 		execute(e) {
-			RN(e, 3);
+			WN(e, 3);
 		}
 	},
 	{
@@ -67121,7 +67191,7 @@ var VN = [
 		label: g("command.page.applyHfTemplate.registryLabel"),
 		canExecute: (e) => e.hasDocument,
 		execute(e, t) {
-			BN(e, t?.isHeader === "true", parseInt(t?.applyTo ?? "0", 10), parseInt(t?.templateId ?? "0", 10));
+			KN(e, t?.isHeader === "true", parseInt(t?.applyTo ?? "0", 10), parseInt(t?.templateId ?? "0", 10));
 		}
 	},
 	{
@@ -67215,6 +67285,15 @@ var VN = [
 			} catch (e) {
 				console.warn("[page:column-break] 단 나누기 실패:", e);
 			}
+		}
+	},
+	{
+		id: "page:section-break",
+		label: "구역 나누기",
+		shortcutLabel: "Alt+Shift+Enter",
+		canExecute: m_,
+		execute: (e) => {
+			h_(e);
 		}
 	},
 	...[
@@ -67318,7 +67397,7 @@ var VN = [
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.getPosition();
-			new PN(e.wasm, e.eventBus, n.sectionIndex, e).show();
+			new BN(e.wasm, e.eventBus, n.sectionIndex, e).show();
 		}
 	},
 	{
@@ -67330,13 +67409,13 @@ var VN = [
 			let t = e.getInputHandler();
 			if (!t) return;
 			let n = t.cursor?.getPosition()?.sectionIndex ?? 0;
-			new kN(e.wasm, e.eventBus, n, e).show();
+			new FN(e.wasm, e.eventBus, n, e).show();
 		}
 	}
 ];
 //#endregion
 //#region @rhwp/studio/src/ui/font-set-edit-dialog.ts
-function HN() {
+function JN() {
 	let e = /* @__PURE__ */ new Set();
 	for (let t of an) e.add(t);
 	return [
@@ -67345,7 +67424,7 @@ function HN() {
 		"monospace"
 	].forEach((t) => e.add(t)), Array.from(e).sort((e, t) => e.localeCompare(t, "ko"));
 }
-var UN = class extends A {
+var YN = class extends A {
 	nameInput;
 	langSelects = [];
 	editTarget;
@@ -67356,7 +67435,7 @@ var UN = class extends A {
 	createBody() {
 		let e = document.createElement("div");
 		e.className = "fse-body";
-		let t = HN(), n = Gr(), r = [
+		let t = JN(), n = Gr(), r = [
 			"korean",
 			"english",
 			"chinese",
@@ -67412,7 +67491,7 @@ var UN = class extends A {
 		};
 		this.onApply(t);
 	}
-}, WN = class extends A {
+}, XN = class extends A {
 	listEl;
 	infoEl;
 	selectedIndex = -1;
@@ -67466,7 +67545,7 @@ var UN = class extends A {
 		}
 		let t = document.createElement("div");
 		t.className = "fs-info-name", t.textContent = e.name, this.infoEl.appendChild(t), ku.forEach((t, n) => {
-			let r = GN(e, n), i = document.createElement("div");
+			let r = ZN(e, n), i = document.createElement("div");
 			i.className = "fs-info-row";
 			let a = document.createElement("span");
 			a.className = "fs-info-label", a.textContent = t;
@@ -67475,14 +67554,14 @@ var UN = class extends A {
 		});
 	}
 	onAdd() {
-		new UN(null, (e) => {
+		new YN(null, (e) => {
 			V.addFontSet(e) ? this.refreshList() : alert(g("dialog.fontSet.onAdd.message"));
 		}).show();
 	}
 	onEdit() {
 		if (this.selectedIndex < 0) return;
 		let e = V.getUserFontSets()[this.selectedIndex];
-		e && new UN(e, (e) => {
+		e && new YN(e, (e) => {
 			if (V.getAllFontSets().some((t, n) => n !== ju.length + this.selectedIndex && t.name === e.name)) {
 				alert(g("dialog.fontSet.onEdit.message"));
 				return;
@@ -67497,7 +67576,7 @@ var UN = class extends A {
 	}
 	onConfirm() {}
 };
-function GN(e, t) {
+function ZN(e, t) {
 	return e[[
 		"korean",
 		"english",
@@ -67510,7 +67589,7 @@ function GN(e, t) {
 }
 //#endregion
 //#region @rhwp/studio/src/ui/options-dialog.ts
-var KN = class extends A {
+var QN = class extends A {
 	eventBus;
 	showRecentCheck;
 	recentCountInput;
@@ -67560,7 +67639,7 @@ var KN = class extends A {
 		l.className = "opt-desc", l.textContent = g("dialog.options.fontSetDesc.text"), s.appendChild(l);
 		let u = document.createElement("button");
 		u.className = "dialog-btn opt-fontset-btn", u.textContent = g("dialog.options.fontSetBtn.text"), u.addEventListener("click", () => {
-			new WN().show();
+			new XN().show();
 		}), s.appendChild(u), e.appendChild(s);
 		let d = document.createElement("div");
 		d.className = "dialog-section";
@@ -67578,7 +67657,7 @@ var KN = class extends A {
 		v.className = "opt-local-status";
 		let y = (e) => {
 			let t = $r();
-			v.textContent = e ?? YN(t), _.disabled = !t.stored, h.textContent = t.source === "host-font-provider" ? "시스템 글꼴 목록 확인" : t.stored ? g("dialog.options.localBtn.text.x827ff8") : g("dialog.options.localBtn.text");
+			v.textContent = e ?? tP(t), _.disabled = !t.stored, h.textContent = t.source === "host-font-provider" ? "시스템 글꼴 목록 확인" : t.stored ? g("dialog.options.localBtn.text.x827ff8") : g("dialog.options.localBtn.text");
 		};
 		return y(g("dialog.options.updateLocalStatus.label")), (si() ? ci() : Vr()).then(() => y(), () => y(g("dialog.options.updateLocalStatus.label.x562451"))), h.addEventListener("click", async () => {
 			if (!si() && !Gn()) {
@@ -67593,7 +67672,7 @@ var KN = class extends A {
 					source: "options-dialog"
 				});
 			} catch (e) {
-				y(ZN(e));
+				y(rP(e));
 			}
 			h.disabled = !1;
 		}), _.addEventListener("click", async () => {
@@ -67615,12 +67694,12 @@ var KN = class extends A {
 		let i = document.createElement("div");
 		i.className = "dialog-section-title", i.textContent = g("dialog.options.saveTitle.text"), r.appendChild(i);
 		let a = document.createElement("p");
-		a.className = "opt-desc", a.textContent = g("dialog.options.desc.text"), r.appendChild(a), this.recoveryEnabledCheck = document.createElement("input"), this.recoveryEnabledCheck.type = "checkbox", this.recoveryEnabledCheck.id = "opt-recovery-enabled", this.recoveryEnabledCheck.checked = t.recoveryEnabled, this.recoveryIntervalInput = document.createElement("input"), this.recoveryIntervalInput.type = "number", this.recoveryIntervalInput.className = "dialog-input opt-interval-input", this.recoveryIntervalInput.min = "1", this.recoveryIntervalInput.max = "120", this.recoveryIntervalInput.value = String(t.recoveryIntervalMinutes), r.appendChild(qN({
+		a.className = "opt-desc", a.textContent = g("dialog.options.desc.text"), r.appendChild(a), this.recoveryEnabledCheck = document.createElement("input"), this.recoveryEnabledCheck.type = "checkbox", this.recoveryEnabledCheck.id = "opt-recovery-enabled", this.recoveryEnabledCheck.checked = t.recoveryEnabled, this.recoveryIntervalInput = document.createElement("input"), this.recoveryIntervalInput.type = "number", this.recoveryIntervalInput.className = "dialog-input opt-interval-input", this.recoveryIntervalInput.min = "1", this.recoveryIntervalInput.max = "120", this.recoveryIntervalInput.value = String(t.recoveryIntervalMinutes), r.appendChild($N({
 			checkbox: this.recoveryEnabledCheck,
 			labelText: g("dialog.options.createFilePanel.label"),
 			numberInput: this.recoveryIntervalInput,
 			unitText: g("dialog.options.createFilePanel.label.x3f334d")
-		})), this.idleSaveEnabledCheck = document.createElement("input"), this.idleSaveEnabledCheck.type = "checkbox", this.idleSaveEnabledCheck.id = "opt-idle-save-enabled", this.idleSaveEnabledCheck.checked = t.idleSaveEnabled, this.idleDelayInput = document.createElement("input"), this.idleDelayInput.type = "number", this.idleDelayInput.className = "dialog-input opt-interval-input", this.idleDelayInput.min = "5", this.idleDelayInput.max = "600", this.idleDelayInput.value = String(t.idleDelaySeconds), r.appendChild(qN({
+		})), this.idleSaveEnabledCheck = document.createElement("input"), this.idleSaveEnabledCheck.type = "checkbox", this.idleSaveEnabledCheck.id = "opt-idle-save-enabled", this.idleSaveEnabledCheck.checked = t.idleSaveEnabled, this.idleDelayInput = document.createElement("input"), this.idleDelayInput.type = "number", this.idleDelayInput.className = "dialog-input opt-interval-input", this.idleDelayInput.min = "5", this.idleDelayInput.max = "600", this.idleDelayInput.value = String(t.idleDelaySeconds), r.appendChild($N({
 			checkbox: this.idleSaveEnabledCheck,
 			labelText: g("dialog.options.createFilePanel.label.xa5fe57"),
 			numberInput: this.idleDelayInput,
@@ -67648,13 +67727,13 @@ var KN = class extends A {
 			recentFontCount: e
 		}), V.updateAutosaveSettings({
 			recoveryEnabled: this.recoveryEnabledCheck.checked,
-			recoveryIntervalMinutes: JN(this.recoveryIntervalInput.value, 10, 1, 120),
+			recoveryIntervalMinutes: eP(this.recoveryIntervalInput.value, 10, 1, 120),
 			idleSaveEnabled: this.idleSaveEnabledCheck.checked,
-			idleDelaySeconds: JN(this.idleDelayInput.value, 10, 5, 600)
+			idleDelaySeconds: eP(this.idleDelayInput.value, 10, 5, 600)
 		}), V.setShowPdfPrintGuidance(this.pdfPrintGuidanceCheck.checked), this.eventBus?.emit("autosave-settings-changed", { source: "options-dialog" });
 	}
 };
-function qN(e) {
+function $N(e) {
 	let t = document.createElement("div");
 	t.className = "dialog-row opt-row opt-autosave-row";
 	let n = document.createElement("label");
@@ -67662,59 +67741,59 @@ function qN(e) {
 	let r = document.createElement("span");
 	return r.className = "opt-count-label", r.textContent = e.unitText, t.appendChild(e.checkbox), t.appendChild(n), t.appendChild(e.numberInput), t.appendChild(r), t;
 }
-function JN(e, t, n, r) {
+function eP(e, t, n, r) {
 	let i = Number.parseInt(e, 10);
 	return Number.isFinite(i) ? Math.min(r, Math.max(n, i)) : t;
 }
-function YN(e) {
+function tP(e) {
 	if (e.source === "host-font-provider") return e.lastError ? "앱의 시스템 글꼴 목록을 확인하지 못했습니다. 문서를 저장한 뒤 앱을 다시 열어 주세요." : `앱 시스템 글꼴: ${e.count}개 face · 문서와 같은 목록을 사용합니다. 새 글꼴을 설치한 뒤에는 앱을 다시 열어 주세요.`;
 	if (e.lastError) return `저장소 접근 실패: ${e.lastError}`;
 	if (!e.stored) return e.method === "font-presence-probe" ? g("dialog.options.localStatus.noStoredFirefox") : e.supported ? g("dialog.options.localStatus.noStored") : g("dialog.options.localStatus.unsupported");
-	let t = XN(e.detectedAt), n = t ? ` · ${t}` : "";
+	let t = nP(e.detectedAt), n = t ? ` · ${t}` : "";
 	return e.source === "font-presence-probe" ? `문서별 확인 결과 저장됨: 사용 가능 ${e.count}개 / 확인한 글꼴 ${e.checkedFamilies.length}개${n}` : e.checkedFamilies.length > 0 ? `로컬 글꼴 결과 저장됨: 사용 가능 ${e.count}개 / 문서 후보 ${e.checkedFamilies.length}개 / 열거 누락 확인 ${e.probedFamilies.length}개${n}` : `로컬 글꼴 열거 결과 저장됨: ${e.count}개 · 문서별 누락 후보는 문서를 열 때 추가 확인${n}`;
 }
-function XN(e) {
+function nP(e) {
 	if (!e) return "";
 	let t = new Date(e);
 	if (Number.isNaN(t.getTime())) return "";
 	let n = (e) => String(e).padStart(2, "0");
 	return `${t.getFullYear()}.${n(t.getMonth() + 1)}.${n(t.getDate())} ${n(t.getHours())}:${n(t.getMinutes())}`;
 }
-function ZN(e) {
+function rP(e) {
 	let t = typeof e == "object" && e && "name" in e ? String(e.name ?? "") : "", n = `${t} ${e instanceof Error ? e.message : String(e ?? "")}`.toLowerCase();
 	return t === "NotAllowedError" || n.includes("permission") || n.includes("denied") ? "로컬 글꼴 접근 권한이 허용되지 않았습니다. 브라우저 권한 설정에서 허용한 뒤 다시 시도해 주세요." : "글꼴 감지에 실패했습니다. 웹 대체 글꼴로 계속 사용할 수 있습니다.";
 }
 //#endregion
 //#region @rhwp/studio/src/command/commands/tool.ts
-var QN = [{
+var iP = [{
 	id: "tool:options",
 	opensDialog: !0,
 	label: g("command.tool.options.label"),
 	execute(e) {
-		new KN(e.eventBus).show();
+		new QN(e.eventBus).show();
 	}
 }];
 //#endregion
 //#region @rhwp/studio/src/command/pwa-file-handling.ts
-async function $N(e) {
+async function aP(e) {
 	let t = await e.getFile();
 	return {
 		name: t.name,
 		bytes: new Uint8Array(await t.arrayBuffer())
 	};
 }
-async function eP(e, t) {
+async function oP(e, t) {
 	let n = e.files ?? [];
 	if (n.length === 0) return;
 	n.length > 1 && t.notifyMultipleFiles?.(n.length);
 	let r = n[0];
-	if (!mC(r.name)) {
+	if (!yC(r.name)) {
 		t.notifyUnsupportedFile(r.name);
 		return;
 	}
 	try {
-		let { bytes: e, name: n } = await $N(r);
-		if (!mC(n)) {
+		let { bytes: e, name: n } = await aP(r);
+		if (!yC(n)) {
 			t.notifyUnsupportedFile(n);
 			return;
 		}
@@ -67728,14 +67807,14 @@ async function eP(e, t) {
 		t.notifyError(e);
 	}
 }
-function tP(e, t) {
+function sP(e, t) {
 	return e.launchQueue?.setConsumer ? (e.launchQueue.setConsumer((e) => {
-		eP(e, t);
+		oP(e, t);
 	}), !0) : !1;
 }
 //#endregion
 //#region @rhwp/studio/src/ui/context-menu.ts
-var nP = class {
+var cP = class {
 	dispatcher;
 	registry;
 	el = null;
@@ -67769,7 +67848,7 @@ var nP = class {
 			let a = document.createTextNode(e.label ?? n.label);
 			if (i.appendChild(a), n.shortcutLabel) {
 				let e = document.createElement("span");
-				e.className = "md-shortcut", e.textContent = j_(n.shortcutLabel), i.appendChild(e);
+				e.className = "md-shortcut", e.textContent = I_(n.shortcutLabel), i.appendChild(e);
 			}
 			i.addEventListener("click", (e) => {
 				e.stopPropagation(), !i.classList.contains("disabled") && (this.dispatcher.dispatch(t), this.hide());
@@ -67794,7 +67873,7 @@ var nP = class {
 	dispose() {
 		this.hide();
 	}
-}, rP = class {
+}, lP = class {
 	registry;
 	dispatcher;
 	overlay = null;
@@ -67856,7 +67935,7 @@ var nP = class {
 	}
 	filter(e) {
 		let t = e.trim().toLowerCase();
-		return t ? this.items.filter((e) => !!(e.label.toLowerCase().includes(t) || e.id.toLowerCase().includes(t) || e.shortcutLabel && (e.shortcutLabel.toLowerCase().includes(t) || j_(e.shortcutLabel).toLowerCase().includes(t)))) : this.items;
+		return t ? this.items.filter((e) => !!(e.label.toLowerCase().includes(t) || e.id.toLowerCase().includes(t) || e.shortcutLabel && (e.shortcutLabel.toLowerCase().includes(t) || I_(e.shortcutLabel).toLowerCase().includes(t)))) : this.items;
 	}
 	renderList(e) {
 		if (this.list) {
@@ -67871,7 +67950,7 @@ var nP = class {
 				let i = document.createElement("span");
 				if (i.className = "cp-item-label", i.textContent = t.label, r.appendChild(i), t.shortcutLabel) {
 					let e = document.createElement("span");
-					e.className = "cp-item-shortcut", e.textContent = j_(t.shortcutLabel), r.appendChild(e);
+					e.className = "cp-item-shortcut", e.textContent = I_(t.shortcutLabel), r.appendChild(e);
 				}
 				r.addEventListener("mousedown", (t) => {
 					t.preventDefault(), this.selectedIdx = n, this.executeSelected(e);
@@ -67898,26 +67977,26 @@ var nP = class {
 		let t = (e ?? this.filter(this.input?.value ?? ""))[this.selectedIdx];
 		t && (this.close(), this.dispatcher.dispatch(t.id));
 	}
-}, iP = 3;
-function aP(e) {
+}, uP = 3;
+function dP(e) {
 	let t = e.hwpmlVersion ? ` ${e.hwpmlVersion}` : "", n = [e.hmlSavable === !0 ? `HML${t} 문서를 열었습니다. HML로 의미를 보존해 저장할 수 있지만 원본 바이트와 동일하지는 않습니다.` : `HML${t} 문서를 열었습니다. 보존할 수 없는 요소가 있어 HML로는 저장할 수 없습니다. HWP 또는 HWPX로 저장하세요.`];
 	if (e.warnings.length === 0) return n.join("\n");
 	n.push(`지원하지 않거나 변환된 요소 ${e.warnings.length}건이 있습니다.`);
-	for (let t of e.warnings.slice(0, iP)) n.push(`${t.xmlPath}: ${t.message}`);
-	return e.warnings.length > iP && n.push(`그 외 ${e.warnings.length - iP}건`), n.join("\n");
+	for (let t of e.warnings.slice(0, uP)) n.push(`${t.xmlPath}: ${t.message}`);
+	return e.warnings.length > uP && n.push(`그 외 ${e.warnings.length - uP}건`), n.join("\n");
 }
 //#endregion
 //#region @rhwp/studio/src/ui/hml-import-warning.ts
-function oP(e) {
+function fP(e) {
 	j({
-		message: aP(e),
+		message: dP(e),
 		durationMs: 0,
 		confirmLabel: g("dialog.hmlImportWarning.message")
 	});
 }
 //#endregion
 //#region @rhwp/studio/src/ui/drop-confirm-dialog.ts
-var sP = class extends A {
+var pP = class extends A {
 	fileName;
 	resolve;
 	constructor(e) {
@@ -67944,12 +68023,12 @@ var sP = class extends A {
 		});
 	}
 };
-function cP(e) {
-	return new sP(e).showAsync();
+function mP(e) {
+	return new pP(e).showAsync();
 }
 //#endregion
 //#region @rhwp/studio/src/ui/chrome-mode.ts
-var lP = [
+var hP = [
 	"file:new-doc",
 	"file:open",
 	"file:open-recent",
@@ -67962,13 +68041,13 @@ var lP = [
 	"file:export-doc",
 	"file:print-to-pdf",
 	"file:print"
-], uP = ["edit:compare-documents"];
-function dP(e) {
+], gP = [];
+function _P(e) {
 	if (!(e.ctrlKey || e.metaKey) || e.altKey) return !1;
 	let t = e.key.toLowerCase();
 	return t === "s" || t === "ㄴ" || t === "p" || t === "ㅔ";
 }
-function fP(e = "") {
+function vP(e = "") {
 	let t = new URLSearchParams(e).get("chrome"), n = t?.trim().toLowerCase();
 	return n ? n === "embed" ? {
 		mode: "embed",
@@ -67990,7 +68069,7 @@ function fP(e = "") {
 }
 //#endregion
 //#region @rhwp/studio/src/core/document-dirty-state.ts
-var pP = class {
+var yP = class {
 	dirty = !1;
 	beforeUnloadWindow = null;
 	eventBus;
@@ -68021,12 +68100,12 @@ var pP = class {
 			reason: t
 		}));
 	}
-}, mP = /* @__PURE__ */ new Set([
+}, bP = /* @__PURE__ */ new Set([
 	"serif",
 	"sans-serif",
 	"monospace"
 ]);
-function hP(e) {
+function xP(e) {
 	let t = /* @__PURE__ */ new Set();
 	for (let n of e ?? []) {
 		let e = n.trim();
@@ -68034,18 +68113,18 @@ function hP(e) {
 	}
 	return Array.from(t).sort((e, t) => e.localeCompare(t, "ko"));
 }
-function gP(e) {
+function SP(e) {
 	if (an.has(e)) return e;
 	let t = Za(e, 0, 0);
 	return t && t !== e && an.has(t) ? t : null;
 }
-function _P(e, t = {}) {
+function CP(e, t = {}) {
 	let n = $r(), r = t.localFonts ?? Kr(), i = new Set(r), a = t.localSupported ?? n.supported, o = t.localSnapshotLoaded ?? n.loaded, s = t.localSnapshotStored ?? n.stored, c = t.localSnapshotComplete ?? (t.localSnapshotStored === void 0 ? n.complete : t.localSnapshotStored), l = t.localSnapshotSource ?? n.source, u = t.localCheckedFonts ?? n.checkedFamilies, d = new Set(u), f = t.detectionMethod ?? qn(), p = {
 		available: 0,
 		needsLocalCheck: 0,
 		webSubstitute: 0,
 		missing: 0
-	}, m = hP(e).map((e) => {
+	}, m = xP(e).map((e) => {
 		let n = t.localFonts === void 0 ? qr(e) : null;
 		if (i.has(e) || n) return p.available++, {
 			fontName: e,
@@ -68060,13 +68139,13 @@ function _P(e, t = {}) {
 			source: "local",
 			substituteFont: o
 		};
-		if (mP.has(e) || an.has(e)) return p.available++, {
+		if (bP.has(e) || an.has(e)) return p.available++, {
 			fontName: e,
 			status: "available",
-			source: mP.has(e) ? "generic" : "web",
+			source: bP.has(e) ? "generic" : "web",
 			substituteFont: null
 		};
-		let l = gP(e);
+		let l = SP(e);
 		return a && (!s || !c && !d.has(e)) ? (p.needsLocalCheck++, {
 			fontName: e,
 			status: "needs-local-check",
@@ -68100,48 +68179,48 @@ function _P(e, t = {}) {
 }
 //#endregion
 //#region @rhwp/studio/src/recovery/autosave-store.ts
-var vP = "rhwpStudioAutosave", yP = 1, bP = "drafts", xP = 12, SP = /* @__PURE__ */ new Map();
-function CP() {
+var wP = "rhwpStudioAutosave", TP = 1, EP = "drafts", DP = 12, OP = /* @__PURE__ */ new Map();
+function kP() {
 	return typeof indexedDB < "u";
 }
-function wP(e) {
+function AP(e) {
 	return new Uint8Array(e);
 }
-function TP(e) {
+function jP(e) {
 	let t = new Uint8Array(e.byteLength);
 	return t.set(e), t.buffer;
 }
-function EP(e) {
+function MP(e) {
 	return {
 		...e,
-		data: wP(e.data)
+		data: AP(e.data)
 	};
 }
-function DP(e) {
+function NP(e) {
 	return {
 		...e,
 		byteLength: e.byteLength,
 		data: new Uint8Array(e.data ?? /* @__PURE__ */ new ArrayBuffer(0))
 	};
 }
-function OP(e) {
+function PP(e) {
 	return {
 		...e,
 		byteLength: e.data.byteLength,
-		data: TP(e.data)
+		data: jP(e.data)
 	};
 }
-function kP() {
-	return CP() ? new Promise((e) => {
-		let t = indexedDB.open(vP, yP);
+function FP() {
+	return kP() ? new Promise((e) => {
+		let t = indexedDB.open(wP, TP);
 		t.onerror = () => e(null), t.onsuccess = () => e(t.result), t.onupgradeneeded = () => {
 			let e = t.result;
-			e.objectStoreNames.contains(bP) || e.createObjectStore(bP, { keyPath: "id" });
+			e.objectStoreNames.contains(EP) || e.createObjectStore(EP, { keyPath: "id" });
 		};
 	}) : Promise.resolve(null);
 }
-async function AP(e, t) {
-	let n = await kP();
+async function IP(e, t) {
+	let n = await FP();
 	if (!n) return t();
 	try {
 		return await e(n);
@@ -68149,67 +68228,67 @@ async function AP(e, t) {
 		n.close();
 	}
 }
-async function jP() {
-	if (SP.size <= xP) return;
-	let e = [...SP.values()].sort((e, t) => e.savedAt - t.savedAt).slice(0, SP.size - xP);
-	for (let t of e) SP.delete(t.id);
+async function LP() {
+	if (OP.size <= DP) return;
+	let e = [...OP.values()].sort((e, t) => e.savedAt - t.savedAt).slice(0, OP.size - DP);
+	for (let t of e) OP.delete(t.id);
 }
-async function MP(e) {
+async function RP(e) {
 	let t = await new Promise((t, n) => {
-		let r = e.transaction(bP, "readonly").objectStore(bP).getAll();
+		let r = e.transaction(EP, "readonly").objectStore(EP).getAll();
 		r.onsuccess = () => t(r.result ?? []), r.onerror = () => n(r.error);
 	});
-	if (t.length <= xP) return;
-	let n = t.sort((e, t) => e.savedAt - t.savedAt).slice(0, t.length - xP);
+	if (t.length <= DP) return;
+	let n = t.sort((e, t) => e.savedAt - t.savedAt).slice(0, t.length - DP);
 	for (let t of n) await new Promise((n, r) => {
-		let i = e.transaction(bP, "readwrite");
-		i.objectStore(bP).delete(t.id), i.oncomplete = () => n(), i.onerror = () => r(i.error);
+		let i = e.transaction(EP, "readwrite");
+		i.objectStore(EP).delete(t.id), i.oncomplete = () => n(), i.onerror = () => r(i.error);
 	});
 }
-function NP() {
+function zP() {
 	return globalThis.crypto?.randomUUID?.() ?? `draft_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 }
-async function PP(e) {
-	let t = EP({
+async function BP(e) {
+	let t = MP({
 		...e,
 		byteLength: e.data.byteLength
 	});
-	await AP(async (e) => {
-		await MP(e), await new Promise((n, r) => {
-			let i = e.transaction(bP, "readwrite");
-			i.objectStore(bP).put(OP(t)), i.oncomplete = () => n(), i.onerror = () => r(i.error);
+	await IP(async (e) => {
+		await RP(e), await new Promise((n, r) => {
+			let i = e.transaction(EP, "readwrite");
+			i.objectStore(EP).put(PP(t)), i.oncomplete = () => n(), i.onerror = () => r(i.error);
 		});
 	}, async () => {
-		SP.set(t.id, t), await jP();
+		OP.set(t.id, t), await LP();
 	});
 }
-async function FP() {
-	return AP(async (e) => new Promise((t, n) => {
-		let r = e.transaction(bP, "readonly").objectStore(bP).getAll();
+async function VP() {
+	return IP(async (e) => new Promise((t, n) => {
+		let r = e.transaction(EP, "readonly").objectStore(EP).getAll();
 		r.onsuccess = () => {
-			t((r.result ?? []).map(DP).sort((e, t) => t.savedAt - e.savedAt));
+			t((r.result ?? []).map(NP).sort((e, t) => t.savedAt - e.savedAt));
 		}, r.onerror = () => n(r.error);
-	}), async () => [...SP.values()].map(EP).sort((e, t) => t.savedAt - e.savedAt));
+	}), async () => [...OP.values()].map(MP).sort((e, t) => t.savedAt - e.savedAt));
 }
-async function IP(e) {
-	SP.delete(e), await AP(async (t) => new Promise((n, r) => {
-		let i = t.transaction(bP, "readwrite");
-		i.objectStore(bP).delete(e), i.oncomplete = () => n(), i.onerror = () => r(i.error);
+async function HP(e) {
+	OP.delete(e), await IP(async (t) => new Promise((n, r) => {
+		let i = t.transaction(EP, "readwrite");
+		i.objectStore(EP).delete(e), i.oncomplete = () => n(), i.onerror = () => r(i.error);
 	}), async () => {});
 }
-async function LP() {
-	SP.clear(), await AP(async (e) => new Promise((t, n) => {
-		let r = e.transaction(bP, "readwrite");
-		r.objectStore(bP).clear(), r.oncomplete = () => t(), r.onerror = () => n(r.error);
+async function UP() {
+	OP.clear(), await IP(async (e) => new Promise((t, n) => {
+		let r = e.transaction(EP, "readwrite");
+		r.objectStore(EP).clear(), r.oncomplete = () => t(), r.onerror = () => n(r.error);
 	}), async () => {});
 }
 //#endregion
 //#region @rhwp/studio/src/recovery/autosave-manager.ts
-var RP = 1e4, zP = 6e5;
-function BP(e, t) {
+var WP = 1e4, GP = 6e5;
+function KP(e, t) {
 	return typeof e == "string" && e.length > 0 ? e : t;
 }
-var VP = class {
+var qP = class {
 	exportBytes;
 	isRecoveryBlocked;
 	now;
@@ -68226,25 +68305,25 @@ var VP = class {
 	discardGeneration = 0;
 	scheduleSettings;
 	constructor(e) {
-		this.exportBytes = e.exportBytes, this.isRecoveryBlocked = e.isRecoveryBlocked ?? (() => !1), this.scheduleSettings = HP({
+		this.exportBytes = e.exportBytes, this.isRecoveryBlocked = e.isRecoveryBlocked ?? (() => !1), this.scheduleSettings = JP({
 			recoveryEnabled: !0,
-			recoveryIntervalMs: e.minSaveIntervalMs ?? zP,
+			recoveryIntervalMs: e.minSaveIntervalMs ?? GP,
 			idleEnabled: !0,
-			idleDelayMs: e.debounceMs ?? RP,
+			idleDelayMs: e.debounceMs ?? WP,
 			...e.schedule ?? {}
-		}), this.now = e.now ?? (() => Date.now()), this.idFactory = e.idFactory ?? NP, this.store = e.store ?? {
-			saveDraft: PP,
-			deleteDraft: IP
+		}), this.now = e.now ?? (() => Date.now()), this.idFactory = e.idFactory ?? zP, this.store = e.store ?? {
+			saveDraft: BP,
+			deleteDraft: HP
 		}, this.logger = e.logger ?? console, this.onStatus = e.onStatus;
 	}
 	connect(e) {
 		let t = e.on("document-dirty-changed", (e) => {
 			let t = e;
-			t?.dirty ? this.schedule(BP(t.reason, "document-dirty")) : this.discardCurrentDraft(BP(t?.reason, "document-clean"));
+			t?.dirty ? this.schedule(KP(t.reason, "document-dirty")) : this.discardCurrentDraft(KP(t?.reason, "document-clean"));
 		}), n = e.on("document-mutated", (e) => {
-			this.schedule(BP(e, "document-mutated"));
+			this.schedule(KP(e, "document-mutated"));
 		}), r = e.on("document-changed", (e) => {
-			this.schedule(BP(e, "document-changed"));
+			this.schedule(KP(e, "document-changed"));
 		});
 		return () => {
 			t(), n(), r(), this.dispose();
@@ -68263,7 +68342,7 @@ var VP = class {
 	}
 	updateSchedule(e) {
 		let t = !!(this.idleTimer || this.recoveryTimer || this.pendingReason);
-		this.scheduleSettings = HP({
+		this.scheduleSettings = JP({
 			...this.scheduleSettings,
 			...e
 		}), this.current && (this.cancelTimers(), t && (this.scheduleSettings.recoveryEnabled || this.scheduleSettings.idleEnabled) && this.schedule("autosave-settings-changed"));
@@ -68363,45 +68442,45 @@ var VP = class {
 		}
 	}
 };
-function HP(e) {
+function JP(e) {
 	return {
 		recoveryEnabled: e.recoveryEnabled,
-		recoveryIntervalMs: UP(e.recoveryIntervalMs, zP, 0),
+		recoveryIntervalMs: YP(e.recoveryIntervalMs, GP, 0),
 		idleEnabled: e.idleEnabled,
-		idleDelayMs: UP(e.idleDelayMs, RP, 0)
+		idleDelayMs: YP(e.idleDelayMs, WP, 0)
 	};
 }
-function UP(e, t, n) {
+function YP(e, t, n) {
 	let r = typeof e == "number" ? e : Number(e);
 	return Number.isFinite(r) ? Math.max(n, Math.round(r)) : t;
 }
 //#endregion
 //#region @rhwp/studio/src/recovery/recovery-format.ts
-function WP(e) {
+function XP(e) {
 	let t = e.trim() || "문서.hwp", n = t.lastIndexOf(".");
 	if (n <= 0) return t;
 	let r = t.slice(n).toLowerCase();
 	return r === ".hwp" || r === ".hwpx" || r === ".hml" ? t.slice(0, n) : t;
 }
-function GP(e) {
-	return `${WP(e)} 복구본.hwp`;
+function ZP(e) {
+	return `${XP(e)} 복구본.hwp`;
 }
-function KP(e) {
+function QP(e) {
 	return !Number.isFinite(e) || e <= 0 ? "저장 시각 알 수 없음" : new Date(e).toLocaleString("ko-KR");
 }
-function qP(e) {
+function $P(e) {
 	if (!Number.isFinite(e) || e < 0) return "크기 알 수 없음";
 	if (e < 1024) return `${e} B`;
 	let t = e / 1024;
 	return t < 1024 ? `${t.toFixed(1)} KB` : `${(t / 1024).toFixed(1)} MB`;
 }
-function JP(e) {
+function eF(e) {
 	let t = e.sourceFormat.toUpperCase(), n = ["hwpx", "hml"].includes(e.sourceFormat.toLowerCase()) ? " → HWP 복구본" : "";
-	return `${KP(e.savedAt)} · ${qP(e.byteLength)} · ${t}${n}`;
+	return `${QP(e.savedAt)} · ${$P(e.byteLength)} · ${t}${n}`;
 }
 //#endregion
 //#region @rhwp/studio/src/recovery/recovery-ui.ts
-var YP = class extends A {
+var tF = class extends A {
 	drafts;
 	resolve;
 	selectedDraftId;
@@ -68435,7 +68514,7 @@ var YP = class extends A {
 				}
 			})(), a.style.fontWeight = "600";
 			let o = document.createElement("div");
-			o.textContent = JP(e), o.style.fontSize = "12px", o.style.color = "var(--text-muted, #8b95a1)", i.append(a, o), t.append(n, i), r.appendChild(t);
+			o.textContent = eF(e), o.style.fontSize = "12px", o.style.color = "var(--text-muted, #8b95a1)", i.append(a, o), t.append(n, i), r.appendChild(t);
 		}
 		return e.appendChild(r), e;
 	}
@@ -68463,12 +68542,12 @@ var YP = class extends A {
 		});
 	}
 };
-function XP(e) {
-	return new YP(e).showAsync();
+function nF(e) {
+	return new tF(e).showAsync();
 }
 //#endregion
 //#region @rhwp/studio/src/engine/cell-selection-renderer.ts
-var ZP = class {
+var rF = class {
 	container;
 	virtualScroll;
 	onPhaseChange;
@@ -68515,7 +68594,7 @@ var ZP = class {
 };
 //#endregion
 //#region @rhwp/studio/src/engine/cell-selection-phase.ts
-function QP(e) {
+function iF(e) {
 	switch (e) {
 		case 1: return "셀 선택 · 방향키로 이동";
 		case 2: return "셀 범위 선택 · 방향키로 확장";
@@ -68524,23 +68603,23 @@ function QP(e) {
 }
 //#endregion
 //#region @rhwp/studio/src/engine/table-object-renderer.ts
-var $P = "http://www.w3.org/2000/svg";
-function eF(e, t, n, r) {
+var aF = "http://www.w3.org/2000/svg";
+function oF(e, t, n, r) {
 	let i = r ? Math.max(n, 10) : n, a = i / 2, o = document.createElement("div");
 	if (o.style.cssText = `position:absolute;left:${e - a}px;top:${t - a}px;width:${i}px;height:${i}px;box-sizing:border-box;pointer-events:none;`, !r) return o.style.background = "#fff", o.style.border = "1px solid #000", o;
 	o.style.background = "rgba(255,255,255,0.9)", o.style.border = "1px solid #777", o.style.borderRadius = "50%";
 	let s = document.createElement("div");
 	return s.style.cssText = `position:absolute;left:50%;top:50%;width:${Math.max(i - 1, 1)}px;height:1px;background:#777;transform:translate(-50%,-50%) rotate(45deg);transform-origin:center;`, o.appendChild(s), o;
 }
-function tF(e, t) {
-	let n = document.createElementNS($P, "svg");
+function sF(e, t) {
+	let n = document.createElementNS(aF, "svg");
 	return n.style.width = e, n.style.height = t, n.style.overflow = "visible", n;
 }
-function nF(e, t, n, r, i, a, o) {
-	let s = document.createElementNS($P, "line");
+function cF(e, t, n, r, i, a, o) {
+	let s = document.createElementNS(aF, "line");
 	return s.setAttribute("x1", String(e)), s.setAttribute("y1", String(t)), s.setAttribute("x2", String(n)), s.setAttribute("y2", String(r)), s.setAttribute("stroke", i), s.setAttribute("stroke-width", String(a)), o && s.setAttribute("stroke-dasharray", o), s;
 }
-var rF = class e {
+var lF = class e {
 	container;
 	virtualScroll;
 	showRotateHandle;
@@ -68608,7 +68687,7 @@ var rF = class e {
 			}
 		];
 		for (let e of y) {
-			let [t, n] = g(e.lx, e.ly), r = eF(t, n, v, i);
+			let [t, n] = g(e.lx, e.ly), r = oF(t, n, v, i);
 			this.layer.appendChild(r), this.handles.push({
 				dir: e.dir,
 				el: r,
@@ -68621,10 +68700,10 @@ var rF = class e {
 			if (!i) {
 				let e = document.createElement("div");
 				e.style.cssText = "position:absolute;left:0;top:0;width:0;height:0;pointer-events:none;";
-				let t = tF("", "");
-				t.style.position = "absolute", t.style.pointerEvents = "none", t.appendChild(nF(a, o, s, c, "#4CAF50", 1)), e.appendChild(t), this.layer.appendChild(e), this.extraEls.push(e);
+				let t = sF("", "");
+				t.style.position = "absolute", t.style.pointerEvents = "none", t.appendChild(cF(a, o, s, c, "#4CAF50", 1)), e.appendChild(t), this.layer.appendChild(e), this.extraEls.push(e);
 			}
-			let l = i ? eF(s, c, t, !0) : document.createElement("div");
+			let l = i ? oF(s, c, t, !0) : document.createElement("div");
 			i || (l.style.cssText = `position:absolute;left:${s - n}px;top:${c - n}px;width:${t}px;height:${t}px;background:#4CAF50;border:1px solid #388E3C;border-radius:50%;box-sizing:border-box;pointer-events:none;`), this.layer.appendChild(l), this.handles.push({
 				dir: "rotate",
 				el: l,
@@ -68697,7 +68776,7 @@ var rF = class e {
 				}
 			];
 			for (let e of f) {
-				let t = eF(e.cx, e.cy, a, r);
+				let t = oF(e.cx, e.cy, a, r);
 				this.layer.appendChild(t), this.handles.push({
 					dir: e.dir,
 					el: t,
@@ -68711,7 +68790,7 @@ var rF = class e {
 					let e = document.createElement("div");
 					e.style.cssText = `position:absolute;left:${a}px;top:${o}px;width:1px;height:${i}px;background:#4CAF50;pointer-events:none;`, this.layer.appendChild(e), this.extraEls.push(e);
 				}
-				let s = r ? eF(a, o, t, !0) : document.createElement("div");
+				let s = r ? oF(a, o, t, !0) : document.createElement("div");
 				r || (s.style.cssText = `position:absolute;left:${a - n}px;top:${o - n}px;width:${t}px;height:${t}px;background:#4CAF50;border:1px solid #388E3C;border-radius:50%;box-sizing:border-box;pointer-events:none;`), this.layer.appendChild(s), this.handles.push({
 					dir: "rotate",
 					el: s,
@@ -68727,8 +68806,8 @@ var rF = class e {
 		if (!r) {
 			let e = document.createElement("div");
 			e.style.cssText = "position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;";
-			let t = tF("100%", "100%");
-			t.appendChild(nF(s, c, l, u, "#000", 1, "4,2")), e.appendChild(t), this.layer.appendChild(e), this.extraEls.push(e);
+			let t = sF("100%", "100%");
+			t.appendChild(cF(s, c, l, u, "#000", 1, "4,2")), e.appendChild(t), this.layer.appendChild(e), this.extraEls.push(e);
 		}
 		let d = e.HANDLE_SIZE, f = d / 2, p = [[
 			"sw",
@@ -68795,7 +68874,7 @@ var rF = class e {
 		this.clear(), this.layer.remove();
 	}
 };
-function iF(e, t = 1) {
+function uF(e, t = 1) {
 	let n = [...new Set(e)].sort((e, t) => e - t), r = [], i = /* @__PURE__ */ new Map();
 	for (let e of n) {
 		let n = r[r.length - 1];
@@ -68806,8 +68885,8 @@ function iF(e, t = 1) {
 		indexByCoord: i
 	};
 }
-var aF = .5;
-function oF(e, t = aF) {
+var dF = .5;
+function fF(e, t = dF) {
 	if (e.length <= 1) return e.map((e) => ({ ...e }));
 	let n = [...e].sort((e, t) => e.start - t.start), r = [{ ...n[0] }];
 	for (let e of n.slice(1)) {
@@ -68816,7 +68895,7 @@ function oF(e, t = aF) {
 	}
 	return r;
 }
-function sF(e, t, n, r) {
+function pF(e, t, n, r) {
 	let i = /* @__PURE__ */ new Map(), a = /* @__PURE__ */ new Map(), o = (e, t, n, r) => {
 		let i = e.get(t);
 		i ? i.push({
@@ -68837,8 +68916,8 @@ function sF(e, t, n, r) {
 		let u = n.get(r(s.x + s.w));
 		u !== void 0 && o(a, u, s.y, s.y + s.h);
 	}
-	for (let [e, t] of i) i.set(e, oF(t));
-	for (let [e, t] of a) a.set(e, oF(t));
+	for (let [e, t] of i) i.set(e, fF(t));
+	for (let [e, t] of a) a.set(e, fF(t));
 	return {
 		rowSpans: i,
 		colSpans: a
@@ -68846,7 +68925,7 @@ function sF(e, t, n, r) {
 }
 //#endregion
 //#region @rhwp/studio/src/engine/table-resize-renderer.ts
-var cF = class e {
+var mF = class e {
 	container;
 	virtualScroll;
 	layer;
@@ -68867,7 +68946,7 @@ var cF = class e {
 		};
 		let t = (e) => Math.round(e * 10) / 10, n = /* @__PURE__ */ new Set(), r = /* @__PURE__ */ new Set();
 		for (let i of e) n.add(t(i.y)), n.add(t(i.y + i.h)), r.add(t(i.x)), r.add(t(i.x + i.w));
-		let i = iF(n), a = iF(r), { rowSpans: o, colSpans: s } = sF(e, i.indexByCoord, a.indexByCoord, t);
+		let i = uF(n), a = uF(r), { rowSpans: o, colSpans: s } = pF(e, i.indexByCoord, a.indexByCoord, t);
 		return {
 			rowLines: i.positions.map((e, t) => ({
 				y: e,
@@ -68979,50 +69058,50 @@ var cF = class e {
 };
 //#endregion
 //#region @rhwp/studio/src/view/ruler-pin-geometry.ts
-function lF(e) {
+function hF(e) {
 	return Math.round(e * 7200 / 96);
 }
-function uF(e) {
+function gF(e) {
 	return Math.round(e * 150);
 }
-function dF(e, t, n, r, i) {
+function _F(e, t, n, r, i) {
 	return e === "left" ? t + r * i : t + n - r * i;
 }
-function fF(e, t, n, r) {
+function vF(e, t, n, r) {
 	return e + (t + Math.max(n, 0)) * r;
 }
-function pF(e, t, n) {
+function yF(e, t, n) {
 	if (e === "pageMarginLeft" || e === "pageMarginRight") {
 		let r = e === "pageMarginLeft", i = r ? (t - n.pageLeft) / n.zoom : (n.pageLeft + n.pageDisplayWidth - t) / n.zoom, a = r === n.bindingMirrored ? 0 : n.pageGutterPx, o = Math.max(0, i - a), s = r === n.bindingMirrored ? "right" : "left";
 		return {
 			kind: "pageMargin",
 			pageIdx: n.pageIdx,
 			marginKind: s,
-			hwpunit: lF(o)
+			hwpunit: hF(o)
 		};
 	}
 	return {
 		kind: "paraProps",
-		props: { indent: uF(Math.max(0, (t - n.refLeft) / n.zoom - n.paraMarginLeftPx)) }
+		props: { indent: gF(Math.max(0, (t - n.refLeft) / n.zoom - n.paraMarginLeftPx)) }
 	};
 }
 //#endregion
 //#region @rhwp/studio/src/view/ruler-scale.ts
-var mF = 96 / 25.4, hF = 30, gF = 3.5, _F = 10;
-function vF(e) {
+var bF = 96 / 25.4, xF = 30, SF = 3.5, CF = 10;
+function wF(e) {
 	let t = Number.isFinite(e) && e > 0 ? e : 1, n = 10 ** Math.floor(Math.log10(t)), r = t / n;
 	return r <= 1 ? n : r <= 2 ? 2 * n : r <= 5 ? 5 * n : 10 * n;
 }
-function yF(e) {
-	let t = mF * (Number.isFinite(e) && e > 0 ? e : 1);
+function TF(e) {
+	let t = bF * (Number.isFinite(e) && e > 0 ? e : 1);
 	return {
-		labelStepMm: vF(Math.max(_F, hF / t)),
-		tickStepMm: vF(gF / t)
+		labelStepMm: wF(Math.max(CF, xF / t)),
+		tickStepMm: wF(SF / t)
 	};
 }
 //#endregion
 //#region @rhwp/studio/src/view/ruler-label-geometry.ts
-function bF(e, t, n, r) {
+function EF(e, t, n, r) {
 	if (![
 		e,
 		t,
@@ -69034,11 +69113,11 @@ function bF(e, t, n, r) {
 }
 //#endregion
 //#region @rhwp/studio/src/view/ruler.ts
-var xF = 96 / 25.4, SF = 20, CF = 6, wF = 8;
-function TF(e, t) {
+var DF = 96 / 25.4, OF = 20, kF = 6, AF = 8;
+function jF(e, t) {
 	return getComputedStyle(document.documentElement).getPropertyValue(e).trim() || t;
 }
-var EF = class e {
+var MF = class e {
 	hCanvas;
 	vCanvas;
 	container;
@@ -69099,17 +69178,17 @@ var EF = class e {
 	}
 	palette() {
 		return {
-			bgMargin: TF("--ruler-bg", "#d0d0d0"),
-			bgBody: TF("--ruler-body", "#ffffff"),
-			tick: TF("--ruler-tick", "#555555"),
-			text: TF("--ruler-text", "#333333"),
-			marker: TF("--ruler-marker", "#4080c0")
+			bgMargin: jF("--ruler-bg", "#d0d0d0"),
+			bgBody: jF("--ruler-body", "#ffffff"),
+			tick: jF("--ruler-tick", "#555555"),
+			text: jF("--ruler-text", "#333333"),
+			marker: jF("--ruler-marker", "#4080c0")
 		};
 	}
 	syncCanvasSize(e) {
-		let t = this.container.clientWidth, n = this.container.clientHeight, r = Math.round(t * e), i = Math.round(n * e), a = Math.round(SF * e);
+		let t = this.container.clientWidth, n = this.container.clientHeight, r = Math.round(t * e), i = Math.round(n * e), a = Math.round(OF * e);
 		this.hCanvas.width !== r && (this.hCanvas.width = r), this.hCanvas.height !== a && (this.hCanvas.height = a), this.vCanvas.width !== a && (this.vCanvas.width = a), this.vCanvas.height !== i && (this.vCanvas.height = i);
-		let o = `${t}px`, s = `${n}px`, c = `${SF}px`;
+		let o = `${t}px`, s = `${n}px`, c = `${OF}px`;
 		this.hCanvas.style.width !== o && (this.hCanvas.style.width = o), this.hCanvas.style.height !== c && (this.hCanvas.style.height = c), this.vCanvas.style.width !== c && (this.vCanvas.style.width = c), this.vCanvas.style.height !== s && (this.vCanvas.style.height = s);
 	}
 	scheduleUpdate() {
@@ -69166,7 +69245,7 @@ var EF = class e {
 	}
 	onHPinDown(e) {
 		if (!this.canStartPinDrag(e)) return;
-		let t = this.hCanvas.getBoundingClientRect(), n = e.clientX - t.left, r = e.clientY - t.top, i = this.hPins.find((e) => Math.abs(e.x - n) <= wF && Math.abs(e.y - r) <= wF);
+		let t = this.hCanvas.getBoundingClientRect(), n = e.clientX - t.left, r = e.clientY - t.top, i = this.hPins.find((e) => Math.abs(e.x - n) <= AF && Math.abs(e.y - r) <= AF);
 		i && (this.hDrag = {
 			kind: i.kind,
 			pageIdx: this.hPageIdx,
@@ -69175,7 +69254,7 @@ var EF = class e {
 		}, this.beginPinDrag(e, this.hCanvas));
 	}
 	minPinGap() {
-		return Math.max(10 * xF * this.viewportManager.getZoom(), 17);
+		return Math.max(10 * DF * this.viewportManager.getZoom(), 17);
 	}
 	hDragRange(e) {
 		let t = this.minPinGap(), n = (e) => this.hPins.find((t) => t.kind === e)?.x, r = this.hPageLeft + this.hPageDisplayWidth;
@@ -69197,11 +69276,11 @@ var EF = class e {
 		}
 		if (this.dragPointerId !== null) return;
 		let t = this.hCanvas.getBoundingClientRect(), n = e.clientX - t.left, r = e.clientY - t.top;
-		this.hCanvas.style.cursor = this.hPins.some((e) => Math.abs(e.x - n) <= wF && Math.abs(e.y - r) <= wF) ? "ew-resize" : "default";
+		this.hCanvas.style.cursor = this.hPins.some((e) => Math.abs(e.x - n) <= AF && Math.abs(e.y - r) <= AF) ? "ew-resize" : "default";
 	}
 	onVPinDown(e) {
 		if (!this.canStartPinDrag(e)) return;
-		let t = e.clientY - this.vCanvas.getBoundingClientRect().top, n = this.vPins.find((e) => Math.abs(e.y - t) <= wF);
+		let t = e.clientY - this.vCanvas.getBoundingClientRect().top, n = this.vPins.find((e) => Math.abs(e.y - t) <= AF);
 		n && (this.vDrag = {
 			kind: n.kind,
 			pageIdx: n.pageIdx,
@@ -69226,7 +69305,7 @@ var EF = class e {
 		}
 		if (this.dragPointerId !== null) return;
 		let t = e.clientY - this.vCanvas.getBoundingClientRect().top;
-		this.vCanvas.style.cursor = this.vPins.some((e) => Math.abs(e.y - t) <= wF) ? "ns-resize" : "default";
+		this.vCanvas.style.cursor = this.vPins.some((e) => Math.abs(e.y - t) <= AF) ? "ns-resize" : "default";
 	}
 	static clampToRange(e, t) {
 		return Math.min(Math.max(e, t.min), Math.max(t.min, t.max));
@@ -69265,7 +69344,7 @@ var EF = class e {
 		this.hDrag = null, this.vDrag = null, this.dragCanvas = null, this.dragPointerId = null, document.removeEventListener("pointermove", this.onPinDragMoveBound), document.removeEventListener("pointerup", this.onPinDragUpBound), document.removeEventListener("pointercancel", this.onPinDragCancelBound), window.removeEventListener("blur", this.onPinDragBlurBound), e?.removeEventListener("lostpointercapture", this.onPinDragCancelBound), t !== null && e?.hasPointerCapture(t) && e.releasePointerCapture(t), this.hCanvas.style.cursor = "default", this.vCanvas.style.cursor = "default";
 	}
 	commitHDrag(e) {
-		this.onCommitPin?.(pF(e.kind, e.x, this.hDropContext(e.pageIdx)));
+		this.onCommitPin?.(yF(e.kind, e.x, this.hDropContext(e.pageIdx)));
 	}
 	hDropContext(e) {
 		return {
@@ -69285,7 +69364,7 @@ var EF = class e {
 			kind: "pageMargin",
 			pageIdx: e.pageIdx,
 			marginKind: e.kind,
-			hwpunit: lF(a)
+			hwpunit: hF(a)
 		});
 	}
 	drawTriangleDown(e, t, n, r) {
@@ -69297,7 +69376,7 @@ var EF = class e {
 	drawHorizontal(e) {
 		let t = this.hCtx;
 		if (!t) return;
-		let n = this.hCanvas.width / e, r = SF;
+		let n = this.hCanvas.width / e, r = OF;
 		t.save(), t.setTransform(e, 0, 0, e, 0, 0);
 		let i = this.palette();
 		t.fillStyle = i.bgMargin, t.fillRect(0, 0, n, r);
@@ -69311,7 +69390,7 @@ var EF = class e {
 			this.hPins = [], t.restore();
 			return;
 		}
-		let l = this.getPageScreenLeft(a, s), u = c.width * o, d = Uu(a, this.focusedPageIndex) || this.hDrag?.kind === "paraIndent" && this.hDrag.pageIdx === a, f = dF("left", l, u, c.bodyLeft, o), p = dF("right", l, u, c.width - c.bodyRight, o), m = this.hDrag?.kind === "pageMarginLeft" ? this.hDrag.x : f, h = this.hDrag?.kind === "pageMarginRight" ? this.hDrag.x : p;
+		let l = this.getPageScreenLeft(a, s), u = c.width * o, d = Uu(a, this.focusedPageIndex) || this.hDrag?.kind === "paraIndent" && this.hDrag.pageIdx === a, f = _F("left", l, u, c.bodyLeft, o), p = _F("right", l, u, c.width - c.bodyRight, o), m = this.hDrag?.kind === "pageMarginLeft" ? this.hDrag.x : f, h = this.hDrag?.kind === "pageMarginRight" ? this.hDrag.x : p;
 		if (d && this.inCell) {
 			let e = l + this.cellX * o, n = l + (this.cellX + this.cellWidth) * o;
 			t.fillStyle = i.bgBody, t.fillRect(e, 0, n - e, r);
@@ -69328,7 +69407,7 @@ var EF = class e {
 			t.fillStyle = i.bgBody, t.fillRect(s, 0, u - s, r);
 		} else t.fillStyle = i.bgBody, t.fillRect(m, 0, h - m, r);
 		t.strokeStyle = i.tick, t.lineWidth = 1, t.beginPath(), t.moveTo(l, 0), t.lineTo(l, r), t.moveTo(l + u, 0), t.lineTo(l + u, r), t.stroke();
-		let g = xF * o, _ = Math.ceil(c.width / xF), v = yF(o), y = Math.max(1, Math.round(v.labelStepMm / v.tickStepMm)), b = Math.max(1, Math.round(y / 2)), x = Math.floor(_ / v.tickStepMm);
+		let g = DF * o, _ = Math.ceil(c.width / DF), v = TF(o), y = Math.max(1, Math.round(v.labelStepMm / v.tickStepMm)), b = Math.max(1, Math.round(y / 2)), x = Math.floor(_ / v.tickStepMm);
 		t.strokeStyle = i.tick, t.fillStyle = i.text, t.lineWidth = .5, t.font = "9px sans-serif", t.textAlign = "center", t.textBaseline = "top";
 		for (let e = 0; e <= x; e++) {
 			let i = e * v.tickStepMm, a = l + i * g;
@@ -69339,7 +69418,7 @@ var EF = class e {
 				let e = i / 10;
 				if (e > 0) {
 					let n = `${e}`;
-					bF(a, t.measureText(n).width, l, u) && t.fillText(n, a, 1);
+					EF(a, t.measureText(n).width, l, u) && t.fillText(n, a, 1);
 				}
 			} else o = e % b === 0 ? 6 : 3;
 			t.beginPath(), t.moveTo(a, r), t.lineTo(a, r - o), t.stroke();
@@ -69352,7 +69431,7 @@ var EF = class e {
 			kind: "pageMarginRight",
 			x: h,
 			y: r
-		}), this.drawTriangleUp(t, m, r, CF), this.drawTriangleUp(t, h, r, CF), this.hasParaInfo && d) {
+		}), this.drawTriangleUp(t, m, r, kF), this.drawTriangleUp(t, h, r, kF), this.hasParaInfo && d) {
 			let e, n;
 			if (this.inCell) e = l + this.cellX * o, n = l + (this.cellX + this.cellWidth) * o;
 			else if (c.columns && c.columns.length > 1) {
@@ -69367,19 +69446,19 @@ var EF = class e {
 				let r = c.columns[t];
 				e = l + r.x * o, n = l + (r.x + r.width) * o;
 			} else e = f, n = p;
-			let r = fF(e, this.paraMarginLeftPx, this.paraIndentPx, o);
+			let r = vF(e, this.paraMarginLeftPx, this.paraIndentPx, o);
 			this.hDrag?.kind === "paraIndent" && (r = this.hDrag.x), this.hRefLeft = e, this.hRefRight = n, this.hPins.push({
 				kind: "paraIndent",
 				x: r,
 				y: 0
-			}), this.drawTriangleDown(t, r, 0, CF);
+			}), this.drawTriangleDown(t, r, 0, kF);
 		}
 		t.restore();
 	}
 	drawVertical(e) {
 		let t = this.vCtx;
 		if (!t) return;
-		let n = SF, r = this.vCanvas.height / e;
+		let n = OF, r = this.vCanvas.height / e;
 		t.save(), t.setTransform(e, 0, 0, e, 0, 0);
 		let i = this.palette();
 		t.fillStyle = i.bgMargin, t.fillRect(0, 0, n, r);
@@ -69388,7 +69467,7 @@ var EF = class e {
 			this.vPins = [], t.restore();
 			return;
 		}
-		let o = this.viewportManager.getZoom(), s = this.viewportManager.getScrollY(), c = xF * o, l = yF(o), u = Math.max(1, Math.round(l.labelStepMm / l.tickStepMm)), d = Math.max(1, Math.round(u / 2)), f = a;
+		let o = this.viewportManager.getZoom(), s = this.viewportManager.getScrollY(), c = DF * o, l = TF(o), u = Math.max(1, Math.round(l.labelStepMm / l.tickStepMm)), d = Math.max(1, Math.round(u / 2)), f = a;
 		this.vPins = [];
 		let p = this.virtualScroll.isGridMode(), m = this.virtualScroll.getPageOffset(f) - s, h = this.pageInfoOrNull(f);
 		if (!h) {
@@ -69409,7 +69488,7 @@ var EF = class e {
 			y: b,
 			pageIdx: f
 		});
-		let x = Math.ceil(h.height / xF), S = Math.floor(x / l.tickStepMm);
+		let x = Math.ceil(h.height / DF), S = Math.floor(x / l.tickStepMm);
 		t.strokeStyle = i.tick, t.fillStyle = i.text, t.lineWidth = .5, t.font = "9px sans-serif", t.textAlign = "center", t.textBaseline = "middle";
 		for (let e = 0; e <= S; e++) {
 			let i = e * l.tickStepMm, a = m + i * c;
@@ -69422,24 +69501,24 @@ var EF = class e {
 			} else o = e % d === 0 ? 6 : 3;
 			t.beginPath(), t.moveTo(n, a), t.lineTo(n - o, a), t.stroke();
 		}
-		p || (t.fillStyle = i.marker, this.drawTriangleDown(t, n / 2, y, CF), this.drawTriangleUp(t, n / 2, b, CF)), t.restore();
+		p || (t.fillStyle = i.marker, this.drawTriangleDown(t, n / 2, y, kF), this.drawTriangleUp(t, n / 2, b, kF)), t.restore();
 	}
 	dispose() {
 		this.clearPinDrag(), this.rafId &&= (cancelAnimationFrame(this.rafId), 0);
 		for (let e of this.unsubscribers) e();
 		this.unsubscribers = [], this.hCanvas.removeEventListener("pointerdown", this.onHPinDownBound), this.hCanvas.removeEventListener("pointermove", this.onHPinHoverBound), this.vCanvas.removeEventListener("pointerdown", this.onVPinDownBound), this.vCanvas.removeEventListener("pointermove", this.onVPinHoverBound);
 	}
-}, DF = 1e3;
-DF / 2;
-var OF = 24;
-function kF(e) {
+}, NF = 1e3;
+NF / 2;
+var PF = 24;
+function FF(e) {
 	return Number.isFinite(e) ? Math.max(10, Math.min(500, e)) : 100;
 }
-function AF(e) {
-	return Number.isFinite(e) ? Math.max(0, Math.min(DF, e)) : 500;
+function IF(e) {
+	return Number.isFinite(e) ? Math.max(0, Math.min(NF, e)) : 500;
 }
-function jF(e) {
-	let t = kF(e);
+function LF(e) {
+	let t = FF(e);
 	if (t === 100) return 500;
 	if (t < 100) {
 		let e = Math.log(t / 10) / Math.log(10);
@@ -69448,9 +69527,9 @@ function jF(e) {
 	let n = Math.log(t / 100) / Math.log(5);
 	return Math.round(500 + n * 500);
 }
-function MF(e, t = !0) {
-	let n = AF(e);
-	if (t && Math.abs(n - 500) <= OF) return 100;
+function RF(e, t = !0) {
+	let n = IF(e);
+	if (t && Math.abs(n - 500) <= PF) return 100;
 	if (n <= 500) {
 		let e = n / 500;
 		return Math.round(10 * 10 ** e);
@@ -69458,9 +69537,9 @@ function MF(e, t = !0) {
 	let r = (n - 500) / 500;
 	return Math.round(100 * 5 ** r);
 }
-function NF(e, t, n) {
+function zF(e, t, n) {
 	if (n === "mac") {
-		let r = j_(t, n).replace(/-$/, "−");
+		let r = I_(t, n).replace(/-$/, "−");
 		return `${g(`ui.zoom.${e}`)} (${r})`;
 	}
 	let r = t === "Ctrl++" ? "Ctrl + +" : "Ctrl + -";
@@ -69468,10 +69547,10 @@ function NF(e, t, n) {
 }
 //#endregion
 //#region @rhwp/studio/src/view/renderer-session.ts
-function PF(e) {
+function BF(e) {
 	return e instanceof Error ? e.message : String(e);
 }
-var FF = class {
+var VF = class {
 	request;
 	canvaskitMode;
 	canvaskitSurface;
@@ -69530,7 +69609,7 @@ var FF = class {
 	fallbackForCurrentDecision(e, t, n, r) {
 		let i = this.decisionSnapshot();
 		if (t !== i.key) return null;
-		let a = this.selection(i, "canvas2d", n, r, this.current?.diagnostics.preflight ?? null, PF(e));
+		let a = this.selection(i, "canvas2d", n, r, this.current?.diagnostics.preflight ?? null, BF(e));
 		return this.current = a, this.pending = null, a;
 	}
 	diagnostics() {
@@ -69564,7 +69643,7 @@ var FF = class {
 			try {
 				r = this.readPreflight(e);
 			} catch (e) {
-				return this.selection(t, "canvas2d", "autoPreflightIncomplete", "canvaskitDocumentPreflightIncomplete", null, PF(e));
+				return this.selection(t, "canvas2d", "autoPreflightIncomplete", "canvaskitDocumentPreflightIncomplete", null, BF(e));
 			}
 			if (!r.complete || r.status === "incomplete") return this.selection(t, "canvas2d", "autoPreflightIncomplete", "canvaskitDocumentPreflightIncomplete", r);
 			if (!r.eligible || r.status !== "eligible") return this.selection(t, "canvas2d", "autoIneligible", "canvaskitDocumentIneligible", r);
@@ -69573,14 +69652,14 @@ var FF = class {
 		try {
 			i = await this.ensureCanvasKitRenderer();
 		} catch (e) {
-			return this.selection(t, "canvas2d", "canvaskitInitializationFailed", "canvaskitInitializationFailed", r, PF(e), PF(e));
+			return this.selection(t, "canvas2d", "canvaskitInitializationFailed", "canvaskitInitializationFailed", r, BF(e), BF(e));
 		}
 		if (this.decisionKey() !== n) return this.selection(t, "canvas2d", "superseded", "canvaskitRevisionInvalidated", r);
 		if (this.options.prepareCanvasKitDocument) {
 			try {
 				await this.options.prepareCanvasKitDocument(i, r);
 			} catch (e) {
-				if (this.decisionKey() === n) return this.selection(t, "canvas2d", "canvaskitResourcePreparationFailed", "canvaskitResourcePreparationFailed", r, PF(e));
+				if (this.decisionKey() === n) return this.selection(t, "canvas2d", "canvaskitResourcePreparationFailed", "canvaskitResourcePreparationFailed", r, BF(e));
 			}
 			if (this.decisionKey() !== n) return this.selection(t, "canvas2d", "superseded", "canvaskitRevisionInvalidated", r);
 		}
@@ -69600,7 +69679,7 @@ var FF = class {
 			if (this.disposed) throw t.dispose(), Error("RendererSession was disposed during CanvasKit initialization");
 			return this.canvaskitInitialization === e && (this.canvaskitRenderer = t, this.canvaskitInitialization = null, this.canvaskitInitializationError = null), t;
 		}, (t) => {
-			throw this.canvaskitInitialization === e && (this.canvaskitInitialization = null, this.canvaskitInitializationError = PF(t)), t;
+			throw this.canvaskitInitialization === e && (this.canvaskitInitialization = null, this.canvaskitInitializationError = BF(t)), t;
 		});
 		return this.canvaskitInitialization = e, e;
 	}
@@ -69644,36 +69723,36 @@ var FF = class {
 			documentDigest: this.documentDigest
 		};
 	}
-}, IF = "rhwp-busy", LF = 0;
-function RF(e) {
-	LF += 1, LF === 1 && e.classList.add(IF);
+}, HF = "rhwp-busy", UF = 0;
+function WF(e) {
+	UF += 1, UF === 1 && e.classList.add(HF);
 }
-function zF(e) {
-	LF !== 0 && (--LF, LF === 0 && e.classList.remove(IF));
+function GF(e) {
+	UF !== 0 && (--UF, UF === 0 && e.classList.remove(HF));
 }
-async function BF(e, t) {
-	RF(e);
+async function KF(e, t) {
+	WF(e);
 	try {
 		return await t();
 	} finally {
-		zF(e);
+		GF(e);
 	}
 }
 //#endregion
 //#region @rhwp/studio/src/view/page-indicator.ts
-function VF(e) {
+function qF(e) {
 	return typeof e == "number" && Number.isFinite(e) && e >= 1;
 }
-function HF(e) {
-	return VF(e.documentPageNumber) ? Math.floor(e.documentPageNumber) : e.pageIndex + 1;
+function JF(e) {
+	return qF(e.documentPageNumber) ? Math.floor(e.documentPageNumber) : e.pageIndex + 1;
 }
-function UF(e) {
+function YF(e) {
 	return g("ui.sbPage.text", {
-		p1: HF(e),
+		p1: JF(e),
 		p2: e.totalPages
 	});
 }
-var WF = [
+var XF = [
 	"transferable-array-buffer",
 	"hml-export",
 	"renderer-diagnostics-v1",
@@ -69689,22 +69768,22 @@ var WF = [
 	"target-navigation-v1",
 	"document-change-events-v1"
 ];
-function GF(e) {
+function ZF(e) {
 	return typeof e == "object" && !!e;
 }
-function KF(e) {
-	return qF(e) && e.version === 1 && Array.isArray(e.capabilities) && e.capabilities.includes("transferable-array-buffer");
+function QF(e) {
+	return $F(e) && e.version === 1 && Array.isArray(e.capabilities) && e.capabilities.includes("transferable-array-buffer");
 }
-function qF(e) {
-	return GF(e) && e.type === "rhwp-connect" && Number.isSafeInteger(e.version) && typeof e.sessionId == "string" && e.sessionId.length > 0;
+function $F(e) {
+	return ZF(e) && e.type === "rhwp-connect" && Number.isSafeInteger(e.version) && typeof e.sessionId == "string" && e.sessionId.length > 0;
 }
-function JF(e, t) {
-	return YF(e, t) && e.version === 1 && typeof e.method == "string" && e.method.length > 0;
+function eI(e, t) {
+	return tI(e, t) && e.version === 1 && typeof e.method == "string" && e.method.length > 0;
 }
-function YF(e, t) {
-	return GF(e) && e.type === "rhwp-request" && e.sessionId === t && Number.isSafeInteger(e.id);
+function tI(e, t) {
+	return ZF(e) && e.type === "rhwp-request" && e.sessionId === t && Number.isSafeInteger(e.id);
 }
-function XF(e) {
+function nI(e) {
 	if (!e || e === "null") return !1;
 	try {
 		let t = new URL(e).protocol;
@@ -69715,7 +69794,7 @@ function XF(e) {
 }
 //#endregion
 //#region @rhwp/studio/src/document-agent/types.ts
-var ZF = [
+var rI = [
 	"CAPABILITY_UNSUPPORTED",
 	"INVALID_COMMAND",
 	"DOCUMENT_EPOCH_MISMATCH",
@@ -69739,45 +69818,45 @@ var ZF = [
 		super(t), this.name = "DocumentAgentError", this.code = e, n !== void 0 && (this.recovered = n);
 	}
 };
-function QF(e) {
-	return e instanceof Error && ZF.includes(e.code);
+function iI(e) {
+	return e instanceof Error && rI.includes(e.code);
 }
 //#endregion
 //#region @rhwp/studio/src/document-agent/contract.ts
-var $F = /^[0-9a-f]{64}$/;
-function eI(e, t) {
+var aI = /^[0-9a-f]{64}$/;
+function oI(e, t) {
 	if (typeof e != "object" || !e || Array.isArray(e)) throw new q("INVALID_COMMAND", `${t}은 객체여야 합니다.`);
 	return e;
 }
-function tI(e, t, n) {
+function sI(e, t, n) {
 	let r = Object.keys(e).sort(), i = [...t].sort();
 	if (r.length !== i.length || r.some((e, t) => e !== i[t])) throw new q("INVALID_COMMAND", `${n} 필드가 strict schema와 다릅니다.`);
 }
-function nI(e, t, n) {
+function cI(e, t, n) {
 	if (!Number.isSafeInteger(e) || e < t) throw new q("INVALID_COMMAND", `${n}은 ${t} 이상의 safe integer여야 합니다.`);
 }
-function rI(e, t) {
-	if (typeof e != "string" || !$F.test(e)) throw new q("INVALID_COMMAND", `${t}은 lowercase SHA-256 hex여야 합니다.`);
+function lI(e, t) {
+	if (typeof e != "string" || !aI.test(e)) throw new q("INVALID_COMMAND", `${t}은 lowercase SHA-256 hex여야 합니다.`);
 }
-function iI(e) {
+function uI(e) {
 	if (typeof e != "string" || e.length < 1 || e.length > 128) throw new q("INVALID_COMMAND", "commandId 길이는 1..=128이어야 합니다.");
 }
-function aI(e) {
-	let t = eI(e, "target");
-	if (tI(t, [
+function dI(e) {
+	let t = oI(e, "target");
+	if (sI(t, [
 		"kind",
 		"section",
 		"paragraph",
 		"charOffset",
 		"length"
 	], "target"), t.kind !== "body_paragraph") throw new q("INVALID_COMMAND", "target.kind는 body_paragraph여야 합니다.");
-	if (nI(t.section, 0, "target.section"), nI(t.paragraph, 0, "target.paragraph"), t.charOffset !== 0) throw new q("INVALID_COMMAND", "target.charOffset은 0이어야 합니다.");
-	if (nI(t.length, 0, "target.length"), t.length > 4e3) throw new q("INVALID_COMMAND", "target.length는 4000 이하여야 합니다.");
+	if (cI(t.section, 0, "target.section"), cI(t.paragraph, 0, "target.paragraph"), t.charOffset !== 0) throw new q("INVALID_COMMAND", "target.charOffset은 0이어야 합니다.");
+	if (cI(t.length, 0, "target.length"), t.length > 4e3) throw new q("INVALID_COMMAND", "target.length는 4000 이하여야 합니다.");
 	return t;
 }
-function oI(e) {
-	let t = eI(e, "command");
-	if (tI(t, [
+function fI(e) {
+	let t = oI(e, "command");
+	if (sI(t, [
 		"schemaVersion",
 		"commandId",
 		"expectedDocumentEpoch",
@@ -69789,18 +69868,18 @@ function oI(e) {
 		"expectedAdjacentContextSha256",
 		"replacement"
 	], "command"), t.schemaVersion !== 1) throw new q("INVALID_COMMAND", "schemaVersion은 1이어야 합니다.");
-	iI(t.commandId), nI(t.expectedDocumentEpoch, 1, "expectedDocumentEpoch"), nI(t.expectedChangeSeq, 0, "expectedChangeSeq"), rI(t.expectedDocumentSha256, "expectedDocumentSha256");
-	let n = aI(t.target);
-	if (rI(t.expectedBeforeSha256, "expectedBeforeSha256"), rI(t.expectedFormatSha256, "expectedFormatSha256"), rI(t.expectedAdjacentContextSha256, "expectedAdjacentContextSha256"), typeof t.replacement != "string" || Array.from(t.replacement).length > 4e3) throw new q("INVALID_COMMAND", "replacement는 4000자 이하 문자열이어야 합니다.");
+	uI(t.commandId), cI(t.expectedDocumentEpoch, 1, "expectedDocumentEpoch"), cI(t.expectedChangeSeq, 0, "expectedChangeSeq"), lI(t.expectedDocumentSha256, "expectedDocumentSha256");
+	let n = dI(t.target);
+	if (lI(t.expectedBeforeSha256, "expectedBeforeSha256"), lI(t.expectedFormatSha256, "expectedFormatSha256"), lI(t.expectedAdjacentContextSha256, "expectedAdjacentContextSha256"), typeof t.replacement != "string" || Array.from(t.replacement).length > 4e3) throw new q("INVALID_COMMAND", "replacement는 4000자 이하 문자열이어야 합니다.");
 	if (/[\u0000-\u001f\u007f]/u.test(t.replacement)) throw new q("INVALID_COMMAND", "replacement에 control 문자를 넣을 수 없습니다.");
 	return {
 		...t,
 		target: n
 	};
 }
-function sI(e) {
-	let t = eI(e, "command");
-	if (tI(t, [
+function pI(e) {
+	let t = oI(e, "command");
+	if (sI(t, [
 		"schemaVersion",
 		"commandId",
 		"expectedDocumentEpoch",
@@ -69808,37 +69887,37 @@ function sI(e) {
 		"expectedAfterDocumentSha256",
 		"expectedAfterSha256"
 	], "command"), t.schemaVersion !== 1) throw new q("INVALID_COMMAND", "schemaVersion은 1이어야 합니다.");
-	return iI(t.commandId), nI(t.expectedDocumentEpoch, 1, "expectedDocumentEpoch"), nI(t.expectedChangeSeq, 0, "expectedChangeSeq"), rI(t.expectedAfterDocumentSha256, "expectedAfterDocumentSha256"), rI(t.expectedAfterSha256, "expectedAfterSha256"), t;
+	return uI(t.commandId), cI(t.expectedDocumentEpoch, 1, "expectedDocumentEpoch"), cI(t.expectedChangeSeq, 0, "expectedChangeSeq"), lI(t.expectedAfterDocumentSha256, "expectedAfterDocumentSha256"), lI(t.expectedAfterSha256, "expectedAfterSha256"), t;
 }
-function cI(e, t) {
-	tI(e, [], t);
+function mI(e, t) {
+	sI(e, [], t);
 }
-function lI(e, t, n) {
-	return tI(e, [t], n), e[t];
+function hI(e, t, n) {
+	return sI(e, [t], n), e[t];
 }
 //#endregion
 //#region @rhwp/studio/src/embed/rpc-router.ts
-function uI(e) {
+function gI(e) {
 	return typeof e == "object" && e ? e : {};
 }
-function dI(e, t, n) {
+function _I(e, t, n) {
 	let r = Object.keys(e).filter((e) => !t.includes(e));
 	if (r.length > 0) throw Error(`${n} contains unknown field: ${r.sort()[0]}`);
 }
-function fI(e) {
+function vI(e) {
 	if (typeof e != "string" || e.length === 0) throw Error("id must be a non-empty string");
 	return e;
 }
-function pI(e, t) {
+function yI(e, t) {
 	if (e instanceof Uint8Array) return e;
 	if (e instanceof ArrayBuffer || t && Array.isArray(e)) return new Uint8Array(e);
 	throw Error("loadFile requires binary data");
 }
-async function mI(e, t, n, r = !1) {
-	let i = uI(t);
+async function bI(e, t, n, r = !1) {
+	let i = gI(t);
 	switch (e) {
 		case "ready": return n.ready();
-		case "loadFile": return n.loadFile(pI(i.data, r), typeof i.fileName == "string" ? i.fileName : "document.hwp", i.skipUnsavedGuard === !0, i.suppressDialogs === !0);
+		case "loadFile": return n.loadFile(yI(i.data, r), typeof i.fileName == "string" ? i.fileName : "document.hwp", i.skipUnsavedGuard === !0, i.suppressDialogs === !0);
 		case "pageCount": return n.pageCount();
 		case "getRendererDiagnostics": {
 			let e = i.page ?? 0;
@@ -69846,12 +69925,12 @@ async function mI(e, t, n, r = !1) {
 			return n.getRendererDiagnostics(e);
 		}
 		case "getFontDecisionTrace": {
-			dI(i, ["page", "limits"], "getFontDecisionTrace params");
+			_I(i, ["page", "limits"], "getFontDecisionTrace params");
 			let e = i.page ?? 0;
 			if (!Number.isSafeInteger(e) || e < 0) throw Error("page must be a non-negative safe integer");
-			let t = i.limits === void 0 ? {} : uI(i.limits);
+			let t = i.limits === void 0 ? {} : gI(i.limits);
 			if (i.limits !== void 0 && (typeof i.limits != "object" || i.limits === null || Array.isArray(i.limits))) throw Error("limits must be an object");
-			dI(t, ["maxCharacters"], "getFontDecisionTrace limits");
+			_I(t, ["maxCharacters"], "getFontDecisionTrace limits");
 			let r = t.maxCharacters ?? 1024;
 			if (!Number.isSafeInteger(r) || r < 1 || r > 4096) throw Error("maxCharacters must be a safe integer in 1..=4096");
 			return n.getFontDecisionTrace(e, r);
@@ -69863,31 +69942,31 @@ async function mI(e, t, n, r = !1) {
 		case "getHmlSaveState": return n.getHmlSaveState();
 		case "exportHwpVerify": return n.exportHwpVerify();
 		case "notifySaved": return n.notifySaved(typeof i.fileName == "string" && i.fileName.length > 0 ? i.fileName : void 0);
-		case "getDocumentState": return cI(i, "getDocumentState params"), n.getDocumentState();
-		case "getSelectionContext": return cI(i, "getSelectionContext params"), n.getSelectionContext();
-		case "applyTextCommand": return n.applyTextCommand(oI(lI(i, "command", "applyTextCommand params")));
-		case "revertTextCommand": return n.revertTextCommand(sI(lI(i, "command", "revertTextCommand params")));
-		case "focusTarget": return n.focusTarget(aI(lI(i, "target", "focusTarget params")));
+		case "getDocumentState": return mI(i, "getDocumentState params"), n.getDocumentState();
+		case "getSelectionContext": return mI(i, "getSelectionContext params"), n.getSelectionContext();
+		case "applyTextCommand": return n.applyTextCommand(fI(hI(i, "command", "applyTextCommand params")));
+		case "revertTextCommand": return n.revertTextCommand(pI(hI(i, "command", "revertTextCommand params")));
+		case "focusTarget": return n.focusTarget(dI(hI(i, "target", "focusTarget params")));
 		case "automation.list": return n.automationList();
 		case "automation.menuModel": return n.automationMenuModel();
-		case "automation.isEnabled": return n.automationIsEnabled(fI(i.id));
-		case "automation.execute": return n.automationExecute(fI(i.id), typeof i.params == "object" && i.params !== null ? i.params : void 0, { allowDialog: i.allowDialog === !0 });
+		case "automation.isEnabled": return n.automationIsEnabled(vI(i.id));
+		case "automation.execute": return n.automationExecute(vI(i.id), typeof i.params == "object" && i.params !== null ? i.params : void 0, { allowDialog: i.allowDialog === !0 });
 		case "automation.context": return n.automationContext();
 		case "plugin.list": return n.pluginList();
-		case "plugin.load": return n.pluginLoad(fI(i.id));
-		case "plugin.unload": return n.pluginUnload(fI(i.id));
-		case "plugin.invoke": return n.pluginInvoke(fI(i.id), fI(i.method), Array.isArray(i.args) ? i.args : []);
+		case "plugin.load": return n.pluginLoad(vI(i.id));
+		case "plugin.unload": return n.pluginUnload(vI(i.id));
+		case "plugin.invoke": return n.pluginInvoke(vI(i.id), vI(i.method), Array.isArray(i.args) ? i.args : []);
 		case "chrome.get": return n.chromeGet();
-		case "chrome.set": return n.chromeSet(uI(i.visibility));
+		case "chrome.set": return n.chromeSet(gI(i.visibility));
 		default: throw Error(`Unknown method: ${e}`);
 	}
 }
 //#endregion
 //#region @rhwp/studio/src/embed/runtime.ts
-function hI(e) {
+function xI(e) {
 	return e instanceof Error ? e.message : String(e);
 }
-function gI(e, t) {
+function SI(e, t) {
 	if (!(t.result instanceof Uint8Array)) {
 		e.postMessage(t);
 		return;
@@ -69898,22 +69977,22 @@ function gI(e, t) {
 		result: n
 	}, [n.buffer]);
 }
-function _I(e) {
+function CI(e) {
 	e && (e.onmessage = null, e.close());
 }
-function vI(e) {
-	for (let t of e) _I(t);
+function wI(e) {
+	for (let t of e) CI(t);
 }
-function yI(e, t, n, r, i) {
+function TI(e, t, n, r, i) {
 	return e.onmessage = async ({ data: i }) => {
-		if (!YF(i, t)) return;
+		if (!tI(i, t)) return;
 		let a = {
 			type: "rhwp-response",
 			version: 1,
 			sessionId: t,
 			id: i.id
 		};
-		if (!JF(i, t)) {
+		if (!eI(i, t)) {
 			a.error = typeof i.version == "number" && Number.isSafeInteger(i.version) && i.version !== 1 ? {
 				code: "UNSUPPORTED_VERSION",
 				message: `Unsupported embed protocol version: ${i.version}`,
@@ -69921,7 +70000,7 @@ function yI(e, t, n, r, i) {
 			} : {
 				code: "INVALID_REQUEST",
 				message: "Invalid embed request."
-			}, gI(e, a);
+			}, SI(e, a);
 			return;
 		}
 		let o = {
@@ -69935,25 +70014,25 @@ function yI(e, t, n, r, i) {
 			a.error = {
 				code: "UNSUPPORTED_CAPABILITY",
 				message: `${o} was not negotiated by the client.`
-			}, gI(e, a);
+			}, SI(e, a);
 			return;
 		}
 		try {
-			a.result = await mI(i.method, i.params, r);
+			a.result = await bI(i.method, i.params, r);
 		} catch (e) {
-			let t = QF(e) ? e : null;
+			let t = iI(e) ? e : null;
 			a.error = {
 				code: t?.code ?? "RPC_ERROR",
-				message: hI(e),
+				message: xI(e),
 				...typeof t?.recovered == "boolean" ? { recovered: t.recovered } : {}
 			};
 		}
-		gI(e, a);
+		SI(e, a);
 	}, e.start(), e.postMessage({
 		type: "rhwp-connected",
 		version: 1,
 		sessionId: t,
-		capabilities: WF
+		capabilities: XF
 	}), i?.((n) => {
 		e.postMessage({
 			type: "rhwp-event",
@@ -69964,7 +70043,7 @@ function yI(e, t, n, r, i) {
 		});
 	}) ?? (() => {});
 }
-function bI(e, t) {
+function EI(e, t) {
 	e.start(), e.postMessage({
 		type: "rhwp-connect-error",
 		version: 1,
@@ -69974,9 +70053,9 @@ function bI(e, t) {
 			message: t.version === 1 ? "필수 embed capability를 지원하지 않습니다." : `지원하지 않는 embed protocol version: ${t.version}`,
 			supportedVersions: [1]
 		}
-	}), _I(e);
+	}), CI(e);
 }
-async function xI(e, t) {
+async function DI(e, t) {
 	let n = e.data, r = n?.type === "hwpctl-load" && n.data;
 	if (!r && (n?.type !== "rhwp-request" || !n.method)) return;
 	let i = r ? "loadFile" : n.method, a = r ? n : n.params, o = {
@@ -69985,40 +70064,40 @@ async function xI(e, t) {
 	};
 	try {
 		if (i === "applyTextCommand" || i === "revertTextCommand") throw Error("Legacy embed transport cannot execute document mutations.");
-		let e = await mI(i, a, t, !0);
+		let e = await bI(i, a, t, !0);
 		o.result = e instanceof Uint8Array ? Array.from(e) : e;
 	} catch (e) {
-		o.error = hI(e);
+		o.error = xI(e);
 	}
 	e.source?.postMessage(o, { targetOrigin: e.origin });
 }
-function SI(e) {
+function OI(e) {
 	let t = /* @__PURE__ */ new Set(), n = e.parentWindow === e.hostWindow, r = null, i = (i) => {
 		let a = Array.from(i.ports), o = n && i.data?.type === "rhwp-request";
-		if (i.source !== e.parentWindow || !XF(i.origin) && !o) {
-			vI(a);
+		if (i.source !== e.parentWindow || !nI(i.origin) && !o) {
+			wI(a);
 			return;
 		}
 		let s = i.data?.type === "rhwp-connect" ? a.shift() : void 0;
-		if (vI(a), r && i.origin !== r.origin) {
-			_I(s);
+		if (wI(a), r && i.origin !== r.origin) {
+			CI(s);
 			return;
 		}
 		if (s) {
-			if (!qF(i.data)) {
-				_I(s);
+			if (!$F(i.data)) {
+				CI(s);
 				return;
 			}
-			if (!KF(i.data)) {
-				bI(s, i.data);
+			if (!QF(i.data)) {
+				EI(s, i.data);
 				return;
 			}
 			if (r) {
-				_I(s);
+				CI(s);
 				return;
 			}
 			t.add(s);
-			let n = yI(s, i.data.sessionId, i.data.capabilities, e.handlers, i.data.capabilities.includes("document-change-events-v1") ? e.subscribeDocumentChanged : void 0);
+			let n = TI(s, i.data.sessionId, i.data.capabilities, e.handlers, i.data.capabilities.includes("document-change-events-v1") ? e.subscribeDocumentChanged : void 0);
 			r = {
 				origin: i.origin,
 				sessionId: i.data.sessionId,
@@ -70027,17 +70106,17 @@ function SI(e) {
 			};
 			return;
 		}
-		r || xI(i, e.handlers);
+		r || DI(i, e.handlers);
 	};
 	return e.hostWindow.addEventListener("message", i), () => {
 		e.hostWindow.removeEventListener("message", i), r?.offDocumentChanged();
-		for (let e of t) _I(e);
+		for (let e of t) CI(e);
 		t.clear(), r = null;
 	};
 }
 //#endregion
 //#region @rhwp/studio/node_modules/@noble/hashes/sha2.js
-var CI = /* @__PURE__ */ Uint32Array.from([
+var kI = /* @__PURE__ */ Uint32Array.from([
 	1116352408,
 	1899447441,
 	3049323471,
@@ -70102,7 +70181,7 @@ var CI = /* @__PURE__ */ Uint32Array.from([
 	2756734187,
 	3204031479,
 	3329325298
-]), wI = /* @__PURE__ */ new Uint32Array(64), TI = class extends Qo {
+]), AI = /* @__PURE__ */ new Uint32Array(64), jI = class extends Qo {
 	A = 0;
 	B = 0;
 	C = 0;
@@ -70134,38 +70213,38 @@ var CI = /* @__PURE__ */ Uint32Array.from([
 		return (e ||= new this.constructor()).set(...this.get()), this._cloneIntoMeta(e);
 	}
 	process(e, t) {
-		for (let n = 0; n < 16; n++, t += 4) wI[n] = e.getUint32(t, !1);
+		for (let n = 0; n < 16; n++, t += 4) AI[n] = e.getUint32(t, !1);
 		for (let e = 16; e < 64; e++) {
-			let t = wI[e - 15], n = wI[e - 2], r = Ro(t, 7) ^ Ro(t, 18) ^ t >>> 3, i = Ro(n, 17) ^ Ro(n, 19) ^ n >>> 10;
-			wI[e] = i + wI[e - 7] + r + wI[e - 16] | 0;
+			let t = AI[e - 15], n = AI[e - 2], r = Ro(t, 7) ^ Ro(t, 18) ^ t >>> 3, i = Ro(n, 17) ^ Ro(n, 19) ^ n >>> 10;
+			AI[e] = i + AI[e - 7] + r + AI[e - 16] | 0;
 		}
 		let { A: n, B: r, C: i, D: a, E: o, F: s, G: c, H: l } = this;
 		for (let e = 0; e < 64; e++) {
-			let t = Ro(o, 6) ^ Ro(o, 11) ^ Ro(o, 25), u = l + t + Xo(o, s, c) + CI[e] + wI[e] | 0, d = (Ro(n, 2) ^ Ro(n, 13) ^ Ro(n, 22)) + Zo(n, r, i) | 0;
+			let t = Ro(o, 6) ^ Ro(o, 11) ^ Ro(o, 25), u = l + t + Xo(o, s, c) + kI[e] + AI[e] | 0, d = (Ro(n, 2) ^ Ro(n, 13) ^ Ro(n, 22)) + Zo(n, r, i) | 0;
 			l = c, c = s, s = o, o = a + u | 0, a = i, i = r, r = n, n = u + d | 0;
 		}
 		n = n + this.A | 0, r = r + this.B | 0, i = i + this.C | 0, a = a + this.D | 0, o = o + this.E | 0, s = s + this.F | 0, c = c + this.G | 0, l = l + this.H | 0, this.set(n, r, i, a, o, s, c, l);
 	}
 	roundClean() {
-		Io(wI);
+		Io(AI);
 	}
 	destroy() {
 		this.destroyed = !0, this.set(0, 0, 0, 0, 0, 0, 0, 0), Io(this.buffer);
 	}
-}, EI = class extends TI {
+}, MI = class extends jI {
 	constructor() {
 		super(32, $o);
 	}
-}, DI = /* @__PURE__ */ Jo(() => new EI(), /* @__PURE__ */ Yo(1));
+}, NI = /* @__PURE__ */ Jo(() => new MI(), /* @__PURE__ */ Yo(1));
 //#endregion
 //#region @rhwp/studio/src/core/font-decision-trace.ts
-function OI(e) {
+function PI(e) {
 	return [...new Set(e.filter(Boolean))];
 }
-function kI(e) {
+function FI(e) {
 	return e.split(",")[0].trim().replace(/^(["'])|(["'])$/g, "");
 }
-function AI(e, t, n) {
+function II(e, t, n) {
 	let r = e.document.face ?? e.layoutName.normalizedFace ?? e.paint.canvas2d.requested ?? "", i = eo(r, e.document.altType ?? 0, e.document.languageSlot ?? 0), a = i.candidates, o = [...i.ruleIds], s = null, c = null;
 	for (let e of a) {
 		if (qr(e) || n.has(e)) {
@@ -70191,13 +70270,13 @@ function AI(e, t, n) {
 		candidates: a,
 		resolved: null,
 		source: s,
-		capabilities: OI(l),
-		failures: OI(u),
-		ruleIds: OI(o)
+		capabilities: PI(l),
+		failures: PI(u),
+		ruleIds: PI(o)
 	};
 }
-function jI(e, t) {
-	let n = kI(e.paint.canvaskit.requested ?? e.layoutName.normalizedFace ?? e.document.face ?? "");
+function LI(e, t) {
+	let n = FI(e.paint.canvaskit.requested ?? e.layoutName.normalizedFace ?? e.document.face ?? "");
 	if (t.canvasKitEvidence) return t.canvasKitEvidence(e) || {
 		status: "notObserved",
 		certainty: "notObserved",
@@ -70213,7 +70292,7 @@ function jI(e, t) {
 		status: "notObserved",
 		certainty: "planned",
 		requested: n || null,
-		candidates: OI([n, ...i.sources.flatMap((e) => e.aliases)]),
+		candidates: PI([n, ...i.sources.flatMap((e) => e.aliases)]),
 		resolved: null,
 		source: r ? "local" : "bundled",
 		capabilities: ["canvaskitSfntPlanAvailable"],
@@ -70231,14 +70310,14 @@ function jI(e, t) {
 		ruleIds: i.ruleIds
 	};
 }
-function MI(e, t, n = !1) {
+function RI(e, t, n = !1) {
 	if (Array.isArray(e)) {
-		let r = e.map((e) => MI(e, t, n));
+		let r = e.map((e) => RI(e, t, n));
 		return [
 			"capabilities",
 			"failures",
 			"knownLimitations"
-		].includes(t ?? "") && r.every((e) => typeof e == "string") ? OI(r).sort() : r;
+		].includes(t ?? "") && r.every((e) => typeof e == "string") ? PI(r).sort() : r;
 	}
 	if (typeof e == "object" && e) {
 		let t = {};
@@ -70250,30 +70329,30 @@ function MI(e, t, n = !1) {
 			"elapsedMs",
 			"durationMs",
 			"stack"
-		].includes(r) || (t[r] = MI(e[r], r, n));
+		].includes(r) || (t[r] = RI(e[r], r, n));
 		return t;
 	}
 	return e;
 }
-function NI(e) {
-	let t = `${JSON.stringify(MI(e, void 0, !0), null, 2)}\n`;
-	return Ko(DI(new TextEncoder().encode(t)));
+function zI(e) {
+	let t = `${JSON.stringify(RI(e, void 0, !0), null, 2)}\n`;
+	return Ko(NI(new TextEncoder().encode(t)));
 }
-function PI(e) {
+function BI(e) {
 	if (typeof e != "object" || !e || e.schemaVersion !== 1 || !Array.isArray(e.records)) throw Error("WASM font decision trace must be a schemaVersion 1 envelope");
 }
-function FI(e, t = {}) {
+function VI(e, t = {}) {
 	let n = JSON.parse(e);
-	PI(n);
+	BI(n);
 	let r = structuredClone(n), i = t.localState ?? $r(), a = t.detectedOsFonts ?? Tn();
-	for (let e of r.records) e.paint.canvas2d = AI(e, i, a), e.paint.canvaskit = jI(e, t);
+	for (let e of r.records) e.paint.canvas2d = II(e, i, a), e.paint.canvaskit = LI(e, t);
 	let o = r.records.map((e) => e.paint.canvas2d.status), s = r.records.map((e) => e.paint.canvaskit.status);
 	return r.backendSummary.canvas2d = {
 		status: o.every((e) => e === "complete") ? "complete" : "notObserved",
-		reasons: OI(r.records.flatMap((e) => e.paint.canvas2d.failures))
+		reasons: PI(r.records.flatMap((e) => e.paint.canvas2d.failures))
 	}, r.backendSummary.canvaskit = {
 		status: s.every((e) => e === "complete") ? "complete" : "notObserved",
-		reasons: OI(r.records.flatMap((e) => e.paint.canvaskit.failures))
+		reasons: PI(r.records.flatMap((e) => e.paint.canvaskit.failures))
 	}, r.reasons.push({
 		code: "backendNotObserved",
 		detail: "Canvas2D and CanvasKit evidence was read from current snapshots without loading fonts or rendering."
@@ -70282,12 +70361,12 @@ function FI(e, t = {}) {
 		detail: "The current CanvasKit snapshot could not be joined safely to this source record."
 	}), r.normalizedHash = {
 		algorithm: "sha256",
-		value: NI(r)
+		value: zI(r)
 	}, r;
 }
 //#endregion
 //#region @rhwp/studio/src/document-agent/pwh-document-state-cache.mjs
-function II() {
+function HI() {
 	let e = null, t = null, n = 0;
 	function r(e) {
 		if (!e || !["hwp", "hwpx"].includes(e.format) || typeof e.dirty != "boolean" || ![
@@ -70344,50 +70423,50 @@ function II() {
 }
 //#endregion
 //#region @rhwp/studio/src/document-agent/controller.ts
-var LI = 4e3, RI = 3e3, zI = new TextEncoder();
-function BI(e) {
-	return Ko(DI(e));
+var UI = 4e3, WI = 3e3, GI = new TextEncoder();
+function KI(e) {
+	return Ko(NI(e));
 }
-function VI(e) {
-	return BI(zI.encode(e));
+function qI(e) {
+	return KI(GI.encode(e));
 }
-function HI(e) {
+function JI(e) {
 	return Array.from(e).length;
 }
-function UI(e, t) {
+function YI(e, t) {
 	if (!Number.isSafeInteger(e) || e < 0) throw new q("TARGET_FORMAT_MISMATCH", `${t}을 확인할 수 없습니다.`);
 	return e;
 }
-function WI(e, t) {
-	if (t.kind !== "body_paragraph" || t.charOffset !== 0 || !Number.isSafeInteger(t.section) || !Number.isSafeInteger(t.paragraph) || !Number.isSafeInteger(t.length) || t.section < 0 || t.paragraph < 0 || t.length < 0 || t.length > LI || t.section >= e.getSectionCount() || t.paragraph >= e.getParagraphCount(t.section) || e.getParagraphLength(t.section, t.paragraph) !== t.length) throw new q("TARGET_NOT_FOUND", "exact body paragraph target을 찾을 수 없습니다.");
+function XI(e, t) {
+	if (t.kind !== "body_paragraph" || t.charOffset !== 0 || !Number.isSafeInteger(t.section) || !Number.isSafeInteger(t.paragraph) || !Number.isSafeInteger(t.length) || t.section < 0 || t.paragraph < 0 || t.length < 0 || t.length > UI || t.section >= e.getSectionCount() || t.paragraph >= e.getParagraphCount(t.section) || e.getParagraphLength(t.section, t.paragraph) !== t.length) throw new q("TARGET_NOT_FOUND", "exact body paragraph target을 찾을 수 없습니다.");
 }
-function GI(e, t, n, r) {
+function ZI(e, t, n, r) {
 	let i = [], a = Math.max(r, 1);
-	for (let r = 0; r < a; r += 1) i.push(UI(e.getCharPropertiesAt(t, n, r).charShapeId, "charShapeId"));
+	for (let r = 0; r < a; r += 1) i.push(YI(e.getCharPropertiesAt(t, n, r).charShapeId, "charShapeId"));
 	return i;
 }
-function KI(e, t, n) {
+function QI(e, t, n) {
 	let r = e.getParagraphLength(t, n);
 	return {
 		section: t,
 		paragraph: n,
 		length: r,
-		textSha256: VI(r > 0 ? e.getTextRange(t, n, 0, r) : ""),
-		paraShapeId: UI(e.getParaPropertiesAt(t, n).paraShapeId, "paraShapeId"),
-		styleId: UI(e.getStyleAt(t, n).id, "styleId"),
-		charShapeIds: GI(e, t, n, r),
+		textSha256: qI(r > 0 ? e.getTextRange(t, n, 0, r) : ""),
+		paraShapeId: YI(e.getParaPropertiesAt(t, n).paraShapeId, "paraShapeId"),
+		styleId: YI(e.getStyleAt(t, n).id, "styleId"),
+		charShapeIds: ZI(e, t, n, r),
 		controls: e.getControlTextPositions(t, n)
 	};
 }
-function qI(e, t) {
-	let n = t.paragraph > 0 ? KI(e, t.section, t.paragraph - 1) : null, r = t.paragraph + 1 < e.getParagraphCount(t.section) ? KI(e, t.section, t.paragraph + 1) : null;
-	return VI(JSON.stringify({
+function $I(e, t) {
+	let n = t.paragraph > 0 ? QI(e, t.section, t.paragraph - 1) : null, r = t.paragraph + 1 < e.getParagraphCount(t.section) ? QI(e, t.section, t.paragraph + 1) : null;
+	return qI(JSON.stringify({
 		schemaVersion: 1,
 		previous: n,
 		next: r
 	}));
 }
-function JI(e, t) {
+function eL(e, t) {
 	for (let n = 0; n <= t.length; n += 1) if (e.getFieldInfoAt({
 		sectionIndex: t.section,
 		paragraphIndex: t.paragraph,
@@ -70395,43 +70474,43 @@ function JI(e, t) {
 	}).inField) return !0;
 	return !1;
 }
-function YI(e, t) {
-	if (WI(e, t), e.getControlTextPositions(t.section, t.paragraph).length > 0 || JI(e, t)) throw new q("TARGET_FORMAT_MISMATCH", "컨트롤 또는 필드가 포함된 문단은 에이전트 명령으로 편집할 수 없습니다.");
-	let n = GI(e, t.section, t.paragraph, t.length), r = n[0];
+function tL(e, t) {
+	if (XI(e, t), e.getControlTextPositions(t.section, t.paragraph).length > 0 || eL(e, t)) throw new q("TARGET_FORMAT_MISMATCH", "컨트롤 또는 필드가 포함된 문단은 에이전트 명령으로 편집할 수 없습니다.");
+	let n = ZI(e, t.section, t.paragraph, t.length), r = n[0];
 	if (!n.every((e) => e === r)) throw new q("TARGET_FORMAT_MISMATCH", "혼합 글자 서식 문단은 에이전트 명령으로 편집할 수 없습니다.");
-	let i = UI(e.getParaPropertiesAt(t.section, t.paragraph).paraShapeId, "paraShapeId"), a = UI(e.getStyleAt(t.section, t.paragraph).id, "styleId"), o = t.length > 0 ? e.getTextRange(t.section, t.paragraph, 0, t.length) : "";
+	let i = YI(e.getParaPropertiesAt(t.section, t.paragraph).paraShapeId, "paraShapeId"), a = YI(e.getStyleAt(t.section, t.paragraph).id, "styleId"), o = t.length > 0 ? e.getTextRange(t.section, t.paragraph, 0, t.length) : "";
 	return {
 		text: o,
-		textSha256: VI(o),
-		formatSha256: VI(JSON.stringify({
+		textSha256: qI(o),
+		formatSha256: qI(JSON.stringify({
 			schemaVersion: 1,
 			charShapeId: r,
 			paraShapeId: i,
 			styleId: a
 		})),
-		adjacentContextSha256: qI(e, t),
+		adjacentContextSha256: $I(e, t),
 		charShapeId: r,
 		paraShapeId: i,
 		styleId: a
 	};
 }
-function XI(e, t) {
+function nL(e, t) {
 	let n = [];
-	for (let r = 0; r < e.getSectionCount(); r += 1) for (let i = 0; i < e.getParagraphCount(r); i += 1) (r !== t.section || i !== t.paragraph) && n.push(KI(e, r, i));
-	return VI(JSON.stringify({
+	for (let r = 0; r < e.getSectionCount(); r += 1) for (let i = 0; i < e.getParagraphCount(r); i += 1) (r !== t.section || i !== t.paragraph) && n.push(QI(e, r, i));
+	return qI(JSON.stringify({
 		schemaVersion: 1,
 		sectionCount: e.getSectionCount(),
 		paragraphCounts: Array.from({ length: e.getSectionCount() }, (t, n) => e.getParagraphCount(n)),
 		paragraphs: n
 	}));
 }
-function ZI(e, t) {
+function rL(e, t) {
 	let n = e.borrowDocumentHandle();
 	if (!n) throw new q("TARGET_NOT_FOUND", "문서가 로드되지 않았습니다.");
-	return BI(t === "hwpx" ? n.exportHwpx() : n.exportHwp());
+	return KI(t === "hwpx" ? n.exportHwpx() : n.exportHwp());
 }
-function QI(e) {
-	return VI(JSON.stringify({
+function iL(e) {
+	return qI(JSON.stringify({
 		schemaVersion: e.schemaVersion,
 		commandId: e.commandId,
 		expectedDocumentEpoch: e.expectedDocumentEpoch,
@@ -70444,8 +70523,8 @@ function QI(e) {
 		replacement: e.replacement
 	}));
 }
-function $I(e) {
-	return VI(JSON.stringify({
+function aL(e) {
+	return qI(JSON.stringify({
 		schemaVersion: e.schemaVersion,
 		commandId: e.commandId,
 		expectedDocumentEpoch: e.expectedDocumentEpoch,
@@ -70454,14 +70533,14 @@ function $I(e) {
 		expectedAfterSha256: e.expectedAfterSha256
 	}));
 }
-function eL(e, t) {
+function oL(e, t) {
 	return e.parentParaIndex === void 0 && t.parentParaIndex === void 0 && e.sectionIndex === t.sectionIndex && e.paragraphIndex === t.paragraphIndex;
 }
-function tL(e, t) {
-	return eL(e, t) && e.charOffset === t.charOffset;
+function sL(e, t) {
+	return oL(e, t) && e.charOffset === t.charOffset;
 }
-var nL = class {
-	pwhStateCache = II();
+var cL = class {
+	pwhStateCache = HI();
 	pwhStateCacheOff = null;
 	getPresentationDocumentRevision() {
 		return this.syncGeneration(), {
@@ -70479,10 +70558,10 @@ var nL = class {
 			let e = this.deps.wasm.exportHwpxWithReport();
 			return {
 				artifact: e,
-				digest: BI(e.bytes)
+				digest: KI(e.bytes)
 			};
 		}
-		return this.pwhStateCache.readArtifact(e, () => this.deps.wasm.exportHwpxWithReport(), BI);
+		return this.pwhStateCache.readArtifact(e, () => this.deps.wasm.exportHwpxWithReport(), KI);
 	}
 	getPresentationDocumentState() {
 		if (this.syncGeneration(), !this.pwhStateCacheOff) {
@@ -70499,7 +70578,7 @@ var nL = class {
 		return {
 			schemaVersion: 1,
 			...e,
-			documentSha256: this.pwhStateCache.read(e, () => e.format === "hwpx" ? this.getPresentationRecoveryExport().digest : ZI(this.deps.wasm, e.format))
+			documentSha256: this.pwhStateCache.read(e, () => e.format === "hwpx" ? this.getPresentationRecoveryExport().digest : rL(this.deps.wasm, e.format))
 		};
 	}
 	deps;
@@ -70527,15 +70606,15 @@ var nL = class {
 			changeSeq: this.changeSeq,
 			dirty: this.deps.isDirty(),
 			pageCount: this.deps.wasm.pageCount,
-			documentSha256: ZI(this.deps.wasm, e)
+			documentSha256: rL(this.deps.wasm, e)
 		};
 	}
 	getSelectionContext() {
 		this.syncGeneration();
-		let e = this.deps.input.getCursorPosition(), t = this.pageFor(e.sectionIndex, e.paragraphIndex), n = this.deps.input.getSelection(), r = !n || tL(n.start, n.end), i = null, a = !1, o = null;
+		let e = this.deps.input.getCursorPosition(), t = this.pageFor(e.sectionIndex, e.paragraphIndex), n = this.deps.input.getSelection(), r = !n || sL(n.start, n.end), i = null, a = !1, o = null;
 		if (e.parentParaIndex === void 0 && e.sectionIndex >= 0 && e.paragraphIndex >= 0 && e.sectionIndex < this.deps.wasm.getSectionCount() && e.paragraphIndex < this.deps.wasm.getParagraphCount(e.sectionIndex)) {
 			let t = this.deps.wasm.getParagraphLength(e.sectionIndex, e.paragraphIndex);
-			if (t <= LI) {
+			if (t <= UI) {
 				i = {
 					kind: "body_paragraph",
 					section: e.sectionIndex,
@@ -70544,15 +70623,15 @@ var nL = class {
 					length: t
 				};
 				try {
-					YI(this.deps.wasm, i), this.currentFormat(), a = !0;
+					tL(this.deps.wasm, i), this.currentFormat(), a = !0;
 				} catch {
 					a = !1;
 				}
 			}
 		}
-		if (!r && n && eL(n.start, n.end)) {
+		if (!r && n && oL(n.start, n.end)) {
 			let e = n.end.charOffset - n.start.charOffset;
-			e >= 0 && (o = VI(this.deps.wasm.getTextRange(n.start.sectionIndex, n.start.paragraphIndex, n.start.charOffset, e)));
+			e >= 0 && (o = qI(this.deps.wasm.getTextRange(n.start.sectionIndex, n.start.paragraphIndex, n.start.charOffset, e)));
 		}
 		return {
 			schemaVersion: 1,
@@ -70567,22 +70646,22 @@ var nL = class {
 	}
 	async applyTextCommand(e) {
 		this.syncGeneration();
-		let t = QI(e), n = this.journal.get(e.commandId);
+		let t = iL(e), n = this.journal.get(e.commandId);
 		if (n) {
 			if (n.status === "applied" && n.applyBindingSha256 === t && this.isCurrentReceiptState(n.applyReceipt, n.afterTarget, n.applyReceipt.afterTextSha256)) return n.applyReceipt;
 			throw new q("COMMAND_REPLAY_MISMATCH", "같은 commandId가 다른 binding 또는 terminal 상태로 이미 사용되었습니다.");
 		}
 		let r = this.now(), i = this.getDocumentState();
 		this.assertApplyFence(e, i);
-		let a = YI(this.deps.wasm, e.target);
+		let a = tL(this.deps.wasm, e.target);
 		if (a.textSha256 !== e.expectedBeforeSha256) throw new q("TARGET_PREIMAGE_MISMATCH", "target before SHA가 다릅니다.");
 		if (a.formatSha256 !== e.expectedFormatSha256) throw new q("TARGET_FORMAT_MISMATCH", "target format SHA가 다릅니다.");
 		if (a.adjacentContextSha256 !== e.expectedAdjacentContextSha256) throw new q("TARGET_CONTEXT_MISMATCH", "target adjacent context SHA가 다릅니다.");
-		let o = XI(this.deps.wasm, e.target);
+		let o = nL(this.deps.wasm, e.target);
 		this.assertWithinBudget(r);
 		let s = {
 			...e.target,
-			length: HI(e.replacement)
+			length: JI(e.replacement)
 		}, c, l = "", u = this.changeSeq;
 		try {
 			await this.deps.input.executeDocumentAgentOperation({
@@ -70595,12 +70674,12 @@ var nL = class {
 						t.beginDeferredPagination?.(), n = !0;
 						let u = t.replaceText(e.target.section, e.target.paragraph, 0, e.target.length, e.replacement);
 						if (!u.ok || u.newLength !== s.length) throw new q("TRANSACTION_FAILED", "replaceText가 target을 교체하지 못했습니다.");
-						if (s.length > 0 && t.setCharShapeId(e.target.section, e.target.paragraph, 0, s.length, a.charShapeId), t.setParaShapeId(e.target.section, e.target.paragraph, a.paraShapeId), t.flushDeferredPagination?.(), n = !1, c = YI(t, s), c.text !== e.replacement) throw new q("TARGET_PREIMAGE_MISMATCH", "target postimage가 replacement와 다릅니다.");
+						if (s.length > 0 && t.setCharShapeId(e.target.section, e.target.paragraph, 0, s.length, a.charShapeId), t.setParaShapeId(e.target.section, e.target.paragraph, a.paraShapeId), t.flushDeferredPagination?.(), n = !1, c = tL(t, s), c.text !== e.replacement) throw new q("TARGET_PREIMAGE_MISMATCH", "target postimage가 replacement와 다릅니다.");
 						if (c.formatSha256 !== a.formatSha256) throw new q("TARGET_FORMAT_MISMATCH", "target format이 변경되었습니다.");
 						if (c.adjacentContextSha256 !== a.adjacentContextSha256) throw new q("TARGET_CONTEXT_MISMATCH", "adjacent context가 변경되었습니다.");
-						if (XI(t, s) !== o) throw new q("NON_TARGET_CHANGED", "target 밖 semantic manifest가 변경되었습니다.");
+						if (nL(t, s) !== o) throw new q("NON_TARGET_CHANGED", "target 밖 semantic manifest가 변경되었습니다.");
 						if (t.pageCount !== i.pageCount) throw new q("PAGE_COUNT_CHANGED", "문서 페이지 수가 변경되었습니다.");
-						return l = ZI(t, i.format), this.assertWithinBudget(r), {
+						return l = rL(t, i.format), this.assertWithinBudget(r), {
 							sectionIndex: s.section,
 							paragraphIndex: s.paragraph,
 							charOffset: s.length
@@ -70664,7 +70743,7 @@ var nL = class {
 	}
 	async revertTextCommand(e) {
 		this.syncGeneration();
-		let t = $I(e), n = this.journal.get(e.commandId);
+		let t = aL(e), n = this.journal.get(e.commandId);
 		if (n?.status === "reverted") {
 			if (n.revertBindingSha256 === t && n.revertReceipt && this.isCurrentReceiptState(n.revertReceipt, n.beforeTarget, n.revertReceipt.afterTextSha256)) return n.revertReceipt;
 			throw new q("COMMAND_REPLAY_MISMATCH", "revert command binding 또는 현재 terminal receipt 상태가 다릅니다.");
@@ -70674,9 +70753,9 @@ var nL = class {
 		if (e.expectedDocumentEpoch !== i.documentEpoch) throw new q("DOCUMENT_EPOCH_MISMATCH", "document epoch가 다릅니다.");
 		if (e.expectedChangeSeq !== i.changeSeq) throw new q("CHANGE_SEQ_MISMATCH", "changeSeq가 다릅니다.");
 		if (e.expectedAfterDocumentSha256 !== i.documentSha256) throw new q("DOCUMENT_SHA_MISMATCH", "after document SHA가 다릅니다.");
-		let a = YI(this.deps.wasm, n.afterTarget);
+		let a = tL(this.deps.wasm, n.afterTarget);
 		if (a.textSha256 !== e.expectedAfterSha256 || a.textSha256 !== n.applyReceipt.afterTextSha256) throw new q("TARGET_PREIMAGE_MISMATCH", "revert target after SHA가 다릅니다.");
-		if (XI(this.deps.wasm, n.afterTarget) !== n.nonTargetManifestSha256) throw new q("COMMAND_NOT_LATEST", "target 밖 변경이 있어 되돌릴 수 없습니다.");
+		if (nL(this.deps.wasm, n.afterTarget) !== n.nonTargetManifestSha256) throw new q("COMMAND_NOT_LATEST", "target 밖 변경이 있어 되돌릴 수 없습니다.");
 		this.assertWithinBudget(r);
 		let o = "", s, c = this.changeSeq;
 		try {
@@ -70690,12 +70769,12 @@ var nL = class {
 						t.beginDeferredPagination?.(), a = !0;
 						let e = t.replaceText(n.afterTarget.section, n.afterTarget.paragraph, 0, n.afterTarget.length, n.beforeText);
 						if (!e.ok || e.newLength !== n.beforeTarget.length) throw new q("TRANSACTION_FAILED", "inverse replaceText가 실패했습니다.");
-						if (n.beforeTarget.length > 0 && t.setCharShapeId(n.beforeTarget.section, n.beforeTarget.paragraph, 0, n.beforeTarget.length, n.beforeEvidence.charShapeId), t.setParaShapeId(n.beforeTarget.section, n.beforeTarget.paragraph, n.beforeEvidence.paraShapeId), t.flushDeferredPagination?.(), a = !1, s = YI(t, n.beforeTarget), s.textSha256 !== n.beforeEvidence.textSha256) throw new q("TARGET_PREIMAGE_MISMATCH", "before target 복원이 일치하지 않습니다.");
+						if (n.beforeTarget.length > 0 && t.setCharShapeId(n.beforeTarget.section, n.beforeTarget.paragraph, 0, n.beforeTarget.length, n.beforeEvidence.charShapeId), t.setParaShapeId(n.beforeTarget.section, n.beforeTarget.paragraph, n.beforeEvidence.paraShapeId), t.flushDeferredPagination?.(), a = !1, s = tL(t, n.beforeTarget), s.textSha256 !== n.beforeEvidence.textSha256) throw new q("TARGET_PREIMAGE_MISMATCH", "before target 복원이 일치하지 않습니다.");
 						if (s.formatSha256 !== n.beforeEvidence.formatSha256) throw new q("TARGET_FORMAT_MISMATCH", "before format 복원이 일치하지 않습니다.");
 						if (s.adjacentContextSha256 !== n.beforeEvidence.adjacentContextSha256) throw new q("TARGET_CONTEXT_MISMATCH", "before context 복원이 일치하지 않습니다.");
-						if (XI(t, n.beforeTarget) !== n.nonTargetManifestSha256) throw new q("NON_TARGET_CHANGED", "revert가 target 밖을 변경했습니다.");
+						if (nL(t, n.beforeTarget) !== n.nonTargetManifestSha256) throw new q("NON_TARGET_CHANGED", "revert가 target 밖을 변경했습니다.");
 						if (t.pageCount !== n.applyReceipt.pageCountBefore) throw new q("PAGE_COUNT_CHANGED", "revert 뒤 페이지 수가 다릅니다.");
-						return o = ZI(t, i.format), this.assertWithinBudget(r), {
+						return o = rL(t, i.format), this.assertWithinBudget(r), {
 							sectionIndex: n.beforeTarget.section,
 							paragraphIndex: n.beforeTarget.paragraph,
 							charOffset: n.beforeTarget.length
@@ -70747,7 +70826,7 @@ var nL = class {
 		}), l;
 	}
 	focusTarget(e) {
-		this.syncGeneration(), WI(this.deps.wasm, e);
+		this.syncGeneration(), XI(this.deps.wasm, e);
 		let t = this.pageFor(e.section, e.paragraph);
 		return {
 			focused: this.deps.input.focusBodyParagraph(e.section, e.paragraph, e.length),
@@ -70773,21 +70852,21 @@ var nL = class {
 		if (this.changeSeq !== t) throw new q("CHANGE_SEQ_MISMATCH", "transaction 직전 changeSeq가 바뀌었습니다.");
 	}
 	assertWithinBudget(e) {
-		if (this.now() - e > RI) throw new q("COMMAND_TOO_SLOW", "문서 명령이 3초 상한을 넘었습니다.");
+		if (this.now() - e > WI) throw new q("COMMAND_TOO_SLOW", "문서 명령이 3초 상한을 넘었습니다.");
 	}
 	syncGeneration() {
 		let e = this.deps.wasm.documentGeneration;
 		e !== this.documentEpoch && (this.documentEpoch = e, this.changeSeq = 0, this.latest = null, this.journal.clear());
 	}
 	normalizeExecutionError(e) {
-		if (QF(e)) return e.code === "TRANSACTION_FAILED" && e.recovered === void 0 ? new q(e.code, e.message, !0) : e;
+		if (iI(e)) return e.code === "TRANSACTION_FAILED" && e.recovered === void 0 ? new q(e.code, e.message, !0) : e;
 		let t = e, n = t.cause;
 		return t.code === "RENDER_FAILED" && typeof t.recovered == "boolean" ? n?.code === "COMMAND_TOO_SLOW" ? new q("COMMAND_TOO_SLOW", typeof n.message == "string" ? n.message : "command time budget을 초과했습니다.", t.recovered) : new q("RENDER_FAILED", typeof t.message == "string" ? t.message : "render commit이 실패했습니다.", t.recovered) : new q("TRANSACTION_FAILED", e instanceof Error ? e.message : String(e), !(e instanceof AggregateError));
 	}
 	isCurrentReceiptState(e, t, n) {
 		try {
 			let r = this.getDocumentState();
-			return r.documentEpoch !== e.documentEpoch || r.changeSeq !== e.afterChangeSeq || r.documentSha256 !== e.afterDocumentSha256 ? !1 : YI(this.deps.wasm, t).textSha256 === n;
+			return r.documentEpoch !== e.documentEpoch || r.changeSeq !== e.afterChangeSeq || r.documentSha256 !== e.afterDocumentSha256 ? !1 : tL(this.deps.wasm, t).textSha256 === n;
 		} catch {
 			return !1;
 		}
@@ -70799,12 +70878,12 @@ var nL = class {
 			console.error("[DocumentAgentController] documentChanged observer 실패:", e);
 		}
 	}
-}, rL = (e) => typeof e == "string" ? JSON.parse(e) : e, iL = (e, t) => JSON.stringify(e) === JSON.stringify(t), aL = (e) => typeof e == "string" && /^#[0-9a-f]{6}$/i.test(e);
-async function oL(e) {
+}, lL = (e) => typeof e == "string" ? JSON.parse(e) : e, uL = (e, t) => JSON.stringify(e) === JSON.stringify(t), dL = (e) => typeof e == "string" && /^#[0-9a-f]{6}$/i.test(e);
+async function fL(e) {
 	return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify(e))))).map((e) => e.toString(16).padStart(2, "0")).join("");
 }
-function sL(e, t, n, r) {
-	let i = rL(e.getTableDimensions(t, n, r));
+function pL(e, t, n, r) {
+	let i = lL(e.getTableDimensions(t, n, r));
 	if (!i?.cellCount || i.cellCount > 256) throw Error("Table size exceeds supported limits");
 	let a = 0, o = [];
 	for (let s = 0; s < i.cellCount; s++) {
@@ -70815,8 +70894,8 @@ function sL(e, t, n, r) {
 			if (a += c, a > 24e3) throw Error("Table text exceeds supported limits");
 			let l = [], u;
 			for (let i = 0; i < Math.max(1, c); i++) {
-				let a = rL(e.getCellCharPropertiesAt(t, n, r, s, o, i));
-				iL(a, u) || (l.push({
+				let a = lL(e.getCellCharPropertiesAt(t, n, r, s, o, i));
+				uL(a, u) || (l.push({
 					offset: i,
 					format: a
 				}), u = a);
@@ -70824,52 +70903,52 @@ function sL(e, t, n, r) {
 			i.push({
 				length: c,
 				text: e.getTextInCell(t, n, r, s, o, 0, c),
-				format: rL(e.getCellParaPropertiesAt(t, n, r, s, o)),
+				format: lL(e.getCellParaPropertiesAt(t, n, r, s, o)),
 				formats: l
 			});
 		}
 		o.push({
-			geometry: rL(e.getCellInfo(t, n, r, s)),
-			properties: rL(e.getCellProperties(t, n, r, s)),
+			geometry: lL(e.getCellInfo(t, n, r, s)),
+			properties: lL(e.getCellProperties(t, n, r, s)),
 			paragraphs: i
 		});
 	}
 	return {
 		dimensions: i,
-		properties: rL(e.getTableProperties(t, n, r)),
+		properties: lL(e.getTableProperties(t, n, r)),
 		cells: o
 	};
 }
-async function cL(e, t) {
+async function mL(e, t) {
 	if (t.kind !== "cell_block" || !t.table?.selectedCellsComplete || !t.table.selectedCells?.length) return null;
 	let { sec: n, ppi: r, ci: i, cellPath: a } = t.table.source;
 	if (a?.length > 1) return null;
 	let o = t.table.selectedCells.map((e) => e.cellIndex);
 	if (o.length > 256) return null;
-	let s = sL(e, n, r, i);
+	let s = pL(e, n, r, i);
 	return {
 		kind: "table_cells",
 		epoch: t.documentState.documentEpoch,
 		section: n,
 		controlIndex: i,
 		cells: o,
-		sha256: await oL(s)
+		sha256: await fL(s)
 	};
 }
-async function lL(e, t, n) {
+async function hL(e, t, n) {
 	if (t?.kind !== "table_cells" || t.epoch !== n.documentState?.documentEpoch) throw Error("Table request expired; reopen request");
 	let r = null, i = e.getParagraphCount(t.section);
 	if (i > 2e4) throw Error("Too many paragraphs");
 	for (let n = 0; n < i; n++) {
-		let i = rL(e.getControlTextPositions(t.section, n));
+		let i = lL(e.getControlTextPositions(t.section, n));
 		for (let a = 0; a < i.length; a++) {
 			let i;
 			try {
-				i = sL(e, t.section, n, a);
+				i = pL(e, t.section, n, a);
 			} catch {
 				continue;
 			}
-			if (await oL(i) === t.sha256) {
+			if (await fL(i) === t.sha256) {
 				if (r) throw Error("Ambiguous table target");
 				r = {
 					sec: t.section,
@@ -70883,7 +70962,7 @@ async function lL(e, t, n) {
 	if (!r) throw Error("Requested table changed or was deleted");
 	return r;
 }
-function uL(e, t) {
+function gL(e, t) {
 	if (!Array.isArray(e) || !e.length || e.length > 256) throw Error("Provide 1 to 256 cell styles");
 	let n = /* @__PURE__ */ new Set();
 	for (let r of e) {
@@ -70904,7 +70983,7 @@ function uL(e, t) {
 			"fillColor",
 			"textColor",
 			"borderColor"
-		]) if (r[e] !== void 0 && !aL(r[e])) throw Error("Use #RRGGBB colors");
+		]) if (r[e] !== void 0 && !dL(r[e])) throw Error("Use #RRGGBB colors");
 		if (r.fontFamily !== void 0 && (typeof r.fontFamily != "string" || !r.fontFamily.trim() || r.fontFamily.length > 100) || r.fontSize !== void 0 && (!Number.isFinite(r.fontSize) || r.fontSize < 600 || r.fontSize > 7200)) throw Error("Invalid font");
 		if (r.borders !== void 0) {
 			if (!r.borders || typeof r.borders != "object" || Array.isArray(r.borders) || !Object.keys(r.borders).length) throw Error("Specify at least one border");
@@ -70917,7 +70996,7 @@ function uL(e, t) {
 				"color",
 				"type",
 				"width"
-			].includes(e)) || !aL(t.color) || ![
+			].includes(e)) || !dL(t.color) || ![
 				0,
 				1,
 				2,
@@ -70932,11 +71011,11 @@ function uL(e, t) {
 		].includes(r.alignment) || r.borderWidth !== void 0 && (!Number.isInteger(r.borderWidth) || r.borderWidth < 0 || r.borderWidth > 6 || !r.borderColor)) throw Error("Invalid cell style");
 	}
 }
-function dL(e) {
-	if (rL(e)?.ok === !1) throw Error("Cell style operation failed");
+function _L(e) {
+	if (lL(e)?.ok === !1) throw Error("Cell style operation failed");
 }
-function fL(e, t, n) {
-	uL(n, n.map((e) => e.cellIndex));
+function vL(e, t, n) {
+	gL(n, n.map((e) => e.cellIndex));
 	let { sec: r, ppi: i, ci: a, snapshot: o } = t, s = /* @__PURE__ */ new Map(), c = {
 		Left: "Right",
 		Right: "Left",
@@ -70965,14 +71044,14 @@ function fL(e, t, n) {
 			if (r === "Left" ? a.col + a.colSpan === t.col && l : r === "Right" ? t.col + t.colSpan === a.col && l : r === "Top" ? a.row + a.rowSpan === t.row && u : t.row + t.rowSpan === a.row && u) {
 				if (!(r === "Left" || r === "Right" ? t.row <= a.row && t.row + t.rowSpan >= a.row + a.rowSpan : t.col <= a.col && t.col + t.colSpan >= a.col + a.colSpan)) throw Error("A neighbouring merged cell extends beyond the requested edge");
 				let e = n + ":" + c[r], o = s.get(e);
-				if (o && !iL(o, i)) throw Error("Conflicting borders on a shared edge");
+				if (o && !uL(o, i)) throw Error("Conflicting borders on a shared edge");
 				s.set(e, i);
 			}
 		}
 	}
 	for (let e of n) for (let [t, n] of Object.entries(e.borders || {})) {
 		let r = s.get(e.cellIndex + ":" + t);
-		if (r && !iL(r, n)) throw Error("Conflicting borders on a shared edge");
+		if (r && !uL(r, n)) throw Error("Conflicting borders on a shared edge");
 	}
 	for (let t of n) {
 		let n = o.cells[t.cellIndex];
@@ -70998,7 +71077,7 @@ function fL(e, t, n) {
 			"Top",
 			"Bottom"
 		]) s["border" + e] || (s["border" + e] = n.properties["border" + e]);
-		Object.keys(s).length && dL(e.setCellProperties(r, i, a, t.cellIndex, s));
+		Object.keys(s).length && _L(e.setCellProperties(r, i, a, t.cellIndex, s));
 		for (let o = 0; o < n.paragraphs.length; o++) {
 			let s = n.paragraphs[o], c = {};
 			for (let e of [
@@ -71006,16 +71085,16 @@ function fL(e, t, n) {
 				"bold",
 				"fontSize"
 			]) t[e] !== void 0 && (c[e] = t[e]);
-			t.fontFamily && (c.fontIds = Array.from({ length: 7 }, (n, r) => e.findOrCreateFontIdForLang(r, t.fontFamily))), Object.keys(c).length && s.length && dL(e.applyCharFormatInCell(r, i, a, t.cellIndex, o, 0, s.length, JSON.stringify(c))), t.alignment && dL(e.applyParaFormatInCell(r, i, a, t.cellIndex, o, JSON.stringify({ alignment: t.alignment })));
+			t.fontFamily && (c.fontIds = Array.from({ length: 7 }, (n, r) => e.findOrCreateFontIdForLang(r, t.fontFamily))), Object.keys(c).length && s.length && _L(e.applyCharFormatInCell(r, i, a, t.cellIndex, o, 0, s.length, JSON.stringify(c))), t.alignment && _L(e.applyParaFormatInCell(r, i, a, t.cellIndex, o, JSON.stringify({ alignment: t.alignment })));
 		}
 	}
 	e.flushDeferredPagination();
-	let l = sL(e, r, i, a);
-	if (!iL(o.dimensions, l.dimensions) || !iL(o.properties, l.properties)) throw Error("Table structure or placement changed");
+	let l = pL(e, r, i, a);
+	if (!uL(o.dimensions, l.dimensions) || !uL(o.properties, l.properties)) throw Error("Table structure or placement changed");
 	for (let e = 0; e < o.cells.length; e++) {
 		let t = o.cells[e], r = l.cells[e], i = n.find((t) => t.cellIndex === e);
-		if (!iL(t.paragraphs.map((e) => e.text), r.paragraphs.map((e) => e.text)) || t.properties.width !== r.properties.width) throw Error("Cell content or width changed");
-		if (!iL(t.geometry, r.geometry)) throw Error("Cell geometry changed");
+		if (!uL(t.paragraphs.map((e) => e.text), r.paragraphs.map((e) => e.text)) || t.properties.width !== r.properties.width) throw Error("Cell content or width changed");
+		if (!uL(t.geometry, r.geometry)) throw Error("Cell geometry changed");
 		if (!i) {
 			let n = (t) => {
 				let n = { ...t.properties };
@@ -71032,7 +71111,7 @@ function fL(e, t, n) {
 					paragraphs: t.paragraphs
 				};
 			};
-			if (!iL(n(t), n(r))) throw Error("Unselected cell changed outside a shared border");
+			if (!uL(n(t), n(r))) throw Error("Unselected cell changed outside a shared border");
 		}
 		for (let t of [
 			"Left",
@@ -71049,7 +71128,7 @@ function fL(e, t, n) {
 				"Right",
 				"Top",
 				"Bottom"
-			]) if (!i.borderColor && !Object.hasOwn(i.borders || {}, n) && !s.has(e + ":" + n) && !iL(t.properties["border" + n], r.properties["border" + n])) throw Error("Unrequested border changed");
+			]) if (!i.borderColor && !Object.hasOwn(i.borders || {}, n) && !s.has(e + ":" + n) && !uL(t.properties["border" + n], r.properties["border" + n])) throw Error("Unrequested border changed");
 		}
 		if (i?.fillColor && r.properties.fillColor.toLowerCase() !== i.fillColor.toLowerCase()) throw Error("Cell fill verification failed");
 		for (let [e, t] of Object.entries(i?.borders || {})) {
@@ -71077,17 +71156,17 @@ function fL(e, t, n) {
 		cellIndices: n.map((e) => e.cellIndex)
 	};
 }
-async function pL(e, t) {
-	let n = [], r = [], i = 0, a = rL(e.getControls()).filter((e) => e.ctrlId === "tbl" && e.list !== 0).length;
+async function yL(e, t) {
+	let n = [], r = [], i = 0, a = lL(e.getControls()).filter((e) => e.ctrlId === "tbl" && e.list !== 0).length;
 	for (let t = 0; t < e.getSectionCount(); t++) {
 		let a = e.getParagraphCount(t);
 		if (a > 2e4) throw Error("Too many paragraphs");
 		for (let o = 0; o < a; o++) {
-			let a = rL(e.getControlTextPositions(t, o));
+			let a = lL(e.getControlTextPositions(t, o));
 			for (let s = 0; s < a.length; s++) {
 				let a;
 				try {
-					a = rL(e.getTableDimensions(t, o, s));
+					a = lL(e.getTableDimensions(t, o, s));
 				} catch {
 					continue;
 				}
@@ -71103,7 +71182,7 @@ async function pL(e, t) {
 				}
 				let c;
 				try {
-					c = sL(e, t, o, s);
+					c = pL(e, t, o, s);
 				} catch (e) {
 					r.push({
 						sec: t,
@@ -71118,7 +71197,7 @@ async function pL(e, t) {
 					ppi: o,
 					ci: s,
 					snapshot: c,
-					sha256: await oL(c)
+					sha256: await fL(c)
 				});
 			}
 		}
@@ -71130,7 +71209,7 @@ async function pL(e, t) {
 		skipped: r
 	};
 }
-var mL = (e) => {
+var bL = (e) => {
 	let t = e?.paragraphs.find((e) => e.length) || e?.paragraphs[0], n = t?.formats[0]?.format || {};
 	return {
 		fontFamily: n.fontFamily || "맑은 고딕",
@@ -71141,15 +71220,15 @@ var mL = (e) => {
 		alignment: t?.format.alignment || "left"
 	};
 };
-function hL(e) {
+function xL(e) {
 	let t = e.snapshot.cells, n = t.find((e) => e.properties.isHeader) || t.find((e) => e.geometry.row === 0), r = t.find((e) => e.geometry.row > 0 && !e.properties.isHeader) || n, i = r?.properties.borderBottom || {
 		type: 1,
 		width: 1,
 		color: "#b8c6d4"
 	};
 	return {
-		header: mL(n),
-		body: mL(r),
+		header: bL(n),
+		body: bL(r),
 		border: {
 			color: i.color,
 			width: i.width,
@@ -71161,7 +71240,7 @@ function hL(e) {
 		headerRows: 1
 	};
 }
-function gL(e) {
+function SL(e) {
 	if (!e || Object.keys(e).some((e) => ![
 		"header",
 		"body",
@@ -71177,7 +71256,7 @@ function gL(e) {
 			"bold",
 			"alignment"
 		].includes(e))) throw Error("Invalid header/body theme");
-		uL([{
+		gL([{
 			cellIndex: 0,
 			...e[t]
 		}], [0]);
@@ -71190,7 +71269,7 @@ function gL(e) {
 		"outerLeft",
 		"outerRight",
 		"vertical"
-	].includes(e)) || !aL(t.color) || !Number.isInteger(t.width) || t.width < 0 || t.width > 6 || ![
+	].includes(e)) || !dL(t.color) || !Number.isInteger(t.width) || t.width < 0 || t.width > 6 || ![
 		0,
 		1,
 		2,
@@ -71202,8 +71281,8 @@ function gL(e) {
 	].some((e) => typeof t[e] != "boolean")) throw Error("Invalid table border theme");
 	if (!Number.isInteger(e.headerRows) || e.headerRows < 0 || e.headerRows > 10) throw Error("Invalid header row count");
 }
-function _L(e, t, n = t.headerRows) {
-	gL(t);
+function CL(e, t, n = t.headerRows) {
+	SL(t);
 	let { rowCount: r, colCount: i } = e.snapshot.dimensions, a = t.border;
 	return e.snapshot.cells.map((e, r) => {
 		let o = e.geometry, s = n > 0 && (e.properties.isHeader || o.row < n), c = (e) => ({
@@ -71223,10 +71302,10 @@ function _L(e, t, n = t.headerRows) {
 		};
 	});
 }
-async function vL(e, t, n, r, i) {
+async function wL(e, t, n, r, i) {
 	if (t.epoch !== n.documentState?.documentEpoch) throw Error("Table plan expired");
 	if (r === "document" && t.unsupported) throw Error("일부 표의 디자인을 확인하지 못해 문서 전체 서식을 적용할 수 없습니다. 개별 표를 지정하세요.");
-	let a = await pL(e, n);
+	let a = await yL(e, n);
 	if (r === "document" && (a.refs.length !== t.refs.length || a.unsupported !== t.unsupported)) throw Error("Document table set changed");
 	let o = r === "document" ? t.refs : [t.refs[i]];
 	if (o.some((e) => !e)) throw Error("Unknown table index");
@@ -71239,18 +71318,18 @@ async function vL(e, t, n, r, i) {
 }
 //#endregion
 //#region @rhwp/studio/src/pwh-collaboration-target.ts
-function yL(e, t, n) {
+function TL(e, t, n) {
 	if (!n) throw Error("요청 대상 식별 정보가 없습니다.");
 	let r = -1, i = e.getParagraphCount(t);
 	if (i > 2e4) throw Error("문단 추적 한도 초과");
-	for (let a = 0; a < i; a++) if (n.startsWith("content:") ? bL(e, t, a) === n : e.getParagraphStableId(t, a) === n) {
+	for (let a = 0; a < i; a++) if (n.startsWith("content:") ? EL(e, t, a) === n : e.getParagraphStableId(t, a) === n) {
 		if (r !== -1) throw Error("문단 식별자가 중복됩니다.");
 		r = a;
 	}
 	if (r < 0) throw Error("요청한 문단이 삭제되거나 다른 문서로 바뀌었습니다.");
 	return r;
 }
-function bL(e, t, n) {
+function EL(e, t, n) {
 	let r = e.getParagraphStableId(t, n);
 	if (r) return r;
 	let i = e.getParagraphLength(t, n);
@@ -71260,7 +71339,7 @@ function bL(e, t, n) {
 		paragraphFormat: e.getParaPropertiesAt(t, n)
 	});
 }
-async function xL(e, t) {
+async function DL(e, t) {
 	let n = t.documentState?.documentEpoch;
 	if (t.kind === "object" && t.objects?.length === 1 && t.objects[0].source.type === "image") {
 		let r = t.objects[0].source;
@@ -71317,7 +71396,7 @@ async function xL(e, t) {
 		for (let t = r.paragraphIndex; t <= i.paragraphIndex; t++) {
 			let n = e.getParagraphLength(r.sectionIndex, t), i = e.getTextRange(r.sectionIndex, t, 0, n);
 			a.push({
-				id: bL(e, r.sectionIndex, t),
+				id: EL(e, r.sectionIndex, t),
 				text: i,
 				length: n,
 				format: e.getCharPropertiesAt(r.sectionIndex, t, t === r.paragraphIndex ? r.charOffset : 0),
@@ -71335,12 +71414,12 @@ async function xL(e, t) {
 	}
 	return null;
 }
-async function SL(e, t, n) {
+async function OL(e, t, n) {
 	let r = t.target;
 	if (!r) throw Error("이전 요청은 대상 추적 정보를 포함하지 않습니다. 다시 요청하세요.");
 	if (n.documentState.documentEpoch !== r.epoch) throw Error("문서를 다시 열어 요청 대상이 만료됐습니다.");
 	if (r.kind === "body_text") {
-		let i = r.segments.map((t) => yL(e, r.section, t.id));
+		let i = r.segments.map((t) => TL(e, r.section, t.id));
 		if (i.some((e, t) => t && e !== i[t - 1] + 1)) throw Error("요청 범위에 문단이 추가·이동됐습니다.");
 		for (let t = 0; t < i.length; t++) {
 			let n = i[t], a = r.segments[t], o = e.getParagraphLength(r.section, n);
@@ -71362,7 +71441,7 @@ async function SL(e, t, n) {
 		};
 	}
 	if (r.kind === "cell_text") {
-		let i = r.parentId ? [yL(e, r.section, r.parentId)] : Array.from({ length: Math.min(e.getParagraphCount(r.section), 2e4) }, (e, t) => t), a = [];
+		let i = r.parentId ? [TL(e, r.section, r.parentId)] : Array.from({ length: Math.min(e.getParagraphCount(r.section), 2e4) }, (e, t) => t), a = [];
 		for (let t of i) try {
 			if (JSON.stringify(e.getTableProperties(r.section, t, r.controlIndex)) !== JSON.stringify(r.tableProperties)) continue;
 			r.segments.every((n, i) => {
@@ -71387,7 +71466,7 @@ async function SL(e, t, n) {
 		};
 	}
 	if (r.kind === "image") {
-		let i = r.source, a = [], o = r.parentId ? [yL(e, i.sec, r.parentId)] : Array.from({ length: Math.min(e.getParagraphCount(i.sec), 2e4) }, (e, t) => t);
+		let i = r.source, a = [], o = r.parentId ? [TL(e, i.sec, r.parentId)] : Array.from({ length: Math.min(e.getParagraphCount(i.sec), 2e4) }, (e, t) => t);
 		for (let t of o) {
 			let n = e.getControlTextPositions(i.sec, t);
 			for (let o = 0; o < n.length; o++) try {
@@ -71415,7 +71494,7 @@ async function SL(e, t, n) {
 }
 //#endregion
 //#region @rhwp/studio/src/pwh-picture-replace.ts
-function CL(e) {
+function kL(e) {
 	if (e?.kind !== "object" || e.objects?.length !== 1) throw Error("교체할 그림 하나를 선택하세요.");
 	let t = e.objects[0].source;
 	if (t?.type !== "image" || t.headerFooter || t.noteRef || ![
@@ -71435,8 +71514,8 @@ function CL(e) {
 		pathJson: JSON.stringify(n)
 	};
 }
-function wL(e, t, n, r) {
-	let { ref: i, path: a, pathJson: o } = CL(t), s = a.length ? e.getCellPicturePropertiesByPath(i.sec, i.ppi, a, i.ci) : e.getPictureProperties(i.sec, i.ppi, i.ci);
+function AL(e, t, n, r) {
+	let { ref: i, path: a, pathJson: o } = kL(t), s = a.length ? e.getCellPicturePropertiesByPath(i.sec, i.ppi, a, i.ci) : e.getPictureProperties(i.sec, i.ppi, i.ci);
 	if (JSON.stringify(s) !== JSON.stringify(t.objects[0].properties)) throw Error("그림 속성이 바뀌었습니다. 다시 선택하세요.");
 	let c = e.assignPictureImage(i.sec, i.ppi, o, i.ci, n, r.width, r.height, r.extension), l = typeof c == "string" ? JSON.parse(c) : c;
 	if (l?.ok !== !0) throw Error("그림 교체 실패");
@@ -71454,14 +71533,14 @@ function wL(e, t, n, r) {
 }
 //#endregion
 //#region @rhwp/studio/src/pwh-page-layout.ts
-var TL = {
+var jL = {
 	A4: [59528, 84188],
 	A3: [84188, 119055],
 	B4: [72850, 103040],
 	B5: [51502, 72850],
 	Letter: [62208, 80496],
 	Legal: [62208, 102816]
-}, EL = {
+}, ML = {
 	left: "marginLeft",
 	right: "marginRight",
 	top: "marginTop",
@@ -71470,24 +71549,24 @@ var TL = {
 	footer: "marginFooter",
 	gutter: "marginGutter"
 };
-function DL(e) {
+function NL(e) {
 	if (!e || typeof e != "object" || Array.isArray(e) || Object.keys(e).some((e) => ![
 		"paper",
 		"orientation",
 		"marginsMm"
 	].includes(e)) || !Object.keys(e).length) throw Error("용지·방향·여백 중 변경할 설정을 지정하세요.");
-	if (e.paper !== void 0 && !TL[e.paper]) throw Error("지원되지 않는 용지입니다.");
+	if (e.paper !== void 0 && !jL[e.paper]) throw Error("지원되지 않는 용지입니다.");
 	if (e.orientation !== void 0 && !["portrait", "landscape"].includes(e.orientation)) throw Error("용지 방향을 확인하세요.");
-	if (e.marginsMm !== void 0 && (!e.marginsMm || typeof e.marginsMm != "object" || Array.isArray(e.marginsMm) || !Object.keys(e.marginsMm).length || Object.entries(e.marginsMm).some(([e, t]) => !EL[e] || typeof t != "number" || !Number.isFinite(t) || t < 0 || t > 150))) throw Error("여백은 0~150mm 범위의 숫자여야 합니다.");
+	if (e.marginsMm !== void 0 && (!e.marginsMm || typeof e.marginsMm != "object" || Array.isArray(e.marginsMm) || !Object.keys(e.marginsMm).length || Object.entries(e.marginsMm).some(([e, t]) => !ML[e] || typeof t != "number" || !Number.isFinite(t) || t < 0 || t > 150))) throw Error("여백은 0~150mm 범위의 숫자여야 합니다.");
 }
-function OL(e, t, n) {
-	DL(t);
+function PL(e, t, n) {
+	NL(t);
 	let r = e.getSectionCount();
 	if (n !== void 0 && (!Number.isInteger(n) || n < 0 || n >= r)) throw Error("구역 번호를 확인하세요.");
 	return Array.from({ length: n === void 0 ? r : 1 }, (r, i) => {
 		let a = n ?? i, o = e.getPageDef(a), s = typeof o == "string" ? JSON.parse(o) : o, c = { ...s };
-		t.paper && ([c.width, c.height] = TL[t.paper]), t.orientation !== void 0 && (c.landscape = t.orientation === "landscape");
-		for (let [e, n] of Object.entries(t.marginsMm || {})) c[EL[e]] = Math.round(Number(n) * 7200 / 25.4);
+		t.paper && ([c.width, c.height] = jL[t.paper]), t.orientation !== void 0 && (c.landscape = t.orientation === "landscape");
+		for (let [e, n] of Object.entries(t.marginsMm || {})) c[ML[e]] = Math.round(Number(n) * 7200 / 25.4);
 		let l = c.landscape ? c.height : c.width, u = c.landscape ? c.width : c.height;
 		if (l - c.marginLeft - c.marginRight - c.marginGutter < 2835 || u - c.marginTop - c.marginBottom < 2835) throw Error("여백을 적용하면 본문 영역이 너무 작습니다.");
 		return {
@@ -71497,8 +71576,8 @@ function OL(e, t, n) {
 		};
 	});
 }
-function kL(e, t, n) {
-	let r = OL(e, t, n);
+function FL(e, t, n) {
+	let r = PL(e, t, n);
 	for (let t of r) {
 		let n = e.setPageDef(t.section, t.after);
 		if ((typeof n == "string" ? JSON.parse(n) : n)?.ok === !1) throw Error("용지 설정 적용 실패");
@@ -71512,7 +71591,7 @@ function kL(e, t, n) {
 }
 //#endregion
 //#region @rhwp/studio/src/pwh-blank-compose.ts
-function AL(e) {
+function IL(e) {
 	try {
 		if (e.getSectionCount() !== 1) return !1;
 		let t = e.getControls(), n = typeof t == "string" ? JSON.parse(t) : t;
@@ -71523,7 +71602,7 @@ function AL(e) {
 		return !1;
 	}
 }
-function jL(e) {
+function LL(e) {
 	if (!Array.isArray(e) || !e.length || e.length > 128) throw Error("초안은 1~128개 문단이어야 합니다.");
 	let t = 0;
 	for (let n of e) if (!n || typeof n.text != "string" || /[\r\n\u0000-\u0008\ufffc]/.test(n.text) || ![
@@ -71533,8 +71612,8 @@ function jL(e) {
 	].includes(n.role) || (t += n.text.length) > 24e3) throw Error("초안 문단·역할·길이를 확인하세요.");
 	if (!e.some((e) => e.text.trim())) throw Error("작성할 내용을 입력하세요.");
 }
-function ML(e, t) {
-	if (jL(t), !AL(e)) throw Error("빈 문서가 아닙니다. 기존 내용을 덮어쓰지 않았습니다.");
+function RL(e, t) {
+	if (LL(t), !IL(e)) throw Error("빈 문서가 아닙니다. 기존 내용을 덮어쓰지 않았습니다.");
 	let n = (e) => {
 		if ((typeof e == "string" ? JSON.parse(e) : e)?.ok === !1) throw Error("초안 적용 실패");
 	};
@@ -71557,44 +71636,44 @@ function ML(e, t) {
 }
 //#endregion
 //#region @rhwp/studio/src/pwh-request-state.mjs
-function NL(e, t, n = 0) {
+function zL(e, t, n = 0) {
 	if (e === t) return !0;
 	if (n > 32 || e === null || t === null || typeof e != "object" || typeof t != "object" || Array.isArray(e) !== Array.isArray(t)) return !1;
-	if (Array.isArray(e)) return e.length === t.length && e.every((e, r) => NL(e, t[r], n + 1));
+	if (Array.isArray(e)) return e.length === t.length && e.every((e, r) => zL(e, t[r], n + 1));
 	let r = Object.keys(e).sort(), i = Object.keys(t).sort();
-	return r.length === i.length && r.every((r, a) => r === i[a] && NL(e[r], t[r], n + 1));
+	return r.length === i.length && r.every((r, a) => r === i[a] && zL(e[r], t[r], n + 1));
 }
-function PL(e) {
+function BL(e) {
 	if (!e || typeof e != "object" || e.target != null) return e;
 	let { target: t, ...n } = e;
 	return n;
 }
-function FL(e, t) {
-	return NL(PL(e), PL(t));
+function VL(e, t) {
+	return zL(BL(e), BL(t));
 }
 //#endregion
 //#region @rhwp/studio/src/pwh-table-content.mjs
-var IL = (e) => typeof e == "string" ? JSON.parse(e) : e, LL = (e) => {
-	let t = IL(e);
+var HL = (e) => typeof e == "string" ? JSON.parse(e) : e, UL = (e) => {
+	let t = HL(e);
 	if (t?.ok !== !0) throw Error("Table operation failed");
 	return t;
-}, RL = (e) => Array.from(e).length, zL = (e) => typeof e == "string" && e.length <= 24e3 && !/[\r\n\u0000-\u0008\u000b-\u001f\ufffc]/.test(e);
-function BL(e, t) {
+}, WL = (e) => Array.from(e).length, GL = (e) => typeof e == "string" && e.length <= 24e3 && !/[\r\n\u0000-\u0008\u000b-\u001f\ufffc]/.test(e);
+function KL(e, t) {
 	if (!Array.isArray(e) || !e.length || e.length > 256) throw Error("Provide 1 to 256 cell edits");
 	let n = /* @__PURE__ */ new Set(), r = 0;
 	for (let i of e) {
 		if (!i || Object.keys(i).some((e) => !["cellIndex", "paragraphs"].includes(e)) || !Number.isSafeInteger(i.cellIndex) || i.cellIndex < 0 || n.has(i.cellIndex) || t && !t.includes(i.cellIndex)) throw Error("Invalid, duplicate or unselected cell");
-		if (n.add(i.cellIndex), !Array.isArray(i.paragraphs) || !i.paragraphs.length || i.paragraphs.length > 128 || i.paragraphs.some((e) => !zL(e)) || (r += i.paragraphs.reduce((e, t) => e + t.length, 0)) > 24e3) throw Error("Invalid cell paragraphs; maximum total text is 24000 characters");
+		if (n.add(i.cellIndex), !Array.isArray(i.paragraphs) || !i.paragraphs.length || i.paragraphs.length > 128 || i.paragraphs.some((e) => !GL(e)) || (r += i.paragraphs.reduce((e, t) => e + t.length, 0)) > 24e3) throw Error("Invalid cell paragraphs; maximum total text is 24000 characters");
 	}
 }
-function VL(e, t, n, r) {
-	BL(n, r);
-	let i = sL(e, t.sec, t.ppi, t.ci);
+function qL(e, t, n, r) {
+	KL(n, r);
+	let i = pL(e, t.sec, t.ppi, t.ci);
 	for (let e of n) {
 		let t = i.cells[e.cellIndex];
 		if (!t || t.paragraphs.length !== e.paragraphs.length) throw Error("Keep the existing paragraph count in each cell");
 		for (let e of t.paragraphs) {
-			if (RL(e.text) !== e.length || !zL(e.text)) throw Error("Cell contains an object or unsupported text");
+			if (WL(e.text) !== e.length || !GL(e.text)) throw Error("Cell contains an object or unsupported text");
 			if (e.formats.length !== 1) throw Error("Cell has mixed character formatting; select a uniform cell");
 		}
 	}
@@ -71603,16 +71682,16 @@ function VL(e, t, n, r) {
 		snapshot: i
 	};
 }
-function HL(e, t, n, r) {
-	t = VL(e, t, n, r);
+function JL(e, t, n, r) {
+	t = qL(e, t, n, r);
 	let { sec: i, ppi: a, ci: o, snapshot: s } = t;
 	for (let t of n) for (let n = 0; n < t.paragraphs.length; n++) {
 		let r = s.cells[t.cellIndex].paragraphs[n], c = t.paragraphs[n];
-		r.length && LL(e.deleteTextInCell(i, a, o, t.cellIndex, n, 0, r.length)), c && (LL(e.insertTextInCell(i, a, o, t.cellIndex, n, 0, c)), LL(e.setCharShapeIdInCell(i, a, o, t.cellIndex, n, 0, RL(c), r.formats[0].format.charShapeId)));
+		r.length && UL(e.deleteTextInCell(i, a, o, t.cellIndex, n, 0, r.length)), c && (UL(e.insertTextInCell(i, a, o, t.cellIndex, n, 0, c)), UL(e.setCharShapeIdInCell(i, a, o, t.cellIndex, n, 0, WL(c), r.formats[0].format.charShapeId)));
 	}
 	e.flushDeferredPagination();
-	let c = sL(e, i, a, o);
-	if (!NL(s.dimensions, c.dimensions) || !NL(s.properties, c.properties)) throw Error("Table structure or placement changed");
+	let c = pL(e, i, a, o);
+	if (!zL(s.dimensions, c.dimensions) || !zL(s.properties, c.properties)) throw Error("Table structure or placement changed");
 	for (let e = 0; e < s.cells.length; e++) {
 		let t = s.cells[e], r = c.cells[e], i = n.find((t) => t.cellIndex === e), a = (e) => {
 			let { height: t, ...n } = e.properties;
@@ -71621,15 +71700,15 @@ function HL(e, t, n, r) {
 				properties: n
 			};
 		};
-		if (!NL(a(t), a(r))) throw Error("Cell structure or style changed");
+		if (!zL(a(t), a(r))) throw Error("Cell structure or style changed");
 		if (!i) {
-			if (!NL(t.paragraphs, r.paragraphs)) throw Error("Unselected cell changed");
+			if (!zL(t.paragraphs, r.paragraphs)) throw Error("Unselected cell changed");
 			continue;
 		}
 		if (r.paragraphs.length !== i.paragraphs.length) throw Error("Cell paragraph count changed");
 		for (let e = 0; e < r.paragraphs.length; e++) {
 			let n = t.paragraphs[e], a = r.paragraphs[e];
-			if (a.text !== i.paragraphs[e] || !NL(n.format, a.format) || a.formats.some((e) => !NL(e.format, n.formats[0].format))) throw Error("Cell content or formatting verification failed");
+			if (a.text !== i.paragraphs[e] || !zL(n.format, a.format) || a.formats.some((e) => !zL(e.format, n.formats[0].format))) throw Error("Cell content or formatting verification failed");
 		}
 	}
 	return {
@@ -71638,42 +71717,42 @@ function HL(e, t, n, r) {
 		structurePreserved: !0
 	};
 }
-function UL(e, t, n, r) {
-	if (typeof n != "string" || !n.trim() || n.length > 500 || !zL(n)) throw Error("표 제목은 줄바꿈 없는 1~500자로 입력하세요.");
-	r !== void 0 && uL([{
+function YL(e, t, n, r) {
+	if (typeof n != "string" || !n.trim() || n.length > 500 || !GL(n)) throw Error("표 제목은 줄바꿈 없는 1~500자로 입력하세요.");
+	r !== void 0 && gL([{
 		cellIndex: 0,
 		borders: r
 	}], [0]);
-	let { sec: i, ppi: a, ci: o } = t, s = sL(e, i, a, o), c = s.dimensions;
+	let { sec: i, ppi: a, ci: o } = t, s = pL(e, i, a, o), c = s.dimensions;
 	if (!c.rowCount || !c.colCount || c.rowCount >= 256 || (c.rowCount + 1) * c.colCount > 256) throw Error("제목 행을 추가할 수 없는 표 크기입니다.");
 	if (s.cells.some((e) => e.geometry.row === 0 && e.geometry.rowSpan > 1)) throw Error("첫 행에 세로 병합 셀이 있어 자동으로 제목을 추가할 수 없습니다.");
-	LL(e.insertTableRow(i, a, o, 0, !1)), c.colCount > 1 && LL(e.mergeTableCells(i, a, o, 0, 0, 0, c.colCount - 1));
-	let l = sL(e, i, a, o), u = l.cells.findIndex((e) => e.geometry.row === 0 && e.geometry.col === 0);
+	UL(e.insertTableRow(i, a, o, 0, !1)), c.colCount > 1 && UL(e.mergeTableCells(i, a, o, 0, 0, 0, c.colCount - 1));
+	let l = pL(e, i, a, o), u = l.cells.findIndex((e) => e.geometry.row === 0 && e.geometry.col === 0);
 	if (u < 0 || l.cells[u].geometry.colSpan !== c.colCount || l.dimensions.rowCount !== c.rowCount + 1 || l.dimensions.colCount !== c.colCount) throw Error("제목 행의 구조를 확인하지 못했습니다.");
 	for (let e of s.cells) {
 		let t = e.geometry, n = l.cells.find((e) => e.geometry.row === t.row + 1 && e.geometry.col === t.col), r = (e) => {
 			let { height: t, ...n } = e.properties;
 			return n;
 		};
-		if (!n || n.geometry.rowSpan !== t.rowSpan || n.geometry.colSpan !== t.colSpan || !NL(n.paragraphs, e.paragraphs) || !NL(r(n), r(e))) throw Error("기존 표 내용이나 구조·서식이 변경되었습니다.");
+		if (!n || n.geometry.rowSpan !== t.rowSpan || n.geometry.colSpan !== t.colSpan || !zL(n.paragraphs, e.paragraphs) || !zL(r(n), r(e))) throw Error("기존 표 내용이나 구조·서식이 변경되었습니다.");
 	}
 	if (l.cells[u].paragraphs.length !== 1 || l.cells[u].paragraphs[0].text) throw Error("새 제목 셀이 비어 있지 않습니다.");
-	if (HL(e, {
+	if (JL(e, {
 		sec: i,
 		ppi: a,
 		ci: o
 	}, [{
 		cellIndex: u,
 		paragraphs: [n]
-	}]), r !== void 0 && fL(e, {
+	}]), r !== void 0 && vL(e, {
 		sec: i,
 		ppi: a,
 		ci: o,
-		snapshot: sL(e, i, a, o)
+		snapshot: pL(e, i, a, o)
 	}, [{
 		cellIndex: u,
 		borders: r
-	}]), l = sL(e, i, a, o), l.cells[u].paragraphs[0].text !== n) throw Error("표 제목을 확인하지 못했습니다.");
+	}]), l = pL(e, i, a, o), l.cells[u].paragraphs[0].text !== n) throw Error("표 제목을 확인하지 못했습니다.");
 	return {
 		source: {
 			sec: i,
@@ -71687,7 +71766,7 @@ function UL(e, t, n, r) {
 		...r ? { bordersApplied: r } : {}
 	};
 }
-function WL(e) {
+function XL(e) {
 	if (!e || Object.keys(e).some((e) => ![
 		"rows",
 		"columns",
@@ -71707,7 +71786,7 @@ function WL(e) {
 			r.rowSpan ?? 1,
 			r.columnSpan ?? 1
 		].every(Number.isSafeInteger) || r.row < 0 || r.column < 0 || (r.rowSpan ?? 1) < 1 || (r.columnSpan ?? 1) < 1 || r.row + (r.rowSpan ?? 1) > e.rows || r.column + (r.columnSpan ?? 1) > e.columns) throw Error("Invalid cell coordinates or span");
-		if (BL([{
+		if (KL([{
 			cellIndex: 0,
 			paragraphs: r.paragraphs
 		}]), n += r.paragraphs.reduce((e, t) => e + t.length, 0), n > 24e3) throw Error("Table text exceeds 24000 characters");
@@ -71720,32 +71799,32 @@ function WL(e) {
 	if (t.size !== e.rows * e.columns) throw Error("Table grid has missing cells");
 	return e;
 }
-function GL(e, t, n) {
-	if (WL(n), t.parentParaIndex != null || t.cellPath?.length || t.headerFooter || t.noteRef) throw Error("Insert a new table at a body cursor outside existing cells");
+function ZL(e, t, n) {
+	if (XL(n), t.parentParaIndex != null || t.cellPath?.length || t.headerFooter || t.noteRef) throw Error("Insert a new table at a body cursor outside existing cells");
 	let { sectionIndex: r, paragraphIndex: i, charOffset: a } = t;
 	if (![
 		r,
 		i,
 		a
 	].every((e) => Number.isSafeInteger(e) && e >= 0) || a > e.getParagraphLength(r, i)) throw Error("Invalid insertion position");
-	let o = LL(e.createTable(r, i, a, n.rows, n.columns)), s = o.controlIdx, c = o.paraIdx;
+	let o = UL(e.createTable(r, i, a, n.rows, n.columns)), s = o.controlIdx, c = o.paraIdx;
 	if (!Number.isSafeInteger(s) || !Number.isSafeInteger(c)) throw Error("Missing created table address");
-	for (let t of n.cells) ((t.rowSpan ?? 1) > 1 || (t.columnSpan ?? 1) > 1) && LL(e.mergeTableCells(r, c, s, t.row, t.column, t.row + (t.rowSpan ?? 1) - 1, t.column + (t.columnSpan ?? 1) - 1));
-	let l = sL(e, r, c, s);
+	for (let t of n.cells) ((t.rowSpan ?? 1) > 1 || (t.columnSpan ?? 1) > 1) && UL(e.mergeTableCells(r, c, s, t.row, t.column, t.row + (t.rowSpan ?? 1) - 1, t.column + (t.columnSpan ?? 1) - 1));
+	let l = pL(e, r, c, s);
 	for (let t of n.cells) {
 		let n = l.cells.findIndex((e) => e.geometry.row === t.row && e.geometry.col === t.column);
 		if (n < 0) throw Error("Created cell not found");
 		let i = l.cells[n].geometry;
 		if (i.rowSpan !== (t.rowSpan ?? 1) || i.colSpan !== (t.columnSpan ?? 1)) throw Error("Created merge differs");
-		for (let i = 1; i < t.paragraphs.length; i++) LL(e.splitParagraphInCell(r, c, s, n, i - 1, 0));
+		for (let i = 1; i < t.paragraphs.length; i++) UL(e.splitParagraphInCell(r, c, s, n, i - 1, 0));
 	}
 	let u = {
 		sec: r,
 		ppi: c,
 		ci: s
-	}, d = sL(e, r, c, s);
+	}, d = pL(e, r, c, s);
 	return {
-		...HL(e, u, n.cells.map((e) => ({
+		...JL(e, u, n.cells.map((e) => ({
 			cellIndex: d.cells.findIndex((t) => t.geometry.row === e.row && t.geometry.col === e.column),
 			paragraphs: e.paragraphs
 		}))),
@@ -71756,18 +71835,18 @@ function GL(e, t, n) {
 }
 //#endregion
 //#region @rhwp/studio/src/pwh-text-edit.mjs
-var KL = (e) => typeof e == "string" ? JSON.parse(e) : e, qL = (e) => Array.from(e), JL = [
+var QL = (e) => typeof e == "string" ? JSON.parse(e) : e, $L = (e) => Array.from(e), eR = [
 	"documentEpoch",
 	"changeSeq",
 	"documentSha256"
-], YL = (e) => Object.fromEntries(JL.map((t) => [t, (e?.documentState || e)?.[t]]));
-function XL(e, t) {
-	if (!e || JL.some((n) => e[n] !== YL(t)[n])) throw Error("문서 내용이 변경되었습니다. 텍스트를 다시 검색해 주세요.");
+], tR = (e) => Object.fromEntries(eR.map((t) => [t, (e?.documentState || e)?.[t]]));
+function nR(e, t) {
+	if (!e || eR.some((n) => e[n] !== tR(t)[n])) throw Error("문서 내용이 변경되었습니다. 텍스트를 다시 검색해 주세요.");
 }
-var ZL = (e) => {
-	let t = KL(e);
+var rR = (e) => {
+	let t = QL(e);
 	if (t?.ok === !1 || t?.error) throw Error(t.error || "텍스트 수정 실패");
-}, QL = (e, t = !1) => typeof e == "string" && (t || e.length > 0) && e.length <= 12e3 && !/[\r\n\u0000-\u0008\u000b-\u001f\ufffc]/.test(e), $L = (e) => JSON.stringify(e.cellPath), eR = (e) => JSON.stringify([
+}, iR = (e, t = !1) => typeof e == "string" && (t || e.length > 0) && e.length <= 12e3 && !/[\r\n\u0000-\u0008\u000b-\u001f\ufffc]/.test(e), aR = (e) => JSON.stringify(e.cellPath), oR = (e) => JSON.stringify([
 	e.section,
 	e.paragraph,
 	(e.cellPath || []).map((e) => [
@@ -71776,7 +71855,7 @@ var ZL = (e) => {
 		e.cellParaIndex
 	])
 ]);
-function tR(e) {
+function sR(e) {
 	let t = e.cellContext, n = e.cellPath || t && [{
 		controlIndex: t.ctrlIdx,
 		cellIndex: t.cellIdx,
@@ -71788,13 +71867,13 @@ function tR(e) {
 		...n?.length ? { cellPath: n } : {}
 	};
 }
-function nR(e, t) {
-	let n = t.cellPath ? e.getCellParagraphLengthByPath(t.section, t.paragraph, $L(t)) : e.getParagraphLength(t.section, t.paragraph);
+function cR(e, t) {
+	let n = t.cellPath ? e.getCellParagraphLengthByPath(t.section, t.paragraph, aR(t)) : e.getParagraphLength(t.section, t.paragraph);
 	if (n > 48e3) throw Error("문단이 텍스트 편집 한도를 넘습니다.");
-	return t.cellPath ? e.getTextInCellByPath(t.section, t.paragraph, $L(t), 0, n) : e.getTextRange(t.section, t.paragraph, 0, n);
+	return t.cellPath ? e.getTextInCellByPath(t.section, t.paragraph, aR(t), 0, n) : e.getTextRange(t.section, t.paragraph, 0, n);
 }
-function rR(e, t, n, r) {
-	let i = KL(t.cellPath ? e.getCharShapeRunsInCellByPath(t.section, t.paragraph, $L(t), n, r) : e.getCharShapeRuns(t.section, t.paragraph, n, r));
+function lR(e, t, n, r) {
+	let i = QL(t.cellPath ? e.getCharShapeRunsInCellByPath(t.section, t.paragraph, aR(t), n, r) : e.getCharShapeRuns(t.section, t.paragraph, n, r));
 	if (!Array.isArray(i)) throw Error("글자 서식을 읽지 못했습니다.");
 	let a = n;
 	for (let e of i) {
@@ -71804,22 +71883,22 @@ function rR(e, t, n, r) {
 	if (a !== r) throw Error("글자 서식 구간이 누락되었습니다.");
 	return i;
 }
-function iR(e, t, n, r) {
-	return rR(e, t, n, r).flatMap((e) => Array(e.endOffset - e.startOffset).fill(e.charShapeId));
+function uR(e, t, n, r) {
+	return lR(e, t, n, r).flatMap((e) => Array(e.endOffset - e.startOffset).fill(e.charShapeId));
 }
-var aR = [
+var dR = [
 	"textColor",
 	"bold",
 	"italic",
 	"underline",
 	"strikethrough",
 	"fontSize"
-], oR = ["alignment", "lineSpacingPercent"];
-function sR(e, t = !1) {
+], fR = ["alignment", "lineSpacingPercent"];
+function pR(e, t = !1) {
 	if (!Array.isArray(e) || !e.length || e.length > 100) throw Error("서식을 적용할 검색 결과를 1~100개 지정하세요.");
 	for (let n of e) {
 		if (!n || typeof n.searchId != "string" || n.searchId.length > 64 || typeof n.matchId != "string" || !/^\d+$/.test(n.matchId) || n.matchId.length > 16) throw Error("서식을 적용할 검색 결과를 확인하세요.");
-		let e = n.style, r = t ? oR : aR;
+		let e = n.style, r = t ? fR : dR;
 		if (!e || typeof e != "object" || Array.isArray(e) || !Object.keys(e).length || Object.keys(e).some((e) => !r.includes(e))) throw Error("글자 서식을 확인하세요.");
 		if (t) {
 			if (Object.hasOwn(e, "alignment") && ![
@@ -71841,16 +71920,16 @@ function sR(e, t = !1) {
 		if (Object.hasOwn(e, "fontSize") && (!Number.isSafeInteger(e.fontSize) || e.fontSize < 600 || e.fontSize > 7200)) throw Error("글자 크기는 6~72pt 범위로 지정하세요.");
 	}
 }
-function cR(e, t, n) {
-	return KL(t.cellPath ? e.getCellCharPropertiesAtByPath(t.section, t.paragraph, $L(t), n) : e.getCharPropertiesAt(t.section, t.paragraph, n));
+function mR(e, t, n) {
+	return QL(t.cellPath ? e.getCellCharPropertiesAtByPath(t.section, t.paragraph, aR(t), n) : e.getCharPropertiesAt(t.section, t.paragraph, n));
 }
-function lR(e, t) {
-	return KL(t.cellPath ? e.getCellParaPropertiesAtByPath(t.section, t.paragraph, $L(t)) : e.getParaPropertiesAt(t.section, t.paragraph));
+function hR(e, t) {
+	return QL(t.cellPath ? e.getCellParaPropertiesAtByPath(t.section, t.paragraph, aR(t)) : e.getParaPropertiesAt(t.section, t.paragraph));
 }
-function uR(e) {
-	return Object.fromEntries(["fontFamily", ...aR].map((t) => [t, e[t]]));
+function gR(e) {
+	return Object.fromEntries(["fontFamily", ...dR].map((t) => [t, e[t]]));
 }
-function dR(e) {
+function _R(e) {
 	return Object.fromEntries([
 		"alignment",
 		"lineSpacing",
@@ -71859,7 +71938,7 @@ function dR(e) {
 		"spacingAfter"
 	].map((t) => [t, e[t]]));
 }
-function fR(e, t) {
+function vR(e, t) {
 	for (let { source: n, original: r, style: i } of t.groups) {
 		let { lineSpacingPercent: t, ...a } = i;
 		t !== void 0 && Object.assign(a, {
@@ -71867,30 +71946,30 @@ function fR(e, t) {
 			lineSpacing: t
 		});
 		let o = JSON.stringify(a);
-		ZL(n.cellPath ? e.applyParaFormatInCellByPath(n.section, n.paragraph, $L(n), o) : e.applyParaFormat(n.section, n.paragraph, o));
-		let s = lR(e, n);
-		if (Object.keys(a).some((e) => s[e] !== a[e]) || nR(e, n) !== r) throw Error("문단 모양 적용 결과를 확인하지 못했습니다.");
+		rR(n.cellPath ? e.applyParaFormatInCellByPath(n.section, n.paragraph, aR(n), o) : e.applyParaFormat(n.section, n.paragraph, o));
+		let s = hR(e, n);
+		if (Object.keys(a).some((e) => s[e] !== a[e]) || cR(e, n) !== r) throw Error("문단 모양 적용 결과를 확인하지 못했습니다.");
 	}
 	return e.flushDeferredPagination(), { paragraphs: t.groups.length };
 }
-function pR(e, t, n, r) {
+function yR(e, t, n, r) {
 	let i = t.get(n.searchId);
 	if (!i) throw Error("검색 결과가 만료되었습니다. 다시 검색하세요.");
-	XL(i.revision, r);
+	nR(i.revision, r);
 	let a = i.refs.find((e) => e.id === n.matchId);
 	if (!a) throw Error("검색 결과의 문장 위치를 확인하세요.");
-	let o = nR(e, a.source);
+	let o = cR(e, a.source);
 	if (o !== a.paragraphText) throw Error("검색한 문단이 변경되었습니다. 다시 검색해 주세요.");
 	return {
 		ref: a,
 		actual: o
 	};
 }
-function mR(e, t, n, r, i = !1) {
-	sR(n, i);
+function bR(e, t, n, r, i = !1) {
+	pR(n, i);
 	let a = /* @__PURE__ */ new Map();
 	for (let o of n) {
-		let { ref: n, actual: s } = pR(e, t, o, r), c = eR(n.source);
+		let { ref: n, actual: s } = yR(e, t, o, r), c = oR(n.source);
 		if (i) {
 			if (a.has(c)) throw Error("같은 문단의 서식은 하나로 합쳐 주세요.");
 			a.set(c, {
@@ -71906,7 +71985,7 @@ function mR(e, t, n, r, i = !1) {
 			ranges: []
 		}, u = n.start + n.length;
 		if (l.ranges.some((e) => n.start < e.end && e.start < u)) throw Error("서식을 적용할 텍스트 범위가 겹칩니다.");
-		iR(e, n.source, n.start, u), l.ranges.push({
+		uR(e, n.source, n.start, u), l.ranges.push({
 			start: n.start,
 			end: u,
 			style: { ...o.style }
@@ -71917,33 +71996,33 @@ function mR(e, t, n, r, i = !1) {
 		count: n.length
 	};
 }
-function hR(e, t) {
+function xR(e, t) {
 	for (let { source: n, original: r, ranges: i } of t.groups) {
 		for (let { start: t, end: r, style: a } of i) {
 			let i = JSON.stringify(a);
-			ZL(n.cellPath ? e.applyCharFormatInCellByPath(n.section, n.paragraph, $L(n), t, r, i) : e.applyCharFormat(n.section, n.paragraph, t, r, i));
+			rR(n.cellPath ? e.applyCharFormatInCellByPath(n.section, n.paragraph, aR(n), t, r, i) : e.applyCharFormat(n.section, n.paragraph, t, r, i));
 		}
-		for (let { start: t, end: r, style: a } of i) if (rR(e, n, t, r).some((t) => {
-			let r = cR(e, n, t.startOffset);
+		for (let { start: t, end: r, style: a } of i) if (lR(e, n, t, r).some((t) => {
+			let r = mR(e, n, t.startOffset);
 			return Object.entries(a).some(([e, t]) => e === "textColor" ? r[e]?.toLowerCase() !== t.toLowerCase() : r[e] !== t);
 		})) throw Error("글자 모양 적용 결과를 확인하지 못했습니다.");
-		if (nR(e, n) !== r) throw Error("글자 서식 적용 중 원문이 변경되었습니다.");
+		if (cR(e, n) !== r) throw Error("글자 서식 적용 중 원문이 변경되었습니다.");
 	}
 	return e.flushDeferredPagination(), {
 		ranges: t.count,
 		paragraphs: t.groups.length
 	};
 }
-function gR(e, t, n, { cursor: r = 0, limit: i = 40, includeStyle: a = !1 } = {}) {
-	if (!QL(n) || !Number.isSafeInteger(r) || r < 0 || !Number.isSafeInteger(i) || i < 1 || i > 100) throw Error("검색어와 검색 범위를 확인하세요.");
-	let o = KL(e.searchAllText(n, !0, !0));
+function SR(e, t, n, { cursor: r = 0, limit: i = 40, includeStyle: a = !1 } = {}) {
+	if (!iR(n) || !Number.isSafeInteger(r) || r < 0 || !Number.isSafeInteger(i) || i < 1 || i > 100) throw Error("검색어와 검색 범위를 확인하세요.");
+	let o = QL(e.searchAllText(n, !0, !0));
 	if (!Array.isArray(o)) throw Error("텍스트 검색 결과가 올바르지 않습니다.");
 	if (r > o.length) throw Error("텍스트 검색 위치가 범위를 넘었습니다.");
 	let s = [], c = [], l = r, u = 0;
 	for (; l < o.length && c.length < i; l++) {
 		let t = o[l];
 		if (t.equationControl != null) continue;
-		let r = tR(t), i = nR(e, r), d = qL(i).slice(t.charOffset, t.charOffset + t.length).join("");
+		let r = sR(t), i = cR(e, r), d = $L(i).slice(t.charOffset, t.charOffset + t.length).join("");
 		if (d !== n) throw Error("검색 위치의 원문을 확인하지 못했습니다.");
 		if (c.length && u + i.length > 48e3) break;
 		let f = {
@@ -71955,23 +72034,23 @@ function gR(e, t, n, { cursor: r = 0, limit: i = 40, includeStyle: a = !1 } = {}
 			paragraphText: i
 		};
 		s.push(f);
-		let p = a ? rR(e, r, f.start, f.start + f.length).map((t) => ({
+		let p = a ? lR(e, r, f.start, f.start + f.length).map((t) => ({
 			start: t.startOffset,
 			end: t.endOffset,
-			...uR(cR(e, r, t.startOffset))
+			...gR(mR(e, r, t.startOffset))
 		})) : void 0;
 		c.push({
 			...f,
 			...p ? {
 				formats: p,
-				paragraphStyle: dR(lR(e, r))
+				paragraphStyle: _R(hR(e, r))
 			} : {},
 			kind: r.cellPath ? "cell_text" : "body_text",
 			depth: r.cellPath?.length || 0
 		}), u += i.length;
 	}
 	return {
-		revision: YL(t),
+		revision: tR(t),
 		refs: s,
 		result: {
 			query: n,
@@ -71983,7 +72062,7 @@ function gR(e, t, n, { cursor: r = 0, limit: i = 40, includeStyle: a = !1 } = {}
 		}
 	};
 }
-function _R(e, t) {
+function CR(e, t) {
 	let n = [], r = [];
 	if (t !== "tables") for (let t = 0; t < e.getSectionCount(); t++) for (let r = 0, i = e.getParagraphCount(t); r < i; r++) n.push({
 		section: t,
@@ -71993,7 +72072,7 @@ function _R(e, t) {
 		sources: n,
 		unsupported: r
 	};
-	let i = KL(e.getCursorModel());
+	let i = QL(e.getCursorModel());
 	if (!Array.isArray(i?.lists)) throw Error("표 셀의 조판 주소를 읽지 못했습니다.");
 	let a = new Map(i.lists.map((e) => [e.listId, e]));
 	for (let t of i.lists) {
@@ -72037,13 +72116,13 @@ function _R(e, t) {
 		unsupported: r
 	};
 }
-function vR(e, t, n, { filter: r = "all", cursor: i = {
+function wR(e, t, n, { filter: r = "all", cursor: i = {
 	index: 0,
 	offset: 0
 }, limit: a = 40 } = {}) {
 	let { sources: o, unsupported: s } = t, c = i.index, l = i.offset, u = 0;
 	if (c > o.length || c === o.length && l) throw Error("서식 검사 위치가 범위를 넘었습니다.");
-	let d = [], f = [], p = /* @__PURE__ */ new Map(), m = (t) => t.cellPath ? e.getCellParagraphLengthByPath(t.section, t.paragraph, $L(t)) : e.getParagraphLength(t.section, t.paragraph);
+	let d = [], f = [], p = /* @__PURE__ */ new Map(), m = (t) => t.cellPath ? e.getCellParagraphLengthByPath(t.section, t.paragraph, aR(t)) : e.getParagraphLength(t.section, t.paragraph);
 	for (; c < o.length && u < 256 && d.length < a;) {
 		let t = o[c], n = m(t);
 		if (l > n) throw Error("서식 검사 위치가 문단 범위를 넘었습니다.");
@@ -72052,12 +72131,12 @@ function vR(e, t, n, { filter: r = "all", cursor: i = {
 			continue;
 		}
 		let i = Math.min(n, l + 4096), s, h, g;
-		for (let o of rR(e, t, l, i)) {
+		for (let o of lR(e, t, l, i)) {
 			let { startOffset: i, endOffset: c, charShapeId: u } = o, m = p.get(u);
-			if (m || (m = uR(cR(e, t, i)), p.set(u, m)), r === "all" || m[r] === !0) {
-				s ??= t.cellPath ? e.getTextInCellByPath(t.section, t.paragraph, $L(t), 0, n) : e.getTextRange(t.section, t.paragraph, 0, n), h ??= qL(s);
+			if (m || (m = gR(mR(e, t, i)), p.set(u, m)), r === "all" || m[r] === !0) {
+				s ??= t.cellPath ? e.getTextInCellByPath(t.section, t.paragraph, aR(t), 0, n) : e.getTextRange(t.section, t.paragraph, 0, n), h ??= $L(s);
 				let r = h.slice(i, c).join(""), a = String(d.length);
-				g ??= dR(lR(e, t));
+				g ??= _R(hR(e, t));
 				let o = {
 					id: a,
 					source: t,
@@ -72071,7 +72150,7 @@ function vR(e, t, n, { filter: r = "all", cursor: i = {
 					source: t,
 					start: i,
 					length: c - i,
-					text: qL(r).slice(0, 180).join(""),
+					text: $L(r).slice(0, 180).join(""),
 					style: m,
 					paragraphStyle: g
 				});
@@ -72085,7 +72164,7 @@ function vR(e, t, n, { filter: r = "all", cursor: i = {
 		offset: l
 	} : null;
 	return {
-		revision: YL(n),
+		revision: tR(n),
 		refs: f,
 		result: {
 			hits: d,
@@ -72095,8 +72174,8 @@ function vR(e, t, n, { filter: r = "all", cursor: i = {
 		}
 	};
 }
-function yR(e, t, n) {
-	let r = qL(e), i = qL(t);
+function TR(e, t, n) {
+	let r = $L(e), i = $L(t);
 	if (n.length !== r.length) throw Error("글자 서식 길이가 다릅니다.");
 	if (!i.length) return [];
 	let a = 0, o = 0;
@@ -72110,18 +72189,18 @@ function yR(e, t, n) {
 	for (; f < s || p < c;) f < s && p < c && r[a + f] === i[a + p] ? (m = n[a + f], h = !1, d.push(m), f++, p++) : f < s && (p === c || u[(f + 1) * l + p] >= u[f * l + p + 1]) ? (h || (m = n[a + f]), h = !0, f++) : (d.push(m), p++);
 	return d.push(...n.slice(r.length - o)), d;
 }
-function bR(e, t, n, r) {
+function ER(e, t, n, r) {
 	if (!Array.isArray(n) || n.length < 1 || n.length > 100) throw Error("수정할 텍스트 범위를 1~100개 지정하세요.");
 	let i = [], a = /* @__PURE__ */ new Map(), o = 0;
 	for (let s of n) {
-		if (!QL(s.replacement, !0) || (o += s.replacement.length) > 48e3) throw Error("수정할 검색 결과와 내용을 확인하세요.");
-		let { ref: n, actual: c } = pR(e, t, s, r), l = eR(n.source), u = iR(e, n.source, n.start, n.start + n.length), d = {
+		if (!iR(s.replacement, !0) || (o += s.replacement.length) > 48e3) throw Error("수정할 검색 결과와 내용을 확인하세요.");
+		let { ref: n, actual: c } = yR(e, t, s, r), l = oR(n.source), u = uR(e, n.source, n.start, n.start + n.length), d = {
 			...n,
 			replacement: s.replacement,
-			ids: yR(n.original, s.replacement, u)
+			ids: TR(n.original, s.replacement, u)
 		}, f = a.get(l) || {
 			source: n.source,
-			text: qL(c),
+			text: $L(c),
 			parts: []
 		};
 		if (f.parts.some((e) => n.start < e.start + e.length && e.start < n.start + n.length)) throw Error("수정할 텍스트 범위가 겹칩니다.");
@@ -72129,7 +72208,7 @@ function bR(e, t, n, r) {
 	}
 	for (let e of a.values()) {
 		e.parts.sort((e, t) => t.start - e.start);
-		for (let t of e.parts) e.text.splice(t.start, t.length, ...qL(t.replacement));
+		for (let t of e.parts) e.text.splice(t.start, t.length, ...$L(t.replacement));
 		e.expectedText = e.text.join("");
 	}
 	return {
@@ -72137,7 +72216,7 @@ function bR(e, t, n, r) {
 		count: i.length
 	};
 }
-function xR(e, t, n) {
+function DR(e, t, n) {
 	for (let r of t.groups) for (let t of r.parts) {
 		let r = t.source, i = r.cellPath?.[0], a = {
 			sectionIndex: r.section,
@@ -72151,21 +72230,21 @@ function xR(e, t, n) {
 				cellPath: r.cellPath
 			} : {}
 		};
-		n ? n(e, a, t.length, t.replacement) : r.cellPath ? (ZL(e.deleteTextInCellByPath(r.section, r.paragraph, $L(r), t.start, t.length)), t.replacement && ZL(e.insertTextInCellByPath(r.section, r.paragraph, $L(r), t.start, t.replacement))) : (ZL(e.deleteText(r.section, r.paragraph, t.start, t.length)), t.replacement && ZL(e.insertText(r.section, r.paragraph, t.start, t.replacement)));
+		n ? n(e, a, t.length, t.replacement) : r.cellPath ? (rR(e.deleteTextInCellByPath(r.section, r.paragraph, aR(r), t.start, t.length)), t.replacement && rR(e.insertTextInCellByPath(r.section, r.paragraph, aR(r), t.start, t.replacement))) : (rR(e.deleteText(r.section, r.paragraph, t.start, t.length)), t.replacement && rR(e.insertText(r.section, r.paragraph, t.start, t.replacement)));
 		for (let n = 0; n < t.ids.length;) {
 			let i = n + 1;
 			for (; i < t.ids.length && t.ids[i] === t.ids[n];) i++;
-			ZL(r.cellPath ? e.setCharShapeIdInCellByPath(r.section, r.paragraph, $L(r), t.start + n, t.start + i, t.ids[n]) : e.setCharShapeId(r.section, r.paragraph, t.start + n, t.start + i, t.ids[n])), n = i;
+			rR(r.cellPath ? e.setCharShapeIdInCellByPath(r.section, r.paragraph, aR(r), t.start + n, t.start + i, t.ids[n]) : e.setCharShapeId(r.section, r.paragraph, t.start + n, t.start + i, t.ids[n])), n = i;
 		}
 	}
 	e.flushDeferredPagination();
-	for (let n of t.groups) if (nR(e, n.source) !== n.expectedText) throw Error("텍스트 수정 결과가 요청과 다릅니다.");
+	for (let n of t.groups) if (cR(e, n.source) !== n.expectedText) throw Error("텍스트 수정 결과가 요청과 다릅니다.");
 	return {
 		ranges: t.count,
 		paragraphs: t.groups.length
 	};
 }
-function SR(e, t) {
+function OR(e, t) {
 	let n = t.cellPath?.length ? t.cellPath : t.parentParaIndex == null ? void 0 : [{
 		controlIndex: t.controlIndex,
 		cellIndex: t.cellIndex,
@@ -72174,12 +72253,12 @@ function SR(e, t) {
 		section: t.sectionIndex,
 		paragraph: t.parentParaIndex ?? t.paragraphIndex,
 		...n ? { cellPath: n } : {}
-	}, i = e.groups.find((e) => eR(e.source) === eR(r));
+	}, i = e.groups.find((e) => oR(e.source) === oR(r));
 	if (!i) return t;
 	let a = t.charOffset, o = 0, s;
 	for (let e of [...i.parts].reverse()) {
 		if (a < e.start) break;
-		let t = qL(e.replacement).length;
+		let t = $L(e.replacement).length;
 		if (a < e.start + e.length) {
 			s = e.start + o + Math.min(a - e.start, t);
 			break;
@@ -72188,16 +72267,16 @@ function SR(e, t) {
 	}
 	return {
 		...t,
-		charOffset: Math.max(0, Math.min(s ?? a + o, qL(i.expectedText).length))
+		charOffset: Math.max(0, Math.min(s ?? a + o, $L(i.expectedText).length))
 	};
 }
 //#endregion
 //#region @rhwp/studio/src/pwh-nested-table-paste.mjs
-var CR = (e) => typeof e == "string" ? JSON.parse(e) : e, wR = (e) => {
-	let t = CR(e);
+var kR = (e) => typeof e == "string" ? JSON.parse(e) : e, AR = (e) => {
+	let t = kR(e);
 	if (!t?.ok) throw Error("중첩 표 처리에 실패했습니다.");
 	return t;
-}, TR = (e) => e.reduce((e, t) => (e[t.ctrlId] = (e[t.ctrlId] || 0) + 1, e), {}), ER = (e, t) => {
+}, jR = (e) => e.reduce((e, t) => (e[t.ctrlId] = (e[t.ctrlId] || 0) + 1, e), {}), MR = (e, t) => {
 	let n = {};
 	for (let r of /* @__PURE__ */ new Set([...Object.keys(e), ...Object.keys(t)])) {
 		let i = (e[r] || 0) - (t[r] || 0);
@@ -72205,7 +72284,7 @@ var CR = (e) => typeof e == "string" ? JSON.parse(e) : e, wR = (e) => {
 	}
 	return n;
 };
-function DR(e) {
+function NR(e) {
 	if (typeof e != "string" || e.length > 8388608) return null;
 	let t = e.indexOf("[data-hwpjson]");
 	if (t < 0) return null;
@@ -72219,7 +72298,7 @@ function DR(e) {
 	}
 	return i;
 }
-function OR(e) {
+function PR(e) {
 	let t = e?.cursor, n = e?.table?.selectedCells;
 	if (!t || t.parentParaIndex == null || t.controlIndex == null || t.cellIndex == null || t.cellParaIndex == null || t.isTextBox || t.headerFooter || t.noteRef) throw Error("표 안의 셀에 커서를 놓고 다시 붙여넣으세요.");
 	let r = (e) => e && Object.fromEntries([
@@ -72232,39 +72311,39 @@ function OR(e) {
 		"cellParaIndex",
 		"cellPath"
 	].map((t) => [t, e[t]]));
-	if (e.selection && !NL(r(e.selection.start), r(e.selection.end)) || e.kind === "cell_block" && (!n || n.length !== 1 || n[0].cellIndex !== t.cellIndex)) throw Error("표를 넣을 셀 하나만 선택해 주세요.");
+	if (e.selection && !zL(r(e.selection.start), r(e.selection.end)) || e.kind === "cell_block" && (!n || n.length !== 1 || n[0].cellIndex !== t.cellIndex)) throw Error("표를 넣을 셀 하나만 선택해 주세요.");
 	return t;
 }
-function kR(e, t) {
-	return t.cellPath?.length > 1 ? wR(e.pasteInternalInCellByPath(t.sectionIndex, t.parentParaIndex, JSON.stringify(t.cellPath), t.charOffset)) : wR(e.pasteInternalInCell(t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, t.cellParaIndex, t.charOffset));
+function FR(e, t) {
+	return t.cellPath?.length > 1 ? AR(e.pasteInternalInCellByPath(t.sectionIndex, t.parentParaIndex, JSON.stringify(t.cellPath), t.charOffset)) : AR(e.pasteInternalInCell(t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, t.cellParaIndex, t.charOffset));
 }
-function AR(e, t) {
-	let n = OR(t);
+function IR(e, t) {
+	let n = PR(t);
 	if (!e.clipboardHasControl()) throw Error("복사한 표를 다시 선택해 복사하세요.");
-	let r = TR(CR(e.getControls()));
-	if (kR(e, n), (TR(CR(e.getControls())).tbl || 0) <= (r.tbl || 0)) throw Error("붙여넣은 표 개체를 확인하지 못했습니다.");
+	let r = jR(kR(e.getControls()));
+	if (FR(e, n), (jR(kR(e.getControls())).tbl || 0) <= (r.tbl || 0)) throw Error("붙여넣은 표 개체를 확인하지 못했습니다.");
 	return { ok: !0 };
 }
-function jR(e, t, n, r, i) {
-	let a = OR(t);
+function LR(e, t, n, r, i) {
+	let a = PR(t);
 	if (typeof n != "string" || !n || n.length > 8388608) throw Error("표 원본 정보를 확인하지 못했습니다.");
 	if (e.getSectionCount() !== 1 || a.sectionIndex !== 0) throw Error("여러 구역 문서에는 아직 표를 넣을 수 없습니다.");
 	let o = a.sectionIndex, s = e.getParagraphCount(o), c = s - 1;
 	if (c < 0) throw Error("문서의 본문을 확인하지 못했습니다.");
-	let l = CR(e.getControls()), u = e.getParagraphLength(o, c), d = e.getTextRange(o, c, 0, u), f = CR(e.getParaPropertiesAt(o, c)), p = Array.from({ length: Math.max(1, u) }, (t, n) => CR(e.getCharPropertiesAt(o, c, n)));
-	if (wR(e.insertPwhScratchParagraph(o, s)), e.getParagraphCount(o) !== s + 1) throw Error("임시 문단을 확인하지 못했습니다.");
+	let l = kR(e.getControls()), u = e.getParagraphLength(o, c), d = e.getTextRange(o, c, 0, u), f = kR(e.getParaPropertiesAt(o, c)), p = Array.from({ length: Math.max(1, u) }, (t, n) => kR(e.getCharPropertiesAt(o, c, n)));
+	if (AR(e.insertPwhScratchParagraph(o, s)), e.getParagraphCount(o) !== s + 1) throw Error("임시 문단을 확인하지 못했습니다.");
 	let m = s;
-	wR(r === "hancom" ? e.pasteHwpJson(o, m, 0, n) : e.pasteHtml(o, m, 0, n));
-	let h = CR(e.getControls()), g = h.filter((e) => e.list === 0 && e.para >= m), _ = g.filter((e) => e.ctrlId === "tbl");
+	AR(r === "hancom" ? e.pasteHwpJson(o, m, 0, n) : e.pasteHtml(o, m, 0, n));
+	let h = kR(e.getControls()), g = h.filter((e) => e.list === 0 && e.para >= m), _ = g.filter((e) => e.ctrlId === "tbl");
 	if (_.length !== 1 || g.length !== 1) throw Error("표 하나만 복사해 다시 붙여넣어 주세요.");
-	let v = _[0], y = CR(e.getTableDimensions(o, v.para, v.controlIndex));
+	let v = _[0], y = kR(e.getTableDimensions(o, v.para, v.controlIndex));
 	if (!y?.cellCount || y.cellCount > 256) throw Error("복사한 표의 크기를 확인하지 못했습니다.");
 	if (i) {
 		if (y.rowCount !== i.rows || y.colCount !== i.columns || y.cellCount !== i.cells.length) throw Error("원본 표의 행·열·병합을 보존하지 못했습니다.");
 		for (let [t, n] of i.cells.entries()) {
 			let r = -1;
 			for (let t = 0; t < y.cellCount; t++) {
-				let i = CR(e.getCellInfo(o, v.para, v.controlIndex, t));
+				let i = kR(e.getCellInfo(o, v.para, v.controlIndex, t));
 				if (i.row === n.row && i.col === n.column) {
 					if (i.rowSpan !== (n.rowSpan ?? 1) || i.colSpan !== (n.columnSpan ?? 1)) throw Error("원본 표의 병합을 보존하지 못했습니다.");
 					r = t;
@@ -72281,53 +72360,53 @@ function jR(e, t, n, r, i) {
 			if (c(s) !== c(n.paragraphs)) throw Error("원본 표의 셀 내용을 보존하지 못했습니다.");
 			let l = i.clipboardStyles?.[t];
 			if (l) {
-				let t = CR(e.getCellProperties(o, v.para, v.controlIndex, r));
+				let t = kR(e.getCellProperties(o, v.para, v.controlIndex, r));
 				if (l.fillColor && String(t.fillColor).toLowerCase() !== l.fillColor.toLowerCase()) throw Error("셀 배경을 보존하지 못했습니다.");
 				for (let t = 0; t < a; t++) {
 					if (!e.getCellParagraphLength(o, v.para, v.controlIndex, r, t)) continue;
-					let n = CR(e.getCellCharPropertiesAt(o, v.para, v.controlIndex, r, t, 0));
+					let n = kR(e.getCellCharPropertiesAt(o, v.para, v.controlIndex, r, t, 0));
 					for (let e of [
 						"bold",
 						"fontSize",
 						"fontFamily",
 						"textColor"
 					]) if (l[e] !== void 0 && String(n[e]).toLowerCase() !== String(l[e]).toLowerCase()) throw Error("셀 글자 서식을 보존하지 못했습니다.");
-					if (l.alignment && CR(e.getCellParaPropertiesAt(o, v.para, v.controlIndex, r, t)).alignment !== l.alignment) throw Error("셀 문단 정렬을 보존하지 못했습니다.");
+					if (l.alignment && kR(e.getCellParaPropertiesAt(o, v.para, v.controlIndex, r, t)).alignment !== l.alignment) throw Error("셀 문단 정렬을 보존하지 못했습니다.");
 				}
 			}
 		}
 	}
-	let b = ER(TR(h), TR(l)), x = e.getParagraphCount(o);
+	let b = MR(jR(h), jR(l)), x = e.getParagraphCount(o);
 	for (let t = m; t < x; t++) if (e.getParagraphLength(o, t) !== 0) throw Error("표 밖의 글이 함께 복사되어 중첩 표로 넣지 않았습니다.");
-	wR(e.copyControl(o, v.para, v.controlIndex, "[]")), wR(e.deleteTableControl(o, v.para, v.controlIndex));
+	AR(e.copyControl(o, v.para, v.controlIndex, "[]")), AR(e.deleteTableControl(o, v.para, v.controlIndex));
 	for (let t = e.getParagraphCount(o) - 1; t >= m; t--) {
-		if (e.getParagraphLength(o, t) !== 0 || CR(e.getControls()).some((e) => e.list === 0 && e.para === t)) throw Error("임시 표를 안전하게 정리하지 못했습니다.");
-		wR(e.deletePwhScratchParagraph(o, t));
+		if (e.getParagraphLength(o, t) !== 0 || kR(e.getControls()).some((e) => e.list === 0 && e.para === t)) throw Error("임시 표를 안전하게 정리하지 못했습니다.");
+		AR(e.deletePwhScratchParagraph(o, t));
 	}
-	if (e.getParagraphCount(o) !== s || e.getParagraphLength(o, c) !== u || e.getTextRange(o, c, 0, u) !== d || !NL(CR(e.getParaPropertiesAt(o, c)), f) || !NL(Array.from({ length: Math.max(1, u) }, (t, n) => CR(e.getCharPropertiesAt(o, c, n))), p) || !NL(CR(e.getControls()), l)) throw Error("원래 본문을 보존하지 못해 붙여넣기를 취소했습니다.");
-	if (kR(e, a), !NL(ER(TR(CR(e.getControls())), TR(l)), b)) throw Error("붙여넣은 표의 개체를 확인하지 못했습니다.");
+	if (e.getParagraphCount(o) !== s || e.getParagraphLength(o, c) !== u || e.getTextRange(o, c, 0, u) !== d || !zL(kR(e.getParaPropertiesAt(o, c)), f) || !zL(Array.from({ length: Math.max(1, u) }, (t, n) => kR(e.getCharPropertiesAt(o, c, n))), p) || !zL(kR(e.getControls()), l)) throw Error("원래 본문을 보존하지 못해 붙여넣기를 취소했습니다.");
+	if (FR(e, a), !zL(MR(jR(kR(e.getControls())), jR(l)), b)) throw Error("붙여넣은 표의 개체를 확인하지 못했습니다.");
 	return {
 		rows: y.rowCount,
 		columns: y.colCount,
 		cells: y.cellCount
 	};
 }
-function MR(e, t, n) {
-	return jR(e, t, n, "hancom");
+function RR(e, t, n) {
+	return LR(e, t, n, "hancom");
 }
-function NR(e, t, n, r) {
-	return jR(e, t, n, "html", r);
+function zR(e, t, n, r) {
+	return LR(e, t, n, "html", r);
 }
 //#endregion
 //#region @rhwp/studio/src/pwh-table-clipboard.mjs
-var PR = (e) => String(e ?? "").replace(/[&<>"']/g, (e) => ({
+var BR = (e) => String(e ?? "").replace(/[&<>"']/g, (e) => ({
 	"&": "&amp;",
 	"<": "&lt;",
 	">": "&gt;",
 	"\"": "&quot;",
 	"'": "&#39;"
-})[e]), FR = (e) => typeof e == "string" ? JSON.parse(e) : e;
-function IR(e, t) {
+})[e]), VR = (e) => typeof e == "string" ? JSON.parse(e) : e;
+function HR(e, t) {
 	if (!Array.isArray(t) || !t.length || new Set(t).size !== t.length) throw Error("Select table cells to copy");
 	let n = t.map((t) => e.cells[t]);
 	if (n.some((e) => !e)) throw Error("Invalid selected cell");
@@ -72342,16 +72421,16 @@ function IR(e, t) {
 			paragraphs: e.paragraphs.map((e) => e.text)
 		}))
 	};
-	WL(s);
+	XL(s);
 	for (let e of n) for (let t of e.paragraphs) if (Array.from(t.text).length !== t.length || /[\u0000-\u0008\ufffc]/.test(t.text)) throw Error("Selected cells contain an object; copy its source HWPX instead");
 	let c = Array.from({ length: s.rows }, () => []), l = Array.from({ length: s.rows }, () => Array(s.columns).fill(""));
 	return n.forEach((e, t) => {
 		let n = s.cells[t], r = e.properties, i = e.paragraphs.map((e) => {
 			let t = Array.from(e.text), n = e.formats.map((n, r) => {
 				let i = n.format, a = t.slice(n.offset, e.formats[r + 1]?.offset ?? t.length).join("");
-				return `<span style="font-family:${PR(i.fontFamily || "맑은 고딕")};font-size:${(i.fontSize || 1e3) / 100}pt;font-weight:${i.bold ? "bold" : "normal"};font-style:${i.italic ? "italic" : "normal"};color:${PR(i.textColor || "#000000")}">${PR(a)}</span>`;
+				return `<span style="font-family:${BR(i.fontFamily || "맑은 고딕")};font-size:${(i.fontSize || 1e3) / 100}pt;font-weight:${i.bold ? "bold" : "normal"};font-style:${i.italic ? "italic" : "normal"};color:${BR(i.textColor || "#000000")}">${BR(a)}</span>`;
 			}).join("");
-			return `<p style="margin:0;text-align:${PR(e.format.alignment || "left")}">${n || "<br>"}</p>`;
+			return `<p style="margin:0;text-align:${BR(e.format.alignment || "left")}">${n || "<br>"}</p>`;
 		}).join(""), a = [
 			"Left",
 			"Right",
@@ -72359,11 +72438,11 @@ function IR(e, t) {
 			"Bottom"
 		].map((e) => {
 			let t = r["border" + e];
-			return `border-${e.toLowerCase()}:${t?.type === 0 ? "none" : `${Math.max(.3, (t?.width || 1) * .25)}pt ${t?.type === 2 ? "dashed" : t?.type === 3 ? "dotted" : "solid"} ${PR(t?.color || "#000000")}`}`;
+			return `border-${e.toLowerCase()}:${t?.type === 0 ? "none" : `${Math.max(.3, (t?.width || 1) * .25)}pt ${t?.type === 2 ? "dashed" : t?.type === 3 ? "dotted" : "solid"} ${BR(t?.color || "#000000")}`}`;
 		}).join(";");
 		c[n.row].push({
 			column: n.column,
-			html: `<td rowspan="${n.rowSpan}" colspan="${n.columnSpan}" style="${a};padding:2pt;width:${(r.width || 0) / 100}pt;height:${(r.height || 0) / 100}pt;background:${PR(r.fillType === "solid" ? r.fillColor : "#ffffff")}">${i}</td>`
+			html: `<td rowspan="${n.rowSpan}" colspan="${n.columnSpan}" style="${a};padding:2pt;width:${(r.width || 0) / 100}pt;height:${(r.height || 0) / 100}pt;background:${BR(r.fillType === "solid" ? r.fillColor : "#ffffff")}">${i}</td>`
 		}), l[n.row][n.column] = n.paragraphs.join("\n");
 	}), {
 		spec: s,
@@ -72371,7 +72450,7 @@ function IR(e, t) {
 		html: `<table style="border-collapse:collapse">${c.map((e) => "<tr>" + e.sort((e, t) => e.column - t.column).map((e) => e.html).join("") + "</tr>").join("")}</table>`
 	};
 }
-function LR(e) {
+function UR(e) {
 	let t = [];
 	for (let n = e; n && n.tagName !== "BODY"; n = n.parentElement) t.unshift(n);
 	let n = {};
@@ -72403,7 +72482,7 @@ function LR(e) {
 	let f = (i["font-family"] || "").split(",")[0].trim().replace(/^['"]|['"]$/g, "");
 	return f && f.length <= 100 && (o.fontFamily = f), o;
 }
-function RR(e, t = globalThis.DOMParser) {
+function WR(e, t = globalThis.DOMParser) {
 	if (typeof e != "string" || !e.trim() || e.length > 8388608) return null;
 	if (typeof t != "function") throw Error("HTML parser unavailable");
 	!/<table\b/i.test(e) && /<(?:tr|td|th)\b/i.test(e) && (e = "<table>" + e + "</table>");
@@ -72452,7 +72531,7 @@ function RR(e, t = globalThis.DOMParser) {
 				rowSpan: e,
 				columnSpan: l,
 				paragraphs: u
-			}), a.push(LR(r));
+			}), a.push(UR(r));
 			for (let r = 0; r < e; r++) for (let e = 0; e < l; e++) {
 				let i = t + r + ":" + (n + e);
 				if (o.has(i)) throw Error("Overlapping clipboard cells");
@@ -72461,17 +72540,17 @@ function RR(e, t = globalThis.DOMParser) {
 			n += l, s = Math.max(s, n);
 		}
 	});
-	let l = WL({
+	let l = XL({
 		rows: c.length,
 		columns: s,
 		cells: i
 	});
 	return Object.defineProperty(l, "clipboardStyles", { value: a }), l;
 }
-function zR(e) {
+function GR(e) {
 	if (typeof e != "string" || !e.includes("	") || e.length > 24e3) return null;
 	let t = e.replace(/\r\n?/g, "\n").replace(/\n$/, "").split("\n").map((e) => e.split("	")), n = t[0]?.length;
-	return !n || t.some((e) => e.length !== n) ? null : WL({
+	return !n || t.some((e) => e.length !== n) ? null : XL({
 		rows: t.length,
 		columns: n,
 		cells: t.flatMap((e, t) => e.map((e, n) => ({
@@ -72481,7 +72560,7 @@ function zR(e) {
 		})))
 	});
 }
-function BR(e, t) {
+function KR(e, t) {
 	if (e && /<table\b/i.test(e)) {
 		let t = new DOMParser().parseFromString(e, "text/html").querySelectorAll("table");
 		if (t.length !== 1 || t[0].querySelector("table,img,svg,object,embed,math,iframe,video,canvas")) throw Error("이 HTML 표의 중첩 객체는 안전하게 가져올 수 없습니다.");
@@ -72493,11 +72572,11 @@ function BR(e, t) {
 	let n = Array.from({ length: t.rows }, () => []);
 	for (let e of t.cells) n[e.row].push({
 		column: e.column,
-		html: `<td rowspan="${e.rowSpan ?? 1}" colspan="${e.columnSpan ?? 1}">${e.paragraphs.map((e) => "<p>" + PR(e) + "</p>").join("")}</td>`
+		html: `<td rowspan="${e.rowSpan ?? 1}" colspan="${e.columnSpan ?? 1}">${e.paragraphs.map((e) => "<p>" + BR(e) + "</p>").join("")}</td>`
 	});
 	return "<table>" + n.map((e) => "<tr>" + e.sort((e, t) => e.column - t.column).map((e) => e.html).join("") + "</tr>").join("") + "</table>";
 }
-function VR(e) {
+function qR(e) {
 	if (typeof e != "string" || e.length > 8388608) return !1;
 	let t = e.indexOf("[data-hwpjson]"), n = e.indexOf("{", t), r = e.indexOf("-->", n);
 	if (t < 0 || n < 0 || r < 0) return !1;
@@ -72507,15 +72586,15 @@ function VR(e) {
 		return !1;
 	}
 }
-function HR(e, t, n) {
-	WL(n);
+function JR(e, t, n) {
+	XL(n);
 	let r = t.table?.source, i = t.cursor;
 	if (!r || r.cellPath?.length > 1) throw Error("중첩 표의 기존 셀에 덮어쓰기는 아직 지원하지 않습니다.");
 	let a = {
 		sec: r.sec,
 		ppi: r.ppi,
 		ci: r.ci
-	}, o = sL(e, a.sec, a.ppi, a.ci), s = t.kind === "cell_block" ? t.table.selectedCells : null, c = s?.length ? o.cells[s[0].cellIndex] : o.cells[i.cellIndex];
+	}, o = pL(e, a.sec, a.ppi, a.ci), s = t.kind === "cell_block" ? t.table.selectedCells : null, c = s?.length ? o.cells[s[0].cellIndex] : o.cells[i.cellIndex];
 	if (!c) throw Error("Choose a destination cell");
 	let l = s?.length ? Math.min(...s.map((e) => e.row)) : c.geometry.row, u = s?.length ? Math.min(...s.map((e) => e.col)) : c.geometry.col, d = s?.length > 1 ? new Set(s.map((e) => e.cellIndex)) : null, f = [];
 	for (let e of n.cells) {
@@ -72530,7 +72609,7 @@ function HR(e, t, n) {
 	}
 	if (d && d.size !== f.length) throw Error("복사한 표와 같은 크기의 셀 범위를 선택해 주세요.");
 	try {
-		VL(e, a, f.map((e) => ({
+		qL(e, a, f.map((e) => ({
 			cellIndex: e.cellIndex,
 			paragraphs: o.cells[e.cellIndex].paragraphs.map((e) => e.text)
 		})), d ? [...d] : void 0);
@@ -72538,7 +72617,7 @@ function HR(e, t, n) {
 		throw /mixed character formatting/i.test(e.message) ? Error("대상 셀에 여러 글자 서식이 섞여 있어 덮어쓰지 않았습니다.") : /contains an object/i.test(e.message) ? Error("대상 셀에 표나 그림이 있어 덮어쓰지 않았습니다.") : e;
 	}
 	let p = (e) => {
-		if (FR(e)?.ok !== !0) throw Error("Cell paragraph operation failed");
+		if (VR(e)?.ok !== !0) throw Error("Cell paragraph operation failed");
 	};
 	for (let t of f) {
 		let n = o.cells[t.cellIndex].paragraphs;
@@ -72548,9 +72627,9 @@ function HR(e, t, n) {
 			for (let r = n.length; r < t.paragraphs.length; r++) p(e.splitParagraphInCell(a.sec, a.ppi, a.ci, t.cellIndex, r - 1, 0));
 		}
 	}
-	return HL(e, a, f, d ? [...d] : void 0);
+	return JL(e, a, f, d ? [...d] : void 0);
 }
-function UR({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a, chooseTablePaste: o, enableNestedClipping: s }) {
+function YR({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a, chooseTablePaste: o, enableNestedClipping: s }) {
 	let c = !1, l = 0, u = null, d = (t, n) => {
 		let r = t.cellPath || [], i = r.length > 1 ? {
 			ci: r.at(-1).controlIndex,
@@ -72559,7 +72638,7 @@ function UR({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 			ci: t.ci,
 			owner: "[]"
 		};
-		if (FR(e.copyControl(t.sec, t.ppi, i.ci, i.owner))?.ok !== !0) throw Error("표를 복사하지 못했습니다.");
+		if (VR(e.copyControl(t.sec, t.ppi, i.ci, i.owner))?.ok !== !0) throw Error("표를 복사하지 못했습니다.");
 		let a = e.exportControlHtml(t.sec, t.ppi, i.ci, i.owner);
 		if (typeof a != "string" || !/<table\b/i.test(a)) throw Error("표의 복사 형식을 만들지 못했습니다.");
 		let o = crypto.randomUUID();
@@ -72585,8 +72664,8 @@ function UR({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 			if (o.length === t.cellCount) return d(a, i);
 			throw Error("중첩 표의 일부 셀 복사는 아직 지원하지 않습니다.");
 		}
-		let s = sL(e, a.sec, a.ppi, a.ci);
-		return o ??= s.cells.map((e, t) => t), o.length === s.dimensions.cellCount ? d(a, i) : IR(s, o);
+		let s = pL(e, a.sec, a.ppi, a.ci);
+		return o ??= s.cells.map((e, t) => t), o.length === s.dimensions.cellCount ? d(a, i) : HR(s, o);
 	};
 	document.addEventListener("copy", (e) => {
 		u = null;
@@ -72620,7 +72699,7 @@ function UR({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 	let m = async (e, t) => r(t, (n) => {
 		let r, i;
 		if (t.cursor?.parentParaIndex != null) {
-			r = HR(n, t, e);
+			r = JR(n, t, e);
 			let a = t.table.source;
 			i = {
 				sec: a.sec,
@@ -72629,15 +72708,15 @@ function UR({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 			};
 		} else {
 			if (t.selection) throw Error("Place a body cursor outside a selection before pasting a table");
-			r = GL(n, t.cursor, e), i = r.source;
+			r = ZL(n, t.cursor, e), i = r.source;
 		}
 		let a = (e.clipboardStyles || []).map((e, t) => ({
 			cellIndex: r.cellIndices[t],
 			...e
 		})).filter((e) => Object.keys(e).length > 1);
-		return a.length && fL(n, {
+		return a.length && vL(n, {
 			...i,
-			snapshot: sL(n, i.sec, i.ppi, i.ci)
+			snapshot: pL(n, i.sec, i.ppi, i.ci)
 		}, a), r;
 	});
 	return document.addEventListener("paste", (n) => {
@@ -72653,10 +72732,10 @@ function UR({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 			return;
 		}
 		let p = f.getData("text/html"), h = f.getData("text/plain"), g, _, v = d.cursor?.parentParaIndex != null, y = p.match(/<!--pwh-rich-table:([0-9a-f-]+)-->/i)?.[1], b = v && !!y && u?.token === y && u.epoch === d.documentState.documentEpoch && e.clipboardHasControl();
-		if (!v && VR(p)) return;
-		let x = v ? DR(p) : null;
+		if (!v && qR(p)) return;
+		let x = v ? NR(p) : null;
 		try {
-			!x && !b && (g = RR(p) || zR(h));
+			!x && !b && (g = WR(p) || GR(h));
 		} catch (e) {
 			_ = e;
 		}
@@ -72699,23 +72778,23 @@ function UR({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 					E();
 					let t = (e) => String(e || "").replace(/\r\n?/g, "\n").replace(/\0+$/, "");
 					if (e && t(h) && t(e.text) === t(h)) {
-						if (!v && VR(e.html)) {
+						if (!v && qR(e.html)) {
 							let t = new DataTransfer();
 							t.setData("text/html", e.html), t.setData("text/plain", h), D(t);
 							return;
 						}
-						v && VR(e.html) && (p = e.html, x = DR(p));
+						v && qR(e.html) && (p = e.html, x = NR(p));
 					}
 				}
 				if ((x || b || g) && v) {
 					let e = await o({ htmlOnly: !x && !b });
 					if (!e) return;
 					if (e === "nested") {
-						let e = !x && !b ? BR(p, g) : null;
-						await r(d, (t) => x ? MR(t, d, x) : b ? AR(t, d) : NR(t, d, e, g)), s?.(), i("셀 안에 표를 넣었습니다. 실행 취소 한 번으로 되돌릴 수 있습니다.");
+						let e = !x && !b ? KR(p, g) : null;
+						await r(d, (t) => x ? RR(t, d, x) : b ? IR(t, d) : zR(t, d, e, g)), s?.(), i("셀 안에 표를 넣었습니다. 실행 취소 한 번으로 되돌릴 수 있습니다.");
 						return;
 					}
-					if (g ||= RR(p) || zR(h), !g) throw Error("기존 셀에 붙일 표 내용을 확인하지 못했습니다.");
+					if (g ||= WR(p) || GR(h), !g) throw Error("기존 셀에 붙일 표 내용을 확인하지 못했습니다.");
 				}
 				if (_ && !g) throw _;
 				g ? (await m(g, d), i("표·셀 붙여넣기를 완료했습니다. 실행 취소 한 번으로 되돌릴 수 있습니다.")) : (E(), D(T));
@@ -72728,7 +72807,7 @@ function UR({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 		(async () => {
 			try {
 				let n = await a(), l = e.cursor?.parentParaIndex != null;
-				if (!l && VR(n.html)) {
+				if (!l && qR(n.html)) {
 					let r = t();
 					if (JSON.stringify(r.documentState) !== JSON.stringify(e.documentState) || JSON.stringify(r.cursor) !== JSON.stringify(e.cursor)) throw Error("문서나 커서가 변경되어 붙여넣기를 취소했습니다.");
 					let i = new DataTransfer();
@@ -72747,17 +72826,17 @@ function UR({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 					}
 					return;
 				}
-				let u = l ? DR(n.html) : null, d = u ? null : RR(n.html) || zR(n.text);
+				let u = l ? NR(n.html) : null, d = u ? null : WR(n.html) || GR(n.text);
 				if (l && (u || d)) {
 					let t = await o({ htmlOnly: !u });
 					if (!t) return;
 					if (t === "nested") {
-						let t = u ? null : BR(n.html, d);
-						await r(e, (n) => u ? MR(n, e, u) : NR(n, e, t, d)), s?.(), i("셀 안에 표를 넣었습니다. 실행 취소 한 번으로 되돌릴 수 있습니다.");
+						let t = u ? null : KR(n.html, d);
+						await r(e, (n) => u ? RR(n, e, u) : zR(n, e, t, d)), s?.(), i("셀 안에 표를 넣었습니다. 실행 취소 한 번으로 되돌릴 수 있습니다.");
 						return;
 					}
 				}
-				if (d ||= RR(n.html) || zR(n.text), !d) throw Error("클립보드에서 표 구조를 찾지 못했습니다. 한글에서 표 또는 셀을 다시 복사하거나 원본 HWPX를 열어 주세요.");
+				if (d ||= WR(n.html) || GR(n.text), !d) throw Error("클립보드에서 표 구조를 찾지 못했습니다. 한글에서 표 또는 셀을 다시 복사하거나 원본 HWPX를 열어 주세요.");
 				await m(d, e), i("한글 표·셀을 가져왔습니다.");
 			} catch (e) {
 				i(e.message, !0);
@@ -72770,7 +72849,7 @@ function UR({ wasm: e, read: t, getInput: n, mutate: r, notice: i, nativeRead: a
 }
 //#endregion
 //#region @rhwp/studio/src/pwh-table-paste-dialog.ts
-function WR(e = {}) {
+function XR(e = {}) {
 	return new Promise((t) => {
 		class n extends A {
 			choice = null;
@@ -72803,7 +72882,7 @@ function WR(e = {}) {
 }
 //#endregion
 //#region @rhwp/studio/src/selection-page-context.mjs
-function GR(e, t) {
+function ZR(e, t) {
 	let n = e?.cursorRect?.pageIndex, r = t?.cursorRect?.pageIndex;
 	return Number.isInteger(n) && n >= 0 && Number.isInteger(r) && r >= 0 ? {
 		startPageHint: n,
@@ -72812,11 +72891,11 @@ function GR(e, t) {
 }
 //#endregion
 //#region @rhwp/studio/src/collaboration-selection.ts
-var KR = 6e3, qR = 24, JR = 256, YR = 256, XR = 96;
-function ZR(e, t = 0) {
-	return e == null ? null : typeof e == "string" ? e.slice(0, KR) : typeof e == "number" ? Number.isFinite(e) ? e : null : typeof e == "boolean" ? e : t > 7 || typeof e != "object" || ArrayBuffer.isView(e) ? null : Array.isArray(e) ? e.slice(0, XR).map((e) => ZR(e, t + 1)) : Object.fromEntries(Object.entries(e).slice(0, 80).filter(([, e]) => typeof e != "function").map(([e, n]) => [e, ZR(n, t + 1)]));
+var QR = 6e3, $R = 24, ez = 256, tz = 256, nz = 96;
+function rz(e, t = 0) {
+	return e == null ? null : typeof e == "string" ? e.slice(0, QR) : typeof e == "number" ? Number.isFinite(e) ? e : null : typeof e == "boolean" ? e : t > 7 || typeof e != "object" || ArrayBuffer.isView(e) ? null : Array.isArray(e) ? e.slice(0, nz).map((e) => rz(e, t + 1)) : Object.fromEntries(Object.entries(e).slice(0, 80).filter(([, e]) => typeof e != "function").map(([e, n]) => [e, rz(n, t + 1)]));
 }
-function QR(e, t, n) {
+function iz(e, t, n) {
 	let r = (e?.cellPath || []).map((e) => ({
 		controlIndex: e.controlIndex ?? e.controlIdx,
 		cellIndex: e.cellIndex ?? e.cellIdx,
@@ -72824,20 +72903,20 @@ function QR(e, t, n) {
 	}));
 	return r.length && (t !== void 0 && (r[r.length - 1].cellParaIndex = t), n !== void 0 && (r[r.length - 1].cellIndex = n)), r;
 }
-function $R(e) {
-	return QR(e).at(-1)?.cellParaIndex ?? e.cellParaIndex ?? e.paragraphIndex;
+function az(e) {
+	return iz(e).at(-1)?.cellParaIndex ?? e.cellParaIndex ?? e.paragraphIndex;
 }
-function ez(e, t) {
+function oz(e, t) {
 	if (!e || !t || e.sectionIndex !== t.sectionIndex) return !1;
 	if (e.parentParaIndex === void 0 || t.parentParaIndex === void 0) return e.parentParaIndex === void 0 && t.parentParaIndex === void 0;
 	if (e.parentParaIndex !== t.parentParaIndex) return !1;
-	let n = QR(e), r = QR(t);
+	let n = iz(e), r = iz(t);
 	return n.length || r.length ? JSON.stringify(n.map(({ controlIndex: e, cellIndex: t }) => [e, t])) === JSON.stringify(r.map(({ controlIndex: e, cellIndex: t }) => [e, t])) : e.controlIndex === t.controlIndex && e.cellIndex === t.cellIndex;
 }
-function tz(e) {
+function sz(e) {
 	let t = window;
 	function n(t = {}) {
-		let n = e.getInputHandler(), r = [], i = KR, a = (e, t, n, ...i) => {
+		let n = e.getInputHandler(), r = [], i = QR, a = (e, t, n, ...i) => {
 			if (typeof t?.[n] != "function") return r.push(`${e}: unavailable`), null;
 			try {
 				return t[n](...i);
@@ -72869,7 +72948,7 @@ function tz(e) {
 		let c = a("text selection", n, "getSelection"), l = a("cell selection mode", n, "isInCellSelectionMode") === !0, u = a("table object selection", n, "isInTableObjectSelection") === !0, d = a("picture object selection", n, "isInPictureObjectSelection") === !0, f = s.parentParaIndex !== void 0, p = !l && !u && !d && a("text submode coverage", n, "canEditHyperlink") === !0, m = d ? "object" : u ? "table_object" : l ? "cell_block" : p ? f ? s.isTextBox ? "textbox_text" : "cell_text" : "body_text" : "unsupported_submode";
 		m === "unsupported_submode" && r.push("Header/footer/footnote coordinates are not exposed by this bridge.");
 		function h(t, n, r, s) {
-			let c = t.parentParaIndex !== void 0, l = QR(t, n), u = c ? l.length ? a("cell paragraph length", e.wasm, "getCellParagraphLengthByPath", t.sectionIndex, t.parentParaIndex, JSON.stringify(l)) : a("cell paragraph length", e.wasm, "getCellParagraphLength", t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, n) : a("paragraph length", e.wasm, "getParagraphLength", t.sectionIndex, n);
+			let c = t.parentParaIndex !== void 0, l = iz(t, n), u = c ? l.length ? a("cell paragraph length", e.wasm, "getCellParagraphLengthByPath", t.sectionIndex, t.parentParaIndex, JSON.stringify(l)) : a("cell paragraph length", e.wasm, "getCellParagraphLength", t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, n) : a("paragraph length", e.wasm, "getParagraphLength", t.sectionIndex, n);
 			if (!Number.isInteger(u) || u < 0) return {
 				text: null,
 				length: null,
@@ -72887,9 +72966,9 @@ function tz(e) {
 			truncated: !1,
 			known: !1
 		}, _ = [];
-		if (p && c?.start && c?.end && ez(c.start, c.end)) {
-			let { start: t, end: n } = c, o = f ? $R(t) : t.paragraphIndex, s = f ? $R(n) : n.paragraphIndex, l = [], u = !1, d = !0;
-			for (let e = o; e <= Math.min(s, o + qR - 1); e++) {
+		if (p && c?.start && c?.end && oz(c.start, c.end)) {
+			let { start: t, end: n } = c, o = f ? az(t) : t.paragraphIndex, s = f ? az(n) : n.paragraphIndex, l = [], u = !1, d = !0;
+			for (let e = o; e <= Math.min(s, o + $R - 1); e++) {
 				let r = e === o ? t.charOffset : 0, a = e === s ? Math.max(0, n.charOffset - r) : 2 ** 53 - 1, c = h(t, e, r, a);
 				if (c.text === null ? d = !1 : l.push(c.text), u ||= c.truncated, !i && e < s) {
 					u = !0;
@@ -72899,21 +72978,21 @@ function tz(e) {
 			g = {
 				text: d ? l.join("\n") : null,
 				known: d,
-				truncated: u || s - o + 1 > qR
+				truncated: u || s - o + 1 > $R
 			};
-			let p = QR(t), m = GR(t, n), v = f ? p.length > 1 ? a("selection rectangles", e.wasm, "getSelectionRectsInCellByPath", t.sectionIndex, t.parentParaIndex, JSON.stringify(p), o, t.charOffset, s, n.charOffset, m) : a("selection rectangles", e.wasm, "getSelectionRectsInCell", t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, o, t.charOffset, s, n.charOffset, m) : a("selection rectangles", e.wasm, "getSelectionRects", t.sectionIndex, t.paragraphIndex, t.charOffset, n.paragraphIndex, n.charOffset);
-			_ = Array.isArray(v) ? v.slice(0, XR) : [], Array.isArray(v) && v.length > XR && r.push("Selection rectangle list truncated.");
+			let p = iz(t), m = ZR(t, n), v = f ? p.length > 1 ? a("selection rectangles", e.wasm, "getSelectionRectsInCellByPath", t.sectionIndex, t.parentParaIndex, JSON.stringify(p), o, t.charOffset, s, n.charOffset, m) : a("selection rectangles", e.wasm, "getSelectionRectsInCell", t.sectionIndex, t.parentParaIndex, t.controlIndex, t.cellIndex, o, t.charOffset, s, n.charOffset, m) : a("selection rectangles", e.wasm, "getSelectionRects", t.sectionIndex, t.paragraphIndex, t.charOffset, n.paragraphIndex, n.charOffset);
+			_ = Array.isArray(v) ? v.slice(0, nz) : [], Array.isArray(v) && v.length > nz && r.push("Selection rectangle list truncated.");
 		} else p && !c ? g = {
 			text: "",
 			known: !0,
 			truncated: !1
-		} : c && !ez(c.start, c.end) && r.push("Selected text spans unsupported source containers.");
+		} : c && !oz(c.start, c.end) && r.push("Selected text spans unsupported source containers.");
 		let v = p ? {
 			position: {
 				...s,
 				charOffset: 0
 			},
-			...h(s, f ? $R(s) : s.paragraphIndex, 0, 2 ** 53 - 1)
+			...h(s, f ? az(s) : s.paragraphIndex, 0, 2 ** 53 - 1)
 		} : null, y = {
 			character: a("current character properties", n, "getCharProperties"),
 			paragraph: a("current paragraph properties", n, "getParaProperties")
@@ -72924,16 +73003,16 @@ function tz(e) {
 			cellPath: s.cellPath
 		} : null, x = null;
 		if (b) {
-			let t = QR(b), i = t.length > 1, o = l ? a("selected cell range", n, "getSelectedCellRange") : null, s = l && a("excluded cells", n, "hasExcludedCellSelection") === !0, c = i ? a("table dimensions", e.wasm, "getTableDimensionsByPath", b.sec, b.ppi, JSON.stringify(t)) : a("table dimensions", e.wasm, "getTableDimensions", b.sec, b.ppi, b.ci), u = i ? a("cell rectangles", e.wasm, "getTableCellBboxesByPath", b.sec, b.ppi, JSON.stringify(t)) : a("cell rectangles", e.wasm, "getTableCellBboxes", b.sec, b.ppi, b.ci), d = [], f = 0;
+			let t = iz(b), i = t.length > 1, o = l ? a("selected cell range", n, "getSelectedCellRange") : null, s = l && a("excluded cells", n, "hasExcludedCellSelection") === !0, c = i ? a("table dimensions", e.wasm, "getTableDimensionsByPath", b.sec, b.ppi, JSON.stringify(t)) : a("table dimensions", e.wasm, "getTableDimensions", b.sec, b.ppi, b.ci), u = i ? a("cell rectangles", e.wasm, "getTableCellBboxesByPath", b.sec, b.ppi, JSON.stringify(t)) : a("cell rectangles", e.wasm, "getTableCellBboxes", b.sec, b.ppi, b.ci), d = [], f = 0;
 			if (s) r.push("Nonrectangular cell exclusions are not public; selectedCells is unknown.");
-			else if (o && Number.isInteger(c?.cellCount)) for (let n = 0; n < Math.min(c.cellCount, YR); n++) {
+			else if (o && Number.isInteger(c?.cellCount)) for (let n = 0; n < Math.min(c.cellCount, tz); n++) {
 				f++;
 				let r = {
 					...b,
 					cellPath: t
-				}, s = i ? a("cell information", e.wasm, "getCellInfoByPath", b.sec, b.ppi, JSON.stringify(QR(r, 0, n))) : a("cell information", e.wasm, "getCellInfo", b.sec, b.ppi, b.ci, n);
+				}, s = i ? a("cell information", e.wasm, "getCellInfoByPath", b.sec, b.ppi, JSON.stringify(iz(r, 0, n))) : a("cell information", e.wasm, "getCellInfo", b.sec, b.ppi, b.ci, n);
 				if (s && !(s.row > o.endRow || s.col > o.endCol || s.row + s.rowSpan <= o.startRow || s.col + s.colSpan <= o.startCol)) {
-					if (d.length >= JR) break;
+					if (d.length >= ez) break;
 					d.push({
 						cellIndex: n,
 						...s,
@@ -72941,7 +73020,7 @@ function tz(e) {
 							sec: b.sec,
 							ppi: b.ppi,
 							ci: b.ci,
-							...t.length ? { cellPath: QR(r, 0, n) } : {}
+							...t.length ? { cellPath: iz(r, 0, n) } : {}
 						}
 					});
 				}
@@ -72954,8 +73033,8 @@ function tz(e) {
 				selectedCellsComplete: !s && (!o || f >= (c?.cellCount ?? Infinity)),
 				scannedCellCount: f,
 				properties: i ? null : a("table properties", e.wasm, "getTableProperties", b.sec, b.ppi, b.ci),
-				rectangles: Array.isArray(u) ? u.slice(0, XR) : [],
-				rectanglesTruncated: Array.isArray(u) && u.length > XR
+				rectangles: Array.isArray(u) ? u.slice(0, nz) : [],
+				rectanglesTruncated: Array.isArray(u) && u.length > nz
 			};
 		}
 		let S = d ? a("selected objects", n, "getSelectedPictureRefs") : [], C = d ? a("selected object", n, "getSelectedPictureRef") : null, w = (Array.isArray(S) && S.length ? S : C ? [C] : []).slice(0, 16).map((t) => {
@@ -72994,7 +73073,7 @@ function tz(e) {
 				} : null
 			};
 		}), T = e.getDocumentAgent?.(), E = t.fresh === !1 && typeof T?.getPresentationDocumentState == "function" ? "getPresentationDocumentState" : "getDocumentState";
-		return ZR({
+		return rz({
 			schemaVersion: 1,
 			ready: !0,
 			kind: m,
@@ -73009,11 +73088,11 @@ function tz(e) {
 			selectionRects: _,
 			coordinateSystem: "Source indices are zero-based; rectangles use unzoomed page CSS pixels.",
 			limits: {
-				maxTextCodePoints: KR,
-				maxParagraphs: qR,
-				maxCells: JR,
-				maxScannedCells: YR,
-				maxRectangles: XR
+				maxTextCodePoints: QR,
+				maxParagraphs: $R,
+				maxCells: ez,
+				maxScannedCells: tz,
+				maxRectangles: nz
 			},
 			unknown: [...new Set(r)].slice(0, 24)
 		});
@@ -73034,7 +73113,7 @@ function tz(e) {
 		try {
 			o = (e.wasm.getPageControlLayout(n)?.controls || []).filter((e) => r >= e.x && i >= e.y && r <= e.x + e.w && i <= e.y + e.h).slice(0, 16);
 		} catch {}
-		return ZR({
+		return rz({
 			schemaVersion: 1,
 			ready: !0,
 			pageIndex: n,
@@ -73054,15 +73133,15 @@ function tz(e) {
 }
 //#endregion
 //#region @rhwp/studio/src/pwh-inline-adapter.ts
-function nz(e) {
-	let t = tz(e), n = /* @__PURE__ */ new Map(), r = /* @__PURE__ */ new Map(), i = /* @__PURE__ */ new Map(), a = (e) => {
+function cz(e) {
+	let t = sz(e), n = /* @__PURE__ */ new Map(), r = /* @__PURE__ */ new Map(), i = /* @__PURE__ */ new Map(), a = (e) => {
 		let t = crypto.randomUUID();
 		return r.set(t, e), r.size > 24 && r.delete(r.keys().next().value), t;
 	}, o = (n = !0) => {
 		let r = t.getSelectionContext({ fresh: n });
 		return {
 			...r,
-			blankDocument: !!r.ready && AL(e.wasm),
+			blankDocument: !!r.ready && IL(e.wasm),
 			requestScope: r.kind === "cell_block" && r.table?.selectedCells?.length || r.selection && r.selectedText?.text ? "selection" : r.kind === "object" ? "object" : "document",
 			pageSettings: r.ready ? Array.from({ length: Math.min(e.wasm.getSectionCount(), 32) }, (t, n) => ({
 				sectionIndex: n,
@@ -73079,7 +73158,7 @@ function nz(e) {
 		let t = structuredClone(o());
 		if (c(t)) {
 			try {
-				t.target = t.kind === "cell_block" ? await cL(e.wasm, t) : await xL(e.wasm, t);
+				t.target = t.kind === "cell_block" ? await mL(e.wasm, t) : await DL(e.wasm, t);
 			} catch {
 				t.target = null;
 			}
@@ -73094,11 +73173,11 @@ function nz(e) {
 		execute: l
 	});
 	let u = !1;
-	e.ready.then(() => UR({
+	e.ready.then(() => YR({
 		wasm: e.wasm,
 		read: () => o(),
 		getInput: () => e.getInputHandler(),
-		chooseTablePaste: WR,
+		chooseTablePaste: XR,
 		enableNestedClipping: () => {
 			V.getViewSettings().clipView && document.querySelector("[data-cmd=\"view:toggle-clip\"]")?.click();
 		},
@@ -73117,7 +73196,7 @@ function nz(e) {
 			if (u) throw Error("Another edit is being applied");
 			u = !0;
 			try {
-				if (!FL(o(), t)) throw Error("붙여넣는 동안 문서 또는 커서가 바뀌었습니다. 다시 붙여넣으세요.");
+				if (!VL(o(), t)) throw Error("붙여넣는 동안 문서 또는 커서가 바뀌었습니다. 다시 붙여넣으세요.");
 				let r = e.getInputHandler(), i = r.getCursorPosition();
 				await r.executeDocumentAgentOperation({
 					kind: "snapshot",
@@ -73255,7 +73334,7 @@ function nz(e) {
 		interacting: () => d || performance.now() - f < 1200,
 		capture: async () => {
 			let t = structuredClone(o());
-			return t.target = await xL(e.wasm, t), t;
+			return t.target = await DL(e.wasm, t), t;
 		},
 		export: () => e.wasm.exportHwpxWithReport(),
 		recoveryExport: () => {
@@ -73269,13 +73348,13 @@ function nz(e) {
 		recovered: () => e.recovered(),
 		legacyDrafts: () => e.legacyDrafts(),
 		async replacePicture(t, n) {
-			let r = o(), i = t.expected.target ? await SL(e.wasm, t.expected, r) : r;
+			let r = o(), i = t.expected.target ? await OL(e.wasm, t.expected, r) : r;
 			if (!t.expected.target && JSON.stringify(i) !== JSON.stringify(t.expected)) throw Error("문서·선택 상태가 바뀌었습니다. 다시 요청하세요.");
 			if (u) throw Error("이전 수정 적용 중입니다.");
 			u = !0;
 			let a = e.getInputHandler(), s = a.getCursorPosition(), c;
 			try {
-				let { ref: r, pathJson: l } = CL(i), u = e.wasm.getControlImageData(r.sec, r.ppi, r.ci, l), d = await createImageBitmap(new Blob([u])), f = await createImageBitmap(new Blob([n], { type: t.image.mediaType })), p = n, m = t.image, h = !1;
+				let { ref: r, pathJson: l } = kL(i), u = e.wasm.getControlImageData(r.sec, r.ppi, r.ci, l), d = await createImageBitmap(new Blob([u])), f = await createImageBitmap(new Blob([n], { type: t.image.mediaType })), p = n, m = t.image, h = !1;
 				try {
 					if (d.width * d.height > 16777216) throw Error("기존 이미지가 비율 보존 처리 한도를 초과합니다.");
 					if (d.width * f.height !== d.height * f.width) {
@@ -73298,13 +73377,13 @@ function nz(e) {
 				} finally {
 					d.close(), f.close();
 				}
-				if (t.expected.target) await SL(e.wasm, t.expected, o());
+				if (t.expected.target) await OL(e.wasm, t.expected, o());
 				else if (JSON.stringify(o()) !== JSON.stringify(t.expected)) throw Error("이미지 준비 중 문서·선택이 바뀌었습니다.");
 				await a.executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-picture-replace",
 					operation: (e) => (c = {
-						...wL(e, i, p, m),
+						...AL(e, i, p, m),
 						fit: "contain",
 						transparentPadding: h
 					}, s)
@@ -73322,7 +73401,7 @@ function nz(e) {
 		async tables(t) {
 			let r = o();
 			if (r.documentState.documentEpoch !== t.expected.documentState?.documentEpoch) throw Error("Table request expired");
-			let i = await pL(e.wasm, r), a = crypto.randomUUID();
+			let i = await yL(e.wasm, r), a = crypto.randomUUID();
 			return n.set(a, i), n.size > 8 && n.delete(n.keys().next().value), {
 				ok: !0,
 				tablePlan: {
@@ -73344,7 +73423,7 @@ function nz(e) {
 						})),
 						headerRows: e.snapshot.cells.filter((e) => e.properties.isHeader).map((e) => e.geometry.row),
 						sample: e.snapshot.cells.slice(0, 4).map((e) => e.paragraphs.map((e) => e.text).join(" ").slice(0, 160)),
-						theme: hL(e)
+						theme: xL(e)
 					}))
 				}
 			};
@@ -73352,7 +73431,7 @@ function nz(e) {
 		async textSearch(t) {
 			let n = o();
 			if (!n.ready || n.documentState.documentEpoch !== t.expected.documentState?.documentEpoch) throw Error("텍스트 검색 요청이 만료되었습니다.");
-			let r = gR(e.wasm, n, t.query, {
+			let r = SR(e.wasm, n, t.query, {
 				cursor: t.cursor,
 				limit: t.limit,
 				includeStyle: t.includeStyle
@@ -73371,11 +73450,11 @@ function nz(e) {
 			u = !0;
 			let n = e.getInputHandler(), i = n.getCursorPosition(), a;
 			try {
-				let s = bR(e.wasm, r, t.edits, o());
+				let s = ER(e.wasm, r, t.edits, o());
 				await n.executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-text-edit",
-					operation: (e) => (a = xR(e, s, ip), SR(s, i))
+					operation: (e) => (a = DR(e, s, ip), OR(s, i))
 				}, () => e.getCanvasView().refreshDocumentAgentMutation()), r.clear();
 			} finally {
 				u = !1;
@@ -73393,14 +73472,14 @@ function nz(e) {
 			let r = t.cursor?.scanId ?? crypto.randomUUID(), s = i.get(r);
 			if (t.cursor) {
 				if (!s || s.scope !== t.scope || s.filter !== t.filter) throw Error("서식 검사 조건이 변경되었습니다. 처음부터 확인해 주세요.");
-				XL(s.revision, n);
+				nR(s.revision, n);
 			} else s = {
-				index: _R(e.wasm, t.scope),
-				revision: YL(n),
+				index: CR(e.wasm, t.scope),
+				revision: tR(n),
 				scope: t.scope,
 				filter: t.filter
 			}, i.set(r, s), i.size > 4 && i.delete(i.keys().next().value);
-			let c = vR(e.wasm, s.index, n, t), l = a(c);
+			let c = wR(e.wasm, s.index, n, t), l = a(c);
 			return {
 				ok: !0,
 				styleScan: {
@@ -73419,11 +73498,11 @@ function nz(e) {
 			u = !0;
 			let n = e.getInputHandler(), i = n.getCursorPosition(), a;
 			try {
-				let s = t.type === "paragraphStyle", c = mR(e.wasm, r, t.edits, o(), s);
+				let s = t.type === "paragraphStyle", c = bR(e.wasm, r, t.edits, o(), s);
 				await n.executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: s ? "pwh-paragraph-style" : "pwh-text-style",
-					operation: (e) => (a = s ? fR(e, c) : hR(e, c), i)
+					operation: (e) => (a = s ? vR(e, c) : xR(e, c), i)
 				}, () => e.getCanvasView().refreshDocumentAgentMutation()), r.clear();
 			} finally {
 				u = !1;
@@ -73441,16 +73520,16 @@ function nz(e) {
 			let r = e.getInputHandler(), i = r.getCursorPosition(), a;
 			try {
 				let s = o(), c, l;
-				if (t.expected.target?.kind === "table_cells") c = await lL(e.wasm, t.expected.target, s), l = t.expected.target.cells;
+				if (t.expected.target?.kind === "table_cells") c = await hL(e.wasm, t.expected.target, s), l = t.expected.target.cells;
 				else {
 					let r = n.get(t.planId);
 					if (!r) throw Error("Inspect the table again");
-					[c] = await vL(e.wasm, r, s, "table", t.tableIndex);
+					[c] = await wL(e.wasm, r, s, "table", t.tableIndex);
 				}
-				VL(e.wasm, c, t.edits, l), await r.executeDocumentAgentOperation({
+				qL(e.wasm, c, t.edits, l), await r.executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-table-fill",
-					operation: (e) => (a = HL(e, c, t.edits, l), i)
+					operation: (e) => (a = JL(e, c, t.edits, l), i)
 				}, () => e.getCanvasView().refreshDocumentAgentMutation());
 			} finally {
 				u = !1;
@@ -73468,11 +73547,11 @@ function nz(e) {
 			let n;
 			try {
 				let r = o();
-				if (!FL(r, t.expected) || r.kind !== "body_text" || r.selection) throw Error("Insertion cursor or document changed");
+				if (!VL(r, t.expected) || r.kind !== "body_text" || r.selection) throw Error("Insertion cursor or document changed");
 				await e.getInputHandler().executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-table-insert",
-					operation: (e) => (n = GL(e, r.cursor, t.table), r.cursor)
+					operation: (e) => (n = ZL(e, r.cursor, t.table), r.cursor)
 				}, () => e.getCanvasView().refreshDocumentAgentMutation());
 			} finally {
 				u = !1;
@@ -73490,17 +73569,17 @@ function nz(e) {
 			let r;
 			try {
 				let i = o(), a;
-				if (t.expected.target?.kind === "table_cells") a = await lL(e.wasm, t.expected.target, i);
+				if (t.expected.target?.kind === "table_cells") a = await hL(e.wasm, t.expected.target, i);
 				else {
 					let r = n.get(t.planId);
 					if (!r) throw Error("표를 다시 분석하세요.");
-					[a] = await vL(e.wasm, r, i, "table", t.tableIndex);
+					[a] = await wL(e.wasm, r, i, "table", t.tableIndex);
 				}
 				let s = e.getInputHandler(), c = s.getCursorPosition();
 				await s.executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-table-title",
-					operation: (e) => (r = UL(e, a, t.title, t.borders), c)
+					operation: (e) => (r = YL(e, a, t.title, t.borders), c)
 				}, () => e.getCanvasView().refreshDocumentAgentMutation());
 			} finally {
 				u = !1;
@@ -73516,17 +73595,17 @@ function nz(e) {
 			let r = o(), i = e.getInputHandler(), a = i.getCursorPosition(), s, c, l = [];
 			if (t.styles) {
 				let i;
-				if (t.expected.target?.kind === "table_cells") i = await lL(e.wasm, t.expected.target, r);
+				if (t.expected.target?.kind === "table_cells") i = await hL(e.wasm, t.expected.target, r);
 				else {
 					let a = n.get(t.planId);
 					if (!a) throw Error("Inspect the table again");
-					[i] = await vL(e.wasm, a, r, "table", t.tableIndex);
+					[i] = await wL(e.wasm, a, r, "table", t.tableIndex);
 				}
 				s = [i], c = [t.styles];
 			} else {
 				let i = n.get(t.planId);
 				if (!i) throw Error("Table plan expired; inspect tables again");
-				s = await vL(e.wasm, i, r, t.scope, t.tableIndex), c = s.map((e, n) => _L(e, t.theme, t.headerRowsByTable?.[t.scope === "document" ? n : t.tableIndex] ?? t.theme.headerRows));
+				s = await wL(e.wasm, i, r, t.scope, t.tableIndex), c = s.map((e, n) => CL(e, t.theme, t.headerRowsByTable?.[t.scope === "document" ? n : t.tableIndex] ?? t.theme.headerRows));
 			}
 			if (u) throw Error("Another edit is being applied");
 			u = !0;
@@ -73536,7 +73615,7 @@ function nz(e) {
 					operationType: "pwh-table-style",
 					operation: (e) => {
 						for (let t = 0; t < s.length; t++) l.push({
-							...fL(e, s[t], c[t]),
+							...vL(e, s[t], c[t]),
 							section: s[t].sec,
 							paragraph: s[t].ppi
 						});
@@ -73580,7 +73659,7 @@ function nz(e) {
 				await s.executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-page-layout",
-					operation: (e) => (l = kL(e, t.patch, t.sectionIndex), c)
+					operation: (e) => (l = FL(e, t.patch, t.sectionIndex), c)
 				}, () => e.getCanvasView().refreshDocumentAgentMutation());
 			} finally {
 				u = !1;
@@ -73601,7 +73680,7 @@ function nz(e) {
 				await e.getInputHandler().executeDocumentAgentOperation({
 					kind: "snapshot",
 					operationType: "pwh-blank-compose",
-					operation: (e) => ML(e, t.paragraphs)
+					operation: (e) => RL(e, t.paragraphs)
 				}, () => e.getCanvasView().refreshDocumentAgentMutation());
 			} finally {
 				u = !1;
@@ -73613,7 +73692,7 @@ function nz(e) {
 			};
 		},
 		async rewrite(t) {
-			let n = o(), r = t.expected.target ? await SL(e.wasm, t.expected, n) : n, i = e.getInputHandler();
+			let n = o(), r = t.expected.target ? await OL(e.wasm, t.expected, n) : n, i = e.getInputHandler();
 			if (!r.ready || !r.selection || !r.selectedText?.known || r.selectedText.truncated || ![
 				"body_text",
 				"cell_text",
@@ -73706,43 +73785,43 @@ function nz(e) {
 document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", () => n(), { once: !0 }) : n(), ht(), se();
 var J = new Js();
 Ys(J);
-var Y = new Xs(), rz = new pP(Y);
-rz.installBeforeUnload(window);
-var iz = new VP({
+var Y = new Xs(), lz = new yP(Y);
+lz.installBeforeUnload(window);
+var uz = new qP({
 	exportBytes: () => J.exportHwp(),
 	isRecoveryBlocked: () => J.requiresPasswordForSave,
-	schedule: Pz(),
-	onStatus: Fz
+	schedule: Bz(),
+	onStatus: Vz
 });
-iz.connect(Y), PD((e, t) => {
+uz.connect(Y), zD((e, t) => {
 	Y.emit("theme-changed", {
 		mode: t,
 		effective: e
 	}), Y.emit("command-state-changed");
-}), sO();
-var az = Sb(document.getElementById("icon-toolbar"));
-Ab(document.getElementById("style-bar"));
-async function oz(e) {
-	let t = rz.isDirty();
-	return e && (J.fileName = e), rz.markClean("host-save"), await iz.discardCurrentDraft("host-save"), {
+}), fO();
+var dz = Db(document.getElementById("icon-toolbar"));
+Fb(document.getElementById("style-bar"));
+async function fz(e) {
+	let t = lz.isDirty();
+	return e && (J.fileName = e), lz.markClean("host-save"), await uz.discardCurrentDraft("host-save"), {
 		ok: !0,
 		wasDirty: t
 	};
 }
 window.rhwpStudio = {
-	notifySaved: (e) => oz(e),
+	notifySaved: (e) => fz(e),
 	fonts: {
 		setProvider: ai,
 		getState: li
 	}
 };
-var X = null, Z = null, sz = null, cz = null, lz = null, uz = null, dz = "normal", fz = null, pz = null, mz = null, hz = !1, gz = { disableExternalWebFonts: !1 };
-async function _z() {}
-var vz = fP("?chrome=embed"), yz = vz.mode;
-vz.unsupportedReason && console.warn(`[main] 지원하지 않는 chrome 값입니다: ${vz.requested}; full 프로파일을 사용합니다.`);
-var bz = new Gb();
-function xz() {
-	let e = J.pageCount > 0, t = Z?.canEditCurrentFormField() ?? !1, n = dz === "form";
+var X = null, Z = null, pz = null, mz = null, hz = null, gz = null, _z = "normal", vz = null, yz = null, bz = null, xz = !1, Sz = { disableExternalWebFonts: !1 };
+async function Cz() {}
+var wz = vP("?chrome=embed"), Tz = wz.mode;
+wz.unsupportedReason && console.warn(`[main] 지원하지 않는 chrome 값입니다: ${wz.requested}; full 프로파일을 사용합니다.`);
+var Ez = new Xb();
+function Dz() {
+	let e = J.pageCount > 0, t = Z?.canEditCurrentFormField() ?? !1, n = _z === "form";
 	return {
 		hasDocument: e,
 		hasSelection: Z?.hasSelection() ?? !1,
@@ -73756,7 +73835,7 @@ function xz() {
 		inPictureObjectSelection: Z?.isInPictureObjectSelection() ?? !1,
 		inField: Z?.isInField() ?? !1,
 		isEditable: !n || t,
-		editMode: dz,
+		editMode: _z,
 		isFormMode: n,
 		canEditFormField: t,
 		canUndo: Z?.canUndo() ?? !1,
@@ -73764,54 +73843,54 @@ function xz() {
 		zoom: X?.getViewportManager().getZoom() ?? 1,
 		showControlCodes: J.getShowControlCodes(),
 		showParagraphMarks: J.getShowParagraphMarks(),
-		isDirty: rz.isDirty(),
+		isDirty: lz.isDirty(),
 		sourceFormat: e ? J.getSourceFormat() : void 0
 	};
 }
-function Sz(e) {
-	dz = e, Z?.setEditMode(e), document.documentElement.dataset.editMode = e, document.querySelectorAll("[data-cmd=\"view:form-mode\"]").forEach((t) => {
+function Oz(e) {
+	_z = e, Z?.setEditMode(e), document.documentElement.dataset.editMode = e, document.querySelectorAll("[data-cmd=\"view:form-mode\"]").forEach((t) => {
 		t.classList.toggle("active", e === "form");
-	}), Oz().textContent = g(e === "form" ? "ui.sbMessage.formMode" : "ui.sbMessage.editMode"), Y.emit("edit-mode-changed", e), Y.emit("command-state-changed");
+	}), Pz().textContent = g(e === "form" ? "ui.sbMessage.formMode" : "ui.sbMessage.editMode"), Y.emit("edit-mode-changed", e), Y.emit("command-state-changed");
 }
-var Cz = {
+var kz = {
 	eventBus: Y,
 	wasm: J,
-	documentState: rz,
-	getContext: xz,
+	documentState: lz,
+	getContext: Dz,
 	getInputHandler: () => Z,
 	getViewportManager: () => X?.getViewportManager() ?? null,
 	gotoPage: (e) => X?.gotoPage(e) ?? !1,
 	refreshDocumentStatus: () => {
-		Oz().textContent = g("ui.sbMessage.filePages", {
+		Pz().textContent = g("ui.sbMessage.filePages", {
 			p1: J.fileName,
 			p2: J.pageCount
 		});
 	},
-	setEditMode: Sz
-}, Q = new Sx(bz, Cz, Y), wz = new cx({
-	registry: bz,
+	setEditMode: Oz
+}, Q = new Dx(Ez, kz, Y), Az = new px({
+	registry: Ez,
 	dispatcher: Q,
-	getContext: xz,
+	getContext: Dz,
 	getMenuContainer: () => document.getElementById("menu-bar")
 });
-window.rhwpStudio.automation = wz;
-async function Tz(e) {
+window.rhwpStudio.automation = Az;
+async function jz(e) {
 	throw Error(`허용되지 않은 플러그인: ${e}`);
 }
-var Ez = new vx({
+var Mz = new Cx({
 	wasm: J,
-	automation: wz,
+	automation: Az,
 	eventBus: Y,
 	getInputHandler: () => Z,
-	loadDocument: (e, t) => mB(e, t ?? "document.hwp", null),
+	loadDocument: (e, t) => bB(e, t ?? "document.hwp", null),
 	createBlankDocument: () => {
-		xB();
+		DB();
 	},
-	resolve: Tz
+	resolve: jz
 });
-window.rhwpStudio.plugins = Ez, bz.registerAll(yz === "embed" ? xw.filter((e) => !lP.includes(e.id) || window.__PWH_DESKTOP__ === !0 && e.id === "file:print") : xw), bz.registerAll(yz === "embed" ? yD.filter((e) => !uP.includes(e.id)) : yD), bz.registerAll(pO), bz.registerAll(Gj), bz.registerAll(qA), bz.registerAll(hN), bz.registerAll(We), bz.registerAll(VN), bz.registerAll(QN);
-function Dz() {
-	for (let e of [...lP, ...uP]) (window.__PWH_DESKTOP__ !== !0 || e !== "file:print") && document.querySelectorAll(`[data-cmd="${e}"]`).forEach((e) => e.remove());
+window.rhwpStudio.plugins = Mz, Ez.registerAll(Tz === "embed" ? Ew.filter((e) => !hP.includes(e.id) || window.__PWH_DESKTOP__ === !0 && e.id === "file:print") : Ew), Ez.registerAll(Tz === "embed" ? wD.filter((e) => !gP.includes(e.id)) : wD), Ez.registerAll(vO), Ez.registerAll(Xj), Ez.registerAll(QA), Ez.registerAll(xN), Ez.registerAll(We), Ez.registerAll(qN), Ez.registerAll(iP);
+function Nz() {
+	for (let e of [...hP, ...gP]) (window.__PWH_DESKTOP__ !== !0 || e !== "file:print") && document.querySelectorAll(`[data-cmd="${e}"]`).forEach((e) => e.remove());
 	let e = document.querySelector(".menu-item[data-menu=\"file\"] .menu-dropdown");
 	if (!e) return;
 	e.querySelectorAll(".md-sub[data-recent]").forEach((e) => e.remove()), e.querySelectorAll(".md-sep").forEach((e) => {
@@ -73821,11 +73900,11 @@ function Dz() {
 	let t = e.lastElementChild;
 	t?.classList.contains("md-sep") && t.remove();
 }
-yz === "embed" && Dz(), yz === "embed" && document.addEventListener("keydown", (e) => {
-	dP(e) && e.preventDefault();
+Tz === "embed" && Nz(), Tz === "embed" && document.addEventListener("keydown", (e) => {
+	_P(e) && e.preventDefault();
 }, !0);
-var Oz = () => document.getElementById("sb-message"), kz = () => document.getElementById("sb-page"), Az = () => document.getElementById("sb-section"), jz = () => document.getElementById("sb-zoom-val"), Mz = null, Nz = null;
-function Pz() {
+var Pz = () => document.getElementById("sb-message"), Fz = () => document.getElementById("sb-page"), Iz = () => document.getElementById("sb-section"), Lz = () => document.getElementById("sb-zoom-val"), Rz = null, zz = null;
+function Bz() {
 	let e = V.getAutosaveSettings();
 	return {
 		recoveryEnabled: e.recoveryEnabled,
@@ -73834,26 +73913,26 @@ function Pz() {
 		idleDelayMs: e.idleDelaySeconds * 1e3
 	};
 }
-function Fz(e) {
+function Vz(e) {
 	let t = document.getElementById("sb-message");
 	if (!t) return;
-	if (Mz &&= (clearTimeout(Mz), null), e.state === "saving") {
-		Nz === null && (Nz = t.textContent ?? ""), t.textContent = "복구용 자동 저장 중...";
+	if (Rz &&= (clearTimeout(Rz), null), e.state === "saving") {
+		zz === null && (zz = t.textContent ?? ""), t.textContent = "복구용 자동 저장 중...";
 		return;
 	}
-	let n = Nz ?? (e.state === "blocked" ? t.textContent ?? "" : null);
-	Nz = null;
+	let n = zz ?? (e.state === "blocked" ? t.textContent ?? "" : null);
+	zz = null;
 	let r;
-	r = e.state === "saved" ? `복구용 자동 저장 완료 (${Iz(e.byteLength)})` : e.state === "blocked" ? "보호 문서는 복구용 자동 저장을 하지 않습니다" : "복구용 자동 저장 실패", t.textContent = r, n !== null && n !== r && (Mz = setTimeout(() => {
-		t.textContent === r && (t.textContent = n), Mz = null;
+	r = e.state === "saved" ? `복구용 자동 저장 완료 (${Hz(e.byteLength)})` : e.state === "blocked" ? "보호 문서는 복구용 자동 저장을 하지 않습니다" : "복구용 자동 저장 실패", t.textContent = r, n !== null && n !== r && (Rz = setTimeout(() => {
+		t.textContent === r && (t.textContent = n), Rz = null;
 	}, e.state === "saved" ? 1600 : 4e3));
 }
-function Iz(e) {
+function Hz(e) {
 	if (e < 1024) return `${e} B`;
 	let t = e / 1024;
 	return t < 1024 ? `${t.toFixed(1)} KiB` : `${(t / 1024).toFixed(1)} MiB`;
 }
-function Lz() {
+function Uz() {
 	return new Promise((e) => {
 		let t = !1, n = () => {
 			t || (t = !0, e());
@@ -73861,28 +73940,28 @@ function Lz() {
 		window.setTimeout(n, 50), requestAnimationFrame(() => requestAnimationFrame(n));
 	});
 }
-async function Rz(e, t) {
+async function Wz(e, t) {
 	let n = Math.max(0, Math.min(100, Math.round(e)));
-	Oz().textContent = `파일 로딩 ${n}% - ${t}`, await Lz();
+	Pz().textContent = `파일 로딩 ${n}% - ${t}`, await Uz();
 }
-function zz(e) {
-	let t = X?.getRenderBackend() === "canvaskit" ? uz?.getCanvasKitRenderer() ?? null : null;
+function Gz(e) {
+	let t = X?.getRenderBackend() === "canvaskit" ? gz?.getCanvasKitRenderer() ?? null : null;
 	if (!t || !e?.length) return;
 	let n = [...e];
 	(async () => {
-		await Vr(), await t.prepareLocalFonts(n), t === uz?.getCanvasKitRenderer() && X?.getRenderBackend() === "canvaskit" && Y.emit("document-view-changed");
+		await Vr(), await t.prepareLocalFonts(n), t === gz?.getCanvasKitRenderer() && X?.getRenderBackend() === "canvaskit" && Y.emit("document-view-changed");
 	})().catch((e) => {
 		console.warn("[CanvasKit] 로컬 Typeface 준비 실패, 기본 fallback으로 계속 표시합니다:", e);
 	});
 }
-async function Bz() {
-	let e = Oz();
+async function Kz() {
+	let e = Pz();
 	try {
-		gz = await Wb(), gz.disableExternalWebFonts && console.info("[main] 외부 웹폰트 사용 안 함 옵션이 켜져 있습니다."), e.textContent = gz.disableExternalWebFonts ? "로컬 폰트 준비 중..." : "웹폰트 로딩 중...", await Dn([], void 0, gz), e.textContent = "WASM 로딩 중...", await J.initialize();
+		Sz = await Yb(), Sz.disableExternalWebFonts && console.info("[main] 외부 웹폰트 사용 안 함 옵션이 켜져 있습니다."), e.textContent = Sz.disableExternalWebFonts ? "로컬 폰트 준비 중..." : "웹폰트 로딩 중...", await Dn([], void 0, Sz), e.textContent = "WASM 로딩 중...", await J.initialize();
 		let t = Ul(window.location.search), n = Wl(window.location.search);
 		n.mode;
 		let r = Gl(window.location.search), i = Kl(window.location.search);
-		fz = {
+		vz = {
 			backend: t.backend === "auto" ? {
 				...t,
 				backend: "canvas2d"
@@ -73893,11 +73972,11 @@ async function Bz() {
 			canvaskitMode: n,
 			canvaskitSurface: r,
 			renderProfile: i
-		}, t.unsupportedReason && console.warn(`[main] 지원하지 않는 renderer 값입니다: ${t.requested}; Canvas2D를 사용합니다.`), n.unsupportedReason && console.warn(`[main] 지원하지 않는 CanvasKit mode입니다: ${n.requested}; default를 사용합니다.`), pz = t.unsupportedReason ?? null, uz = new FF(t, n, r, i, async (n, r) => (e.textContent = "CanvasKit 로딩 중...", { create() {
+		}, t.unsupportedReason && console.warn(`[main] 지원하지 않는 renderer 값입니다: ${t.requested}; Canvas2D를 사용합니다.`), n.unsupportedReason && console.warn(`[main] 지원하지 않는 CanvasKit mode입니다: ${n.requested}; default를 사용합니다.`), yz = t.unsupportedReason ?? null, gz = new VF(t, n, r, i, async (n, r) => (e.textContent = "CanvasKit 로딩 중...", { create() {
 			throw Error("This client uses the Canvas2D editor backend");
 		} }.create(n, r, { requirePreparedFontFamilies: t.backend === "auto" })), {
 			transformCanvasKitPreflight(e) {
-				return gs(e, mn(e.requiredFontFamilies, gz).unavailableFonts.map((e) => `fontUnavailable:${e}`));
+				return gs(e, mn(e.requiredFontFamilies, Sz).unavailableFonts.map((e) => `fontUnavailable:${e}`));
 			},
 			async prepareCanvasKitDocument(e, t) {
 				if (si()) {
@@ -73908,7 +73987,7 @@ async function Bz() {
 					await e.prepareHostFonts([...r.values()]);
 				}
 				if (!t) return;
-				let n = mn(t.requiredFontFamilies, gz);
+				let n = mn(t.requiredFontFamilies, Sz);
 				if (n.unavailableFonts.length > 0) throw Error(`CanvasKit font family가 준비되지 않았습니다: ${n.unavailableFonts.join(", ")}`);
 				try {
 					await Vr(), await e.prepareLocalFonts(t.requiredFontFamilies);
@@ -73919,15 +73998,15 @@ async function Bz() {
 			}
 		}), e.textContent = "HWP 파일을 선택해주세요.";
 		let a = document.getElementById("scroll-container");
-		X = new Ad(a, J, Y, uz), await _z(), J.onExternalImagesInjected = () => {
+		X = new Ad(a, J, Y, gz), await Cz(), J.onExternalImagesInjected = () => {
 			X?.loadDocument();
-		}, lz = new EF(document.getElementById("h-ruler"), document.getElementById("v-ruler"), a, Y, J, X.getVirtualScroll(), X.getViewportManager()), Z = new ib(a, J, Y, X.getVirtualScroll(), X.getViewportManager()), Z.setEditMode(dz), sz?.dispose(), sz = new nL({
+		}, hz = new MF(document.getElementById("h-ruler"), document.getElementById("v-ruler"), a, Y, J, X.getVirtualScroll(), X.getViewportManager()), Z = new lb(a, J, Y, X.getVirtualScroll(), X.getViewportManager()), Z.setEditMode(_z), pz?.dispose(), pz = new cL({
 			wasm: J,
 			input: Z,
 			eventBus: Y,
-			isDirty: () => rz.isDirty(),
+			isDirty: () => lz.isDirty(),
 			render: () => X.refreshDocumentAgentMutation()
-		}), lz.onCommitPin = (e) => {
+		}), hz.onCommitPin = (e) => {
 			if (Z) {
 				if (e.kind === "paraProps") {
 					Z.applyParaPropsAtCursor(e.props);
@@ -73942,19 +74021,19 @@ async function Bz() {
 		}, J.onBeforeExport = () => {
 			let e = Z?.getCursorPosition();
 			e && J.setCaretPosition(e.sectionIndex, e.parentParaIndex ?? e.paragraphIndex, e.parentParaIndex === void 0 ? e.charOffset : 0);
-		}, cz = new sb(document.getElementById("style-bar"), J, Y, Q), cz.setEnabled(!1), Z.setDispatcher(Q), Z.setContextMenu(new nP(Q, bz)), Z.setCommandPalette(new rP(bz, Q)), Z.setCellSelectionRenderer(new ZP(a, X.getVirtualScroll(), (e) => Y.emit("cell-selection-phase-changed", e))), Z.setTableObjectRenderer(new rF(a, X.getVirtualScroll())), Z.setTableResizeRenderer(new cF(a, X.getVirtualScroll())), Z.setPictureObjectRenderer(new rF(a, X.getVirtualScroll(), !0));
+		}, mz = new fb(document.getElementById("style-bar"), J, Y, Q), mz.setEnabled(!1), Z.setDispatcher(Q), Z.setContextMenu(new cP(Q, Ez)), Z.setCommandPalette(new lP(Ez, Q)), Z.setCellSelectionRenderer(new rF(a, X.getVirtualScroll(), (e) => Y.emit("cell-selection-phase-changed", e))), Z.setTableObjectRenderer(new lF(a, X.getVirtualScroll())), Z.setTableResizeRenderer(new mF(a, X.getVirtualScroll())), Z.setPictureObjectRenderer(new lF(a, X.getVirtualScroll(), !0));
 		let o = Ze({
 			menu: document.getElementById("menu-bar"),
 			toolbar: document.getElementById("icon-toolbar"),
-			registry: bz,
+			registry: Ez,
 			dispatcher: Q,
 			eventBus: Y,
-			onChange: () => az?.resetToStart()
+			onChange: () => dz?.resetToStart()
 		});
-		new Mb(document.getElementById("menu-bar"), Y, Q, bz, {
+		new Lb(document.getElementById("menu-bar"), Y, Q, Ez, {
 			onTabSelect: (e) => o.select(e),
 			onMenuOpen: (e, t) => {
-				Qe(t), e === "file" && _B();
+				Qe(t), e === "file" && CB();
 			}
 		});
 		let s = () => {
@@ -73992,31 +74071,31 @@ async function Bz() {
 		}), document.querySelectorAll(".tb-split").forEach((e) => {
 			let t = e.querySelector(".tb-split-arrow"), n = e.querySelector(".tb-split-menu");
 			t && (t.setAttribute("aria-haspopup", "menu"), t.setAttribute("aria-expanded", "false"), t.addEventListener("click", (t) => {
-				t.preventDefault(), t.stopPropagation(), db(document, e);
+				t.preventDefault(), t.stopPropagation(), gb(document, e);
 				let n = !e.classList.contains("open");
-				ub(e, n, { focus: n && t.detail === 0 ? "first" : void 0 });
+				hb(e, n, { focus: n && t.detail === 0 ? "first" : void 0 });
 			}), t.addEventListener("keydown", (t) => {
-				(t.key === "ArrowDown" || t.key === "ArrowUp") && (t.preventDefault(), db(document, e), ub(e, !0, { focus: t.key === "ArrowDown" ? "first" : "last" }));
+				(t.key === "ArrowDown" || t.key === "ArrowUp") && (t.preventDefault(), gb(document, e), hb(e, !0, { focus: t.key === "ArrowDown" ? "first" : "last" }));
 			})), e.querySelectorAll(".tb-split-item[data-cmd]").forEach((t) => {
 				t.addEventListener("click", (n) => {
-					n.preventDefault(), ub(e, !1, { returnFocus: n.detail === 0 });
+					n.preventDefault(), hb(e, !1, { returnFocus: n.detail === 0 });
 					let r = t.dataset.cmd;
 					r && Q.dispatch(r, { anchorEl: t });
 				});
 			}), n?.addEventListener("keydown", (t) => {
 				let n = t.target;
 				if (n instanceof Element) {
-					if (t.key === "Escape") t.preventDefault(), t.stopPropagation(), ub(e, !1, { returnFocus: !0 });
-					else if (t.key === "ArrowDown" || t.key === "ArrowUp") t.preventDefault(), fb(e, n, t.key === "ArrowDown" ? 1 : -1);
+					if (t.key === "Escape") t.preventDefault(), t.stopPropagation(), hb(e, !1, { returnFocus: !0 });
+					else if (t.key === "ArrowDown" || t.key === "ArrowUp") t.preventDefault(), _b(e, n, t.key === "ArrowDown" ? 1 : -1);
 					else if (t.key === "Home" || t.key === "End") {
 						t.preventDefault();
-						let n = lb(e);
+						let n = mb(e);
 						(t.key === "Home" ? n[0] : n.at(-1))?.focus({ preventScroll: !0 });
 					}
 				}
 			});
 		}), document.addEventListener("mousedown", () => {
-			db(document);
+			gb(document);
 		});
 		for (let e of ["icon-toolbar", "style-bar"]) {
 			let t = document.getElementById(e);
@@ -74024,46 +74103,46 @@ async function Bz() {
 				e.target.tagName !== "INPUT" && e.target.tagName !== "SELECT" && e.preventDefault();
 			});
 		}
-		Gz(), Kz(), Xz(), Vz(), Wz(), (async () => {
-			await wB(), yz !== "embed" && await yB(), await SB();
-		})(), yz !== "embed" && tP(window, {
+		Zz(), Qz(), nB(), qz(), Xz(), (async () => {
+			await AB(), Tz !== "embed" && await TB(), await OB();
+		})(), Tz !== "embed" && sP(window, {
 			openDocumentBytes(e) {
 				Y.emit("open-document-bytes", e);
 			},
 			notifyUnsupportedFile(e) {
-				DB(/* @__PURE__ */ Error(`지원하지 않는 파일 형식입니다: ${e}. HWP/HWPX/HML 파일만 지원합니다.`));
+				NB(/* @__PURE__ */ Error(`지원하지 않는 파일 형식입니다: ${e}. HWP/HWPX/HML 파일만 지원합니다.`));
 			},
 			notifyError(e) {
-				dB(e);
+				_B(e);
 			},
 			notifyMultipleFiles(e) {
 				console.warn(`[pwa-file-handling] 여러 파일(${e}개)이 전달되어 첫 번째 파일만 엽니다.`);
 			}
-		}), hz = !0;
+		}), xz = !0;
 	} catch (t) {
-		mz = t instanceof Error ? t.message : String(t), e.textContent = `WASM 초기화 실패: ${t}`, console.error("[main] WASM 초기화 실패:", t);
+		bz = t instanceof Error ? t.message : String(t), e.textContent = `WASM 초기화 실패: ${t}`, console.error("[main] WASM 초기화 실패:", t);
 	}
 }
-function Vz() {
+function qz() {
 	document.addEventListener(ce, () => {
 		Z?.isActive() && Z.focus();
 	});
 }
-var Hz = /* @__PURE__ */ new Set([
+var Jz = /* @__PURE__ */ new Set([
 	"PageUp",
 	"PageDown",
 	"Home",
 	"End"
-]), Uz = /* @__PURE__ */ new Set([
+]), Yz = /* @__PURE__ */ new Set([
 	"view:zoom-in",
 	"view:zoom-out",
 	"view:zoom-100",
 	"view:toolbox-basic"
 ]);
-function Wz() {
+function Xz() {
 	document.addEventListener("keydown", (e) => {
-		if (Cx(e.target)) return;
-		if (Hz.has(e.key) && !e.altKey) {
+		if (Ox(e.target)) return;
+		if (Jz.has(e.key) && !e.altKey) {
 			if (Z?.isActive()) {
 				Z.handleDocumentNavigationKey(e);
 				return;
@@ -74073,17 +74152,17 @@ function Wz() {
 				return;
 			}
 		}
-		let t = N_(e, M_);
-		if (t && Uz.has(t)) {
+		let t = R_(e, L_);
+		if (t && Yz.has(t)) {
 			e.preventDefault(), Q.dispatch(t);
 			return;
 		}
 		if (Z?.isActive()) {
-			let t = N_(e, M_);
+			let t = R_(e, L_);
 			if (t === "edit:undo" || t === "edit:redo") {
 				let n = Q.dispatchWithResult(t);
 				(n.ok || n.reason === "threw") && e.preventDefault();
-			} else t === "edit:select-all" && Tx(e, document.querySelector(".modal-overlay"), () => {
+			} else t === "edit:select-all" && Ax(e, document.querySelector(".modal-overlay"), () => {
 				Q.dispatchWithResult(t);
 			}, () => {
 				Z?.focus();
@@ -74101,18 +74180,18 @@ function Wz() {
 		}
 	}, !1);
 }
-function Gz() {
+function Zz() {
 	let e = document.getElementById("file-input");
 	e.addEventListener("change", async (t) => {
 		let n = t.target, r = n.dataset.skipUnsavedGuard === "true";
 		delete n.dataset.skipUnsavedGuard;
 		let i = n.files?.[0];
 		if (i) {
-			if (!mC(i.name)) {
+			if (!yC(i.name)) {
 				alert("HWP/HWPX/HML 파일만 지원합니다."), e.value = "";
 				return;
 			}
-			await fB(i, { skipUnsavedGuard: r }), e.value = "";
+			await vB(i, { skipUnsavedGuard: r }), e.value = "";
 		}
 	}), document.addEventListener("dragover", (e) => e.preventDefault()), document.addEventListener("drop", (e) => e.preventDefault());
 	let t = document.getElementById("scroll-container");
@@ -74131,14 +74210,14 @@ function Gz() {
 			".gif",
 			".bmp",
 			".webp"
-		].some((e) => r.endsWith(e)), a = mC(r);
-		if (!(yz === "embed" && a)) {
+		].some((e) => r.endsWith(e)), a = yC(r);
+		if (!(Tz === "embed" && a)) {
 			if (!i && !a) {
 				alert("HWP/HWPX/HML 파일 또는 이미지 파일만 지원합니다.");
 				return;
 			}
 			if (i) {
-				if (!await cP(n.name) || !Z || J.pageCount === 0) return;
+				if (!await mP(n.name) || !Z || J.pageCount === 0) return;
 				let t = new Uint8Array(await n.arrayBuffer()), r = n.name.split(".").pop()?.toLowerCase() || "png", i = new Image(), a = URL.createObjectURL(n);
 				try {
 					i.src = a, await i.decode();
@@ -74157,20 +74236,20 @@ function Gz() {
 				}
 				return;
 			}
-			await fB(n);
+			await vB(n);
 		}
 	});
 }
-function Kz() {
+function Qz() {
 	if (!X) return;
-	let e = X.getViewportManager(), t = document.getElementById("sb-zoom-in"), n = document.getElementById("sb-zoom-out"), r = document.getElementById("sb-zoom-range"), i = D_();
-	t.title = NF("zoomIn", "Ctrl++", i), n.title = NF("zoomOut", "Ctrl+-", i), t.addEventListener("click", () => {
+	let e = X.getViewportManager(), t = document.getElementById("sb-zoom-in"), n = document.getElementById("sb-zoom-out"), r = document.getElementById("sb-zoom-range"), i = M_();
+	t.title = zF("zoomIn", "Ctrl++", i), n.title = zF("zoomOut", "Ctrl+-", i), t.addEventListener("click", () => {
 		Q.dispatch("view:zoom-in");
 	}), n.addEventListener("click", () => {
 		Q.dispatch("view:zoom-out");
 	}), r.addEventListener("input", () => {
-		let t = MF(Number(r.value));
-		r.value = String(jF(t)), r.setAttribute("aria-valuetext", `${t}%`), e.setZoom(t / 100);
+		let t = RF(Number(r.value));
+		r.value = String(LF(t)), r.setAttribute("aria-valuetext", `${t}%`), e.setZoom(t / 100);
 	}), r.addEventListener("keydown", (t) => {
 		let n = Math.round(e.getZoom() * 100), r = null;
 		switch (t.key) {
@@ -74205,43 +74284,43 @@ function Kz() {
 		Q.dispatch("view:zoom-dialog");
 	});
 }
-var qz = 1, Jz = [], Yz = null;
-function Xz() {
-	kz().addEventListener("click", () => {
+var $z = 1, eB = [], tB = null;
+function nB() {
+	Fz().addEventListener("click", () => {
 		Q.dispatch("edit:goto");
 	}), Y.on("current-page-changed", (e, t) => {
 		let n = e, r = null;
 		if (J.pageCount > 0) try {
 			r = J.getPageInfo(n);
 		} catch {}
-		kz().textContent = UF({
+		Fz().textContent = YF({
 			pageIndex: n,
 			totalPages: t,
 			documentPageNumber: r?.pageNumber
-		}), r && (Az().textContent = g("ui.sbSection.text", {
+		}), r && (Iz().textContent = g("ui.sbSection.text", {
 			p1: r.sectionIndex + 1,
-			p2: qz
+			p2: J.getSectionCount()
 		}));
 	}), Y.on("zoom-fit-mode-changed", (e) => {
 		V.setZoomFitMode(Eu(e));
 	}), Y.on("zoom-level-display", (e) => {
 		let t = Math.round(e * 100);
-		jz().textContent = `${t}%`;
+		Lz().textContent = `${t}%`;
 		let n = document.getElementById("sb-zoom-range");
-		n && (n.value = String(jF(t)), n.setAttribute("aria-valuetext", `${t}%`));
+		n && (n.value = String(LF(t)), n.setAttribute("aria-valuetext", `${t}%`));
 	}), Y.on("insert-mode-changed", (e) => {
 		document.getElementById("sb-mode").textContent = g(e ? "ui.sbMode.label" : "ui.sbMode.label.overwrite");
 	}), Y.on("cell-selection-phase-changed", (e) => {
 		let t = document.getElementById("sb-cell-selection"), n = e;
 		t.hidden = n === null;
-		let r = n === null ? "" : QP(n);
+		let r = n === null ? "" : iF(n);
 		t.textContent !== r && (t.textContent = r);
 	}), Y.on("document-mutated", (e) => {
-		J.noteCanvasMetricMutation(e === "input-handler-paragraph-geometry"), rz.markDirty(typeof e == "string" ? e : "document-mutated");
+		J.noteCanvasMetricMutation(e === "input-handler-paragraph-geometry"), lz.markDirty(typeof e == "string" ? e : "document-mutated");
 	}), Y.on("document-changed", (e) => {
-		rz.markDirty(typeof e == "string" ? e : "document-changed");
+		lz.markDirty(typeof e == "string" ? e : "document-changed");
 	}), Y.on("renderer-selection-changed", (e) => {
-		pz = e.fallbackReason;
+		yz = e.fallbackReason;
 	}), oi(() => {
 		X && J.pageCount !== 0 && (J.invalidateCanvasMetricFonts(), X.refreshFontResources().catch((e) => {
 			console.warn("[HostFonts] View refresh failed:", e);
@@ -74249,9 +74328,9 @@ function Xz() {
 	}), Y.on("local-fonts-changed", () => {
 		if (!X || J.pageCount === 0) return;
 		let e = $r(), t = `${e.detectedAt ?? "none"}:${e.source ?? "none"}:${e.count}`;
-		if (t !== Yz) {
-			if (Yz = t, J.invalidateCanvasMetricFonts(), X.getRenderBackend() === "canvaskit") {
-				zz(Jz);
+		if (t !== tB) {
+			if (tB = t, J.invalidateCanvasMetricFonts(), X.getRenderBackend() === "canvaskit") {
+				Gz(eB);
 				return;
 			}
 			Y.emit("document-view-changed");
@@ -74261,7 +74340,7 @@ function Xz() {
 	}), Y.on("document-dirty-changed", () => {
 		Y.emit("command-state-changed");
 	}), Y.on("autosave-settings-changed", () => {
-		iz.updateSchedule(Pz());
+		uz.updateSchedule(Bz());
 	});
 	let e = document.getElementById("sb-field");
 	Y.on("field-info-changed", (t) => {
@@ -74283,7 +74362,7 @@ function Xz() {
 	let d = document.getElementById("hf-edit-status-live");
 	Y.on("headerFooterModeChanged", (e) => {
 		let t = qu(e), n = t !== "none";
-		if (r = n, az?.resetToStart(), o && (o.hidden = !n), s) {
+		if (r = n, dz?.resetToStart(), o && (o.hidden = !n), s) {
 			let e = t === "none" ? "" : t.mode === "header" ? g("ui.tbHfLabel.header") : g("ui.tbHfLabel.footer"), n = t === "none" ? "" : Wu(t.applyTo);
 			s.textContent = t === "none" ? "" : g("ui.tbHfLabel.editing", {
 				p1: e,
@@ -74299,12 +74378,12 @@ function Xz() {
 		}), a(), u && (n ? u.classList.add("hf-editing") : u.classList.remove("hf-editing"));
 	}), Y.on("footnoteModeChanged", (e) => {
 		let t = e;
-		n = t, az?.resetToStart(), c && (c.hidden = !t), l.forEach((e) => {
+		n = t, dz?.resetToStart(), c && (c.hidden = !t), l.forEach((e) => {
 			e.hidden = t;
 		}), a();
 	});
 }
-function Zz(e) {
+function rB(e) {
 	if (e === "none") return;
 	let t = X?.getViewportManager(), n = document.getElementById("scroll-container");
 	if (t && n && J.pageCount !== 0) try {
@@ -74320,150 +74399,150 @@ function Zz(e) {
 		console.warn("[main] 저장된 맞춤 배율 복원 실패:", e);
 	}
 }
-function Qz() {
+function iB() {
 	let e = V.getViewSettings();
-	J.setShowControlCodes(e.showControlCodes), J.setShowParagraphMarks(e.showParagraphMarks), iO(e.showControlCodes, e.showParagraphMarks);
+	J.setShowControlCodes(e.showControlCodes), J.setShowParagraphMarks(e.showParagraphMarks), lO(e.showControlCodes, e.showParagraphMarks);
 	let t = !e.clipView;
-	J.setClipEnabled(t), oO(t);
+	J.setClipEnabled(t), dO(t);
 }
-async function $z(e, t, n = {}) {
-	let r = Oz();
+async function aB(e, t, n = {}) {
+	let r = Pz();
 	try {
-		Fa(e.fontSubstitutions), Jz = [...e.fontsUsed ?? []], Yz = null, console.log("[initDoc] 1. 폰트 로딩 시작"), await Rz(55, "폰트 준비 중..."), e.fontsUsed?.length && await Dn(e.fontsUsed, (e, t) => {
+		Fa(e.fontSubstitutions), eB = [...e.fontsUsed ?? []], tB = null, console.log("[initDoc] 1. 폰트 로딩 시작"), await Wz(55, "폰트 준비 중..."), e.fontsUsed?.length && await Dn(e.fontsUsed, (e, t) => {
 			let n = t > 0 ? 55 + Math.round(e / t * 20) : 65;
 			r.textContent = `파일 로딩 ${n}% - 폰트 로딩 중... (${e}/${t})`;
-		}, gz), console.log("[initDoc] 2. 폰트 로딩 완료"), await Vr(), await Rz(75, "문서 상태 적용 중..."), qz = e.sectionCount ?? 1, Az().textContent = g("ui.sbSection.text", {
+		}, Sz), console.log("[initDoc] 2. 폰트 로딩 완료"), await Vr(), await Wz(75, "문서 상태 적용 중..."), $z = e.sectionCount ?? 1, Iz().textContent = g("ui.sbSection.text", {
 			p1: 1,
-			p2: qz
-		}), Qz(), console.log("[initDoc] 3. inputHandler deactivate"), Z?.deactivate(), console.log("[initDoc] 4. canvasView loadDocument"), await Rz(82, "페이지 렌더 준비 중...");
+			p2: $z
+		}), iB(), console.log("[initDoc] 3. inputHandler deactivate"), Z?.deactivate(), console.log("[initDoc] 4. canvasView loadDocument"), await Wz(82, "페이지 렌더 준비 중...");
 		let i = V.getViewSettings().zoomFitMode;
-		await X?.loadDocument(), Zz(i), zz(e.fontsUsed), console.log("[initDoc] 5. toolbar setEnabled"), await Rz(90, "도구 모음 준비 중..."), cz?.setEnabled(!0), console.log("[initDoc] 6. toolbar initFontDropdown + initStyleDropdown"), cz?.initFontDropdown(e.fontsUsed), cz?.initStyleDropdown(), console.log("[initDoc] 7. 사전 검증 및 로컬 글꼴 확인"), await Rz(94, "문서 검증 및 글꼴 확인 중...");
+		await X?.loadDocument(), rB(i), Gz(e.fontsUsed), console.log("[initDoc] 5. toolbar setEnabled"), await Wz(90, "도구 모음 준비 중..."), mz?.setEnabled(!0), console.log("[initDoc] 6. toolbar initFontDropdown + initStyleDropdown"), mz?.initFontDropdown(e.fontsUsed), mz?.initStyleDropdown(), console.log("[initDoc] 7. 사전 검증 및 로컬 글꼴 확인"), await Wz(94, "문서 검증 및 글꼴 확인 중...");
 		try {
 			if (J.getSourceFormat() === "hwpx") {
 				let e = J.getValidationWarnings();
 				e.count > 0 && console.log(`[validation] ${e.count} warnings — 그대로 보기 (#2527)`, e.summary);
 			} else if (J.getSourceFormat() === "hml") {
 				let e = J.getHmlOpenMetadata();
-				e && oP(e);
+				e && fP(e);
 			}
 		} catch (e) {
 			console.warn("[validation] 감지 실패 (치명적이지 않음):", e);
 		}
-		n.suppressDialogs || await eB(e, t), console.log("[initDoc] 8. inputHandler activateWithCaretPosition"), await Rz(96, "편집 상태 초기화 중..."), Z?.activateWithCaretPosition(), r.textContent = t, console.log("[initDoc] 9. 완료"), rz.markClean("document-initialized");
+		n.suppressDialogs || await oB(e, t), console.log("[initDoc] 8. inputHandler activateWithCaretPosition"), await Wz(96, "편집 상태 초기화 중..."), Z?.activateWithCaretPosition(), r.textContent = t, console.log("[initDoc] 9. 완료"), lz.markClean("document-initialized");
 	} catch (e) {
 		if (console.error("[initDoc] 오류:", e), n.suppressDialogs) throw e;
 		window.innerWidth < 768 && alert(`초기화 오류: ${e}`);
 	}
 }
-async function eB(e, t) {
+async function oB(e, t) {
 	if (e.fontsUsed?.length) try {
 		$r().loaded || await Vr();
-		let n = _P(e.fontsUsed);
+		let n = CP(e.fontsUsed);
 		if (!n.shouldPromptLocalAccess) return;
 		console.log(`[local-fonts] 감지 안내 모달 생략 — 대체 글꼴로 표시 (확인 필요 ${n.summary.needsLocalCheck}개, 문서 ${t})`);
 	} catch (e) {
 		console.warn("[local-fonts] 저장된 감지 결과 로드 실패 (치명적이지 않음):", e);
 	}
 }
-var tB = class extends Error {
+var sB = class extends Error {
 	constructor() {
 		super("문서 열기가 취소되었습니다."), this.name = "DocumentOpenCancelledError";
 	}
-}, nB = "비밀번호가 필요한 암호 문서", rB = "비밀번호가 일치하지 않거나 암호화 데이터가 손상되었습니다";
-function iB(e) {
-	return e instanceof tB;
+}, cB = "비밀번호가 필요한 암호 문서", lB = "비밀번호가 일치하지 않거나 암호화 데이터가 손상되었습니다";
+function uB(e) {
+	return e instanceof sB;
 }
-function aB(e) {
-	return String(e).includes(nB);
+function dB(e) {
+	return String(e).includes(cB);
 }
-function oB(e) {
-	return String(e).includes(rB);
+function fB(e) {
+	return String(e).includes(lB);
 }
-function sB(e) {
+function pB(e) {
 	let t = String(e);
 	return t.includes("지원하지 않는 암호화 방식") ? /* @__PURE__ */ Error("지원하지 않는 암호화 방식의 문서입니다. 지원되는 HWP3/HWP5 암호 문서만 열 수 있습니다.") : t.includes("DRM") ? /* @__PURE__ */ Error("DRM으로 보호된 문서는 지원하지 않습니다.") : /* @__PURE__ */ Error("암호화된 문서를 열 수 없습니다. 문서가 손상되었는지 확인하세요.");
 }
-async function cB(e, t) {
+async function mB(e, t) {
 	let n;
 	for (;;) {
-		let r = await kS(t, n);
-		if (r === null) throw new tB();
+		let r = await PS(t, n);
+		if (r === null) throw new sB();
 		try {
 			J.loadDocumentWithPassword(e, r, t);
 			return;
 		} catch (e) {
-			if (oB(e)) {
+			if (fB(e)) {
 				n = "암호가 일치하지 않거나 문서가 손상되었습니다. 다시 입력하세요.";
 				continue;
 			}
-			throw sB(e);
+			throw pB(e);
 		} finally {
 			r = "";
 		}
 	}
 }
-async function lB(e, t) {
+async function hB(e, t) {
 	try {
 		return J.loadDocument(e, t);
 	} catch (n) {
-		if (!aB(n)) throw n;
-		return await cB(e, t), J.getDocumentInfo();
+		if (!dB(n)) throw n;
+		return await mB(e, t), J.getDocumentInfo();
 	}
 }
-function uB() {
+function gB() {
 	X && J.pageCount !== 0 && X.loadDocument().catch((e) => {
 		console.warn("[main] 열기 실패 후 이전 문서 뷰 복구 실패:", e);
 	});
 }
-function dB(e) {
-	if (iB(e)) {
-		Oz().textContent = "문서 열기를 취소했습니다.", uB();
+function _B(e) {
+	if (uB(e)) {
+		Pz().textContent = "문서 열기를 취소했습니다.", gB();
 		return;
 	}
-	DB(e);
+	NB(e);
 }
-async function fB(e, t = {}) {
+async function vB(e, t = {}) {
 	try {
-		return await CB(t.skipUnsavedGuard) ? await BF(document.documentElement, async () => {
+		return await kB(t.skipUnsavedGuard) ? await KF(document.documentElement, async () => {
 			let n = performance.now();
-			await Rz(0, "파일 읽는 중...");
+			await Wz(0, "파일 읽는 중...");
 			let r = new Uint8Array(await e.arrayBuffer());
-			return await Rz(15, "파일 읽기 완료"), await mB(r, e.name, t.fileHandle ?? null, n, { dataReadProgressShown: !0 }), !0;
+			return await Wz(15, "파일 읽기 완료"), await bB(r, e.name, t.fileHandle ?? null, n, { dataReadProgressShown: !0 }), !0;
 		}) : !1;
 	} catch (e) {
-		return dB(e), !1;
+		return _B(e), !1;
 	}
 }
-function pB() {
+function yB() {
 	X?.prepareDocumentLoad();
 }
-async function mB(e, t, n, r = performance.now(), i = {}) {
-	await BF(document.documentElement, async () => {
-		X?.showBlankPage(), i.dataReadProgressShown || await Rz(0, "문서 데이터 준비 중..."), await Rz(25, "문서 파싱 및 쪽 계산 중...");
-		let a = await lB(e, t);
-		pB(), Ez.notifyDocumentSwap(), Y.emit("document-swapped"), await Rz(45, "자동 저장 준비 중..."), xS(n), J.currentFileHandle = n, i.skipRecent || (gB = !1, RC({
+async function bB(e, t, n, r = performance.now(), i = {}) {
+	await KF(document.documentElement, async () => {
+		X?.showBlankPage(), i.dataReadProgressShown || await Wz(0, "문서 데이터 준비 중..."), await Wz(25, "문서 파싱 및 쪽 계산 중...");
+		let a = await hB(e, t);
+		yB(), Mz.notifyDocumentSwap(), Y.emit("document-swapped"), await Wz(45, "자동 저장 준비 중..."), ES(n), J.currentFileHandle = n, i.skipRecent || (SB = !1, UC({
 			fileName: J.fileName,
 			sourceFormat: J.getSourceFormat(),
 			handle: n
-		}).catch((e) => console.warn("[recent] 최근 문서 기록 실패:", e))), await iz.beginDocument({
+		}).catch((e) => console.warn("[recent] 최근 문서 기록 실패:", e))), await uz.beginDocument({
 			fileName: J.fileName,
 			sourceFormat: J.getSourceFormat()
-		}, { discardPreviousDraft: !0 }), await Rz(50, "문서 초기화 중...");
+		}, { discardPreviousDraft: !0 }), await Wz(50, "문서 초기화 중...");
 		let o = performance.now() - r;
-		await $z(a, g("ui.sbMessage.filePagesTimed", {
+		await aB(a, g("ui.sbMessage.filePagesTimed", {
 			p1: t,
 			p2: a.pageCount,
 			p3: o.toFixed(1)
 		}), { suppressDialogs: i.suppressDialogs });
 	});
 }
-var hB = 8, gB = !1;
-async function _B() {
+var xB = 8, SB = !1;
+async function CB() {
 	let e = document.getElementById("recent-docs-panel");
 	if (!e) return;
 	let t;
 	try {
-		t = await zC();
+		t = await WC();
 	} catch (e) {
 		console.warn("[recent] 최근 문서 조회 실패:", e);
 		return;
@@ -74487,7 +74566,7 @@ async function _B() {
 		disabled: !0
 	}));
 	else {
-		let e = gB ? t : t.slice(0, hB);
+		let e = SB ? t : t.slice(0, xB);
 		for (let t of e) r.append(n({
 			label: t.fileName,
 			cmd: "file:open-recent",
@@ -74495,10 +74574,10 @@ async function _B() {
 			right: t.sourceFormat.toUpperCase(),
 			title: t.fileName
 		}));
-		!gB && t.length > hB && r.append(n({
-			label: `최근 문서 더보기 (${t.length - hB}개)`,
+		!SB && t.length > xB && r.append(n({
+			label: `최근 문서 더보기 (${t.length - xB}개)`,
 			onClick: () => {
-				gB = !0, _B();
+				SB = !0, CB();
 			}
 		}));
 		let i = document.createElement("div");
@@ -74509,17 +74588,17 @@ async function _B() {
 	}
 	e.replaceChildren(r), e.closest(".md-sub")?.classList.toggle("disabled", t.length === 0);
 }
-function vB() {
+function wB() {
 	return new URLSearchParams(window.location.search).has("url");
 }
-async function yB() {
-	if (!vB()) try {
-		let e = (await FP()).filter((e) => e.data.byteLength > 0);
-		if (e.length === 0 || J.pageCount > 0 || rz.isDirty()) return;
-		let t = await XP(e);
+async function TB() {
+	if (!wB()) try {
+		let e = (await VP()).filter((e) => e.data.byteLength > 0);
+		if (e.length === 0 || J.pageCount > 0 || lz.isDirty()) return;
+		let t = await nF(e);
 		if (t.action === "later") return;
 		if (t.action === "delete-all") {
-			await LP(), j({
+			await UP(), j({
 				message: "복구 후보를 삭제했습니다.",
 				durationMs: 2200
 			});
@@ -74528,45 +74607,45 @@ async function yB() {
 		let n = e.find((e) => e.id === t.draftId);
 		if (!n) return;
 		try {
-			await bB(n);
+			await EB(n);
 		} catch (e) {
-			dB(e);
+			_B(e);
 		}
 	} catch (e) {
 		console.warn("[autosave] 복구 후보 확인 실패:", e);
 	}
 }
-async function bB(e) {
-	let t = GP(e.fileName);
-	await mB(new Uint8Array(e.data), t, null, performance.now(), { skipRecent: !0 }), await IP(e.id), rz.markDirty("autosave-recovered"), j({
+async function EB(e) {
+	let t = ZP(e.fileName);
+	await bB(new Uint8Array(e.data), t, null, performance.now(), { skipRecent: !0 }), await HP(e.id), lz.markDirty("autosave-recovered"), j({
 		message: `"${t}" 복구본을 열었습니다.\n원본 파일은 자동으로 덮어쓰지 않습니다.`,
 		durationMs: 5e3
 	});
 }
-async function xB() {
-	let e = Oz();
+async function DB() {
+	let e = Pz();
 	try {
-		await BF(document.documentElement, async () => {
+		await KF(document.documentElement, async () => {
 			e.textContent = "새 문서 생성 중...";
 			let t = J.createNewDocument();
-			pB(), Ez.notifyDocumentSwap(), await iz.beginDocument({
+			yB(), Mz.notifyDocumentSwap(), await uz.beginDocument({
 				fileName: J.fileName,
 				sourceFormat: J.getSourceFormat()
-			}, { discardPreviousDraft: !0 }), await $z(t, g("ui.sbMessage.newDocPages", { p1: t.pageCount }));
+			}, { discardPreviousDraft: !0 }), await aB(t, g("ui.sbMessage.newDocPages", { p1: t.pageCount }));
 		});
 	} catch (t) {
 		e.textContent = `새 문서 생성 실패: ${t}`, console.error("[main] 새 문서 생성 실패:", t);
 	}
 }
-async function SB() {
-	yz !== "embed" && (J.pageCount > 0 || rz.isDirty() || await xB());
+async function OB() {
+	Tz !== "embed" && (J.pageCount > 0 || lz.isDirty() || await DB());
 }
-async function CB(e) {
-	return e === !0 || await uw(Cz, { allowLocalSave: yz !== "embed" });
+async function kB(e) {
+	return e === !0 || await hw(kz, { allowLocalSave: Tz !== "embed" });
 }
 Y.on("create-new-document", (e) => {
 	(async () => {
-		await CB(e?.skipUnsavedGuard) && await xB();
+		await kB(e?.skipUnsavedGuard) && await DB();
 	})();
 }), Y.on("open-document-bytes", async (e) => {
 	let t = e, n = (e, n) => {
@@ -74577,23 +74656,23 @@ Y.on("create-new-document", (e) => {
 		});
 	};
 	try {
-		if (!await CB(t.skipUnsavedGuard)) {
+		if (!await kB(t.skipUnsavedGuard)) {
 			n(!1, "문서 열기가 취소되었습니다.");
 			return;
 		}
-		await mB(t.bytes, t.fileName, t.fileHandle), n(!0);
+		await bB(t.bytes, t.fileName, t.fileHandle), n(!0);
 	} catch (e) {
-		dB(e), n(!1, iB(e) ? "문서 열기가 취소되었습니다." : e instanceof Error ? e.message : String(e));
+		_B(e), n(!1, uB(e) ? "문서 열기가 취소되었습니다." : e instanceof Error ? e.message : String(e));
 	}
 }), Y.on("pwh-picture-properties-request", () => Q.dispatch("insert:picture-props")), Y.on("pwh-table-properties-request", () => Q.dispatch("table:cell-props")), Y.on("equation-edit-request", () => {
 	Q.dispatch("insert:equation-edit");
 }), Y.on("chart-data-edit-request", () => {
 	Q.dispatch("insert:chart-data-edit");
 });
-async function wB() {
+async function AB() {
 	let e = new URLSearchParams(window.location.search), t = e.get("url");
 	if (!t) return;
-	let n = e.get("filename") || t.split("/").pop()?.split("?")[0] || "document.hwp", r = Oz();
+	let n = e.get("filename") || t.split("/").pop()?.split("?")[0] || "document.hwp", r = Pz();
 	try {
 		r.textContent = "파일 로딩 중...", console.log(`[loadFromUrlParam] ${t}`);
 		let e;
@@ -74606,26 +74685,26 @@ async function wB() {
 			});
 			if (e.error) throw Error(e.error);
 			let r = new Uint8Array(e.data);
-			oc(r), await mB(r, n, null);
+			oc(r), await bB(r, n, null);
 			return;
 		}
 		else e = await fetch(t);
 		if (!e.ok) throw Error(`HTTP ${e.status}: ${e.statusText}`);
 		let i = e.headers.get("content-type"), a = await e.arrayBuffer(), o = new Uint8Array(a);
-		oc(o, i), await mB(o, n, null);
+		oc(o, i), await bB(o, n, null);
 	} catch (e) {
-		if (iB(e)) {
-			dB(e);
+		if (uB(e)) {
+			_B(e);
 			return;
 		}
-		if (t.startsWith("file:") && typeof chrome < "u" && await TB() === !1) {
-			EB();
+		if (t.startsWith("file:") && typeof chrome < "u" && await jB() === !1) {
+			MB();
 			return;
 		}
-		dB(e);
+		_B(e);
 	}
 }
-async function TB() {
+async function jB() {
 	let e = typeof chrome < "u" ? chrome.extension : void 0;
 	if (!e?.isAllowedFileSchemeAccess) return null;
 	try {
@@ -74634,8 +74713,8 @@ async function TB() {
 		return null;
 	}
 }
-function EB() {
-	let e = Oz();
+function MB() {
+	let e = Pz();
 	e && (e.textContent = "파일 로드 실패: 파일 URL 액세스 권한이 필요합니다."), console.error("[main] file:// 로드 실패 — 파일 URL 액세스 미허용 (#1131)"), j({
 		message: "로컬 파일을 열려면 확장 프로그램의 \"파일 URL에 대한 액세스 허용\"을 켜야 합니다.\n설정에서 권한을 허용한 뒤 파일을 다시 열어 주세요.",
 		durationMs: 0,
@@ -74648,16 +74727,16 @@ function EB() {
 		}
 	});
 }
-function DB(e) {
-	let t = `파일 로드 실패: ${String(e).replace(/^Error:\s*/, "")}`, n = Oz();
-	n && (n.textContent = t), console.error("[main] 파일 로드 실패:", e), uB(), j({
+function NB(e) {
+	let t = `파일 로드 실패: ${String(e).replace(/^Error:\s*/, "")}`, n = Pz();
+	n && (n.textContent = t), console.error("[main] 파일 로드 실패:", e), gB(), j({
 		message: t,
 		durationMs: 0,
 		confirmLabel: "확인"
 	});
 }
-var $ = Bz();
-$.then(() => {}), SI({
+var $ = Kz();
+$.then(() => {}), OI({
 	hostWindow: window,
 	parentWindow: window.parent,
 	subscribeDocumentChanged: (e) => Y.on("document-agent-changed", e),
@@ -74666,8 +74745,8 @@ $.then(() => {}), SI({
 			return await $, !0;
 		},
 		async loadFile(e, t, n, r) {
-			if (await $, !await CB(n)) throw Error("문서 열기가 취소되었습니다.");
-			return await mB(e, t, null, void 0, { suppressDialogs: r }), { pageCount: J.pageCount };
+			if (await $, !await kB(n)) throw Error("문서 열기가 취소되었습니다.");
+			return await bB(e, t, null, void 0, { suppressDialogs: r }), { pageCount: J.pageCount };
 		},
 		async pageCount() {
 			return await $, J.pageCount;
@@ -74677,11 +74756,11 @@ $.then(() => {}), SI({
 			let t = X?.getRendererSessionDiagnostics() ?? null;
 			return {
 				schemaVersion: 1,
-				request: fz,
-				initialized: hz,
-				initializationError: mz,
+				request: vz,
+				initialized: xz,
+				initializationError: bz,
 				effectiveBackend: t?.effectiveBackend ?? null,
-				backendFallbackReason: t?.fallbackReason ?? pz,
+				backendFallbackReason: t?.fallbackReason ?? yz,
 				selection: t,
 				page: {
 					index: e,
@@ -74690,7 +74769,7 @@ $.then(() => {}), SI({
 			};
 		},
 		async getFontDecisionTrace(e, t) {
-			return await $, FI(J.getFontDecisionTrace(e, t), { canvasKitEvidence: (t) => X?.getCanvasKitFontDecisionEvidence(e, t) ?? null });
+			return await $, VI(J.getFontDecisionTrace(e, t), { canvasKitEvidence: (t) => X?.getCanvasKitFontDecisionEvidence(e, t) ?? null });
 		},
 		async getPageSvg(e) {
 			return await $, J.renderPageSvg(e);
@@ -74711,73 +74790,73 @@ $.then(() => {}), SI({
 			return await $, JSON.parse(J.exportHwpVerify());
 		},
 		async notifySaved(e) {
-			return await $, oz(e);
+			return await $, fz(e);
 		},
 		async getDocumentState() {
-			if (await $, !sz) throw Error("Document agent is not initialized");
-			return sz.getDocumentState();
+			if (await $, !pz) throw Error("Document agent is not initialized");
+			return pz.getDocumentState();
 		},
 		async getSelectionContext() {
-			if (await $, !sz) throw Error("Document agent is not initialized");
-			return sz.getSelectionContext();
+			if (await $, !pz) throw Error("Document agent is not initialized");
+			return pz.getSelectionContext();
 		},
 		async applyTextCommand(e) {
-			if (await $, !sz) throw Error("Document agent is not initialized");
-			return sz.applyTextCommand(e);
+			if (await $, !pz) throw Error("Document agent is not initialized");
+			return pz.applyTextCommand(e);
 		},
 		async revertTextCommand(e) {
-			if (await $, !sz) throw Error("Document agent is not initialized");
-			return sz.revertTextCommand(e);
+			if (await $, !pz) throw Error("Document agent is not initialized");
+			return pz.revertTextCommand(e);
 		},
 		async focusTarget(e) {
-			if (await $, !sz) throw Error("Document agent is not initialized");
-			return sz.focusTarget(e);
+			if (await $, !pz) throw Error("Document agent is not initialized");
+			return pz.focusTarget(e);
 		},
 		async automationList() {
-			return await $, wz.listCommands();
+			return await $, Az.listCommands();
 		},
 		async automationMenuModel() {
-			return await $, wz.getMenuModel();
+			return await $, Az.getMenuModel();
 		},
 		async automationIsEnabled(e) {
-			return await $, wz.isEnabled(e);
+			return await $, Az.isEnabled(e);
 		},
 		async automationExecute(e, t, n) {
-			return await $, wz.execute(e, t, n);
+			return await $, Az.execute(e, t, n);
 		},
 		async automationContext() {
-			return await $, wz.getContext();
+			return await $, Az.getContext();
 		},
 		async pluginList() {
-			return await $, Ez.list();
+			return await $, Mz.list();
 		},
 		async pluginLoad(e) {
-			return await $, Ez.load(e);
+			return await $, Mz.load(e);
 		},
 		async pluginUnload(e) {
-			return await $, await Ez.unload(e), { ok: !0 };
+			return await $, await Mz.unload(e), { ok: !0 };
 		},
 		async pluginInvoke(e, t, n) {
-			return await $, Ez.invoke(e, t, n);
+			return await $, Mz.invoke(e, t, n);
 		},
 		async chromeGet() {
-			return dx();
+			return gx();
 		},
 		async chromeSet(e) {
-			return fx(e);
+			return _x(e);
 		}
 	}
-}), nz({
-	registry: bz,
+}), cz({
+	registry: Ez,
 	ready: $,
 	getInputHandler: () => Z,
 	wasm: J,
-	getDocumentAgent: () => sz,
+	getDocumentAgent: () => pz,
 	getCanvasView: () => X,
-	load: (e, t) => mB(e, t, null, void 0, { suppressDialogs: !0 }),
-	saved: oz,
-	recovered: () => rz.markDirty("pwh-recovered"),
-	legacyDrafts: FP
+	load: (e, t) => bB(e, t, null, void 0, { suppressDialogs: !0 }),
+	saved: fz,
+	recovered: () => lz.markDirty("pwh-recovered"),
+	legacyDrafts: VP
 });
 for (let e of [
 	"document-mutated",

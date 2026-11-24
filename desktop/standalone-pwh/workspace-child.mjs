@@ -32,4 +32,8 @@ try{
  process.stdout.write(JSON.stringify({url})+'\n');
  process.stdin.on('end',()=>{server.close();server.closeAllConnections?.();if(process.connected)process.disconnect();});
  process.stdin.resume();
-}catch(error){process.stdout.write(JSON.stringify({errorCode:error.code||'START_FAILED'})+'\n');process.exitCode=1;}
+}catch(error){
+ const errorCode=/^[A-Z_]{3,32}$/.test(error.code??'')?error.code:'START_FAILED';
+ process.stdout.write(JSON.stringify({errorCode})+'\n');
+ process.exitCode=1;
+}

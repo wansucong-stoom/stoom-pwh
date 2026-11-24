@@ -33,6 +33,9 @@ jobs:
       artifact: ${{ steps.pack.outputs.artifact }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ (github.event.release.tag_name || inputs.release_tag) && format('refs/tags/{0}', github.event.release.tag_name || inputs.release_tag) || github.sha }}
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -43,9 +46,8 @@ jobs:
         env:
           RELEASE_TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
         run: |
-          if [ -n "$RELEASE_TAG" ] && [ "$RELEASE_TAG" != "v$(node -p 'require("./package.json").version')" ]; then
-            echo "Checkout and requested release differ"
-            exit 1
+          if [ -n "$RELEASE_TAG" ]; then
+            node scripts/check-desktop-release-ref.mjs
           fi
           npm install --prefix "$RUNNER_TEMP/pwh-macos-tools" --no-save --package-lock=false --ignore-scripts playwright-core@1.62.1
           export PWH_MACOS_TEST_PLAYWRIGHT="$RUNNER_TEMP/pwh-macos-tools/node_modules/playwright-core/index.mjs"

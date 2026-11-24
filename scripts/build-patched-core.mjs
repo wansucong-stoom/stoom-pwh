@@ -2023,6 +2023,17 @@ const patches = [
         "patchedSha256": "9b1ea1aac5a285644b25a19e2f13ff3f69f38cac136deeb7eae1665f3702aeca"
       }
     ]
+  },
+  {
+    "file": "rhwp-0.8.7-editable-section-break.patch",
+    "sha256": "9a7f78ee40c868f9fc9e168dfd3ae3fe0b07270955d13c0b210a86857617986b",
+    "sources": [
+      {
+        "path": "src/document_core/queries/hwpctrl_sets.rs",
+        "originalSha256": "d681de62c0f805cac9c6c9154cea07ea7d812d98e0853d6a19ec58cd45f90d0f",
+        "patchedSha256": "b4e67d0e636d92ec8f4527f124f23d063f67593e0f7d229aa9ba98d7eb6080c7"
+      }
+    ]
   }
 ];
 const help = `Usage: node scripts/build-patched-core.mjs

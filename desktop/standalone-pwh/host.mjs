@@ -16,6 +16,7 @@ import {readDraftTemplate,createReportTemplateLibrary,fillPreparedTemplate,creat
 import {diagramSpecSchema,prepareReportDiagram} from './report-diagram.mjs';
 import {reportFigureById} from './report-figures.mjs';
 import {convertHwp} from './convert-hwp.mjs';
+import {importDocx,exportDocx} from './docx-conversion.mjs';
 import {outlineDraftFromText} from './report-outline.mjs';
 import {inspectBodyFlow,newBodyOverflows} from './desktop-body-style.mjs';
 import {createLocalProvider,createCodexProvider} from './ai-providers.mjs';
@@ -28,6 +29,7 @@ import {loadStoomRuntime} from '../bridge/hwp-codex-host.mjs';
 import {createDesktopFileManager,chooseDesktopFile} from './desktop-files.mjs';
 import {createImageExportManager} from './image-export.mjs';
 import {createRecentDocuments} from './recent-documents.mjs';
+import {createDesktopRecovery} from './desktop-recovery.mjs';
 import {runEngine} from '../release-source/src/engine.mjs';
 import {sameRequestContext} from '../release-source/src/request-state.mjs';
 import {scanDocumentText} from './document-scan.mjs';
@@ -44,21 +46,74 @@ const agentTools=new Set(['pwh_editor_text_search','pwh_editor_text_edit','pwh_e
 const parse=async(req,limit)=>{const parts=[];let n=0;for await(const part of req){n+=part.length;if(n>limit)throw Error('요청 크기가 허용 범위를 넘습니다.');parts.push(part);}return Buffer.concat(parts);};
 const json=(res,value,status=200)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(value));};
 async function blankDocument(){
- const js=path.join(config.runtimeRoot,'core','rhwp.js'),wasm=path.join(config.runtimeRoot,'core','rhwp_bg.wasm');
- const core=await import(pathToFileURL(js).href);await core.default({module_or_path:await fs.readFile(wasm)});
- const doc=core.HwpDocument.createEmpty();try{doc.createBlankDocument();return Buffer.from(doc.exportHwpx());}finally{doc.free();}
+ blankDocumentBytes??=(async()=>{
+  const js=path.join(config.runtimeRoot,'core','rhwp.js'),wasm=path.join(config.runtimeRoot,'core','rhwp_bg.wasm');
+  const core=await import(pathToFileURL(js).href);await core.default({module_or_path:await fs.readFile(wasm)});
+  const doc=core.HwpDocument.createEmpty();try{doc.createBlankDocument();return Buffer.from(doc.exportHwpx());}finally{doc.free();}
+ })().catch(error=>{blankDocumentBytes=null;throw error;});
+ return blankDocumentBytes;
 }
-async function stageDocument(bytes,{sourceName}={}){
+let blankDocumentBytes;
+async function stageDocument(bytes,owned,{sourceName}={}){
  if(bytes.length<8||bytes.length>maxDocument)throw Error('HWP/HWPX 파일을 선택하세요.');
- const dir=path.join(appData,'documents',randomUUID());await fs.mkdir(dir,{recursive:true});
  const signature=bytes.subarray(0,8).toString('hex');
- if(signature==='d0cf11e0a1b11ae1'){
-  const source=path.join(dir,'source.hwp'),converted=path.join(dir,'document.hwpx');await fs.writeFile(source,bytes,{flag:'wx'});
-  const result=await convertHwp({executable:config.rhwpPath,source,output:converted});
-  return {...await registerClientDocument(converted),...(sourceName?{name:path.basename(sourceName)}:{}),convertedFromHwp:true,...result};
+ const legacy=signature==='d0cf11e0a1b11ae1';
+ if(!legacy&&bytes.subarray(0,2).toString()!=='PK')throw Error('HWP 또는 HWPX 문서가 아닙니다.');
+ const dir=path.join(appData,'documents','.pwh-edit-'+randomUUID());
+ await fs.mkdir(dir,{recursive:true});
+ const file=path.join(dir,'document.hwpx'),original=path.join(dir,'source.hwp');
+ async function dispose(){
+  for(const item of [original,file])await fs.unlink(item).catch(error=>{if(error.code!=='ENOENT')throw error;});
+  await fs.rmdir(dir).catch(error=>{if(error.code!=='ENOENT')throw error;});
  }
- if(bytes.subarray(0,2).toString()!=='PK')throw Error('HWP 또는 HWPX 문서가 아닙니다.');
- const file=path.join(dir,'document.hwpx');await fs.writeFile(file,bytes,{flag:'wx'});return registerClientDocument(file);
+ try{
+  let attributes={};
+  if(legacy){
+   await fs.writeFile(original,bytes,{flag:'wx'});
+   attributes={convertedFromHwp:true,...await convertHwp({executable:config.rhwpPath,source:original,output:file})};
+   if(sourceName)Object.assign(attributes,{name:path.basename(sourceName),originalHwpSource:sourceName,originalHwpSha256:fileHash(bytes)});
+   await fs.unlink(original);
+  }else await fs.writeFile(file,bytes,{flag:'wx'});
+  const doc={...await registerClientDocument(file),...attributes};
+  owned.set(doc.source,dispose);
+  return doc;
+ }catch(error){await dispose().catch(()=>{});throw error;}
+}
+const fileHash=bytes=>createHash('sha256').update(bytes).digest('hex');
+async function disposeWorkingFile(owned,file){
+ const dispose=owned.get(file);
+ if(dispose)try{await dispose();owned.delete(file);}catch{/* A reader may still hold the file. Retry on tab close. */}
+}
+async function loadDesktopDocument(file,owned,expectedHash){
+ const ext=path.extname(file).toLowerCase();
+ if(ext==='.hwpx'){
+  const doc=await registerClientDocument(file);
+  if(expectedHash&&expectedHash!==doc.sourceSha256)throw Error('선택한 파일이 변경되었습니다. 다시 열어 주세요.');
+  return doc;
+ }
+ file=await fs.realpath(file);
+ const bytes=await fs.readFile(file), digest=fileHash(bytes);
+ if(expectedHash&&expectedHash!==digest)throw Error('선택한 파일이 변경되었습니다. 다시 열어 주세요.');
+ if(ext==='.hwp')return stageDocument(bytes,owned,{sourceName:file});
+ if(ext!=='.docx')throw Error('HWP, HWPX 또는 DOCX 문서를 선택하세요.');
+ const template=await blankDocument();
+ let converted;
+ try{converted=importDocx(bytes,template);}
+ catch(error){throw Object.assign(new Error('Word DOCX 파일을 읽지 못했습니다. 파일이 정상적으로 열리는지 확인해 주세요.',{cause:error}),{code:'INVALID_DOCX'});}
+ const doc=await stageDocument(converted.bytes,owned);
+ try{if((await runEngine(['info',doc.source,'--json'])).data?.format!=='hwpx')throw Error('DOCX에서 가져온 문서를 확인하지 못했습니다.');}
+ catch(error){await disposeWorkingFile(owned,doc.source);throw error;}
+ return {...doc,name:path.basename(file),docxSource:file,docxSha256:digest,docxWarnings:converted.warnings};
+}
+async function prepareDocxSave(bytes,file,owned){
+ const result=exportDocx(bytes);
+ if(result.warnings.length)throw Error('DOCX에 보존되지 않는 요소가 있습니다 ('+result.warnings.join(', ')+'). HWPX로 저장하면 편집 내용을 보존할 수 있습니다.');
+ const reopened=importDocx(result.bytes,await blankDocument());
+ if(reopened.warnings.length)throw Error('DOCX 저장 후 문서를 다시 읽는 검증에 실패했습니다.');
+ const doc=await stageDocument(bytes,owned),dispose=()=>disposeWorkingFile(owned,doc.source);
+ try{if((await runEngine(['info',doc.source,'--json'])).data?.format!=='hwpx')throw Error('저장할 편집 문서를 확인하지 못했습니다.');}
+ catch(error){await dispose();throw error;}
+ return {bytes:result.bytes,dispose,document:{...doc,name:path.basename(file),docxSource:file,docxSha256:fileHash(result.bytes),docxWarnings:[]}};
 }
 async function providerFor(settings,{auth,runtimeRoot,home}={}){
  if(settings.provider==='local')return createLocalProvider({baseUrl:settings.localBaseUrl,model:settings.localModel});
@@ -74,7 +129,20 @@ async function desktopEditorHtml(){
  let html=addDesktopVersion(await clientViewerHtml(),await desktopVersion(appRoot));const anchor=" window.addEventListener('pwh-status',event=>status(String(event.detail)));";if(!html.includes(anchor))throw Error('편집기 저장 연결을 확인하지 못했습니다.');
  html=html.replace("status('본문에서 직접 편집하세요. 다시 쓸 부분을 드래그하고 채팅으로 요청할 수 있습니다.')","status('')");
  const dispatch="command.type==='openDocument'?await openDocument(command):";if(!html.includes(dispatch))throw Error('편집기 문서 서식 연결을 확인하지 못했습니다.');html=html.replace(dispatch,"command.type==='desktopBodyStyle'?window.pwhEditor.desktopBodyStyle(command):command.type==='desktopColumns'?window.pwhEditor.desktopColumns(command):command.type==='desktopPageFlow'?window.pwhEditor.desktopPageFlow(command):command.type==='desktopImage'?window.pwhEditor.desktopInsertImage(command,await replacementBytes(command.image)):"+dispatch);
- html=html.replace(anchor,` window.pwhDesktopAcceptSave=async(d,seq)=>{const oldKey=recoveryKey();if(window.pwhEditor.context().documentState.changeSeq===seq&&state.protectedRecoveryKey!==oldKey)await recoveryStore('delete',oldKey).catch(()=>{});state.documentId=d.documentId;state.source=d.source;state.displayName=d.name;state.sourceSha256=d.sourceSha256;state.checkpointSha=null;state.recoveryEligible=true;document.getElementById('pwh-title').textContent=d.name;document.getElementById('pwh-title').title=d.source;if(window.pwhEditor.context().documentState.changeSeq===seq)await window.pwhEditor.saved(d.name);const current=window.pwhEditor.context().documentState,same=current.changeSeq===seq;if(!same&&!current.dirty)window.pwhEditor.recovered();status(same?'저장했습니다.':'저장 후 추가 변경은 아직 미저장 상태입니다.');return same;};\n`+anchor);
+ html=html.replace(anchor,` window.pwhDesktopAcceptSave=async(d,seq)=>{
+   const oldKey=recoveryKey(),oldId=state.documentId;
+   if(window.pwhEditor.context().documentState.changeSeq===seq){
+    await recoveryRequest('finish-save',{draft:state.recoveredDiskDraft},oldId).catch(()=>{});
+    if(state.protectedRecoveryKey!==oldKey)await recoveryStore('delete',oldKey).catch(()=>{});
+   }
+   state.documentId=d.documentId;state.source=d.source;state.displayName=d.name;state.sourceSha256=d.sourceSha256;
+   state.checkpointSha=null;state.checkpointRevision=null;state.recoveredDiskDraft=null;state.recoveryEligible=true;
+   document.getElementById('pwh-title').textContent=d.name;document.getElementById('pwh-title').title=d.docxSource??d.source;
+   if(window.pwhEditor.context().documentState.changeSeq===seq)await window.pwhEditor.saved(d.name);
+   const current=window.pwhEditor.context().documentState,same=current.changeSeq===seq;
+   if(!same&&!current.dirty)window.pwhEditor.recovered();
+   status(same?'저장했습니다.':'저장 후 추가 변경은 아직 미저장 상태입니다.');return same;
+ };\n`+anchor);
  html=html.replace('</head>',`<script>window.__PWH_DESKTOP__=true;</script><style>#pwh-task{display:none!important}#pwh-status:empty{display:none}#pwh-import-table,#pwh-save{display:none!important}[data-menu="file"] [data-cmd="file:new-doc"],[data-menu="file"] [data-cmd="file:open"],[data-menu="file"] [data-cmd="file:save"],[data-menu="file"] [data-cmd="file:save-as"]{opacity:1!important;pointer-events:auto!important}</style></head>`);
  const dir=path.join(appRoot,'client');let manifest;
  try{manifest=JSON.parse(await fs.readFile(path.join(dir,'manifest.json'),'utf8'));}catch(error){if(error.code==='ENOENT')return html;throw error;}
@@ -86,7 +154,20 @@ async function desktopEditorHtml(){
 export async function createAppServer({initialBytes,initialPath,imported=false,report=false,chooseFile,chatgptAuth:sharedChatgptAuth,createAgentSession=createCodexSession,editorHtml=desktopEditorHtml,launchToken=randomBytes(24).toString('hex'),idleTimeoutMs=120000,port=0,nativeBranding}={}){
  if(nativeBranding&&!/^[0-9a-f]{32}$/.test(nativeBranding.token))throw Error('Windows 창 식별자가 올바르지 않습니다.');
  let nativePageGeneration=0;
- let current=initialPath?(path.extname(initialPath).toLowerCase()==='.hwp'?await stageDocument(await fs.readFile(path.resolve(initialPath)),{sourceName:initialPath}):await registerClientDocument(path.resolve(initialPath))):await stageDocument(initialBytes||await blankDocument());
+ const workingFiles=new Map(), recovery=createDesktopRecovery(path.join(appData,'recovery'));
+ let current=initialPath?await loadDesktopDocument(path.resolve(initialPath),workingFiles):await stageDocument(initialBytes||await blankDocument(),workingFiles);
+ let previousSave=null, changingDocument=false;
+ async function switchDocument(document,{saved=false}={}){
+  const previous=current;
+  current=document;
+  previousSave=saved?previous:null;
+  if(previous.source!==document.source)await disposeWorkingFile(workingFiles,previous.source);
+ }
+ async function documentAction(operation){
+  if(changingDocument)throw Error('문서 열기 또는 저장이 진행 중입니다.');
+  changingDocument=true;
+  try{return await operation();}finally{changingDocument=false;}
+ }
  if(imported)current={...current,imported:true};
  if(report){const reportTemplate=await readDraftTemplate(initialPath);current={...current,name:reportTemplate.name+'.hwpx',reportTemplate};}
  const agentToken=randomBytes(32).toString('hex');
@@ -217,11 +298,18 @@ export async function createAppServer({initialBytes,initialPath,imported=false,r
   }
   return {pageBreaks,remaining};
  }
- const files=createDesktopFileManager({...(chooseFile?{choose:chooseFile}:{}),verify:async file=>(await runEngine(['info',file,'--json'])).data,register:registerClientDocument});
+ const files=createDesktopFileManager({...(chooseFile?{choose:chooseFile}:{}),verify:async file=>(await runEngine(['info',file,'--json'])).data,
+  register:registerClientDocument,prepareDocx:(bytes,file)=>prepareDocxSave(bytes,file,workingFiles)});
+ function setSaveTarget(doc){
+  if(doc.docxWarnings?.length)files.setTarget(doc.docxSource,doc.docxSha256,{protect:true});
+  else if(doc.imported||doc.convertedFromHwp)return;
+  else if(doc.docxSource)files.setTarget(doc.docxSource,doc.docxSha256);
+  else files.setTarget(doc.source,doc.sourceSha256);
+ }
  const imageExports=createImageExportManager({choose:chooseFile||chooseDesktopFile});
  const recent=createRecentDocuments(appData),remember=async file=>{try{if(typeof file==='string')await recent.record(path.resolve(file));}catch{}};
  if(initialPath&&!imported)await remember(initialPath);
- if(initialPath&&!imported&&path.extname(initialPath).toLowerCase()==='.hwpx')files.setTarget(current.source,current.sourceSha256);
+ if(initialPath)setSaveTarget(current);
  const chatgptAuth=sharedChatgptAuth??createChatgptAuth({dataRoot:path.join(appData,'chatgpt-auth')});
  const chatgptRuntime={auth:chatgptAuth,runtimeRoot:process.env.PWH_CODEX_RUNTIME_DIR||path.join(appRoot,'codex-runtime'),home:path.join(appData,'chatgpt-runtime')};
  let codexSession=null,codexSessionKey='',codexTokenHash='',codexSessionAccount='',credentialStamp='',checkingCredential=false,savedThread=null,agentBusy=false,activeAgentSessionId=null,agentProgress=[],cancelRequested=false;
@@ -453,11 +541,59 @@ export async function createAppServer({initialBytes,initialPath,imported=false,r
    }
    if(req.method!=='POST'||req.headers.origin!==origin||req.headers['x-pwh-request']!=='1')return json(res,{error:'허용되지 않은 요청입니다.'},403);
    if(route==='/initialize')return json(res,{document:current});
-   if(route==='/new'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 문서를 바꿔 주세요.');current=await stageDocument(await blankDocument());files.clear();documentSnapshot=null;closeCodexSession();return json(res,{document:current});}
-   if(route==='/open'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 문서를 바꿔 주세요.');current=await stageDocument(await parse(req,maxDocument));files.clear();documentSnapshot=null;closeCodexSession();return json(res,{document:current});}
-   if(route==='/file/open'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 문서를 바꿔 주세요.');const picked=await files.open();if(!picked)return json(res,{cancelled:true});const doc=path.extname(picked.file).toLowerCase()==='.hwp'?await stageDocument(await fs.readFile(picked.file),{sourceName:picked.file}):await registerClientDocument(picked.file);if(path.extname(picked.file).toLowerCase()==='.hwpx'&&doc.sourceSha256!==picked.digest)throw Error('선택한 파일이 변경되었습니다. 다시 열어 주세요.');current=doc;files.clear();if(!doc.convertedFromHwp)files.setTarget(doc.source,doc.sourceSha256);documentSnapshot=null;closeCodexSession();await remember(picked.file);return json(res,{document:doc});}
-   if(route==='/file/prepare'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 저장해 주세요.');const input=JSON.parse((await parse(req,8192)).toString());if(input.documentId!==current.documentId)throw Error('문서가 변경되었습니다. 다시 저장해 주세요.');return json(res,await files.prepare({mode:input.mode,documentId:current.documentId,suggestedName:current.convertedFromHwp?path.parse(current.name).name+'.hwpx':current.name}));}
-   if(route==='/file/write'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 저장해 주세요.');const bytes=await parse(req,maxDocument),ticket=req.headers['x-pwh-ticket'],documentId=req.headers['x-pwh-document'];if(documentId!==current.documentId)throw Error('문서가 변경되었습니다. 다시 저장해 주세요.');const document=await files.write({ticket,documentId,bytes});current=document;await remember(document.source);return json(res,{document});}
+   if(route==='/new'||route==='/open')return await documentAction(async()=>{
+    if(agentBusy)throw Error('AI 작업이 끝난 뒤 문서를 바꿔 주세요.');
+    const bytes=route==='/new'?await blankDocument():await parse(req,maxDocument);
+    await switchDocument(await stageDocument(bytes,workingFiles));
+    files.clear();documentSnapshot=null;closeCodexSession();return json(res,{document:current});
+   });
+   if(route==='/file/open')return await documentAction(async()=>{
+    if(agentBusy)throw Error('AI 작업이 끝난 뒤 문서를 바꿔 주세요.');
+    const picked=await files.open();
+    if(!picked)return json(res,{cancelled:true});
+    const doc=await loadDesktopDocument(picked.file,workingFiles,picked.digest);
+    await switchDocument(doc);files.clear();setSaveTarget(doc);documentSnapshot=null;closeCodexSession();await remember(picked.file);
+    return json(res,{document:doc});
+   });
+   if(route==='/file/prepare'){
+    if(agentBusy)throw Error('AI 작업이 끝난 뒤 저장해 주세요.');
+    const input=JSON.parse((await parse(req,8192)).toString());
+    if(input.documentId!==current.documentId)throw Error('문서가 변경되었습니다. 다시 저장해 주세요.');
+    const stem=path.parse(current.name).name;
+    const suggestedName=current.docxWarnings?.length?stem+'-편집본.docx':current.convertedFromHwp?stem+'.hwpx':current.name;
+    return json(res,await files.prepare({mode:input.mode,documentId:current.documentId,suggestedName}));
+   }
+   if(route==='/file/write')return await documentAction(async()=>{
+    if(agentBusy)throw Error('AI 작업이 끝난 뒤 저장해 주세요.');
+    const bytes=await parse(req,maxDocument),ticket=req.headers['x-pwh-ticket'],documentId=req.headers['x-pwh-document'];
+    if(documentId!==current.documentId)throw Error('문서가 변경되었습니다. 다시 저장해 주세요.');
+    const document=await files.write({ticket,documentId,bytes});
+    await switchDocument(document,{saved:true});
+    await remember(document.docxSource??document.source).catch(()=>{});
+    return json(res,{document});
+   });
+   if(route.startsWith('/recovery/')){
+    const documentId=req.headers['x-pwh-document'];
+    const doc=documentId===current.documentId?current:route==='/recovery/finish-save'&&documentId===previousSave?.documentId?previousSave:null;
+    if(!doc)throw Error('복구할 문서가 변경되었습니다.');
+    if(route==='/recovery/write'){
+     const result=await recovery.write(doc,req,req.headers['x-pwh-digest'],Number(req.headers['content-length']),()=>doc===current);
+     return json(res,result);
+    }
+    const input=JSON.parse((await parse(req,8192)).toString()||'{}');
+    if(route==='/recovery/info')return json(res,{draft:await recovery.info(doc,input)});
+    if(route==='/recovery/read')return await recovery.read(doc,res,input);
+    if(route==='/recovery/acknowledge'){
+     const changed=await recovery.acknowledge(doc,input.draft,input.dismissed===true);
+     return json(res,{ok:true,changed:changed===true});
+    }
+    if(route==='/recovery/finish-save'){
+     await recovery.removeOwn(doc);
+     if(input.draft)await recovery.acknowledge(doc,input.draft,true);
+     if(doc===previousSave)previousSave=null;
+     return json(res,{ok:true});
+    }
+   }
    if(route==='/image-export/start'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 그림으로 저장해 주세요.');const input=JSON.parse((await parse(req,8192)).toString());if(input.documentId!==current.documentId)throw Error('문서가 변경되었습니다. 다시 시도해 주세요.');return json(res,await imageExports.start({documentId:current.documentId,pages:input.pages,suggestedName:current.name}));}
    if(route==='/image-export/page'){if(agentBusy)throw Error('AI 작업이 끝난 뒤 그림으로 저장해 주세요.');const documentId=req.headers['x-pwh-document'];if(documentId!==current.documentId)throw Error('문서가 변경되었습니다. 다시 시도해 주세요.');return json(res,await imageExports.add({ticket:req.headers['x-pwh-ticket'],documentId,page:Number(req.headers['x-pwh-page']),bytes:await parse(req,32*1024*1024)}));}
    if(route==='/image-export/finish'){const input=JSON.parse((await parse(req,8192)).toString());if(input.documentId!==current.documentId)throw Error('문서가 변경되었습니다. 다시 시도해 주세요.');return json(res,await imageExports.finish(input));}
@@ -611,10 +747,12 @@ export async function createAppServer({initialBytes,initialPath,imported=false,r
     const result=await generate({prompt:input.note});return json(res,{text:result.text,applied:false});
    }
    return json(res,{error:'찾을 수 없는 요청입니다.'},404);
-  }catch(error){json(res,{error:error.message||'요청 처리에 실패했습니다.',...(error.code==='usage_limit'?{code:'usage_limit'}:{})},400);}
+  }catch(error){if(res.headersSent){res.destroy();return;}json(res,{error:error.message||'요청 처리에 실패했습니다.',...(error.code==='usage_limit'?{code:'usage_limit'}:{})},400);}
  });
- const idleTimer=setInterval(()=>{if(!agentBusy&&Date.now()-lastActivity>idleTimeoutMs)server.close();},15000);idleTimer.unref();server.once('close',()=>{clearInterval(idleTimer);clearInterval(accountWatcher);closeCodexSession();chatgptAuth.close();void imageExports.dispose();});
- await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(port,'127.0.0.1',resolve);});
+ const cleanupWorking=()=>Promise.all(Array.from(workingFiles.keys(),file=>disposeWorkingFile(workingFiles,file)));
+ const idleTimer=setInterval(()=>{if(!agentBusy&&!changingDocument&&Date.now()-lastActivity>idleTimeoutMs)server.close();},15000);idleTimer.unref();server.once('close',()=>{clearInterval(idleTimer);clearInterval(accountWatcher);closeCodexSession();chatgptAuth.close();void imageExports.dispose();void cleanupWorking();});
+ try{await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(port,'127.0.0.1',resolve);});}
+ catch(error){clearInterval(idleTimer);clearInterval(accountWatcher);chatgptAuth.close();await cleanupWorking();throw error;}
  return {server,url:`http://127.0.0.1:${server.address().port}/${launchToken}/`};
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href){

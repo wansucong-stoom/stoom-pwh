@@ -6,12 +6,16 @@ The historical full Studio component is retained unless a separately verified
 full Studio replacement is supplied. The active Pwh inline client and core are
 verified against their current source and build evidence.
 """
-import argparse, hashlib, json, re, zipfile
+import argparse, hashlib, io, json, re, zipfile
 from pathlib import Path, PurePosixPath
 
 COMPONENTS = {'rhwp', 'core', 'editor-sdk', 'studio', 'studio-inline'}
 CORE_FILES = ('rhwp.js', 'rhwp.d.ts', 'rhwp_bg.wasm', 'rhwp_bg.wasm.d.ts')
 CLIENT_FILES = ('editor.js', 'rhwp-studio.css', 'editor-body.html')
+STUDIO_INPUT_FILES = {
+    'rhwp-studio/package.json', 'rhwp-studio/index.html',
+    'rhwp-studio/public/images/icon_small_ko.svg', 'rhwp-studio/public/images/icon_small_ko_dark.svg'
+}
 MAX_TOTAL = 512 * 1024 * 1024
 
 def sha(data): return hashlib.sha256(data).hexdigest()
@@ -133,11 +137,33 @@ def component_marker(files, component, identity, extra=None):
     if extra: marker.update(extra)
     files[name] = js(marker)
 
+def preserved_studio_inputs(base_lock, base_archive, studio_archive):
+    pin = next((asset for asset in reversed(base_lock['preservationAssets'])
+                if asset['file'].startswith('pwh-inline-build-inputs-')), None)
+    if not pin:
+        raise ValueError('The base lock must contain pinned inline Studio inputs')
+    raw = regular(studio_archive or base_archive.with_name(pin['file']))
+    if len(raw) != pin['size'] or sha(raw) != pin['sha256']:
+        raise ValueError('Base inline Studio inputs checksum mismatch')
+    with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+        inputs = {}
+        for entry in archive.infolist():
+            if entry.is_dir() or (entry.filename not in STUDIO_INPUT_FILES and not entry.filename.startswith('rhwp-studio/src/')):
+                continue
+            name = safe_name(entry.filename)
+            if name in inputs or (entry.external_attr >> 16) & 0o170000 == 0o120000:
+                raise ValueError('Duplicate Studio input or symlink')
+            inputs[name] = archive.read(entry)
+    if not STUDIO_INPUT_FILES <= inputs.keys() or 'rhwp-studio/src/main.ts' not in inputs:
+        raise ValueError('Incomplete base inline Studio inputs')
+    return inputs
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('base-lock', 'base-archive', 'candidate-core', 'client-root', 'client-build-root', 'regression-evidence', 'output-dir'):
         parser.add_argument('--'+name, type=Path, required=True)
     parser.add_argument('--revision', type=int, required=True)
+    parser.add_argument('--studio-input-archive', type=Path, help='Pinned base inline build input ZIP, defaults to the base runtime directory')
     parser.add_argument('--release-tag', help='Product release tag containing the runtime assets, such as v0.6.34')
     parser.add_argument('--verify-only', action='store_true', help='Verify all inputs without creating output')
     parser.add_argument('--studio-replacement', type=Path, help='Verified complete Studio runtime tree; requires --studio-verification')
@@ -156,6 +182,8 @@ def main():
     client_marker_raw = regular(args.client_root / '.pwh-install.json'); client_marker = json.loads(client_marker_raw)
     if client_marker['kind'] != 'studio-inline' or client_marker['upstreamCommit'] != lock['upstreamCommit'] or sorted(client_marker['files']) != sorted(CLIENT_FILES):
         raise ValueError('Unsupported current inline client marker')
+    if client_marker['version'] != json.loads(regular(project/'package.json'))['version']:
+        raise ValueError('Inline client version differs from the current Pwh source')
     client = {}
     for name in CLIENT_FILES:
         data = regular(args.client_root/name)
@@ -193,11 +221,9 @@ def main():
     if studio_evidence: component_marker(files, 'studio', identity)
     # Explicit, source-only inputs. Binary fonts, samples, local configs, recovery
     # files, installed dependencies and Git history are never collected.
-    build_inputs = tree(args.client_build_root/'rhwp-studio/src', 'rhwp-studio/src/')
-    for name in ('package.json','index.html'):
-        build_inputs['rhwp-studio/'+name] = regular(args.client_build_root/'rhwp-studio'/name)
-    for name in ('icon_small_ko.svg','icon_small_ko_dark.svg'):
-        build_inputs['rhwp-studio/public/images/'+name] = regular(args.client_build_root/'rhwp-studio/public/images'/name)
+    # The build in client_build_root applies the patches in place. Preserve the
+    # pinned inputs from before those edits so the next rebuild applies them once.
+    build_inputs = preserved_studio_inputs(lock, args.base_archive, args.studio_input_archive)
     for name in ('rhwp.js','rhwp.d.ts','rhwp_bg.wasm.d.ts','package.json','LICENSE'):
         build_inputs['pkg/'+name] = regular(args.client_build_root/'pkg'/name)
     for directory in ('scripts','src','tests/engine-source-ownership','docs/engine-patches'):

@@ -14,7 +14,7 @@ const FILES = Object.freeze([
   'scripts/patch-auto-fill.mjs', 'scripts/patch-dialog-focus.mjs',
   'scripts/patch-table-resize-grid.mjs',
   'scripts/patch-shape-tools.mjs',
-  'scripts/patch-auto-page-arrangement.mjs',
+  'scripts/patch-auto-page-arrangement.mjs', 'scripts/patch-section-edit.mjs', 'scripts/patch-document-compare.mjs',
   'scripts/patch-host-font-settings.mjs',
   'scripts/patch-canvas-metric-reuse.mjs', 'scripts/desktop-runtime-assets.mjs', 'scripts/verify-desktop-runtime.mjs',
   'scripts/patch-context-ribbon.mjs', 'scripts/patch-format-copy-options.mjs', 'scripts/patch-control-marker-delete.mjs', 'scripts/patch-native-paste-command.mjs',

@@ -21,7 +21,7 @@
    for(const item of documents){
     const row=document.createElement('div');row.className='recent-row'+(item.available?'':' recent-missing');
     const open=document.createElement('button');open.type='button';open.className='recent-open';open.title=item.path;open.setAttribute('aria-label',item.name+' 열기');open.onclick=()=>void openFromHome('recent/open',{id:item.id});
-    const icon=document.createElement('span');icon.className='recent-icon';icon.setAttribute('aria-hidden','true');icon.textContent=item.name.toLowerCase().endsWith('.hwpx')?'HWPX':'HWP';
+    const icon=document.createElement('span');icon.className='recent-icon';icon.setAttribute('aria-hidden','true');icon.textContent=item.name.split('.').at(-1).toUpperCase();
     const details=document.createElement('span');details.className='recent-details';const name=document.createElement('span');name.className='recent-name';name.textContent=item.name;const path=document.createElement('span');path.className='recent-path';path.textContent=item.path;details.append(name,path);
     const date=document.createElement('span');date.className='recent-time';date.textContent=item.available?new Intl.DateTimeFormat('ko-KR',{year:'numeric',month:'short',day:'numeric'}).format(new Date(item.openedAt)):'파일을 열 수 없음';
     const remove=document.createElement('button');remove.type='button';remove.className='recent-remove';remove.textContent='×';remove.title='최근 문서 목록에서 제거';remove.setAttribute('aria-label',item.name+' 최근 문서 목록에서 제거');remove.onclick=async()=>{try{await api('recent/remove',{id:item.id});await refreshHome();}catch(error){$('home-status').textContent=error.message;}};
@@ -185,7 +185,7 @@
  window.addEventListener('pagehide',()=>navigator.sendBeacon('tabs/closing'));
  async function openDroppedFiles(input){
   if(starting||updateLocked||closeLocked){$('workspace-status').textContent='현재 작업을 마친 뒤 파일을 열어 주세요.';return;}
-  const files=Array.from(input||[]);if(!files.length)return;if(files.length>12||files.some(file=>!(file instanceof File)||!/\.hwpx?$/i.test(file.name)||file.size<8)){$('workspace-status').textContent='HWP 또는 HWPX 파일을 놓아 주세요.';return;}
+  const files=Array.from(input||[]);if(!files.length)return;if(files.length>12||files.some(file=>!(file instanceof File)||!/\.(?:hwpx?|docx)$/i.test(file.name)||file.size<8)){$('workspace-status').textContent='HWP, HWPX 또는 DOCX 파일을 놓아 주세요.';return;}
   if(tabs.size+files.length>12){$('workspace-status').textContent='문서는 최대 12개까지 열 수 있습니다.';return;}
   starting=true;setFrozen();const id=crypto.randomUUID();window.__pwhDropFiles.set(id,files);
   try{
@@ -199,7 +199,7 @@
   }finally{window.__pwhDropFiles.delete(id);starting=false;setFrozen();}
  }
  document.addEventListener('dragover',event=>{if(event.dataTransfer?.types.includes('Files')&&Array.from(event.dataTransfer.items).some(item=>item.kind==='file'&&!item.type.startsWith('image/'))){event.preventDefault();event.dataTransfer.dropEffect='copy';}},true);
- document.addEventListener('drop',event=>{if(Array.from(event.dataTransfer?.files||[]).some(file=>/\.hwpx?$/i.test(file.name))){event.preventDefault();event.stopPropagation();if(event.isTrusted)void openDroppedFiles(event.dataTransfer.files);}},true);
+ document.addEventListener('drop',event=>{if(Array.from(event.dataTransfer?.files||[]).some(file=>/\.(?:hwpx?|docx)$/i.test(file.name))){event.preventDefault();event.stopPropagation();if(event.isTrusted)void openDroppedFiles(event.dataTransfer.files);}},true);
  const viewObserver=new MutationObserver(()=>publishWorkspace());for(const id of ['workspace-status','workspace-update','codex-plugin-retry'])viewObserver.observe($(id),{childList:true,characterData:true,attributes:true,subtree:true});
  $('workspace-home').onclick=()=>{if(!starting&&!updateLocked&&!closeLocked)showHome({focus:true});};
  $('home-refresh').onclick=()=>void refreshHome();

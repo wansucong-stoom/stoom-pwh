@@ -4,7 +4,7 @@ import {createHash, randomUUID} from 'node:crypto';
 
 const maximumRecent = 30;
 const validId = id => typeof id === 'string' && /^[a-f0-9]{64}$/.test(id);
-const validFile = file => typeof file === 'string' && path.isAbsolute(file) && file.length <= 32767 && /\.hwpx?$/i.test(file);
+const validFile = file => typeof file === 'string' && path.isAbsolute(file) && file.length <= 32767 && /\.(?:hwpx?|docx)$/i.test(file);
 const fileId = file => createHash('sha256').update(process.platform === 'win32' ? path.normalize(file).toLowerCase() : path.normalize(file)).digest('hex');
 
 export function createRecentDocuments(dataRoot) {

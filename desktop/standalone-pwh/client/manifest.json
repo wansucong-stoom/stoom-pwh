@@ -1,12 +1,12 @@
 {
-  "sha256": "9afeb11f72487fbee9e6cf11011a040171348bf52beb4c616d0b87af6344433b",
-  "baseVersion": "0.6.68",
-  "baseEditorSha256": "2d939d95bd91a01a9be5a14dea9717f9d0d207a86de62d736852a491fec9eb06",
+  "sha256": "826b5d66c508a2abb68eec68b72e1785c555662cf631068b3a58031094fcb4c8",
+  "baseVersion": "0.6.69",
+  "baseEditorSha256": "793e2ee95dde910bdd585b1f5e0cc1df815d8dea01210db3800240f2a0c0bcb0",
   "upstreamCommit": "1a76570e833917d15817415a53c09ad61ab3203f",
   "buildInputs": {
     "schemaVersion": 1,
     "variant": "desktop",
-    "sha256": "9a596b4f4bf41af668c8bf6d859779ecceb6073d0eaf6c0059acce4017db2774",
+    "sha256": "5ad75365631e3d40301ce54acf6f7f9a90f01bca3eff3c0c2d7fde71a0ee3267",
     "files": [
       {
         "path": "desktop/standalone-pwh/build-desktop-editor.mjs",
@@ -30,11 +30,11 @@
       },
       {
         "path": "package.json",
-        "sha256": "adee661e03f26c1a49136735fb40185ddfe5b22847d527c8faa3bab617a17eef"
+        "sha256": "978d0d8c00e2bbce292cf3c4a06e58d938185507181d1fb78901f6cb7c04fd51"
       },
       {
         "path": "scripts/build-inline.mjs",
-        "sha256": "880cd4ffcb968e41b3ed3918d462c5fcbf44344d20770d3e87373ca866571bb4"
+        "sha256": "55b475ee01d9cc21dee54d0e150cc5bbe9e0459376e9a7a6b881aacbd3e133d8"
       },
       {
         "path": "scripts/bundle-client.mjs",
@@ -42,7 +42,7 @@
       },
       {
         "path": "scripts/editor-build-contract.mjs",
-        "sha256": "1cfcfda3bcd69be9895e31a1182f7d87e5b1450d92ec63431e59ac8be1fe3bfe"
+        "sha256": "0f0594572d81abed048913dd6b7a8604f233f331eddc982c865fdefd36b2e81b"
       },
       {
         "path": "scripts/patch-auto-fill.mjs",
@@ -74,7 +74,7 @@
       },
       {
         "path": "scripts/patch-context-ribbon.mjs",
-        "sha256": "887e7b0f797badffc1eb3ab99610c29a2250dcf1c3d168c19e5b9027e35f5eef"
+        "sha256": "961f0b4ebe9389ba40846b04f0e4dc86c42463d9104ad13212d6853c74c0dbf0"
       },
       {
         "path": "scripts/patch-control-marker-delete.mjs",
@@ -83,6 +83,10 @@
       {
         "path": "scripts/patch-dialog-focus.mjs",
         "sha256": "b1eb40e51e9455237a48064ab0d624bd80729c04e0ec912f84a038bd8a9d39ba"
+      },
+      {
+        "path": "scripts/patch-document-compare.mjs",
+        "sha256": "cf992a4c5371836d80433e1d7899076643df75fcd275b6504a11cd69cea59277"
       },
       {
         "path": "scripts/patch-format-copy-options.mjs",
@@ -127,6 +131,10 @@
       {
         "path": "scripts/patch-pointer-hit-geometry.mjs",
         "sha256": "19f3118df9de43b23af6fb21c782d3d42a31528cf21b171193b45eb5b4aea5b2"
+      },
+      {
+        "path": "scripts/patch-section-edit.mjs",
+        "sha256": "a5c07b5c78b21f662c7ddee37ebc9e4188a161a1ebc156ead7a82acc0b6c9326"
       },
       {
         "path": "scripts/patch-shape-tools.mjs",
@@ -202,7 +210,7 @@
       },
       {
         "path": "src/client-assets.mjs",
-        "sha256": "e191390c7e77096608d83676835e280c371fda6c7ae8807957abf4e365fadafc"
+        "sha256": "d30d4b583041984d3fe408c43c1c5e85f46bd7bad741434d3b7ba146fcfb79cd"
       },
       {
         "path": "src/clipboard-structure.mjs",
@@ -294,7 +302,7 @@
       },
       {
         "path": "src/inline-host.js",
-        "sha256": "da48a5b60bee509e32de7ef6d15ee1e6f62dd1e5ba2b3f5e0c37527fb1fc4f9b"
+        "sha256": "9730733fc01be5a8a78fcdb84721b406bc4b8ca6cb15fcc8d53f8a4c887f7945"
       },
       {
         "path": "src/inline-image-urls.mjs",
@@ -406,11 +414,11 @@
       },
       {
         "path": "src/pwh-context-ribbon.css",
-        "sha256": "f79822576b6a04db00314d45a0e418ac9306e13dc808036ec3c020d79b782c8e"
+        "sha256": "84e5315a56db8fddb89beca8eb2ad9a04c51e7a4bef6d9ea23d2869286b3d556"
       },
       {
         "path": "src/pwh-context-ribbon.ts",
-        "sha256": "bc4409298682708dd527724428128f69d6670dda862c68b6c1c237143085fd21"
+        "sha256": "716062a63b11f80bcc24c6fdf3d9330163061ce3c5d80ac8033adc0365c8985d"
       },
       {
         "path": "src/pwh-format-copy-dialog.css",
@@ -434,11 +442,15 @@
       },
       {
         "path": "src/pwh-ribbon-model.mjs",
-        "sha256": "4e55bd597bdfb487b2552dde8b95099ec2bbe05556fc833c2c899e26868f7b38"
+        "sha256": "664a0b2a7974c5db7c1a98c0ef7baaa4091fbc9244ad0229efb7edf016424785"
       },
       {
         "path": "src/pwh-ribbon-styles.ts",
         "sha256": "53d2ab6987b1c7c6e89bc2d231fbf678775de5b42915c5b314f88f74c3048721"
+      },
+      {
+        "path": "src/pwh-section-edit.ts",
+        "sha256": "55003c31eac4306d6d90f46a5b2d8a92b0712ff50a36d325c9651f03c8c3e2ee"
       },
       {
         "path": "src/pwh-shape-picker.ts",
@@ -454,7 +466,7 @@
       },
       {
         "path": "src/pwh-table-command-access.ts",
-        "sha256": "7a6c5663dbcd62c25c62f7c4b734a790580dc59422da73a35899cc3279b68123"
+        "sha256": "8a229afad531d2464fcfe89ac0fd5c8bcdbc7e88fd52e5b078bd1351596313f9"
       },
       {
         "path": "src/render-fonts.mjs",

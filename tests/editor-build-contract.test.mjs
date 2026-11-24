@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
+import {fileURLToPath} from 'node:url';
 import {normalizeEditorBundle,assertPortableEditorBundle,editorBuildInputs,assertEditorBuildInputs} from '../scripts/editor-build-contract.mjs';
 
 test('module labels are stable across build directories without changing executable text',()=>{
@@ -17,14 +18,17 @@ test('module labels are stable across build directories without changing executa
 
 test('source changes, new source modules and Desktop-only changes invalidate the correct input record',async t=>{
   const root=await fs.mkdtemp(path.join(os.tmpdir(),'pwh-build-contract-'));t.after(()=>fs.rm(root,{recursive:true,force:true}));
-  for(const dir of ['src','scripts','desktop/standalone-pwh'])await fs.mkdir(path.join(root,dir),{recursive:true});
-  for(const name of ['package.json',...['build-inline.mjs','bundle-client.mjs','patch-body-cursor-contract.mjs','patch-pointer-hit-geometry.mjs','patch-cell-text-history.mjs','patch-object-properties.mjs', 'patch-viewport-table-selection.mjs', 'patch-table-and-symbol-shortcuts.mjs', 'patch-hancom-key-aliases.mjs', 'patch-hancom-key-contexts.mjs','editor-build-contract.mjs'].map(n=>'scripts/'+n),...['build-desktop-editor.mjs','table-plan.mjs','desktop-body-style.mjs'].map(n=>'desktop/standalone-pwh/'+n),'src/a.ts'])await fs.writeFile(path.join(root,name),'original\n');
-  await fs.mkdir(path.join(root,'docs/engine-patches/studio'),{recursive:true});
-  for(const name of ['scripts/patch-format-properties.mjs','scripts/patch-clipboard-safety.mjs','scripts/patch-table-command-access.mjs','scripts/patch-nested-paragraph-format.mjs','scripts/patch-inline-object-cursors.mjs','scripts/patch-context-ribbon.mjs','scripts/patch-format-copy-options.mjs','scripts/patch-control-marker-delete.mjs','scripts/patch-native-paste-command.mjs','scripts/patch-picture-drag.mjs','scripts/patch-background-recovery.mjs','docs/engine-patches/studio/clipboard-safety.patch','docs/engine-patches/studio/nested-paragraph-format.patch'])await fs.writeFile(path.join(root,name),'original\n');
-  for(const name of ['patch-auto-fill.mjs','patch-dialog-focus.mjs','patch-table-resize-grid.mjs','patch-shape-tools.mjs','patch-auto-page-arrangement.mjs','patch-host-font-settings.mjs','patch-canvas-metric-reuse.mjs'])await fs.writeFile(path.join(root,'scripts',name),'original\n');
+  const project=fileURLToPath(new URL('../',import.meta.url));
+  const projectInputs=await editorBuildInputs(project,'desktop');
+  const fixtureInputs=projectInputs.files.map(file=>file.path).filter(name=>!name.startsWith('src/'));
+  for(const name of [...fixtureInputs,'src/a.ts']) {
+    const filename=path.join(root,name);
+    await fs.mkdir(path.dirname(filename),{recursive:true});
+    await fs.writeFile(filename,'original\n');
+  }
   const common=await editorBuildInputs(root),desktop=await editorBuildInputs(root,'desktop');
   await assertEditorBuildInputs(root,common);await assertEditorBuildInputs(root,desktop,'desktop');
-  for(const name of ['scripts/patch-host-font-settings.mjs','scripts/patch-table-resize-grid.mjs','scripts/patch-auto-fill.mjs','scripts/patch-dialog-focus.mjs','scripts/patch-picture-drag.mjs','scripts/patch-background-recovery.mjs','scripts/patch-nested-paragraph-format.mjs','docs/engine-patches/studio/nested-paragraph-format.patch']) {
+  for(const name of ['scripts/patch-section-edit.mjs','scripts/patch-document-compare.mjs','scripts/patch-host-font-settings.mjs','scripts/patch-table-resize-grid.mjs','scripts/patch-auto-fill.mjs','scripts/patch-dialog-focus.mjs','scripts/patch-picture-drag.mjs','scripts/patch-background-recovery.mjs','scripts/patch-nested-paragraph-format.mjs','docs/engine-patches/studio/nested-paragraph-format.patch']) {
     await fs.writeFile(path.join(root,name),'changed\n');
     await assert.rejects(assertEditorBuildInputs(root,common),/sources changed/);
     await assert.rejects(assertEditorBuildInputs(root,desktop,'desktop'),/sources changed/);

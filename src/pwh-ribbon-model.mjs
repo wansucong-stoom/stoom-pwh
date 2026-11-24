@@ -37,7 +37,7 @@ export const ribbonTabs=[
   group('용지',[item('page:setup','편집 용지','page'),item('page:page-border','쪽 테두리/배경','page-border')]),
   group('머리말·꼬리말',[item('page:header-create','머리말','header'),item('page:footer-create','꼬리말','footer')]),
   group('쪽 번호',[item('page:new-page-num','새 번호로 시작','page-number'),item('page:hide-current','현재 쪽 감추기','hide-page')]),
-  group('나누기',[item('page:break','쪽 나누기','page-break'),item('page:column-break','단 나누기','column-break'),item('page:section-settings','구역 설정','section')]),
+  group('나누기',[item('page:break','쪽 나누기','page-break'),item('page:column-break','단 나누기','column-break'),item('page:section-settings','구역 설정','section'),item('page:section-break','구역 나누기','page-break')]),
   group('단',[item('page:col-1','1단','column-one'),item('page:col-2','2단','columns'),item('page:col-3','3단','column-three'),item('page:col-settings','단 설정','settings')])
  ]},
  {id:'table',label:'표',groups:[

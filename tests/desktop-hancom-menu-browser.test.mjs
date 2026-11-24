@@ -38,6 +38,20 @@ test('Desktop contextual menus preserve command routes and narrow-window access'
    assert.equal(await editor.locator('.pwh-ribbon-panel:visible').count(),1);
    assert.equal(await editor.locator('#style-bar').isVisible(),true);
   }
+  await editor.locator('[data-menu="view"] .menu-title').click();
+  const marks=await editor.locator('#pwh-ribbon-panel-view [data-cmd="view:para-mark"]').evaluate(button=>{
+   const original=window.requestAnimationFrame;
+   window.requestAnimationFrame=()=>0;
+   try {
+    const before=button.getAttribute('aria-pressed');
+    button.click();
+    const enabled=button.getAttribute('aria-pressed');
+    button.click();
+    return [before,enabled,button.getAttribute('aria-pressed')];
+   }finally{window.requestAnimationFrame=original;}
+  });
+  assert.notEqual(marks[0],marks[1],'view state updates without a render frame');
+  assert.equal(marks[0],marks[2]);
   await editor.locator('[data-menu="format"] .menu-title').click();
   await editor.getByRole('button',{name:'스타일 전체 펼치기',exact:true}).click();
   assert.equal(await editor.locator('.pwh-ribbon-style-option').count(),await editor.locator('#style-name option').count());

@@ -7,6 +7,15 @@ export async function desktopVersion(root){
   return typeof version==='string'&&/^\d{1,3}\.\d{1,3}\.\d{1,5}$/.test(version)?version:null;
  }catch{return null;}
 }
+export async function desktopPackageVersion(root,requested){
+ const version=await desktopVersion(root);
+ if(!version||version.split('.').some((part,index)=>Number(part)>(index===2?65535:255))){
+  throw Error('Desktop version.json has an invalid package version');
+ }
+ if(requested!==undefined&&requested!==version)throw Error('Requested Desktop version differs from version.json ('+version+')');
+ return version;
+}
+
 export function addDesktopVersion(html,version){
  const marker=/<small id="pwh-version"[^>]*>Pwh (\d+\.\d+\.\d+)<\/small>/i;
  if(!marker.test(html))throw Error('조판기 버전 표시를 확인하지 못했습니다.');

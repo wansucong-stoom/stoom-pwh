@@ -32,7 +32,11 @@ Pwh는 **무료·오픈소스 HWP/HWPX 문서 편집기**입니다. 익숙한 �
 | **Pwh Desktop · Apple Silicon Mac 시험판** | [GitHub 릴리스](https://github.com/wansucong-stoom/stoom-pwh/releases) · [설치 안내](docs/MACOS.md) | 새 Mac 패키지를 앱에서 확인한 뒤 직접 설치 |
 | **Pwh 플러그인 · Codex 데스크톱** | [GitHub 릴리스의 플러그인 ZIP](https://github.com/wansucong-stoom/stoom-pwh/releases/latest) | 최신 플러그인으로 갱신 |
 
-최근 정식 배포 기준은 **Pwh 0.6.68 · Desktop 0.1.49 · 공통 코어 r32**입니다. GitHub 배포와 Store 심사·게시 시점은 다르며, Store 설치판은 게시된 버전으로 업데이트됩니다. 이전 MSI 사용자는 [Store 이전 안내](docs/PWH-DESKTOP.md#설치와-사용)를 참고하세요.
+GitHub 정식 릴리스는 **Pwh 0.6.69 · Desktop 0.1.51 · 공통 코어 r33**입니다. 이 릴리스의 Windows, Linux, Apple Silicon macOS 패키지는 같은 조판 코어와 편집기를 사용합니다. [구역 나누기와 Word 문서](docs/USER-GUIDE.md#구역-나누기와-word-문서)
+
+Windows Store 설치판은 Microsoft Store에 게시된 버전으로 업데이트됩니다. 이전 MSI 사용자는 [Store 이전 안내](docs/PWH-DESKTOP.md#설치와-사용)를 참고하세요.
+
+**도구 → 문서 비교**에서 두 HWP·HWPX 문서의 차이를 별도 창으로 볼 수 있습니다. 비교를 열면 현재 문서의 편집 상태를 비교용으로 복사하고 작업 중인 탭과 실행 취소 기록을 유지합니다.
 
 Desktop에서는 자주 쓰는 기관 양식을 등록해 AI 요청에 사용할 수 있습니다. 문서에 맞춰 그림과 한글 도식을 갱신하고, 저장 후 전체 그림이 보이는지 확인합니다. [자주 쓰는 양식](docs/PWH-DESKTOP.md#자주-쓰는-양식)
 
@@ -56,9 +60,9 @@ Desktop에서는 자주 쓰는 기관 양식을 등록해 AI 요청에 사용할
 | **그림과 개체** | 그림 이동·크기 조절·속성 편집, 그림 교체, 글자처럼 취급한 표 앞뒤 커서와 선택 |
 | **용지와 출력** | 용지·여백 설정, 인쇄 미리보기, 쪽 범위 인쇄, 쪽을 그림으로 저장 |
 | **문서 작업 공간** | 최근 문서, 여러 문서 탭, 문서별 AI 대화와 선택 영역 수정 요청 |
+| **큰 파일** | 파일 크기와 연결 환경에 맞춘 분할 전송·저장 |
 
 [AI 대화로 글자·문단 모양을 편집하고 취소선을 검수하는 방법](docs/USER-GUIDE.md#문서-열기부터-저장까지)
-| **큰 파일** | 파일 크기와 연결 환경에 맞춘 분할 전송·저장 |
 
 1. 새 문서를 만들거나 HWP·HWPX 파일을 엽니다.
 2. 글·표·그림을 직접 편집합니다. AI가 필요하면 연결한 뒤 **AI 수정 요청**을 사용합니다.

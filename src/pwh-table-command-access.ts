@@ -12,10 +12,11 @@ const scopedCommands=new Set([
 ]);
 // These operations still have body-only native mutation/editing APIs. Disabling
 // the command is safer than sending an inner cell index to the containing table.
+const blockCalculations = new Set(['table:block-sum','table:block-avg','table:block-product']);
 const needsPathBackend=new Set([
   'table:delete','table:caption-toggle','table:split','table:attach',
   'table:transpose-copy','table:transpose-paste','table:formula','table:block-formula',
-  'table:block-sum','table:block-avg','table:block-product',
+  ...blockCalculations,
 ]);
 
 function nestedTarget(services: CommandServices): boolean {
@@ -69,7 +70,8 @@ export function wrapTableCommands(commands: CommandDef[]): CommandDef[] {
         else command.execute(services,params);
       }};
     if(needsPathBackend.has(command.id))return {...command,
-      canExecute:ctx=>!ctx.inNestedTable&&(command.canExecute?.(ctx)??true),
+      canExecute:ctx=>!ctx.inNestedTable&&(!blockCalculations.has(command.id)||ctx.hasMultiCellSelection)
+        &&(command.canExecute?.(ctx)??true),
       execute(services,params) {
         if(nestedTarget(services)) {
           showToast({message:'이 명령의 중첩 표 편집은 아직 지원하지 않습니다.',durationMs:5000});return;

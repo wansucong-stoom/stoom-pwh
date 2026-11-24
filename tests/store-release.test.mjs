@@ -45,9 +45,10 @@ test('Store verification catches stale host, common editor, core, and wrong upda
   const identity={name:'Tests.PwhDesktop',publisher:'CN=unit-test',publisherDisplayName:'Tests'},desktopVersion='1.2.4';
   const manifest=Buffer.from(msixManifest(msixIdentity({channel:'store',version:desktopVersion,identity})));
   const options={sourceRoot,runtimeRoot,identity,desktopVersion};
-  for (const [member,match] of [['standalone-pwh/host.mjs',/package\/source mismatch/],['release-source/client/editor.js',/package\/source mismatch/],['engine/core/rhwp_bg.wasm',/package\/source mismatch/],['standalone-pwh/distribution.json',/distribution differs/]]) {
+  for (const [member,match] of [['standalone-pwh/version.json',/Desktop version differs/],['standalone-pwh/host.mjs',/package\/source mismatch/],['release-source/client/editor.js',/package\/source mismatch/],['engine/core/rhwp_bg.wasm',/package\/source mismatch/],['standalone-pwh/distribution.json',/distribution differs/]]) {
     const read=async name=>{
       if(name==='AppxManifest.xml')return manifest;
+      if(name==='standalone-pwh/version.json')return Buffer.from(JSON.stringify({version:name===member?'1.2.3':desktopVersion}));
       if(name==='standalone-pwh/distribution.json')return Buffer.from(JSON.stringify({schema:1,channel:name===member?'msix-preview':'microsoft-store',name:identity.name}));
       if(name===member)return Buffer.from('stale bytes');
       if(name.startsWith('standalone-pwh/'))return fs.readFile(path.join(sourceRoot,'desktop',name));
